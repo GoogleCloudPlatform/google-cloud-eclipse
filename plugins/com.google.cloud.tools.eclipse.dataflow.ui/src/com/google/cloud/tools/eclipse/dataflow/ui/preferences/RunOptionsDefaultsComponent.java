@@ -103,7 +103,6 @@ public class RunOptionsDefaultsComponent {
   private final Button createButton;
 
   private GcpProjectServicesJob checkProjectConfigurationJob;
-  private VerifyStagingLocationJob verifyJob;
   private SelectFirstMatchingPrefixListener completionListener;
   private ControlDecoration stagingLocationResults;
 
@@ -276,7 +275,7 @@ public class RunOptionsDefaultsComponent {
         }
       }
     }
-    
+
     stagingLocationInput.setEnabled(true);
 
     // fetchStagingLocationsJob is a proxy for project checking

@@ -21,12 +21,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -63,7 +60,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.concurrent.Future;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
@@ -138,8 +134,9 @@ public class RunOptionsDefaultsComponentTest {
         CompositeUtil.findControlAfterLabel(shell, Combo.class, "Cloud Storage staging &location:");
     createButton = CompositeUtil.findControl(shell, Button.class);
   }
-  
-  private void mockProjectList(Credential credential, GcpProject... gcpProjects) {
+
+  private void mockProjectList(Credential credential, GcpProject... gcpProjects)
+      throws IOException {
     Projects projectsApi = mock(Projects.class);
     Projects.List listApi = mock(Projects.List.class);
     List<Project> projectsList = new ArrayList<>();
@@ -151,14 +148,10 @@ public class RunOptionsDefaultsComponentTest {
     }
     ListProjectsResponse response = new ListProjectsResponse(); // cannot mock final classes
     response.setProjects(projectsList);
-    try {
-      doReturn(projectsApi).when(apiFactory).newProjectsApi(credential);
-      doReturn(listApi).when(listApi).setPageSize(any(Integer.class));
-      doReturn(listApi).when(projectsApi).list();
-      doReturn(response).when(listApi).execute();
-    } catch (IOException ex) {
-      fail(ex.toString());
-    }
+    doReturn(projectsApi).when(apiFactory).newProjectsApi(credential);
+    doReturn(listApi).when(listApi).setPageSize(anyInt());
+    doReturn(listApi).when(projectsApi).list();
+    doReturn(response).when(listApi).execute();
   }
 
   private void mockStorageApiBucketList(Credential credential, String projectId,
@@ -172,7 +165,7 @@ public class RunOptionsDefaultsComponentTest {
     doReturn(storageApi).when(apiFactory).newStorageApi(credential);
     doReturn(bucketsApi).when(storageApi).buckets();
     doThrow(new IOException("not found")).when(bucketsApi).list(anyString());
-    doReturn(listApi).when(bucketsApi).list(eq(projectId));
+    doReturn(listApi).when(bucketsApi).list(projectId);
     doReturn(buckets).when(listApi).execute();
 
     Storage.Buckets.Get exceptionGet = mock(Storage.Buckets.Get.class);
@@ -185,7 +178,7 @@ public class RunOptionsDefaultsComponentTest {
       bucketList.add(bucket);
 
       Storage.Buckets.Get get = mock(Storage.Buckets.Get.class);
-      when(bucketsApi.get(eq(bucketName))).thenReturn(get);
+      when(bucketsApi.get(bucketName)).thenReturn(get);
       when(get.execute()).thenReturn(bucket);
     }
     buckets.setItems(bucketList);
@@ -197,7 +190,7 @@ public class RunOptionsDefaultsComponentTest {
     Services servicesApi = mock(Services.class);
     Services.List request = mock(Services.List.class);
     ListServicesResponse response = new ListServicesResponse();
-    
+
     doReturn(servicesManagementApi).when(apiFactory).newServiceManagementApi(credential);
     doReturn(servicesApi).when(servicesManagementApi).services();
 
@@ -208,7 +201,7 @@ public class RunOptionsDefaultsComponentTest {
     when(request.setPageSize(anyInt())).thenReturn(request);
     when(request.setPageToken(anyString())).thenReturn(request);
     when(request.execute()).thenReturn(response);
-    
+
     List<ManagedService> managedServices = new ArrayList<>();
     for (String serviceId : serviceIds) {
       ManagedService managedService = new ManagedService();
@@ -295,7 +288,7 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testEnablement_nonExistentProject() throws InterruptedException {
+  public void testEnablement_nonExistentProject() {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("doesnotexist");
     spinEvents();
@@ -308,7 +301,7 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testEnablement_existingStagingLocation() throws InterruptedException {
+  public void testEnablement_existingStagingLocation() {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
     waitUntilResolvedProject();
@@ -330,8 +323,7 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testEnablement_nonExistentStagingLocation()
-      throws OperationCanceledException, InterruptedException {
+  public void testEnablement_nonExistentStagingLocation() {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
     waitUntilResolvedProject();
@@ -362,7 +354,7 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testAccountSelector_loadBucketCombo() throws InterruptedException {
+  public void testAccountSelector_loadBucketCombo() {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
     waitUntilResolvedProject();
@@ -375,14 +367,14 @@ public class RunOptionsDefaultsComponentTest {
     assertStagingLocationCombo("gs://bob-bucket");
   }
 
-  private void assertStagingLocationCombo(final String... buckets) throws InterruptedException {
+  private void assertStagingLocationCombo(final String... buckets) {
     bot.waitUntil(new DefaultCondition() {
-      
+
       @Override
       public boolean test() throws Exception {
         return new SWTBotCombo(stagingLocations).itemCount() == buckets.length;
       }
-      
+
       @Override
       public String getFailureMessage() {
         return "missing staging buckets";
@@ -417,14 +409,14 @@ public class RunOptionsDefaultsComponentTest {
         true /* allowIncomplete */, loginService, apiFactory);
     assertTrue("should be complete when totally empty", page.isPageComplete());
   }
-  
+
   @Test
   public void testPartialValidity_account() {
-    testPartialValidity_allEmpty();      
+    testPartialValidity_allEmpty();
     component.selectAccount("alice@example.com");
     assertTrue("should be complete with account", page.isPageComplete());
   }
-  
+
   @Test
   public void testPartialValidity_account_project() throws InterruptedException {
     testPartialValidity_account();
@@ -442,7 +434,7 @@ public class RunOptionsDefaultsComponentTest {
 
   /**
    * Spin the display loop while the waitCondition is true or we timeout.
-   * 
+   *
    * @param waitCondition
    */
   private void waitForFuture(final Future<?> future) {
@@ -491,6 +483,5 @@ public class RunOptionsDefaultsComponentTest {
     // does a syncExec
     bot.shells();
   }
-
 
 }

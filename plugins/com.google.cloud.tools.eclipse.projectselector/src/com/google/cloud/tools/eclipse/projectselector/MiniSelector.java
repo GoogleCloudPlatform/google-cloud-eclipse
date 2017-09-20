@@ -132,18 +132,12 @@ public class MiniSelector implements ISelectionProvider {
   }
 
   /**
-   * Set the currently selected project.
-   */
-  public void setProject(GcpProject project) {
-    setProject(project.getId());
-  }
-
-  /**
    * Set the currently selected project by ID; return the project or {@code null} if no project by
    * that ID.
    */
   public void setProject(final String projectId) {
     projectsProvider.resolve(projectId, displayExecutor, new Consumer<GcpProject>() {
+      @Override
       public void accept(final GcpProject resolvedProject) {
         comboViewer.setSelection(new StructuredSelection(resolvedProject));
       }
