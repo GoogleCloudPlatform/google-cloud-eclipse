@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.util;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -28,7 +27,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class DependencyResolverTest {
-  
+
   private NullProgressMonitor monitor = new NullProgressMonitor();
 
   @Test
@@ -40,9 +39,9 @@ public class DependencyResolverTest {
     Assert.assertFalse(actual.contains("io.grpc:grpc-protobuf:1.4.0"));
     Assert.assertTrue(actual.contains("com.fasterxml.jackson.core:jackson-core:2.1.3"));
   }
-  
+
   @Test
-  public void testBadDependency() throws CoreException {
+  public void testBadDependency() {
     try {
       DependencyResolver.getTransitiveDependencies(
           "com.google.cloud", "google-cloud-nonesuch", "1.4.0", monitor);
@@ -61,7 +60,7 @@ public class DependencyResolverTest {
     Assert.assertTrue(actual.contains("io.grpc:grpc-protobuf:1.4.0"));
     Assert.assertTrue(actual.contains("com.fasterxml.jackson.core:jackson-core:2.1.3"));
   }
-  
+
   /**
    * Easier to check for inclusion by Maven coordinates.
    */
