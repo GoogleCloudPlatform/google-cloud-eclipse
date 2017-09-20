@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.flex;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.osgi.service.prefs.BackingStoreException;
@@ -34,8 +33,7 @@ import org.osgi.service.prefs.BackingStoreException;
  */
 public class FlexGlobalDeployPreferences extends FlexDeployPreferences {
 
-  @VisibleForTesting
-  static final String PREF_DEPLOY_ARTIFACT_PATH = "deploy.artifact.path";
+  private static final String PREF_DEPLOY_ARTIFACT_PATH = "deploy.artifact.path";
 
   private static final String DEFAULT_APP_YAML_PATH = "app.yaml";
   private static final String DEFAULT_DEPLOY_ARTIFACT_PATH = "";
