@@ -43,11 +43,11 @@ public class FlexGlobalDeployArtifactStagingDelegateTest {
 
   @Before
   public void setUp() throws IOException, BackingStoreException {
-    stagingDirectory = new Path(tempFolder.getRoot().toString()).append("stagingDirectory");
-    appEngineDirectory = new Path(tempFolder.newFolder("appEngineDirectory").toString());
+    stagingDirectory = new Path(tempFolder.getRoot().getAbsolutePath()).append("stagingDirectory");
+    appEngineDirectory = new Path(tempFolder.newFolder("appEngineDirectory").getAbsolutePath());
     appEngineDirectory.append("app.yaml").toFile().createNewFile();
     deployArtifact = tempFolder.newFile("my-app.war");
-    preferences.setDeployArtifactPath(deployArtifact.toString());
+    preferences.setDeployArtifactPath(deployArtifact.getAbsolutePath());
     preferences.save();
   }
 
