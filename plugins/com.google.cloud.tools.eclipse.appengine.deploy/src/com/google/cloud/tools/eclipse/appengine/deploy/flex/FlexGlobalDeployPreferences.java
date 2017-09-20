@@ -21,6 +21,17 @@ import com.google.common.base.Strings;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.osgi.service.prefs.BackingStoreException;
 
+/**
+ * Deploy parameters required to deploy a user-supplied WAR/JAR to App Engine flexible. The class
+ * adds one more parameter, a WAR/JAR path, to the deploy parameters for flexible defined in {@link
+ * FlexDeployPreferences}.
+ *
+ * Unlike {@link FlexDeployPreferences}, these parameters are for storing values for the global
+ * WAR/JAR deploy dialog and thus stored in the instance-scoped preferences store.
+ *
+ * The class additionally overrides the system default value for the {@code app.yaml} path (from
+ * {@code src/main/appengine/app.yaml} to {@code app.yaml}.
+ */
 public class FlexGlobalDeployPreferences extends FlexDeployPreferences {
 
   @VisibleForTesting

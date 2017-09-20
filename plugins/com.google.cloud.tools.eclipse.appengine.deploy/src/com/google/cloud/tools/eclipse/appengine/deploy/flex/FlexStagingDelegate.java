@@ -30,6 +30,14 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.ui.console.MessageConsoleStream;
 
+/**
+ * Stages an App Engine flexible app, copying an app (a WAR or a runnable JAR file) and {@code
+ * app.yaml} to the given staging directory.
+ *
+ * See the Javadoc of {@link StagingDelegate} for more details.
+ *
+ * @see StagingDelegate
+ */
 abstract class FlexStagingDelegate implements StagingDelegate {
 
   private final IPath appEngineDirectory;

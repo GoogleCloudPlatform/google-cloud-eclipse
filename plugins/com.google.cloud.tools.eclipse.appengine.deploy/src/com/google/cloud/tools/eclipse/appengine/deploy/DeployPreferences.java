@@ -22,6 +22,13 @@ import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.osgi.service.prefs.BackingStoreException;
 
+/**
+ * Common deploy parameters (e.g., account email, GCP project ID, whether to stop previous versions,
+ * etc.) required to deploy an Eclipse project to App Engine. The parameters are saved to a
+ * project-scoped preferences store.
+ *
+ * Incidentally, these parameters are all that the standard deploy needs.
+ */
 public class DeployPreferences {
 
   public static final String PREFERENCE_STORE_QUALIFIER =

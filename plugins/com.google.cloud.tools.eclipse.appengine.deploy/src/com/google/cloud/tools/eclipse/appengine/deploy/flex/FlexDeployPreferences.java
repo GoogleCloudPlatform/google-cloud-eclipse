@@ -16,6 +16,11 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.flex;
 
+/**
+ * Deploy parameters required to deploy an Eclipse project to App Engine flexible. The class adds
+ * one more parameter, an {@code app.yaml} path, to the common deploy parameters defined in {@link
+ * DeployPrefereces}.
+ */
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
