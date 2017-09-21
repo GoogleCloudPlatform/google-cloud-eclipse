@@ -380,6 +380,7 @@ public class RunOptionsDefaultsComponentTest {
       
       @Override
       public boolean test() throws Exception {
+        spinEvents();
         return new SWTBotCombo(stagingLocations).itemCount() == buckets.length;
       }
       

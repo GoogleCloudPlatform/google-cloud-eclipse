@@ -21,8 +21,15 @@ import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.ui.util.DisplayExecutor;
 import com.google.cloud.tools.eclipse.util.jobs.Consumer;
+import com.google.cloud.tools.eclipse.util.jobs.FuturisticJob;
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.MoreExecutors;
+import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -32,6 +39,8 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -40,13 +49,18 @@ import org.eclipse.swt.widgets.Control;
  */
 public class MiniSelector implements ISelectionProvider {
   private static final Logger logger = Logger.getLogger(MiniSelector.class.getName());
+  private static final GcpProject[] EMPTY_PROJECTS = new GcpProject[0];
 
   private final ProjectRepository projectRepository;
-  private Executor displayExecutor;
-  private ComboViewer comboViewer;
-  private ProjectsProvider projectsProvider;
-  private Credential credential;
 
+  private Executor displayExecutor;
+  private ProjectRepository projectsRepository;
+  private ComboViewer comboViewer;
+  private Credential credential;
+  private FetchProjectsJob fetchProjectsJob;
+
+  /** Stashed projectID to be selected when fetch-project-list completes. */
+  private String toBeSelectedProjectId;
 
   public MiniSelector(Composite container, IGoogleApiFactory apiFactory) {
     this(container, apiFactory, null);
@@ -71,11 +85,17 @@ public class MiniSelector implements ISelectionProvider {
         }
         return super.getText(element);
       }
-
     });
-    projectsProvider = new ProjectsProvider(projectRepository);
-    comboViewer.setContentProvider(projectsProvider);
-    comboViewer.setInput(credential);
+    comboViewer.setContentProvider(ArrayContentProvider.getInstance());
+    comboViewer.setInput(EMPTY_PROJECTS);
+    parent.addDisposeListener(new DisposeListener() {
+      @Override
+      public void widgetDisposed(DisposeEvent e) {
+        cancelFetch();
+      }
+    });
+
+    fetch();
   }
 
   public Control getControl() {
@@ -94,12 +114,82 @@ public class MiniSelector implements ISelectionProvider {
   }
 
   public void setCredential(Credential credential) {
-    // try to preserve the selection if possible
-    GcpProject selected = getProject();
     this.credential = credential;
-    comboViewer.setInput(credential);
-    if (selected != null) {
-      setProject(selected.getId());
+    fetch();
+  }
+
+  /**
+   * Fetch and update the projects list, preserving the current selection.
+   */
+  private void fetch() {
+    toBeSelectedProjectId = getProjectId(); // save currently selected project ID
+    comboViewer.setInput(EMPTY_PROJECTS);
+
+    cancelFetch();
+    if (credential == null) {
+      return;
+    }
+
+    fetchProjectsJob = new FetchProjectsJob();
+    fetchProjectsJob.onSuccess(displayExecutor, new Consumer<GcpProject[]>() {
+      @Override
+      public void accept(GcpProject[] projects) {
+        comboViewer.setInput(projects);
+        setProject(toBeSelectedProjectId);
+      }
+    });
+    // maybe this should be shown to the user?
+    fetchProjectsJob.onError(MoreExecutors.directExecutor(), new Consumer<Exception>() {
+      @Override
+      public void accept(Exception ex) {
+        logger.log(Level.SEVERE, "Unable to fetch project list", ex);
+      }
+    });
+    fetchProjectsJob.schedule();
+  }
+
+  /**
+   * 
+   */
+  private void cancelFetch() {
+    if (fetchProjectsJob != null) {
+      fetchProjectsJob.abandon();
+      fetchProjectsJob = null;
+    }
+  }
+
+  /**
+   * Return the currently selected project or {@code null} if none selected.
+   */
+  public GcpProject getProject() {
+    IStructuredSelection selection = comboViewer.getStructuredSelection();
+    return selection.isEmpty() ? null : (GcpProject) selection.getFirstElement();
+  }
+
+  /**
+   * Return the currently selected project ID or {@code null} if none selected.
+   */
+  public String getProjectId() {
+    GcpProject selected = getProject();
+    return selected == null ? null : selected.getId();
+  }
+
+  /**
+   * Set the currently selected project by ID. The selection may not take effect immediately if the
+   * project-list is still being fetched.
+   */
+  public void setProject(final String projectId) {
+    Preconditions.checkState(comboViewer.getInput() instanceof GcpProject[]);
+    // if there's a fetch in progress, then we override the result that should be shown
+    toBeSelectedProjectId = projectId;
+    if (projectId == null) {
+      comboViewer.setSelection(StructuredSelection.EMPTY);
+    } else {
+      for (GcpProject project : (GcpProject[]) comboViewer.getInput()) {
+        if (project.getId().equals(projectId)) {
+          comboViewer.setSelection(new StructuredSelection(project));
+        }
+      }
     }
   }
 
@@ -124,29 +214,26 @@ public class MiniSelector implements ISelectionProvider {
   }
 
   /**
-   * Return the currently selected project or {@code null} if none selected.
+   * Simple job for fetching projects accessible to the current account.
    */
-  public GcpProject getProject() {
-    IStructuredSelection selection = comboViewer.getStructuredSelection();
-    return selection.isEmpty() ? null : (GcpProject) selection.getFirstElement();
-  }
+  private class FetchProjectsJob extends FuturisticJob<GcpProject[]> {
+    private final Credential credential; // the credential used for fetch
 
-  /**
-   * Set the currently selected project.
-   */
-  public void setProject(GcpProject project) {
-    setProject(project.getId());
-  }
+    public FetchProjectsJob() {
+      super("Determining accessible projects");
+      this.credential = MiniSelector.this.credential;
+    }
 
-  /**
-   * Set the currently selected project by ID; return the project or {@code null} if no project by
-   * that ID.
-   */
-  public void setProject(final String projectId) {
-    projectsProvider.resolve(projectId, displayExecutor, new Consumer<GcpProject>() {
-      public void accept(final GcpProject resolvedProject) {
-        comboViewer.setSelection(new StructuredSelection(resolvedProject));
-      }
-    });
+    @Override
+    protected GcpProject[] compute(IProgressMonitor monitor) throws Exception {
+      List<GcpProject> projects = projectRepository.getProjects(credential);
+      return projects.toArray(new GcpProject[projects.size()]);
+    }
+
+    @Override
+    protected boolean isStale() {
+      // check if the MiniSelector's credential has changed
+      return this.credential != MiniSelector.this.credential;
+    }
   }
 }
