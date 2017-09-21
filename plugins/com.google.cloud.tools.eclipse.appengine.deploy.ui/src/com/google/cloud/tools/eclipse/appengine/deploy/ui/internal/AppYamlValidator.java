@@ -53,6 +53,10 @@ public class AppYamlValidator extends FixedMultiValidator {
 
   @Override
   protected IStatus validate() {
+    if (appYamlPath.getValue().toString().isEmpty()) {
+      return ValidationStatus.error(Messages.getString("error.app.yaml.empty"));
+    }
+
     File appYaml = new File((String) appYamlPath.getValue());
     if (!appYaml.isAbsolute()) {
       appYaml = new File(basePath + "/" + appYaml);
@@ -64,7 +68,7 @@ public class AppYamlValidator extends FixedMultiValidator {
     } else if (!appYaml.exists()) {
       return ValidationStatus.error(Messages.getString("error.app.yaml.non.existing"));
     } else if (!appYaml.isFile()) {
-      return ValidationStatus.error(Messages.getString("error.app.yaml.not.a.file", appYaml));
+      return ValidationStatus.error(Messages.getString("error.not.a.file", appYaml));
     } else {
       return validateRuntime(appYaml);
     }

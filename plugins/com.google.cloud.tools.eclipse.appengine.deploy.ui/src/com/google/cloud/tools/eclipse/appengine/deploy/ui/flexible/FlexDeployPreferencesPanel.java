@@ -70,7 +70,8 @@ public class FlexDeployPreferencesPanel extends AppEngineDeployPreferencesPanel 
 
     Button browse = new Button(secondColumn, SWT.PUSH);
     browse.setText(Messages.getString("deploy.preferences.dialog.browse"));
-    browse.addSelectionListener(new RelativeFileFieldSetter(appYamlField, project.getLocation()));
+    browse.addSelectionListener(
+        new RelativeFileFieldSetter(appYamlField, project.getLocation(), new String[] {"*.yaml"}));
 
     GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(secondColumn);
     GridDataFactory.fillDefaults().applyTo(secondColumn);

@@ -29,7 +29,8 @@ import org.eclipse.ui.console.MessageConsoleStream;
 public interface StagingDelegate {
 
   /**
-   * @param project Eclipse project to be deployed
+   * @param project Eclipse project to be deployed; can be null when staging a WAR/JAR directly
+   *     given by users
    * @param stagingDirectory directory where files ready for {@code gcloud app deploy} execution
    *     will be placed
    * @param safeWorkDirectory directory path that may be created safely to use as a temporary work

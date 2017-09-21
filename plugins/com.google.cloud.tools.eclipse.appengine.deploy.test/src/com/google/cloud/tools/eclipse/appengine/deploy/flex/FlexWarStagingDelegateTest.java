@@ -32,7 +32,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-public class FlexStagingDelegateTest {
+public class FlexWarStagingDelegateTest {
 
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacetVersions(
       JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineFlexWarFacet.FACET_VERSION);
@@ -52,7 +52,7 @@ public class FlexStagingDelegateTest {
 
   @Test
   public void testStage() {
-    StagingDelegate delegate = new FlexStagingDelegate(appEngineDirectory);
+    StagingDelegate delegate = new FlexWarStagingDelegate(appEngineDirectory);
     IStatus status = delegate.stage(project, stagingDirectory, safeWorkDirectory,
         null, null, new NullProgressMonitor());
 
@@ -63,7 +63,7 @@ public class FlexStagingDelegateTest {
 
   @Test
   public void testGetOptionalConfigurationFilesDirectory() {
-    StagingDelegate delegate = new FlexStagingDelegate(appEngineDirectory);
+    StagingDelegate delegate = new FlexWarStagingDelegate(appEngineDirectory);
 
     assertEquals(appEngineDirectory, delegate.getOptionalConfigurationFilesDirectory());
   }

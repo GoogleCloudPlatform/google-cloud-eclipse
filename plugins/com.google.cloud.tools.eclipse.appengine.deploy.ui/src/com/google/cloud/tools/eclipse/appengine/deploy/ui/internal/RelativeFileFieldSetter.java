@@ -39,15 +39,18 @@ public class RelativeFileFieldSetter extends SelectionAdapter {
   private final Text fileField;
   private final IPath basePath;
   private final FileDialog dialog;
+  private final String[] filterExtensions;
 
-  public RelativeFileFieldSetter(Text directoryField, IPath basePath) {
-    this(directoryField, basePath, new FileDialog(directoryField.getShell()));
+  public RelativeFileFieldSetter(Text directoryField, IPath basePath, String[] filterExtensions) {
+    this(directoryField, basePath, filterExtensions, new FileDialog(directoryField.getShell()));
   }
 
   @VisibleForTesting
-  RelativeFileFieldSetter(Text directoryField, IPath basePath, FileDialog directoryDialog) {
+  RelativeFileFieldSetter(Text directoryField, IPath basePath, String[] filterExtensions,
+      FileDialog directoryDialog) {
     this.fileField = directoryField;
     this.basePath = Preconditions.checkNotNull(basePath);
+    this.filterExtensions = filterExtensions;
     Preconditions.checkArgument(basePath.isAbsolute());
     dialog = directoryDialog;
   }
@@ -62,7 +65,7 @@ public class RelativeFileFieldSetter extends SelectionAdapter {
       filterPath = filterPath.removeLastSegments(1);
     }
     dialog.setFilterPath(filterPath.toString());
-    dialog.setFilterExtensions(new String[]{ "*.yaml" });
+    dialog.setFilterExtensions(filterExtensions);
 
     String result = dialog.open();
     if (result != null) {

@@ -18,8 +18,8 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexDeployPreferences;
-import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexJarMavenProjectStagingDelegate;
-import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexStagingDelegate;
+import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexMavenPackagedProjectStagingDelegate;
+import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexWarStagingDelegate;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployCommandHandler;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesDialog;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
@@ -60,10 +60,10 @@ public class FlexDeployCommandHandler extends DeployCommandHandler {
     IPath appEngineDirectory = appYaml.getParent().getLocation();
 
     if (AppEngineFlexWarFacet.hasFacet(facetedProject)) {
-      return new FlexStagingDelegate(appEngineDirectory);
+      return new FlexWarStagingDelegate(appEngineDirectory);
     } else if (AppEngineFlexJarFacet.hasFacet(facetedProject)) {
       if (MavenUtils.hasMavenNature(project)) {
-        return new FlexJarMavenProjectStagingDelegate(appEngineDirectory);
+        return new FlexMavenPackagedProjectStagingDelegate(appEngineDirectory);
       } else {
         throw new IllegalStateException("BUG: command enabled for non-Maven flex projects");
       }
