@@ -90,7 +90,7 @@ public class MiniSelector implements ISelectionProvider {
     comboViewer.setInput(EMPTY_PROJECTS);
     parent.addDisposeListener(new DisposeListener() {
       @Override
-      public void widgetDisposed(DisposeEvent e) {
+      public void widgetDisposed(DisposeEvent event) {
         cancelFetch();
       }
     });
@@ -148,9 +148,6 @@ public class MiniSelector implements ISelectionProvider {
     fetchProjectsJob.schedule();
   }
 
-  /**
-   * 
-   */
   private void cancelFetch() {
     if (fetchProjectsJob != null) {
       fetchProjectsJob.abandon();
