@@ -34,18 +34,17 @@ import org.eclipse.core.runtime.Path;
  */
 public class FlexExistingDeployArtifactStagingDelegate extends FlexStagingDelegate {
 
-  private final FlexExistingArtifactDeployPreferences deployPreferences;
+  private final IPath deployArtifact;
 
   public FlexExistingDeployArtifactStagingDelegate(IPath appEngineDirectory,
-      FlexExistingArtifactDeployPreferences deployPreferences) {
+      Path deployArtifact) {
     super(appEngineDirectory);
-    this.deployPreferences = deployPreferences;
+    this.deployArtifact = deployArtifact;
   }
 
   @Override
   protected IPath getDeployArtifact(IPath safeWorkDirectory, IProgressMonitor monitor)
       throws CoreException {
-    String artifactPath = deployPreferences.getDeployArtifactPath();
-    return new Path(artifactPath);
+    return deployArtifact;
   }
 }
