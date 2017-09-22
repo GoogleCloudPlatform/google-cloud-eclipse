@@ -21,7 +21,6 @@ import com.google.cloud.tools.eclipse.appengine.deploy.CloudSdkStagingHelper;
 import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -47,7 +46,7 @@ abstract class FlexStagingDelegate implements StagingDelegate {
   }
 
   @Override
-  public IStatus stage(IProject project, IPath stagingDirectory, IPath safeWorkDirectory,
+  public IStatus stage(IPath stagingDirectory, IPath safeWorkDirectory,
       MessageConsoleStream stdoutOutputStream, MessageConsoleStream stderrOutputStream,
       IProgressMonitor monitor) {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
@@ -58,7 +57,7 @@ abstract class FlexStagingDelegate implements StagingDelegate {
     }
 
     try {
-      IPath deployArtifact = getDeployArtifact(project, safeWorkDirectory, subMonitor.newChild(40));
+      IPath deployArtifact = getDeployArtifact(safeWorkDirectory, subMonitor.newChild(40));
       CloudSdkStagingHelper.stageFlexible(appEngineDirectory, deployArtifact, stagingDirectory,
           subMonitor.newChild(60));
       return Status.OK_STATUS;
@@ -69,8 +68,8 @@ abstract class FlexStagingDelegate implements StagingDelegate {
     }
   }
 
-  protected abstract IPath getDeployArtifact(IProject project, IPath safeWorkDirectory,
-      IProgressMonitor monitor) throws CoreException;
+  protected abstract IPath getDeployArtifact(IPath safeWorkDirectory, IProgressMonitor monitor)
+      throws CoreException;
 
   @Override
   public IPath getOptionalConfigurationFilesDirectory() {

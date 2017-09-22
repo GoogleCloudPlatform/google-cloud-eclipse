@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.flex;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -35,14 +34,18 @@ import org.eclipse.core.runtime.Path;
  */
 public class FlexExistingDeployArtifactStagingDelegate extends FlexStagingDelegate {
 
-  public FlexExistingDeployArtifactStagingDelegate(IPath appEngineDirectory) {
+  private final FlexExistingArtifactDeployPreferences deployPreferences;
+
+  public FlexExistingDeployArtifactStagingDelegate(IPath appEngineDirectory,
+      FlexExistingArtifactDeployPreferences deployPreferences) {
     super(appEngineDirectory);
+    this.deployPreferences = deployPreferences;
   }
 
   @Override
-  protected IPath getDeployArtifact(IProject project, IPath safeWorkDirectory,
-      IProgressMonitor monitor) throws CoreException {
-    String artifactPath = new FlexExistingArtifactDeployPreferences().getDeployArtifactPath();
+  protected IPath getDeployArtifact(IPath safeWorkDirectory, IProgressMonitor monitor)
+      throws CoreException {
+    String artifactPath = deployPreferences.getDeployArtifactPath();
     return new Path(artifactPath);
   }
 }

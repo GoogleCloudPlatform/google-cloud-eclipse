@@ -47,7 +47,7 @@ public class StandardDeployCommandHandler extends DeployCommandHandler {
     // TODO: this may still not be a JDK (although it will be very likely):
     // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2195#issuecomment-318439239
     Path javaHome = getProjectVm(project);
-    return new StandardStagingDelegate(javaHome);
+    return new StandardStagingDelegate(project, javaHome);
   }
 
   private static Path getProjectVm(IProject project) {

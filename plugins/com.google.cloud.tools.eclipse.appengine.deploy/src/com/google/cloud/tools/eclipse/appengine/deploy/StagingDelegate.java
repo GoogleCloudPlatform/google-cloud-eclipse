@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -29,8 +28,6 @@ import org.eclipse.ui.console.MessageConsoleStream;
 public interface StagingDelegate {
 
   /**
-   * @param project Eclipse project to be deployed; can be null when staging a WAR/JAR directly
-   *     given by users
    * @param stagingDirectory directory where files ready for {@code gcloud app deploy} execution
    *     will be placed
    * @param safeWorkDirectory directory path that may be created safely to use as a temporary work
@@ -38,7 +35,7 @@ public interface StagingDelegate {
    * @param stdoutOutputStream where staging may stream stdout
    * @param stderrOutputStream where staging may stream stderr
    */
-  IStatus stage(IProject project, IPath stagingDirectory, IPath safeWorkDirectory,
+  IStatus stage(IPath stagingDirectory, IPath safeWorkDirectory,
       MessageConsoleStream stdoutOutputStream, MessageConsoleStream stderrOutputStream,
       IProgressMonitor monitor);
 

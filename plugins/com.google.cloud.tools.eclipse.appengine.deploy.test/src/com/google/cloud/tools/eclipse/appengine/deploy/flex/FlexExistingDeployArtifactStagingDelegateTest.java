@@ -60,8 +60,9 @@ public class FlexExistingDeployArtifactStagingDelegateTest {
 
   @Test
   public void testStage() {
-    StagingDelegate delegate = new FlexExistingDeployArtifactStagingDelegate(appEngineDirectory);
-    IStatus status = delegate.stage(null, stagingDirectory, null, null, null, null);
+    StagingDelegate delegate =
+        new FlexExistingDeployArtifactStagingDelegate(appEngineDirectory, preferences);
+    IStatus status = delegate.stage(stagingDirectory, null, null, null, null);
 
     assertTrue(stagingDirectory.append("my-app.war").toFile().exists());
     assertTrue(stagingDirectory.append("app.yaml").toFile().exists());

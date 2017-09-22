@@ -138,7 +138,7 @@ public class DeployJob extends WorkspaceJob {
     try {
       getJobManager().beginRule(project, progress.newChild(1));
       IPath safeWorkDirectory = workDirectory.append(SAFE_STAGING_WORK_DIRECTORY_NAME);
-      return stager.stage(project, stagingDirectory, safeWorkDirectory,
+      return stager.stage(stagingDirectory, safeWorkDirectory,
           stdoutOutputStream, stderrOutputStream, progress.newChild(99));
     } catch (IllegalArgumentException ex) {
       return StatusUtil.error(this, Messages.getString("deploy.job.staging.failed"), ex);

@@ -35,23 +35,25 @@ import org.eclipse.ui.console.MessageConsoleStream;
 
 public class StandardStagingDelegate implements StagingDelegate {
 
+  private final IProject project;
   private final Path javaHome;
   private final CloudSdkProcessWrapper cloudSdkWrapper;
 
   private IPath optionalConfigurationFilesDirectory;
 
-  public StandardStagingDelegate(Path javaHome) {
-    this(javaHome, new CloudSdkProcessWrapper());
+  public StandardStagingDelegate(IProject project, Path javaHome) {
+    this(project, javaHome, new CloudSdkProcessWrapper());
   }
 
   @VisibleForTesting
-  StandardStagingDelegate(Path javaHome, CloudSdkProcessWrapper cloudSdkWrapper) {
+  StandardStagingDelegate(IProject project, Path javaHome, CloudSdkProcessWrapper cloudSdkWrapper) {
+    this.project = project;
     this.javaHome = javaHome;
     this.cloudSdkWrapper = cloudSdkWrapper;
   }
 
   @Override
-  public IStatus stage(IProject project, IPath stagingDirectory, IPath safeWorkDirectory,
+  public IStatus stage(IPath stagingDirectory, IPath safeWorkDirectory,
       MessageConsoleStream stdoutOutputStream, MessageConsoleStream stderrOutputStream,
       IProgressMonitor monitor) {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);

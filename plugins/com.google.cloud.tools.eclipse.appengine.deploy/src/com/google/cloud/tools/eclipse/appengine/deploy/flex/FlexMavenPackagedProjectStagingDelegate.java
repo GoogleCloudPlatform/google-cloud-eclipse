@@ -60,8 +60,11 @@ import org.eclipse.m2e.core.project.IMavenProjectRegistry;
  */
 public class FlexMavenPackagedProjectStagingDelegate extends FlexStagingDelegate {
 
-  public FlexMavenPackagedProjectStagingDelegate(IPath appEngineDirectory) {
+  private final IProject project;
+
+  public FlexMavenPackagedProjectStagingDelegate(IProject project, IPath appEngineDirectory) {
     super(appEngineDirectory);
+    this.project = project;
   }
 
   @VisibleForTesting
@@ -140,8 +143,8 @@ public class FlexMavenPackagedProjectStagingDelegate extends FlexStagingDelegate
   }
 
   @Override
-  protected IPath getDeployArtifact(IProject project, IPath safeWorkingDirectory,
-      IProgressMonitor monitor) throws CoreException {
+  protected IPath getDeployArtifact(IPath safeWorkingDirectory, IProgressMonitor monitor)
+      throws CoreException {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
     try {

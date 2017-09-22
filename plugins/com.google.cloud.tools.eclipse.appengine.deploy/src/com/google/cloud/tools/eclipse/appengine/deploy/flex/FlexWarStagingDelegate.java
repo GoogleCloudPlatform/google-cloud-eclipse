@@ -35,13 +35,16 @@ import org.eclipse.core.runtime.IProgressMonitor;
  */
 public class FlexWarStagingDelegate extends FlexStagingDelegate {
 
-  public FlexWarStagingDelegate(IPath appEngineDirectory) {
+  private final IProject project;
+
+  public FlexWarStagingDelegate(IProject project, IPath appEngineDirectory) {
     super(appEngineDirectory);
+    this.project = project;
   }
 
   @Override
-  protected IPath getDeployArtifact(IProject project, IPath safeWorkDirectory,
-      IProgressMonitor monitor) throws CoreException {
+  protected IPath getDeployArtifact(IPath safeWorkDirectory, IProgressMonitor monitor)
+      throws CoreException {
     IPath war = safeWorkDirectory.append("app-to-deploy.war");
     WarPublisher.publishWar(project, war, monitor);
     return war;

@@ -60,10 +60,10 @@ public class FlexDeployCommandHandler extends DeployCommandHandler {
     IPath appEngineDirectory = appYaml.getParent().getLocation();
 
     if (AppEngineFlexWarFacet.hasFacet(facetedProject)) {
-      return new FlexWarStagingDelegate(appEngineDirectory);
+      return new FlexWarStagingDelegate(project, appEngineDirectory);
     } else if (AppEngineFlexJarFacet.hasFacet(facetedProject)) {
       if (MavenUtils.hasMavenNature(project)) {
-        return new FlexMavenPackagedProjectStagingDelegate(appEngineDirectory);
+        return new FlexMavenPackagedProjectStagingDelegate(project, appEngineDirectory);
       } else {
         throw new IllegalStateException("BUG: command enabled for non-Maven flex projects");
       }

@@ -48,8 +48,9 @@ public class FlexMavenPackagedProjectStagingDelegateTest {
     IPath stagingDirectory = project.getFolder("staging-result").getLocation();
     IPath appEngineDirectory = project.getFolder("src/main/appengine").getLocation();
 
-    StagingDelegate delegate = new FlexMavenPackagedProjectStagingDelegate(appEngineDirectory);
-    IStatus status = delegate.stage(project, stagingDirectory, safeWorkDirectory,
+    StagingDelegate delegate =
+        new FlexMavenPackagedProjectStagingDelegate(project, appEngineDirectory);
+    IStatus status = delegate.stage(stagingDirectory, safeWorkDirectory,
         null, null, new NullProgressMonitor());
     assertTrue(status.isOK());
 

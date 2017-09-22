@@ -52,8 +52,8 @@ public class FlexWarStagingDelegateTest {
 
   @Test
   public void testStage() {
-    StagingDelegate delegate = new FlexWarStagingDelegate(appEngineDirectory);
-    IStatus status = delegate.stage(project, stagingDirectory, safeWorkDirectory,
+    StagingDelegate delegate = new FlexWarStagingDelegate(project, appEngineDirectory);
+    IStatus status = delegate.stage(stagingDirectory, safeWorkDirectory,
         null, null, new NullProgressMonitor());
 
     assertTrue(stagingDirectory.append("app-to-deploy.war").toFile().exists());
@@ -63,7 +63,7 @@ public class FlexWarStagingDelegateTest {
 
   @Test
   public void testGetOptionalConfigurationFilesDirectory() {
-    StagingDelegate delegate = new FlexWarStagingDelegate(appEngineDirectory);
+    StagingDelegate delegate = new FlexWarStagingDelegate(project, appEngineDirectory);
 
     assertEquals(appEngineDirectory, delegate.getOptionalConfigurationFilesDirectory());
   }
