@@ -150,8 +150,8 @@ public abstract class DeployCommandHandler extends AbstractHandler {
 
     StagingDelegate stagingDelegate = getStagingDelegate(project);
 
-    DeployJob deploy = new DeployJob(project, credential, workDirectory, outputStream, errorStream,
-        stagingDelegate);
+    DeployJob deploy = new DeployJob(deployPreferences, credential, workDirectory,
+        outputStream, errorStream, stagingDelegate);
     messageConsole.setJob(deploy);
     deploy.addJobChangeListener(new JobChangeAdapter() {
 

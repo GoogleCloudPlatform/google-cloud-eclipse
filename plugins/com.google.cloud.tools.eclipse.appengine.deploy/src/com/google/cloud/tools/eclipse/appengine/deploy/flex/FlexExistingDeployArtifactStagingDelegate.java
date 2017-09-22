@@ -17,9 +17,12 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.flex;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 /**
  * Copies an existing runnable JAR or a WAR (an App Engine flexible app) to the given staging
@@ -33,16 +36,21 @@ import org.eclipse.core.runtime.IProgressMonitor;
  */
 public class FlexExistingDeployArtifactStagingDelegate extends FlexStagingDelegate {
 
-  private final IPath deployArtifact;
+  private final IFile deployArtifact;
 
   public FlexExistingDeployArtifactStagingDelegate(IPath deployArtifact, IPath appEngineDirectory) {
     super(appEngineDirectory);
-    this.deployArtifact = deployArtifact;
+    this.deployArtifact = ResourcesPlugin.getWorkspace().getRoot().getFile(deployArtifact);
   }
 
   @Override
   protected IPath getDeployArtifact(IPath safeWorkDirectory, IProgressMonitor monitor)
       throws CoreException {
+    return deployArtifact.getLocation();
+  }
+
+  @Override
+  public ISchedulingRule getSchedulingRule() {
     return deployArtifact;
   }
 }

@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.deploy;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.ui.console.MessageConsoleStream;
 
 /**
@@ -38,6 +39,13 @@ public interface StagingDelegate {
   IStatus stage(IPath stagingDirectory, IPath safeWorkDirectory,
       MessageConsoleStream stdoutOutputStream, MessageConsoleStream stderrOutputStream,
       IProgressMonitor monitor);
+
+  /**
+   * Returns a {#link ISchedulingRule} for this stager to work safely. For example, if this stager
+   * needs to lock down a {#link IProject} during staging, it could return the {#link IProject}.
+   * Must be reentrant, returning the same object all the time. May return {@code null}.
+   */
+  ISchedulingRule getSchedulingRule();
 
   /**
    * Returns a directory where optional YAML configuration files such as {@code cron.yaml}

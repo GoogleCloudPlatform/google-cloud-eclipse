@@ -18,10 +18,12 @@ package com.google.cloud.tools.eclipse.appengine.deploy.flex;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.appengine.deploy.WarPublisher;
+import com.google.common.base.Preconditions;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 /**
  * Copies a WAR (an App Engine flexible app) to the given staging directory (in addition to copying
@@ -48,5 +50,11 @@ public class FlexWarStagingDelegate extends FlexStagingDelegate {
     IPath war = safeWorkDirectory.append("app-to-deploy.war");
     WarPublisher.publishWar(project, war, monitor);
     return war;
+  }
+
+  @Override
+  public ISchedulingRule getSchedulingRule() {
+    Preconditions.checkNotNull(project);
+    return project;
   }
 }
