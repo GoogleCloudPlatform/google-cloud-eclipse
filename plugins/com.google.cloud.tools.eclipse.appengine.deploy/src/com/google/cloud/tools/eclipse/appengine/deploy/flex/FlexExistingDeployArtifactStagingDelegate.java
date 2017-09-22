@@ -36,8 +36,7 @@ public class FlexExistingDeployArtifactStagingDelegate extends FlexStagingDelega
 
   private final IPath deployArtifact;
 
-  public FlexExistingDeployArtifactStagingDelegate(IPath appEngineDirectory,
-      Path deployArtifact) {
+  public FlexExistingDeployArtifactStagingDelegate(Path deployArtifact, IPath appEngineDirectory) {
     super(appEngineDirectory);
     this.deployArtifact = deployArtifact;
   }

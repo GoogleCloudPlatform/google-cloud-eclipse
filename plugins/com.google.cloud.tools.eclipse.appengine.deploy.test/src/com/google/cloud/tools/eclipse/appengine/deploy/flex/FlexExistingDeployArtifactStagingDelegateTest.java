@@ -48,7 +48,7 @@ public class FlexExistingDeployArtifactStagingDelegateTest {
   @Test
   public void testStage() {
     StagingDelegate delegate = new FlexExistingDeployArtifactStagingDelegate(
-        appEngineDirectory, new Path(deployArtifact.getAbsolutePath()));
+        new Path(deployArtifact.getAbsolutePath()), appEngineDirectory);
     IStatus status = delegate.stage(stagingDirectory, null, null, null, null);
 
     assertTrue(stagingDirectory.append("my-app.war").toFile().exists());
