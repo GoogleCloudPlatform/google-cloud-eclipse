@@ -20,7 +20,6 @@ import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
 
 /**
  * Copies an existing runnable JAR or a WAR (an App Engine flexible app) to the given staging
@@ -36,7 +35,7 @@ public class FlexExistingDeployArtifactStagingDelegate extends FlexStagingDelega
 
   private final IPath deployArtifact;
 
-  public FlexExistingDeployArtifactStagingDelegate(Path deployArtifact, IPath appEngineDirectory) {
+  public FlexExistingDeployArtifactStagingDelegate(IPath deployArtifact, IPath appEngineDirectory) {
     super(appEngineDirectory);
     this.deployArtifact = deployArtifact;
   }
