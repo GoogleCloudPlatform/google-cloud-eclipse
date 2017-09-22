@@ -19,36 +19,44 @@ package com.google.cloud.tools.eclipse.appengine.deploy.flex;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
-import java.io.File;
-import java.io.IOException;
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import java.io.ByteArrayInputStream;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 public class FlexExistingDeployArtifactStagingDelegateTest {
 
-  @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
 
   private IPath stagingDirectory;
   private IPath appEngineDirectory;
-  private File deployArtifact;
+  private IFile deployArtifact;
 
   @Before
-  public void setUp() throws IOException {
-    stagingDirectory = new Path(tempFolder.getRoot().getAbsolutePath()).append("stagingDirectory");
-    appEngineDirectory = new Path(tempFolder.newFolder("appEngineDirectory").getAbsolutePath());
-    appEngineDirectory.append("app.yaml").toFile().createNewFile();
-    deployArtifact = tempFolder.newFile("my-app.war");
+  public void setUp() throws  CoreException {
+    IProject project = projectCreator.getProject();
+    stagingDirectory = project.getFolder("stagingDirectory").getLocation();
+
+    IFolder appEngineFolder = project.getFolder("appEngineDirectory");
+    appEngineFolder.create(true, true, null);
+    appEngineFolder.getFile("app.yaml").create(new ByteArrayInputStream(new byte[0]), true, null);
+    appEngineDirectory = appEngineFolder.getLocation();
+
+    deployArtifact = project.getFile("my-app.war");
+    deployArtifact.create(new ByteArrayInputStream(new byte[0]), true, null);
   }
 
   @Test
   public void testStage() {
     StagingDelegate delegate = new FlexExistingDeployArtifactStagingDelegate(
-        new Path(deployArtifact.getAbsolutePath()), appEngineDirectory);
+        deployArtifact, appEngineDirectory);
     IStatus status = delegate.stage(stagingDirectory, null, null, null, null);
 
     assertTrue(stagingDirectory.append("my-app.war").toFile().exists());

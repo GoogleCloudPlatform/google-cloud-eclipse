@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.appengine.deploy.flex;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -38,9 +37,9 @@ public class FlexExistingDeployArtifactStagingDelegate extends FlexStagingDelega
 
   private final IFile deployArtifact;
 
-  public FlexExistingDeployArtifactStagingDelegate(IPath deployArtifact, IPath appEngineDirectory) {
+  public FlexExistingDeployArtifactStagingDelegate(IFile deployArtifact, IPath appEngineDirectory) {
     super(appEngineDirectory);
-    this.deployArtifact = ResourcesPlugin.getWorkspace().getRoot().getFile(deployArtifact);
+    this.deployArtifact = deployArtifact;
   }
 
   @Override
