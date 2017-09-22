@@ -23,6 +23,7 @@ import com.google.cloud.tools.eclipse.ui.util.DisplayExecutor;
 import com.google.cloud.tools.eclipse.util.jobs.Consumer;
 import com.google.cloud.tools.eclipse.util.jobs.FuturisticJob;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -164,22 +165,24 @@ public class MiniSelector implements ISelectionProvider {
   }
 
   /**
-   * Return the currently selected project ID or {@code null} if none selected.
+   * Return the currently selected project ID or {@code ""} if none selected.
    */
   public String getProjectId() {
     GcpProject selected = getProject();
-    return selected == null ? null : selected.getId();
+    return selected != null ? selected.getId() : "";
   }
 
   /**
    * Set the currently selected project by ID. The selection may not take effect immediately if the
    * project-list is still being fetched.
+   * 
+   * @param projectId may be {@code null} or {@code ""} to deselect
    */
   public void setProject(final String projectId) {
     Preconditions.checkState(comboViewer.getInput() instanceof GcpProject[]);
     // if there's a fetch in progress, then we override the result that should be shown
     toBeSelectedProjectId = projectId;
-    if (projectId == null) {
+    if (Strings.isNullOrEmpty(projectId)) {
       comboViewer.setSelection(StructuredSelection.EMPTY);
     } else {
       for (GcpProject project : (GcpProject[]) comboViewer.getInput()) {

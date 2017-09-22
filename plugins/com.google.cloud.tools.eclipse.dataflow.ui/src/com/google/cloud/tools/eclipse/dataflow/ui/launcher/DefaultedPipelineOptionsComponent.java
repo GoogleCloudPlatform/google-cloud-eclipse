@@ -19,8 +19,6 @@ package com.google.cloud.tools.eclipse.dataflow.ui.launcher;
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.MessageTarget;
 import com.google.cloud.tools.eclipse.dataflow.ui.preferences.RunOptionsDefaultsComponent;
-import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.HashMap;
 import java.util.Map;
@@ -112,9 +110,7 @@ public class DefaultedPipelineOptionsComponent {
   public Map<String, String> getValues() {
     Map<String, String> values = new HashMap<>();
     values.put(DataflowPreferences.ACCOUNT_EMAIL_PROPERTY, defaultOptions.getAccountEmail());
-    GcpProject project = defaultOptions.getProject();
-    Preconditions.checkNotNull(project);
-    values.put(DataflowPreferences.PROJECT_PROPERTY, project.getId());
+    values.put(DataflowPreferences.PROJECT_PROPERTY, defaultOptions.getProjectId());
     values.put(DataflowPreferences.STAGING_LOCATION_PROPERTY, defaultOptions.getStagingLocation());
     // TODO: Give this a separate input
     values.put(DataflowPreferences.GCP_TEMP_LOCATION_PROPERTY, defaultOptions.getStagingLocation());
@@ -133,7 +129,7 @@ public class DefaultedPipelineOptionsComponent {
     if (isUseDefaultOptions()) {
       customValues.put(
           DataflowPreferences.ACCOUNT_EMAIL_PROPERTY, defaultOptions.getAccountEmail());
-      customValues.put(DataflowPreferences.PROJECT_PROPERTY, defaultOptions.getProject().getId());
+      customValues.put(DataflowPreferences.PROJECT_PROPERTY, defaultOptions.getProjectId());
       customValues.put(
           DataflowPreferences.STAGING_LOCATION_PROPERTY, defaultOptions.getStagingLocation());
       // TODO: Give this a separate input

@@ -58,7 +58,7 @@ public class NewDataflowProjectWizardDefaultRunOptionsPage extends WizardPage {
   }
 
   public String getProjectId() {
-    return runOptionsDefaultsComponent.getProject().getId();
+    return runOptionsDefaultsComponent.getProjectId();
   }
 
   /**

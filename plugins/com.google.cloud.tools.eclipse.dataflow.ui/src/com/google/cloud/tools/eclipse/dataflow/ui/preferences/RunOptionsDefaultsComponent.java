@@ -389,9 +389,20 @@ public class RunOptionsDefaultsComponent {
     return accountSelector.getSelectedEmail();
   }
 
+  /**
+   * Return the selected project, or {@code null} if no project selected.
+   */
   public GcpProject getProject() {
     return projectInput.getProject();
   }
+
+  /**
+   * Return the selected project ID, or {@code ""} if no project selected.
+   */
+  public String getProjectId() {
+    return projectInput.getProjectId();
+  }
+
 
   public void setStagingLocationText(String stagingLocation) {
     stagingLocationInput.setText(stagingLocation);
@@ -409,7 +420,9 @@ public class RunOptionsDefaultsComponent {
     projectInput.addSelectionChangedListener(new ISelectionChangedListener() {
       @Override
       public void selectionChanged(SelectionChangedEvent event) {
-        listener.modifyText(new ModifyEvent(new Event()));
+        Event dummy = new Event();
+        dummy.widget = projectInput.getControl();
+        listener.modifyText(new ModifyEvent(dummy));
       }
     });
     stagingLocationInput.addModifyListener(listener);
