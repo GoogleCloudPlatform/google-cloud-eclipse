@@ -42,42 +42,42 @@ public class AppEngineProjectConfig {
   private String mavenArtifactId;
   private String mavenVersion;
 
-  public File getCloudSdkLocation() {
+  File getCloudSdkLocation() {
     return cloudSdkLocation;
   }
 
-  public void setCloudSdkLocation(File cloudSdkLocation) {
+  void setCloudSdkLocation(File cloudSdkLocation) {
     this.cloudSdkLocation = cloudSdkLocation;
   }
 
-  public void setPackageName(String name) {
+  void setPackageName(String name) {
     this.packageName = name;
   }
 
-  public String getPackageName() {
+  String getPackageName() {
     return this.packageName;
   }
 
   /**
    * Null project location URI means the default location.
    */
-  public void setProject(IProject project) {
+  void setProject(IProject project) {
     this.project = project;
   }
 
-  public IProject getProject() {
+  IProject getProject() {
     return this.project;
   }
 
-  public URI getEclipseProjectLocationUri() {
+  URI getEclipseProjectLocationUri() {
     return this.eclipseProjectLocationUri;
   }
 
-  public void setEclipseProjectLocationUri(URI uri) {
+  void setEclipseProjectLocationUri(URI uri) {
     this.eclipseProjectLocationUri = uri;
   }
 
-  public List<Library> getAppEngineLibraries() {
+  List<Library> getAppEngineLibraries() {
     return appEngineLibraries;
   }
 
@@ -85,23 +85,23 @@ public class AppEngineProjectConfig {
     this.appEngineLibraries = new ArrayList<>(libraries);
   }
 
-  public String getServiceName() {
+  String getServiceName() {
     return serviceName;
   }
 
-  public void setServiceName(String serviceName) {
+  void setServiceName(String serviceName) {
     this.serviceName = serviceName;
   }
 
-  public String getRuntimeId() {
+  String getRuntimeId() {
     return runtimeId;
   }
 
-  public void setRuntimeId(String runtimeId) {
+  void setRuntimeId(String runtimeId) {
     this.runtimeId = runtimeId;
   }
 
-  public void setUseMaven(String mavenGroupId, String mavenArtifactId, String mavenVersion) {
+  void setUseMaven(String mavenGroupId, String mavenArtifactId, String mavenVersion) {
     this.useMaven = true;
     this.mavenGroupId = mavenGroupId;
     this.mavenArtifactId = mavenArtifactId;
@@ -112,15 +112,15 @@ public class AppEngineProjectConfig {
     return useMaven;
   }
 
-  public String getMavenGroupId() {
+  String getMavenGroupId() {
     return mavenGroupId;
   }
 
-  public String getMavenArtifactId() {
+  String getMavenArtifactId() {
     return mavenArtifactId;
   }
 
-  public String getMavenVersion() {
+  String getMavenVersion() {
     return mavenVersion;
   }
 }
