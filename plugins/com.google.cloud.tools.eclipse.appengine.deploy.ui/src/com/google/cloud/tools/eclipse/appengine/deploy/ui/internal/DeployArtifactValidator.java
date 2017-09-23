@@ -24,6 +24,9 @@ import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Text;
 
 public class DeployArtifactValidator extends FixedMultiValidator {
 
@@ -35,6 +38,13 @@ public class DeployArtifactValidator extends FixedMultiValidator {
     Preconditions.checkArgument(String.class.equals(deployArtifactPath.getValueType()));
     this.basePath = basePath;
     this.deployArtifactPath = deployArtifactPath;
+  }
+
+  /**
+   * Convenience constructor for {@link Text}.
+   */
+  public DeployArtifactValidator(IPath basePath, Text fileField) {
+    this(basePath, WidgetProperties.text(SWT.Modify).observe(fileField));
   }
 
   @Override

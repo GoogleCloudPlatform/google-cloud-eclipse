@@ -23,16 +23,15 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Text;
 
 /**
- * {@link SelectionListener} that opens a {@link DirectoryDialog} that is pre-configured with the
- * directory set in the associated {@link Text} field (if possible) and sets the field with the user
- * chosen directory. The path retrieved from and set to the field is relative to a given base path.
- * For example, if the base path is {@code /usr/local} and a user chose {@code /usr/local/lib/cups},
- * the text field will be set to {@code lib/cups}.
+ * {@link SelectionListener} that opens a {@link FileDialog} to show the file set in the associated
+ * {@link Text} field (if possible) and sets the field after the user chooses a file. The path
+ * retrieved from and set to the field is relative to a given base path. For example, if the base
+ * path is {@code /usr/local} and a user chose {@code /usr/local/lib/cups}, the text field will be
+ * set to {@code lib/cups}.
  */
 public class RelativeFileFieldSetter extends SelectionAdapter {
 
@@ -41,18 +40,18 @@ public class RelativeFileFieldSetter extends SelectionAdapter {
   private final FileDialog dialog;
   private final String[] filterExtensions;
 
-  public RelativeFileFieldSetter(Text directoryField, IPath basePath, String[] filterExtensions) {
-    this(directoryField, basePath, filterExtensions, new FileDialog(directoryField.getShell()));
+  public RelativeFileFieldSetter(Text fileField, IPath basePath, String[] filterExtensions) {
+    this(fileField, basePath, filterExtensions, new FileDialog(fileField.getShell()));
   }
 
   @VisibleForTesting
-  RelativeFileFieldSetter(Text directoryField, IPath basePath, String[] filterExtensions,
-      FileDialog directoryDialog) {
-    this.fileField = directoryField;
+  RelativeFileFieldSetter(Text fileField, IPath basePath, String[] filterExtensions,
+      FileDialog fileDialog) {
+    this.fileField = fileField;
     this.basePath = Preconditions.checkNotNull(basePath);
     this.filterExtensions = filterExtensions;
     Preconditions.checkArgument(basePath.isAbsolute());
-    dialog = directoryDialog;
+    dialog = fileDialog;
   }
 
   @Override
@@ -69,8 +68,8 @@ public class RelativeFileFieldSetter extends SelectionAdapter {
 
     String result = dialog.open();
     if (result != null) {
-      IPath maybeProjectRelative = new Path(result).makeRelativeTo(basePath);
-      fileField.setText(maybeProjectRelative.toString());
+      IPath maybeRelative = new Path(result).makeRelativeTo(basePath);
+      fileField.setText(maybeRelative.toString());
     }
   }
 }

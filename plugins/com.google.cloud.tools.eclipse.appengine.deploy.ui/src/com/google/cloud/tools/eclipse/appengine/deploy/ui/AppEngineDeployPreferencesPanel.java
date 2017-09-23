@@ -48,6 +48,7 @@ import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.ObservablesManager;
 import org.eclipse.core.databinding.UpdateValueStrategy;
+import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.databinding.beans.PojoProperties;
 import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.value.ComputedValue;
@@ -152,7 +153,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     createCenterArea();
 
     createAdvancedSection();
-    setupTextFieldDataBinding(bucket, "bucket", new BucketNameValidator());
+    setupOptionalTextFieldDataBinding(bucket, "bucket", new BucketNameValidator());
 
     observables.addObservablesFromContext(bindingContext, true, true);
 
@@ -162,7 +163,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
 
   protected void createCenterArea() {
     createProjectVersionSection();
-    setupTextFieldDataBinding(version, "version", new ProjectVersionValidator());
+    setupOptionalTextFieldDataBinding(version, "version", new ProjectVersionValidator());
 
     createPromoteSection();
     setupMasterDependantDataBinding(autoPromoteButton, "autoPromote",
@@ -223,12 +224,23 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
         gcpProjectToProjectId, projectIdToGcpProject);
   }
 
-  private void setupTextFieldDataBinding(Control control, String modelPropertyName,
-      IValidator setAfterGetValidator) {
-    ISWTObservableValue controlValue = WidgetProperties.text(SWT.Modify).observe(control);
+  protected void setupTextFieldDataBinding(Text text, String modelPropertyName,
+      ValidationStatusProvider validator) {
+    ISWTObservableValue textValue = WidgetProperties.text(SWT.Modify).observe(text);
     IObservableValue modelValue = PojoProperties.value(modelPropertyName).observe(model);
 
-    bindingContext.bindValue(controlValue, modelValue,
+    bindingContext.bindValue(textValue, modelValue);
+    if (requireValues) {
+      bindingContext.addValidationStatusProvider(validator);
+    }
+  }
+
+  private void setupOptionalTextFieldDataBinding(Text text, String modelPropertyName,
+      IValidator setAfterGetValidator) {
+    ISWTObservableValue textValue = WidgetProperties.text(SWT.Modify).observe(text);
+    IObservableValue modelValue = PojoProperties.value(modelPropertyName).observe(model);
+
+    bindingContext.bindValue(textValue, modelValue,
         new UpdateValueStrategy().setAfterGetValidator(setAfterGetValidator),
         new UpdateValueStrategy().setAfterGetValidator(setAfterGetValidator));
   }
