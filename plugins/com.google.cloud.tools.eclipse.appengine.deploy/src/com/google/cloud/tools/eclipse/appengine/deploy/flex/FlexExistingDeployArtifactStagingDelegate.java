@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.flex;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
+import com.google.common.base.Preconditions;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -39,7 +40,7 @@ public class FlexExistingDeployArtifactStagingDelegate extends FlexStagingDelega
 
   public FlexExistingDeployArtifactStagingDelegate(IFile deployArtifact, IPath appEngineDirectory) {
     super(appEngineDirectory);
-    this.deployArtifact = deployArtifact;
+    this.deployArtifact = Preconditions.checkNotNull(deployArtifact);
   }
 
   @Override

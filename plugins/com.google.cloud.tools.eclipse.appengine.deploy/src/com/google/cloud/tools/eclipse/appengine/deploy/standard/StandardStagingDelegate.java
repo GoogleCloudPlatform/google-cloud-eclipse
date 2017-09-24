@@ -49,7 +49,7 @@ public class StandardStagingDelegate implements StagingDelegate {
 
   @VisibleForTesting
   StandardStagingDelegate(IProject project, Path javaHome, CloudSdkProcessWrapper cloudSdkWrapper) {
-    this.project = project;
+    this.project = Preconditions.checkNotNull(project);
     this.javaHome = javaHome;
     this.cloudSdkWrapper = cloudSdkWrapper;
   }
@@ -92,7 +92,6 @@ public class StandardStagingDelegate implements StagingDelegate {
 
   @Override
   public ISchedulingRule getSchedulingRule() {
-    Preconditions.checkNotNull(project);
     return project;
   }
 }
