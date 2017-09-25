@@ -234,7 +234,9 @@ public class AppEngineDeployPreferencesPanelTest {
     deployPanel = createPanel(true /* validationErrorAsInfo */);
     selectAccount(account1);
     deployPanel.latestGcpProjectQueryJob.join();
-    assertThat(getProjectSelectionValidator().getSeverity(), is(IStatus.OK));
+    IStatus status = getProjectSelectionValidator();
+    assertEquals(IStatus.INFO, status.getSeverity());
+    assertEquals("Select a project", status.getMessage());
   }
 
   @Test
