@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.AppYamlValidator;
@@ -66,7 +65,7 @@ public class FlexDeployPreferencesPanelTest {
 
   @Test
   public void testGetHelpContextId() {
-    FlexDeployPreferencesPanel panel = createPanel(true /* requireValues */);
+    FlexDeployPreferencesPanel panel = createPanel(false /* validationErrorAsInfo */);
 
     assertEquals(
         "com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployAppEngineFlexProjectContext",
@@ -75,7 +74,7 @@ public class FlexDeployPreferencesPanelTest {
 
   @Test
   public void testDefaultAppYamlPathSet() {
-    FlexDeployPreferencesPanel panel = createPanel(true /* requireValues */);
+    FlexDeployPreferencesPanel panel = createPanel(false /* validationErrorAsInfo */);
 
     Text appYamlField = findAppYamlField(panel);
     assertEquals("src/main/appengine/app.yaml", appYamlField.getText());
@@ -84,7 +83,7 @@ public class FlexDeployPreferencesPanelTest {
 
   @Test
   public void testAppYamlPathValidation_nonExistingAppYaml() {
-    FlexDeployPreferencesPanel panel = createPanel(true /* requireValues */);
+    FlexDeployPreferencesPanel panel = createPanel(false /* validationErrorAsInfo */);
 
     Text appYamlField = findAppYamlField(panel);
     appYamlField.setText("non/existing/app.yaml");
@@ -92,17 +91,19 @@ public class FlexDeployPreferencesPanelTest {
   }
 
   @Test
-  public void testAppYamlPathValidation_noValidationIfRequireValuesIsFalse() {
-    FlexDeployPreferencesPanel panel = createPanel(false /* requireValues */);
+  public void testAppYamlPathValidation_noErrorIfValidationErrorAsInfo() {
+    FlexDeployPreferencesPanel panel = createPanel(true /* validationErrorAsInfo */);
 
     Text appYamlField = findAppYamlField(panel);
     appYamlField.setText("non/existing/app.yaml");
-    assertNull(getAppYamlPathValidationStatus(panel));
+    IStatus status = getAppYamlPathValidationStatus(panel);
+    assertEquals(IStatus.INFO, status.getSeverity());
+    assertEquals("app.yaml does not exist.", status.getMessage());
   }
 
   @Test
   public void testAppYamlPathValidation_absolutePathWorks() {
-    FlexDeployPreferencesPanel panel = createPanel(true /* requireValues */);
+    FlexDeployPreferencesPanel panel = createPanel(false /* validationErrorAsInfo */);
     Text appYamlField = findAppYamlField(panel);
 
     IPath absolutePath = project.getLocation().append("src/main/appengine/app.yaml");
@@ -112,9 +113,9 @@ public class FlexDeployPreferencesPanelTest {
     assertTrue(getAppYamlPathValidationStatus(panel).isOK());
   }
 
-  private FlexDeployPreferencesPanel createPanel(boolean requireValues) {
+  private FlexDeployPreferencesPanel createPanel(boolean validationErrorAsInfo) {
     return new FlexDeployPreferencesPanel(shellResource.getShell(),
-        project, loginService, layoutHandler, requireValues, projectRepository);
+        project, loginService, layoutHandler, validationErrorAsInfo, projectRepository);
   }
 
   private static IStatus getAppYamlPathValidationStatus(FlexDeployPreferencesPanel panel) {
@@ -130,9 +131,9 @@ public class FlexDeployPreferencesPanelTest {
 
   private static Text findAppYamlField(Composite panel) {
     Control control = CompositeUtil.findControlAfterLabel(panel, Text.class, "app.yaml:");
-    
+
     if (control == null) {
-      Assert.fail("Could not locate app.yaml field"); 
+      Assert.fail("Could not locate app.yaml field");
     }
     return (Text) control;
   }

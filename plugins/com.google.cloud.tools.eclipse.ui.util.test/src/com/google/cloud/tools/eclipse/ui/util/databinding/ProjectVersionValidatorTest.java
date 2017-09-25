@@ -27,11 +27,6 @@ public class ProjectVersionValidatorTest {
   private static final String LENGTH_63 = "123456789012345678901234567890123456789012345678901234567890123";
 
   @Test
-  public void testValidate_nonStringInput() {
-    assertThat(new ProjectVersionValidator().validate(new Object()).getSeverity(), is(IStatus.ERROR));
-  }
-
-  @Test
   public void testValidate_emptyString() {
     assertThat(new ProjectVersionValidator().validate("").getSeverity(), is(IStatus.OK));
   }

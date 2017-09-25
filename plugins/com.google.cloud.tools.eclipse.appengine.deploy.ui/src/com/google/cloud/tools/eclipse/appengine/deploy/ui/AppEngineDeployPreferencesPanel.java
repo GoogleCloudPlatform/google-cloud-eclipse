@@ -123,19 +123,19 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
   protected final DataBindingContext bindingContext = new DataBindingContext();
 
   private final Runnable layoutChangedHandler;
-  protected final boolean requireValues;
+  protected final boolean validationErrorAsInfo;
 
   private final ProjectRepository projectRepository;
   private final FormToolkit formToolkit;
 
   public AppEngineDeployPreferencesPanel(Composite parent, IProject project,
-      IGoogleLoginService loginService, Runnable layoutChangedHandler, boolean requireValues,
-      ProjectRepository projectRepository, DeployPreferences model) {
+      IGoogleLoginService loginService, Runnable layoutChangedHandler,
+      boolean validationErrorAsInfo, ProjectRepository projectRepository, DeployPreferences model) {
     super(parent, SWT.NONE);
 
     this.project = project;
     this.layoutChangedHandler = Preconditions.checkNotNull(layoutChangedHandler);
-    this.requireValues = requireValues;
+    this.validationErrorAsInfo = validationErrorAsInfo;
     this.projectRepository = projectRepository;
     this.model = model;
 
@@ -177,9 +177,10 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
           @Override
           public Object convert(Object savedEmail) {
             Preconditions.checkArgument(savedEmail instanceof String);
+            boolean autoSelectSingleAccount = !validationErrorAsInfo;
             if (accountSelector.isEmailAvailable((String) savedEmail)) {
               return savedEmail;
-            } else if (requireValues && accountSelector.getAccountCount() == 1) {
+            } else if (autoSelectSingleAccount && accountSelector.getAccountCount() == 1) {
               return accountSelector.getFirstEmail();
             } else {
               return null;
@@ -198,17 +199,12 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
      * model.
      */
     binding.updateTargetToModel();
-    bindingContext.addValidationStatusProvider(new AccountSelectorValidator(
-        requireValues, accountSelector, accountSelectorObservableValue));
+    bindingContext.addValidationStatusProvider(
+        new AccountSelectorValidator(accountSelectorObservableValue));
   }
 
   private void setupProjectSelectorDataBinding() {
-    IViewerObservableValue projectInput =
-        ViewerProperties.input().observe(projectSelector.getViewer());
-    IViewerObservableValue projectSelection =
-        ViewerProperties.singleSelection().observe(projectSelector.getViewer());
-    bindingContext.addValidationStatusProvider(
-        new ProjectSelectionValidator(projectInput, projectSelection, requireValues));
+    bindingContext.addValidationStatusProvider(new ProjectSelectionValidator());
 
     IViewerObservableValue projectList =
         ViewerProperties.singleSelection().observe(projectSelector.getViewer());
@@ -547,18 +543,14 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     }
   }
 
-  static class ProjectSelectionValidator extends FixedMultiValidator {
+  class ProjectSelectionValidator extends FixedMultiValidator {
 
-    private final IViewerObservableValue projectInput;
-    private final IViewerObservableValue projectSelection;
-    private final boolean requireValues;
+    private final IObservableValue projectInput;
+    private final IObservableValue projectSelection;
 
-    private ProjectSelectionValidator(IViewerObservableValue projectInput,
-                                      IViewerObservableValue projectSelection,
-                                      boolean requireValues) {
-      this.projectInput = projectInput;
-      this.projectSelection = projectSelection;
-      this.requireValues = requireValues;
+    private ProjectSelectionValidator() {
+      projectInput = ViewerProperties.input().observe(projectSelector.getViewer());
+      projectSelection = ViewerProperties.singleSelection().observe(projectSelector.getViewer());
     }
 
     @Override
@@ -568,18 +560,17 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
       // this access is recorded and ensures that changes are tracked, don't move it inside the if
       Object selectedProject = projectSelection.getValue();
       if (projects.isEmpty()) {
-        if (requireValues) {
-          return ValidationStatus.error(Messages.getString("projectselector.no.projects")); //$NON-NLS-1$
-        } else {
-          return ValidationStatus.info(Messages.getString("projectselector.no.projects")); //$NON-NLS-1$
-        }
+        return createStatusForError(Messages.getString("projectselector.no.projects")); //$NON-NLS-1$
       }
-      if (requireValues) {
-        if (selectedProject == null) {
-          return ValidationStatus.error(Messages.getString("projectselector.project.not.selected")); //$NON-NLS-1$
-        }
+      if (selectedProject == null) {
+        return createStatusForError(Messages.getString("projectselector.project.not.selected")); //$NON-NLS-1$
       }
       return ValidationStatus.ok();
+    }
+
+    private IStatus createStatusForError(String message) {
+      return validationErrorAsInfo ?
+          ValidationStatus.info(message) : ValidationStatus.error(message);
     }
   }
 
@@ -588,15 +579,10 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
    * Reports an error if the panel requires all values to be set, but the account selector does not
    * have a valid account.
    */
-  private static class AccountSelectorValidator extends FixedMultiValidator {
-    final private boolean requireValues;
-    final private AccountSelectorObservableValue accountSelectorObservableValue;
-    final private AccountSelector accountSelector;
+  private class AccountSelectorValidator extends FixedMultiValidator {
+    private final IObservableValue accountSelectorObservableValue;
 
-    private AccountSelectorValidator(boolean requireValues, AccountSelector accountSelector,
-        AccountSelectorObservableValue accountSelectorObservableValue) {
-      this.requireValues = requireValues;
-      this.accountSelector = accountSelector;
+    private AccountSelectorValidator(IObservableValue accountSelectorObservableValue) {
       this.accountSelectorObservableValue = accountSelectorObservableValue;
       // trigger the validator, as defaults to OK otherwise
       getValidationStatus();
@@ -606,14 +592,19 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     protected IStatus validate() {
       // access accountSelectorObservableValue so MultiValidator records the access
       String selectedEmail = (String) accountSelectorObservableValue.getValue();
-      if (requireValues && Strings.isNullOrEmpty(selectedEmail)) {
+      if (Strings.isNullOrEmpty(selectedEmail)) {
         if (accountSelector.isSignedIn()) {
-          return ValidationStatus.error(Messages.getString("error.account.missing.signedin"));
+          return createStatusForError(Messages.getString("error.account.missing.signedin"));
         } else {
-          return ValidationStatus.error(Messages.getString("error.account.missing.signedout"));
+          return createStatusForError(Messages.getString("error.account.missing.signedout"));
         }
       }
       return ValidationStatus.ok();
+    }
+
+    private IStatus createStatusForError(String message) {
+      return validationErrorAsInfo ? ValidationStatus.info(message)
+          : ValidationStatus.error(message);
     }
   }
 

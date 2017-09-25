@@ -28,10 +28,10 @@ import org.eclipse.swt.widgets.Composite;
 public class StandardDeployPreferencesPanel extends AppEngineDeployPreferencesPanel {
 
   public StandardDeployPreferencesPanel(Composite parent, IProject project,
-      IGoogleLoginService loginService, Runnable layoutChangedHandler, boolean requireValues,
-      ProjectRepository projectRepository) {
-    super(parent, project, loginService, layoutChangedHandler, requireValues, projectRepository,
-        new DeployPreferences(project));
+      IGoogleLoginService loginService, Runnable layoutChangedHandler,
+      boolean validationErrorAsInfo, ProjectRepository projectRepository) {
+    super(parent, project, loginService, layoutChangedHandler, validationErrorAsInfo,
+        projectRepository, new DeployPreferences(project));
   }
 
   @Override

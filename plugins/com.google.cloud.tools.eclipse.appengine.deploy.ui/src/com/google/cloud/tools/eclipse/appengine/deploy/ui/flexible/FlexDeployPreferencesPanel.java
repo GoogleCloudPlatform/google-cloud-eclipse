@@ -39,10 +39,10 @@ import org.eclipse.swt.widgets.Text;
 public class FlexDeployPreferencesPanel extends AppEngineDeployPreferencesPanel {
 
   public FlexDeployPreferencesPanel(Composite parent, IProject project,
-      IGoogleLoginService loginService, Runnable layoutChangedHandler, boolean requireValues,
-      ProjectRepository projectRepository) {
-    super(parent, project, loginService, layoutChangedHandler, requireValues, projectRepository,
-        new FlexDeployPreferences(project));
+      IGoogleLoginService loginService, Runnable layoutChangedHandler,
+      boolean validationErrorAsInfo, ProjectRepository projectRepository) {
+    super(parent, project, loginService, layoutChangedHandler, validationErrorAsInfo,
+        projectRepository, new FlexDeployPreferences(project));
   }
 
   @Override
@@ -81,10 +81,8 @@ public class FlexDeployPreferencesPanel extends AppEngineDeployPreferencesPanel 
     IObservableValue modelValue = PojoProperties.value("appYamlPath").observe(model);
 
     bindingContext.bindValue(fieldValue, modelValue);
-    if (requireValues) {
-      bindingContext.addValidationStatusProvider(
-          new AppYamlValidator(project.getLocation(), fieldValue));
-    }
+    bindingContext.addValidationStatusProvider(
+        new AppYamlValidator(project.getLocation(), fieldValue, validationErrorAsInfo));
   }
 
   @Override

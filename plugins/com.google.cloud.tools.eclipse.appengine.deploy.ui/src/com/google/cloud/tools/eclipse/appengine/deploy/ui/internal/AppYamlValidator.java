@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui.internal;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
 import com.google.cloud.tools.project.AppYaml;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.io.File;
 import java.io.IOException;
@@ -43,18 +42,21 @@ public class AppYamlValidator extends FixedMultiValidator {
 
   private final IPath basePath;
   private final IObservableValue appYamlPath;
+  private boolean errorAsInfo;
 
-  public AppYamlValidator(IPath basePath, IObservableValue appYamlPath) {
+  public AppYamlValidator(IPath basePath, IObservableValue appYamlPath,
+      boolean errorAsInfo) {
     Preconditions.checkArgument(basePath.isAbsolute(), "basePath is not absolute.");
     Preconditions.checkArgument(String.class.equals(appYamlPath.getValueType()));
     this.basePath = basePath;
     this.appYamlPath = appYamlPath;
+    this.errorAsInfo = errorAsInfo;
   }
 
   @Override
   protected IStatus validate() {
     if (appYamlPath.getValue().toString().isEmpty()) {
-      return ValidationStatus.error(Messages.getString("error.app.yaml.empty"));
+      return createStatusForError(Messages.getString("error.app.yaml.empty"));
     }
 
     File appYaml = new File((String) appYamlPath.getValue());
@@ -64,35 +66,37 @@ public class AppYamlValidator extends FixedMultiValidator {
 
     // appengine-plugins-core does not yet support other file names.
     if (!"app.yaml".equals(appYaml.getName())) {
-      return ValidationStatus.error(Messages.getString("error.app.yaml.invalid.name", appYaml));
+      return createStatusForError(Messages.getString("error.app.yaml.invalid.name", appYaml));
     } else if (!appYaml.exists()) {
-      return ValidationStatus.error(Messages.getString("error.app.yaml.non.existing"));
+      return createStatusForError(Messages.getString("error.app.yaml.non.existing"));
     } else if (!appYaml.isFile()) {
-      return ValidationStatus.error(Messages.getString("error.not.a.file", appYaml));
+      return createStatusForError(Messages.getString("error.not.a.file", appYaml));
     } else {
       return validateRuntime(appYaml);
     }
   }
 
-  @VisibleForTesting
-  static IStatus validateRuntime(File appYamlFile) {
+  private IStatus validateRuntime(File appYamlFile) {
     try {
       AppYaml appYaml = new AppYaml(appYamlFile.toPath());
       String runtime = appYaml.getRuntime();
 
       if ("custom".equals(runtime)) {
-        return ValidationStatus.error(Messages.getString("error.app.yaml.custom.runtime"));
+        return createStatusForError(Messages.getString("error.app.yaml.custom.runtime"));
       } else if (!"java".equals(runtime)) {
-        return ValidationStatus.error(
-            Messages.getString("error.app.yaml.not.java.runtime", runtime));
+        return createStatusForError(Messages.getString("error.app.yaml.not.java.runtime", runtime));
       } else {
         return ValidationStatus.ok();
       }
     } catch (ScannerException | ParserException ex) {
-      return ValidationStatus.error(Messages.getString("error.app.yaml.malformed"));
+      return createStatusForError(Messages.getString("error.app.yaml.malformed"));
     } catch (IOException ex) {
-      return ValidationStatus.error(
+      return createStatusForError(
           Messages.getString("error.app.yaml.cannot.read", ex.getLocalizedMessage()));
     }
+  }
+
+  private IStatus createStatusForError(String message) {
+    return errorAsInfo ? ValidationStatus.info(message) : ValidationStatus.error(message);
   }
 }

@@ -44,7 +44,7 @@ public class DeployPropertyPageTest extends BaseProjectTest {
 
     SwtBotProjectActions.openProjectProperties(bot, projectName);
     bot.tree().expandNode("Google Cloud Platform").select("App Engine Deployment");
-    bot.text("No projects found");
+    bot.text("Select an account.");
   }
 
 }

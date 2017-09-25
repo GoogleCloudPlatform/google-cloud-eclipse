@@ -66,8 +66,8 @@ class FlexDeployPreferencesDialog extends DeployPreferencesDialog {
   @Override
   protected AppEngineDeployPreferencesPanel createDeployPreferencesPanel(Composite container,
       IProject project, IGoogleLoginService loginService, Runnable layoutChangedHandler,
-      boolean requireValues, ProjectRepository projectRepository) {
+      boolean validationErrorAsInfo, ProjectRepository projectRepository) {
     return new FlexDeployPreferencesPanel(container, project, loginService, layoutChangedHandler,
-        requireValues, projectRepository);
+        validationErrorAsInfo, projectRepository);
   }
 }

@@ -49,7 +49,8 @@ public class DeployArtifactValidatorTest {
   public void setUp() throws IOException {
     basePath = new Path(tempFolder.newFolder().toString());
     when(deployArtifactPath.getValueType()).thenReturn(String.class);
-    pathValidator = new DeployArtifactValidator(basePath, deployArtifactPath);
+    pathValidator = new DeployArtifactValidator(basePath, deployArtifactPath,
+        false /* errorAsInfo */);
     assertTrue(basePath.isAbsolute());
   }
 
@@ -57,7 +58,8 @@ public class DeployArtifactValidatorTest {
   public void testConstructor_nonAbsoluteBasePath() {
     try {
       when(deployArtifactPath.getValue()).thenReturn("some.jar");
-      new DeployArtifactValidator(new Path("non/absolute/base/path"), deployArtifactPath);
+      new DeployArtifactValidator(new Path("non/absolute/base/path"), deployArtifactPath,
+          false /* errorAsInfo */);
       fail();
     } catch (IllegalArgumentException ex) {
       assertEquals("basePath is not absolute.", ex.getMessage());

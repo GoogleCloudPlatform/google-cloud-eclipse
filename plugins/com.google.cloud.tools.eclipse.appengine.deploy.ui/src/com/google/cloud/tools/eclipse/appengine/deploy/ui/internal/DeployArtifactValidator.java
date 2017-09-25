@@ -29,21 +29,24 @@ public class DeployArtifactValidator extends FixedMultiValidator {
 
   private final IPath basePath;
   private final IObservableValue deployArtifactPath;
+  private final boolean errorAsInfo;
 
-  public DeployArtifactValidator(IPath basePath, IObservableValue deployArtifactPath) {
+  public DeployArtifactValidator(IPath basePath, IObservableValue deployArtifactPath,
+      boolean errorAsInfo) {
     Preconditions.checkArgument(basePath.isAbsolute(), "basePath is not absolute.");
     Preconditions.checkArgument(String.class.equals(deployArtifactPath.getValueType()));
     this.basePath = basePath;
     this.deployArtifactPath = deployArtifactPath;
+    this.errorAsInfo = errorAsInfo;
   }
 
   @Override
   protected IStatus validate() {
     String pathValue = deployArtifactPath.getValue().toString();
     if (pathValue.isEmpty()) {
-      return ValidationStatus.error(Messages.getString("error.deploy.artifact.empty"));
+      return createStatusForError(Messages.getString("error.deploy.artifact.empty"));
     } else if (!pathValue.endsWith(".war") && !pathValue.endsWith(".jar")) {
-      return ValidationStatus.error(Messages.getString("error.deploy.artifact.invalid.extension"));
+      return createStatusForError(Messages.getString("error.deploy.artifact.invalid.extension"));
     }
 
     File deployArtifact = new File((String) deployArtifactPath.getValue());
@@ -52,11 +55,15 @@ public class DeployArtifactValidator extends FixedMultiValidator {
     }
 
     if (!deployArtifact.exists()) {
-      return ValidationStatus.error(
+      return createStatusForError(
           Messages.getString("error.deploy.artifact.non.existing", deployArtifact));
     } else if (!deployArtifact.isFile()) {
-      return ValidationStatus.error(Messages.getString("error.not.a.file", deployArtifact));
+      return createStatusForError(Messages.getString("error.not.a.file", deployArtifact));
     }
     return Status.OK_STATUS;
+  }
+
+  private IStatus createStatusForError(String message) {
+    return errorAsInfo ? ValidationStatus.info(message) : ValidationStatus.error(message);
   }
 }

@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.ui.util.databinding;
 
 import com.google.cloud.tools.eclipse.ui.util.Messages;
+import com.google.common.base.Preconditions;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -44,9 +45,7 @@ public class ProjectVersionValidator implements IValidator {
     // "The version specifier can contain lowercase letters, digits, and hyphens.
     // It cannot begin with the prefix ah- and the names default and latest are
     // reserved and cannot be used."
-    if (!(input instanceof String)) {
-      return ValidationStatus.error(Messages.getString("version.invalid")); //$NON-NLS-1$
-    }
+    Preconditions.checkState(input instanceof String);
     String value = (String) input;
     if (value.isEmpty()) {
       return ValidationStatus.ok();

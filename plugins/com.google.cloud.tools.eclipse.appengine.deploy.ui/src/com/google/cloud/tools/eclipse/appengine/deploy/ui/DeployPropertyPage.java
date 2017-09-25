@@ -188,7 +188,7 @@ public class DeployPropertyPage extends PropertyPage {
     if (standardPreferencesPanel == null) {
       standardPreferencesPanel = new StandardDeployPreferencesPanel(
           container, facetedProject.getProject(), loginService, getLayoutChangedHandler(),
-          false /* requireValues */, new ProjectRepository(googleApiFactory));
+          true /* validationErrorAsInfo */, new ProjectRepository(googleApiFactory));
     }
   }
 
@@ -196,7 +196,7 @@ public class DeployPropertyPage extends PropertyPage {
     if (flexPreferencesPanel == null) {
       flexPreferencesPanel = new FlexDeployPreferencesPanel(
           container, facetedProject.getProject(), loginService, getLayoutChangedHandler(),
-          false /* requireValues */, new ProjectRepository(googleApiFactory));
+          true /* validationErrorAsInfo */, new ProjectRepository(googleApiFactory));
     }
   }
 }

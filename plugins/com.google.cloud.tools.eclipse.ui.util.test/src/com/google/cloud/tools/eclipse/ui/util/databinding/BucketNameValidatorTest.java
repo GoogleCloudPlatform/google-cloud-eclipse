@@ -31,15 +31,8 @@ public class BucketNameValidatorTest {
       + "b1234567890123456789012345678901234567890123456789."
       + "c1234567890123456789012345678901234567890123456789."
       + "d1234567890123456789012345678901234567890123456789.e12345678901234.us";
-  
-  private BucketNameValidator validator = new BucketNameValidator();
 
-  @Test
-  public void testValidation_nonStringInput() {
-    IStatus status = validator.validate(new Object());
-    assertThat(status.getSeverity(), is(IStatus.ERROR));
-    assertThat(status.getMessage(), is("Invalid bucket name"));
-  }
+  private BucketNameValidator validator = new BucketNameValidator();
 
   @Test
   public void testValidation_emptyString() {
