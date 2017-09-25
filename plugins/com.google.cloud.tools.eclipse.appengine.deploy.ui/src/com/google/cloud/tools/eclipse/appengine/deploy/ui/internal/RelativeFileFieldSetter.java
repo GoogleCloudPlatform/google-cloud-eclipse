@@ -20,6 +20,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -41,7 +42,7 @@ public class RelativeFileFieldSetter extends SelectionAdapter {
   private final String[] filterExtensions;
 
   public RelativeFileFieldSetter(Text fileField, IPath basePath, String[] filterExtensions) {
-    this(fileField, basePath, filterExtensions, new FileDialog(fileField.getShell()));
+    this(fileField, basePath, filterExtensions, new FileDialog(fileField.getShell(), SWT.SHEET));
   }
 
   @VisibleForTesting
