@@ -570,6 +570,11 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
       }
       return ValidationStatus.ok();
     }
+
+    private IStatus createStatusForError(String message) {
+      return validationErrorAsInfo ?
+          ValidationStatus.info(message) : ValidationStatus.error(message);
+    }
   }
 
   /**
@@ -578,7 +583,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
    * have a valid account.
    */
   private class AccountSelectorValidator extends FixedMultiValidator {
-    private final AccountSelectorObservableValue accountSelectorObservableValue;
+    private final IObservableValue accountSelectorObservableValue;
 
     private AccountSelectorValidator() {
       accountSelectorObservableValue = new AccountSelectorObservableValue(accountSelector);
@@ -599,13 +604,10 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
       }
       return ValidationStatus.ok();
     }
-  }
 
-  private IStatus createStatusForError(String message) {
-    if (validationErrorAsInfo) {
-      return ValidationStatus.info(Messages.getString("error.account.missing.signedout"));
-    } else {
-      return ValidationStatus.error(Messages.getString("error.account.missing.signedout"));
+    private IStatus createStatusForError(String message) {
+      return validationErrorAsInfo ? ValidationStatus.info(message)
+          : ValidationStatus.error(message);
     }
   }
 

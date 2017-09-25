@@ -97,10 +97,6 @@ public class AppYamlValidator extends FixedMultiValidator {
   }
 
   private IStatus createStatusForError(String message) {
-    if (errorAsInfo) {
-      return ValidationStatus.info(message);
-    } else {
-      return ValidationStatus.error(message);
-    }
+    return errorAsInfo ?  ValidationStatus.info(message) : ValidationStatus.error(message);
   }
 }
