@@ -199,14 +199,11 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
      * model.
      */
     binding.updateTargetToModel();
-    bindingContext.addValidationStatusProvider(new AccountSelectorValidator());
+    bindingContext.addValidationStatusProvider(
+        new AccountSelectorValidator(accountSelectorObservableValue));
   }
 
   private void setupProjectSelectorDataBinding() {
-    IViewerObservableValue projectInput =
-        ViewerProperties.input().observe(projectSelector.getViewer());
-    IViewerObservableValue projectSelection =
-        ViewerProperties.singleSelection().observe(projectSelector.getViewer());
     bindingContext.addValidationStatusProvider(new ProjectSelectionValidator());
 
     IViewerObservableValue projectList =
@@ -585,8 +582,8 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
   private class AccountSelectorValidator extends FixedMultiValidator {
     private final IObservableValue accountSelectorObservableValue;
 
-    private AccountSelectorValidator() {
-      accountSelectorObservableValue = new AccountSelectorObservableValue(accountSelector);
+    private AccountSelectorValidator(IObservableValue accountSelectorObservableValue) {
+      this.accountSelectorObservableValue = accountSelectorObservableValue;
       // trigger the validator, as defaults to OK otherwise
       getValidationStatus();
     }

@@ -64,6 +64,6 @@ public class DeployArtifactValidator extends FixedMultiValidator {
   }
 
   private IStatus createStatusForError(String message) {
-    return errorAsInfo ?  ValidationStatus.info(message) : ValidationStatus.error(message);
+    return errorAsInfo ? ValidationStatus.info(message) : ValidationStatus.error(message);
   }
 }
