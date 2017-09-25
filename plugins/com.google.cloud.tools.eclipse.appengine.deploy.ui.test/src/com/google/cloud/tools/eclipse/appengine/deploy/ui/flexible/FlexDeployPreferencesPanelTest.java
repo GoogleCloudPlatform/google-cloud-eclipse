@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.AppYamlValidator;
@@ -97,7 +96,9 @@ public class FlexDeployPreferencesPanelTest {
 
     Text appYamlField = findAppYamlField(panel);
     appYamlField.setText("non/existing/app.yaml");
-    assertNull(getAppYamlPathValidationStatus(panel));
+    IStatus status = getAppYamlPathValidationStatus(panel);
+    assertEquals(IStatus.INFO, status.getSeverity());
+    assertEquals("app.yaml does not exist.", status.getMessage());
   }
 
   @Test
