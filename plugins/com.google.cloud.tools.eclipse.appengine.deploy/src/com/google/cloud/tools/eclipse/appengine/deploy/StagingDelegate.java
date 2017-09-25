@@ -41,7 +41,7 @@ public interface StagingDelegate {
       IProgressMonitor monitor);
 
   /**
-   * Returns a {#link ISchedulingRule} for this stager to work safely. For example, if this stager
+   * Returns an {#link ISchedulingRule} for this stager to work safely. For example, if this stager
    * needs to lock down an {#link IProject} during staging, it could return the {#link IProject}.
    * Must be reentrant, returning the same object all the time. May return {@code null}.
    */
