@@ -51,7 +51,7 @@ public class AppYamlValidatorTest {
   public void setUp() throws IOException {
     basePath = new Path(tempFolder.newFolder().toString());
     when(appYamlPath.getValueType()).thenReturn(String.class);
-    pathValidator = new AppYamlValidator(basePath, appYamlPath);
+    pathValidator = new AppYamlValidator(basePath, appYamlPath, false /* errorAsInfo */);
     assertTrue(basePath.isAbsolute());
   }
 
@@ -59,7 +59,7 @@ public class AppYamlValidatorTest {
   public void testConstructor_nonAbsoluteBasePath() {
     try {
       when(appYamlPath.getValue()).thenReturn("app.yaml");
-      new AppYamlValidator(new Path("non/absolute/base/path"), appYamlPath);
+      new AppYamlValidator(new Path("non/absolute/base/path"), appYamlPath, false);
       fail();
     } catch (IllegalArgumentException ex) {
       assertEquals("basePath is not absolute.", ex.getMessage());
@@ -163,14 +163,18 @@ public class AppYamlValidatorTest {
   @Test
   public void testValidateRuntime_javaRuntime() throws IOException {
     File appYaml = createAppYamlFile(tempFolder.getRoot().toString(), "runtime: java");
-    IStatus result = AppYamlValidator.validateRuntime(appYaml);
+    when(appYamlPath.getValue()).thenReturn(appYaml.toString());
+
+    IStatus result = pathValidator.validate();
     assertTrue(result.isOK());
   }
 
   @Test
   public void testValidateRuntime_malformedAppYaml() throws IOException {
     File appYaml = createAppYamlFile(tempFolder.getRoot().toString(), ": m a l f o r m e d !");
-    IStatus result = AppYamlValidator.validateRuntime(appYaml);
+    when(appYamlPath.getValue()).thenReturn(appYaml.toString());
+
+    IStatus result = pathValidator.validate();
     assertEquals(IStatus.ERROR, result.getSeverity());
     assertEquals("Malformed app.yaml.", result.getMessage());
   }
@@ -178,7 +182,9 @@ public class AppYamlValidatorTest {
   @Test
   public void testValidateRuntime_noRuntime() throws IOException {
     File appYaml = createAppYamlFile(tempFolder.getRoot().toString(), "env: flex");
-    IStatus result = AppYamlValidator.validateRuntime(appYaml);
+    when(appYamlPath.getValue()).thenReturn(appYaml.toString());
+
+    IStatus result = pathValidator.validate();
     assertEquals(IStatus.ERROR, result.getSeverity());
     assertEquals("\"runtime: null\" in app.yaml is not \"java\".", result.getMessage());
   }
@@ -186,7 +192,9 @@ public class AppYamlValidatorTest {
   @Test
   public void testValidateRuntime_nullRuntime() throws IOException {
     File appYaml = createAppYamlFile(tempFolder.getRoot().toString(), "runtime:");
-    IStatus result = AppYamlValidator.validateRuntime(appYaml);
+    when(appYamlPath.getValue()).thenReturn(appYaml.toString());
+
+    IStatus result = pathValidator.validate();
     assertEquals(IStatus.ERROR, result.getSeverity());
     assertEquals("\"runtime: null\" in app.yaml is not \"java\".", result.getMessage());
   }
@@ -194,7 +202,9 @@ public class AppYamlValidatorTest {
   @Test
   public void testValidateRuntime_notJavaRuntime() throws IOException {
     File appYaml = createAppYamlFile(tempFolder.getRoot().toString(), "runtime: python");
-    IStatus result = AppYamlValidator.validateRuntime(appYaml);
+    when(appYamlPath.getValue()).thenReturn(appYaml.toString());
+
+    IStatus result = pathValidator.validate();
     assertEquals(IStatus.ERROR, result.getSeverity());
     assertEquals("\"runtime: python\" in app.yaml is not \"java\".", result.getMessage());
   }
@@ -202,18 +212,12 @@ public class AppYamlValidatorTest {
   @Test
   public void testValidateRuntime_customRuntime() throws IOException {
     File appYaml = createAppYamlFile(tempFolder.getRoot().toString(), "runtime: custom");
-    IStatus result = AppYamlValidator.validateRuntime(appYaml);
+    when(appYamlPath.getValue()).thenReturn(appYaml.toString());
+
+    IStatus result = pathValidator.validate();
     assertEquals(IStatus.ERROR, result.getSeverity());
     assertEquals("\"runtime: custom\" is not yet supported by Cloud Tools for Eclipse.",
         result.getMessage());
-  }
-
-  @Test
-  public void testValidateRuntime_ioException() {
-    File nonExisting = new File("/non/existing/file");
-    IStatus result = AppYamlValidator.validateRuntime(nonExisting);
-    assertEquals(IStatus.ERROR, result.getSeverity());
-    assertTrue(result.getMessage().startsWith("Cannot read app.yaml:"));
   }
 
   private static void createAppYamlAsDirectory(IPath parent) {

@@ -37,7 +37,7 @@ public class StandardDeployPreferencesPanelTest {
     when(project.getName()).thenReturn("");
     StandardDeployPreferencesPanel panel = new StandardDeployPreferencesPanel(
         shellResource.getShell(), project, mock(IGoogleLoginService.class), mock(Runnable.class),
-        false, mock(ProjectRepository.class));
+        true, mock(ProjectRepository.class));
 
     assertEquals(
         "com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployAppEngineStandardProjectContext",

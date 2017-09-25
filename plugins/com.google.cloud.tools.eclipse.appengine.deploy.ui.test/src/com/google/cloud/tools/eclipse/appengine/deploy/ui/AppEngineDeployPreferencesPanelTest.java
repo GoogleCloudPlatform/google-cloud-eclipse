@@ -107,7 +107,7 @@ public class AppEngineDeployPreferencesPanelTest {
   @Test
   public void testAutoSelectSingleAccount() {
     when(loginService.getAccounts()).thenReturn(oneAccountSet);
-    deployPanel = createPanel(true /* requireValues */);
+    deployPanel = createPanel(false /* validationErrorAsInfo */);
     assertThat(deployPanel.getSelectedCredential(), is(credential));
 
     // verify not in error
@@ -123,7 +123,7 @@ public class AppEngineDeployPreferencesPanelTest {
       throws ProjectRepositoryException, InterruptedException {
     when(loginService.getAccounts()).thenReturn(oneAccountSet);
     initializeProjectRepository();
-    deployPanel = createPanel(true /* requireValues */);
+    deployPanel = createPanel(false /* validationErrorAsInfo */);
     assertNotNull(deployPanel.latestGcpProjectQueryJob);
     deployPanel.latestGcpProjectQueryJob.join();
 
@@ -132,7 +132,7 @@ public class AppEngineDeployPreferencesPanelTest {
 
   @Test
   public void testValidationMessageWhenNotSignedIn() {
-    deployPanel = createPanel(true /* requireValues */);
+    deployPanel = createPanel(false /* validationErrorAsInfo */);
     IStatus status = getAccountSelectorValidationStatus();
     assertThat(status.getMessage(), is("Sign in to Google."));
   }
@@ -142,7 +142,7 @@ public class AppEngineDeployPreferencesPanelTest {
     // Return two accounts because the account selector will auto-select if there exists only one.
     when(loginService.getAccounts()).thenReturn(twoAccountSet);
 
-    deployPanel = createPanel(true /* requireValues */);
+    deployPanel = createPanel(false /* validationErrorAsInfo */);
     IStatus status = getAccountSelectorValidationStatus();
     assertThat(status.getMessage(), is("Select an account."));
   }
@@ -150,7 +150,7 @@ public class AppEngineDeployPreferencesPanelTest {
   // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1229
   @Test
   public void testUncheckStopPreviousVersionButtonWhenDisabled() {
-    deployPanel = createPanel(true /* requireValues */);
+    deployPanel = createPanel(false /* validationErrorAsInfo */);
 
     Button promoteButton = getButtonWithText("Promote the deployed version to receive all traffic");
     Button stopButton = getButtonWithText("Stop previous version");
@@ -198,7 +198,7 @@ public class AppEngineDeployPreferencesPanelTest {
       node.put("account.email", EMAIL_1);
       initializeProjectRepository();
       when(loginService.getAccounts()).thenReturn(twoAccountSet);
-      deployPanel = createPanel(true /* requireValues */);
+      deployPanel = createPanel(false /* validationErrorAsInfo */);
       deployPanel.latestGcpProjectQueryJob.join();
 
       ProjectSelector projectSelector = getProjectSelector();
@@ -215,14 +215,14 @@ public class AppEngineDeployPreferencesPanelTest {
   }
 
   @Test
-  public void testProjectNotSelectedIsAnErrorWhenRequireValuesIsTrue() {
-    deployPanel = createPanel(true /* requireValues */);
+  public void testProjectNotSelectedIsAnErrorWhenValidationErrorAsInfoIsFalse() {
+    deployPanel = createPanel(false /* validationErrorAsInfo */);
     assertThat(getProjectSelectionValidator().getSeverity(), is(IStatus.ERROR));
   }
 
   @Test
-  public void testProjectNotSelectedIsNotAnErrorWhenRequireValuesIsFalse() {
-    deployPanel = createPanel(false /* requireValues */);
+  public void testProjectNotSelectedIsNotAnErrorWhenValidationErrorAsInfoIsTrue() {
+    deployPanel = createPanel(true /* validationErrorAsInfo */);
     assertThat(getProjectSelectionValidator().getSeverity(), is(IStatus.INFO));
   }
 
@@ -231,7 +231,7 @@ public class AppEngineDeployPreferencesPanelTest {
       throws ProjectRepositoryException, InterruptedException {
     when(loginService.getAccounts()).thenReturn(oneAccountSet);
     initializeProjectRepository();
-    deployPanel = createPanel(false /* requireValues */);
+    deployPanel = createPanel(true /* validationErrorAsInfo */);
     selectAccount(account1);
     deployPanel.latestGcpProjectQueryJob.join();
     assertThat(getProjectSelectionValidator().getSeverity(), is(IStatus.OK));
@@ -243,7 +243,7 @@ public class AppEngineDeployPreferencesPanelTest {
     when(loginService.getAccounts()).thenReturn(twoAccountSet);
     initializeProjectRepository();
 
-    deployPanel = createPanel(false /* requireValues */);
+    deployPanel = createPanel(true /* validationErrorAsInfo */);
     assertNull(deployPanel.latestGcpProjectQueryJob);
     assertThat(getProjectSelector().getProjectCount(), is(0));
 
@@ -261,7 +261,7 @@ public class AppEngineDeployPreferencesPanelTest {
     when(loginService.getAccounts()).thenReturn(twoAccountSet);
     initializeProjectRepository();
 
-    deployPanel = createPanel(false /* requireValues */);
+    deployPanel = createPanel(true /* validationErrorAsInfo */);
     assertNull(deployPanel.latestGcpProjectQueryJob);
     assertThat(getProjectSelector().getProjectCount(), is(0));
 
@@ -284,7 +284,7 @@ public class AppEngineDeployPreferencesPanelTest {
     when(loginService.getAccounts()).thenReturn(twoAccountSet);
     initializeProjectRepository();
 
-    deployPanel = createPanel(false /* requireValues */);
+    deployPanel = createPanel(true /* validationErrorAsInfo */);
     selectAccount(account1);
     deployPanel.latestGcpProjectQueryJob.join();
 
@@ -314,9 +314,9 @@ public class AppEngineDeployPreferencesPanelTest {
     selector.selectAccount(account.getEmail());
   }
 
-  private AppEngineDeployPreferencesPanel createPanel(boolean requireValues) {
+  private AppEngineDeployPreferencesPanel createPanel(boolean validationErrorAsInfo) {
     return new AppEngineDeployPreferencesPanel(parent, project, loginService, layoutChangedHandler,
-        requireValues, projectRepository, new DeployPreferences(project)) {
+        validationErrorAsInfo, projectRepository, new DeployPreferences(project)) {
           @Override
           protected String getHelpContextId() {
             return null;
