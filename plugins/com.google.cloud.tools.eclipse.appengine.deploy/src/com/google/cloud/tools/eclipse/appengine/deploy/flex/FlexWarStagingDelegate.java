@@ -41,7 +41,7 @@ public class FlexWarStagingDelegate extends FlexStagingDelegate {
 
   public FlexWarStagingDelegate(IProject project, IPath appEngineDirectory) {
     super(appEngineDirectory);
-    this.project = project;
+    this.project = Preconditions.checkNotNull(project);
   }
 
   @Override
@@ -54,7 +54,6 @@ public class FlexWarStagingDelegate extends FlexStagingDelegate {
 
   @Override
   public ISchedulingRule getSchedulingRule() {
-    Preconditions.checkNotNull(project);
     return project;
   }
 }

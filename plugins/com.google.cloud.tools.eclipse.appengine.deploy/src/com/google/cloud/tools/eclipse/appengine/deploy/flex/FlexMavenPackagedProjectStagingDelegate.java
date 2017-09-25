@@ -66,7 +66,7 @@ public class FlexMavenPackagedProjectStagingDelegate extends FlexStagingDelegate
 
   public FlexMavenPackagedProjectStagingDelegate(IProject project, IPath appEngineDirectory) {
     super(appEngineDirectory);
-    this.project = project;
+    this.project = Preconditions.checkNotNull(project);
   }
 
   @VisibleForTesting
@@ -163,7 +163,6 @@ public class FlexMavenPackagedProjectStagingDelegate extends FlexStagingDelegate
 
   @Override
   public ISchedulingRule getSchedulingRule() {
-    Preconditions.checkNotNull(project);
     return project;
   }
 
