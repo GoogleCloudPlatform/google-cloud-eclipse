@@ -59,7 +59,8 @@ public class AppYamlValidatorTest {
   public void testConstructor_nonAbsoluteBasePath() {
     try {
       when(appYamlPath.getValue()).thenReturn("app.yaml");
-      new AppYamlValidator(new Path("non/absolute/base/path"), appYamlPath, false);
+      new AppYamlValidator(new Path("non/absolute/base/path"), appYamlPath,
+          false /* errorAsInfo */);
       fail();
     } catch (IllegalArgumentException ex) {
       assertEquals("basePath is not absolute.", ex.getMessage());

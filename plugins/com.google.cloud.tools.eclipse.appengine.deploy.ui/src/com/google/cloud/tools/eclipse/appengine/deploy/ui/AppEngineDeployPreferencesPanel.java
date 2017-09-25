@@ -179,7 +179,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
             Preconditions.checkArgument(savedEmail instanceof String);
             if (accountSelector.isEmailAvailable((String) savedEmail)) {
               return savedEmail;
-            } else if (validationErrorAsInfo && accountSelector.getAccountCount() == 1) {
+            } else if (!validationErrorAsInfo && accountSelector.getAccountCount() == 1) {
               return accountSelector.getFirstEmail();
             } else {
               return null;
