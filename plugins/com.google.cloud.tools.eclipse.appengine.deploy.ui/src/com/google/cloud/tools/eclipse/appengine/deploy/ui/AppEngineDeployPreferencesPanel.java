@@ -177,9 +177,10 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
           @Override
           public Object convert(Object savedEmail) {
             Preconditions.checkArgument(savedEmail instanceof String);
+            boolean autoSelectSingleAccount = !validationErrorAsInfo;
             if (accountSelector.isEmailAvailable((String) savedEmail)) {
               return savedEmail;
-            } else if (!validationErrorAsInfo && accountSelector.getAccountCount() == 1) {
+            } else if (autoSelectSingleAccount && accountSelector.getAccountCount() == 1) {
               return accountSelector.getFirstEmail();
             } else {
               return null;
