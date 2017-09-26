@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.logging.Logger;
-
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.core.runtime.CoreException;
@@ -66,7 +65,7 @@ class LibraryFactory {
 
   // prevent instantiation
   private LibraryFactory() {}
-  
+
   static Library create(IConfigurationElement configurationElement) throws LibraryFactoryException {
     try {
       if (ELEMENT_NAME_LIBRARY.equals(configurationElement.getName())) {
@@ -110,7 +109,7 @@ class LibraryFactory {
   }
 
   private static List<LibraryFile> getLibraryFiles(IConfigurationElement[] children)
-      throws InvalidRegistryObjectException, URISyntaxException, LibraryFactoryException {
+      throws InvalidRegistryObjectException, URISyntaxException {
     List<LibraryFile> libraryFiles = new ArrayList<>();
     for (IConfigurationElement libraryFileElement : children) {
       if (ELEMENT_NAME_LIBRARY_FILE.equals(libraryFileElement.getName())) {
@@ -123,7 +122,7 @@ class LibraryFactory {
     return libraryFiles;
   }
 
-  static Collection<LibraryFile> loadTransitiveDependencies(MavenCoordinates root) 
+  static Collection<LibraryFile> loadTransitiveDependencies(MavenCoordinates root)
       throws CoreException {
     Set<LibraryFile> dependencies = new HashSet<>();
     // todo need a progress monitor here
@@ -174,11 +173,11 @@ class LibraryFactory {
     IConfigurationElement mavenCoordinatesElement = children[0];
     String groupId = mavenCoordinatesElement.getAttribute(ATTRIBUTE_NAME_GROUP_ID);
     String artifactId = mavenCoordinatesElement.getAttribute(ATTRIBUTE_NAME_ARTIFACT_ID);
-    
+
     MavenCoordinates.Builder builder = new MavenCoordinates.Builder()
         .setGroupId(groupId)
         .setArtifactId(artifactId);
-    
+
     String repository = mavenCoordinatesElement.getAttribute(ATTRIBUTE_NAME_REPOSITORY_URI);
     if (!Strings.isNullOrEmpty(repository)) {
       builder.setRepository(repository);
@@ -192,8 +191,8 @@ class LibraryFactory {
       if (artifactVersion != null) {
         version = artifactVersion.toString();
       }
-    } 
-    
+    }
+
     if (!Strings.isNullOrEmpty(version)) {
       builder.setVersion(version);
     }

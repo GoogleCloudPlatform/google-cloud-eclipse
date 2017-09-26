@@ -20,9 +20,7 @@ import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.eclipse.appengine.deploy.CloudSdkStagingHelper;
 import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
-import com.google.cloud.tools.eclipse.appengine.deploy.WarPublisher;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -31,7 +29,15 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.ui.console.MessageConsoleStream;
 
-public class FlexStagingDelegate implements StagingDelegate {
+/**
+ * Stages an App Engine flexible app, copying an app (a WAR or a runnable JAR file) and {@code
+ * app.yaml} to the given staging directory.
+ *
+ * See the Javadoc of {@link StagingDelegate} for more details.
+ *
+ * @see StagingDelegate
+ */
+abstract class FlexStagingDelegate implements StagingDelegate {
 
   private final IPath appEngineDirectory;
 
@@ -40,7 +46,7 @@ public class FlexStagingDelegate implements StagingDelegate {
   }
 
   @Override
-  public IStatus stage(IProject project, IPath stagingDirectory, IPath safeWorkDirectory,
+  public IStatus stage(IPath stagingDirectory, IPath safeWorkDirectory,
       MessageConsoleStream stdoutOutputStream, MessageConsoleStream stderrOutputStream,
       IProgressMonitor monitor) {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
@@ -50,20 +56,20 @@ public class FlexStagingDelegate implements StagingDelegate {
       return StatusUtil.error(this, "Could not create staging directory " + stagingDirectory);
     }
 
-    IPath war = safeWorkDirectory.append("app-to-deploy.war");
     try {
-      WarPublisher.publishWar(project, war, subMonitor.newChild(40));
-      CloudSdkStagingHelper.stageFlexible(appEngineDirectory, war, stagingDirectory,
+      IPath deployArtifact = getDeployArtifact(safeWorkDirectory, subMonitor.newChild(40));
+      CloudSdkStagingHelper.stageFlexible(appEngineDirectory, deployArtifact, stagingDirectory,
           subMonitor.newChild(60));
       return Status.OK_STATUS;
-    } catch (AppEngineException ex) {
+    } catch (AppEngineException | CoreException ex) {
       return StatusUtil.error(this, Messages.getString("deploy.job.staging.failed"), ex);
-    } catch (CoreException ex) {
-      return StatusUtil.error(this, "war publishing failed", ex);
     } finally {
       subMonitor.done();
     }
   }
+
+  protected abstract IPath getDeployArtifact(IPath safeWorkDirectory, IProgressMonitor monitor)
+      throws CoreException;
 
   @Override
   public IPath getOptionalConfigurationFilesDirectory() {

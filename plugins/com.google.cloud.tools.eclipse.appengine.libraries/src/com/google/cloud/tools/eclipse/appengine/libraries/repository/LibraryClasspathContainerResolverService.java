@@ -108,6 +108,9 @@ public class LibraryClasspathContainerResolverService
   public IStatus resolveContainer(IJavaProject javaProject, IPath containerPath,
                                   IProgressMonitor monitor) {
     Preconditions.checkArgument(containerPath.segment(0).equals(Library.CONTAINER_PATH_PREFIX));
+    
+    SubMonitor subMonitor = SubMonitor.convert(monitor, 10);
+    
     try {
       String libraryId = containerPath.segment(1);
       Library library = CloudLibraries.getLibrary(libraryId);
@@ -115,11 +118,11 @@ public class LibraryClasspathContainerResolverService
         List<Job> sourceAttacherJobs = new ArrayList<>();
         LibraryClasspathContainer container = resolveLibraryFiles(javaProject, containerPath,
                                                                   library, sourceAttacherJobs,
-                                                                  monitor);
+                                                                  subMonitor.newChild(9));
         JavaCore.setClasspathContainer(containerPath,
                                        new IJavaProject[] {javaProject},
                                        new IClasspathContainer[] {container},
-                                       new NullProgressMonitor());
+                                       subMonitor.newChild(1));
         serializer.saveContainer(javaProject, container);
         for (Job job : sourceAttacherJobs) {
           job.schedule();

@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexFacet;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexWarFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
@@ -32,10 +32,10 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-public class FlexStagingDelegateTest {
+public class FlexWarStagingDelegateTest {
 
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacetVersions(
-      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineFlexFacet.FACET_VERSION);
+      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineFlexWarFacet.FACET_VERSION);
 
   private IProject project;
   private IPath safeWorkDirectory;
@@ -52,8 +52,8 @@ public class FlexStagingDelegateTest {
 
   @Test
   public void testStage() {
-    StagingDelegate delegate = new FlexStagingDelegate(appEngineDirectory);
-    IStatus status = delegate.stage(project, stagingDirectory, safeWorkDirectory,
+    StagingDelegate delegate = new FlexWarStagingDelegate(project, appEngineDirectory);
+    IStatus status = delegate.stage(stagingDirectory, safeWorkDirectory,
         null, null, new NullProgressMonitor());
 
     assertTrue(stagingDirectory.append("app-to-deploy.war").toFile().exists());
@@ -63,7 +63,7 @@ public class FlexStagingDelegateTest {
 
   @Test
   public void testGetOptionalConfigurationFilesDirectory() {
-    StagingDelegate delegate = new FlexStagingDelegate(appEngineDirectory);
+    StagingDelegate delegate = new FlexWarStagingDelegate(project, appEngineDirectory);
 
     assertEquals(appEngineDirectory, delegate.getOptionalConfigurationFilesDirectory());
   }

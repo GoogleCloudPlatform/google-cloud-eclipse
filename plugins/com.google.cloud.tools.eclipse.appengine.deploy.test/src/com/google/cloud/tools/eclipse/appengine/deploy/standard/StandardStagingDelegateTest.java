@@ -81,8 +81,8 @@ public class StandardStagingDelegateTest {
 
   @Test
   public void testStage() {
-    StagingDelegate delegate = new StandardStagingDelegate(null, cloudSdkWrapper);
-    delegate.stage(project, stagingDirectory, safeWorkDirectory, null, null,
+    StagingDelegate delegate = new StandardStagingDelegate(project, null, cloudSdkWrapper);
+    delegate.stage(stagingDirectory, safeWorkDirectory, null, null,
         new NullProgressMonitor());
 
     assertTrue(stagingDirectory.append("WEB-INF").toFile().exists());
@@ -93,8 +93,8 @@ public class StandardStagingDelegateTest {
 
   @Test
   public void testGetOptionalConfigurationFilesDirectory() {
-    StagingDelegate delegate = new StandardStagingDelegate(null, cloudSdkWrapper);
-    delegate.stage(project, stagingDirectory, safeWorkDirectory, null, null,
+    StagingDelegate delegate = new StandardStagingDelegate(project, null, cloudSdkWrapper);
+    delegate.stage(stagingDirectory, safeWorkDirectory, null, null,
         new NullProgressMonitor());
 
     assertEquals(stagingDirectory.append("WEB-INF/appengine-generated"),
@@ -104,8 +104,8 @@ public class StandardStagingDelegateTest {
   @Test
   public void testSetJavaHome() {
     Path javaHome = Paths.get("/some/path");
-    StagingDelegate delegate = new StandardStagingDelegate(javaHome, cloudSdkWrapper);
-    delegate.stage(project, stagingDirectory, safeWorkDirectory, null, null,
+    StagingDelegate delegate = new StandardStagingDelegate(project, javaHome, cloudSdkWrapper);
+    delegate.stage(stagingDirectory, safeWorkDirectory, null, null,
         new NullProgressMonitor());
 
     verify(cloudSdkWrapper).setUpStandardStagingCloudSdk(

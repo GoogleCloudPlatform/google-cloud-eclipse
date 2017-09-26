@@ -16,8 +16,9 @@
 
 package com.google.cloud.tools.eclipse.integration.appengine;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
 import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowProjectCreator;
@@ -37,7 +38,7 @@ public class NewDataflowProjectWizardLandingPageTest {
 
   private NewDataflowProjectWizardLandingPage page;
   private Combo templateDropdown;
-  private Combo templateVersionDropdown;
+  private Combo dataflowVersionDropdown;
 
   @Before
   public void setUp() {
@@ -51,7 +52,7 @@ public class NewDataflowProjectWizardLandingPageTest {
 
         templateDropdown =
             CompositeUtil.findControlAfterLabel(shell, Combo.class, "Project &template:");
-        templateVersionDropdown =
+        dataflowVersionDropdown =
             CompositeUtil.findControlAfterLabel(shell, Combo.class, "Dataflow &version:");
       }
     });
@@ -74,7 +75,7 @@ public class NewDataflowProjectWizardLandingPageTest {
       public void run() {
         assertEquals(0, templateDropdown.getSelectionIndex());
         assertEquals("Starter project with a simple pipeline", templateDropdown.getText());
-        assertArrayEquals(new String[] {"2.0.0", "1.9.0"}, templateVersionDropdown.getItems());
+        assertThat(dataflowVersionDropdown.getItems().length, greaterThan(0));
       }
     });
   }
@@ -86,7 +87,7 @@ public class NewDataflowProjectWizardLandingPageTest {
       public void run() {
         templateDropdown.select(1);
         assertEquals("Example pipelines", templateDropdown.getText());
-        assertArrayEquals(new String[] {"2.0.0", "1.9.0"}, templateVersionDropdown.getItems());
+        assertThat(dataflowVersionDropdown.getItems().length, greaterThan(0));
       }
     });
   }

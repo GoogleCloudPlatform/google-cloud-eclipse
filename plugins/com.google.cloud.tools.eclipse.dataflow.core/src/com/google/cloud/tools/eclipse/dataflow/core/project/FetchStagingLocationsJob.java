@@ -16,59 +16,38 @@
 
 package com.google.cloud.tools.eclipse.dataflow.core.project;
 
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
-import java.io.IOException;
+import com.google.cloud.tools.eclipse.util.jobs.FuturisticJob;
 import java.util.SortedSet;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 
 /**
  * A job that retrieves a collection of potential Staging Locations from a {@link
  * GcsDataflowProjectClient}.
  */
-public class FetchStagingLocationsJob extends Job {
+public class FetchStagingLocationsJob extends FuturisticJob<SortedSet<String>> {
   private final GcsDataflowProjectClient gcsClient;
 
   private final String accountEmail;
   private final String cloudProjectId;
-  private final SettableFuture<SortedSet<String>> stagingLocations;
 
   public FetchStagingLocationsJob(GcsDataflowProjectClient gcsClient, String accountEmail,
       String cloudProjectId) {
-    super("Update Status Locations for project " + cloudProjectId);
+    super("Update staging locations for project " + cloudProjectId);
     this.gcsClient = gcsClient;
     this.accountEmail = accountEmail;
     this.cloudProjectId = cloudProjectId;
-    this.stagingLocations = SettableFuture.create();
   }
 
   public String getAccountEmail() {
     return accountEmail;
   }
 
-  public String getProject() {
+  public String getProjectId() {
     return cloudProjectId;
   }
 
   @Override
-  protected IStatus run(IProgressMonitor monitor) {
-    try {
-      SortedSet<String> locations = gcsClient.getPotentialStagingLocations(cloudProjectId);
-      if (monitor.isCanceled()) {
-        stagingLocations.cancel(false);
-        return Status.CANCEL_STATUS;
-      }
-      stagingLocations.set(locations);
-    } catch (IOException ex) {
-      stagingLocations.setException(ex);
-    }
-    return Status.OK_STATUS;
-  }
-
-  public ListenableFuture<SortedSet<String>> getStagingLocations() {
-    return stagingLocations;
+  protected SortedSet<String> compute(IProgressMonitor monitor) throws Exception {
+    return gcsClient.getPotentialStagingLocations(cloudProjectId);
   }
 }

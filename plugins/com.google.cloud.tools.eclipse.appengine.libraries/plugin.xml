@@ -19,7 +19,7 @@
         <mavenCoordinates
               artifactId="appengine-api-1.0-sdk"
               groupId="com.google.appengine" 
-              version="1.9.55" />
+              version="1.9.56" />
         <exclusionFilter pattern="com/google/appengine/repackaged/**" />
         <exclusionFilter pattern="com/google/appengine/labs/repackaged/**" />
         <inclusionFilter pattern="com/google/apphosting/api/**" />
@@ -273,6 +273,18 @@
               groupId="org.threeten"
               version="1.3.3" />
       </libraryFile>
+      <libraryFile>
+        <mavenCoordinates
+              groupId="com.google.api.grpc"
+              artifactId="proto-google-common-protos"
+              version="0.1.15" />
+      </libraryFile>
+      <libraryFile>
+        <mavenCoordinates
+              groupId="com.google.http-client"
+              artifactId="google-http-client-protobuf"
+              version="1.22.0" />
+      </libraryFile>
     </library>
     
     <library
@@ -295,7 +307,7 @@
         <mavenCoordinates
               artifactId="google-api-services-storage"
               groupId="com.google.apis"
-              version="v1-rev102-1.22.0" />
+              version="v1-rev108-1.22.0" />
       </libraryFile>
     </library>
     
@@ -312,24 +324,19 @@
         <mavenCoordinates
               artifactId="google-cloud-datastore"
               groupId="com.google.cloud"
-              version="1.0.1" />
+              version="1.4.0" />
       </libraryFile>
-    </library>
-    
-    <library
-          id="cloudtranslation"
-          group="clientapis"
-          name="%cloudtranslation.name"
-          tooltip="%cloudtranslation.tooltip"
-          javaVersion="1.8"
-          siteUri="https://cloud.google.com/translate/docs/reference/libraries"
-          dependencies="include">
-      <libraryFile
-          javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.21.0/apidocs/index.html?com/google/cloud/translate/package-summary.html">    
+      <libraryFile>
         <mavenCoordinates
-              artifactId="google-cloud-translate"
-              groupId="com.google.cloud"
-              version="1.3.1" />
+              artifactId="datastore-v1-protos"
+              groupId="com.google.cloud.datastore"
+              version="1.3.0" />
+      </libraryFile>
+      <libraryFile>
+        <mavenCoordinates
+              artifactId="datastore-v1-proto-client"
+              groupId="com.google.cloud.datastore"
+              version="1.4.0" />
       </libraryFile>
     </library>
   </extension>

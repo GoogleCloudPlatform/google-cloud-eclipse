@@ -35,7 +35,7 @@ import com.google.cloud.tools.eclipse.dataflow.ui.page.MessageTarget;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.component.LabeledTextMapComponent;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.component.TextAndButtonComponent;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.component.TextAndButtonSelectionListener;
-import com.google.cloud.tools.eclipse.dataflow.ui.util.DisplayExecutor;
+import com.google.cloud.tools.eclipse.ui.util.DisplayExecutor;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;

@@ -40,13 +40,13 @@ public class FlexFacetInstallDelegateTest {
     IProject project = projectCreator.getProject();
 
     IProgressMonitor monitor = new NullProgressMonitor();
-    IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
+    IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexWarFacet.ID);
     IProjectFacetVersion appEngineFacetVersion =
-        appEngineFacet.getVersion(AppEngineFlexFacet.VERSION);
+        appEngineFacet.getVersion(AppEngineFlexWarFacet.VERSION);
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     facetedProject.installProjectFacet(appEngineFacetVersion, null /* config */, monitor);
 
-    Assert.assertTrue(AppEngineFlexFacet.hasFacet(facetedProject));
+    Assert.assertTrue(AppEngineFlexWarFacet.hasFacet(facetedProject));
     Assert.assertTrue(project.getFile("src/main/appengine/app.yaml").exists());
   }
 }

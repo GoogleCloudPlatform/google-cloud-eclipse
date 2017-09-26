@@ -24,6 +24,7 @@ import com.google.cloud.tools.eclipse.appengine.deploy.WarPublisher;
 import com.google.cloud.tools.eclipse.appengine.deploy.util.CloudSdkProcessWrapper;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import java.nio.file.Path;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -31,27 +32,30 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.ui.console.MessageConsoleStream;
 
 public class StandardStagingDelegate implements StagingDelegate {
 
+  private final IProject project;
   private final Path javaHome;
   private final CloudSdkProcessWrapper cloudSdkWrapper;
 
   private IPath optionalConfigurationFilesDirectory;
 
-  public StandardStagingDelegate(Path javaHome) {
-    this(javaHome, new CloudSdkProcessWrapper());
+  public StandardStagingDelegate(IProject project, Path javaHome) {
+    this(project, javaHome, new CloudSdkProcessWrapper());
   }
 
   @VisibleForTesting
-  StandardStagingDelegate(Path javaHome, CloudSdkProcessWrapper cloudSdkWrapper) {
+  StandardStagingDelegate(IProject project, Path javaHome, CloudSdkProcessWrapper cloudSdkWrapper) {
+    this.project = Preconditions.checkNotNull(project);
     this.javaHome = javaHome;
     this.cloudSdkWrapper = cloudSdkWrapper;
   }
 
   @Override
-  public IStatus stage(IProject project, IPath stagingDirectory, IPath safeWorkDirectory,
+  public IStatus stage(IPath stagingDirectory, IPath safeWorkDirectory,
       MessageConsoleStream stdoutOutputStream, MessageConsoleStream stderrOutputStream,
       IProgressMonitor monitor) {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
@@ -84,5 +88,10 @@ public class StandardStagingDelegate implements StagingDelegate {
   @Override
   public void interrupt() {
     cloudSdkWrapper.interrupt();
+  }
+
+  @Override
+  public ISchedulingRule getSchedulingRule() {
+    return project;
   }
 }

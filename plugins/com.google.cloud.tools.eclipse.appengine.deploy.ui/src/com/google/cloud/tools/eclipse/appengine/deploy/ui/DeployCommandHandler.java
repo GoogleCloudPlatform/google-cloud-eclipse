@@ -129,7 +129,8 @@ public abstract class DeployCommandHandler extends AbstractHandler {
     return severity != IMarker.SEVERITY_ERROR;
   }
 
-  private void launchDeployJob(IProject project, Credential credential) throws IOException {
+  private void launchDeployJob(IProject project, Credential credential)
+      throws IOException, CoreException {
     AnalyticsPingManager.getInstance().sendPing(
         AnalyticsEvents.APP_ENGINE_DEPLOY, AnalyticsEvents.APP_ENGINE_DEPLOY_STANDARD, null);
 
@@ -149,8 +150,8 @@ public abstract class DeployCommandHandler extends AbstractHandler {
 
     StagingDelegate stagingDelegate = getStagingDelegate(project);
 
-    DeployJob deploy = new DeployJob(project, credential, workDirectory, outputStream, errorStream,
-        stagingDelegate);
+    DeployJob deploy = new DeployJob(deployPreferences, credential, workDirectory,
+        outputStream, errorStream, stagingDelegate);
     messageConsole.setJob(deploy);
     deploy.addJobChangeListener(new JobChangeAdapter() {
 
@@ -166,7 +167,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
     deploy.schedule();
   }
 
-  protected abstract StagingDelegate getStagingDelegate(IProject project);
+  protected abstract StagingDelegate getStagingDelegate(IProject project) throws CoreException;
 
   private static String getConsoleName(String projectId) {
     Date now = new Date();

@@ -14,7 +14,7 @@
  * the License.
  */
 
-package com.google.cloud.tools.eclipse.dataflow.ui.util;
+package com.google.cloud.tools.eclipse.ui.util;
 
 import org.eclipse.swt.widgets.Display;
 

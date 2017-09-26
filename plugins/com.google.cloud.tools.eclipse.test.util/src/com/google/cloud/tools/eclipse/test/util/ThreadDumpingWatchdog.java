@@ -168,17 +168,17 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
    * Attempt to obtain the Eclipse Lock Manager debug output. The output represents a matrix where
    * the columns are the allocated locks and the rows correspond to the threads and their interest
    * in the locks.
-   * 
+   *
    * <pre>
    * Eclipse Locks:
-   *  :: 
+   *  ::
    *  R/, OrderedLock (4),
    *  ModalContext :  1, 0,
    *  Worker-4 :  0, 1,
    *  Worker-3 :  -1, 0,
    *  -------
    * </pre>
-   * 
+   *
    * The first row following "::" lists the locks. A lock is either an
    * {@link org.eclipse.core.runtime.jobs.ISchedulingRule ISchedulingRule} or an explicit
    * {@link org.eclipse.core.runtime.jobs.ILock ILock}. Each subsequent row lists the relationships
@@ -186,7 +186,7 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
    * has no relationship (0). In the above, the workspace root ({@code R/}) has been acquired by
    * <em>ModalContext</em> but <em>Worker-3</em> would like to acquire it, and <em>Worker-4</em> has
    * acquired <em>ILock #4</em>.
-   * 
+   *
    * @see org.eclipse.core.internal.jobs.DeadlockDetector
    */
   private void dumpEclipseLocks(StringBuilder sb, String linePrefix) {
@@ -250,7 +250,7 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
           ReflectionUtil.getField(implicitJobs, "threadJobs", Map.class); /* <Thread,ThreadJob> */
       if (!threadJobs.isEmpty()) {
         sb.append("\n").append(linePrefix).append(threadJobs.size() + " ThreadJobs:");
-        for (Entry entry : threadJobs.entrySet()) {
+        for (Entry<?, ?> entry : threadJobs.entrySet()) {
           dumpJob(sb, linePrefix, (Job) entry.getValue(), (Thread) entry.getKey());
         }
       }
@@ -292,8 +292,8 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
     //@formatter:off
     sb.append(String.format("  %s%s{pri=%d%s%s%s%s} %s (%s)%s",
         status,
-        (job.isBlocking() ? "<BLOCKING>" : ""), 
-        job.getPriority(), 
+        (job.isBlocking() ? "<BLOCKING>" : ""),
+        job.getPriority(),
         (job.isSystem() ? ",system" : ""),
         (job.isUser() ? ",user" : ""),
         (job.getRule() != null ? ",rule=" + job.getRule() : ""),
