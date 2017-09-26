@@ -153,7 +153,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     createCenterArea();
 
     createAdvancedSection();
-    setupTextFieldDataBindingWithPermanentValidation(bucket, "bucket", new BucketNameValidator());
+    setupTextFieldDataBinding(bucket, "bucket", new BucketNameValidator());
 
     observables.addObservablesFromContext(bindingContext, true, true);
 
@@ -163,8 +163,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
 
   protected void createCenterArea() {
     createProjectVersionSection();
-    setupTextFieldDataBindingWithPermanentValidation(
-        version, "version", new ProjectVersionValidator());
+    setupTextFieldDataBinding(version, "version", new ProjectVersionValidator());
 
     createPromoteSection();
     setupMasterDependantDataBinding(autoPromoteButton, "autoPromote",
@@ -233,7 +232,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
    *
    * @see #AppEngineDeployPreferencesPanel
    */
-  protected void setupTextFieldDataBinding(Text text, String modelPropertyName,
+  protected void setupPossiblyUnvalidatedTextFieldDataBinding(Text text, String modelPropertyName,
       ValidationStatusProvider validator) {
     ISWTObservableValue textValue = WidgetProperties.text(SWT.Modify).observe(text);
     IObservableValue modelValue = PojoProperties.value(modelPropertyName).observe(model);
@@ -253,7 +252,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
    *
    * @see #setupTextFieldDataBinding
    */
-  private void setupTextFieldDataBindingWithPermanentValidation(Text text, String modelPropertyName,
+  private void setupTextFieldDataBinding(Text text, String modelPropertyName,
       IValidator setAfterGetValidator) {
     ISWTObservableValue textValue = WidgetProperties.text(SWT.Modify).observe(text);
     IObservableValue modelValue = PojoProperties.value(modelPropertyName).observe(model);

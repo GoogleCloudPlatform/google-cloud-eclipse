@@ -50,7 +50,7 @@ public class FlexDeployPreferencesPanel extends AppEngineDeployPreferencesPanel 
         Messages.getString("deploy.preferences.dialog.label.app.yaml"),
         Messages.getString("tooltip.app.yaml"),
         fileFieldBasePath, new String[] {"*.yaml"});
-    setupTextFieldDataBinding(appYamlField, "appYamlPath",
+    setupPossiblyUnvalidatedTextFieldDataBinding(appYamlField, "appYamlPath",
         new AppYamlValidator(fileFieldBasePath, appYamlField));
 
     super.createCenterArea();
