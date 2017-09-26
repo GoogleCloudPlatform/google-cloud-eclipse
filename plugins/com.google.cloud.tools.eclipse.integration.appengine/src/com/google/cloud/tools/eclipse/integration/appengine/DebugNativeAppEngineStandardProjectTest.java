@@ -24,7 +24,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotTestingUtilities;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotTreeUtilities;
@@ -64,17 +63,6 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
   @Rule
   public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
-  @Test
-  public void testDebugLaunch_java7() throws Exception {
-    launchDebug("testapp_java7", AppEngineRuntime.STANDARD_JAVA_7);
-  }
-
-  @Test
-  public void testDebugLaunch_java8() throws Exception {
-    Assume.assumeTrue("Only for JavaSE-8", ImportMavenAppEngineStandardProjectTest.hasJavaSE8());
-    launchDebug("testapp_java8", AppEngineRuntime.STANDARD_JAVA_8);
-  }
-
   /**
    * Launch a native application in debug mode and verify that:
    * <ol>
@@ -83,7 +71,10 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
    * <li>the process is actually terminated.</li>
    * </ol>
    */
-  private void launchDebug(String projectName, AppEngineRuntime appEngineRuntime) throws Exception {
+  @Test
+  public void launchDebug(String projectName) throws Exception {
+    Assume.assumeTrue("Only for JavaSE-8", ImportMavenAppEngineStandardProjectTest.hasJavaSE8());
+
     // Disable WTP's download-server-bindings
     // Equivalent to: ServerUIPreferences.getInstance().setCacheFrequency(0);
     Preferences prefs = InstanceScope.INSTANCE.getNode("org.eclipse.wst.server.ui");
@@ -92,11 +83,11 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
 
     assertNoService(new URL("http://localhost:8080/hello"));
 
-    project = SwtBotAppEngineActions.createNativeWebAppProject(bot, projectName, null,
-        "app.engine.test", appEngineRuntime);
+    project = SwtBotAppEngineActions.createNativeWebAppProject(bot, "testapp_java8", null,
+        "app.engine.test", null /* runtime */);
     assertTrue(project.exists());
 
-    SWTBotTreeItem testProject = SwtBotProjectActions.selectProject(bot, projectName);
+    SWTBotTreeItem testProject = SwtBotProjectActions.selectProject(bot, "testapp_java8");
     assertNotNull(testProject);
     SwtBotTestingUtilities.performAndWaitForWindowChange(bot, new Runnable() {
       @Override
