@@ -163,7 +163,8 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
 
   protected void createCenterArea() {
     createProjectVersionSection();
-    setupTextFieldDataBindingWithPermanentValidation(version, "version", new ProjectVersionValidator());
+    setupTextFieldDataBindingWithPermanentValidation(
+        version, "version", new ProjectVersionValidator());
 
     createPromoteSection();
     setupMasterDependantDataBinding(autoPromoteButton, "autoPromote",
