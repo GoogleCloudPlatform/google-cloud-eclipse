@@ -49,29 +49,29 @@ public class NewNativeAppEngineStandardProjectTest extends BaseProjectTest {
 
   @Test
   public void testWithDefaults() throws Exception {
+    Assume.assumeTrue("Requires a Java 8 JRE", JavaRuntimeUtils.hasJavaSE8());
     String[] projectFiles = {"src/main/java/HelloAppEngine.java",
         "src/main/webapp/META-INF/MANIFEST.MF", "src/main/webapp/WEB-INF/appengine-web.xml",
         "src/main/webapp/WEB-INF/web.xml", "src/main/webapp/index.html"};
-    createAndCheck("appWithDefault_java7", null /* packageName */, AppEngineRuntime.STANDARD_JAVA_7,
+    createAndCheck("appWithDefault_java8", null /* packageName */, null /* runtime */,
         projectFiles);
   }
 
   @Test
   public void testWithPackage() throws Exception {
-    String[] projectFiles = {"src/main/java/app/engine/test/HelloAppEngine.java",
-        "src/main/webapp/META-INF/MANIFEST.MF", "src/main/webapp/WEB-INF/appengine-web.xml",
-        "src/main/webapp/WEB-INF/web.xml", "src/main/webapp/index.html",};
-    createAndCheck("appWithPackage_java7", "app.engine.test", AppEngineRuntime.STANDARD_JAVA_7,
-        projectFiles);
-  }
-
-  @Test
-  public void testWithPackage_java8() throws Exception {
     Assume.assumeTrue("Requires a Java 8 JRE", JavaRuntimeUtils.hasJavaSE8());
     String[] projectFiles = {"src/main/java/app/engine/test/HelloAppEngine.java",
         "src/main/webapp/META-INF/MANIFEST.MF", "src/main/webapp/WEB-INF/appengine-web.xml",
         "src/main/webapp/WEB-INF/web.xml", "src/main/webapp/index.html",};
-    createAndCheck("appWithPackage_java8", "app.engine.test", AppEngineRuntime.STANDARD_JAVA_8,
+    createAndCheck("appWithPackage_java8", "app.engine.test", null /* runtime */, projectFiles);
+  }
+
+  @Test
+  public void testWithPackage_java7() throws Exception {
+    String[] projectFiles = {"src/main/java/app/engine/test/HelloAppEngine.java",
+        "src/main/webapp/META-INF/MANIFEST.MF", "src/main/webapp/WEB-INF/appengine-web.xml",
+        "src/main/webapp/WEB-INF/web.xml", "src/main/webapp/index.html",};
+    createAndCheck("appWithPackage_java7", "app.engine.test", AppEngineRuntime.STANDARD_JAVA_7,
         projectFiles);
   }
 
@@ -86,13 +86,7 @@ public class NewNativeAppEngineStandardProjectTest extends BaseProjectTest {
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     assertNotNull("Native App Engine projects should be faceted", facetedProject);
 
-    if (runtime == AppEngineRuntime.STANDARD_JAVA_7) {
-      assertEquals("Project does not have standard facet", AppEngineStandardFacet.JRE7,
-          facetedProject.getProjectFacetVersion(AppEngineStandardFacet.FACET));
-      assertEquals(JavaFacet.VERSION_1_7, facetedProject.getProjectFacetVersion(JavaFacet.FACET));
-      assertEquals(WebFacetUtils.WEB_25,
-          facetedProject.getProjectFacetVersion(WebFacetUtils.WEB_FACET));
-    } else {
+    if (runtime == null || runtime == AppEngineRuntime.STANDARD_JAVA_8) {
       // we don't currently export a JRE8 facet version
       assertNotNull("Project does not have standard facet",
           facetedProject.getProjectFacetVersion(AppEngineStandardFacet.FACET));
@@ -100,6 +94,12 @@ public class NewNativeAppEngineStandardProjectTest extends BaseProjectTest {
           facetedProject.getProjectFacetVersion(AppEngineStandardFacet.FACET).getVersionString());
       assertEquals(JavaFacet.VERSION_1_8, facetedProject.getProjectFacetVersion(JavaFacet.FACET));
       assertEquals(WebFacetUtils.WEB_31,
+          facetedProject.getProjectFacetVersion(WebFacetUtils.WEB_FACET));
+    } else {
+      assertEquals("Project does not have standard facet", AppEngineStandardFacet.JRE7,
+          facetedProject.getProjectFacetVersion(AppEngineStandardFacet.FACET));
+      assertEquals(JavaFacet.VERSION_1_7, facetedProject.getProjectFacetVersion(JavaFacet.FACET));
+      assertEquals(WebFacetUtils.WEB_25,
           facetedProject.getProjectFacetVersion(WebFacetUtils.WEB_FACET));
     }
 
