@@ -17,7 +17,9 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -131,5 +133,25 @@ public class LibraryFileTest {
     LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
     libraryFile.setExport(false);
     assertFalse(libraryFile.isExport());
+  }
+  
+
+  @Test
+  public void testEquals() throws URISyntaxException {
+    MavenCoordinates mavenCoordinatesAb = new MavenCoordinates("a", "b");
+    MavenCoordinates mavenCoordinatesXy = new MavenCoordinates("x", "y");
+    LibraryFile libraryFile1 = new LibraryFile(mavenCoordinatesAb);
+    LibraryFile libraryFile2 = new LibraryFile(mavenCoordinatesXy);
+    LibraryFile libraryFile3 = new LibraryFile(mavenCoordinatesAb);
+    libraryFile3.setJavadocUri(new URI("http://www.example.com"));
+    
+    assertEquals(libraryFile1, libraryFile1);
+    assertEquals(libraryFile1, libraryFile3);
+    assertEquals(libraryFile1.hashCode(), libraryFile3.hashCode());
+    assertNotEquals(libraryFile1, libraryFile2);
+    assertNotEquals(libraryFile1.hashCode(), libraryFile2.hashCode());
+    assertNotEquals(libraryFile1, null);
+    assertNotEquals(libraryFile1, "a:b");
+    assertEquals(libraryFile1, libraryFile3);
   }
 }

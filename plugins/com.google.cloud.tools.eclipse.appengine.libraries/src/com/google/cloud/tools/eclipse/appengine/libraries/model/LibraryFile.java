@@ -78,4 +78,23 @@ public class LibraryFile {
   void setExport(boolean export) {
     this.export = export;
   }
+  
+  /**
+   * Two LibraryFile objects are equal if and only if their Maven coordinates are equal.
+   * 
+   * @see MavenCoordinates#equals(Object)
+   */
+  @Override
+  public boolean equals(Object o) {
+    if (o == null || !(o instanceof LibraryFile)) {
+      return false;
+    }
+    LibraryFile other = (LibraryFile) o;
+    return other.mavenCoordinates.equals(mavenCoordinates);
+  }
+  
+  @Override
+  public int hashCode() {
+    return 37 * mavenCoordinates.hashCode() + 43;
+  }
 }

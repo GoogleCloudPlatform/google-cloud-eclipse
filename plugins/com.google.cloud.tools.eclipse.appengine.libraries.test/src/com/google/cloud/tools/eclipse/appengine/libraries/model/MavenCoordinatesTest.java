@@ -17,6 +17,8 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
@@ -161,4 +163,22 @@ public class MavenCoordinatesTest {
         .build();
     assertThat(mavenCoordinates.getClassifier(), is(""));
   }
+  
+  @Test
+  public void testEquals() {
+    MavenCoordinates mavenCoordinates1 =
+        new MavenCoordinates.Builder().setGroupId("g").setArtifactId("a").setClassifier("").build();
+    MavenCoordinates mavenCoordinates2 = mavenCoordinates1.toBuilder().build();
+    MavenCoordinates mavenCoordinates3 = mavenCoordinates1.toBuilder().setVersion("1.9.3").build();
+    MavenCoordinates mavenCoordinates4 = mavenCoordinates1.toBuilder().setArtifactId("b").build();
+
+    assertEquals(mavenCoordinates1, mavenCoordinates2);
+    assertEquals(mavenCoordinates1, mavenCoordinates3);
+    assertEquals(mavenCoordinates1.hashCode(), mavenCoordinates3.hashCode());
+    assertNotEquals(mavenCoordinates1, mavenCoordinates4);
+    assertNotEquals(mavenCoordinates1.hashCode(), mavenCoordinates4.hashCode());
+    assertNotEquals(mavenCoordinates1, null);
+    assertNotEquals(mavenCoordinates1, "g:a:1.9.3");
+  }
+
 }
