@@ -251,7 +251,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
    * Unlike {@link #setupFileFieldDataBinding}, {@code setAfterGetValidator} is always enforced
    * regardless of the panel's validation mode.
    *
-   * @see #setupFileFieldDataBinding
+   * @see #setupTextFieldDataBinding
    */
   private void setupTextFieldDataBindingWithPermanentValidation(Text text, String modelPropertyName,
       IValidator setAfterGetValidator) {
