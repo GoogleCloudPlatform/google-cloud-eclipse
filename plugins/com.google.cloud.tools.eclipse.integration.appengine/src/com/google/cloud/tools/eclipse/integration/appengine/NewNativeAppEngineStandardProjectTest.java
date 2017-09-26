@@ -52,7 +52,8 @@ public class NewNativeAppEngineStandardProjectTest extends BaseProjectTest {
     String[] projectFiles = {"src/main/java/HelloAppEngine.java",
         "src/main/webapp/META-INF/MANIFEST.MF", "src/main/webapp/WEB-INF/appengine-web.xml",
         "src/main/webapp/WEB-INF/web.xml", "src/main/webapp/index.html"};
-    createAndCheck("appWithDefault", null /* packageName */, null /* runtime */, projectFiles);
+    createAndCheck("appWithDefault_java7", null /* packageName */, AppEngineRuntime.STANDARD_JAVA_7,
+        projectFiles);
   }
 
   @Test
@@ -60,7 +61,8 @@ public class NewNativeAppEngineStandardProjectTest extends BaseProjectTest {
     String[] projectFiles = {"src/main/java/app/engine/test/HelloAppEngine.java",
         "src/main/webapp/META-INF/MANIFEST.MF", "src/main/webapp/WEB-INF/appengine-web.xml",
         "src/main/webapp/WEB-INF/web.xml", "src/main/webapp/index.html",};
-    createAndCheck("appWithPackage", "app.engine.test", null /* runtime */, projectFiles);
+    createAndCheck("appWithPackage_java7", "app.engine.test", AppEngineRuntime.STANDARD_JAVA_7,
+        projectFiles);
   }
 
   @Test
@@ -84,7 +86,7 @@ public class NewNativeAppEngineStandardProjectTest extends BaseProjectTest {
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     assertNotNull("Native App Engine projects should be faceted", facetedProject);
 
-    if (runtime == null || runtime == AppEngineRuntime.STANDARD_JAVA_7) {
+    if (runtime == AppEngineRuntime.STANDARD_JAVA_7) {
       assertEquals("Project does not have standard facet", AppEngineStandardFacet.JRE7,
           facetedProject.getProjectFacetVersion(AppEngineStandardFacet.FACET));
       assertEquals(JavaFacet.VERSION_1_7, facetedProject.getProjectFacetVersion(JavaFacet.FACET));
