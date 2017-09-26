@@ -253,13 +253,13 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
    * @see #setupTextFieldDataBinding
    */
   private void setupTextFieldDataBinding(Text text, String modelPropertyName,
-      IValidator setAfterGetValidator) {
+      IValidator afterGetValidator) {
     ISWTObservableValue textValue = WidgetProperties.text(SWT.Modify).observe(text);
     IObservableValue modelValue = PojoProperties.value(modelPropertyName).observe(model);
 
     bindingContext.bindValue(textValue, modelValue,
-        new UpdateValueStrategy().setAfterGetValidator(setAfterGetValidator),
-        new UpdateValueStrategy().setAfterGetValidator(setAfterGetValidator));
+        new UpdateValueStrategy().setAfterGetValidator(afterGetValidator),
+        new UpdateValueStrategy().setAfterGetValidator(afterGetValidator));
   }
 
   /**
