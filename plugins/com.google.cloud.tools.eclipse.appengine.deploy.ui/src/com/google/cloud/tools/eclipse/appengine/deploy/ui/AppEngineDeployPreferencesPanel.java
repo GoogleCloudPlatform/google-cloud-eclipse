@@ -153,7 +153,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     createCenterArea();
 
     createAdvancedSection();
-    setupOptionalTextFieldDataBinding(bucket, "bucket", new BucketNameValidator());
+    setupTextFieldDataBindingWithPermanentValidation(bucket, "bucket", new BucketNameValidator());
 
     observables.addObservablesFromContext(bindingContext, true, true);
 
@@ -163,7 +163,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
 
   protected void createCenterArea() {
     createProjectVersionSection();
-    setupOptionalTextFieldDataBinding(version, "version", new ProjectVersionValidator());
+    setupTextFieldDataBindingWithPermanentValidation(version, "version", new ProjectVersionValidator());
 
     createPromoteSection();
     setupMasterDependantDataBinding(autoPromoteButton, "autoPromote",
@@ -224,6 +224,14 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
         gcpProjectToProjectId, projectIdToGcpProject);
   }
 
+  /**
+   * Binds a {@link Text} field with a property of the {@link DeployPreferences deploy
+   * preferences model} given to the panel. This method honors the panel's validation mode (set
+   * through the {@code requireValues} parameter when this panel was instantiated) such that {@code
+   * validator} is ignored if {@code requireValues} is {@code false}.
+   *
+   * @see #AppEngineDeployPreferencesPanel
+   */
   protected void setupTextFieldDataBinding(Text text, String modelPropertyName,
       ValidationStatusProvider validator) {
     ISWTObservableValue textValue = WidgetProperties.text(SWT.Modify).observe(text);
@@ -235,7 +243,16 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     }
   }
 
-  private void setupOptionalTextFieldDataBinding(Text text, String modelPropertyName,
+  /**
+   * Binds a {@link Text} field with a property of the {@link DeployPreferences deploy
+   * preferences model} given to the panel.
+   *
+   * Unlike {@link #setupFileFieldDataBinding}, {@code setAfterGetValidator} is always enforced
+   * regardless of the panel's validation mode.
+   *
+   * @see #setupFileFieldDataBinding
+   */
+  private void setupTextFieldDataBindingWithPermanentValidation(Text text, String modelPropertyName,
       IValidator setAfterGetValidator) {
     ISWTObservableValue textValue = WidgetProperties.text(SWT.Modify).observe(text);
     IObservableValue modelValue = PojoProperties.value(modelPropertyName).observe(model);
