@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.dataflow.ui.launcher;
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.MessageTarget;
 import com.google.cloud.tools.eclipse.dataflow.ui.preferences.RunOptionsDefaultsComponent;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,6 +51,13 @@ public class DefaultedPipelineOptionsComponent {
 
   public DefaultedPipelineOptionsComponent(Composite parent, Object layoutData,
       MessageTarget messageTarget, DataflowPreferences preferences) {
+    this(parent, layoutData, messageTarget, preferences, null);
+  }
+
+  @VisibleForTesting
+  public DefaultedPipelineOptionsComponent(Composite parent, Object layoutData,
+      MessageTarget messageTarget, DataflowPreferences preferences,
+      RunOptionsDefaultsComponent defaultOptions) {
     this.preferences = preferences;
     customValues = new HashMap<>();
 
@@ -60,6 +68,7 @@ public class DefaultedPipelineOptionsComponent {
 
     useDefaultsButton = new Button(defaultsGroup, SWT.CHECK);
     useDefaultsButton.setText("Use &default Dataflow options");
+    useDefaultsButton.setSelection(true);
 
     useDefaultsButton.addSelectionListener(new SetInputsEnabledOppositeButtonSelectionListener());
     useDefaultsButton.addSelectionListener(new SetInputValuesToDefaultOrCustomSelectionListener());
@@ -67,12 +76,15 @@ public class DefaultedPipelineOptionsComponent {
     useDefaultsButton.setLayoutData(
         new GridData(SWT.BEGINNING, SWT.CENTER, true, false, numColumns, 1));
 
-    defaultOptions =
-        new RunOptionsDefaultsComponent(defaultsGroup, numColumns, messageTarget, preferences);
+    this.defaultOptions = defaultOptions == null
+        ? new RunOptionsDefaultsComponent(defaultsGroup, numColumns, messageTarget, preferences)
+        : defaultOptions;
+    updateDefaultableInputValues();
   }
 
   public void setUseDefaultValues(boolean useDefaultValues) {
     useDefaultsButton.setSelection(useDefaultValues);
+    updateDefaultableInputValues();
     setWidgetsEnabled(!useDefaultValues);
   }
 
@@ -94,13 +106,16 @@ public class DefaultedPipelineOptionsComponent {
         .customValues.put(
             DataflowPreferences.GCP_TEMP_LOCATION_PROPERTY,
             customValues.get(DataflowPreferences.STAGING_LOCATION_PROPERTY));
+    if (!isUseDefaultOptions()) {
+      loadCustomValues();
+    }
   }
 
   public void setPreferences(DataflowPreferences preferences) {
     this.preferences = preferences;
-    // The default values may have changed, so ensure the input components are set to the
-    // appropriate values.
-    updateDefaultableInputValues();
+    if (isUseDefaultOptions()) {
+      loadPreferences();
+    }
   }
 
   private void setWidgetsEnabled(boolean enabled) {
@@ -127,34 +142,39 @@ public class DefaultedPipelineOptionsComponent {
    */
   private void updateDefaultableInputValues() {
     if (isUseDefaultOptions()) {
-      customValues.put(
-          DataflowPreferences.ACCOUNT_EMAIL_PROPERTY, defaultOptions.getAccountEmail());
-      customValues.put(DataflowPreferences.PROJECT_PROPERTY, defaultOptions.getProjectId());
-      customValues.put(
-          DataflowPreferences.STAGING_LOCATION_PROPERTY, defaultOptions.getStagingLocation());
-      // TODO: Give this a separate input
-      customValues.put(
-          DataflowPreferences.GCP_TEMP_LOCATION_PROPERTY, defaultOptions.getStagingLocation());
-      String defaultAccountEmail = preferences.getDefaultAccountEmail();
-      defaultOptions.selectAccount(Strings.nullToEmpty(defaultAccountEmail));
-      String defaultProject = preferences.getDefaultProject();
-      defaultOptions.setCloudProjectText(Strings.nullToEmpty(defaultProject));
-      String defaultStagingLocation = preferences.getDefaultStagingLocation();
-      defaultOptions.setStagingLocationText(Strings.nullToEmpty(defaultStagingLocation));
+      saveCustomValues();
+      loadPreferences();
     } else {
-      String accountEmail = customValues.get(DataflowPreferences.ACCOUNT_EMAIL_PROPERTY);
-      if (!Strings.isNullOrEmpty(accountEmail)) {
-        defaultOptions.selectAccount(accountEmail);
-      }
-      String project = customValues.get(DataflowPreferences.PROJECT_PROPERTY);
-      if (!Strings.isNullOrEmpty(project)) {
-        defaultOptions.setCloudProjectText(project);
-      }
-      String stagingLocation = customValues.get(DataflowPreferences.STAGING_LOCATION_PROPERTY);
-      if (!Strings.isNullOrEmpty(stagingLocation)) {
-        defaultOptions.setStagingLocationText(stagingLocation);
-      }
+      loadCustomValues();
     }
+  }
+
+  private void saveCustomValues() {
+    customValues.put(DataflowPreferences.ACCOUNT_EMAIL_PROPERTY, defaultOptions.getAccountEmail());
+    customValues.put(DataflowPreferences.PROJECT_PROPERTY, defaultOptions.getProjectId());
+    customValues.put(DataflowPreferences.STAGING_LOCATION_PROPERTY,
+        defaultOptions.getStagingLocation());
+    // TODO: Give this a separate input
+    customValues.put(DataflowPreferences.GCP_TEMP_LOCATION_PROPERTY,
+        defaultOptions.getStagingLocation());
+  }
+
+  private void loadPreferences() {
+    String defaultAccountEmail = preferences.getDefaultAccountEmail();
+    defaultOptions.selectAccount(Strings.nullToEmpty(defaultAccountEmail));
+    String defaultProject = preferences.getDefaultProject();
+    defaultOptions.setCloudProjectText(Strings.nullToEmpty(defaultProject));
+    String defaultStagingLocation = preferences.getDefaultStagingLocation();
+    defaultOptions.setStagingLocationText(Strings.nullToEmpty(defaultStagingLocation));
+  }
+
+  private void loadCustomValues() {
+    String accountEmail = customValues.get(DataflowPreferences.ACCOUNT_EMAIL_PROPERTY);
+    defaultOptions.selectAccount(Strings.nullToEmpty(accountEmail));
+    String project = customValues.get(DataflowPreferences.PROJECT_PROPERTY);
+    defaultOptions.setCloudProjectText(Strings.nullToEmpty(project));
+    String stagingLocation = customValues.get(DataflowPreferences.STAGING_LOCATION_PROPERTY);
+    defaultOptions.setStagingLocationText(Strings.nullToEmpty(stagingLocation));
   }
 
   public void addAccountSelectionListener(Runnable listener) {
