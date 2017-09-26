@@ -72,7 +72,7 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
    * </ol>
    */
   @Test
-  public void launchDebug(String projectName) throws Exception {
+  public void testDebugLaunch() throws Exception {
     Assume.assumeTrue("Only for JavaSE-8", ImportMavenAppEngineStandardProjectTest.hasJavaSE8());
 
     // Disable WTP's download-server-bindings
