@@ -33,8 +33,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
-public class AppEngineStandardProjectWizard
-    extends AppEngineProjectWizard {
+public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
 
   @Inject
   private ILibraryClasspathContainerResolverService resolverService;
