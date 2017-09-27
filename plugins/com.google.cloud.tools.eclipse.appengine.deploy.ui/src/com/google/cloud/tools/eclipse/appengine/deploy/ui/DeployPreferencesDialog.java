@@ -64,7 +64,6 @@ public abstract class DeployPreferencesDialog extends TitleAreaDialog {
                                  IGoogleApiFactory googleApiFactory) {
     super(parentShell);
 
-    Preconditions.checkNotNull(project, "project is null");
     Preconditions.checkNotNull(loginService, "loginService is null");
     Preconditions.checkNotNull(googleApiFactory, "googleApiFactory is null");
     this.title = title;
