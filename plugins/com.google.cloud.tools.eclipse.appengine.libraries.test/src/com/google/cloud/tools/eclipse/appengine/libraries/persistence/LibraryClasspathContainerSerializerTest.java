@@ -169,6 +169,7 @@ public class LibraryClasspathContainerSerializerTest {
     assertNull(serializer.loadContainer(javaProject, new Path(CONTAINER_PATH)));
   }
 
+  // todo would it be clearer simply to define an equals method?
   private static void compare(LibraryClasspathContainer expected,
       LibraryClasspathContainer actual) {
     assertEquals(expected.getPath(), actual.getPath());
