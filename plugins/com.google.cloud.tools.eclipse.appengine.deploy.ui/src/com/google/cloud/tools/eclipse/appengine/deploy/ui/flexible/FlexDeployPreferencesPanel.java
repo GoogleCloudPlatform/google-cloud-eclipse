@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible;
 
+import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexDeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.AppEngineDeployPreferencesPanel;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
@@ -38,8 +39,15 @@ public class FlexDeployPreferencesPanel extends AppEngineDeployPreferencesPanel 
   public FlexDeployPreferencesPanel(Composite parent, IProject project,
       IGoogleLoginService loginService, Runnable layoutChangedHandler, boolean requireValues,
       ProjectRepository projectRepository) {
-    super(parent, project, loginService, layoutChangedHandler, requireValues, projectRepository,
+    this(parent, project, loginService, layoutChangedHandler, requireValues, projectRepository,
         new FlexDeployPreferences(project));
+  }
+
+  protected FlexDeployPreferencesPanel(Composite parent, IProject project,
+      IGoogleLoginService loginService, Runnable layoutChangedHandler, boolean requireValues,
+      ProjectRepository projectRepository, DeployPreferences model) {
+    super(parent, project, loginService, layoutChangedHandler, requireValues, projectRepository,
+        model);
   }
 
   @Override
