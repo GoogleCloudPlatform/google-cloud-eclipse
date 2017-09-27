@@ -35,7 +35,8 @@ class FlexExistingArtifactDeployPreferencesDialog extends FlexDeployPreferencesD
   protected AppEngineDeployPreferencesPanel createDeployPreferencesPanel(Composite container,
       IProject project, IGoogleLoginService loginService, Runnable layoutChangedHandler,
       ProjectRepository projectRepository) {
+    boolean requireValues = true;
     return new FlexExistingArtifactDeployPreferencesPanel(container, loginService,
-        layoutChangedHandler, true /* requireValues */, projectRepository);
+        layoutChangedHandler, requireValues, projectRepository);
   }
 }

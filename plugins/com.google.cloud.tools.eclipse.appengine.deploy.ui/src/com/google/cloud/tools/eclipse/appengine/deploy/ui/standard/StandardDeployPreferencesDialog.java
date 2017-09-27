@@ -36,8 +36,9 @@ class StandardDeployPreferencesDialog extends DeployPreferencesDialog {
   protected AppEngineDeployPreferencesPanel createDeployPreferencesPanel(Composite container,
       IProject project, IGoogleLoginService loginService, Runnable layoutChangedHandler,
       ProjectRepository projectRepository) {
+    boolean requireValues = true;
     return new StandardDeployPreferencesPanel(container, project, loginService,
-        layoutChangedHandler, true /* requireValues */, projectRepository);
+        layoutChangedHandler, requireValues, projectRepository);
   }
 
 }
