@@ -340,6 +340,23 @@
               version="1.4.0" />
       </libraryFile>
     </library>
+    
+     <library       
+         id="cloudtranslation"       
+         group="clientapis"      
+         name="%cloudtranslation.name"       
+         tooltip="%cloudtranslation.tooltip"     
+         javaVersion="1.8"       
+         siteUri="https://cloud.google.com/translate/docs/reference/libraries"       
+         dependencies="include">     
+       <libraryFile        
+           javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.21.0/apidocs/index.html?com/google/cloud/translate/package-summary.html">         
+         <mavenCoordinates     
+             artifactId="google-cloud-translate"     
+             groupId="com.google.cloud"      
+             version="1.6.0" />      
+      </libraryFile>      
+    </library>
   </extension>
 
   <extension point="org.eclipse.jdt.core.classpathContainerInitializer">
