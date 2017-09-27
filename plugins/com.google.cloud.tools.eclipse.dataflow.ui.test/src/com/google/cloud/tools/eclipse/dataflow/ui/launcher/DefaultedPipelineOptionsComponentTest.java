@@ -48,12 +48,12 @@ public class DefaultedPipelineOptionsComponentTest {
   @Rule
   public ShellTestResource shellCreator = new ShellTestResource();
   @Mock
-  MessageTarget messageTarget;
+  private MessageTarget messageTarget;
 
-  RunOptionsDefaultsComponent defaultOptions;
-  String accountEmail = "";
-  String projectId = "";
-  String stagingLocation = "";
+  private RunOptionsDefaultsComponent defaultOptions;
+  private String accountEmail = "";
+  private String projectId = "";
+  private String stagingLocation = "";
 
   @Before
   public void setUp() {

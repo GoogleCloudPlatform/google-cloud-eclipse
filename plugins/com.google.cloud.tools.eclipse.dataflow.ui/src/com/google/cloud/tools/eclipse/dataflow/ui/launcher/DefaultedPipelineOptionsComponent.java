@@ -55,7 +55,7 @@ public class DefaultedPipelineOptionsComponent {
   }
 
   @VisibleForTesting
-  public DefaultedPipelineOptionsComponent(Composite parent, Object layoutData,
+  DefaultedPipelineOptionsComponent(Composite parent, Object layoutData,
       MessageTarget messageTarget, DataflowPreferences preferences,
       RunOptionsDefaultsComponent defaultOptions) {
     this.preferences = preferences;
