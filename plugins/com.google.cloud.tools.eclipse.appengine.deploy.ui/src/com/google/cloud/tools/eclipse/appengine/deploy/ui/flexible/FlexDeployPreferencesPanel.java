@@ -44,14 +44,12 @@ public class FlexDeployPreferencesPanel extends AppEngineDeployPreferencesPanel 
 
   @Override
   protected void createCenterArea() {
-    IPath fileFieldBasePath = project.getLocation();
-
     Text appYamlField = createBrowseFileRow(
         Messages.getString("deploy.preferences.dialog.label.app.yaml"),
         Messages.getString("tooltip.app.yaml"),
-        fileFieldBasePath, new String[] {"*.yaml"});
+        getFileFieldBasePath(), new String[] {"*.yaml"});
     setupPossiblyUnvalidatedTextFieldDataBinding(appYamlField, "appYamlPath",
-        new AppYamlValidator(fileFieldBasePath, appYamlField));
+        new AppYamlValidator(getFileFieldBasePath(), appYamlField));
 
     super.createCenterArea();
 
@@ -93,5 +91,9 @@ public class FlexDeployPreferencesPanel extends AppEngineDeployPreferencesPanel 
   @Override
   protected String getHelpContextId() {
     return "com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployAppEngineFlexProjectContext";
+  }
+
+  protected IPath getFileFieldBasePath() {
+    return project.getLocation();
   }
 }

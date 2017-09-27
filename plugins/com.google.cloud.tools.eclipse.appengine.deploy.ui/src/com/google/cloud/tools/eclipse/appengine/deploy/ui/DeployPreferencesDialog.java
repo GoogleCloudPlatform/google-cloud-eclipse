@@ -78,7 +78,12 @@ public abstract class DeployPreferencesDialog extends TitleAreaDialog {
     Control contents = super.createContents(parent);
 
     getShell().setText(title);
-    setTitle(Messages.getString("deploy.preferences.dialog.title.withProject", project.getName()));
+    if (project == null) {
+      setTitle(Messages.getString("deploy.preferences.dialog.subtitle"));
+    } else {
+      setTitle(Messages.getString("deploy.preferences.dialog.subtitle.withProject",
+          project.getName()));
+    }
     setTitleImage(titleImage);
 
     getButton(IDialogConstants.OK_ID).setText(Messages.getString("deploy"));
@@ -143,7 +148,7 @@ public abstract class DeployPreferencesDialog extends TitleAreaDialog {
       setReturnCode(Dialog.CANCEL);
       close();
       String cloudSdkNotConfigured = Messages.getString("cloudsdk.not.configured");
-      ErrorDialog.openError(this.getShell(), cloudSdkNotConfigured, cloudSdkNotConfigured, status);
+      ErrorDialog.openError(getShell(), cloudSdkNotConfigured, cloudSdkNotConfigured, status);
     }
   }
 
