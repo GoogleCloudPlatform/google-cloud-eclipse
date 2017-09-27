@@ -18,14 +18,12 @@ package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -82,7 +80,8 @@ public class CloudLibraries {
       CacheBuilder.newBuilder().build(new CacheLoader<IJavaProject, Library>() {
 
         @Override
-        public Library load(IJavaProject project) throws JavaModelException {
+        public Library load(IJavaProject project) {
+          // we rely below on this method not throwing exceptions
           Library library = new Library(MASTER_CONTAINER_ID);
           library.setName("Google APIs"); //$NON-NLS-1$
           return library;
@@ -93,11 +92,7 @@ public class CloudLibraries {
    * Returns the uber container for all Google APIs.
    */
   public static Library getMasterLibrary(IJavaProject javaProject) {
-    try {
-      return masterLibraries.get(javaProject);
-    } catch (ExecutionException ex) {
-      return null;
-    }
+    return masterLibraries.getUnchecked(javaProject);
   }
   
   private static ImmutableMap<String, Library> loadLibraryDefinitions() {
