@@ -40,15 +40,15 @@ public class FlexExistingArtifactDeployPreferencesPanel extends FlexDeployPrefer
     Text deployArtifactField = createBrowseFileRow(
         Messages.getString("deploy.preferences.dialog.label.deploy.artifact"),
         Messages.getString("tooltip.deploy.artifact"),
-        getFileFieldBasePath(), new String[] {"*.war", "*.jar"});
+        getWorkingDirectory(), new String[] {"*.war", "*.jar"});
     setupPossiblyUnvalidatedTextFieldDataBinding(deployArtifactField, "deployArtifactPath",
-        new DeployArtifactValidator(getFileFieldBasePath(), deployArtifactField));
+        new DeployArtifactValidator(getWorkingDirectory(), deployArtifactField));
 
     super.createCenterArea();
   }
 
   @Override
-  protected IPath getFileFieldBasePath() {
+  protected IPath getWorkingDirectory() {
     return ResourcesPlugin.getWorkspace().getRoot().getLocation();
   }
 }
