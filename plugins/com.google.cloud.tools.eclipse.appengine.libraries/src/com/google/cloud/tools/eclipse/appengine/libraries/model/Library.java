@@ -23,14 +23,13 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.TreeMap;
 
+import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.osgi.framework.Version;
 
 /**
  * A library that can be added to App Engine projects, e.g. App Engine Endpoints library.
@@ -215,34 +214,27 @@ public final class Library {
    * @return a new list containing the most recent version of each dependency
    */
   public static List<LibraryFile> resolveDuplicates(List<LibraryFile> dependencies) {
-    List<LibraryFile> result = new ArrayList<>();
-    Map<String, MavenCoordinates> map = new HashMap<>();
+    TreeMap<String, LibraryFile> map = new TreeMap<>();
     for (LibraryFile file : dependencies) {
       MavenCoordinates coordinates = file.getMavenCoordinates();
       String key = coordinates.getGroupId() + ":" + coordinates.getArtifactId();
       if (map.containsKey(key)) {
-        MavenCoordinates previousCoordinates = map.get(key);
+        MavenCoordinates previousCoordinates = map.get(key).getMavenCoordinates();
         if (newer(coordinates, previousCoordinates)) {
-          map.put(key, coordinates);
-          for (int i = 0; i < result.size(); i++) {
-            if (result.get(i).getMavenCoordinates().equals(previousCoordinates)) {
-              result.set(i, file); // replace
-            }
-          }
+          map.put(key, file);
         }
       } else {
-        map.put(key, coordinates);
-        result.add(file);
+        map.put(key, file);
       }
       
     }
-    return result;
+    return new ArrayList<>(map.values());
   }
 
   private static boolean newer(MavenCoordinates coordinates, MavenCoordinates previousCoordinates) {
     try {
-      Version version1 = new Version(coordinates.getVersion());
-      Version version2 = new Version(previousCoordinates.getVersion());
+      ComparableVersion version1 = new ComparableVersion(coordinates.getVersion());
+      ComparableVersion version2 = new ComparableVersion(previousCoordinates.getVersion());
       
       return version1.compareTo(version2) > 0;
     } catch (IllegalArgumentException ex) {
