@@ -256,7 +256,6 @@ public final class Library {
         return true;
       }
     } catch (IllegalArgumentException ex) {
-      
     }
     return false;
   }
