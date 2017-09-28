@@ -3,9 +3,7 @@
 <plugin>
   <extension-point id="com.google.cloud.tools.eclipse.appengine.libraries" 
       name="App Engine Libraries" />
-  
-  <!-- todo the dependency tracking is getting ridiculous. Pull this from Maven Central,
-       whether statically or dynamically --> 
+
   <extension point="com.google.cloud.tools.eclipse.appengine.libraries"
              id="com.google.cloud.tools.eclipse.appengine.libraries.defaultapis">       
              
@@ -120,13 +118,6 @@
               groupId="com.google.cloud"
               version="LATEST" />
       </libraryFile>
-   <!--   <libraryFile
-            javadocUri="https://developers.google.com/resources/api-libraries/documentation/storage/v1/java/latest/index.html">
-        <mavenCoordinates
-              artifactId="google-api-services-storage"
-              groupId="com.google.apis"
-              version="v1-rev108-1.22.0" />
-      </libraryFile> -->
     </library>
     
     <library
@@ -144,18 +135,6 @@
               groupId="com.google.cloud"
               version="LATEST" />
       </libraryFile>
-    <!--  <libraryFile>
-        <mavenCoordinates
-              artifactId="datastore-v1-protos"
-              groupId="com.google.cloud.datastore"
-              version="1.3.0" />
-      </libraryFile>
-      <libraryFile>
-        <mavenCoordinates
-              artifactId="datastore-v1-proto-client"
-              groupId="com.google.cloud.datastore"
-              version="1.4.0" />
-      </libraryFile>-->
     </library>
     
      <library       
