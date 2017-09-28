@@ -109,8 +109,12 @@ public class BuildPath {
     }
 
     Library masterLibrary = CloudLibraries.getMasterLibrary(javaProject);
+
     masterFiles.addAll(masterLibrary.getLibraryFiles());
-    masterLibrary.setLibraryFiles(new ArrayList<LibraryFile>(masterFiles));
+    
+    List<LibraryFile> resolved = Library.resolveDuplicates(new ArrayList<LibraryFile>(masterFiles));
+    
+    masterLibrary.setLibraryFiles(resolved);
     return masterLibrary;
   }
 

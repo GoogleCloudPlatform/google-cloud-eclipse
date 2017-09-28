@@ -209,9 +209,12 @@ public final class Library {
     }
   }  
   
-  // strip out duplicates, resolving to most recent
-  @VisibleForTesting
-  static List<LibraryFile> resolveDuplicates(List<LibraryFile> dependencies) {
+  /**
+   * Strip out different versions of the same library, retaining only the most recent.
+   *
+   * @return a new list containing the most recent version of each dependency
+   */
+  public static List<LibraryFile> resolveDuplicates(List<LibraryFile> dependencies) {
     List<LibraryFile> result = new ArrayList<>();
     Map<String, MavenCoordinates> map = new HashMap<>();
     for (LibraryFile file : dependencies) {

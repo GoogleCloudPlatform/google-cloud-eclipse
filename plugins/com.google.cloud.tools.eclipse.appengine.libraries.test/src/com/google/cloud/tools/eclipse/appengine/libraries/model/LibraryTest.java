@@ -157,7 +157,7 @@ public class LibraryTest {
   }
   
   @Test
-  public void testResolvedDuplicates_semnanticVersioning() throws CoreException {
+  public void testResolvedDuplicates_semanticVersioning() throws CoreException {
     MavenCoordinates coordinates1 = new MavenCoordinates.Builder()
         .setGroupId("com.google.guava")
         .setArtifactId("guava")
