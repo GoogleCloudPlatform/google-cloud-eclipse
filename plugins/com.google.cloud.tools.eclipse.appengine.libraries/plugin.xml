@@ -30,6 +30,7 @@
           group="appengine"
           name="Google Cloud Endpoints"
           tooltip="%endpoints.tooltip"
+          dependencies="include"
           siteUri="https://cloud.google.com/endpoints/docs/frameworks/java/about-cloud-endpoints-frameworks" >
       <libraryDependency id="appengine-api" />
       <libraryFile export="true" 
@@ -148,7 +149,7 @@
        <libraryFile        
            javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.21.0/apidocs/index.html?com/google/cloud/translate/package-summary.html">         
          <mavenCoordinates     
-             artifactId="google-cloud-translate"     
+             artifactId="google-cloud-translate"
              groupId="com.google.cloud"      
              version="LATEST" />      
       </libraryFile>      
