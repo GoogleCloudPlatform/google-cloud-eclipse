@@ -200,26 +200,26 @@
         <mavenCoordinates
               artifactId="google-cloud-core"
               groupId="com.google.cloud"
-              version="1.2.1" />
+              version="1.6.0" />
       </libraryFile>
       <libraryFile
             javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.21.0/apidocs/">
         <mavenCoordinates
               artifactId="google-cloud-core-http"
               groupId="com.google.cloud"
-              version="1.2.1" />
+              version="1.6.0" />
       </libraryFile>
       <libraryFile>  <!-- todo javadoc if it's published -->
         <mavenCoordinates
               artifactId="google-auth-library-oauth2-http"
               groupId="com.google.auth"
-              version="0.7.0" />
+              version="0.8.0" />
       </libraryFile>
       <libraryFile> <!-- todo javadoc if it's published -->
         <mavenCoordinates
               artifactId="google-auth-library-credentials"
               groupId="com.google.auth"
-              version="0.7.0" />
+              version="0.8.0" />
       </libraryFile>
       <libraryFile javadocUri="http://www.joda.org/joda-time/apidocs/">
         <mavenCoordinates
@@ -238,14 +238,14 @@
         <mavenCoordinates
               artifactId="protobuf-java"
               groupId="com.google.protobuf"
-              version="3.3.0" />
+              version="3.3.1" />
       </libraryFile>
       <libraryFile
             javadocUri="https://developers.google.com/protocol-buffers/docs/reference/java/">
         <mavenCoordinates
               artifactId="protobuf-java-util"
               groupId="com.google.protobuf"
-              version="3.3.0" />
+              version="3.3.1" />
       </libraryFile>
       <libraryFile
             javadocUri="https://google.github.io/guava/releases/19.0/api/docs/">
@@ -259,7 +259,7 @@
         <mavenCoordinates
               artifactId="gax"
               groupId="com.google.api"
-              version="1.4.1" />
+              version="1.8.1" />
      </libraryFile>
      <libraryFile>
         <mavenCoordinates
@@ -278,7 +278,7 @@
         <mavenCoordinates
               groupId="com.google.api.grpc"
               artifactId="proto-google-common-protos"
-              version="0.1.15" />
+              version="0.1.19" />
       </libraryFile>
       <libraryFile>
         <mavenCoordinates
