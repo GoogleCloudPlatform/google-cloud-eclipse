@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible;
 
+import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexDeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.AppEngineDeployPreferencesPanel;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
@@ -38,20 +39,25 @@ public class FlexDeployPreferencesPanel extends AppEngineDeployPreferencesPanel 
   public FlexDeployPreferencesPanel(Composite parent, IProject project,
       IGoogleLoginService loginService, Runnable layoutChangedHandler, boolean requireValues,
       ProjectRepository projectRepository) {
-    super(parent, project, loginService, layoutChangedHandler, requireValues, projectRepository,
+    this(parent, project, loginService, layoutChangedHandler, requireValues, projectRepository,
         new FlexDeployPreferences(project));
+  }
+
+  protected FlexDeployPreferencesPanel(Composite parent, IProject project,
+      IGoogleLoginService loginService, Runnable layoutChangedHandler, boolean requireValues,
+      ProjectRepository projectRepository, DeployPreferences model) {
+    super(parent, project, loginService, layoutChangedHandler, requireValues, projectRepository,
+        model);
   }
 
   @Override
   protected void createCenterArea() {
-    IPath fileFieldBasePath = project.getLocation();
-
     Text appYamlField = createBrowseFileRow(
         Messages.getString("deploy.preferences.dialog.label.app.yaml"),
         Messages.getString("tooltip.app.yaml"),
-        fileFieldBasePath, new String[] {"*.yaml"});
+        getWorkingDirectory(), new String[] {"*.yaml"});
     setupPossiblyUnvalidatedTextFieldDataBinding(appYamlField, "appYamlPath",
-        new AppYamlValidator(fileFieldBasePath, appYamlField));
+        new AppYamlValidator(getWorkingDirectory(), appYamlField));
 
     super.createCenterArea();
 
@@ -93,5 +99,9 @@ public class FlexDeployPreferencesPanel extends AppEngineDeployPreferencesPanel 
   @Override
   protected String getHelpContextId() {
     return "com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployAppEngineFlexProjectContext";
+  }
+
+  protected IPath getWorkingDirectory() {
+    return project.getLocation();
   }
 }

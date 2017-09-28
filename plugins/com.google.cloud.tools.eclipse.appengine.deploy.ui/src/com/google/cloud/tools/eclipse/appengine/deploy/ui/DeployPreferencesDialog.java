@@ -64,7 +64,6 @@ public abstract class DeployPreferencesDialog extends TitleAreaDialog {
                                  IGoogleApiFactory googleApiFactory) {
     super(parentShell);
 
-    Preconditions.checkNotNull(project, "project is null");
     Preconditions.checkNotNull(loginService, "loginService is null");
     Preconditions.checkNotNull(googleApiFactory, "googleApiFactory is null");
     this.title = title;
@@ -78,7 +77,12 @@ public abstract class DeployPreferencesDialog extends TitleAreaDialog {
     Control contents = super.createContents(parent);
 
     getShell().setText(title);
-    setTitle(Messages.getString("deploy.preferences.dialog.title.withProject", project.getName()));
+    if (project == null) {
+      setTitle(Messages.getString("deploy.preferences.dialog.subtitle"));
+    } else {
+      setTitle(Messages.getString("deploy.preferences.dialog.subtitle.withProject",
+          project.getName()));
+    }
     setTitleImage(titleImage);
 
     getButton(IDialogConstants.OK_ID).setText(Messages.getString("deploy"));
@@ -95,8 +99,7 @@ public abstract class DeployPreferencesDialog extends TitleAreaDialog {
 
     Composite container = new Composite(dialogArea, SWT.NONE);
     content = createDeployPreferencesPanel(container, project, loginService,
-        getLayoutChangedHandler(), true /* requireValues */,
-        new ProjectRepository(googleApiFactory));
+        getLayoutChangedHandler(), new ProjectRepository(googleApiFactory));
     GridDataFactory.fillDefaults().grab(true, false).applyTo(content);
 
     // we pull in Dialog's content margins which are zeroed out by TitleAreaDialog
@@ -119,7 +122,7 @@ public abstract class DeployPreferencesDialog extends TitleAreaDialog {
 
   protected abstract AppEngineDeployPreferencesPanel createDeployPreferencesPanel(
       Composite container, IProject project, IGoogleLoginService loginService,
-      Runnable layoutChangedHandler, boolean requireValues, ProjectRepository projectRepository);
+      Runnable layoutChangedHandler, ProjectRepository projectRepository);
 
   private Runnable getLayoutChangedHandler() {
     return new Runnable() {
@@ -143,7 +146,7 @@ public abstract class DeployPreferencesDialog extends TitleAreaDialog {
       setReturnCode(Dialog.CANCEL);
       close();
       String cloudSdkNotConfigured = Messages.getString("cloudsdk.not.configured");
-      ErrorDialog.openError(this.getShell(), cloudSdkNotConfigured, cloudSdkNotConfigured, status);
+      ErrorDialog.openError(getShell(), cloudSdkNotConfigured, cloudSdkNotConfigured, status);
     }
   }
 
