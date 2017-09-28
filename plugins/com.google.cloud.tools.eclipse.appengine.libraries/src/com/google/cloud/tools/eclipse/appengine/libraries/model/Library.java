@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
+import com.google.cloud.tools.appengine.cloudsdk.serialization.CloudSdkVersion;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
@@ -23,7 +24,9 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -200,11 +203,61 @@ public final class Library {
         Collection<LibraryFile> dependencies = LibraryFactory.loadTransitiveDependencies(coordinates);
         transitiveDependencies.addAll(dependencies);
       }
-      this.libraryFiles = transitiveDependencies;
+      
+      this.libraryFiles = resolveDuplicates(transitiveDependencies);
       this.resolved = true;
     }
-  }
+  }  
   
+  // strip out duplicates, resolving to most recent
+  @VisibleForTesting
+  static List<LibraryFile> resolveDuplicates(List<LibraryFile> dependencies) {
+    List<LibraryFile> result = new ArrayList<>();
+    Map<String, MavenCoordinates> map = new HashMap<>();
+    for (LibraryFile file : dependencies) {
+      MavenCoordinates coordinates = file.getMavenCoordinates();
+      String key = coordinates.getGroupId() + ":" + coordinates.getArtifactId();
+      if (map.containsKey(key)) {
+        MavenCoordinates previousCoordinates = map.get(key);
+        if (newer(coordinates, previousCoordinates)) {
+          map.put(key, coordinates);
+          for (int i = 0; i < result.size(); i++) {
+            if (result.get(i).getMavenCoordinates().equals(previousCoordinates)) {
+              result.set(i, file); // replace
+            }
+          }
+        }
+      } else {
+        map.put(key, coordinates);
+        result.add(file);
+      }
+      
+    }
+    return result;
+  }
+
+  private static boolean newer(MavenCoordinates coordinates, MavenCoordinates previousCoordinates) {
+    try {
+      double currentVersion = Double.parseDouble(coordinates.getVersion());
+      double previousVersion = Double.parseDouble(previousCoordinates.getVersion());
+      return currentVersion > previousVersion;
+    } catch (NumberFormatException ex) {
+      // try sem version
+    }
+    
+    try {
+      // despite the name this is a general semantic version utility
+      CloudSdkVersion previousVersion = new CloudSdkVersion(previousCoordinates.getVersion());
+      CloudSdkVersion newVersion = new CloudSdkVersion(coordinates.getVersion());
+      if (newVersion.compareTo(previousVersion) > 0) {
+        return true;
+      }
+    } catch (IllegalArgumentException ex) {
+      
+    }
+    return false;
+  }
+
   /**
    * @return a string suitable for debugging
    */
