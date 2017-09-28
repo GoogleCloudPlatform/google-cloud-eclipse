@@ -79,7 +79,6 @@ public class DefaultedPipelineOptionsComponent {
     this.defaultOptions = defaultOptions == null
         ? new RunOptionsDefaultsComponent(defaultsGroup, numColumns, messageTarget, preferences)
         : defaultOptions;
-    updateDefaultableInputValues();
   }
 
   public void setUseDefaultValues(boolean useDefaultValues) {

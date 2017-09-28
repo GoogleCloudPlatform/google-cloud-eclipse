@@ -28,6 +28,7 @@ import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferen
 import com.google.cloud.tools.eclipse.dataflow.ui.page.MessageTarget;
 import com.google.cloud.tools.eclipse.dataflow.ui.preferences.RunOptionsDefaultsComponent;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
+import com.google.common.base.Strings;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Before;
@@ -50,10 +51,12 @@ public class DefaultedPipelineOptionsComponentTest {
   @Mock
   private MessageTarget messageTarget;
 
+  @Mock
+  private DataflowPreferences preferences;
   private RunOptionsDefaultsComponent defaultOptions;
-  private String accountEmail = "";
-  private String projectId = "";
-  private String stagingLocation = "";
+  private String accountEmail;
+  private String projectId;
+  private String stagingLocation;
 
   @Before
   public void setUp() {
@@ -61,7 +64,8 @@ public class DefaultedPipelineOptionsComponentTest {
     Answer<String> answerAccountEmail = new Answer<String>() {
       @Override
       public String answer(InvocationOnMock invocation) throws Throwable {
-        return accountEmail;
+        return Strings.nullToEmpty(
+            accountEmail == null ? preferences.getDefaultAccountEmail() : accountEmail);
       }
     };
     Answer<Void> recordAccountEmail = new Answer<Void>() {
@@ -75,7 +79,7 @@ public class DefaultedPipelineOptionsComponentTest {
     Answer<String> answerProjectId = new Answer<String>() {
       @Override
       public String answer(InvocationOnMock invocation) throws Throwable {
-        return projectId;
+        return Strings.nullToEmpty(projectId == null ? preferences.getDefaultProject() : projectId);
       }
     };
     Answer<Void> recordProjectId = new Answer<Void>() {
@@ -88,7 +92,8 @@ public class DefaultedPipelineOptionsComponentTest {
     Answer<String> answerStagingLocation = new Answer<String>() {
       @Override
       public String answer(InvocationOnMock invocation) throws Throwable {
-        return stagingLocation;
+        return Strings.nullToEmpty(
+            stagingLocation == null ? preferences.getDefaultStagingLocation() : stagingLocation);
       }
     };
     Answer<Void> recordStagingLocation = new Answer<Void>() {
@@ -111,9 +116,6 @@ public class DefaultedPipelineOptionsComponentTest {
 
   @Test
   public void testDefaults_nulls() {
-    // no preference values set
-    DataflowPreferences preferences = mock(DataflowPreferences.class);
-
     DefaultedPipelineOptionsComponent component = new DefaultedPipelineOptionsComponent(
         shellCreator.getShell(), null, messageTarget, preferences, defaultOptions);
 
@@ -128,7 +130,6 @@ public class DefaultedPipelineOptionsComponentTest {
 
   @Test
   public void testDefaults_values() {
-    DataflowPreferences preferences = mock(DataflowPreferences.class);
     doReturn("pref-email").when(preferences).getDefaultAccountEmail();
     doReturn("pref-project").when(preferences).getDefaultProject();
     doReturn("gs://pref-staging").when(preferences).getDefaultStagingLocation();
@@ -147,7 +148,6 @@ public class DefaultedPipelineOptionsComponentTest {
 
   @Test
   public void testCustomValues_nulls() {
-    DataflowPreferences preferences = mock(DataflowPreferences.class);
     doReturn("pref-email").when(preferences).getDefaultAccountEmail();
     doReturn("pref-project").when(preferences).getDefaultProject();
     doReturn("gs://pref-staging").when(preferences).getDefaultStagingLocation();
@@ -169,7 +169,6 @@ public class DefaultedPipelineOptionsComponentTest {
 
   @Test
   public void testCustomValues_values() {
-    DataflowPreferences preferences = mock(DataflowPreferences.class);
     DefaultedPipelineOptionsComponent component = new DefaultedPipelineOptionsComponent(
         shellCreator.getShell(), null, messageTarget, preferences, defaultOptions);
 
@@ -192,7 +191,6 @@ public class DefaultedPipelineOptionsComponentTest {
 
   @Test
   public void testToggleDefaults() {
-    DataflowPreferences preferences = mock(DataflowPreferences.class);
     doReturn("pref-email").when(preferences).getDefaultAccountEmail();
     doReturn("pref-project").when(preferences).getDefaultProject();
     doReturn("gs://pref-staging").when(preferences).getDefaultStagingLocation();

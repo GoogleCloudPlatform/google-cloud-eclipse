@@ -377,16 +377,15 @@ public class RunOptionsDefaultsComponent {
     return target;
   }
 
-  public void selectAccount(String accountEmail) {
-    accountSelector.selectAccount(accountEmail);
-  }
-
-  public void setCloudProjectText(String project) {
-    projectInput.setProject(project);
-  }
-
+  /**
+   * Return the selected account's email, or {@code ""} if no account selected.
+   */
   public String getAccountEmail() {
     return accountSelector.getSelectedEmail();
+  }
+
+  public void selectAccount(String accountEmail) {
+    accountSelector.selectAccount(accountEmail);
   }
 
   /**
@@ -403,13 +402,19 @@ public class RunOptionsDefaultsComponent {
     return projectInput.getProjectId();
   }
 
+  public void setCloudProjectText(String project) {
+    projectInput.setProject(project);
+  }
+
+  /**
+   * Return the selected staging location, or {@code ""} if no staging location specified.
+   */
+  public String getStagingLocation() {
+    return GcsDataflowProjectClient.toGcsLocationUri(stagingLocationInput.getText());
+  }
 
   public void setStagingLocationText(String stagingLocation) {
     stagingLocationInput.setText(stagingLocation);
-  }
-
-  public String getStagingLocation() {
-    return GcsDataflowProjectClient.toGcsLocationUri(stagingLocationInput.getText());
   }
 
   public void addAccountSelectionListener(Runnable listener) {
