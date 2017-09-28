@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
-import com.google.cloud.tools.appengine.cloudsdk.serialization.CloudSdkVersion;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
@@ -31,6 +30,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.osgi.framework.Version;
 
 /**
  * A library that can be added to App Engine projects, e.g. App Engine Endpoints library.
@@ -241,23 +241,13 @@ public final class Library {
 
   private static boolean newer(MavenCoordinates coordinates, MavenCoordinates previousCoordinates) {
     try {
-      double currentVersion = Double.parseDouble(coordinates.getVersion());
-      double previousVersion = Double.parseDouble(previousCoordinates.getVersion());
-      return currentVersion > previousVersion;
-    } catch (NumberFormatException ex) {
-      // try sem version
-    }
-    
-    try {
-      // despite the name this is a general semantic version utility
-      CloudSdkVersion previousVersion = new CloudSdkVersion(previousCoordinates.getVersion());
-      CloudSdkVersion newVersion = new CloudSdkVersion(coordinates.getVersion());
-      if (newVersion.compareTo(previousVersion) > 0) {
-        return true;
-      }
+      Version version1 = new Version(coordinates.getVersion());
+      Version version2 = new Version(previousCoordinates.getVersion());
+      
+      return version1.compareTo(version2) > 0;
     } catch (IllegalArgumentException ex) {
+      return false;
     }
-    return false;
   }
 
   /**
