@@ -45,7 +45,6 @@ public final class Library {
   private URI siteUri;
   private boolean export = true;
   private List<LibraryFile> libraryFiles = Collections.emptyList();
-  private LibraryRecommendation recommendation = LibraryRecommendation.OPTIONAL;
   private String group;
   private String javaVersion="1.7";
   
@@ -145,21 +144,6 @@ public final class Library {
    void setLibraryDependencies(List<String> libraryDependencies) {
     Preconditions.checkNotNull(libraryDependencies);
     this.libraryDependencies = new ArrayList<>(libraryDependencies);
-  }
-
-  /**
-   * @param recommendation the level of recommendation for this library, cannot be <code>null</code>
-   */
-  void setRecommendation(LibraryRecommendation recommendation) {
-    Preconditions.checkNotNull(recommendation);
-    this.recommendation = recommendation;
-  }
-
-  /**
-   * @return the level of recommendation for this library
-   */
-  public LibraryRecommendation getRecommendation() {
-    return recommendation;
   }
 
   /**

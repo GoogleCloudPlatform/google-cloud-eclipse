@@ -195,7 +195,6 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(servletApiLibrary.getSiteUri(),
         is(new URI("http://www.oracle.com/technetwork/java/javaee/servlet/index.html")));
     assertFalse(servletApiLibrary.isExport());
-    assertThat(servletApiLibrary.getRecommendation(), is(LibraryRecommendation.REQUIRED));
     assertNotNull(servletApiLibrary.getLibraryDependencies());
     assertTrue(servletApiLibrary.getLibraryDependencies().isEmpty());
 
@@ -229,7 +228,6 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(jspApiLibrary.getSiteUri(),
         is(new URI("http://www.oracle.com/technetwork/java/javaee/jsp/index.html")));
     assertFalse(jspApiLibrary.isExport());
-    assertThat(jspApiLibrary.getRecommendation(), is(LibraryRecommendation.OPTIONAL));
     assertNotNull(jspApiLibrary.getLibraryDependencies());
     assertTrue(jspApiLibrary.getLibraryDependencies().isEmpty());
 

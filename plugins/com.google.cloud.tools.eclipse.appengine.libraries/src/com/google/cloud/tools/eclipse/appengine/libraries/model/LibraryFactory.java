@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import java.util.logging.Logger;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -61,7 +60,6 @@ class LibraryFactory {
   private static final String ATTRIBUTE_NAME_TOOLTIP = "tooltip"; //$NON-NLS-1$
   private static final String ATTRIBUTE_NAME_CLASSIFIER = "classifier"; //$NON-NLS-1$
   private static final String ATTRIBUTE_NAME_EXPORT = "export"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_NAME_RECOMMENDATION = "recommendation"; //$NON-NLS-1$
 
   // prevent instantiation
   private LibraryFactory() {}
@@ -90,12 +88,6 @@ class LibraryFactory {
         String versionString = configurationElement.getAttribute("javaVersion"); //$NON-NLS-1$
         if (versionString != null) {
           library.setJavaVersion(versionString);
-        }
-        String recommendationString =
-            configurationElement.getAttribute(ATTRIBUTE_NAME_RECOMMENDATION);
-        if (recommendationString != null) {
-          library.setRecommendation(
-              LibraryRecommendation.valueOf(recommendationString.toUpperCase(Locale.US)));
         }
         return library;
       } else {

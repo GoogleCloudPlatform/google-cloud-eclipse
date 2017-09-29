@@ -214,28 +214,12 @@ public class LibraryTest {
     assertThat(library.getLibraryDependencies().size(), is(1));
     assertThat(library.getLibraryDependencies().get(0), is("libraryId"));
   }
-
-  @Test
-  public void testRecommendationDefaultsToOptional() {
-    assertThat(library.getRecommendation(), is(LibraryRecommendation.OPTIONAL));
-  }
-
-  @Test
-  public void testSetRecommendation() {
-    library.setRecommendation(LibraryRecommendation.REQUIRED);
-    assertThat(library.getRecommendation(), is(LibraryRecommendation.REQUIRED));
-  }
   
   @Test
   public void testSetJavaVersion() {
     assertEquals("1.7", library.getJavaVersion());
     library.setJavaVersion("1.9");
     assertEquals("1.9", library.getJavaVersion());
-  }
-
-  @Test(expected = NullPointerException.class)
-  public void testSetRecommendation_null() {
-    library.setRecommendation(null);
   }
   
   @Test
