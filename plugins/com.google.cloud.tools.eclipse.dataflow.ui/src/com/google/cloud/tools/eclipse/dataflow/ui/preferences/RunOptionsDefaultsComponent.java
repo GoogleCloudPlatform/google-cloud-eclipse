@@ -177,7 +177,7 @@ public class RunOptionsDefaultsComponent {
     // Project input occupies a single row
     projectInputLabel.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false, 1, 1));
     projectInput.getControl().setLayoutData(
-        new GridData(SWT.FILL, SWT.CENTER, true, false, columns - PROJECT_INPUT_SPENT_COLUMNS, 1));
+        new GridData(SWT.FILL, SWT.FILL, true, false, columns - PROJECT_INPUT_SPENT_COLUMNS, 1));
 
     // Staging Location, Combo, and Label occupy a single line
     comboLabel.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false, 1, 1));
