@@ -8,7 +8,6 @@
             description="%runtimeTypeDescription"
             id="com.google.cloud.tools.eclipse.appengine.standard.runtime"
             name="%apptoolsRuntimeTypeName"
-            supportsManualCreation="false"
             vendor="%runtimeTypeVendor"
             version="1">
          <!-- J2EE Web Modules -->
@@ -28,6 +27,7 @@
          </moduleType>
       </runtimeType>
    </extension>
+ 
    <extension
          point="org.eclipse.wst.server.core.serverTypes">
       <serverType
@@ -62,6 +62,7 @@
             runtimeTypeIds="com.google.cloud.tools.eclipse.appengine.standard.runtime">
       </runtimeClasspathProvider>
    </extension>
+ 
    <extension
          point="org.eclipse.wst.common.project.facet.core.runtimes">
       <runtime-component-type
@@ -101,6 +102,7 @@
          </type>
       </adapter>
    </extension>
+ 
    <extension
          point="org.eclipse.jst.server.core.runtimeFacetMappings">
       <runtimeFacetMapping
@@ -110,6 +112,7 @@
             version="1">
       </runtimeFacetMapping>
    </extension>
+ 
    <extension
          point="org.eclipse.wst.server.ui.serverImages">
       <image
@@ -139,6 +142,7 @@
             sourcePathComputerId="org.eclipse.jst.server.generic.core.sourcePathComputer">
       </launchConfigurationType>
    </extension>
+   
    <extension
          point="org.eclipse.debug.ui.launchConfigurationTypeImages">
       <launchConfigurationTypeImage
@@ -147,6 +151,7 @@
             id="com.google.cloud.tools.eclipse.appengine.launchConfigurationTypeImages">
       </launchConfigurationTypeImage>
    </extension>
+ 
    <extension
          point="org.eclipse.debug.ui.launchConfigurationTabGroups">
       <launchConfigurationTabGroup
@@ -155,6 +160,7 @@
             type="com.google.cloud.tools.eclipse.appengine.AppToolsLaunchConfigurationType">
       </launchConfigurationTabGroup>
    </extension>
+ 
    <extension
          point="org.eclipse.ui.console.consolePageParticipants">
       <consolePageParticipant
@@ -165,6 +171,7 @@
               </enablement>    
       </consolePageParticipant>
    </extension>
+ 
    <extension
          id="urlLinker"
          point="org.eclipse.ui.console.consolePatternMatchListeners">
@@ -178,6 +185,7 @@
       </enablement>
     </consolePatternMatchListener>
    </extension>
+ 
    <extension
          id="com.google.cloud.tools.eclipse.appengineDefaultFacet"
          point="org.eclipse.wst.common.project.facet.core.defaultFacets">
@@ -192,6 +200,7 @@
          </runtime-component>
       </default-facets>
    </extension>
+   
    <extension
          point="org.eclipse.debug.core.processFactories">
       <processFactory
@@ -206,6 +215,7 @@
             class="com.google.cloud.tools.eclipse.appengine.localserver.PreferencesInitializer">
       </initializer>
    </extension>
+   
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
@@ -215,6 +225,7 @@
             name="%launch.prefpage.name">
       </page>
    </extension>
+   
    <extension
          point="com.google.cloud.tools.eclipse.preferences.areas">
          <area
@@ -223,6 +234,7 @@
                class="com.google.cloud.tools.eclipse.appengine.localserver.ui.LaunchBehaviorsArea"
                preferences="instance://com.google.cloud.tools.eclipse.appengine.localserver"/>
    </extension>
+   
    <extension
          point="org.eclipse.wst.server.ui.wizardFragments">
       <fragment
@@ -231,6 +243,7 @@
             typeIds="com.google.cloud.tools.eclipse.appengine.standard.server">
       </fragment>
    </extension>
+   
    <extension
          point="org.eclipse.ui.commands">
       <command
@@ -245,6 +258,7 @@
          </commandParameter>
       </command>
    </extension>
+   
    <extension
          point="org.eclipse.ui.handlers">
       <handler
@@ -284,6 +298,7 @@
          </enabledWhen>
       </handler>
    </extension>
+   
    <extension
          point="org.eclipse.debug.ui.launchShortcuts">
       <shortcut
@@ -314,8 +329,8 @@
          <configurationType
                id="com.google.cloud.tools.eclipse.appengine.AppToolsLaunchConfigurationType"/>
       </shortcut>
-      
    </extension>
+   
    <extension
          point="org.eclipse.debug.ui.debugModelPresentations">
       <debugModelPresentation
@@ -323,6 +338,7 @@
             id="com.google.cloud.tools.eclipse.appengine.localserver.cloudSdkDebugTarget">
       </debugModelPresentation>
    </extension>
+   
    <extension
          point="org.eclipse.debug.core.statusHandlers">
       <statusHandler
