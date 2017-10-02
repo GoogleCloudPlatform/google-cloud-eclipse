@@ -16,7 +16,7 @@ Require-Bundle: org.eclipse.equinox.common,
 Export-Package: com.google.cloud.tools.eclipse.appengine.libraries,
  com.google.cloud.tools.eclipse.appengine.libraries.model,
  com.google.cloud.tools.eclipse.appengine.libraries.repository
-Import-Package: com.google.cloud.tools.appengine.cloudsdk.serialization;version="0.3.6",
+Import-Package: com.google.cloud.tools.appengine.cloudsdk.serialization;version="0.3.7",
  com.google.cloud.tools.eclipse.appengine.ui,
  com.google.cloud.tools.eclipse.util,
  com.google.cloud.tools.eclipse.util.io,
