@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.repository;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
 import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService;
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
 import com.google.cloud.tools.eclipse.appengine.libraries.Messages;
@@ -35,6 +36,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.logging.Logger;
 import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -59,6 +61,8 @@ import org.osgi.service.component.annotations.Reference;
 @Component
 public class LibraryClasspathContainerResolverService
     implements ILibraryClasspathContainerResolverService {
+  private static final Logger logger =
+      Logger.getLogger(LibraryClasspathContainerResolverService.class.getName());
 
   private static final String CLASSPATH_ATTRIBUTE_SOURCE_URL =
       "com.google.cloud.tools.eclipse.appengine.libraries.sourceUrl"; //$NON-NLS-1$
@@ -115,7 +119,17 @@ public class LibraryClasspathContainerResolverService
       String libraryId = containerPath.segment(1);
       Library library = null;
       if (CloudLibraries.MASTER_CONTAINER_ID.equals(libraryId)) {
-        library = CloudLibraries.getMasterLibrary(javaProject);
+        List<String> referencedIds = serializer.loadLibraryIds(javaProject, containerPath);
+        List<Library> referencedLibraries = new ArrayList<>();
+        for (String referencedId : referencedIds) {
+          Library referencedLibrary = CloudLibraries.getLibrary(referencedId);
+          if (referencedLibrary != null) {
+            referencedLibraries.add(referencedLibrary);
+          } else {
+            logger.severe("Referenced library not found: " + referencedId);
+          }
+        }
+        library = BuildPath.collectLibraryFiles(javaProject, referencedLibraries);
       } else {
         library = CloudLibraries.getLibrary(libraryId);
       }

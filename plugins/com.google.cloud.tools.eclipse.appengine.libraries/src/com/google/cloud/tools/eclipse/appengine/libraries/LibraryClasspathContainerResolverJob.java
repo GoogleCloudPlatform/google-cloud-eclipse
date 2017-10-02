@@ -17,13 +17,17 @@
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import com.google.common.base.Preconditions;
+import java.util.logging.Logger;
 import javax.inject.Inject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
 
 public class LibraryClasspathContainerResolverJob extends Job {
+  private static final Logger logger =
+      Logger.getLogger(LibraryClasspathContainerResolverJob.class.getName());
 
   @Inject
   private ILibraryClasspathContainerResolverService resolverService;
@@ -40,6 +44,11 @@ public class LibraryClasspathContainerResolverJob extends Job {
 
   @Override
   protected IStatus run(IProgressMonitor monitor) {
+    // may have been deleted before this job runs
+    if (!javaProject.exists()) {
+      logger.warning("Project no longer exists: " + javaProject.getElementName());
+      return Status.OK_STATUS;
+    }
     return resolverService.resolveAll(javaProject, monitor);
   }
 }
