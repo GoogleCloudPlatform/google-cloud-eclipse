@@ -47,41 +47,40 @@ public class WarPublisher {
 
   public static final Logger logger = Logger.getLogger(WarPublisher.class.getName());
 
-  /**
-   * It does a smart export, i.e. considers the resources to be copied and if the destination
-   * directory already contains resources those will be deleted if they are not part of the exploded
-   * WAR.
-   */
   public static void publishExploded(IProject project, IPath destination,
       IPath safeWorkDirectory, IProgressMonitor monitor) throws CoreException {
-    publish(project, destination, safeWorkDirectory, true /* exploded */, monitor);
-  }
-
-  public static void publishWar(IProject project, IPath destination, IPath safeWorkDirectory,
-      IProgressMonitor monitor) throws CoreException {
-    publish(project, destination, safeWorkDirectory, false /* exploded */, monitor);
-  }
-
-  private static void publish(IProject project, IPath destination, IPath safeWorkDirectory,
-      boolean exploded, IProgressMonitor monitor) throws CoreException {
-    if (monitor.isCanceled()) {
-      throw new OperationCanceledException();
-    }
     Preconditions.checkNotNull(project, "project is null"); //$NON-NLS-1$
     Preconditions.checkNotNull(destination, "destination is null"); //$NON-NLS-1$
     Preconditions.checkArgument(!destination.isEmpty(), "destination is empty path"); //$NON-NLS-1$
     Preconditions.checkNotNull(safeWorkDirectory, "safeWorkDirectory is null"); //$NON-NLS-1$
-
-    SubMonitor progress = SubMonitor.convert(monitor, 100);
-    progress.setTaskName(Messages.getString("task.name.publish.war"));
-
-    IModuleResource[] resources = flattenResources(project, safeWorkDirectory, progress);
-
-    if (exploded) {
-      PublishUtil.publishFull(resources, destination, progress.newChild(100));
-    } else {
-      PublishUtil.publishZip(resources, destination, progress.newChild(100));
+    if (monitor.isCanceled()) {
+      throw new OperationCanceledException();
     }
+
+    SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
+    subMonitor.setTaskName(Messages.getString("task.name.publish.war"));
+
+    IModuleResource[] resources =
+        flattenResources(project, safeWorkDirectory, subMonitor.newChild(10));
+    PublishUtil.publishFull(resources, destination, subMonitor.newChild(90));
+  }
+
+  public static void publishWar(IProject project, IPath destination, IPath safeWorkDirectory,
+      IProgressMonitor monitor) throws CoreException {
+    Preconditions.checkNotNull(project, "project is null"); //$NON-NLS-1$
+    Preconditions.checkNotNull(destination, "destination is null"); //$NON-NLS-1$
+    Preconditions.checkArgument(!destination.isEmpty(), "destination is empty path"); //$NON-NLS-1$
+    Preconditions.checkNotNull(safeWorkDirectory, "safeWorkDirectory is null"); //$NON-NLS-1$
+    if (monitor.isCanceled()) {
+      throw new OperationCanceledException();
+    }
+
+    SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
+    subMonitor.setTaskName(Messages.getString("task.name.publish.war"));
+
+    IModuleResource[] resources =
+        flattenResources(project, safeWorkDirectory, subMonitor.newChild(10));
+    PublishUtil.publishZip(resources, destination, subMonitor.newChild(90));
   }
 
   private static IModuleResource[] flattenResources(IProject project, IPath safeWorkDirectory,
