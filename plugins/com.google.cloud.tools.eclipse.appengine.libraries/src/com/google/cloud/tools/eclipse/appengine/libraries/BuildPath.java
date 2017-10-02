@@ -127,7 +127,6 @@ public class BuildPath {
     Library masterLibrary = new Library(CloudLibraries.MASTER_CONTAINER_ID);
     masterLibrary.setName("Google APIs"); //$NON-NLS-1$
     masterLibrary.setLibraryDependencies(dependentIds);
-    masterFiles.addAll(masterLibrary.getLibraryFiles()); // does this actually do anything?
     
     List<LibraryFile> resolved = Library.resolveDuplicates(new ArrayList<LibraryFile>(masterFiles));
     masterLibrary.setLibraryFiles(resolved);
