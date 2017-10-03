@@ -38,6 +38,18 @@ public class CloudLibrariesTest {
   }
 
   @Test
+  public void testGetClientApis() {
+    List<Library> libraries = CloudLibraries.getLibraries("clientapis");
+    Assert.assertTrue(libraries.size() > 3);
+    for (Library library : libraries) {
+      Assert.assertFalse(library.getLibraryFiles().isEmpty());
+      String tooltip = library.getToolTip();
+      Assert.assertFalse(tooltip.isEmpty());
+      Assert.assertFalse(tooltip, tooltip.startsWith("!"));
+    }
+  }
+  
+  @Test
   public void testGetLibraries_null() {
     List<Library> libraries = CloudLibraries.getLibraries(null);
     Assert.assertTrue(libraries.isEmpty());

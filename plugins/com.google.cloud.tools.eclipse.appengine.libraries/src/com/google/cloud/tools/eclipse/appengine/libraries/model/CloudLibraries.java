@@ -16,10 +16,17 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonReaderFactory;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.RegistryFactory;
@@ -60,6 +67,10 @@ public class CloudLibraries {
    * Returns libraries in the named group.
    */
   public static List<Library> getLibraries(String group) {
+    if (CLIENT_APIS_GROUP.equals(group)) {
+      return getClientApis();
+    }
+    
     List<Library> result = new ArrayList<>();
     for (Library library : libraries.values()) {
       if (library.getGroup().equals(group)) {
@@ -74,6 +85,20 @@ public class CloudLibraries {
    */
   public static Library getLibrary(String id) {
     return libraries.get(id);
+  }
+
+  private static List<Library> getClientApis() {
+    // TODO cache
+    List<Library> clientApis = new ArrayList<>();
+    ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+    InputStream in = classLoader.getResourceAsStream("com/google/cloud/tools/libraries/libraries.json");
+    
+    JsonReaderFactory factory = Json.createReaderFactory(null);
+    JsonReader reader = factory.createReader(in); 
+    // apis = reader.readArray().toArray(new JsonObject[0]); 
+    
+    
+    return clientApis;
   }
 
   private static final LoadingCache<IJavaProject, Library> masterLibraries =

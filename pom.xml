@@ -187,6 +187,12 @@
       <artifactId>snakeyaml</artifactId>
       <version>1.17</version>
     </dependency>
+    <dependency>
+      <!-- bundle: org.glassfish.javax.json -->
+      <groupId>org.glassfish</groupId>
+      <artifactId>javax.json</artifactId>
+      <version>1.1</version>
+    </dependency>
   </dependencies>
 
   <dependencyManagement>
