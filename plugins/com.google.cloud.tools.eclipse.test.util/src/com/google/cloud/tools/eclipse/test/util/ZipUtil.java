@@ -16,17 +16,22 @@
 
 package com.google.cloud.tools.eclipse.test.util;
 
+import static org.junit.Assert.assertTrue;
+
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.io.ByteStreams;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 
@@ -72,6 +77,18 @@ public class ZipUtil {
     } catch (IOException ex) {
       return StatusUtil.error(ZipUtil.class, "Unable to extract zip file: " + zip, ex);
     }
+  }
+
+  public static File extractZip(URL zipProjectLocation, File destination) throws IOException {
+    URL zipLocation = FileLocator.toFileURL(zipProjectLocation);
+    if (!zipLocation.getProtocol().equals("file")) {
+      throw new IOException("could not resolve location to a file");
+    }
+    File zippedFile = new File(zipLocation.getPath());
+    assertTrue(zippedFile.exists());
+    IStatus status = unzip(zippedFile, destination, new NullProgressMonitor());
+    assertTrue("failed to extract: " + status, status.isOK());
+    return destination;
   }
 
 }
