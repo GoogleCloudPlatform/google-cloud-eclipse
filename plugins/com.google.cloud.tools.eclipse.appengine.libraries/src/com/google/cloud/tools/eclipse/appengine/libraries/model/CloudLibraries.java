@@ -16,7 +16,9 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -27,11 +29,16 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonReaderFactory;
+import javax.json.JsonString;
 
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.jdt.core.IJavaProject;
 
+import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -68,7 +75,7 @@ public class CloudLibraries {
    */
   public static List<Library> getLibraries(String group) {
     if (CLIENT_APIS_GROUP.equals(group)) {
-      return getClientApis();
+      return clientApis.get();
     }
     
     List<Library> result = new ArrayList<>();
@@ -87,19 +94,65 @@ public class CloudLibraries {
     return libraries.get(id);
   }
 
-  private static List<Library> getClientApis() {
-    // TODO cache
-    List<Library> clientApis = new ArrayList<>();
-    ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-    InputStream in = classLoader.getResourceAsStream("com/google/cloud/tools/libraries/libraries.json");
-    
-    JsonReaderFactory factory = Json.createReaderFactory(null);
-    JsonReader reader = factory.createReader(in); 
-    // apis = reader.readArray().toArray(new JsonObject[0]); 
-    
-    
-    return clientApis;
-  }
+  private final static Supplier<List<Library>> clientApis = Suppliers.memoize(new Supplier<List<Library>>() {
+    public List<Library> get() {
+      ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+      InputStream in = classLoader.getResourceAsStream("com/google/cloud/tools/libraries/libraries.json");
+      try {
+        in = new URL(
+            "https://raw.githubusercontent.com/GoogleCloudPlatform/appengine-plugins-core/master/src/main/resources/com/google/cloud/tools/libraries/libraries.json")
+            .openStream();
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+      JsonReaderFactory factory = Json.createReaderFactory(null);
+      JsonReader reader = factory.createReader(in); 
+      JsonObject[] apis = reader.readArray().toArray(new JsonObject[0]); 
+      List<Library> clientApis = new ArrayList<>(apis.length);
+      for (JsonObject api : apis) {
+        String name = api.getString("name");
+        String id = api.getString("id");
+        Library library = new Library(id);
+        library.setGroup(CLIENT_APIS_GROUP);
+        library.setName(name);
+        JsonArray clients = api.getJsonArray("clients");
+        for (JsonObject client : clients.toArray(new JsonObject[0])) {
+          JsonString language = client.getJsonString("language");
+          if (language != null && "java".equals(language.getString())) {
+            String toolTip = client.getString("infotip");
+            library.setToolTip(toolTip);
+            JsonObject coordinates = client.getJsonObject("mavenCoordinates");
+            String groupId = coordinates.getString("groupId");
+            String artifactId = coordinates.getString("artifactId");
+            ArtifactVersion version =
+                ArtifactRetriever.DEFAULT.getLatestArtifactVersion(groupId, artifactId);
+            String versionString;
+            if (version == null) {
+              versionString = coordinates.getString("version");
+              // todo need method to get latest nonrelease version instead for alphas and betas
+            } else {
+              versionString = version.toString();
+            }
+            
+            MavenCoordinates mavenCoordinates = new MavenCoordinates.Builder()
+                .setGroupId(groupId)
+                .setArtifactId(artifactId)
+                .setVersion(versionString)
+                .build();
+            LibraryFile file = new LibraryFile(mavenCoordinates);
+            List<LibraryFile> libraryFiles = new ArrayList<>();
+            libraryFiles.add(file);
+            library.setLibraryFiles(libraryFiles);
+            break;
+          }
+        }
+        clientApis.add(library);
+      }
+      
+      return clientApis;
+    }
+  });
 
   private static final LoadingCache<IJavaProject, Library> masterLibraries =
       CacheBuilder.newBuilder().build(new CacheLoader<IJavaProject, Library>() {
