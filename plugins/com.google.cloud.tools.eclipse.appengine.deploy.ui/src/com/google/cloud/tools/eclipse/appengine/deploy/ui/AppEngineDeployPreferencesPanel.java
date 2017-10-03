@@ -119,12 +119,12 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
   private final Image refreshIcon = SharedImages.REFRESH_IMAGE_DESCRIPTOR.createImage(getDisplay());
 
   protected final IProject project;
-  protected final DeployPreferences model;
+  private final DeployPreferences model;
   private final ObservablesManager observables = new ObservablesManager();
-  protected final DataBindingContext bindingContext = new DataBindingContext();
+  private final DataBindingContext bindingContext = new DataBindingContext();
 
   private final Runnable layoutChangedHandler;
-  protected final boolean requireValues;
+  private final boolean requireValues;
 
   private final ProjectRepository projectRepository;
   private final FormToolkit formToolkit;

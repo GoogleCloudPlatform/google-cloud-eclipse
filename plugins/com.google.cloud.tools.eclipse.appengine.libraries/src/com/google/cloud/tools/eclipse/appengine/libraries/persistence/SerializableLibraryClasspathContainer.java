@@ -17,23 +17,29 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.persistence;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
+
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
 
 /**
  * Represents a {@link LibraryClasspathContainer} in such a way that it can be easily transformed
  * into JSON.
  */
-public class SerializableLibraryClasspathContainer {
+class SerializableLibraryClasspathContainer {
 
   private final String description;
   private final String path;
   private final List<SerializableClasspathEntry> entries = new ArrayList<>();
+  private List<LibraryFile> libraryFiles;
 
-  public SerializableLibraryClasspathContainer(LibraryClasspathContainer container,
+  SerializableLibraryClasspathContainer(LibraryClasspathContainer container,
       IPath baseDirectory, IPath sourceBaseDirectory) {
     description = container.getDescription();
     path = container.getPath().toString();
@@ -41,14 +47,26 @@ public class SerializableLibraryClasspathContainer {
     for (IClasspathEntry entry : container.getClasspathEntries()) {
       entries.add(new SerializableClasspathEntry(entry, baseDirectory, sourceBaseDirectory));
     }
+    
+    libraryFiles = new ArrayList<>(container.getLibraryFiles());
   }
 
-  public LibraryClasspathContainer toLibraryClasspathContainer(IPath baseDirectory,
+  LibraryClasspathContainer toLibraryClasspathContainer(IJavaProject javaProject, IPath baseDirectory,
       IPath sourceBaseDirectory) {
     List<IClasspathEntry> classpathEntries = new ArrayList<>();
+
     for (SerializableClasspathEntry entry : entries) {
       classpathEntries.add(entry.toClasspathEntry(baseDirectory, sourceBaseDirectory));
     }
-    return new LibraryClasspathContainer(new Path(path), description, classpathEntries);
+    
+    Library masterLibrary = CloudLibraries.getMasterLibrary(javaProject);
+    if (libraryFiles == null) { // we deserialized an old version
+      libraryFiles = new ArrayList<>();
+    }
+    masterLibrary.setLibraryFiles(libraryFiles);
+
+    return new LibraryClasspathContainer(new Path(path), description, classpathEntries,
+        libraryFiles);
   }
+
 }

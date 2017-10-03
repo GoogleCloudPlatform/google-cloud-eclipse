@@ -24,7 +24,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.TreeMap;
 
+import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -43,7 +45,6 @@ public final class Library {
   private URI siteUri;
   private boolean export = true;
   private List<LibraryFile> libraryFiles = Collections.emptyList();
-  private LibraryRecommendation recommendation = LibraryRecommendation.OPTIONAL;
   private String group;
   private String javaVersion="1.7";
   
@@ -115,7 +116,7 @@ public final class Library {
   /**
    * @param libraryFiles artifacts associated with this library, cannot be <code>null</code>
    */
-  synchronized void setLibraryFiles(List<LibraryFile> libraryFiles) {
+  public synchronized void setLibraryFiles(List<LibraryFile> libraryFiles) {
     Preconditions.checkNotNull(libraryFiles);
     this.libraryFiles = new ArrayList<>(libraryFiles);
   }
@@ -143,21 +144,6 @@ public final class Library {
    void setLibraryDependencies(List<String> libraryDependencies) {
     Preconditions.checkNotNull(libraryDependencies);
     this.libraryDependencies = new ArrayList<>(libraryDependencies);
-  }
-
-  /**
-   * @param recommendation the level of recommendation for this library, cannot be <code>null</code>
-   */
-  void setRecommendation(LibraryRecommendation recommendation) {
-    Preconditions.checkNotNull(recommendation);
-    this.recommendation = recommendation;
-  }
-
-  /**
-   * @return the level of recommendation for this library
-   */
-  public LibraryRecommendation getRecommendation() {
-    return recommendation;
   }
 
   /**
@@ -200,11 +186,46 @@ public final class Library {
         Collection<LibraryFile> dependencies = LibraryFactory.loadTransitiveDependencies(coordinates);
         transitiveDependencies.addAll(dependencies);
       }
-      this.libraryFiles = transitiveDependencies;
+      
+      this.libraryFiles = resolveDuplicates(transitiveDependencies);
       this.resolved = true;
     }
-  }
+  }  
   
+  /**
+   * Strip out different versions of the same library, retaining only the most recent.
+   *
+   * @return a new list containing the most recent version of each dependency
+   */
+  public static List<LibraryFile> resolveDuplicates(List<LibraryFile> dependencies) {
+    TreeMap<String, LibraryFile> map = new TreeMap<>();
+    for (LibraryFile file : dependencies) {
+      MavenCoordinates coordinates = file.getMavenCoordinates();
+      String key = coordinates.getGroupId() + ":" + coordinates.getArtifactId();
+      if (map.containsKey(key)) {
+        MavenCoordinates previousCoordinates = map.get(key).getMavenCoordinates();
+        if (newer(coordinates, previousCoordinates)) {
+          map.put(key, file);
+        }
+      } else {
+        map.put(key, file);
+      }
+      
+    }
+    return new ArrayList<>(map.values());
+  }
+
+  private static boolean newer(MavenCoordinates coordinates, MavenCoordinates previousCoordinates) {
+    try {
+      ComparableVersion version1 = new ComparableVersion(coordinates.getVersion());
+      ComparableVersion version2 = new ComparableVersion(previousCoordinates.getVersion());
+      
+      return version1.compareTo(version2) > 0;
+    } catch (IllegalArgumentException ex) {
+      return false;
+    }
+  }
+
   /**
    * @return a string suitable for debugging
    */

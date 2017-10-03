@@ -16,12 +16,26 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.ui;
 
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jst.common.project.facet.core.JavaFacet;
+import org.eclipse.swt.widgets.Shell;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 
 public class AppEngineLibrariesPageTest {
 
   private AppEngineLibrariesPage page = new AppEngineLibrariesPage();
+  
+  @Rule
+  public ShellTestResource shellTestResource = new ShellTestResource();
+  
+  @Rule
+  public TestProjectCreator projectCreator = new TestProjectCreator().withFacetVersions(
+      JavaFacet.VERSION_1_7);
 
   @Test
   public void testConstructor() {
@@ -42,6 +56,15 @@ public class AppEngineLibrariesPageTest {
   @Test
   public void testGetSelection() {
     Assert.assertNull(page.getSelection());
+  }
+
+  @Test
+  public void testGetNewContainers() {
+    Shell parent = shellTestResource.getShell();
+    page.initialize(projectCreator.getJavaProject(), null);
+    page.createControl(parent);
+    IClasspathEntry[] newContainers = page.getNewContainers();
+    Assert.assertNull(newContainers); // since we haven't selected any libraries
   }
 
 }

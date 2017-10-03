@@ -21,12 +21,17 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProjectTest;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
+
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -39,8 +44,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class CreateAppEngineStandardWtpProjectTest extends CreateAppEngineWtpProjectTest {
-
-  private static final String APP_ENGINE_API = "appengine-api";
 
   @Override
   protected CreateAppEngineWtpProject newCreateAppEngineWtpProject() {
@@ -65,23 +68,31 @@ public class CreateAppEngineStandardWtpProjectTest extends CreateAppEngineWtpPro
 
   @Test
   public void testAppEngineLibrariesAdded() throws InvocationTargetException, CoreException {
-    Library library = new Library(APP_ENGINE_API);
-    config.setAppEngineLibraries(Collections.singletonList(library));
+    Library library = CloudLibraries.getLibrary("appengine-api");
+    List<Library> libraries = new ArrayList<>();
+    libraries.add(library);
+    config.setAppEngineLibraries(libraries);
     CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
     creator.execute(monitor);
 
-    assertAppEngineContainerOnClasspath(library);
+    assertTrue(project.hasNature(JavaCore.NATURE_ID));
+    assertAppEngineApiSdkOnClasspath();
   }
 
-  private void assertAppEngineContainerOnClasspath(Library library) throws CoreException {
-    assertTrue(project.hasNature(JavaCore.NATURE_ID));
+  private void assertAppEngineApiSdkOnClasspath() throws CoreException {
     IJavaProject javaProject = JavaCore.create(project);
-    for (IClasspathEntry iClasspathEntry : javaProject.getRawClasspath()) {
-      if (iClasspathEntry.getPath().equals(library.getContainerPath())) {
+    Library apisLibrary = CloudLibraries.getMasterLibrary(javaProject);
+    for (IClasspathEntry entry : javaProject.getRawClasspath()) {
+      if (entry.getPath().toString()
+          .equals("com.google.cloud.tools.eclipse.appengine.libraries/master-container")) {
+        List<LibraryFile> files = apisLibrary.getLibraryFiles();
+        Assert.assertEquals("No files added", 1, files.size());
+        Assert.assertEquals("appengine-api-1.0-sdk",
+            files.get(0).getMavenCoordinates().getArtifactId());
         return;
       }
     }
-    fail("Classpath container " + APP_ENGINE_API + " was not added to the build path");
+    fail("API classpath container was not added to the build path");
   }
 
   @Test

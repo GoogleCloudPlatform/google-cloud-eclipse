@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible;
 
+import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexDeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexMavenPackagedProjectStagingDelegate;
@@ -72,4 +73,8 @@ public class FlexDeployCommandHandler extends DeployCommandHandler {
     }
   }
 
+  @Override
+  protected DeployPreferences getDeployPreferences(IProject project) {
+    return new FlexDeployPreferences(project);
+  }
 }

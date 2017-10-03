@@ -16,7 +16,10 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.common.base.Preconditions;
+
+import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IClasspathContainer;
@@ -27,17 +30,20 @@ public class LibraryClasspathContainer implements IClasspathContainer {
   private final IPath containerPath;
   private final String description;
   private final List<IClasspathEntry> classpathEntries;
+  private final List<LibraryFile> libraryFiles;
 
   public LibraryClasspathContainer(IPath path, String description,
-      List<IClasspathEntry> classpathEntries) {
+      List<IClasspathEntry> classpathEntries, List<LibraryFile> libraryFiles) {
     Preconditions.checkNotNull(path, "path is null");
     Preconditions.checkNotNull(description, "description is null");
     Preconditions.checkArgument(!description.isEmpty(), "description is empty");
     Preconditions.checkNotNull(classpathEntries, "classpathEntries is null");
+    Preconditions.checkNotNull(libraryFiles, "libraryFiles is null");
 
     this.containerPath = path;
     this.description = description;
     this.classpathEntries = classpathEntries;
+    this.libraryFiles = new ArrayList<>(libraryFiles);
   }
 
   /**
@@ -47,7 +53,8 @@ public class LibraryClasspathContainer implements IClasspathContainer {
    * @param classpathEntries the classpath entries of the new container
    */
   public LibraryClasspathContainer copyWithNewEntries(List<IClasspathEntry> classpathEntries) {
-    return new LibraryClasspathContainer(containerPath, description, classpathEntries);
+    return new LibraryClasspathContainer(containerPath, description, classpathEntries,
+        libraryFiles);
   }
 
   @Override
@@ -68,5 +75,9 @@ public class LibraryClasspathContainer implements IClasspathContainer {
   @Override
   public IClasspathEntry[] getClasspathEntries() {
     return classpathEntries.toArray(new IClasspathEntry[0]);
+  }
+
+  public List<LibraryFile> getLibraryFiles() {
+    return new ArrayList<>(libraryFiles);
   }
 }

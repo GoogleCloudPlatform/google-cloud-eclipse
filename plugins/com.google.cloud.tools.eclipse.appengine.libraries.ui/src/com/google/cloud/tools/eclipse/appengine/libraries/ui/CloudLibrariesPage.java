@@ -88,6 +88,7 @@ public abstract class CloudLibrariesPage extends WizardPage implements IClasspat
 
   @Override
   public void setSelection(IClasspathEntry containerEntry) {
+    // todo can we use the containerEntry to tick the checkboxes in the library selector group?
   }
 
   @Override
@@ -101,23 +102,17 @@ public abstract class CloudLibrariesPage extends WizardPage implements IClasspat
     if (libraries == null || libraries.isEmpty()) {
       return null;
     }
-  
+
     try {
       if (MavenUtils.hasMavenNature(project.getProject())) {
         BuildPath.addMavenLibraries(project.getProject(), libraries, new NullProgressMonitor());
         return new IClasspathEntry[0];
       } else {
-        for (Library library : libraries) {
-          if (!library.isResolved()) {
-            library.resolveDependencies();
-          }
-        }
-        IClasspathEntry[] added =
-            BuildPath.listAdditionalLibraries(project, libraries, new NullProgressMonitor());
+        Library masterLibrary = BuildPath.collectLibraryFiles(project, libraries);
+        IClasspathEntry[] added = BuildPath.listNativeLibrary(project, masterLibrary);
         return added;
       }
     } catch (CoreException ex) {
-      logger.log(Level.WARNING, "Error adding libraries to project", ex);
       return new IClasspathEntry[0];
     }
   }

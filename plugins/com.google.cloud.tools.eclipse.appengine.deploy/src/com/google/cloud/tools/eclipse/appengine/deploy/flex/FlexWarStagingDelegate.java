@@ -48,7 +48,8 @@ public class FlexWarStagingDelegate extends FlexStagingDelegate {
   protected IPath getDeployArtifact(IPath safeWorkDirectory, IProgressMonitor monitor)
       throws CoreException {
     IPath war = safeWorkDirectory.append("app-to-deploy.war");
-    WarPublisher.publishWar(project, war, monitor);
+    IPath tempDirectory = safeWorkDirectory.append("temp");
+    WarPublisher.publishWar(project, war, tempDirectory, monitor);
     return war;
   }
 

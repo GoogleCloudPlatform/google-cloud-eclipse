@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -38,7 +39,6 @@ import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -130,10 +130,7 @@ public class FlexDeployPreferencesPanelTest {
 
   private static Text findAppYamlField(Composite panel) {
     Control control = CompositeUtil.findControlAfterLabel(panel, Text.class, "app.yaml:");
-    
-    if (control == null) {
-      Assert.fail("Could not locate app.yaml field"); 
-    }
+    assertNotNull("Could not locate app.yaml field", control);
     return (Text) control;
   }
 }

@@ -101,17 +101,19 @@ public class LibraryClasspathContainerSerializer {
       if (fromJson == null) {
         return null;
       }
-      return fromJson.toLibraryClasspathContainer(
+      
+      LibraryClasspathContainer libraryClasspathContainer = fromJson.toLibraryClasspathContainer(
+          javaProject,
           binaryArtifactBaseLocationProvider.getBaseLocation(),
           sourceBaseLocationProvider.getBaseLocation());
+      return libraryClasspathContainer;
     }
   }
 
   private File getContainerStateFile(IJavaProject javaProject, IPath containerPath, boolean create)
       throws CoreException {
-    IPath containerStateFile = stateLocationProvider.getContainerStateFile(javaProject,
-                                                                           containerPath,
-                                                                           create);
+    IPath containerStateFile =
+        stateLocationProvider.getContainerStateFile(javaProject, containerPath, create);
     if (containerStateFile != null && containerStateFile.toFile().exists()) {
       return containerStateFile.toFile();
     }

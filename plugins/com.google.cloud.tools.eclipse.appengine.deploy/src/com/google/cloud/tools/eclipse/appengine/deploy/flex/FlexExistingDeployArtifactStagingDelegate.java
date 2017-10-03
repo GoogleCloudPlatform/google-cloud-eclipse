@@ -18,7 +18,8 @@ package com.google.cloud.tools.eclipse.appengine.deploy.flex;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.common.base.Preconditions;
-import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -36,21 +37,35 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
  */
 public class FlexExistingDeployArtifactStagingDelegate extends FlexStagingDelegate {
 
-  private final IFile deployArtifact;
+  private final IPath deployArtifact;
+  private final ISchedulingRule schedulingRule;
 
-  public FlexExistingDeployArtifactStagingDelegate(IFile deployArtifact, IPath appEngineDirectory) {
+  public FlexExistingDeployArtifactStagingDelegate(IPath deployArtifact, IPath appEngineDirectory) {
     super(appEngineDirectory);
-    this.deployArtifact = Preconditions.checkNotNull(deployArtifact);
+    Preconditions.checkNotNull(deployArtifact);
+    Preconditions.checkArgument(!deployArtifact.isEmpty());
+    Preconditions.checkArgument(deployArtifact.isAbsolute());
+    Preconditions.checkArgument(appEngineDirectory.isAbsolute());
+    this.deployArtifact = deployArtifact;
+
+    // Compute SchedulingRule; will be the artifact itself, if inside the workspace.
+    IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
+    if (workspaceRoot.getLocation().isPrefixOf(deployArtifact)) {
+      IPath relativeToWorkspace = deployArtifact.makeRelativeTo(workspaceRoot.getLocation());
+      schedulingRule = workspaceRoot.getFile(relativeToWorkspace);
+    } else {
+      schedulingRule = null;  // Outside the workspace; we can't lock it.
+    }
   }
 
   @Override
   protected IPath getDeployArtifact(IPath safeWorkDirectory, IProgressMonitor monitor)
       throws CoreException {
-    return deployArtifact.getLocation();
+    return deployArtifact;
   }
 
   @Override
   public ISchedulingRule getSchedulingRule() {
-    return deployArtifact;
+    return schedulingRule;
   }
 }

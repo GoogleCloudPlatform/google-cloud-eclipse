@@ -377,28 +377,44 @@ public class RunOptionsDefaultsComponent {
     return target;
   }
 
+  /**
+   * Return the selected account's email, or {@code ""} if no account selected.
+   */
+  public String getAccountEmail() {
+    return accountSelector.getSelectedEmail();
+  }
+
   public void selectAccount(String accountEmail) {
     accountSelector.selectAccount(accountEmail);
+  }
+
+  /**
+   * Return the selected project, or {@code null} if no project selected.
+   */
+  public GcpProject getProject() {
+    return projectInput.getProject();
+  }
+
+  /**
+   * Return the selected project ID, or {@code ""} if no project selected.
+   */
+  public String getProjectId() {
+    return projectInput.getProjectId();
   }
 
   public void setCloudProjectText(String project) {
     projectInput.setProject(project);
   }
 
-  public String getAccountEmail() {
-    return accountSelector.getSelectedEmail();
-  }
-
-  public GcpProject getProject() {
-    return projectInput.getProject();
+  /**
+   * Return the selected staging location, or {@code ""} if no staging location specified.
+   */
+  public String getStagingLocation() {
+    return GcsDataflowProjectClient.toGcsLocationUri(stagingLocationInput.getText());
   }
 
   public void setStagingLocationText(String stagingLocation) {
     stagingLocationInput.setText(stagingLocation);
-  }
-
-  public String getStagingLocation() {
-    return GcsDataflowProjectClient.toGcsLocationUri(stagingLocationInput.getText());
   }
 
   public void addAccountSelectionListener(Runnable listener) {
@@ -409,7 +425,9 @@ public class RunOptionsDefaultsComponent {
     projectInput.addSelectionChangedListener(new ISelectionChangedListener() {
       @Override
       public void selectionChanged(SelectionChangedEvent event) {
-        listener.modifyText(new ModifyEvent(new Event()));
+        Event dummy = new Event();
+        dummy.widget = projectInput.getControl();
+        listener.modifyText(new ModifyEvent(dummy));
       }
     });
     stagingLocationInput.addModifyListener(listener);

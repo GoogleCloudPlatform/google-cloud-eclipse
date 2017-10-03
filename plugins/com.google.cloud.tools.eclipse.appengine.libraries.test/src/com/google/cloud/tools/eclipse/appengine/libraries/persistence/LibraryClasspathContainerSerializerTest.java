@@ -23,11 +23,16 @@ import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
+import com.google.common.base.Charsets;
 import com.google.gson.JsonParser;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.eclipse.core.runtime.CoreException;
@@ -51,33 +56,7 @@ public class LibraryClasspathContainerSerializerTest {
   private static final String CONTAINER_DESCRIPTION = "Test container description";
   private static final String CONTAINER_PATH = "container/path";
 
-  private static final String SERIALIZED_CONTAINER =
-      "{"
-      + "  \"description\": \"Test container description\","
-      + "  \"path\": \"container/path\","
-      + "  \"entries\": ["
-      + "    {"
-      + "      \"accessRules\": ["
-      + "        {"
-      + "          \"ruleKind\": \"ACCESSIBLE\","
-      + "          \"pattern\": \"/com/example/accessible\""
-      + "        },"
-      + "        {"
-      + "          \"ruleKind\": \"FORBIDDEN\","
-      + "          \"pattern\": \"/com/example/nonaccessible\""
-      + "        }"
-      + "      ],"
-      + "      \"sourceAttachmentPath\": \"SRC/path/to/src\","
-      + "      \"path\": \"path/to/jar\","
-      + "      \"attributes\": ["
-      + "        {"
-      + "          \"name\": \"attrName\","
-      + "          \"value\": \"attrValue\""
-      + "        }"
-      + "      ]"
-      + "    }"
-      + "  ]"
-      + "}";
+  private String serializedContainer;
 
   @Mock private LibraryContainerStateLocationProvider stateLocationProvider;
   @Mock private ArtifactBaseLocationProvider binaryBaseLocationProvider;
@@ -90,7 +69,9 @@ public class LibraryClasspathContainerSerializerTest {
   private LibraryClasspathContainer container;
 
   @Before
-  public void setUp() {
+  public void setUp() throws IOException {
+    serializedContainer = loadFile("testdata/serializedContainer.json");
+    
     List<IClasspathEntry> classpathEntries = Arrays.asList(
         newClasspathEntry(IClasspathEntry.CPE_LIBRARY, "/test/path/to/jar",
             "/test/path/to/src", new IClasspathAttribute[] {newAttribute("attrName", "attrValue")},
@@ -99,8 +80,18 @@ public class LibraryClasspathContainerSerializerTest {
             true));
     when(binaryBaseLocationProvider.getBaseLocation()).thenReturn(new Path("/test"));
     when(sourceBaseLocationProvider.getBaseLocation()).thenReturn(new Path("/test"));
+    MavenCoordinates coordinates = new MavenCoordinates("com.google", "jarartifact");
+    LibraryFile libraryFile = new LibraryFile(coordinates);
+    List<LibraryFile> libraryFiles = new ArrayList<>();
+    libraryFiles.add(libraryFile);
     container = new LibraryClasspathContainer(new Path(CONTAINER_PATH), CONTAINER_DESCRIPTION,
-        classpathEntries);
+        classpathEntries, libraryFiles);
+  }
+
+  private String loadFile(String path) throws IOException {
+    java.nio.file.Path jsonPath = Paths.get(path).toAbsolutePath();
+    byte[] jsonData = Files.readAllBytes(jsonPath);
+    return new String(jsonData, Charsets.UTF_8);
   }
 
   @Test
@@ -122,7 +113,7 @@ public class LibraryClasspathContainerSerializerTest {
     when(stateLocationProvider.getContainerStateFile(any(IJavaProject.class), any(IPath.class),
         anyBoolean())).thenReturn(stateFilePath);
     Files.write(stateFilePath.toFile().toPath(),
-        SERIALIZED_CONTAINER.getBytes(StandardCharsets.UTF_8),
+        serializedContainer.getBytes(StandardCharsets.UTF_8),
         StandardOpenOption.TRUNCATE_EXISTING);
     LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer(
         stateLocationProvider, binaryBaseLocationProvider, sourceBaseLocationProvider);
@@ -131,6 +122,25 @@ public class LibraryClasspathContainerSerializerTest {
     compare(container, containerFromFile);
   }
 
+  // The legacy format
+  @Test
+  public void testLoadContainer_withoutLibraries() throws IOException, CoreException {
+    Path stateFilePath = new Path(stateFolder.newFile().getAbsolutePath());
+    when(stateLocationProvider.getContainerStateFile(any(IJavaProject.class), any(IPath.class),
+        anyBoolean())).thenReturn(stateFilePath);
+    String legacyContainer = loadFile("testdata/legacyContainer.json");
+    Files.write(stateFilePath.toFile().toPath(),
+        legacyContainer.getBytes(StandardCharsets.UTF_8),
+        StandardOpenOption.TRUNCATE_EXISTING);
+    LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer(
+        stateLocationProvider, binaryBaseLocationProvider, sourceBaseLocationProvider);
+    
+    LibraryClasspathContainer containerFromFile =
+        serializer.loadContainer(javaProject, new Path(CONTAINER_PATH));
+    compare(container, containerFromFile);
+  }
+  
+  
   @Test
   public void testSaveContainer() throws CoreException, IOException {
     Path stateFilePath = new Path(stateFolder.newFile().getAbsolutePath());
@@ -142,7 +152,7 @@ public class LibraryClasspathContainerSerializerTest {
     byte[] data = Files.readAllBytes(stateFilePath.toFile().toPath());
     String actual = new String(data, StandardCharsets.UTF_8);
     // use JsonObject.equals()
-    assertEquals(new JsonParser().parse(SERIALIZED_CONTAINER), new JsonParser().parse(actual));
+    assertEquals(new JsonParser().parse(serializedContainer), new JsonParser().parse(actual));
   }
 
   @Test
@@ -159,14 +169,15 @@ public class LibraryClasspathContainerSerializerTest {
     assertNull(serializer.loadContainer(javaProject, new Path(CONTAINER_PATH)));
   }
 
-  private void compare(LibraryClasspathContainer container,
-      LibraryClasspathContainer otherContainer) {
-    assertEquals(container.getPath(), otherContainer.getPath());
-    assertEquals(container.getKind(), otherContainer.getKind());
-    assertEquals(container.getDescription(), otherContainer.getDescription());
-    for (int i = 0; i < container.getClasspathEntries().length; i++) {
-      IClasspathEntry classpathEntry = container.getClasspathEntries()[i];
-      IClasspathEntry otherClasspathEntry = otherContainer.getClasspathEntries()[i];
+  // todo would it be clearer simply to define an equals method?
+  private static void compare(LibraryClasspathContainer expected,
+      LibraryClasspathContainer actual) {
+    assertEquals(expected.getPath(), actual.getPath());
+    assertEquals(expected.getKind(), actual.getKind());
+    assertEquals(expected.getDescription(), actual.getDescription());
+    for (int i = 0; i < expected.getClasspathEntries().length; i++) {
+      IClasspathEntry classpathEntry = expected.getClasspathEntries()[i];
+      IClasspathEntry otherClasspathEntry = actual.getClasspathEntries()[i];
       assertEquals(classpathEntry.getPath(), otherClasspathEntry.getPath());
       assertEquals(classpathEntry.getEntryKind(), otherClasspathEntry.getEntryKind());
       assertEquals(classpathEntry.getSourceAttachmentPath(),
@@ -183,6 +194,13 @@ public class LibraryClasspathContainerSerializerTest {
         IClasspathAttribute otherClasspathAttribute = otherClasspathEntry.getExtraAttributes()[k];
         assertEquals(classpathAttribute.getName(), otherClasspathAttribute.getName());
         assertEquals(classpathAttribute.getValue(), otherClasspathAttribute.getValue());
+      }
+    }
+    
+    List<LibraryFile> libraryFiles = actual.getLibraryFiles();
+    if (libraryFiles.size() != 0) {
+      for (int i = 0; i < libraryFiles.size(); i++) {
+        assertEquals(libraryFiles.get(i), actual.getLibraryFiles().get(i));
       }
     }
   }

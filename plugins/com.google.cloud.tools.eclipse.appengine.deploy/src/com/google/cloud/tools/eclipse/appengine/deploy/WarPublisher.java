@@ -31,13 +31,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.jst.server.core.IWebFragmentModule;
+import org.eclipse.jst.server.core.IJ2EEModule;
+import org.eclipse.jst.server.core.IUtilityModule;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.ServerUtil;
 import org.eclipse.wst.server.core.model.IModuleResource;
 import org.eclipse.wst.server.core.model.ModuleDelegate;
 import org.eclipse.wst.server.core.util.ModuleFile;
-import org.eclipse.wst.server.core.util.PublishHelper;
+import org.eclipse.wst.server.core.util.PublishUtil;
 
 /**
  * Writes a WAR file of a project, or the exploded contents of it to a destination directory.
@@ -46,45 +47,44 @@ public class WarPublisher {
 
   public static final Logger logger = Logger.getLogger(WarPublisher.class.getName());
 
-  /**
-   * It does a smart export, i.e. considers the resources to be copied and if the destination
-   * directory already contains resources those will be deleted if they are not part of the exploded
-   * WAR.
-   */
-  public static void publishExploded(IProject project, IPath destination, IProgressMonitor monitor)
-      throws CoreException {
-    publish(project, destination, true /* exploded */, monitor);
-  }
-
-  public static void publishWar(IProject project, IPath destination, IProgressMonitor monitor)
-      throws CoreException {
-    publish(project, destination, false /* exploded */, monitor);
-  }
-
-  private static void publish(IProject project, IPath destination, boolean exploded,
-      IProgressMonitor monitor) throws CoreException {
-    if (monitor.isCanceled()) {
-      throw new OperationCanceledException();
-    }
+  public static void publishExploded(IProject project, IPath destination,
+      IPath safeWorkDirectory, IProgressMonitor monitor) throws CoreException {
     Preconditions.checkNotNull(project, "project is null"); //$NON-NLS-1$
     Preconditions.checkNotNull(destination, "destination is null"); //$NON-NLS-1$
     Preconditions.checkArgument(!destination.isEmpty(), "destination is empty path"); //$NON-NLS-1$
-
-    SubMonitor progress = SubMonitor.convert(monitor, 100);
-    progress.setTaskName(Messages.getString("task.name.publish.war"));
-
-    PublishHelper publishHelper = new PublishHelper(null);
-    IModuleResource[] resources = flattenResources(project, progress);
-
-    if (exploded) {
-      publishHelper.publishFull(resources, destination, progress.newChild(100));
-    } else {
-      publishHelper.publishZip(resources, destination, progress.newChild(100));
+    Preconditions.checkNotNull(safeWorkDirectory, "safeWorkDirectory is null"); //$NON-NLS-1$
+    if (monitor.isCanceled()) {
+      throw new OperationCanceledException();
     }
+
+    SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
+    subMonitor.setTaskName(Messages.getString("task.name.publish.war"));
+
+    IModuleResource[] resources =
+        flattenResources(project, safeWorkDirectory, subMonitor.newChild(10));
+    PublishUtil.publishFull(resources, destination, subMonitor.newChild(90));
   }
 
-  private static IModuleResource[] flattenResources(
-      IProject project, IProgressMonitor monitor) throws CoreException {
+  public static void publishWar(IProject project, IPath destination, IPath safeWorkDirectory,
+      IProgressMonitor monitor) throws CoreException {
+    Preconditions.checkNotNull(project, "project is null"); //$NON-NLS-1$
+    Preconditions.checkNotNull(destination, "destination is null"); //$NON-NLS-1$
+    Preconditions.checkArgument(!destination.isEmpty(), "destination is empty path"); //$NON-NLS-1$
+    Preconditions.checkNotNull(safeWorkDirectory, "safeWorkDirectory is null"); //$NON-NLS-1$
+    if (monitor.isCanceled()) {
+      throw new OperationCanceledException();
+    }
+
+    SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
+    subMonitor.setTaskName(Messages.getString("task.name.publish.war"));
+
+    IModuleResource[] resources =
+        flattenResources(project, safeWorkDirectory, subMonitor.newChild(10));
+    PublishUtil.publishZip(resources, destination, subMonitor.newChild(90));
+  }
+
+  private static IModuleResource[] flattenResources(IProject project, IPath safeWorkDirectory,
+      IProgressMonitor monitor) throws CoreException {
     List<IModuleResource> resources = new ArrayList<>();
 
     IModule[] modules = ServerUtil.getModules(project);
@@ -101,27 +101,38 @@ public class WarPublisher {
       for (IModule child : delegate.getChildModules()) {
         ModuleDelegate childDelegate = (ModuleDelegate)
             child.loadAdapter(ModuleDelegate.class, monitor);
-        IWebFragmentModule webFragmentModule = (IWebFragmentModule)
-            child.loadAdapter(IWebFragmentModule.class, monitor);
-        if (childDelegate == null || webFragmentModule == null || !webFragmentModule.isBinary()) {
-          logger.log(Level.WARNING, "child modules other than binary web-fragments are not "
-              + "supported: module=" + module + ", moduleType=" + module.getModuleType());
+        IJ2EEModule j2eeModule = (IJ2EEModule) child.loadAdapter(IJ2EEModule.class, monitor);
+        IUtilityModule utilityModule =
+            (IUtilityModule) child.loadAdapter(IUtilityModule.class, monitor);
+        if (childDelegate == null || (j2eeModule == null && utilityModule == null)) {
+          logger.log(Level.WARNING, "child modules other than J2EE module or utility module are "
+              + "not supported: module=" + child + ", moduleType=" + child.getModuleType());
           continue;
         }
 
-        // per "isBinary()" Javadoc, "members()" should have a single resource.
-        IModuleResource zipResource = childDelegate.members()[0];
-        // destination (not an actual zip), e.g., "WEB-INF/lib/spring-web-4.3.6.RELEASE.jar"
-        IPath zip = new Path(delegate.getPath(child));
-        IPath zipParent = zip.removeLastSegments(1);
+        // destination (relative to root), e.g., "WEB-INF/lib/spring-web-4.3.6.RELEASE.jar"
+        IPath destination = new Path(delegate.getPath(child));
+        String zipName = destination.lastSegment();  // to be created
+        IPath zipParent = destination.removeLastSegments(1);
 
-        File javaIoFile = zipResource.getAdapter(File.class);
-        IFile iFile = zipResource.getAdapter(IFile.class);
+        boolean alreadyZip = j2eeModule != null && j2eeModule.isBinary()
+            || utilityModule != null && utilityModule.isBinary();
+        if (alreadyZip) {
+          // per "isBinary()" Javadoc, "members()" should have a single resource.
+          IModuleResource zipResource = childDelegate.members()[0];
 
-        if (javaIoFile != null) {
-          resources.add(new ModuleFile(javaIoFile, zipResource.getName(), zipParent));
-        } else if (iFile != null) {
-          resources.add(new ModuleFile(iFile, zipResource.getName(), zipParent));
+          File javaIoFile = zipResource.getAdapter(File.class);
+          IFile iFile = zipResource.getAdapter(IFile.class);
+
+          if (javaIoFile != null) {
+            resources.add(new ModuleFile(javaIoFile, zipName, zipParent));
+          } else if (iFile != null) {
+            resources.add(new ModuleFile(iFile, zipName, zipParent));
+          }
+        } else {
+          IPath tempZip = safeWorkDirectory.append(zipName);
+          PublishUtil.publishZip(childDelegate.members(), tempZip, monitor);
+          resources.add(new ModuleFile(tempZip.toFile(), destination.lastSegment(), zipParent));
         }
       }
     }

@@ -64,8 +64,10 @@ public class StandardStagingDelegate implements StagingDelegate {
       cloudSdkWrapper.setUpStandardStagingCloudSdk(
           javaHome, stdoutOutputStream, stderrOutputStream);
 
-      WarPublisher.publishExploded(project, safeWorkDirectory, subMonitor.newChild(40));
-      CloudSdkStagingHelper.stageStandard(safeWorkDirectory, stagingDirectory,
+      IPath explodedWar = safeWorkDirectory.append("exploded-war");
+      IPath tempDirectory = safeWorkDirectory.append("temp");
+      WarPublisher.publishExploded(project, explodedWar, tempDirectory, subMonitor.newChild(40));
+      CloudSdkStagingHelper.stageStandard(explodedWar, stagingDirectory,
           cloudSdkWrapper.getCloudSdk(), subMonitor.newChild(60));
 
       optionalConfigurationFilesDirectory =

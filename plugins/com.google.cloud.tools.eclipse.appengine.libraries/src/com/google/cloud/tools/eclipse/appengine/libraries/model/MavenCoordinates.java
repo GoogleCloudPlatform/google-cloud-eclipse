@@ -100,6 +100,10 @@ public class MavenCoordinates {
         groupId, artifactId, type, classifier, version);
   }
   
+  String toStringCoordinates() {
+    return MessageFormat.format("{0}:{1}:{2}", groupId, artifactId, version);
+  }
+  
   public Builder toBuilder() {
     Builder builder = new Builder();
     builder.groupId = groupId;

@@ -51,7 +51,6 @@ public interface ILibraryClasspathContainerResolverService {
    */
   IStatus resolveContainer(IJavaProject javaProject, IPath containerPath, IProgressMonitor monitor);
 
-
   /**
    * Verifies that dependencies of a given runtime are available locally or can be downloaded.
    *

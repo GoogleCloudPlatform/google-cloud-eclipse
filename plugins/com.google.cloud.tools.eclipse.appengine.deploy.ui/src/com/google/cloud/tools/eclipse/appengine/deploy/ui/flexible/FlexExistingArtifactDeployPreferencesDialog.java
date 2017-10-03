@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.deploy.ui.standard;
+package com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.AppEngineDeployPreferencesPanel;
-import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesDialog;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
@@ -25,11 +24,11 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
-class StandardDeployPreferencesDialog extends DeployPreferencesDialog {
+class FlexExistingArtifactDeployPreferencesDialog extends FlexDeployPreferencesDialog {
 
-  StandardDeployPreferencesDialog(Shell parentShell, String title, IProject project,
+  FlexExistingArtifactDeployPreferencesDialog(Shell parentShell, String title,
       IGoogleLoginService loginService, IGoogleApiFactory googleApiFactory) {
-    super(parentShell, title, project, loginService, googleApiFactory);
+    super(parentShell, title, null /*project*/, loginService, googleApiFactory);
   }
 
   @Override
@@ -37,8 +36,7 @@ class StandardDeployPreferencesDialog extends DeployPreferencesDialog {
       IProject project, IGoogleLoginService loginService, Runnable layoutChangedHandler,
       ProjectRepository projectRepository) {
     boolean requireValues = true;
-    return new StandardDeployPreferencesPanel(container, project, loginService,
+    return new FlexExistingArtifactDeployPreferencesPanel(container, loginService,
         layoutChangedHandler, requireValues, projectRepository);
   }
-
 }

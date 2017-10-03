@@ -74,6 +74,7 @@ public class AppEngineDeployPreferencesPanelTest {
   private static final String EMAIL_1 = "some-email-1@example.com";
 
   private Composite parent;
+  private DeployPreferences model;
   private AppEngineDeployPreferencesPanel deployPanel;
   private HashSet<Account> oneAccountSet;
   private HashSet<Account> twoAccountSet;
@@ -96,6 +97,7 @@ public class AppEngineDeployPreferencesPanelTest {
     when(account2.getOAuth2Credential()).thenReturn(mock(Credential.class));
     oneAccountSet = new HashSet<>(Arrays.asList(account1));
     twoAccountSet = new HashSet<>(Arrays.asList(account1, account2));
+    model = new DeployPreferences(project);
   }
 
   @Test
@@ -115,7 +117,7 @@ public class AppEngineDeployPreferencesPanelTest {
     assertTrue("account selector is in error: " + status.getMessage(), status.isOK());
 
     assertThat("auto-selected value should be propagated back to model",
-        deployPanel.model.getAccountEmail(), is(account1.getEmail()));
+        model.getAccountEmail(), is(account1.getEmail()));
   }
 
   @Test
@@ -196,6 +198,8 @@ public class AppEngineDeployPreferencesPanelTest {
     try {
       node.put("project.id", "projectId1");
       node.put("account.email", EMAIL_1);
+      model = new DeployPreferences(project);
+
       initializeProjectRepository();
       when(loginService.getAccounts()).thenReturn(twoAccountSet);
       deployPanel = createPanel(true /* requireValues */);
@@ -316,7 +320,7 @@ public class AppEngineDeployPreferencesPanelTest {
 
   private AppEngineDeployPreferencesPanel createPanel(boolean requireValues) {
     return new AppEngineDeployPreferencesPanel(parent, project, loginService, layoutChangedHandler,
-        requireValues, projectRepository, new DeployPreferences(project)) {
+        requireValues, projectRepository, model) {
           @Override
           protected String getHelpContextId() {
             return null;

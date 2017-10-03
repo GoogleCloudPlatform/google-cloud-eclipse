@@ -72,6 +72,8 @@ public class MiniSelectorTest {
     assertNull(selector.getCredential());
     assertNotNull(selector.getSelection());
     assertTrue(selector.getSelection().isEmpty());
+    assertNull(selector.getProject());
+    assertEquals("", selector.getProjectId());
   }
 
   @Test
@@ -82,6 +84,9 @@ public class MiniSelectorTest {
     assertEquals(credential, selector.getCredential());
     assertNotNull(selector.getSelection());
     assertTrue(selector.getSelection().isEmpty());
+    assertNull(selector.getProject());
+    assertEquals("", selector.getProjectId());
+
     selector.setProject("foo.id");
     waitUntilResolvedProject(selector); // waits for the project list to be returned
 
@@ -89,6 +94,7 @@ public class MiniSelectorTest {
     assertNotNull(selector.getProject());
     assertEquals("foo", selector.getProject().getName());
     assertEquals("foo.id", selector.getProject().getId());
+    assertEquals("foo.id", selector.getProjectId());
   }
 
   @Test

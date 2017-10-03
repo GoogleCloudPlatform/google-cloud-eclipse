@@ -16,11 +16,15 @@
 
 package com.google.cloud.tools.eclipse.dataflow.ui.page;
 
+import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 public class NewDataflowProjectWizardDefaultRunOptionsPageTest {
+  @Rule
+  public ShellTestResource shellCreator = new ShellTestResource();
   
   private NewDataflowProjectWizardDefaultRunOptionsPage page;
   
@@ -43,5 +47,23 @@ public class NewDataflowProjectWizardDefaultRunOptionsPageTest {
   public void testDescription() {
     Assert.assertEquals(
         "Set default options for running a Dataflow Pipeline.", page.getDescription());
+  }
+
+  @Test
+  public void testAccountEmail_none() {
+    page.createControl(shellCreator.getShell());
+    Assert.assertEquals("", page.getAccountEmail());
+  }
+
+  @Test
+  public void testProjectId_none() {
+    page.createControl(shellCreator.getShell());
+    Assert.assertEquals("", page.getProjectId());
+  }
+
+  @Test
+  public void testStagingLocation_none() {
+    page.createControl(shellCreator.getShell());
+    Assert.assertEquals("", page.getStagingLocation());
   }
 }

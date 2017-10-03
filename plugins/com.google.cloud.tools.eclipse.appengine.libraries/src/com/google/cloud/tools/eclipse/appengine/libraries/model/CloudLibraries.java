@@ -16,6 +16,9 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
@@ -24,8 +27,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.RegistryFactory;
+import org.eclipse.jdt.core.IJavaProject;
 
 public class CloudLibraries {
+
+  public static final String MASTER_CONTAINER_ID = "master-container";
 
   /**
    * Library files for App Engine Standard environment applications; specifically
@@ -42,9 +48,8 @@ public class CloudLibraries {
   private static final Logger logger = Logger.getLogger(CloudLibraries.class.getName());
   private static final ImmutableMap<String, Library> libraries = loadLibraryDefinitions();
 
-  // todo consider caching maps of group to libraries
   /**
-   * @return libraries in the named group
+   * Returns libraries in the named group.
    */
   public static List<Library> getLibraries(String group) {
     List<Library> result = new ArrayList<>();
@@ -57,25 +62,41 @@ public class CloudLibraries {
   }
 
   /**
-   * @return the library with the specified ID, or null if not found
+   * Returns the library with the specified ID, or null if not found.
    */
   public static Library getLibrary(String id) {
-    // todo this method is only called by LibraryClasspathContainerResolverService and tests.
-    // Perhaps here or in LibraryClasspathContainerResolverService is where we should
-    // resolve the transitive dependencies
     return libraries.get(id);
+  }
+
+  private static final LoadingCache<IJavaProject, Library> masterLibraries =
+      CacheBuilder.newBuilder().build(new CacheLoader<IJavaProject, Library>() {
+
+        @Override
+        public Library load(IJavaProject project) {
+          // we rely below on this method not throwing exceptions
+          Library library = new Library(MASTER_CONTAINER_ID);
+          library.setName("Google APIs"); //$NON-NLS-1$
+          return library;
+        }
+      });
+
+  /**
+   * Returns the uber container for all Google APIs.
+   */
+  public static Library getMasterLibrary(IJavaProject javaProject) {
+    return masterLibraries.getUnchecked(javaProject);
   }
 
   private static ImmutableMap<String, Library> loadLibraryDefinitions() {
     IConfigurationElement[] elements = RegistryFactory.getRegistry().getConfigurationElementsFor(
-        "com.google.cloud.tools.eclipse.appengine.libraries");
+        "com.google.cloud.tools.eclipse.appengine.libraries"); //$NON-NLS-1$
     ImmutableMap.Builder<String, Library> builder = ImmutableMap.builder();
     for (IConfigurationElement element : elements) {
       try {
         Library library = LibraryFactory.create(element);
         builder.put(library.getId(), library);
       } catch (LibraryFactoryException ex) {
-        logger.log(Level.SEVERE, "Error loading library definition", ex);
+        logger.log(Level.SEVERE, "Error loading library definition", ex); //$NON-NLS-1$
       }
     }
 
