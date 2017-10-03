@@ -31,10 +31,10 @@ import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Preconditions;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
@@ -54,11 +54,8 @@ public class FlexDeployCommandHandler extends DeployCommandHandler {
     Preconditions.checkNotNull(facetedProject);
 
     String appYamlPath = new FlexDeployPreferences(project).getAppYamlPath();
-    IFile appYaml = project.getFile(appYamlPath);
-    if (!appYaml.exists()) {
-      throw new CoreException(StatusUtil.error(this, appYaml + " does not exist."));
-    }
-    IPath appEngineDirectory = appYaml.getParent().getLocation();
+    IPath appYaml = resolveFile(appYamlPath, project.getLocation());
+    IPath appEngineDirectory = appYaml.removeLastSegments(1);
 
     if (AppEngineFlexWarFacet.hasFacet(facetedProject)) {
       return new FlexWarStagingDelegate(project, appEngineDirectory);
@@ -71,6 +68,19 @@ public class FlexDeployCommandHandler extends DeployCommandHandler {
     } else {
       throw new IllegalStateException("BUG: command enabled for non-flex projects");
     }
+  }
+
+  protected static IPath resolveFile(String path, IPath baseDirectory) throws CoreException {
+    IPath fullPath = new Path(path);
+    if (!fullPath.isAbsolute()) {
+      fullPath = baseDirectory.append(path);
+    }
+
+    if (!fullPath.toFile().exists()) {
+      throw new CoreException(
+          StatusUtil.error(FlexDeployCommandHandler.class, fullPath + " does not exist."));
+    }
+    return fullPath;
   }
 
   @Override
