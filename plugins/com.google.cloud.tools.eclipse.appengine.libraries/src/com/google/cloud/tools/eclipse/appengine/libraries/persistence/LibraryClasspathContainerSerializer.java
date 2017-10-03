@@ -56,7 +56,7 @@ public class LibraryClasspathContainerSerializer {
   private static final Logger logger =
       Logger.getLogger(LibraryClasspathContainerSerializer.class.getName());
 
-  private static final String MASTER_LIBRARY_LIST_FILE_ID = "master-libraries";
+  private static final String CONTAINER_LIBRARY_LIST_FILE_ID = "_libraries";
 
   private final LibraryContainerStateLocationProvider stateLocationProvider;
   private final ArtifactBaseLocationProvider binaryArtifactBaseLocationProvider;
@@ -120,7 +120,7 @@ public class LibraryClasspathContainerSerializer {
 
   public void saveLibraryIds(IJavaProject javaProject, List<String> libraryIds)
       throws CoreException, IOException {
-    File stateFile = getContainerStateFile(javaProject, MASTER_LIBRARY_LIST_FILE_ID, true);
+    File stateFile = getContainerStateFile(javaProject, CONTAINER_LIBRARY_LIST_FILE_ID, true);
     if (stateFile == null) {
       logger.warning("Master libraries file cannot be created, save failed");
       return;
@@ -132,9 +132,9 @@ public class LibraryClasspathContainerSerializer {
 
   public List<String> loadLibraryIds(IJavaProject javaProject, IPath containerPath)
       throws IOException, CoreException {
-    File stateFile = getContainerStateFile(javaProject, MASTER_LIBRARY_LIST_FILE_ID, false);
+    File stateFile = getContainerStateFile(javaProject, CONTAINER_LIBRARY_LIST_FILE_ID, false);
     if (stateFile == null) {
-      logger.warning("No library-id state file found: " + stateFile);
+      logger.warning("Library-id state file not found: " + stateFile);
       return Collections.emptyList();
     }
     try (Reader reader = Files.newBufferedReader(stateFile.toPath(), StandardCharsets.UTF_8)) {
@@ -148,7 +148,7 @@ public class LibraryClasspathContainerSerializer {
       }
       return libraryIds;
     } catch (JsonSyntaxException ex) {
-      logger.log(Level.WARNING, "Invalid content found in library-id state file: " + stateFile, ex);
+      logger.log(Level.WARNING, "Invalid content in library-id state file: " + stateFile, ex);
       return Collections.emptyList();
     }
   }
