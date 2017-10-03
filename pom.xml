@@ -143,7 +143,7 @@
       <!-- bundle: com.google.cloud.tools.appengine -->
       <groupId>com.google.cloud.tools</groupId>
       <artifactId>appengine-plugins-core</artifactId>
-      <version>0.3.6</version>
+      <version>0.3.7</version>
     </dependency>
     <dependency>
       <!-- bundle: com.google.guava -->
