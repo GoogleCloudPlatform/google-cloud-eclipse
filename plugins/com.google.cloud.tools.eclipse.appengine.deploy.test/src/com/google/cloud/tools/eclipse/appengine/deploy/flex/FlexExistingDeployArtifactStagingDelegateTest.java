@@ -16,28 +16,33 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.flex;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 public class FlexExistingDeployArtifactStagingDelegateTest {
 
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
+  @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
   private IPath stagingDirectory;
   private IPath appEngineDirectory;
-  private IFile deployArtifact;
 
   @Before
   public void setUp() throws  CoreException {
@@ -49,18 +54,59 @@ public class FlexExistingDeployArtifactStagingDelegateTest {
     appEngineFolder.getFile("app.yaml").create(new ByteArrayInputStream(new byte[0]), true, null);
     appEngineDirectory = appEngineFolder.getLocation();
 
-    deployArtifact = project.getFile("my-app.war");
-    deployArtifact.create(new ByteArrayInputStream(new byte[0]), true, null);
   }
 
   @Test
-  public void testStage() {
+  public void testStage_artifactOutOfWorkspace() throws IOException {
+    IPath deployArtifact = new Path(tempFolder.newFile("not-in-workspace.war").getAbsolutePath());
+
     StagingDelegate delegate = new FlexExistingDeployArtifactStagingDelegate(
         deployArtifact, appEngineDirectory);
     IStatus status = delegate.stage(stagingDirectory, null, null, null, null);
 
-    assertTrue(stagingDirectory.append("my-app.war").toFile().exists());
+    assertTrue(stagingDirectory.append("not-in-workspace.war").toFile().exists());
     assertTrue(stagingDirectory.append("app.yaml").toFile().exists());
     assertTrue(status.isOK());
+  }
+
+  @Test
+  public void testStage_artifactInWorkspace() throws CoreException {
+    IPath deployArtifact = createFileInProject("in-workspace.war");
+
+    StagingDelegate delegate = new FlexExistingDeployArtifactStagingDelegate(
+        deployArtifact, appEngineDirectory);
+    IStatus status = delegate.stage(stagingDirectory, null, null, null, null);
+
+    assertTrue(stagingDirectory.append("in-workspace.war").toFile().exists());
+    assertTrue(stagingDirectory.append("app.yaml").toFile().exists());
+    assertTrue(status.isOK());
+  }
+
+  @Test
+  public void testSchedulingRule_artifactOutOfWorkspace() throws IOException {
+    IPath deployArtifact = new Path(tempFolder.newFile("not-in-workspace.war").getAbsolutePath());
+
+    StagingDelegate delegate = new FlexExistingDeployArtifactStagingDelegate(
+        deployArtifact, appEngineDirectory);
+    assertNull(delegate.getSchedulingRule());
+  }
+
+  @Test
+  public void testSchedulingRule_artifactInWorkspace() throws CoreException {
+    IPath deployArtifact = createFileInProject("in-workspace.war");
+
+    StagingDelegate delegate = new FlexExistingDeployArtifactStagingDelegate(
+        deployArtifact, appEngineDirectory);
+
+    ISchedulingRule rule = delegate.getSchedulingRule();
+    assertTrue(rule instanceof IFile);
+    IFile file = (IFile) rule;
+    assertTrue(file.exists());
+  }
+
+  private IPath createFileInProject(String filename) throws CoreException {
+    IFile file = projectCreator.getProject().getFile(filename);
+    file.create(new ByteArrayInputStream(new byte[0]), true, null);
+    return file.getLocation();
   }
 }

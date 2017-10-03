@@ -40,7 +40,7 @@ public class FlexExistingArtifactDeployPreferencesPanel extends FlexDeployPrefer
     Text deployArtifactField = createBrowseFileRow(
         Messages.getString("deploy.preferences.dialog.label.deploy.artifact"),
         Messages.getString("tooltip.deploy.artifact"),
-        getWorkingDirectory(), new String[] {"*.war", "*.jar"});
+        getWorkingDirectory(), new String[] {"*.war;*.jar"});
     setupPossiblyUnvalidatedTextFieldDataBinding(deployArtifactField, "deployArtifactPath",
         new DeployArtifactValidator(getWorkingDirectory(), deployArtifactField));
 

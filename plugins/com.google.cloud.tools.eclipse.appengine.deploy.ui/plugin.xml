@@ -57,6 +57,11 @@
         id="com.google.cloud.tools.eclipse.appengine.flex.deploy"
         name="%deployFlexCommandName">
     </command>
+    <command
+        description="%deployFlexExistingWarJarCommandDescription"
+        id="com.google.cloud.tools.eclipse.appengine.flex.deploy.existing.war.jar"
+        name="%deployFlexExistingWarJarCommandName">
+    </command>
   </extension>
 
   <extension point="org.eclipse.ui.menus">
@@ -87,6 +92,10 @@
           </iterate>
         </and>
       </enabledWhen>
+    </handler>
+    <handler
+        class="com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible.FlexExistingArtifactDeployCommandHandler"
+        commandId="com.google.cloud.tools.eclipse.appengine.flex.deploy.existing.war.jar">
     </handler>
   </extension>
 
