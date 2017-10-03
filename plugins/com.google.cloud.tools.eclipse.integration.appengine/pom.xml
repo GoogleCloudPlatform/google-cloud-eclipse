@@ -25,9 +25,6 @@
             </goals>
             <configuration>
               <!-- must be run from a fresh workspace to ensure no server runtimes are available -->
-              <useUIHarness>true</useUIHarness>
-              <useUIThread>false</useUIThread>
-              <product>org.eclipse.platform.ide</product>
               <testClass>com.google.cloud.tools.eclipse.integration.appengine.ImportNativeAppEngineStandardProjectTest</testClass>
             </configuration>
           </execution>
@@ -36,13 +33,13 @@
             <goals>
               <goal>test</goal>
             </goals>
-            <configuration>
-              <useUIHarness>true</useUIHarness>
-              <useUIThread>false</useUIThread>
-              <product>org.eclipse.platform.ide</product>
-            </configuration>
           </execution>
         </executions>
+        <configuration>
+          <useUIHarness>true</useUIHarness>
+          <useUIThread>false</useUIThread>
+          <product>org.eclipse.platform.ide</product>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
