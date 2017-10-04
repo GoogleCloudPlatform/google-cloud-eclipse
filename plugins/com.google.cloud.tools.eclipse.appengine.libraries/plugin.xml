@@ -14,7 +14,7 @@
           tooltip="%appengine.api.tooltip"
           siteUri="https://cloud.google.com/appengine/docs/java/" >
       <libraryFile javadocUri="https://cloud.google.com/appengine/docs/java/javadoc/"
-          export="true">
+          export="false">
         <mavenCoordinates
               artifactId="appengine-api-1.0-sdk"
               groupId="com.google.appengine" 
