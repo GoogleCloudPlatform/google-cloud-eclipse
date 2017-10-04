@@ -162,6 +162,7 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
     // 2. Remove "src/test/java" from the Web Deployment Assembly sources.
     deployAssemblyEntryRemoveJob =
         new DeployAssemblyEntryRemoveJob(newProject, new Path("src/test/java"));
+    deployAssemblyEntryRemoveJob.setSystem(true);
     deployAssemblyEntryRemoveJob.schedule();
   }
 
