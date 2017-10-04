@@ -43,7 +43,7 @@ public class CloudLibrariesInPluginXmlTest {
 
   @Test
   public void testLibrarySize() {
-    assertThat(CloudLibraries.getLibraries("appengine").size(), is(3));
+    assertThat(CloudLibraries.getLibraries("appengine").size(), is(2));
     // There may be different number of servlet libraries depending on whether the
     // .appengine.java.standard.java8 bundle is present
     List<Library> servletLibraries = CloudLibraries.getLibraries("servlet");
@@ -60,7 +60,7 @@ public class CloudLibrariesInPluginXmlTest {
                is(Library.CONTAINER_PATH_PREFIX + "/" + APP_ENGINE_API_LIBRARY_ID));
     assertThat(appEngineLibrary.getId(), is(APP_ENGINE_API_LIBRARY_ID));
     assertThat(appEngineLibrary.getName(), is("App Engine API"));
-    assertThat(appEngineLibrary.getGroup(), is("appengine"));
+    assertThat(appEngineLibrary.getGroup(), is("appengine-api"));
     assertFalse(appEngineLibrary.getToolTip().isEmpty());
     assertThat(appEngineLibrary.getSiteUri(),
         is(new URI("https://cloud.google.com/appengine/docs/java/")));
@@ -71,7 +71,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(libraryFile.getJavadocUri(),
         is(new URI("https://cloud.google.com/appengine/docs/java/javadoc/")));
     assertNull(libraryFile.getSourceUri());
-    assertTrue("App Engine API not exported", libraryFile.isExport());
+    assertFalse("App Engine API exported", libraryFile.isExport());
 
     assertNotNull(libraryFile.getMavenCoordinates());
     MavenCoordinates mavenCoordinates = libraryFile.getMavenCoordinates();
@@ -106,9 +106,6 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(endpointsLibrary.getSiteUri(), is(new URI(
         "https://cloud.google.com/endpoints/docs/frameworks/java/about-cloud-endpoints-frameworks")));
     assertTrue(endpointsLibrary.isExport());
-    assertNotNull(endpointsLibrary.getLibraryDependencies());
-    assertThat(endpointsLibrary.getLibraryDependencies().size(), is(1));
-    assertThat(endpointsLibrary.getLibraryDependencies().get(0), is("appengine-api"));
     assertTrue(endpointsLibrary.getToolTip().contains("v2"));
 
     assertThat(endpointsLibrary.getLibraryFiles().size(), is(1));
