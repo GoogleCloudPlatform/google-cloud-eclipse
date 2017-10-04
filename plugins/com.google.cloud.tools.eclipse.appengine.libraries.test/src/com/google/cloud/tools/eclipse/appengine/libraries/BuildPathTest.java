@@ -38,7 +38,6 @@ public class BuildPathTest {
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator()
       .withFacetVersions(JavaFacet.VERSION_1_7);
 
-  private final List<Library> libraries = new ArrayList<>();
   private final IProgressMonitor monitor = new NullProgressMonitor();
   private IJavaProject project;
   private int initialClasspathSize;
@@ -50,56 +49,42 @@ public class BuildPathTest {
   }
 
   @Test
-  public void testAddLibraries_emptyList() throws CoreException {
+  public void testAddMavenLibraries_emptyList() throws CoreException {
     IProject project = null;
-    BuildPath.addLibraries(project, libraries, monitor);
+    List<Library> libraries = new ArrayList<>();
+    BuildPath.addMavenLibraries(project, libraries, monitor);
   }
 
   @Test
-  public void testAddLibraries() throws CoreException {
+  public void testAddNativeLibrary() throws CoreException {
     Library library = new Library("libraryId");
+    List<Library> libraries = new ArrayList<>();
     libraries.add(library);
-    IClasspathEntry[] result = BuildPath.addLibraries(project, libraries, monitor);
+
+    IClasspathEntry[] result = BuildPath.addNativeLibrary(project, libraries, monitor);
     Assert.assertEquals(1, result.length);
     Assert.assertEquals(initialClasspathSize + 1, project.getRawClasspath().length);
   }
-
+  
   @Test
-  public void testListAdditionalLibraries() throws CoreException {
+  public void testListNativeLibrary() throws CoreException {
     Library library = new Library("libraryId");
-    libraries.add(library);
-    IClasspathEntry[] result = BuildPath.listAdditionalLibraries(project, libraries, monitor);
+    IClasspathEntry[] result = BuildPath.listNativeLibrary(project, library);
     Assert.assertEquals(1, result.length);
     Assert.assertEquals(initialClasspathSize, project.getRawClasspath().length);
   }
 
   @Test
-  public void testAddLibraries_noDuplicates() throws CoreException {
+  public void testAddLibraries() throws CoreException {
     Library library = new Library("libraryId");
+    List<Library> libraries = new ArrayList<>();
     libraries.add(library);
-    IClasspathEntry[] setup = BuildPath.addLibraries(project, libraries, monitor);
+    IClasspathEntry[] setup = BuildPath.addNativeLibrary(project, libraries, monitor);
     Assert.assertEquals(1, setup.length);
 
-    IClasspathEntry[] result = BuildPath.addLibraries(project, libraries, monitor);
+    IClasspathEntry[] result = BuildPath.addNativeLibrary(project, libraries, monitor);
     Assert.assertEquals(0, result.length);
     Assert.assertEquals(initialClasspathSize + 1, project.getRawClasspath().length);
-  }
-
-  @Test
-  public void testAddLibraries_withDuplicates() throws CoreException {
-    Library library1 = new Library("library1");
-    libraries.add(library1);
-    IClasspathEntry[] setup = BuildPath.addLibraries(project, libraries, monitor);
-    Assert.assertEquals(1, setup.length);
-
-    Library library2 = new Library("library2");
-    libraries.add(library2);
-    IClasspathEntry[] result = BuildPath.addLibraries(project, libraries, monitor);
-
-    Assert.assertEquals(1, result.length);
-    Assert.assertTrue(result[0].getPath().toString()
-        .endsWith("com.google.cloud.tools.eclipse.appengine.libraries/library2"));
-    Assert.assertEquals(initialClasspathSize + 2, project.getRawClasspath().length);
   }
 
 }

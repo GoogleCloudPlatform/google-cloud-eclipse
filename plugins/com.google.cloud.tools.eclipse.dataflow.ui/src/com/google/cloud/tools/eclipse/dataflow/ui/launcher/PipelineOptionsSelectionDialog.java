@@ -114,7 +114,7 @@ public class PipelineOptionsSelectionDialog extends FilteredItemsSelectionDialog
     }
   }
 
-  private class PipelineOptionsLabelProvider implements ILabelProvider {
+  private static class PipelineOptionsLabelProvider implements ILabelProvider {
     @Override
     public void addListener(ILabelProviderListener listener) {}
 
@@ -140,7 +140,7 @@ public class PipelineOptionsSelectionDialog extends FilteredItemsSelectionDialog
         return null;
       }
       String simpleName = Signature.getSimpleName(element.toString());
-      return String.format("%s - %s", simpleName, element.toString());
+      return String.format("%s - %s", simpleName, element.toString()); //$NON-NLS-1$
     }
   }
 }

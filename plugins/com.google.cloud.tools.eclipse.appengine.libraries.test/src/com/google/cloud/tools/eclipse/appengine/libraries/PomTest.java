@@ -75,8 +75,12 @@ public class PomTest {
   public void testAddDependencies() 
       throws CoreException, ParserConfigurationException, IOException, SAXException {
     
-    MavenCoordinates coordinates0 = new MavenCoordinates("com.example.group0", "artifact0");
-    coordinates0.setVersion("1.2.3");
+    MavenCoordinates.Builder builder = new MavenCoordinates.Builder()
+        .setGroupId("com.example.group0")
+        .setArtifactId("artifact0")
+        .setVersion("1.2.3"); 
+
+    MavenCoordinates coordinates0 = builder.build();
     LibraryFile file0 = new LibraryFile(coordinates0);
     List<LibraryFile> list0 = new ArrayList<>();
     list0.add(file0);

@@ -47,6 +47,20 @@ public class StatusUtilTest {
   }
 
   @Test
+  public void testNullSource() {
+    IStatus error = StatusUtil.error(null, "test error msg");
+    verifyStatus(error);
+  }
+
+  @Test
+  public void testNonOsgiSource() {
+    IStatus error = StatusUtil.error("a string from the system classloader", "test error msg");
+    assertThat(error.getSeverity(), is(IStatus.ERROR));
+    assertThat(error.getMessage(), is("test error msg"));
+    assertThat(error.getPlugin(), is("java.lang.String"));
+  }
+
+  @Test
   public void testError_withClassAndException() {
     Throwable exception = new Exception();
     IStatus error = StatusUtil.error(StatusUtil.class, "test error msg", exception);
@@ -76,6 +90,20 @@ public class StatusUtilTest {
     Assert.assertEquals("test message from StatusUtilTest: testing", status.getMessage());
   }
 
+  @Test
+  public void testErrorMessage_Status() {
+    IStatus originalStatus = StatusUtil.info(this, "testing");
+    IStatus status = StatusUtil.setErrorStatus(this, "test message from StatusUtilTest", originalStatus);
+    Assert.assertEquals("test message from StatusUtilTest: testing", status.getMessage());
+  }
+
+  @Test
+  public void testMerge_nullStatus() {
+    IStatus originalStatus = StatusUtil.info(this, "testing");
+    IStatus status = StatusUtil.merge(null, originalStatus);
+    Assert.assertSame(originalStatus, status);
+  }
+  
   @Test
   public void testErrorMessage_ExceptionWithoutMessage() {
     RuntimeException ex = mock(RuntimeException.class);

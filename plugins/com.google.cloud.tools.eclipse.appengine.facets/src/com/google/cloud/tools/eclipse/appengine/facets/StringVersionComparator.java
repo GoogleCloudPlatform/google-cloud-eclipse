@@ -19,7 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.facets;
 import java.util.Comparator;
 
 /**
- * A {@link Comparator<String>} for the Faceted Project framework that compares versions that are
+ * A {@code Comparator<String>} for the Faceted Project framework that compares versions that are
  * strings, like "JRE7" vs "JRE8", using the natural string ordering. Use the standard Faceted
  * Project {@link org.eclipse.wst.common.project.facet.core.DefaultVersionComparator}) comparator
  * for versions that have some numeric meaning (e.g., 1.2.0).

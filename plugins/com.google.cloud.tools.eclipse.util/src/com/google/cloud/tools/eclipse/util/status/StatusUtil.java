@@ -40,20 +40,8 @@ public class StatusUtil {
     return new Status(IStatus.ERROR, getBundleId(origin), message, error);
   }
 
-  public static IStatus warn(Object origin, String message) {
-    return new Status(IStatus.WARNING, getBundleId(origin), message);
-  }
-
-  public static IStatus warn(Object origin, String message, Throwable error) {
-    return new Status(IStatus.WARNING, getBundleId(origin), message, error);
-  }
-
   public static IStatus info(Object origin, String message) {
     return new Status(IStatus.INFO, getBundleId(origin), message);
-  }
-
-  public static IStatus info(Object origin, String message, Throwable error) {
-    return new Status(IStatus.INFO, getBundleId(origin), message, error);
   }
 
   public static MultiStatus multi(Object origin, String message) {
@@ -99,7 +87,7 @@ public class StatusUtil {
   }
 
   public static IStatus setErrorStatus(Object origin, String message, IStatus status) {
-    return setErrorStatus(origin, message +  " - " + status.getMessage(), status.getException());
+    return setErrorStatus(origin, message +  ": " + status.getMessage(), status.getException());
   }
 
   public static IStatus setErrorStatus(Object origin, String message, Throwable ex) {

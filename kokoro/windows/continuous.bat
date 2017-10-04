@@ -1,3 +1,4 @@
+@echo on
 cd github/google-cloud-eclipse
 
 set CLOUDSDK_CORE_DISABLE_USAGE_REPORTING=true

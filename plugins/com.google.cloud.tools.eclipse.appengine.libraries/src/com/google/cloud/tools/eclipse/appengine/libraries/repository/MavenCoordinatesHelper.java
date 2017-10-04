@@ -82,20 +82,24 @@ public class MavenCoordinatesHelper {
     if (Strings.isNullOrEmpty(artifactId)) {
       throw new IllegalArgumentException("Attribute value for Maven artifact ID not found");
     }
-    MavenCoordinates mavenCoordinates = new MavenCoordinates(groupId, artifactId);
+    
+    MavenCoordinates.Builder builder = new MavenCoordinates.Builder();
+    builder.setGroupId(groupId);
+    builder.setArtifactId(artifactId);
+    
     if (attributeMap.containsKey(CLASSPATH_ATTRIBUTE_REPOSITORY)) {
-      mavenCoordinates.setRepository(attributeMap.get(CLASSPATH_ATTRIBUTE_REPOSITORY));
+      builder.setRepository(attributeMap.get(CLASSPATH_ATTRIBUTE_REPOSITORY));
     }
     if (attributeMap.containsKey(CLASSPATH_ATTRIBUTE_TYPE)) {
-      mavenCoordinates.setType(attributeMap.get(CLASSPATH_ATTRIBUTE_TYPE));
+      builder.setType(attributeMap.get(CLASSPATH_ATTRIBUTE_TYPE));
     }
     if (attributeMap.containsKey(CLASSPATH_ATTRIBUTE_CLASSIFIER)) {
-      mavenCoordinates.setClassifier(attributeMap.get(CLASSPATH_ATTRIBUTE_CLASSIFIER));
+      builder.setClassifier(attributeMap.get(CLASSPATH_ATTRIBUTE_CLASSIFIER));
     }
     if (attributeMap.containsKey(CLASSPATH_ATTRIBUTE_VERSION)) {
-      mavenCoordinates.setVersion(attributeMap.get(CLASSPATH_ATTRIBUTE_VERSION));
+      builder.setVersion(attributeMap.get(CLASSPATH_ATTRIBUTE_VERSION));
     }
-    return mavenCoordinates;
+    return builder.build();
   }
 
 }

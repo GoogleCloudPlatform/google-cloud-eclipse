@@ -16,18 +16,18 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.RegistryFactory;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-
 public class CloudLibraries {
+
+  public static final String MASTER_CONTAINER_ID = "master-container";
 
   /**
    * Library files for App Engine Standard environment applications; specifically
@@ -45,14 +45,13 @@ public class CloudLibraries {
    * Library files for all Java servlet applications; specifically
    * servlet.jar and jsp-api.jar.
    */
-  public static final String SERVLET_GROUP = "servlet";
+  public static final String SERVLET_GROUP = "servlet"; //$NON-NLS-1$
   
   private static final Logger logger = Logger.getLogger(CloudLibraries.class.getName());
   private static final ImmutableMap<String, Library> libraries = loadLibraryDefinitions();
   
-  // todo consider caching maps of group to libraries
   /**
-   * @return libraries in the named group
+   * Returns libraries in the named group.
    */
   public static List<Library> getLibraries(String group) {
     List<Library> result = new ArrayList<>();
@@ -65,26 +64,25 @@ public class CloudLibraries {
   }
   
   /**
-   * @return the library with the specified ID, or null if not found
+   * Returns the library with the specified ID, or null if not found.
    */
   public static Library getLibrary(String id) {
     return libraries.get(id);
   }
-  
+
   private static ImmutableMap<String, Library> loadLibraryDefinitions() {
     IConfigurationElement[] elements = RegistryFactory.getRegistry().getConfigurationElementsFor(
-        "com.google.cloud.tools.eclipse.appengine.libraries");
-    LibraryFactory factory = new LibraryFactory();
+        "com.google.cloud.tools.eclipse.appengine.libraries"); //$NON-NLS-1$
     ImmutableMap.Builder<String, Library> builder = ImmutableMap.builder();
     for (IConfigurationElement element : elements) {
       try {
-        Library library = factory.create(element);
+        Library library = LibraryFactory.create(element);
         builder.put(library.getId(), library);
       } catch (LibraryFactoryException ex) {
-        logger.log(Level.SEVERE, "Error loading library definition", ex);
+        logger.log(Level.SEVERE, "Error loading library definition", ex); //$NON-NLS-1$
       }
     }
-
+    
     ImmutableMap<String, Library> map = builder.build();
     
     resolveTransitiveDependencies(map);

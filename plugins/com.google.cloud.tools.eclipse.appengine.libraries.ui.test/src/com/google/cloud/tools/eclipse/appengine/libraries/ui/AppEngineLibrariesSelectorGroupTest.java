@@ -29,7 +29,6 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
@@ -52,7 +51,7 @@ public class AppEngineLibrariesSelectorGroupTest {
   private SWTBotCheckBox objectifyButton;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     shell = shellTestResource.getShell();
     shell.setLayout(new FillLayout());
     librariesSelector = new LibrarySelectorGroup(shell, CloudLibraries.APP_ENGINE_GROUP);
@@ -229,13 +228,7 @@ public class AppEngineLibrariesSelectorGroupTest {
 
   private List<Library> getSelectedLibrariesSorted() {
     List<Library> selectedLibraries = new ArrayList<>(librariesSelector.getSelectedLibraries());
-    Collections.sort(selectedLibraries, new Comparator<Library>() {
-
-      @Override
-      public int compare(Library l1, Library l2) {
-        return l1.getId().compareTo(l2.getId());
-      }
-    });
+    Collections.sort(selectedLibraries, new LibraryComparator());
     return selectedLibraries;
   }
 }

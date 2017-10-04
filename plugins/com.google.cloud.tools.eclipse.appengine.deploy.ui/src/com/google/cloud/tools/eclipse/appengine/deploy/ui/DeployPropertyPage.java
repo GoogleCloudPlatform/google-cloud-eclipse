@@ -18,7 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible.FlexDeployPreferencesPanel;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.standard.StandardDeployPreferencesPanel;
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexFacet;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexWarFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
@@ -159,8 +159,8 @@ public class DeployPropertyPage extends PropertyPage {
       createStandardPanelIfNeeded();
       showPanel(standardPreferencesPanel);
     } else if (facetedProject != null
-        && ProjectFacetsManager.isProjectFacetDefined(AppEngineFlexFacet.ID)
-        && AppEngineFlexFacet.hasFacet(facetedProject)) {
+        && ProjectFacetsManager.isProjectFacetDefined(AppEngineFlexWarFacet.ID)
+        && AppEngineFlexWarFacet.hasFacet(facetedProject)) {
       createFlexPanelIfNeeded();
       showPanel(flexPreferencesPanel);
     } else {

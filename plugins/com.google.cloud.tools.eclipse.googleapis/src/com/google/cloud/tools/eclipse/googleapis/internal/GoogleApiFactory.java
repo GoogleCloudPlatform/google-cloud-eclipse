@@ -24,6 +24,7 @@ import com.google.api.services.appengine.v1.Appengine;
 import com.google.api.services.appengine.v1.Appengine.Apps;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
+import com.google.api.services.servicemanagement.ServiceManagement;
 import com.google.api.services.storage.Storage;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
@@ -50,7 +51,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
 
   private final JsonFactory jsonFactory = Utils.getDefaultJsonFactory();
   private final ProxyFactory proxyFactory;
-  private LoadingCache<GoogleApiUrl, HttpTransport> transportCache;
+  private LoadingCache<GoogleApi, HttpTransport> transportCache;
 
   private final IProxyChangeListener proxyChangeListener = new IProxyChangeListener() {
     @Override
@@ -73,6 +74,9 @@ public class GoogleApiFactory implements IGoogleApiFactory {
 
   @Activate
   public void init() {
+    // NetHttpTransport advises: "For maximum efficiency, applications should use a single
+    // globally-shared instance of the HTTP transport." But as we need a separate proxy per URL,
+    // we cannot reuse the same httptransport.
     transportCache =
         CacheBuilder.newBuilder().weakValues().build(new TransportCacheLoader(proxyFactory));
   }
@@ -80,7 +84,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   @Override
   public Projects newProjectsApi(Credential credential) {
     Preconditions.checkNotNull(transportCache, "transportCache is null");
-    HttpTransport transport = transportCache.getUnchecked(GoogleApiUrl.CLOUDRESOURCE_MANAGER_API);
+    HttpTransport transport = transportCache.getUnchecked(GoogleApi.CLOUDRESOURCE_MANAGER_API);
     Preconditions.checkNotNull(transport, "transport is null");
     Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
 
@@ -93,7 +97,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   @Override
   public Storage newStorageApi(Credential credential) {
     Preconditions.checkNotNull(transportCache, "transportCache is null");
-    HttpTransport transport = transportCache.getUnchecked(GoogleApiUrl.CLOUD_STORAGE_API);
+    HttpTransport transport = transportCache.getUnchecked(GoogleApi.CLOUD_STORAGE_API);
     Preconditions.checkNotNull(transport, "transport is null");
     Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
 
@@ -106,7 +110,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   @Override
   public Apps newAppsApi(Credential credential) {
     Preconditions.checkNotNull(transportCache, "transportCache is null");
-    HttpTransport transport = transportCache.getUnchecked(GoogleApiUrl.APPENGINE_ADMIN_API);
+    HttpTransport transport = transportCache.getUnchecked(GoogleApi.APPENGINE_ADMIN_API);
     Preconditions.checkNotNull(transport, "transport is null");
     Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
 
@@ -114,6 +118,20 @@ public class GoogleApiFactory implements IGoogleApiFactory {
         new Appengine.Builder(transport, jsonFactory, credential)
             .setApplicationName(CloudToolsInfo.USER_AGENT).build();
     return appengine.apps();
+  }
+
+
+  @Override
+  public ServiceManagement newServiceManagementApi(Credential credential) {
+    Preconditions.checkNotNull(transportCache, "transportCache is null");
+    HttpTransport transport = transportCache.getUnchecked(GoogleApi.SERVICE_MANAGEMENT_API);
+    Preconditions.checkNotNull(transport, "transport is null");
+    Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
+
+    ServiceManagement serviceManagement =
+        new ServiceManagement.Builder(transport, jsonFactory, credential)
+            .setApplicationName(CloudToolsInfo.USER_AGENT).build();
+    return serviceManagement;
   }
 
   @Reference(policy=ReferencePolicy.DYNAMIC, cardinality=ReferenceCardinality.OPTIONAL)
@@ -138,7 +156,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   }
 
   @VisibleForTesting
-  void setTransportCache(LoadingCache<GoogleApiUrl, HttpTransport> transportCache) {
+  void setTransportCache(LoadingCache<GoogleApi, HttpTransport> transportCache) {
     this.transportCache = transportCache;
   }
 }

@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
+import com.google.cloud.tools.eclipse.util.MavenCoordinatesValidator;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -47,10 +48,6 @@ public class MavenCoordinatesUi {
   private Label artifactIdLabel;
   private Label versionLabel;
 
-  /**
-   * @param dynamicEnabling if {@code true}, creates a master check box that enables or disables
-   *     the Maven coordinate area; otherwise, always enables the area
-   */
   public MavenCoordinatesUi(Composite container) {
     asMavenProjectButton = new Button(container, SWT.CHECK);
     asMavenProjectButton.setText(Messages.getString("CREATE_AS_MAVEN_PROJECT")); //$NON-NLS-1$

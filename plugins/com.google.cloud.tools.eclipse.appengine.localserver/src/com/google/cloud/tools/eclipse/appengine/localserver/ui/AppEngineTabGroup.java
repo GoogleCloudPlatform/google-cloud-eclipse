@@ -18,11 +18,12 @@ package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
 import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerDelegate;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTabGroup;
+import org.eclipse.debug.ui.EnvironmentTab;
 import org.eclipse.debug.ui.ILaunchConfigurationDialog;
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
+import org.eclipse.jdt.debug.ui.launchConfigurations.JavaArgumentsTab;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.wst.server.ui.ServerLaunchConfigurationTab;
-import org.eclipse.jdt.debug.ui.launchConfigurations.JavaArgumentsTab;
 
 /**
  *  Tabs shown in launch configurations for an App Engine Server.
@@ -39,12 +40,13 @@ public class AppEngineTabGroup extends AbstractLaunchConfigurationTabGroup {
 
   @Override
   public void createTabs(ILaunchConfigurationDialog dialog, String mode) {
-    ILaunchConfigurationTab[] tabs = new ILaunchConfigurationTab[2];
+    ILaunchConfigurationTab[] tabs = new ILaunchConfigurationTab[3];
     tabs[0] = new AppEngineServerLaunchConfigurationTab(SERVER_TYPE_IDS);
     tabs[0].setLaunchConfigurationDialog(dialog);
     tabs[1] = new JavaArgumentsTab();
     tabs[1].setLaunchConfigurationDialog(dialog);
-
+    tabs[2] = new EnvironmentTab();
+    tabs[2].setLaunchConfigurationDialog(dialog);
     setTabs(tabs);
   }
 

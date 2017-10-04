@@ -45,6 +45,7 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotToolbarButton;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.hamcrest.Matchers;
+import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -72,6 +73,8 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
    */
   @Test
   public void testDebugLaunch() throws Exception {
+    Assume.assumeTrue("Only for JavaSE-8", ImportMavenAppEngineStandardProjectTest.hasJavaSE8());
+
     // Disable WTP's download-server-bindings
     // Equivalent to: ServerUIPreferences.getInstance().setCacheFrequency(0);
     Preferences prefs = InstanceScope.INSTANCE.getNode("org.eclipse.wst.server.ui");
@@ -80,12 +83,12 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
 
     assertNoService(new URL("http://localhost:8080/hello"));
 
-    project = SwtBotAppEngineActions.createNativeWebAppProject(bot, "testapp", null,
-        "app.engine.test", null);
+    project = SwtBotAppEngineActions.createNativeWebAppProject(bot, "testapp_java8", null,
+        "app.engine.test", null /* runtime */);
     assertTrue(project.exists());
 
-    SWTBotTreeItem testappProject = SwtBotProjectActions.selectProject(bot, "testapp");
-    assertNotNull(testappProject);
+    SWTBotTreeItem testProject = SwtBotProjectActions.selectProject(bot, "testapp_java8");
+    assertNotNull(testProject);
     SwtBotTestingUtilities.performAndWaitForWindowChange(bot, new Runnable() {
       @Override
       public void run() {

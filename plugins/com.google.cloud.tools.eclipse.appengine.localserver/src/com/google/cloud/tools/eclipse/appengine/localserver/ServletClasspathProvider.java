@@ -42,7 +42,7 @@ import org.eclipse.wst.server.core.IRuntime;
 public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
 
   /**
-   * The default Servlet API supported by App Engine for Java.
+   * The default Servlet API supported by the App Engine Java 7 runtime.
    */
   private static final IProjectFacetVersion DEFAULT_DYNAMIC_WEB_VERSION = WebFacetUtils.WEB_25;
 
@@ -70,15 +70,10 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
     return doResolveClasspathContainer(webFacetVersion);
   }
 
-  // TODO this method is called often as the result of user initiated UI actions, e.g. when the user
-  // clicks through the project in the Project Explorer view to drill down into the libraries
-  // attached to the project. This method resolves the servlet and jsp jars each time (instead of
-  // persisting the resolved version the first time and use that later). So we must ensure that if
-  // the supported versions change in the future (e.g. a new GAE runtime starts
-  // supporting Servlet API 3.1), then resolved versions of these jars remain the same for a project
-  // as long as it is associated with the originally selected runtime (i.e. the one that supports
-  // Servlet 2.5)
-  // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/953
+  // This method is called often as the result of user initiated UI actions, e.g. when the user
+  // clicks through the project in the Project Explorer to drill down into the libraries
+  // attached to the project. This method resolves the servlet and jsp jars each time instead of
+  // persisting the resolved version the first time and using that later.
   @Override
   public IClasspathEntry[] resolveClasspathContainer(IRuntime runtime) {
     return doResolveClasspathContainer(DEFAULT_DYNAMIC_WEB_VERSION);

@@ -23,6 +23,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.eclipse.core.runtime.IPath;
@@ -32,49 +33,59 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
+
 public class LibraryClasspathContainerTest {
 
   private List<IClasspathEntry> mockClasspathEntry = Arrays.asList(mock(IClasspathEntry.class));
 
   private LibraryClasspathContainer classpathContainer;
+  private List<LibraryFile> libraryFiles = new ArrayList<>();
 
   @Before
   public void setUp() {
-    classpathContainer = new LibraryClasspathContainer(new Path("container/path"),
-                                                       "description",
-                                                       mockClasspathEntry);
+    libraryFiles.add(mock(LibraryFile.class));
+    
+    classpathContainer = new LibraryClasspathContainer(
+        new Path("container/path"), "description", mockClasspathEntry, libraryFiles);
   }
 
+  @Test
   public void testConstructor_nullPath() {
     try {
-      new LibraryClasspathContainer(null, "description", mockClasspathEntry);
+      new LibraryClasspathContainer(null, "description", mockClasspathEntry, libraryFiles);
       fail("Expected NullPointerException");
     } catch (NullPointerException ex) {
       assertNotNull(ex.getMessage());
     }
   }
 
+  @Test
   public void testConstructor_nullDescription() {
     try {
-      new LibraryClasspathContainer(new Path("container/path"), null, mockClasspathEntry);
+      new LibraryClasspathContainer(new Path("container/path"), null, mockClasspathEntry,
+          libraryFiles);
       fail("Expected NullPointerException");
     } catch (NullPointerException ex) {
       assertNotNull(ex.getMessage());
     }
   }
 
+  @Test
   public void testConstructor_emptyDescription() {
     try {
-      new LibraryClasspathContainer(new Path("container/path"), "", mockClasspathEntry);
-      fail("Expected NullPointerException");
-    } catch (NullPointerException ex) {
+      new LibraryClasspathContainer(new Path("container/path"), "", mockClasspathEntry,
+          libraryFiles);
+      fail("Expected IllegalArgumentException");
+    } catch (IllegalArgumentException ex) {
       assertNotNull(ex.getMessage());
     }
   }
 
+  @Test
   public void testConstructor_nullClasspathEntries() {
     try {
-      new LibraryClasspathContainer(new Path("container/path"), "description", null);
+      new LibraryClasspathContainer(new Path("container/path"), "description", null, libraryFiles);
       fail("Expected NullPointerException");
     } catch (NullPointerException ex) {
       assertNotNull(ex.getMessage());
@@ -92,7 +103,7 @@ public class LibraryClasspathContainerTest {
   }
 
   @Test
-  public void testGetKind_returnsApplication() throws Exception {
+  public void testGetKind_returnsApplication() {
     assertThat(classpathContainer.getKind(), is(IClasspathContainer.K_APPLICATION));
   }
 

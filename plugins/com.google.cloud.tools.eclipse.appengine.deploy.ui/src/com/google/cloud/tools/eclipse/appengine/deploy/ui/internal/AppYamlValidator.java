@@ -26,6 +26,9 @@ import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Text;
 import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
@@ -51,8 +54,19 @@ public class AppYamlValidator extends FixedMultiValidator {
     this.appYamlPath = appYamlPath;
   }
 
+  /**
+   * Convenience constructor for {@link Text}.
+   */
+  public AppYamlValidator(IPath basePath, Text fileField) {
+    this(basePath, WidgetProperties.text(SWT.Modify).observe(fileField));
+  }
+
   @Override
   protected IStatus validate() {
+    if (appYamlPath.getValue().toString().isEmpty()) {
+      return ValidationStatus.error(Messages.getString("error.app.yaml.empty"));
+    }
+
     File appYaml = new File((String) appYamlPath.getValue());
     if (!appYaml.isAbsolute()) {
       appYaml = new File(basePath + "/" + appYaml);
@@ -64,7 +78,7 @@ public class AppYamlValidator extends FixedMultiValidator {
     } else if (!appYaml.exists()) {
       return ValidationStatus.error(Messages.getString("error.app.yaml.non.existing"));
     } else if (!appYaml.isFile()) {
-      return ValidationStatus.error(Messages.getString("error.app.yaml.not.a.file", appYaml));
+      return ValidationStatus.error(Messages.getString("error.not.a.file", appYaml));
     } else {
       return validateRuntime(appYaml);
     }

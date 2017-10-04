@@ -17,10 +17,12 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.util.ClasspathUtil;
 import com.google.common.annotations.VisibleForTesting;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.commands.ExecutionException;
@@ -109,7 +111,7 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
     description.setLocationURI(location);
 
     String operationLabel = getDescription();
-    SubMonitor subMonitor = SubMonitor.convert(monitor, operationLabel, 100);
+    SubMonitor subMonitor = SubMonitor.convert(monitor, operationLabel, 120);
     CreateProjectOperation operation = new CreateProjectOperation(description, operationLabel);
     try {
       operation.execute(subMonitor.newChild(10), uiInfoAdapter);
@@ -118,17 +120,21 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
       throw new InvocationTargetException(ex);
     }
 
-    addAppEngineFacet(newProject, subMonitor.newChild(4));
+    addAppEngineFacet(newProject, subMonitor.newChild(6));
 
     if (config.getUseMaven()) {
-      enableMavenNature(newProject, subMonitor.newChild(2));
+      enableMavenNature(newProject, subMonitor.newChild(4));
+      BuildPath.addMavenLibraries(newProject, config.getAppEngineLibraries(), subMonitor.newChild(5));
     } else {
       addJunit4ToClasspath(newProject, subMonitor.newChild(2));
+      IJavaProject javaProject = JavaCore.create(newProject);
+      
+      List<Library> libraries = config.getAppEngineLibraries();
+      
+      BuildPath.addNativeLibrary(javaProject, libraries, subMonitor.newChild(5));
     }
 
-    BuildPath.addLibraries(newProject, config.getAppEngineLibraries(), subMonitor.newChild(2));
-
-    fixTestSourceDirectorySettings(newProject, subMonitor.newChild(2));
+    fixTestSourceDirectorySettings(newProject, subMonitor.newChild(5));
   }
 
   private void fixTestSourceDirectorySettings(IProject newProject, IProgressMonitor monitor)

@@ -56,7 +56,7 @@ public class AppYamlValidatorTest {
   }
 
   @Test
-  public void testContructor_nonAbsoluteBasePath() {
+  public void testConstructor_nonAbsoluteBasePath() {
     try {
       when(appYamlPath.getValue()).thenReturn("app.yaml");
       new AppYamlValidator(new Path("non/absolute/base/path"), appYamlPath);
@@ -64,6 +64,15 @@ public class AppYamlValidatorTest {
     } catch (IllegalArgumentException ex) {
       assertEquals("basePath is not absolute.", ex.getMessage());
     }
+  }
+
+  @Test
+  public void testValidate_emptyField() {
+    when(appYamlPath.getValue()).thenReturn("");
+
+    IStatus result = pathValidator.validate();
+    assertEquals(IStatus.ERROR, result.getSeverity());
+    assertEquals("Missing app.yaml path.", result.getMessage());
   }
 
   @Test
@@ -115,7 +124,7 @@ public class AppYamlValidatorTest {
 
     IStatus result = pathValidator.validate();
     assertEquals(IStatus.ERROR, result.getSeverity());
-    assertEquals("Not a file: " + new Path(basePath + "/app.yaml").toOSString(),
+    assertEquals("Path is a directory: " + new Path(basePath + "/app.yaml").toOSString(),
         result.getMessage());
   }
 
@@ -128,7 +137,7 @@ public class AppYamlValidatorTest {
 
     IStatus result = pathValidator.validate();
     assertEquals(IStatus.ERROR, result.getSeverity());
-    assertEquals("Not a file: " + new Path(basePath + "/app.yaml").toOSString(),
+    assertEquals("Path is a directory: " + new Path(basePath + "/app.yaml").toOSString(),
         result.getMessage());
   }
 

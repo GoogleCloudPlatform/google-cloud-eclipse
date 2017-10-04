@@ -33,9 +33,9 @@ import org.eclipse.wst.server.core.ServerEvent;
  * A console that displays information for a run/debug session of the App Engine runtime
  */
 public class LocalAppEngineConsole extends MessageConsole {
-  private LocalAppEngineServerBehaviour serverBehaviour;
-  private String unprefixedName;
-  private IServerListener serverStateListener = new IServerListener() {
+  private final LocalAppEngineServerBehaviour serverBehaviour;
+  private final String unprefixedName;
+  private final IServerListener serverStateListener = new IServerListener() {
     @Override
     public void serverChanged(ServerEvent event) {
       if ((event.getKind() & ServerEvent.SERVER_CHANGE) != 0) {
@@ -50,7 +50,7 @@ public class LocalAppEngineConsole extends MessageConsole {
     this.serverBehaviour = serverBehaviour;
   }
 
-  protected void update(int serverState) {
+  private void update(int serverState) {
     if (serverState == IServer.STATE_STOPPED) {
       disengage(); // we should no longer update
     }
@@ -60,17 +60,14 @@ public class LocalAppEngineConsole extends MessageConsole {
   /**
    * Update the shown name with the server stop/stopping state.
    */
-  protected void updateName(int serverState) {
+  private void updateName(int serverState) {
     final String computedName;
     if (serverState == IServer.STATE_STARTING) {
-      computedName =
-          Messages.getString("SERVER_STARTING_TEMPLATE", unprefixedName);
+      computedName = Messages.getString("SERVER_STARTING_TEMPLATE", unprefixedName);
     } else if (serverState == IServer.STATE_STOPPING) {
-      computedName =
-          Messages.getString("SERVER_STOPPING_TEMPLATE", unprefixedName);
+      computedName = Messages.getString("SERVER_STOPPING_TEMPLATE", unprefixedName);
     } else if (serverState == IServer.STATE_STOPPED) {
-      computedName =
-          Messages.getString("SERVER_STOPPED_TEMPLATE", unprefixedName);
+      computedName = Messages.getString("SERVER_STOPPED_TEMPLATE", unprefixedName);
     } else {
       computedName = unprefixedName;
     }
@@ -110,7 +107,7 @@ public class LocalAppEngineConsole extends MessageConsole {
 
   public static class Factory implements ConsoleFactory<LocalAppEngineConsole> {
 
-    private LocalAppEngineServerBehaviour serverBehaviour;
+    private final LocalAppEngineServerBehaviour serverBehaviour;
 
     public Factory(LocalAppEngineServerBehaviour serverBehaviour) {
       this.serverBehaviour = serverBehaviour;

@@ -22,12 +22,15 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.common.project.facet.core.IDelegate;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
+/**
+ * Applies to both the WAR facet and the JAR facet. Does nothing for now.
+ */
 public class FlexFacetUninstallDelegate implements IDelegate {
 
   @Override
   public void execute(IProject project, IProjectFacetVersion facetVersion, Object config, IProgressMonitor monitor)
       throws CoreException {
-    
+
   }
 
 }

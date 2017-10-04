@@ -51,22 +51,22 @@ public class M2RepositoryService implements ILibraryRepositoryService {
   }
 
   @Override
-  public IPath resolveSourceArtifact(LibraryFile libraryFile,
-                                     String versionHint,
-                                     IProgressMonitor monitor) throws CoreException {
+  public IPath resolveSourceArtifact(LibraryFile libraryFile, String versionHint,
+      IProgressMonitor monitor) throws CoreException {
+    
     MavenCoordinates mavenCoordinates = libraryFile.getMavenCoordinates();
-    MavenCoordinates sourceCoordinates = new MavenCoordinates(mavenCoordinates);
+    MavenCoordinates.Builder sourceCoordinates = mavenCoordinates.toBuilder();
     if (!Strings.isNullOrEmpty(versionHint)) {
       sourceCoordinates.setVersion(versionHint);
     }
     sourceCoordinates.setClassifier("sources");
     if (libraryFile.getSourceUri() == null) {
-      File artifactFile = MavenHelper.resolveArtifact(sourceCoordinates, monitor).getFile();
+      File artifactFile = MavenHelper.resolveArtifact(sourceCoordinates.build(), monitor).getFile();
       return new Path(artifactFile.getAbsolutePath());
     } else {
       try {
         URL sourceUrl = libraryFile.getSourceUri().toURL();
-        return getDownloadedSourceLocation(sourceCoordinates, sourceUrl, monitor);
+        return getDownloadedSourceLocation(sourceCoordinates.build(), sourceUrl, monitor);
       } catch (MalformedURLException | IllegalArgumentException ex) {
         return null;
       }
