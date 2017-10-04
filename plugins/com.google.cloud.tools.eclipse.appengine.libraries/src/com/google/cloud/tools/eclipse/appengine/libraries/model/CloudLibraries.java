@@ -34,7 +34,10 @@ import javax.json.JsonString;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.RegistryFactory;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
@@ -92,61 +95,58 @@ public class CloudLibraries {
 
   private final static Supplier<List<Library>> clientApis = Suppliers.memoize(new Supplier<List<Library>>() {
     public List<Library> get() {
-      ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-      InputStream in = classLoader.getResourceAsStream("com/google/cloud/tools/libraries/libraries.json");
-      try {
-        in = new URL(
-            "https://raw.githubusercontent.com/GoogleCloudPlatform/appengine-plugins-core/master/src/main/resources/com/google/cloud/tools/libraries/libraries.json")
-            .openStream();
-      } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-      JsonReaderFactory factory = Json.createReaderFactory(null);
-      JsonReader reader = factory.createReader(in); 
-      JsonObject[] apis = reader.readArray().toArray(new JsonObject[0]); 
-      List<Library> clientApis = new ArrayList<>(apis.length);
-      for (JsonObject api : apis) {
-        String name = api.getString("name");
-        String id = api.getString("id");
-        Library library = new Library(id);
-        library.setGroup(CLIENT_APIS_GROUP);
-        library.setName(name);
-        JsonArray clients = api.getJsonArray("clients");
-        for (JsonObject client : clients.toArray(new JsonObject[0])) {
-          JsonString language = client.getJsonString("language");
-          if (language != null && "java".equals(language.getString())) {
-            String toolTip = client.getString("infotip");
-            library.setToolTip(toolTip);
-            JsonObject coordinates = client.getJsonObject("mavenCoordinates");
-            String groupId = coordinates.getString("groupId");
-            String artifactId = coordinates.getString("artifactId");
-            ArtifactVersion version =
-                ArtifactRetriever.DEFAULT.getLatestArtifactVersion(groupId, artifactId);
-            String versionString;
-            if (version == null) {
-              versionString = coordinates.getString("version");
-              // todo need method to get latest nonrelease version instead for alphas and betas
-            } else {
-              versionString = version.toString();
-            }
-            
-            MavenCoordinates mavenCoordinates = new MavenCoordinates.Builder()
-                .setGroupId(groupId)
-                .setArtifactId(artifactId)
-                .setVersion(versionString)
-                .build();
-            LibraryFile file = new LibraryFile(mavenCoordinates);
-            List<LibraryFile> libraryFiles = new ArrayList<>();
-            libraryFiles.add(file);
-            library.setLibraryFiles(libraryFiles);
-            break;
-          }
-        }
-        clientApis.add(library);
-      }
+      Bundle bundle = FrameworkUtil.getBundle(CloudSdk.class);
+      URL url = bundle.getResource("/com/google/cloud/tools/libraries/libraries.json");
       
-      return clientApis;
+      try (InputStream in = url.openStream()) {
+        JsonReaderFactory factory = Json.createReaderFactory(null);
+        JsonReader reader = factory.createReader(in); 
+        JsonObject[] apis = reader.readArray().toArray(new JsonObject[0]); 
+        List<Library> clientApis = new ArrayList<>(apis.length);
+        for (JsonObject api : apis) {
+          String name = api.getString("name");
+          String id = api.getString("id");
+          Library library = new Library(id);
+          library.setGroup(CLIENT_APIS_GROUP);
+          library.setName(name);
+          JsonArray clients = api.getJsonArray("clients");
+          for (JsonObject client : clients.toArray(new JsonObject[0])) {
+            JsonString language = client.getJsonString("language");
+            if (language != null && "java".equals(language.getString())) {
+              String toolTip = client.getString("infotip");
+              library.setToolTip(toolTip);
+              JsonObject coordinates = client.getJsonObject("mavenCoordinates");
+              String groupId = coordinates.getString("groupId");
+              String artifactId = coordinates.getString("artifactId");
+              ArtifactVersion version =
+                  ArtifactRetriever.DEFAULT.getLatestArtifactVersion(groupId, artifactId);
+              String versionString;
+              if (version == null) {
+                versionString = coordinates.getString("version");
+                // todo need method to get latest nonrelease version instead for alphas and betas
+              } else {
+                versionString = version.toString();
+              }
+              
+              MavenCoordinates mavenCoordinates = new MavenCoordinates.Builder()
+                  .setGroupId(groupId)
+                  .setArtifactId(artifactId)
+                  .setVersion(versionString)
+                  .build();
+              LibraryFile file = new LibraryFile(mavenCoordinates);
+              List<LibraryFile> libraryFiles = new ArrayList<>();
+              libraryFiles.add(file);
+              library.setLibraryFiles(libraryFiles);
+              break;
+            }
+          }
+          clientApis.add(library);
+        }
+        
+        return clientApis;
+      } catch (IOException ex) {
+        throw new RuntimeException("Could not read libraries.json", ex);
+      }
     }
   });
   
