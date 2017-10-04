@@ -31,6 +31,7 @@ import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 import com.google.cloud.tools.eclipse.util.NatureUtils;
+import java.nio.file.Paths;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -140,6 +141,6 @@ public class FlexDeployCommandHandlerTest {
   }
 
   private static boolean projectHasAbsoluateAppYamlPath(IProject project) {
-    return new FlexDeployPreferences(project).getAppYamlPath().startsWith("/");
+    return Paths.get(new FlexDeployPreferences(project).getAppYamlPath()).isAbsolute();
   }
 }
