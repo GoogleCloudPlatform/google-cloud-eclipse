@@ -242,7 +242,7 @@ public class LibraryClasspathContainerResolverService
     Artifact artifact = repositoryService.resolveArtifact(libraryFile, new NullProgressMonitor());
     IPath libraryPath = new Path(artifact.getFile().getAbsolutePath());
     
-    // Not all artifacts have sources; need to work if no source arrtifact is available
+    // Not all artifacts have sources; need to work if no source artifact is available
     // e.g. appengine-api-sdk doesn't
     IPath sourceAttachmentPath = null;
     try {
