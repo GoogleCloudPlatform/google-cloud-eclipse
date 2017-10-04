@@ -16,22 +16,20 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.standard;
 
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProjectTest;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -40,6 +38,9 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
+import org.hamcrest.CustomTypeSafeMatcher;
+import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -81,18 +82,24 @@ public class CreateAppEngineStandardWtpProjectTest extends CreateAppEngineWtpPro
 
   private void assertAppEngineApiSdkOnClasspath() throws CoreException {
     IJavaProject javaProject = JavaCore.create(project);
-    Library apisLibrary = CloudLibraries.getMasterLibrary(javaProject);
-    for (IClasspathEntry entry : javaProject.getRawClasspath()) {
-      if (entry.getPath().toString()
-          .equals("com.google.cloud.tools.eclipse.appengine.libraries/master-container")) {
-        List<LibraryFile> files = apisLibrary.getLibraryFiles();
-        Assert.assertEquals("No files added", 1, files.size());
-        Assert.assertEquals("appengine-api-1.0-sdk",
-            files.get(0).getMavenCoordinates().getArtifactId());
-        return;
-      }
-    }
-    fail("API classpath container was not added to the build path");
+    Matcher<IClasspathEntry> masterLibraryEntryMatcher =
+        new CustomTypeSafeMatcher<IClasspathEntry>("has master container") {
+      @Override
+      protected boolean matchesSafely(IClasspathEntry entry) {
+        return entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER && entry.getPath().toString()
+            .equals("com.google.cloud.tools.eclipse.appengine.libraries/master-container");
+      }};
+    Matcher<IClasspathEntry> appEngineSdkMatcher =
+        new CustomTypeSafeMatcher<IClasspathEntry>("has appengine-api-1.0-sdk") {
+          @Override
+          protected boolean matchesSafely(IClasspathEntry entry) {
+            return entry.getEntryKind() == IClasspathEntry.CPE_LIBRARY
+                && entry.getPath().toString().contains("appengine-api-1.0-sdk");
+          }
+        };
+    assertThat(Arrays.asList(javaProject.getRawClasspath()),
+        Matchers.hasItem(masterLibraryEntryMatcher));
+    assertThat(Arrays.asList(javaProject.getResolvedClasspath(true)), Matchers.hasItem(appEngineSdkMatcher));
   }
 
   @Test

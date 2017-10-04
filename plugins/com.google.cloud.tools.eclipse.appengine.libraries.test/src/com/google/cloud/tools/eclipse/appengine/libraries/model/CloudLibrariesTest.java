@@ -17,11 +17,8 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import java.util.List;
-
-import org.eclipse.jdt.core.IJavaProject;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 public class CloudLibrariesTest {
 
@@ -49,12 +46,4 @@ public class CloudLibrariesTest {
     Assert.assertEquals("appengine", library.getGroup());
     Assert.assertEquals("Objectify", library.getName());
   }
- 
-  @Test
-  public void testGetMasterLibrary() {
-    Library library = CloudLibraries.getMasterLibrary(Mockito.mock(IJavaProject.class));
-    Assert.assertEquals("Google APIs", library.getName());
-    Assert.assertEquals("master-container", library.getId());
-  }
-
 }
