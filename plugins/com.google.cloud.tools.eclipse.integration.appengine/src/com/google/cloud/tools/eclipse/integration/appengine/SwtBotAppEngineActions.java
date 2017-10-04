@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.integration.appengine;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotTestingUtilities;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotTimeoutManager;
+import com.google.cloud.tools.eclipse.swtbot.SwtBotTreeUtilities;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotWorkbenchActions;
 import java.io.File;
 import org.eclipse.core.resources.IProject;
@@ -76,6 +77,7 @@ public class SwtBotAppEngineActions {
     SWTBotShell shell = bot.shell("New Project");
     shell.activate();
 
+    SwtBotTreeUtilities.waitUntilTreeHasItems(bot, bot.tree());
     bot.tree().expandNode("Google Cloud Platform")
         .select("Google App Engine Standard Java Project");
     bot.button("Next >").click();
@@ -134,6 +136,7 @@ public class SwtBotAppEngineActions {
     SWTBotShell shell = bot.shell("Import");
     shell.activate();
 
+    SwtBotTreeUtilities.waitUntilTreeHasItems(bot, bot.tree());
     bot.tree().expandNode("General").select("Existing Projects into Workspace");
     bot.button("Next >").click();
 
@@ -174,6 +177,7 @@ public class SwtBotAppEngineActions {
     SWTBotShell shell = bot.shell("Import");
     shell.activate();
 
+    SwtBotTreeUtilities.waitUntilTreeHasItems(bot, bot.tree());
     bot.tree().expandNode("Maven").select("Existing Maven Projects");
     bot.button("Next >").click();
 
