@@ -21,6 +21,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonSyntaxException;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -28,6 +31,10 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -46,9 +53,10 @@ import org.osgi.framework.FrameworkUtil;
  */
 @Creatable
 public class LibraryClasspathContainerSerializer {
-
   private static final Logger logger =
       Logger.getLogger(LibraryClasspathContainerSerializer.class.getName());
+
+  private static final String CONTAINER_LIBRARY_LIST_FILE_ID = "_libraries";
 
   private final LibraryContainerStateLocationProvider stateLocationProvider;
   private final ArtifactBaseLocationProvider binaryArtifactBaseLocationProvider;
@@ -74,7 +82,7 @@ public class LibraryClasspathContainerSerializer {
 
   public void saveContainer(IJavaProject javaProject, LibraryClasspathContainer container)
       throws IOException, CoreException {
-    File stateFile = getContainerStateFile(javaProject, container.getPath(), true);
+    File stateFile = getContainerStateFile(javaProject, container.getPath().lastSegment(), true);
     if (stateFile == null) {
       logger.warning("Container state file cannot be created, save failed");
       return;
@@ -90,7 +98,7 @@ public class LibraryClasspathContainerSerializer {
 
   public LibraryClasspathContainer loadContainer(IJavaProject javaProject, IPath containerPath)
       throws IOException, CoreException {
-    File stateFile = getContainerStateFile(javaProject, containerPath, false);
+    File stateFile = getContainerStateFile(javaProject, containerPath.lastSegment(), false);
     if (stateFile == null) {
       return null;
     }
@@ -110,10 +118,46 @@ public class LibraryClasspathContainerSerializer {
     }
   }
 
-  private File getContainerStateFile(IJavaProject javaProject, IPath containerPath, boolean create)
+  public void saveLibraryIds(IJavaProject javaProject, List<String> libraryIds)
+      throws CoreException, IOException {
+    File stateFile = getContainerStateFile(javaProject, CONTAINER_LIBRARY_LIST_FILE_ID, true);
+    if (stateFile == null) {
+      logger.warning("Master libraries file cannot be created, save failed");
+      return;
+    }
+    try (Writer out = Files.newBufferedWriter(stateFile.toPath(), StandardCharsets.UTF_8)) {
+      out.write(gson.toJson(libraryIds.toArray()));
+    }
+  }
+
+  public List<String> loadLibraryIds(IJavaProject javaProject, IPath containerPath)
+      throws IOException, CoreException {
+    File stateFile = getContainerStateFile(javaProject, CONTAINER_LIBRARY_LIST_FILE_ID, false);
+    if (stateFile == null) {
+      logger.warning("Library-id state file not found: " + stateFile);
+      return Collections.emptyList();
+    }
+    try (Reader reader = Files.newBufferedReader(stateFile.toPath(), StandardCharsets.UTF_8)) {
+      JsonArray array = gson.fromJson(reader, JsonArray.class);
+      if (array == null) {
+        return Collections.emptyList();
+      }
+      List<String> libraryIds = new ArrayList<>(array.size());
+      for (JsonElement element : array) {
+        libraryIds.add(element.getAsString());
+      }
+      return libraryIds;
+    } catch (JsonSyntaxException ex) {
+      logger.log(Level.WARNING, "Invalid content in library-id state file: " + stateFile, ex);
+      return Collections.emptyList();
+    }
+  }
+
+
+  private File getContainerStateFile(IJavaProject javaProject, String fileId, boolean create)
       throws CoreException {
     IPath containerStateFile =
-        stateLocationProvider.getContainerStateFile(javaProject, containerPath, create);
+        stateLocationProvider.getContainerStateFile(javaProject, fileId, create);
     if (containerStateFile != null && containerStateFile.toFile().exists()) {
       return containerStateFile.toFile();
     }
@@ -128,7 +172,7 @@ public class LibraryClasspathContainerSerializer {
      * Therefore if <code>create</code> is false, they will not fail or throw and error.
      */
     @Override
-    public IPath getContainerStateFile(IJavaProject javaProject, IPath containerPath,
+    public IPath getContainerStateFile(IJavaProject javaProject, String id,
         boolean create) throws CoreException {
       IFolder settingsFolder = javaProject.getProject().getFolder(".settings");
       IFolder folder =
@@ -136,7 +180,7 @@ public class LibraryClasspathContainerSerializer {
       if (!folder.exists() && create) {
         folder.create(true, true, null);
       }
-      IFile containerFile = folder.getFile(containerPath.segment(1) + ".container");
+      IFile containerFile = folder.getFile(id + ".container");
       if (!containerFile.exists() && create) {
         containerFile.create(new ByteArrayInputStream(new byte[0]), true, null);
       }

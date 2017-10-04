@@ -16,7 +16,10 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -26,6 +29,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
@@ -45,32 +49,63 @@ public class WarPublisherTest {
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator()
       .withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testWriteProjectToStageDir_nullProject() throws CoreException {
-    WarPublisher.publishExploded(null, null, monitor);
+    try {
+      WarPublisher.publishExploded(null, null, null, monitor);
+      fail();
+    } catch (NullPointerException e) {
+      assertEquals("project is null", e.getMessage());
+    }
   }
 
-  @Test(expected = NullPointerException.class)
-  public void testWriteProjectToStageDir_nullStagingDir() throws CoreException {
-    WarPublisher.publishExploded(mock(IProject.class), null, monitor);
+  @Test
+  public void testWriteProjectToStageDir_nullDestination() throws CoreException {
+    try {
+      WarPublisher.publishExploded(mock(IProject.class), null, null, monitor);
+      fail();
+    } catch (NullPointerException e) {
+      assertEquals("destination is null", e.getMessage());
+    }
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void testWriteProjectToStageDir_emptyStagingDir() throws CoreException {
-    WarPublisher.publishExploded(mock(IProject.class), new Path(""), monitor);
+  @Test
+  public void testWriteProjectToStageDir_emptyDestinationDirectory() throws CoreException {
+    try {
+      WarPublisher.publishExploded(mock(IProject.class), new Path(""), null, monitor);
+      fail();
+    } catch (IllegalArgumentException e) {
+      assertEquals("destination is empty path", e.getMessage());
+    }
   }
 
-  @Test(expected = OperationCanceledException.class)
+  @Test
+  public void testWriteProjectToStageDir_nullSafeWorkDirectory() throws CoreException {
+    try {
+      WarPublisher.publishExploded(mock(IProject.class), new Path("/"), null, monitor);
+      fail();
+    } catch (NullPointerException e) {
+      assertEquals("safeWorkDirectory is null", e.getMessage());
+    }
+  }
+
+  @Test
   public void testWriteProjectToStageDir_cancelled() throws CoreException {
-    when(monitor.isCanceled()).thenReturn(true);
-    WarPublisher.publishExploded(mock(IProject.class), new Path(""), monitor);
+    try {
+      when(monitor.isCanceled()).thenReturn(true);
+      WarPublisher.publishExploded(mock(IProject.class), new Path("/"), new Path("/"), monitor);
+      fail();
+    } catch (OperationCanceledException e) {
+      assertNotNull(e);
+    }
   }
 
   @Test
   public void testPublishExploded() throws CoreException {
     IProject project = projectCreator.getProject();
     IFolder exploded = project.getFolder("exploded-war");
-    WarPublisher.publishExploded(project, exploded.getLocation(), monitor);
+    IPath tempDirectory = project.getFolder("temp").getLocation();
+    WarPublisher.publishExploded(project, exploded.getLocation(), tempDirectory, monitor);
 
     exploded.refreshLocal(IResource.DEPTH_INFINITE, monitor);
     assertTrue(exploded.getFile("META-INF/MANIFEST.MF").exists());
@@ -81,7 +116,8 @@ public class WarPublisherTest {
   public void testPublishWar() throws CoreException {
     IProject project = projectCreator.getProject();
     IFile war = project.getFile("my-app.war");
-    WarPublisher.publishWar(project, war.getLocation(), monitor);
+    IPath tempDirectory = project.getFolder("temp").getLocation();
+    WarPublisher.publishWar(project, war.getLocation(), tempDirectory, monitor);
 
     war.refreshLocal(IResource.DEPTH_ZERO, monitor);
     assertTrue(war.exists());

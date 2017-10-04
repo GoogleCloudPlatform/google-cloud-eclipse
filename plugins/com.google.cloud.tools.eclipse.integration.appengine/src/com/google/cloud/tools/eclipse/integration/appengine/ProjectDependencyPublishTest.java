@@ -17,20 +17,21 @@
 package com.google.cloud.tools.eclipse.integration.appengine;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.junit.BeforeClass;
 
-public class WebFragmentWarPublishTest extends ChildModuleWarPublishTest {
+public class ProjectDependencyPublishTest extends ChildModuleWarPublishTest {
 
   @BeforeClass
   public static void setUp() throws IOException, CoreException {
-    loadTestProjectZip("test-projects/web-fragment-example.zip", "web-fragment-example");
+    loadTestProjectZip("test-projects/project-dep-publish-example.zip", "dep_publish");
   }
 
   @Override
   protected List<String> getExpectedChildModuleNames() {
-    return Collections.singletonList("spring-web-4.3.8.RELEASE.jar");
+    return Arrays.asList("simple-dep-0.0.1-SNAPSHOT.jar", "simple-dep-b-0.0.1-SNAPSHOT.jar");
   }
+
 }

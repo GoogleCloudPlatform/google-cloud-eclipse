@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.libraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
+import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
 import com.google.cloud.tools.eclipse.util.ClasspathUtil;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.collect.Lists;
@@ -27,7 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -83,13 +83,27 @@ public class BuildPath {
         2);
     
     Library masterLibrary = collectLibraryFiles(javaProject, libraries);
-    
     List<IClasspathEntry> newEntries = computeEntries(javaProject, masterLibrary);
     subMonitor.worked(1);
-    
+
+    List<String> libraryIds = new ArrayList<>();
+    for (Library library : libraries) {
+      libraryIds.add(library.getId());
+    }
+    try {
+      LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer();
+      // We could create the LibraryClasspathContainer and serialize out the classpath information,
+      // but our LibraryClasspathContainerInitializer requires source paths to be resolved too,
+      // or it tosses the serialized classpath information
+      serializer.saveLibraryIds(javaProject, libraryIds);
+    } catch (IOException ex) {
+      throw new CoreException(
+          StatusUtil.error(BuildPath.class, "Error saving master library list", ex));
+    }
+
     ClasspathUtil.addClasspathEntries(javaProject.getProject(), newEntries, subMonitor);
     runContainerResolverJob(javaProject);
-    
+
     return newEntries.toArray(new IClasspathEntry[0]);
   }
 
@@ -101,19 +115,20 @@ public class BuildPath {
   public static Library collectLibraryFiles(IJavaProject javaProject, List<Library> libraries)
       throws CoreException {
     SortedSet<LibraryFile> masterFiles = new TreeSet<>();
+    List<String> dependentIds = new ArrayList<>();
     for (Library library : libraries) {
       if (!library.isResolved()) {
         library.resolveDependencies();
       }
+      dependentIds.add(library.getId());
       masterFiles.addAll(library.getLibraryFiles());
     }
 
-    Library masterLibrary = CloudLibraries.getMasterLibrary(javaProject);
-
-    masterFiles.addAll(masterLibrary.getLibraryFiles());
+    Library masterLibrary = new Library(CloudLibraries.MASTER_CONTAINER_ID);
+    masterLibrary.setName("Google APIs"); //$NON-NLS-1$
+    masterLibrary.setLibraryDependencies(dependentIds);
     
     List<LibraryFile> resolved = Library.resolveDuplicates(new ArrayList<LibraryFile>(masterFiles));
-    
     masterLibrary.setLibraryFiles(resolved);
     return masterLibrary;
   }
@@ -123,6 +138,15 @@ public class BuildPath {
     List<IClasspathEntry> rawClasspath = Lists.newArrayList(javaProject.getRawClasspath());
     List<IClasspathEntry> newEntries = new ArrayList<>();
     IClasspathEntry libraryContainer = makeClasspathEntry(library);
+    if (CloudLibraries.MASTER_CONTAINER_ID.equals(library.getId())) {
+      try {
+        LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer();
+        serializer.saveLibraryIds(javaProject, library.getLibraryDependencies());
+      } catch (IOException ex) {
+        throw new CoreException(
+            StatusUtil.error(BuildPath.class, "Error saving master library list", ex));
+      }
+    }
     if (!rawClasspath.contains(libraryContainer)) {
       newEntries.add(libraryContainer);
     }

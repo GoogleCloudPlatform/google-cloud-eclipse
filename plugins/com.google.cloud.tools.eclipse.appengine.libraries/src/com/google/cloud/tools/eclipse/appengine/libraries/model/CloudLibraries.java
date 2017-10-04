@@ -34,14 +34,10 @@ import javax.json.JsonString;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.RegistryFactory;
-import org.eclipse.jdt.core.IJavaProject;
 
 import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
@@ -153,25 +149,6 @@ public class CloudLibraries {
       return clientApis;
     }
   });
-
-  private static final LoadingCache<IJavaProject, Library> masterLibraries =
-      CacheBuilder.newBuilder().build(new CacheLoader<IJavaProject, Library>() {
-
-        @Override
-        public Library load(IJavaProject project) {
-          // we rely below on this method not throwing exceptions
-          Library library = new Library(MASTER_CONTAINER_ID);
-          library.setName("Google APIs"); //$NON-NLS-1$
-          return library;
-        }
-      });
-  
-  /**
-   * Returns the uber container for all Google APIs.
-   */
-  public static Library getMasterLibrary(IJavaProject javaProject) {
-    return masterLibraries.getUnchecked(javaProject);
-  }
   
   private static ImmutableMap<String, Library> loadLibraryDefinitions() {
     IConfigurationElement[] elements = RegistryFactory.getRegistry().getConfigurationElementsFor(

@@ -20,7 +20,6 @@ import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContai
 import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
-
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.core.runtime.IPath;
@@ -59,7 +58,8 @@ class SerializableLibraryClasspathContainer {
       classpathEntries.add(entry.toClasspathEntry(baseDirectory, sourceBaseDirectory));
     }
     
-    Library masterLibrary = CloudLibraries.getMasterLibrary(javaProject);
+    Library masterLibrary = new Library(CloudLibraries.MASTER_CONTAINER_ID);
+    masterLibrary.setName("Google APIs"); //$NON-NLS-1$
     if (libraryFiles == null) { // we deserialized an old version
       libraryFiles = new ArrayList<>();
     }

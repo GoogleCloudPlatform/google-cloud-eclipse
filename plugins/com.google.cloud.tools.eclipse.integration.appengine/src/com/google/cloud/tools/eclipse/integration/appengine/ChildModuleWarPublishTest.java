@@ -1,0 +1,102 @@
+/*
+ * Copyright 2017 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.google.cloud.tools.eclipse.integration.appengine;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import com.google.cloud.tools.eclipse.appengine.deploy.WarPublisher;
+import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
+import com.google.cloud.tools.eclipse.test.util.ZipUtil;
+import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
+import java.io.IOException;
+import java.util.List;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.junit.AfterClass;
+import org.junit.Test;
+
+public abstract class ChildModuleWarPublishTest {
+
+  private static final IProgressMonitor monitor = new NullProgressMonitor();
+  private static IProject project;
+
+  protected abstract List<String> getExpectedChildModuleNames();
+
+  protected static void loadTestProjectZip(String testZip, String mainProject)
+      throws IOException, CoreException {
+    ThreadDumpingWatchdog.report("ChildModuleWarPublishTest.setUp() from "
+        + Thread.currentThread() + " at " + System.nanoTime(), null);
+    List<IProject> projects = ProjectUtils.importProjects(ChildModuleWarPublishTest.class,
+        testZip, false /* checkBuildErrors */, monitor);
+    for (IProject loaded : projects) {
+      if (loaded.getName().equals(mainProject)) {
+        project = loaded;
+      }
+    }
+    assertNotNull(project);
+  }
+
+  @AfterClass
+  public static void tearDown() throws CoreException {
+    ProjectUtils.waitForProjects(project);
+    project.delete(true, null);
+  }
+
+  @Test
+  public void testPublishExploded_childModulePublished() throws CoreException {
+    IFolder exploded = project.getFolder("exploded-war");
+    IFolder tempDirectory = project.getFolder("temp");
+    try {
+      WarPublisher.publishExploded(project,
+          exploded.getLocation(), tempDirectory.getLocation(), monitor);
+
+      exploded.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+      for (String childModule : getExpectedChildModuleNames()) {
+        assertTrue(exploded.getFile("WEB-INF/lib/" + childModule).exists());
+      }
+    } finally {
+      exploded.delete(true, monitor);
+      tempDirectory.delete(true, monitor);
+    }
+  }
+
+  @Test
+  public void testPublishWar_childModulePublished() throws CoreException {
+    IFile war = project.getFile("my-app.war");
+    IFolder unzipped = project.getFolder("unzipped");
+    IFolder tempDirectory = project.getFolder("temp");
+    try {
+      WarPublisher.publishWar(project, war.getLocation(), tempDirectory.getLocation(), monitor);
+
+      ZipUtil.unzip(war.getLocation().toFile(), unzipped.getLocation().toFile(), monitor);
+      unzipped.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+      for (String childModule : getExpectedChildModuleNames()) {
+        assertTrue(unzipped.getFile("WEB-INF/lib/" + childModule).exists());
+      }
+    } finally {
+      war.delete(true, monitor);
+      unzipped.delete(true, monitor);
+      tempDirectory.delete(true, monitor);
+    }
+  }
+}
