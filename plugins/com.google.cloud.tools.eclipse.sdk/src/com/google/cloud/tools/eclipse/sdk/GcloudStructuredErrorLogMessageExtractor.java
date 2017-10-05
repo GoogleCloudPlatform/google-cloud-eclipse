@@ -16,9 +16,10 @@
 
 package com.google.cloud.tools.eclipse.sdk;
 
+import com.google.cloud.tools.appengine.cloudsdk.JsonParseException;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
+import com.google.cloud.tools.appengine.cloudsdk.serialization.GcloudStructuredLog;
 import com.google.common.base.Function;
-import com.google.gson.JsonParseException;
 import java.util.Locale;
 
 /**
@@ -32,8 +33,8 @@ public class GcloudStructuredErrorLogMessageExtractor implements Function<String
   public String apply(String line) {
     try {
       GcloudStructuredLog error = GcloudStructuredLog.parse(line);
-      if (error.verbosity.toUpperCase(Locale.US).equals("ERROR")) {
-        return error.message;
+      if (error.getVerbosity().toUpperCase(Locale.US).equals("ERROR")) {
+        return error.getMessage();
       }
     } catch (JsonParseException e) {  // syntax or semantic parsing error: fall through
     }

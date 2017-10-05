@@ -13,7 +13,6 @@ Require-Bundle: com.google.cloud.tools.appengine;bundle-version="0.3.7",
  org.eclipse.e4.core.di;bundle-version="1.5.0"
 Import-Package: com.google.common.base;version="[20.0.0,21.0.0)",
  com.google.common.collect;version="[20.0.0,21.0.0)",
- com.google.gson;version="2.7.0",
  org.eclipse.jface.preference,
  org.eclipse.ui.console,
  org.eclipse.ui.preferences,
