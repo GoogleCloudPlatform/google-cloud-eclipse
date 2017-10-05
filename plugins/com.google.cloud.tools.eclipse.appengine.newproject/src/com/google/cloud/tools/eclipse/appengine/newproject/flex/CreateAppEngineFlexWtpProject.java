@@ -26,11 +26,11 @@ import com.google.cloud.tools.eclipse.appengine.newproject.CodeTemplates;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
 import com.google.cloud.tools.eclipse.util.ClasspathUtil;
+import com.google.common.collect.ImmutableList;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -66,11 +66,26 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
   private static final List<MavenCoordinates> PROJECT_DEPENDENCIES;
 
   static {
-    MavenCoordinates.Builder servletApi = new MavenCoordinates.Builder()
+    // matches the dependencies in javax:javaee-web-api:7.0
+    // FIXME: include javax.el:javax.el-api:3.0.0?
+    //@formatter:off
+    MavenCoordinates servletApi = new MavenCoordinates.Builder()
         .setGroupId("javax.servlet") //$NON-NLS-1$
         .setArtifactId("javax.servlet-api") //$NON-NLS-1$
-        .setVersion("3.1.0"); //$NON-NLS-1$
-    PROJECT_DEPENDENCIES = Collections.singletonList(servletApi.build());
+        .setVersion("3.1.0") //$NON-NLS-1$
+        .build();
+    MavenCoordinates jspApi = new MavenCoordinates.Builder()
+        .setGroupId("javax.servlet.jsp") //$NON-NLS-1$
+        .setArtifactId("javax.servlet.jsp-api") //$NON-NLS-1$
+        .setVersion("2.3.1") //$NON-NLS-1$
+        .build();
+    MavenCoordinates jstlApi = new MavenCoordinates.Builder()
+        .setGroupId("javax.servlet.jsp.jstl") //$NON-NLS-1$
+        .setArtifactId("javax.servlet.jstl.jsp-api") //$NON-NLS-1$
+        .setVersion("1.2.1") //$NON-NLS-1$
+        .build();
+    //@formatter:on
+    PROJECT_DEPENDENCIES = ImmutableList.of(servletApi, jspApi, jstlApi);
   }
 
   private ILibraryRepositoryService repositoryService;

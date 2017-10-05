@@ -74,6 +74,18 @@ public class CreateAppEngineFlexWtpProjectTest extends CreateAppEngineWtpProject
     File servletApi31Jar = tempFolder.newFile("fake-servlet-api-3.1.jar");
     when(servletApi31.getFile()).thenReturn(servletApi31Jar);
 
+    final Artifact jspApi23 = mock(Artifact.class);
+    File jspApi23Jar = tempFolder.newFile("fake-jsp-api-2.3.1.jar");
+    when(jspApi23.getFile()).thenReturn(jspApi23Jar);
+
+    final Artifact jstlApi121 = mock(Artifact.class);
+    File jstlApi21Jar = tempFolder.newFile("fake-jstl-api-1.2.1.jar");
+    when(jstlApi121.getFile()).thenReturn(jstlApi21Jar);
+
+    final Artifact elApi300 = mock(Artifact.class);
+    File elApi300Jar = tempFolder.newFile("fake-el-api-3.0.0.jar");
+    when(elApi300.getFile()).thenReturn(elApi300Jar);
+
     when(repositoryService.resolveArtifact(any(LibraryFile.class), any(IProgressMonitor.class)))
         .thenAnswer(new Answer<Artifact>() {
           @Override
@@ -85,6 +97,18 @@ public class CreateAppEngineFlexWtpProjectTest extends CreateAppEngineWtpProject
                 && "javax.servlet-api".equals(coordinates.getArtifactId())
                 && "3.1.0".equals(coordinates.getVersion())) {
               return servletApi31;
+            } else if ("javax.servlet.jsp".equals(coordinates.getGroupId())
+                && "javax.servlet.jsp-api".equals(coordinates.getArtifactId())
+                && "2.3.1".equals(coordinates.getVersion())) {
+              return jspApi23;
+            } else if ("javax.servlet.jsp.jstl".equals(coordinates.getGroupId())
+                && "javax.servlet.jsp.jstl-api".equals(coordinates.getArtifactId())
+                && "1.2.1".equals(coordinates.getVersion())) {
+              return jstlApi121;
+            } else if ("javax.el".equals(coordinates.getGroupId())
+                && "javax.el-api".equals(coordinates.getArtifactId())
+                && "3.0.0".equals(coordinates.getVersion())) {
+              return elApi300;
             } else {
               return someArtifact;
             }
@@ -103,6 +127,30 @@ public class CreateAppEngineFlexWtpProjectTest extends CreateAppEngineWtpProject
     creator.execute(monitor);
 
     assertTrue(project.getFile("lib/fake-servlet-api-3.1.jar").exists());
+  }
+
+  @Test
+  public void testJspApi23Added() throws InvocationTargetException, CoreException {
+    CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
+    creator.execute(monitor);
+
+    assertTrue(project.getFile("lib/fake-jsp-api-2.3.1.jar").exists());
+  }
+
+  @Test
+  public void testJstlApi121Added() throws InvocationTargetException, CoreException {
+    CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
+    creator.execute(monitor);
+
+    assertTrue(project.getFile("lib/fake-jstl-api-1.2.1.jar").exists());
+  }
+
+  @Test
+  public void testElApi300Added() throws InvocationTargetException, CoreException {
+    CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
+    creator.execute(monitor);
+
+    assertTrue(project.getFile("lib/fake-el-api-3.0.0.jar").exists());
   }
 
   @Test
