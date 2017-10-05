@@ -16,50 +16,58 @@
 
 package com.google.cloud.tools.eclipse.sdk;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThat;
 
+import java.util.Arrays;
 import org.junit.Test;
 
 public class GcloudStructuredLogErrorMessageCollectorTest {
 
-  @Test
-  public void testGetCollectedMessage_nullProcessorGivesError() {
-    try {
-      new GcloudStructuredLogErrorMessageCollectorTest();
-      fail();
-    } catch (NullPointerException e) {
-      assertEquals("line processor is null", e.getMessage());
-    }
-  }
+  private final GcloudStructuredLogErrorMessageCollector errorMessageCollector =
+      new GcloudStructuredLogErrorMessageCollector();
 
-  /*
   @Test
-  public void testGetCollectedMessage_whenPredicateIsFalseNoMessageIsCollected() {
-    Predicate<String> alwaysFalse = Predicates.alwaysFalse();
-<<<<<<< HEAD
-    ProcessingLineListener listener = new ProcessingLineListener(alwaysFalse);
-=======
-    CollectingLineListener listener = new CollectingLineListener(alwaysFalse);
->>>>>>> master
-    listener.onOutputLine("Error message");
-    assertTrue(listener.getCollectedMessages().isEmpty());
+  public void testInitiallyEmpty() {
+    assertThat(errorMessageCollector.getErrorMessages(), empty());
   }
 
   @Test
-  public void testGetCollectedMessage_whenPredicateIsTrueMessagesArecollected() {
-    Predicate<String> alwaysTrue = Predicates.alwaysTrue();
-<<<<<<< HEAD
-    ProcessingLineListener listener = new ProcessingLineListener(alwaysTrue);
-=======
-    CollectingLineListener listener = new CollectingLineListener(alwaysTrue);
->>>>>>> master
-    listener.onOutputLine("Error message1");
-    listener.onOutputLine("Error message2");
-    List<String> collectedMessages = listener.getCollectedMessages();
-    assertThat(collectedMessages.size(), is(2));
-    assertThat(collectedMessages.get(0), is("Error message1"));
-    assertThat(collectedMessages.get(1), is("Error message2"));
+  public void testIgnoreUnstructuredOutput() {
+    errorMessageCollector.onOutputLine("non-JSON line");
+    assertThat(errorMessageCollector.getErrorMessages(), empty());
   }
-  */
+
+  @Test
+  public void testIgnoreIrrelevantJsonLine() {
+    errorMessageCollector.onOutputLine("{ 'key': 'value' }");
+    assertThat(errorMessageCollector.getErrorMessages(), empty());
+  }
+
+  @Test
+  public void testCaseInSensitiveVerbosity() {
+    errorMessageCollector.onOutputLine("{ 'verbosity': 'eRrOr', 'message': 'OMG!' }");
+    assertThat(errorMessageCollector.getErrorMessages(), equalTo(Arrays.asList("OMG!")));
+  }
+
+  @Test
+  public void testIgonreNonErrorVerbosity() {
+    errorMessageCollector.onOutputLine("{ 'verbosity': 'warning', 'message': 'ignored' }");
+    assertThat(errorMessageCollector.getErrorMessages(), empty());
+  }
+
+  @Test
+  public void testMultipleLines() {
+    errorMessageCollector.onOutputLine("1st normal output");
+    errorMessageCollector.onOutputLine("{ 'verbosity': 'Error', 'message': '1st error log' }");
+    errorMessageCollector.onOutputLine("2nd normal output");
+    errorMessageCollector.onOutputLine("{ 'verbosity': 'ERROR', 'message': '2nd error log' }");
+    errorMessageCollector.onOutputLine("3rd normal output");
+    errorMessageCollector.onOutputLine("4th normal output");
+    errorMessageCollector.onOutputLine("{ 'verbosity': 'debug', 'message': 'uninteresting log' }");
+    errorMessageCollector.onOutputLine("{ 'verbosity': 'error', 'message': '3rd error log' }");
+    assertThat(errorMessageCollector.getErrorMessages(), equalTo(Arrays.asList(
+        "1st error log", "2nd error log", "3rd error log")));
+  }
 }

@@ -35,9 +35,10 @@ public class GcloudStructuredLogErrorMessageCollector implements ProcessOutputLi
   @Override
   public void onOutputLine(String line) {
     try {
-      GcloudStructuredLog error = GcloudStructuredLog.parse(line);
-      if (error != null && error.getVerbosity().toUpperCase(Locale.US).equals("ERROR")) {
-        errorMessages.add(error.getMessage());
+      GcloudStructuredLog log = GcloudStructuredLog.parse(line);
+      if (log != null && log.getVerbosity() != null
+          && log.getVerbosity().toUpperCase(Locale.US).equals("ERROR")) {
+        errorMessages.add(log.getMessage());
       }
     } catch (JsonParseException e) {
       // syntax or semantic parsing error; not a structured error log line
