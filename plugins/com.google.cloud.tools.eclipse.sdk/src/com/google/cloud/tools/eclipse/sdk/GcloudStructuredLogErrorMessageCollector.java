@@ -19,25 +19,32 @@ package com.google.cloud.tools.eclipse.sdk;
 import com.google.cloud.tools.appengine.cloudsdk.JsonParseException;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.appengine.cloudsdk.serialization.GcloudStructuredLog;
-import com.google.common.base.Function;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 /**
- * A {@link ProcessOutputLineListener} that extracts error messages from gcloud structured log
- * output to stderr. If an output line is a structured JSON log whose {@code verbosity} property
- * is {@code "ERROR"}, returns its {@code message} property.
+ * A {@link ProcessOutputLineListener} that extracts error messages from gcloud structured log.
+ * (Should listen stderr). If an output line is a structured JSON log whose {@code verbosity}
+ * property is {@code "ERROR"}, returns its {@code message} property.
  */
-public class GcloudStructuredErrorLogMessageExtractor implements Function<String, String> {
+public class GcloudStructuredLogErrorMessageCollector implements ProcessOutputLineListener {
+
+  private final List<String> errorMessages = new ArrayList<>();
 
   @Override
-  public String apply(String line) {
+  public void onOutputLine(String line) {
     try {
       GcloudStructuredLog error = GcloudStructuredLog.parse(line);
-      if (error.getVerbosity().toUpperCase(Locale.US).equals("ERROR")) {
-        return error.getMessage();
+      if (error != null && error.getVerbosity().toUpperCase(Locale.US).equals("ERROR")) {
+        errorMessages.add(error.getMessage());
       }
-    } catch (JsonParseException e) {  // syntax or semantic parsing error: fall through
+    } catch (JsonParseException e) {
+      // syntax or semantic parsing error; not a structured error log line
     }
-    return null;
+  }
+
+  public List<String> getErrorMessages() {
+    return new ArrayList<>(errorMessages);
   }
 }

@@ -21,12 +21,12 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-public class CollectingLineListenerTest {
+public class GcloudStructuredLogErrorMessageCollectorTest {
 
   @Test
   public void testGetCollectedMessage_nullProcessorGivesError() {
     try {
-      new ProcessingLineListener(null);
+      new GcloudStructuredLogErrorMessageCollectorTest();
       fail();
     } catch (NullPointerException e) {
       assertEquals("line processor is null", e.getMessage());
