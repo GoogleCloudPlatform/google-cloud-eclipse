@@ -106,7 +106,7 @@ public class CloudSdkProcessWrapper {
         .exitListener(new ProcessExitRecorder())
         .appCommandMetricsEnvironment(CloudToolsInfo.METRICS_NAME)
         .appCommandMetricsEnvironmentVersion(CloudToolsInfo.getToolsVersion())
-        .appCommandOutputFormat("json");  // deploy output result in JSON
+        .appCommandOutputFormat("json");  // Deploy result will be in JSON.
   }
 
   public CloudSdk getCloudSdk() {

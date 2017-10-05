@@ -24,9 +24,9 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * A {@link ProcessOutputLineListener} that extracts error messages from gcloud structured log.
- * (Should listen stderr). If an output line is a structured JSON log whose {@code verbosity}
- * property is {@code "ERROR"}, returns its {@code message} property.
+ * A {@link ProcessOutputLineListener} that extracts error messages from gcloud structured logs.
+ * Should listen to stderr. If an output line is a structured JSON log whose {@code verbosity}
+ * property is {@code "ERROR"}, its {@code message} property is extracted and collected.
  */
 public class GcloudStructuredLogErrorMessageCollector implements ProcessOutputLineListener {
 
