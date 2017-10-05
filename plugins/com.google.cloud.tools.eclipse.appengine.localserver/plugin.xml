@@ -4,13 +4,15 @@
    <extension
          point="org.eclipse.wst.server.core.runtimeTypes">
       <runtimeType
-            class="com.google.cloud.tools.eclipse.appengine.localserver.server.AppToolsRuntime"
-            description="%runtimeTypeDescription"
             id="com.google.cloud.tools.eclipse.appengine.standard.runtime"
-            name="%apptoolsRuntimeTypeName"
-            supportsManualCreation="false"
             vendor="%runtimeTypeVendor"
-            version="1">
+            name="%apptoolsRuntimeTypeName"
+            description="%runtimeTypeDescription"
+            version="1"
+            class="com.google.cloud.tools.eclipse.appengine.localserver.server.AppToolsRuntime"
+            supportsManualCreation="false"
+            facetRuntimeComponent="com.google.cloud.tools.eclipse.appengine.standard.runtime"
+            facetRuntimeVersion="1">
          <!-- J2EE Web Modules -->
          <moduleType
                types="jst.web"
@@ -331,5 +333,12 @@
             id="com.google.cloud.tools.eclipse.appengine.localserver.statusHandlers.staleResources"
             plugin="com.google.cloud.tools.eclipse.appengine.localserver">
       </statusHandler>
+   </extension>
+   <extension
+         point="org.eclipse.wst.server.core.internalStartup">
+      <startup
+            class="com.google.cloud.tools.eclipse.appengine.localserver.server.RegisterAppEngineStandardRuntimeStartup"
+            id="com.google.cloud.tools.eclipse.appengine.localserver.startup">
+      </startup>
    </extension>
 </plugin>

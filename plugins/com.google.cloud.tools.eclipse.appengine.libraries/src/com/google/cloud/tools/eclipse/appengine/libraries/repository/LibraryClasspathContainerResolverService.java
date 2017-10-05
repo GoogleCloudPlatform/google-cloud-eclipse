@@ -241,8 +241,16 @@ public class LibraryClasspathContainerResolverService
 
     Artifact artifact = repositoryService.resolveArtifact(libraryFile, new NullProgressMonitor());
     IPath libraryPath = new Path(artifact.getFile().getAbsolutePath());
-    IPath sourceAttachmentPath = repositoryService.resolveSourceArtifact(libraryFile,
-        artifact.getVersion(), new NullProgressMonitor());
+    
+    // Not all artifacts have sources; need to work if no source artifact is available
+    // e.g. appengine-api-sdk doesn't
+    IPath sourceAttachmentPath = null;
+    try {
+      sourceAttachmentPath = repositoryService.resolveSourceArtifact(libraryFile,
+          artifact.getVersion(), new NullProgressMonitor());
+    } catch (CoreException ex) {
+      // continue without source
+    }
     
     IClasspathEntry newLibraryEntry =
         JavaCore.newLibraryEntry(libraryPath,

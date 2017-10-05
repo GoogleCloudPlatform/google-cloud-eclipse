@@ -21,6 +21,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexMavenPackagedProjectStagingDelegate;
+import com.google.cloud.tools.eclipse.test.util.project.JavaRuntimeUtils;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.io.IOException;
 import java.util.List;
@@ -37,7 +38,7 @@ public class FlexMavenPackagedProjectStagingDelegateTest {
 
   @Test
   public void testStage_springBoot() throws IOException, CoreException {
-    Assume.assumeTrue("Only for JavaSE-8", ImportMavenAppEngineStandardProjectTest.hasJavaSE8());
+    Assume.assumeTrue("Only for JavaSE-8", JavaRuntimeUtils.hasJavaSE8());
 
     List<IProject> projects = ProjectUtils.importProjects(getClass(),
         "test-projects/spring-boot-test.zip", false /* checkBuildErrors */, null);

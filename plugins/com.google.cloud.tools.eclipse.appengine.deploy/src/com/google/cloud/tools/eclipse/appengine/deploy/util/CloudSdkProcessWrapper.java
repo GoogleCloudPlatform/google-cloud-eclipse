@@ -161,7 +161,7 @@ public class CloudSdkProcessWrapper {
     @Override
     public void onExit(int exitCode) {
       if (exitCode != 0) {
-        exitStatus = StatusUtil.error(this, getErrorMessage(exitCode));
+        exitStatus = StatusUtil.error(this, getErrorMessage(exitCode), exitCode);
       } else {
         exitStatus = Status.OK_STATUS;
       }

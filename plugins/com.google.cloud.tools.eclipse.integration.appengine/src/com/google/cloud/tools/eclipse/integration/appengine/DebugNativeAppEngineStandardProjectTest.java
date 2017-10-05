@@ -28,6 +28,7 @@ import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotTestingUtilities;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotTreeUtilities;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
+import com.google.cloud.tools.eclipse.test.util.project.JavaRuntimeUtils;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -73,7 +74,7 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
    */
   @Test
   public void testDebugLaunch() throws Exception {
-    Assume.assumeTrue("Only for JavaSE-8", ImportMavenAppEngineStandardProjectTest.hasJavaSE8());
+    Assume.assumeTrue("Only for JavaSE-8", JavaRuntimeUtils.hasJavaSE8());
 
     // Disable WTP's download-server-bindings
     // Equivalent to: ServerUIPreferences.getInstance().setCacheFrequency(0);

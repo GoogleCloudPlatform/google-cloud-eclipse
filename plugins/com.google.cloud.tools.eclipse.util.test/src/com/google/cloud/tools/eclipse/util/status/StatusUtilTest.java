@@ -40,6 +40,13 @@ public class StatusUtilTest {
   }
   
   @Test
+  public void testError_withCode() {
+    IStatus error = StatusUtil.error(StatusUtil.class, "test error msg", 356);
+    verifyStatus(error);
+    assertEquals(356, error.getCode());
+  }
+
+  @Test
   public void testNullSource() {
     IStatus error = StatusUtil.error(null, "test error msg");
     verifyStatus(error);

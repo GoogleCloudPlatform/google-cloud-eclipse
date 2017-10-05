@@ -20,22 +20,19 @@ import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexExistingArtifactDeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexExistingDeployArtifactStagingDelegate;
-import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployCommandHandler;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesDialog;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
-import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.widgets.Shell;
 
-public class FlexExistingArtifactDeployCommandHandler extends DeployCommandHandler {
+public class FlexExistingArtifactDeployCommandHandler extends FlexDeployCommandHandler {
 
   @Override
   protected DeployPreferencesDialog newDeployPreferencesDialog(Shell shell, IProject project,
@@ -47,27 +44,16 @@ public class FlexExistingArtifactDeployCommandHandler extends DeployCommandHandl
 
   @Override
   protected StagingDelegate getStagingDelegate(IProject project) throws CoreException {
+    IPath workspaceRoot = ResourcesPlugin.getWorkspace().getRoot().getLocation();
+
     String appYamlPath = new FlexExistingArtifactDeployPreferences().getAppYamlPath();
-    IPath appYaml = resolveFileAgainstWorkspace(appYamlPath);
+    IPath appYaml = resolveFile(appYamlPath, workspaceRoot);
     IPath appEngineDirectory = appYaml.removeLastSegments(1);
 
     String deployArtifactPath = new FlexExistingArtifactDeployPreferences().getDeployArtifactPath();
-    IPath deployArtifact = resolveFileAgainstWorkspace(deployArtifactPath);
+    IPath deployArtifact = resolveFile(deployArtifactPath, workspaceRoot);
 
     return new FlexExistingDeployArtifactStagingDelegate(deployArtifact, appEngineDirectory);
-  }
-
-  private IPath resolveFileAgainstWorkspace(String path) throws CoreException {
-    IPath fullPath = new Path(path);
-    if (!fullPath.isAbsolute()) {
-      IPath workspaceRoot = ResourcesPlugin.getWorkspace().getRoot().getLocation();
-      fullPath = workspaceRoot.append(path);
-    }
-
-    if (!fullPath.toFile().exists()) {
-      throw new CoreException(StatusUtil.error(this, fullPath + " does not exist."));
-    }
-    return fullPath;
   }
 
   @Override

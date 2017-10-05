@@ -22,6 +22,8 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
+import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexDeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexJarFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexWarFacet;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
@@ -29,8 +31,11 @@ import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 import com.google.cloud.tools.eclipse.util.NatureUtils;
+import java.nio.file.Paths;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
@@ -38,6 +43,7 @@ import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.junit.Rule;
 import org.junit.Test;
+import org.osgi.service.prefs.BackingStoreException;
 
 public class FlexDeployCommandHandlerTest {
 
@@ -101,5 +107,40 @@ public class FlexDeployCommandHandlerTest {
     } catch (WidgetNotFoundException e) {
       return false;
     }
+  }
+
+  @Test
+  public void testGetStagingDelegate_absolauteAppYamlPath()
+      throws CoreException, BackingStoreException {
+    IProject project =  flexWarProjectCreator.getProject();
+    try {
+      IPath appYaml = project.getLocation().append("src/main/appengine/app.yaml");
+      assertTrue(appYaml.isAbsolute());
+
+      FlexDeployPreferences preferences = new FlexDeployPreferences(project);
+      preferences.setAppYamlPath(appYaml.toString());
+      assertFalse(projectHasAbsoluateAppYamlPath(project));
+      preferences.save();
+      assertTrue(projectHasAbsoluateAppYamlPath(project));
+
+      FlexDeployCommandHandler handler = new FlexDeployCommandHandler();
+      StagingDelegate stager = handler.getStagingDelegate(project);
+
+      IPath stagingDirectory = project.getLocation().append("stagingDirectory");
+      IPath safeWorkDirectory = project.getLocation().append("safeWorkDirectory");
+      IStatus status = stager.stage(stagingDirectory, safeWorkDirectory, null, null, null);
+
+      assertTrue(stagingDirectory.append("app-to-deploy.war").toFile().exists());
+      assertTrue(stagingDirectory.append("app.yaml").toFile().exists());
+      assertTrue(status.isOK());
+    } finally {
+      FlexDeployPreferences preferences = new FlexDeployPreferences(project);
+      preferences.resetToDefaults();
+      preferences.save();
+    }
+  }
+
+  private static boolean projectHasAbsoluateAppYamlPath(IProject project) {
+    return Paths.get(new FlexDeployPreferences(project).getAppYamlPath()).isAbsolute();
   }
 }

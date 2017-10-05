@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.integration.appengine;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotTestingUtilities;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotTimeoutManager;
+import com.google.cloud.tools.eclipse.swtbot.SwtBotTreeUtilities;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotWorkbenchActions;
 import java.io.File;
 import org.eclipse.core.resources.IProject;
@@ -76,6 +77,7 @@ public class SwtBotAppEngineActions {
     SWTBotShell shell = bot.shell("New Project");
     shell.activate();
 
+    SwtBotTreeUtilities.waitUntilTreeHasItems(bot, bot.tree());
     bot.tree().expandNode("Google Cloud Platform")
         .select("Google App Engine Standard Java Project");
     bot.button("Next >").click();
@@ -124,6 +126,47 @@ public class SwtBotAppEngineActions {
   }
 
   /**
+   * Use the the Eclipse general import project wizard to import an existing project from a
+   * location.
+   */
+  public static IProject importNativeProject(SWTWorkbenchBot bot, String projectName,
+      File extractedLocation) {
+    bot.menu("File").menu("Import...").click();
+
+    SWTBotShell shell = bot.shell("Import");
+    shell.activate();
+
+    SwtBotTreeUtilities.waitUntilTreeHasItems(bot, bot.tree());
+    bot.tree().expandNode("General").select("Existing Projects into Workspace");
+    bot.button("Next >").click();
+
+    // current comboBox is associated with a radio button
+    // with "Select root directory:"
+    bot.comboBox().setText(extractedLocation.getAbsolutePath());
+    bot.button("Refresh").click();
+
+    // can take a loooong time to resolve jars (e.g. servlet-api.jar) from Maven Central
+    int libraryResolutionTimeout = 300 * 1000/* ms */;
+    SwtBotTimeoutManager.setTimeout(libraryResolutionTimeout);
+    try {
+      SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
+    } catch (TimeoutException ex) {
+      System.err.println("FATAL: timed out while waiting for the wizard to close. Forcibly killing "
+          + "all shells: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1925");
+      System.err.println("FATAL: You will see tons of related errors: \"Widget is disposed\", "
+          + "\"Failed to execute runnable\", \"IllegalStateException\", etc.");
+      SwtBotWorkbenchActions.killAllShells(bot);
+      throw ex;
+    }
+    SwtBotTimeoutManager.resetTimeout();
+    IProject project =
+        waitUntilFacetedProjectExists(bot, getWorkspaceRoot().getProject(projectName));
+    SwtBotWorkbenchActions.waitForProjects(bot, project);
+    return project;
+  }
+
+
+  /**
    * Import a Maven project from a zip file
    */
   public static IProject importMavenProject(SWTWorkbenchBot bot, String projectName,
@@ -134,6 +177,7 @@ public class SwtBotAppEngineActions {
     SWTBotShell shell = bot.shell("Import");
     shell.activate();
 
+    SwtBotTreeUtilities.waitUntilTreeHasItems(bot, bot.tree());
     bot.tree().expandNode("Maven").select("Existing Maven Projects");
     bot.button("Next >").click();
 
@@ -181,5 +225,4 @@ public class SwtBotAppEngineActions {
   }
 
   private SwtBotAppEngineActions() {}
-
 }
