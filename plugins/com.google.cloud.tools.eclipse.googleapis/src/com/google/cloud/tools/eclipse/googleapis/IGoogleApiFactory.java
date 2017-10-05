@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.googleapis;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.services.appengine.v1.Appengine.Apps;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
+import com.google.api.services.servicemanagement.ServiceManagement;
 import com.google.api.services.storage.Storage;
 
 /**
@@ -44,4 +45,8 @@ public interface IGoogleApiFactory {
    */
   Projects newProjectsApi(Credential credential);
 
+  /**
+   * @return a ServiceManagement API client
+   */
+  ServiceManagement newServiceManagementApi(Credential credential);
 }

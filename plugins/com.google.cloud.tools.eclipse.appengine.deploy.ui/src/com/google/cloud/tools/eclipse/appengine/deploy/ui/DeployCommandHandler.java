@@ -74,14 +74,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
     try {
-      IProject project = ProjectFromSelectionHelper.getFirstProject(event);
-      if (project == null) {
-        throw new NullPointerException("Deploy menu enabled for non-project resources");
-      }
-      IFacetedProject facetedProject = ProjectFacetsManager.create(project);
-      if (facetedProject == null) {
-        throw new NullPointerException("Deploy menu enabled for non-faceted projects");
-      }
+      IProject project = getSelectedProject(event);
 
       if (PlatformUI.isWorkbenchRunning()) {
         if (!PlatformUI.getWorkbench().saveAllEditors(true)) {
@@ -91,7 +84,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
           Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
         }
       }
-      if (!checkProjectErrors(project)) {
+      if (project != null && !checkProjectErrors(project)) {
         MessageDialog.openInformation(HandlerUtil.getActiveShell(event),
                                       Messages.getString("build.error.dialog.title"),
                                       Messages.getString("build.error.dialog.message"));
@@ -116,6 +109,19 @@ public abstract class DeployCommandHandler extends AbstractHandler {
     }
   }
 
+  protected IProject getSelectedProject(ExecutionEvent event)
+      throws ExecutionException, CoreException {
+    IProject project = ProjectFromSelectionHelper.getFirstProject(event);
+    if (project == null) {
+      throw new NullPointerException("Deploy menu enabled for non-project resources");
+    }
+    IFacetedProject facetedProject = ProjectFacetsManager.create(project);
+    if (facetedProject == null) {
+      throw new NullPointerException("Deploy menu enabled for non-faceted projects");
+    }
+    return project;
+  }
+
   private IWorkspace getWorkspace(ExecutionEvent event) {
     return ServiceUtils.getService(event, IWorkspace.class);
   }
@@ -123,18 +129,24 @@ public abstract class DeployCommandHandler extends AbstractHandler {
   protected abstract DeployPreferencesDialog newDeployPreferencesDialog(Shell shell,
       IProject project, IGoogleLoginService loginService, IGoogleApiFactory googleApiFactory);
 
+  // It should better be named "getDeployPreferencesSnapshot" or something implying that. The
+  // snapshot then should be propagated as a single source of truth for the entire duration of
+  // the deploy job: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2416
+  protected abstract DeployPreferences getDeployPreferences(IProject project);
+
   private static boolean checkProjectErrors(IProject project) throws CoreException {
     int severity = project.findMaxProblemSeverity(
         IMarker.PROBLEM, true /* includeSubtypes */, IResource.DEPTH_INFINITE);
     return severity != IMarker.SEVERITY_ERROR;
   }
 
-  private void launchDeployJob(IProject project, Credential credential) throws IOException {
+  private void launchDeployJob(IProject project, Credential credential)
+      throws IOException, CoreException {
     AnalyticsPingManager.getInstance().sendPing(
         AnalyticsEvents.APP_ENGINE_DEPLOY, AnalyticsEvents.APP_ENGINE_DEPLOY_STANDARD, null);
 
     IPath workDirectory = createWorkDirectory();
-    DeployPreferences deployPreferences = new DeployPreferences(project);
+    DeployPreferences deployPreferences = getDeployPreferences(project);
 
     DeployConsole messageConsole =
         MessageConsoleUtilities.createConsole(getConsoleName(deployPreferences.getProjectId()),
@@ -149,8 +161,8 @@ public abstract class DeployCommandHandler extends AbstractHandler {
 
     StagingDelegate stagingDelegate = getStagingDelegate(project);
 
-    DeployJob deploy = new DeployJob(project, credential, workDirectory, outputStream, errorStream,
-        stagingDelegate);
+    DeployJob deploy = new DeployJob(deployPreferences, credential, workDirectory,
+        outputStream, errorStream, stagingDelegate);
     messageConsole.setJob(deploy);
     deploy.addJobChangeListener(new JobChangeAdapter() {
 
@@ -166,7 +178,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
     deploy.schedule();
   }
 
-  protected abstract StagingDelegate getStagingDelegate(IProject project);
+  protected abstract StagingDelegate getStagingDelegate(IProject project) throws CoreException;
 
   private static String getConsoleName(String projectId) {
     Date now = new Date();

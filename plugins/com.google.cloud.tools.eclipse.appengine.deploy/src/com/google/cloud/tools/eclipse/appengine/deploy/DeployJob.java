@@ -25,7 +25,6 @@ import com.google.common.base.Preconditions;
 import com.google.gson.JsonParseException;
 import java.io.IOException;
 import java.nio.file.Path;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -55,7 +54,6 @@ public class DeployJob extends WorkspaceJob {
   private static final String CREDENTIAL_FILENAME = "gcloud-credentials.json";
   private static final String DEFAULT_SERVICE = "default";
 
-  private final IProject project;
   private final Credential credential;
   private final IPath workDirectory;
   private final MessageConsoleStream stdoutOutputStream;
@@ -68,14 +66,13 @@ public class DeployJob extends WorkspaceJob {
    * @param workDirectory temporary work directory the job can safely use (e.g., for creating and
    *     copying various files to stage and deploy)
    */
-  public DeployJob(IProject project, Credential credential, IPath workDirectory,
+  public DeployJob(DeployPreferences deployPreferences, Credential credential, IPath workDirectory,
       MessageConsoleStream stdoutOutputStream, MessageConsoleStream stderrOutputStream,
       StagingDelegate stager) {
     super(Messages.getString("deploy.job.name")); //$NON-NLS-1$
-    deployPreferences = new DeployPreferences(project);
     Preconditions.checkNotNull(deployPreferences.getProjectId());
     Preconditions.checkArgument(!deployPreferences.getProjectId().isEmpty());
-    this.project = project;
+    this.deployPreferences = deployPreferences;
     this.credential = credential;
     this.workDirectory = workDirectory;
     this.stdoutOutputStream = stdoutOutputStream;
@@ -136,14 +133,14 @@ public class DeployJob extends WorkspaceJob {
     SubMonitor progress = SubMonitor.convert(monitor, 100);
 
     try {
-      getJobManager().beginRule(project, progress.newChild(1));
+      getJobManager().beginRule(stager.getSchedulingRule(), progress.newChild(1));
       IPath safeWorkDirectory = workDirectory.append(SAFE_STAGING_WORK_DIRECTORY_NAME);
-      return stager.stage(project, stagingDirectory, safeWorkDirectory,
+      return stager.stage(stagingDirectory, safeWorkDirectory,
           stdoutOutputStream, stderrOutputStream, progress.newChild(99));
     } catch (IllegalArgumentException ex) {
       return StatusUtil.error(this, Messages.getString("deploy.job.staging.failed"), ex);
     } finally {
-      getJobManager().endRule(project);
+      getJobManager().endRule(stager.getSchedulingRule());
     }
   }
 

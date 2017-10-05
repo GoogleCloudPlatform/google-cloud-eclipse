@@ -44,6 +44,7 @@ public class RelativeFileFieldSetterTest {
   @Mock private Text field;
   @Mock private FileDialog dialog;
   @Mock private SelectionEvent event;
+  private final String[] filter = new String[0];
 
   private IPath basePath;
 
@@ -56,7 +57,7 @@ public class RelativeFileFieldSetterTest {
   @Test
   public void testConstructor_nonAbsoluteBasePath() {
     try {
-      new RelativeFileFieldSetter(field, new Path("non/absolute/base/path"), dialog);
+      new RelativeFileFieldSetter(field, new Path("non/absolute/base/path"), filter, dialog);
       fail();
     } catch (IllegalArgumentException ex) {}
   }
@@ -66,7 +67,7 @@ public class RelativeFileFieldSetterTest {
     when(field.getText()).thenReturn("");
     when(dialog.open()).thenReturn(null /* means canceled */);
 
-    new RelativeFileFieldSetter(field, basePath, dialog).widgetSelected(event);
+    new RelativeFileFieldSetter(field, basePath, filter, dialog).widgetSelected(event);
     verify(field, never()).setText(anyString());
   }
 
@@ -75,7 +76,7 @@ public class RelativeFileFieldSetterTest {
     when(field.getText()).thenReturn("");
     when(dialog.open()).thenReturn(basePath + "/sub/directory/app.yaml");
 
-    new RelativeFileFieldSetter(field, basePath, dialog).widgetSelected(event);
+    new RelativeFileFieldSetter(field, basePath, filter, dialog).widgetSelected(event);
     verify(field).setText("sub/directory/app.yaml");
   }
 
@@ -84,7 +85,8 @@ public class RelativeFileFieldSetterTest {
     when(field.getText()).thenReturn("");
     when(dialog.open()).thenReturn("/path/outside/base/app.yaml");
 
-    new RelativeFileFieldSetter(field, new Path("/base/path"), dialog).widgetSelected(event);
+    new RelativeFileFieldSetter(field, new Path("/base/path"), filter, dialog)
+        .widgetSelected(event);
     verify(field).setText("../../path/outside/base/app.yaml");
   }
 
@@ -93,12 +95,12 @@ public class RelativeFileFieldSetterTest {
     when(field.getText()).thenReturn("src/main/appengine/app.yaml");
     when(dialog.open()).thenReturn(null);
 
-    new RelativeFileFieldSetter(field, basePath, dialog).widgetSelected(event);
+    new RelativeFileFieldSetter(field, basePath, filter, dialog).widgetSelected(event);
     // "basePath" is the first physically existing directory.
     verify(dialog).setFilterPath(basePath.toString());
 
     basePath.append("src").toFile().mkdir();
-    new RelativeFileFieldSetter(field, basePath, dialog).widgetSelected(event);
+    new RelativeFileFieldSetter(field, basePath, filter, dialog).widgetSelected(event);
     verify(dialog).setFilterPath(basePath + "/src");
   }
 
@@ -107,12 +109,19 @@ public class RelativeFileFieldSetterTest {
     when(field.getText()).thenReturn(basePath + "/deploy/temp/app.yaml");
     when(dialog.open()).thenReturn(null);
 
-    new RelativeFileFieldSetter(field, basePath, dialog).widgetSelected(event);
+    new RelativeFileFieldSetter(field, basePath, filter, dialog).widgetSelected(event);
     // "basePath" is the first physically existing directory.
     verify(dialog).setFilterPath(basePath.toString());
 
     basePath.append("deploy").toFile().mkdir();
-    new RelativeFileFieldSetter(field, basePath, dialog).widgetSelected(event);
+    new RelativeFileFieldSetter(field, basePath, filter, dialog).widgetSelected(event);
     verify(dialog).setFilterPath(basePath + "/deploy");
+  }
+
+  @Test
+  public void testFileDialogFileterExtensionSet() {
+    when(field.getText()).thenReturn("");
+    new RelativeFileFieldSetter(field, basePath, filter, dialog).widgetSelected(event);
+    verify(dialog).setFilterExtensions(filter);
   }
 }

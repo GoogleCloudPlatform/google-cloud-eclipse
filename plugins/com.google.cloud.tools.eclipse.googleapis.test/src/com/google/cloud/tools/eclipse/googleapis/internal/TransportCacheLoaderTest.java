@@ -39,9 +39,9 @@ public class TransportCacheLoaderTest {
   public void test() {
     when(proxyFactory.createProxy(any(URI.class))).thenReturn(mock(Proxy.class));
     HttpTransport load = new TransportCacheLoader(proxyFactory)
-        .load(GoogleApiUrl.APPENGINE_ADMIN_API);
+        .load(GoogleApi.APPENGINE_ADMIN_API);
     assertNotNull(load);
-    verify(proxyFactory).createProxy(GoogleApiUrl.APPENGINE_ADMIN_API.toUri());
+    verify(proxyFactory).createProxy(GoogleApi.APPENGINE_ADMIN_API.toUri());
   }
 
 }

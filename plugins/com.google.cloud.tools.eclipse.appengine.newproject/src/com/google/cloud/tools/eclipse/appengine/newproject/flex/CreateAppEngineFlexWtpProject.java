@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.flex;
 
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexFacet;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexWarFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.FacetUtil;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
@@ -66,9 +66,11 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
   private static final List<MavenCoordinates> PROJECT_DEPENDENCIES;
 
   static {
-    MavenCoordinates servletApi = new MavenCoordinates("javax.servlet", "javax.servlet-api"); //$NON-NLS-1$ //$NON-NLS-2$
-    servletApi.setVersion("3.1.0"); //$NON-NLS-1$
-    PROJECT_DEPENDENCIES = Collections.singletonList(servletApi);
+    MavenCoordinates.Builder servletApi = new MavenCoordinates.Builder()
+        .setGroupId("javax.servlet") //$NON-NLS-1$
+        .setArtifactId("javax.servlet-api") //$NON-NLS-1$
+        .setVersion("3.1.0"); //$NON-NLS-1$
+    PROJECT_DEPENDENCIES = Collections.singletonList(servletApi.build());
   }
 
   private ILibraryRepositoryService repositoryService;
@@ -114,9 +116,9 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
     facetUtil.addJavaFacetToBatch(JavaFacet.VERSION_1_8);
     facetUtil.addWebFacetToBatch(WebFacetUtils.WEB_31);
 
-    IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
+    IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexWarFacet.ID);
     IProjectFacetVersion appEngineFacetVersion =
-        appEngineFacet.getVersion(AppEngineFlexFacet.VERSION);
+        appEngineFacet.getVersion(AppEngineFlexWarFacet.VERSION);
     facetUtil.addFacetToBatch(appEngineFacetVersion, null /* config */);
     facetUtil.install(subMonitor.newChild(50));
   }

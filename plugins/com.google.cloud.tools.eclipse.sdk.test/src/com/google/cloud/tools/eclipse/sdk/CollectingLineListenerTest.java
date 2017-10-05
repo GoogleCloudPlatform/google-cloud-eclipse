@@ -37,7 +37,11 @@ public class CollectingLineListenerTest {
   @Test
   public void testGetCollectedMessage_whenPredicateIsFalseNoMessageIsCollected() {
     Predicate<String> alwaysFalse = Predicates.alwaysFalse();
+<<<<<<< HEAD
     ProcessingLineListener listener = new ProcessingLineListener(alwaysFalse);
+=======
+    CollectingLineListener listener = new CollectingLineListener(alwaysFalse);
+>>>>>>> master
     listener.onOutputLine("Error message");
     assertTrue(listener.getCollectedMessages().isEmpty());
   }
@@ -45,7 +49,11 @@ public class CollectingLineListenerTest {
   @Test
   public void testGetCollectedMessage_whenPredicateIsTrueMessagesArecollected() {
     Predicate<String> alwaysTrue = Predicates.alwaysTrue();
+<<<<<<< HEAD
     ProcessingLineListener listener = new ProcessingLineListener(alwaysTrue);
+=======
+    CollectingLineListener listener = new CollectingLineListener(alwaysTrue);
+>>>>>>> master
     listener.onOutputLine("Error message1");
     listener.onOutputLine("Error message2");
     List<String> collectedMessages = listener.getCollectedMessages();

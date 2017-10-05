@@ -22,17 +22,17 @@ import org.eclipse.jdt.core.JavaCore;
 /**
  * Represents a {@link IClasspathAttribute} in such a way that it can be easily transformed into JSON.
  */
-public class SerializableAttribute {
+class SerializableAttribute {
 
   private final String name;
   private final String value;
 
-  public SerializableAttribute(IClasspathAttribute attribute) {
+  SerializableAttribute(IClasspathAttribute attribute) {
     name = attribute.getName();
     value = attribute.getValue();
   }
 
-  public IClasspathAttribute toClasspathAttribute() {
+  IClasspathAttribute toClasspathAttribute() {
     return JavaCore.newClasspathAttribute(name, value);
   }
 }

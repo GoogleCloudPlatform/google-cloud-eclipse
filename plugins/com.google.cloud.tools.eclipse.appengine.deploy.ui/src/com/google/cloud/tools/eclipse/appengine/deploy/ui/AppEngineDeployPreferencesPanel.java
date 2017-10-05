@@ -48,6 +48,7 @@ import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.ObservablesManager;
 import org.eclipse.core.databinding.UpdateValueStrategy;
+import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.databinding.beans.PojoProperties;
 import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.value.ComputedValue;
@@ -118,12 +119,12 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
   private final Image refreshIcon = SharedImages.REFRESH_IMAGE_DESCRIPTOR.createImage(getDisplay());
 
   protected final IProject project;
-  protected final DeployPreferences model;
+  private final DeployPreferences model;
   private final ObservablesManager observables = new ObservablesManager();
-  protected final DataBindingContext bindingContext = new DataBindingContext();
+  private final DataBindingContext bindingContext = new DataBindingContext();
 
   private final Runnable layoutChangedHandler;
-  protected final boolean requireValues;
+  private final boolean requireValues;
 
   private final ProjectRepository projectRepository;
   private final FormToolkit formToolkit;
@@ -223,14 +224,42 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
         gcpProjectToProjectId, projectIdToGcpProject);
   }
 
-  private void setupTextFieldDataBinding(Control control, String modelPropertyName,
-      IValidator setAfterGetValidator) {
-    ISWTObservableValue controlValue = WidgetProperties.text(SWT.Modify).observe(control);
+  /**
+   * Binds a {@link Text} field with a property of the {@link DeployPreferences deploy
+   * preferences model} given to the panel. This method honors the panel's validation mode (set
+   * through the {@code requireValues} parameter when this panel was instantiated) such that {@code
+   * validator} is ignored if {@code requireValues} is {@code false}.
+   *
+   * @see #AppEngineDeployPreferencesPanel
+   */
+  protected void setupPossiblyUnvalidatedTextFieldDataBinding(Text text, String modelPropertyName,
+      ValidationStatusProvider validator) {
+    ISWTObservableValue textValue = WidgetProperties.text(SWT.Modify).observe(text);
     IObservableValue modelValue = PojoProperties.value(modelPropertyName).observe(model);
 
-    bindingContext.bindValue(controlValue, modelValue,
-        new UpdateValueStrategy().setAfterGetValidator(setAfterGetValidator),
-        new UpdateValueStrategy().setAfterGetValidator(setAfterGetValidator));
+    bindingContext.bindValue(textValue, modelValue);
+    if (requireValues) {
+      bindingContext.addValidationStatusProvider(validator);
+    }
+  }
+
+  /**
+   * Binds a {@link Text} field with a property of the {@link DeployPreferences deploy
+   * preferences model} given to the panel.
+   *
+   * Unlike {@link #setupFileFieldDataBinding}, {@code setAfterGetValidator} is always enforced
+   * regardless of the panel's validation mode.
+   *
+   * @see #setupTextFieldDataBinding
+   */
+  private void setupTextFieldDataBinding(Text text, String modelPropertyName,
+      IValidator afterGetValidator) {
+    ISWTObservableValue textValue = WidgetProperties.text(SWT.Modify).observe(text);
+    IObservableValue modelValue = PojoProperties.value(modelPropertyName).observe(model);
+
+    bindingContext.bindValue(textValue, modelValue,
+        new UpdateValueStrategy().setAfterGetValidator(afterGetValidator),
+        new UpdateValueStrategy().setAfterGetValidator(afterGetValidator));
   }
 
   /**

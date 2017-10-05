@@ -16,46 +16,38 @@
 
 package com.google.cloud.tools.eclipse.dataflow.core.project;
 
-import com.google.cloud.tools.eclipse.dataflow.core.proxy.ListenableFutureProxy;
-import com.google.common.util.concurrent.SettableFuture;
+import com.google.cloud.tools.eclipse.dataflow.core.project.VerifyStagingLocationJob.VerifyStagingLocationResult;
+import com.google.cloud.tools.eclipse.util.jobs.FuturisticJob;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 
 /**
- * A job that verifies a Staging Location.
+ * A job that verifies that a Staging Location exists.
  */
-public class VerifyStagingLocationJob extends Job {
+public class VerifyStagingLocationJob extends FuturisticJob<VerifyStagingLocationResult> {
   private final GcsDataflowProjectClient client;
   private final String email;
   private final String stagingLocation;
-  private final SettableFuture<VerifyStagingLocationResult> future;
 
-  public static VerifyStagingLocationJob create(
-      GcsDataflowProjectClient client, String email, String stagingLocation) {
-    return new VerifyStagingLocationJob(client, email, stagingLocation);
-  }
-
-  private VerifyStagingLocationJob(GcsDataflowProjectClient client,
+  public VerifyStagingLocationJob(GcsDataflowProjectClient client,
       String email, String stagingLocation) {
     super("Verify Staging Location " + stagingLocation);
     this.client = client;
     this.email = email;
     this.stagingLocation = stagingLocation;
-    this.future = SettableFuture.create();
   }
 
   @Override
-  protected IStatus run(IProgressMonitor monitor) {
-    VerifyStagingLocationResult result = new VerifyStagingLocationResult(
-        email, stagingLocation, client.locationIsAccessible(stagingLocation));
-    future.set(result);
-    return Status.OK_STATUS;
+  protected VerifyStagingLocationResult compute(IProgressMonitor monitor) {
+    boolean locationIsAccessible = client.locationIsAccessible(stagingLocation);
+    return new VerifyStagingLocationResult(email, stagingLocation, locationIsAccessible);
   }
 
-  public ListenableFutureProxy<VerifyStagingLocationResult> getVerifyResult() {
-    return new ListenableFutureProxy<>(future);
+  public String getEmail() {
+    return email;
+  }
+
+  public String getStagingLocation() {
+    return stagingLocation;
   }
 
   /**

@@ -32,7 +32,9 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
@@ -59,7 +61,14 @@ public abstract class CloudLibrariesPage extends WizardPage implements IClasspat
     Composite composite = new Composite(parent, SWT.BORDER);
     composite.setLayout(new GridLayout(2, true));
     
-    librariesSelector = new LibrarySelectorGroup(composite, group);
+    boolean java7AppEngineStandardProject = false;
+    IProjectFacetVersion facetVersion =
+        AppEngineStandardFacet.getProjectFacetVersion(project.getProject());
+    if (facetVersion != null && facetVersion.getVersionString().equals("JRE7")) {
+      java7AppEngineStandardProject = true;
+    }
+    
+    librariesSelector = new LibrarySelectorGroup(composite, group, java7AppEngineStandardProject);
     
     setControl(composite);
   }
@@ -79,6 +88,7 @@ public abstract class CloudLibrariesPage extends WizardPage implements IClasspat
 
   @Override
   public void setSelection(IClasspathEntry containerEntry) {
+    // todo can we use the containerEntry to tick the checkboxes in the library selector group?
   }
 
   @Override
@@ -92,18 +102,17 @@ public abstract class CloudLibrariesPage extends WizardPage implements IClasspat
     if (libraries == null || libraries.isEmpty()) {
       return null;
     }
-  
+
     try {
       if (MavenUtils.hasMavenNature(project.getProject())) {
         BuildPath.addMavenLibraries(project.getProject(), libraries, new NullProgressMonitor());
         return new IClasspathEntry[0];
       } else {
-        IClasspathEntry[] added =
-            BuildPath.listAdditionalLibraries(project, libraries, new NullProgressMonitor());
+        Library masterLibrary = BuildPath.collectLibraryFiles(project, libraries);
+        IClasspathEntry[] added = BuildPath.listNativeLibrary(project, masterLibrary);
         return added;
       }
     } catch (CoreException ex) {
-      logger.log(Level.WARNING, "Error adding libraries to project", ex);
       return new IClasspathEntry[0];
     }
   }

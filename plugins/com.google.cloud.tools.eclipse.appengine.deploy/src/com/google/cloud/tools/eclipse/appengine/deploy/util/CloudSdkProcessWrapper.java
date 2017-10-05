@@ -21,6 +21,7 @@ import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.StringBuilderProcessOutputLineListener;
+import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
 import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardStagingDelegate;
 import com.google.cloud.tools.eclipse.sdk.GcloudStructuredErrorLogMessageExtractor;
@@ -42,7 +43,7 @@ import org.eclipse.ui.console.MessageConsoleStream;
  * Helper class wrapping {@link CloudSdk} to hide the bulk of low-level work dealing with process
  * cancellation, process exit monitoring, error output line collection, standard output collection,
  * etc. Intended to be used exclusively by {@link StandardStagingDelegate} and
- * {@link AppEngineDeployer} for their convenience.
+ * {@link AppEngineProjectDeployer} for their convenience.
  */
 public class CloudSdkProcessWrapper {
 
@@ -132,11 +133,11 @@ public class CloudSdkProcessWrapper {
 
   private class StoreProcessObjectListener implements ProcessStartListener {
     @Override
-    public void onStart(Process proces) {
+    public void onStart(Process process) {
       synchronized (CloudSdkProcessWrapper.this) {
-        process = proces;
+        CloudSdkProcessWrapper.this.process = process;
         if (interrupted) {
-          process.destroy();
+          CloudSdkProcessWrapper.this.process.destroy();
         }
       }
     }
@@ -155,7 +156,7 @@ public class CloudSdkProcessWrapper {
     @Override
     public void onExit(int exitCode) {
       if (exitCode != 0) {
-        exitStatus = StatusUtil.error(this, getErrorMessage(exitCode));
+        exitStatus = StatusUtil.error(this, getErrorMessage(exitCode), exitCode);
       } else {
         exitStatus = Status.OK_STATUS;
       }

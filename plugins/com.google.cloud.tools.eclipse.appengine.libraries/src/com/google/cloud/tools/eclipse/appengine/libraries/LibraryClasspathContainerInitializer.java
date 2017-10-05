@@ -52,8 +52,8 @@ public class LibraryClasspathContainerInitializer extends ClasspathContainerInit
 
   @VisibleForTesting
   LibraryClasspathContainerInitializer(String containerPathPrefix,
-                                       LibraryClasspathContainerSerializer serializer,
-                                       ILibraryClasspathContainerResolverService resolverService) {
+      LibraryClasspathContainerSerializer serializer,
+      ILibraryClasspathContainerResolverService resolverService) {
     this.containerPathPrefix = containerPathPrefix;
     this.serializer = serializer;
     this.resolverService = resolverService;

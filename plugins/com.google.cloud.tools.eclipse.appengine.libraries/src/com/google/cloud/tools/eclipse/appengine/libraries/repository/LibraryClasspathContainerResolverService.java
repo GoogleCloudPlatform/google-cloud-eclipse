@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.repository;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
 import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService;
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
 import com.google.cloud.tools.eclipse.appengine.libraries.Messages;
@@ -35,6 +36,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.logging.Logger;
 import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -59,9 +61,11 @@ import org.osgi.service.component.annotations.Reference;
 @Component
 public class LibraryClasspathContainerResolverService
     implements ILibraryClasspathContainerResolverService {
+  private static final Logger logger =
+      Logger.getLogger(LibraryClasspathContainerResolverService.class.getName());
 
   private static final String CLASSPATH_ATTRIBUTE_SOURCE_URL =
-      "com.google.cloud.tools.eclipse.appengine.libraries.sourceUrl";
+      "com.google.cloud.tools.eclipse.appengine.libraries.sourceUrl"; //$NON-NLS-1$
 
   private ILibraryRepositoryService repositoryService;
   private LibraryClasspathContainerSerializer serializer;
@@ -72,18 +76,19 @@ public class LibraryClasspathContainerResolverService
       IStatus status = Status.OK_STATUS;
       IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
       SubMonitor subMonitor = SubMonitor.convert(monitor,
-                                                 Messages.getString("TaskResolveLibraries"),
-                                                 getTotalwork(rawClasspath));
+          Messages.getString("TaskResolveLibraries"), //$NON-NLS-1$
+          getTotalWork(rawClasspath));
       for (IClasspathEntry classpathEntry : rawClasspath) {
         if (classpathEntry.getPath().segment(0).equals(Library.CONTAINER_PATH_PREFIX)) {
-          status = StatusUtil.merge(status, resolveContainer(javaProject,
-                                                             classpathEntry.getPath(),
-                                                             subMonitor.newChild(1)));
+          IStatus resolveContainerStatus =
+              resolveContainer(javaProject, classpathEntry.getPath(), subMonitor.newChild(1));
+          status = StatusUtil.merge(status, resolveContainerStatus);
         }
       }
       return status;
     } catch (CoreException ex) {
-      return StatusUtil.error(this, Messages.getString("TaskResolveLibrariesError"), ex);
+      return StatusUtil.error(this, 
+          Messages.getString("TaskResolveLibrariesError"), ex); //$NON-NLS-1$
     }
   }
 
@@ -91,7 +96,8 @@ public class LibraryClasspathContainerResolverService
   public IClasspathEntry[] resolveLibraryAttachSourcesSync(String libraryId) throws CoreException {
     Library library = CloudLibraries.getLibrary(libraryId);
     if (library == null) {
-      throw new CoreException(StatusUtil.error(this, Messages.getString("InvalidLibraryId",
+      throw new CoreException(
+          StatusUtil.error(this, Messages.getString("InvalidLibraryId", //$NON-NLS-1$
           libraryId)));
     }
 
@@ -106,18 +112,33 @@ public class LibraryClasspathContainerResolverService
   public IStatus resolveContainer(IJavaProject javaProject, IPath containerPath,
                                   IProgressMonitor monitor) {
     Preconditions.checkArgument(containerPath.segment(0).equals(Library.CONTAINER_PATH_PREFIX));
+    
+    SubMonitor subMonitor = SubMonitor.convert(monitor, 10);
+    
     try {
       String libraryId = containerPath.segment(1);
-      Library library = CloudLibraries.getLibrary(libraryId);
+      Library library = null;
+      if (CloudLibraries.MASTER_CONTAINER_ID.equals(libraryId)) {
+        List<String> referencedIds = serializer.loadLibraryIds(javaProject, containerPath);
+        List<Library> referencedLibraries = new ArrayList<>();
+        for (String referencedId : referencedIds) {
+          Library referencedLibrary = CloudLibraries.getLibrary(referencedId);
+          if (referencedLibrary != null) {
+            referencedLibraries.add(referencedLibrary);
+          } else {
+            logger.severe("Referenced library not found: " + referencedId);
+          }
+        }
+        library = BuildPath.collectLibraryFiles(javaProject, referencedLibraries);
+      } else {
+        library = CloudLibraries.getLibrary(libraryId);
+      }
       if (library != null) {
         List<Job> sourceAttacherJobs = new ArrayList<>();
         LibraryClasspathContainer container = resolveLibraryFiles(javaProject, containerPath,
-                                                                  library, sourceAttacherJobs,
-                                                                  monitor);
-        JavaCore.setClasspathContainer(containerPath,
-                                       new IJavaProject[] {javaProject},
-                                       new IClasspathContainer[] {container},
-                                       new NullProgressMonitor());
+            library, sourceAttacherJobs, subMonitor.newChild(9));
+        JavaCore.setClasspathContainer(containerPath, new IJavaProject[] {javaProject},
+            new IClasspathContainer[] {container}, subMonitor.newChild(1));
         serializer.saveContainer(javaProject, container);
         for (Job job : sourceAttacherJobs) {
           job.schedule();
@@ -158,44 +179,40 @@ public class LibraryClasspathContainerResolverService
   }
 
   private LibraryClasspathContainer resolveLibraryFiles(IJavaProject javaProject,
-                                                        IPath containerPath,
-                                                        Library library,
-                                                        List<Job> sourceAttacherJobs,
-                                                        IProgressMonitor monitor)
-                                                            throws CoreException {
+      IPath containerPath, Library library, List<Job> sourceAttacherJobs, IProgressMonitor monitor)
+      throws CoreException {
+    
     List<LibraryFile> libraryFiles = library.getLibraryFiles();
     SubMonitor subMonitor = SubMonitor.convert(monitor, libraryFiles.size());
     subMonitor.subTask(Messages.getString("TaskResolveArtifacts", getLibraryDescription(library)));
     SubMonitor child = subMonitor.newChild(libraryFiles.size());
 
     List<IClasspathEntry> entries = new ArrayList<>();
-    for (final LibraryFile libraryFile : libraryFiles) {
-      IClasspathEntry newLibraryEntry =
-          resolveLibraryFileAttachSourceAsync(javaProject, containerPath, libraryFile,
-                                              sourceAttacherJobs, monitor);
+    for (LibraryFile libraryFile : libraryFiles) {
+      IClasspathEntry newLibraryEntry = resolveLibraryFileAttachSourceAsync(javaProject,
+          containerPath, libraryFile, sourceAttacherJobs, monitor);
       entries.add(newLibraryEntry);
       child.worked(1);
     }
     monitor.done();
-    LibraryClasspathContainer container =
-        new LibraryClasspathContainer(containerPath,
-                                      getLibraryDescription(library), entries);
+    LibraryClasspathContainer container = new LibraryClasspathContainer(
+        containerPath, getLibraryDescription(library), entries, libraryFiles);
+    
     return container;
   }
 
   private IClasspathEntry resolveLibraryFileAttachSourceAsync(IJavaProject javaProject,
-                                                              IPath containerPath,
-                                                              LibraryFile libraryFile,
-                                                              List<Job> sourceAttacherJobs,
-                                                              IProgressMonitor monitor)
-                                                                  throws CoreException {
+      IPath containerPath, LibraryFile libraryFile, List<Job> sourceAttacherJobs,
+      IProgressMonitor monitor) 
+          throws CoreException {
+    
     Artifact artifact = repositoryService.resolveArtifact(libraryFile, monitor);
-    IPath libraryPath = new Path(artifact.getFile().getAbsolutePath());
+    IPath artifactPath = new Path(artifact.getFile().getAbsolutePath());
     Job job = createSourceAttacherJob(javaProject, containerPath, libraryFile,
-                                      monitor, artifact, libraryPath);
+                                      monitor, artifact, artifactPath);
     sourceAttacherJobs.add(job);
     IClasspathEntry newLibraryEntry =
-        JavaCore.newLibraryEntry(libraryPath,
+        JavaCore.newLibraryEntry(artifactPath,
                                  null /* sourceAttachmentPath */,
                                  null /* sourceAttachmentRootPath */,
                                  getAccessRules(libraryFile.getFilters()),
@@ -219,17 +236,23 @@ public class LibraryClasspathContainerResolverService
     });
   }
 
-  private IClasspathEntry resolveLibraryFileAttachSourceSync(final LibraryFile libraryFile)
+  private IClasspathEntry resolveLibraryFileAttachSourceSync(LibraryFile libraryFile)
       throws CoreException {
 
-    final Artifact artifact =
-        repositoryService.resolveArtifact(libraryFile, new NullProgressMonitor());
+    Artifact artifact = repositoryService.resolveArtifact(libraryFile, new NullProgressMonitor());
     IPath libraryPath = new Path(artifact.getFile().getAbsolutePath());
+    
+    // Not all artifacts have sources; need to work if no source artifact is available
+    // e.g. appengine-api-sdk doesn't
     IPath sourceAttachmentPath = null;
-    sourceAttachmentPath = repositoryService.resolveSourceArtifact(libraryFile,
-                                                                   artifact.getVersion(),
-                                                                   new NullProgressMonitor());
-    final IClasspathEntry newLibraryEntry =
+    try {
+      sourceAttachmentPath = repositoryService.resolveSourceArtifact(libraryFile,
+          artifact.getVersion(), new NullProgressMonitor());
+    } catch (CoreException ex) {
+      // continue without source
+    }
+    
+    IClasspathEntry newLibraryEntry =
         JavaCore.newLibraryEntry(libraryPath,
                                  sourceAttachmentPath,
                                  null /*  sourceAttachmentRootPath */,
@@ -240,11 +263,11 @@ public class LibraryClasspathContainerResolverService
 
   }
 
-  private static int getTotalwork(IClasspathEntry[] rawClasspath) {
+  private static int getTotalWork(IClasspathEntry[] rawClasspath) {
     int sum = 0;
     for (IClasspathEntry element : rawClasspath) {
       if (isLibraryClasspathEntry(element.getPath())) {
-        ++sum;
+        sum++;
       }
     }
     return sum;

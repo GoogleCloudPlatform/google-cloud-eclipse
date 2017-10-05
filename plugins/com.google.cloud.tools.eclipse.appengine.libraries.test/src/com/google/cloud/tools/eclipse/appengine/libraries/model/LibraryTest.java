@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -25,8 +26,12 @@ import static org.junit.Assert.assertTrue;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+
+import org.eclipse.core.runtime.CoreException;
 import org.junit.Test;
 
 public class LibraryTest {
@@ -119,9 +124,76 @@ public class LibraryTest {
   }
 
   @Test
+  public void testResolvedDefaultsToTrue() throws CoreException {
+    assertTrue(library.isResolved());
+    library.resolveDependencies(); // no-op because the library is marked resolved
+    library.setResolved(false);
+    assertFalse(library.isResolved());
+  }
+
+  @Test
+  public void testResolvedDuplicates() throws CoreException {
+    MavenCoordinates coordinates19 = new MavenCoordinates.Builder()
+        .setGroupId("com.google.guava")
+        .setArtifactId("guava")
+        .setVersion("19.0")
+        .build();    
+    MavenCoordinates coordinates20 = new MavenCoordinates.Builder()
+        .setGroupId("com.google.guava")
+        .setArtifactId("guava")
+        .setVersion("20.0")
+        .build();    
+    
+    LibraryFile guava19 = new LibraryFile(coordinates19);
+    LibraryFile guava20 = new LibraryFile(coordinates20);
+    
+    List<LibraryFile> guavas = new ArrayList<>();
+    guavas.add(guava19);
+    guavas.add(guava20);
+    
+    List<LibraryFile> actual = Library.resolveDuplicates(guavas);
+    assertEquals(1, actual.size());
+    assertEquals("20.0", actual.get(0).getMavenCoordinates().getVersion());
+  }
+  
+  @Test
+  public void testResolvedDuplicates_semanticVersioning() throws CoreException {
+    MavenCoordinates coordinates1 = new MavenCoordinates.Builder()
+        .setGroupId("com.google.guava")
+        .setArtifactId("guava")
+        .setVersion("19.0.1")
+        .build();    
+    MavenCoordinates coordinates2 = new MavenCoordinates.Builder()
+        .setGroupId("com.google.guava")
+        .setArtifactId("guava")
+        .setVersion("19.0.3")
+        .build();
+    MavenCoordinates coordinates3 = new MavenCoordinates.Builder()
+        .setGroupId("com.google.guava")
+        .setArtifactId("guava")
+        .setVersion("19.0.2")
+        .build();
+    
+    LibraryFile guava1 = new LibraryFile(coordinates1);
+    LibraryFile guava2 = new LibraryFile(coordinates2);
+    LibraryFile guava3 = new LibraryFile(coordinates3);
+    
+    List<LibraryFile> guavas = new ArrayList<>();
+    guavas.add(guava1);
+    guavas.add(guava2);
+    guavas.add(guava3);
+    
+    List<LibraryFile> actual = Library.resolveDuplicates(guavas);
+    assertEquals(1, actual.size());
+    assertEquals("19.0.3", actual.get(0).getMavenCoordinates().getVersion());
+  }
+  
+  @Test
   public void testSetExport() {
     library.setExport(false);
     assertFalse(library.isExport());
+    library.setExport(true);
+    assertTrue(library.isExport());
   }
 
   @Test
@@ -142,20 +214,21 @@ public class LibraryTest {
     assertThat(library.getLibraryDependencies().size(), is(1));
     assertThat(library.getLibraryDependencies().get(0), is("libraryId"));
   }
-
+  
   @Test
-  public void testRecommendationDefaultsToOptional() {
-    assertThat(library.getRecommendation(), is(LibraryRecommendation.OPTIONAL));
+  public void testSetJavaVersion() {
+    assertEquals("1.7", library.getJavaVersion());
+    library.setJavaVersion("1.9");
+    assertEquals("1.9", library.getJavaVersion());
   }
-
+  
   @Test
-  public void testSetRecommendation() {
-    library.setRecommendation(LibraryRecommendation.REQUIRED);
-    assertThat(library.getRecommendation(), is(LibraryRecommendation.REQUIRED));
-  }
+  public void testToString() {
+    library.setName("foo");
+    String s = library.toString();
 
-  @Test(expected = NullPointerException.class)
-  public void testSetRecommendation_null() {
-    library.setRecommendation(null);
+    assertTrue(s, s.startsWith("Library"));
+    assertTrue(s, s.contains(library.getName()));
+    assertTrue(s, s.contains(library.getId()));
   }
 }

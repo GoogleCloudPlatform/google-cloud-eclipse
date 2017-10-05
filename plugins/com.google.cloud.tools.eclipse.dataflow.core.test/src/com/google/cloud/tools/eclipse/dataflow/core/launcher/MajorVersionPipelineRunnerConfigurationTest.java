@@ -31,7 +31,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 /**
  * Test that each {@link MajorVersion} has associated configuration settings in the
- * {@link PipelineRunner#RUNNERS_IN_VERSION} mapping table and {@link PipelineLaunchConfiguration}.
+ * {@code PipelineRunner#RUNNERS_IN_VERSION} mapping table and {@link PipelineLaunchConfiguration}.
  */
 @RunWith(Parameterized.class)
 public class MajorVersionPipelineRunnerConfigurationTest {

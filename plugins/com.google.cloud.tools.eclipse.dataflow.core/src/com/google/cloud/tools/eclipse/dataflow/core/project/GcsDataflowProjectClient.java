@@ -17,6 +17,8 @@
 package com.google.cloud.tools.eclipse.dataflow.core.project;
 
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.googleapis.json.GoogleJsonError;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.Bucket;
 import com.google.api.services.storage.model.Buckets;
@@ -52,12 +54,14 @@ public class GcsDataflowProjectClient {
   /**
    * Gets a collection of potential Staging Locations.
    */
-  public SortedSet<String> getPotentialStagingLocations(String projectName) throws IOException {
+  public SortedSet<String> getPotentialStagingLocations(String projectId) throws IOException {
     SortedSet<String> result = new TreeSet<>();
-    Buckets buckets = gcsClient.buckets().list(projectName).execute();
+    Buckets buckets = gcsClient.buckets().list(projectId).execute();
     List<Bucket> bucketList = buckets.getItems();
-    for (Bucket bucket : bucketList) {
-      result.add(GCS_PREFIX + bucket.getName());
+    if (bucketList != null) {
+      for (Bucket bucket : bucketList) {
+        result.add(GCS_PREFIX + bucket.getName());
+      }
     }
     return result;
   }
@@ -67,7 +71,7 @@ public class GcsDataflowProjectClient {
    * exist. This may be a long-running blocking operation.
    */
   public StagingLocationVerificationResult createStagingLocation(
-      String projectName, String stagingLocation, IProgressMonitor progressMonitor) {
+      String projectId, String stagingLocation, IProgressMonitor progressMonitor) {
     SubMonitor monitor = SubMonitor.convert(progressMonitor, 2);
     String bucketName = toGcsBucketName(stagingLocation);
     if (locationIsAccessible(stagingLocation)) { // bucket already exists
@@ -80,9 +84,12 @@ public class GcsDataflowProjectClient {
     try {
       Bucket newBucket = new Bucket();
       newBucket.setName(bucketName);
-      gcsClient.buckets().insert(projectName, newBucket).execute();
+      gcsClient.buckets().insert(projectId, newBucket).execute();
       return new StagingLocationVerificationResult(
           String.format("Bucket %s created", bucketName), true);
+    } catch (GoogleJsonResponseException ex) {
+      GoogleJsonError error = ex.getDetails();
+      return new StagingLocationVerificationResult(error.getMessage(), false);
     } catch (IOException e) {
       return new StagingLocationVerificationResult(e.getMessage(), false);
     } finally {
@@ -148,7 +155,7 @@ public class GcsDataflowProjectClient {
     /**
      * Gets the message associated with this attempt to create a staging location.
      */
-    String getMessage() {
+    public String getMessage() {
       return message;
     }
 
