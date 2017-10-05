@@ -36,8 +36,7 @@ public class CloudLibraries {
   public static final String APP_ENGINE_GROUP = "appengine";   //$NON-NLS-1$
 
   /**
-   * Library files for Google Client APIs for Java; specifically
-   * google-api-client, oAuth, and google-http-client.
+   * Library files for Google Cloud APIs (mostly Google Cloud Client Libraries for Java).
    */
   public static final String CLIENT_APIS_GROUP = "clientapis"; //$NON-NLS-1$
 
