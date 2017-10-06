@@ -67,7 +67,6 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
 
   static {
     // matches the dependencies in javax:javaee-web-api:7.0
-    // FIXME: include javax.el:javax.el-api:3.0.0?
     //@formatter:off
     MavenCoordinates servletApi = new MavenCoordinates.Builder()
         .setGroupId("javax.servlet") //$NON-NLS-1$

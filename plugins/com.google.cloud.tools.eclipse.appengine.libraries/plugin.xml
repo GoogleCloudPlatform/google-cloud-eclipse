@@ -71,6 +71,7 @@
           group="servlet"
           siteUri="http://www.oracle.com/technetwork/java/javaee/servlet/index.html"
           export="false">
+      <libraryDependency id="appengine-api"/>
       <libraryFile
             javadocUri="https://docs.oracle.com/cd/E17802_01/products/products/servlet/2.5/docs/servlet-2_5-mr2/">
         <mavenCoordinates

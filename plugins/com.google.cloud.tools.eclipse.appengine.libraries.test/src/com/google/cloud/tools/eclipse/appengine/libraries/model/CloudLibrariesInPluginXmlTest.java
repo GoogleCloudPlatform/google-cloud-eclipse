@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -38,19 +39,22 @@ public class CloudLibrariesInPluginXmlTest {
   private static final String APP_ENGINE_API_LIBRARY_ID = "appengine-api";
   private static final String CLOUD_ENDPOINTS_LIBRARY_ID = "appengine-endpoints";
   private static final String OBJECTIFY_LIBRARY_ID = "objectify";
-  private static final String SERVLET_API_LIBRARY_ID = "servlet-api-2.5";
-  private static final String JSP_API_LIBRARY_ID = "jsp-api-2.1";
+  private static final String APP_ENGINE_SERVLET_2_5_LIBRARY_ID = "appengine-servlet-2.5";
 
   @Test
   public void testLibrarySize() {
-    assertThat(CloudLibraries.getLibraries("appengine").size(), is(2));
+    List<Library> appEngineLibraries = CloudLibraries.getLibraries("appengine");
+    assertThat(appEngineLibraries, hasSize(2));
+    assertThat(appEngineLibraries,
+        Matchers.hasItem(Matchers.<Library>hasToString("Library: id=objectify; name=Objectify")));
+    assertThat(appEngineLibraries, Matchers.hasItem(Matchers
+        .<Library>hasToString("Library: id=appengine-endpoints; name=Google Cloud Endpoints")));
     // There may be different number of servlet libraries depending on whether the
     // .appengine.java.standard.java8 bundle is present
     List<Library> servletLibraries = CloudLibraries.getLibraries("servlet");
     assertThat(servletLibraries, Matchers.hasItem(
-        Matchers.<Library>hasToString("Library: id=servlet-api-2.5; name=Servlet API 2.5")));
-    assertThat(servletLibraries, Matchers.hasItem(
-        Matchers.<Library>hasToString("Library: id=jsp-api-2.1; name=Java Server Pages API 2.1")));
+        Matchers.<Library>hasToString(
+            "Library: id=appengine-servlet-2.5; name=App Engine: Servlet API 2.5")));
   }
 
   @Test
@@ -66,7 +70,7 @@ public class CloudLibrariesInPluginXmlTest {
         is(new URI("https://cloud.google.com/appengine/docs/java/")));
     assertTrue(appEngineLibrary.isExport());
 
-    assertThat(appEngineLibrary.getLibraryFiles().size(), is(1));
+    assertThat(appEngineLibrary.getLibraryFiles(), hasSize(1));
     LibraryFile libraryFile = appEngineLibrary.getLibraryFiles().get(0);
     assertThat(libraryFile.getJavadocUri(),
         is(new URI("https://cloud.google.com/appengine/docs/java/javadoc/")));
@@ -84,7 +88,7 @@ public class CloudLibrariesInPluginXmlTest {
 
     assertNotNull(libraryFile.getFilters());
     List<Filter> filters = libraryFile.getFilters();
-    assertThat(filters.size(), is(4));
+    assertThat(filters, hasSize(4));
     assertTrue(filters.get(0).isExclude());
     assertThat(filters.get(0).getPattern(), is("com/google/appengine/repackaged/**"));
     assertTrue(filters.get(1).isExclude());
@@ -108,7 +112,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertTrue(endpointsLibrary.isExport());
     assertTrue(endpointsLibrary.getToolTip().contains("v2"));
 
-    assertThat(endpointsLibrary.getLibraryFiles().size(), is(1));
+    assertThat(endpointsLibrary.getLibraryFiles(), hasSize(1));
     LibraryFile libraryFile = endpointsLibrary.getLibraryFiles().get(0);
     assertNull(libraryFile.getSourceUri());
     assertTrue("Endpoints library not exported", libraryFile.isExport());
@@ -126,7 +130,7 @@ public class CloudLibrariesInPluginXmlTest {
 
     assertNotNull(libraryFile.getFilters());
     List<Filter> filters = libraryFile.getFilters();
-    assertThat(filters.size(), is(1));
+    assertThat(filters, hasSize(1));
     assertTrue(filters.get(0).isExclude());
     assertThat(filters.get(0).getPattern(), is("com/google/appengine/repackaged/**"));
   }
@@ -143,7 +147,7 @@ public class CloudLibrariesInPluginXmlTest {
         is(new URI("https://github.com/objectify/objectify/wiki")));
     assertTrue(objectifyLibrary.isExport());
 
-    assertThat(objectifyLibrary.getLibraryFiles().size(), is(2));
+    assertThat(objectifyLibrary.getLibraryFiles(), hasSize(2));
     LibraryFile objectifyLibraryFile = objectifyLibrary.getLibraryFiles().get(0);
     assertNull(objectifyLibraryFile.getSourceUri());
     assertTrue("Objectify not exported", objectifyLibraryFile.isExport());
@@ -183,83 +187,68 @@ public class CloudLibrariesInPluginXmlTest {
 
   @Test
   public void testServletApiLibraryConfig() throws URISyntaxException {
-    Library servletApiLibrary = CloudLibraries.getLibrary(SERVLET_API_LIBRARY_ID);
+    Library servletApiLibrary = CloudLibraries.getLibrary(APP_ENGINE_SERVLET_2_5_LIBRARY_ID);
     assertThat(servletApiLibrary.getContainerPath().toString(),
-               is(Library.CONTAINER_PATH_PREFIX + "/" + SERVLET_API_LIBRARY_ID));
-    assertThat(servletApiLibrary.getId(), is(SERVLET_API_LIBRARY_ID));
-    assertThat(servletApiLibrary.getName(), is("Servlet API 2.5"));
+        is(Library.CONTAINER_PATH_PREFIX + "/" + APP_ENGINE_SERVLET_2_5_LIBRARY_ID));
+    assertThat(servletApiLibrary.getId(), is(APP_ENGINE_SERVLET_2_5_LIBRARY_ID));
+    assertThat(servletApiLibrary.getName(), is("App Engine: Servlet API 2.5"));
     assertThat(servletApiLibrary.getGroup(), is("servlet"));
     assertThat(servletApiLibrary.getSiteUri(),
         is(new URI("http://www.oracle.com/technetwork/java/javaee/servlet/index.html")));
     assertFalse(servletApiLibrary.isExport());
+
     assertNotNull(servletApiLibrary.getLibraryDependencies());
-    assertTrue(servletApiLibrary.getLibraryDependencies().isEmpty());
+    assertThat(servletApiLibrary.getLibraryDependencies(), hasSize(1));
+    assertThat(servletApiLibrary.getLibraryDependencies().get(0), is("appengine-api"));
 
-    assertThat(servletApiLibrary.getLibraryFiles().size(), is(1));
-    LibraryFile libraryFile = servletApiLibrary.getLibraryFiles().get(0);
-    assertThat(libraryFile.getJavadocUri(), is(new URI(
-        "https://docs.oracle.com/cd/E17802_01/products/products/servlet/2.5/docs/servlet-2_5-mr2/")));
-    assertNull(libraryFile.getSourceUri());
-
-    assertNotNull(libraryFile.getMavenCoordinates());
-    MavenCoordinates mavenCoordinates = libraryFile.getMavenCoordinates();
-    assertThat(mavenCoordinates.getRepository(), is("central"));
-    assertThat(mavenCoordinates.getGroupId(), is("javax.servlet"));
-    assertThat(mavenCoordinates.getArtifactId(), is("servlet-api"));
-    assertThat(mavenCoordinates.getVersion(), is("2.5"));
-    assertThat(mavenCoordinates.getType(), is("jar"));
-    assertNull(mavenCoordinates.getClassifier());
-
-    assertNotNull(libraryFile.getFilters());
-    assertTrue(libraryFile.getFilters().isEmpty());
+    assertThat(servletApiLibrary.getLibraryFiles(), hasSize(3));
+    {
+      LibraryFile libraryFile = servletApiLibrary.getLibraryFiles().get(0);
+      assertThat(libraryFile.getJavadocUri(), is(new URI(
+          "https://docs.oracle.com/cd/E17802_01/products/products/servlet/2.5/docs/servlet-2_5-mr2/")));
+      assertNull(libraryFile.getSourceUri());
+      assertNotNull(libraryFile.getMavenCoordinates());
+      MavenCoordinates mavenCoordinates = libraryFile.getMavenCoordinates();
+      assertThat(mavenCoordinates.getRepository(), is("central"));
+      assertThat(mavenCoordinates.getGroupId(), is("javax.servlet"));
+      assertThat(mavenCoordinates.getArtifactId(), is("servlet-api"));
+      assertThat(mavenCoordinates.getVersion(), is("2.5"));
+      assertThat(mavenCoordinates.getType(), is("jar"));
+      assertNull(mavenCoordinates.getClassifier());
+      assertNotNull(libraryFile.getFilters());
+      assertTrue(libraryFile.getFilters().isEmpty());
+    }
+    {
+      LibraryFile libraryFile = servletApiLibrary.getLibraryFiles().get(1);
+      assertThat(libraryFile.getJavadocUri(), is(new URI(
+          "http://docs.oracle.com/cd/E17802_01/products/products/jsp/2.1/docs/jsp-2_1-pfd2/")));
+      assertNull(libraryFile.getSourceUri());
+      assertNotNull(libraryFile.getMavenCoordinates());
+      MavenCoordinates mavenCoordinates = libraryFile.getMavenCoordinates();
+      assertThat(mavenCoordinates.getRepository(), is("central"));
+      assertThat(mavenCoordinates.getGroupId(), is("javax.servlet.jsp"));
+      assertThat(mavenCoordinates.getArtifactId(), is("jsp-api"));
+      assertThat(mavenCoordinates.getVersion(), is("2.1"));
+      assertThat(mavenCoordinates.getType(), is("jar"));
+      assertNull(mavenCoordinates.getClassifier());
+      assertNotNull(libraryFile.getFilters());
+      assertTrue(libraryFile.getFilters().isEmpty());
+    }
+    {
+      LibraryFile libraryFile = servletApiLibrary.getLibraryFiles().get(2);
+      assertThat(libraryFile.getJavadocUri(),
+          is(new URI("https://tomcat.apache.org/taglibs/standard/apidocs/")));
+      assertNull(libraryFile.getSourceUri());
+      assertNotNull(libraryFile.getMavenCoordinates());
+      MavenCoordinates mavenCoordinates = libraryFile.getMavenCoordinates();
+      assertThat(mavenCoordinates.getRepository(), is("central"));
+      assertThat(mavenCoordinates.getGroupId(), is("javax.servlet"));
+      assertThat(mavenCoordinates.getArtifactId(), is("jstl"));
+      assertThat(mavenCoordinates.getVersion(), is("1.2"));
+      assertThat(mavenCoordinates.getType(), is("jar"));
+      assertNull(mavenCoordinates.getClassifier());
+      assertNotNull(libraryFile.getFilters());
+      assertTrue(libraryFile.getFilters().isEmpty());
+    }
   }
-
-  @Test
-  public void testJspApiLibraryConfig() throws URISyntaxException {
-    Library jspApiLibrary = CloudLibraries.getLibrary(JSP_API_LIBRARY_ID);
-    assertThat(jspApiLibrary.getContainerPath().toString(),
-               is(Library.CONTAINER_PATH_PREFIX + "/" + JSP_API_LIBRARY_ID));
-    assertThat(jspApiLibrary.getId(), is(JSP_API_LIBRARY_ID));
-    assertThat(jspApiLibrary.getGroup(), is("servlet"));
-    assertThat(jspApiLibrary.getName(), is("Java Server Pages API 2.1"));
-    assertThat(jspApiLibrary.getSiteUri(),
-        is(new URI("http://www.oracle.com/technetwork/java/javaee/jsp/index.html")));
-    assertFalse(jspApiLibrary.isExport());
-    assertNotNull(jspApiLibrary.getLibraryDependencies());
-    assertTrue(jspApiLibrary.getLibraryDependencies().isEmpty());
-
-    assertThat(jspApiLibrary.getLibraryFiles().size(), is(2));
-    LibraryFile jspApi = jspApiLibrary.getLibraryFiles().get(0);
-    assertThat(jspApi.getJavadocUri(), is(new URI(
-        "http://docs.oracle.com/cd/E17802_01/products/products/jsp/2.1/docs/jsp-2_1-pfd2/")));
-    assertNull(jspApi.getSourceUri());
-
-    assertNotNull(jspApi.getMavenCoordinates());
-    MavenCoordinates mavenCoordinates = jspApi.getMavenCoordinates();
-    assertThat(mavenCoordinates.getRepository(), is("central"));
-    assertThat(mavenCoordinates.getGroupId(), is("javax.servlet.jsp"));
-    assertThat(mavenCoordinates.getArtifactId(), is("jsp-api"));
-    assertThat(mavenCoordinates.getVersion(), is("2.1"));
-    assertThat(mavenCoordinates.getType(), is("jar"));
-    assertNull(mavenCoordinates.getClassifier());
-
-    assertTrue(jspApi.getFilters().isEmpty());
-
-    LibraryFile jstlApi = jspApiLibrary.getLibraryFiles().get(1);
-    assertThat(jstlApi.getJavadocUri(), 
-        is(new URI("https://tomcat.apache.org/taglibs/standard/apidocs/")));
-    assertNull(jstlApi.getSourceUri());
-
-    assertNotNull(jstlApi.getMavenCoordinates());
-    MavenCoordinates jstlCoordinates = jstlApi.getMavenCoordinates();
-    assertThat(jstlCoordinates.getRepository(), is("central"));
-    assertThat(jstlCoordinates.getGroupId(), is("javax.servlet"));
-    assertThat(jstlCoordinates.getArtifactId(), is("jstl"));
-    assertThat(jstlCoordinates.getVersion(), is("1.2"));
-    assertThat(jstlCoordinates.getType(), is("jar"));
-    assertNull(jstlCoordinates.getClassifier());
-
-    assertTrue(jstlApi.getFilters().isEmpty());
-  }
-
 }
