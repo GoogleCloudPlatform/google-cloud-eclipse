@@ -79,8 +79,8 @@ public class CreateAppEngineFlexWtpProjectTest extends CreateAppEngineWtpProject
     when(jspApi23.getFile()).thenReturn(jspApi23Jar);
 
     final Artifact jstlApi121 = mock(Artifact.class);
-    File jstlApi21Jar = tempFolder.newFile("fake-jstl-api-1.2.1.jar");
-    when(jstlApi121.getFile()).thenReturn(jstlApi21Jar);
+    File jstlApi121Jar = tempFolder.newFile("fake-jstl-api-1.2.1.jar");
+    when(jstlApi121.getFile()).thenReturn(jstlApi121Jar);
 
     final Artifact elApi300 = mock(Artifact.class);
     File elApi300Jar = tempFolder.newFile("fake-el-api-3.0.0.jar");

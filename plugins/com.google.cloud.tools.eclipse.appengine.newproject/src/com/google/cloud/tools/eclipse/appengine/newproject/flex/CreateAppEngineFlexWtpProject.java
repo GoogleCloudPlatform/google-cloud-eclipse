@@ -81,11 +81,16 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
         .build();
     MavenCoordinates jstlApi = new MavenCoordinates.Builder()
         .setGroupId("javax.servlet.jsp.jstl") //$NON-NLS-1$
-        .setArtifactId("javax.servlet.jstl.jsp-api") //$NON-NLS-1$
+        .setArtifactId("javax.servlet.jsp.jstl-api") //$NON-NLS-1$
         .setVersion("1.2.1") //$NON-NLS-1$
         .build();
+    MavenCoordinates elApi = new MavenCoordinates.Builder()
+        .setGroupId("javax.el") //$NON-NLS-1$
+        .setArtifactId("javax.el-api") //$NON-NLS-1$
+        .setVersion("3.0.0") //$NON-NLS-1$
+        .build();
     //@formatter:on
-    PROJECT_DEPENDENCIES = ImmutableList.of(servletApi, jspApi, jstlApi);
+    PROJECT_DEPENDENCIES = ImmutableList.of(servletApi, jspApi, jstlApi, elApi);
   }
 
   private ILibraryRepositoryService repositoryService;
