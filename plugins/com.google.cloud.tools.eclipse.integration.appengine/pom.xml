@@ -17,6 +17,24 @@
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-surefire-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>standalone</id>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <!-- must be run from a fresh workspace to ensure no server runtimes are available -->
+              <testClass>com.google.cloud.tools.eclipse.integration.appengine.ImportNativeAppEngineStandardProjectTest</testClass>
+            </configuration>
+          </execution>
+          <execution>
+            <id>default-test</id>
+            <goals>
+              <goal>test</goal>
+            </goals>
+          </execution>
+        </executions>
         <configuration>
           <useUIHarness>true</useUIHarness>
           <useUIThread>false</useUIThread>

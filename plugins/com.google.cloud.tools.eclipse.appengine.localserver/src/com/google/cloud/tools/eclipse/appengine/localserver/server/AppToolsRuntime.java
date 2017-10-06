@@ -21,6 +21,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.wst.server.core.model.RuntimeDelegate;
 
 public class AppToolsRuntime extends RuntimeDelegate {
+  static final String RUNTIME_TYPE_ID = "com.google.cloud.tools.eclipse.appengine.standard.runtime";
+
   @Override
   public IStatus validate() {
     // TODO Check validation from app tools lib?

@@ -34,22 +34,16 @@ public class CloudLibraries {
    * Objectify, App Engine API, and Google Cloud Endpoints.
    */
   public static final String APP_ENGINE_GROUP = "appengine";   //$NON-NLS-1$
-  
+
   /**
    * Library files for Google Client APIs for Java; specifically
    * google-api-client, oAuth, and google-http-client.
    */
   public static final String CLIENT_APIS_GROUP = "clientapis"; //$NON-NLS-1$
-  
-  /**
-   * Library files for all Java servlet applications; specifically
-   * servlet.jar and jsp-api.jar.
-   */
-  public static final String SERVLET_GROUP = "servlet"; //$NON-NLS-1$
-  
+
   private static final Logger logger = Logger.getLogger(CloudLibraries.class.getName());
   private static final ImmutableMap<String, Library> libraries = loadLibraryDefinitions();
-  
+
   /**
    * Returns libraries in the named group.
    */
@@ -62,7 +56,7 @@ public class CloudLibraries {
     }
     return result;
   }
-  
+
   /**
    * Returns the library with the specified ID, or null if not found.
    */
@@ -82,11 +76,11 @@ public class CloudLibraries {
         logger.log(Level.SEVERE, "Error loading library definition", ex); //$NON-NLS-1$
       }
     }
-    
+
     ImmutableMap<String, Library> map = builder.build();
-    
+
     resolveTransitiveDependencies(map);
-    
+
     return map;
   }
 
@@ -105,6 +99,6 @@ public class CloudLibraries {
         }
       }
       library.setLibraryDependencies(transitiveDependencies);
-    }    
+    }
   }
 }

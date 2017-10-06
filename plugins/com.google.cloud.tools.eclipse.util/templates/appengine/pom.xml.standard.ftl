@@ -70,6 +70,12 @@
       <scope>provided</scope>
     </dependency>
 </#if>
+    <dependency>
+      <groupId>com.google.appengine</groupId>
+      <artifactId>appengine-api-1.0-sdk</artifactId>
+      <version>1.9.57</version>
+      <scope>provided</scope>
+    </dependency>
 
     <!-- Test Dependencies -->
     <dependency>

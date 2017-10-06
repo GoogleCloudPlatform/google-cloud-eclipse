@@ -162,11 +162,6 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
     // 2. Remove "src/test/java" from the Web Deployment Assembly sources.
     deployAssemblyEntryRemoveJob =
         new DeployAssemblyEntryRemoveJob(newProject, new Path("src/test/java"));
-    // Not to be affected by "NonSystemJobSuspender". Not necessary in production, but necessary
-    // for tests to work properly. (As a side note, setting this to system would have not worked
-    // if the deploy assembly update jobs triggered by the above classpath change were non-system
-    // jobs; the update jobs should be visible by "DeployAssemblyEntryRemoveJob" because it joins
-    // the update jobs before removing entries.)
     deployAssemblyEntryRemoveJob.setSystem(true);
     deployAssemblyEntryRemoveJob.schedule();
   }
