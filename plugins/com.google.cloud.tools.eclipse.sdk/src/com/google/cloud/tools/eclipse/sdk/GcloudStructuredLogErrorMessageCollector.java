@@ -38,7 +38,11 @@ public class GcloudStructuredLogErrorMessageCollector implements ProcessOutputLi
       GcloudStructuredLog log = GcloudStructuredLog.parse(line);
       if (log != null && log.getVerbosity() != null
           && log.getVerbosity().toUpperCase(Locale.US).equals("ERROR")) {
-        errorMessages.add(log.getMessage());
+        if (log.getMessage() == null || log.getMessage().trim().isEmpty()) {
+          errorMessages.add("no error message provided");
+        } else {
+          errorMessages.add(log.getMessage());
+        }
       }
     } catch (JsonParseException e) {
       // syntax or semantic parsing error; not a structured error log line

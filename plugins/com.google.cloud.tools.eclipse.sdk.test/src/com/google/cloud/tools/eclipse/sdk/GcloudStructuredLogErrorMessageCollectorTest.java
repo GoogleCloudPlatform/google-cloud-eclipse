@@ -52,6 +52,20 @@ public class GcloudStructuredLogErrorMessageCollectorTest {
   }
 
   @Test
+  public void testNullMessage() {
+    errorMessageCollector.onOutputLine("{ 'verbosity': 'error' }");
+    assertThat(errorMessageCollector.getErrorMessages(),
+        equalTo(Arrays.asList("no error message provided")));
+  }
+
+  @Test
+  public void testEmptyMessage() {
+    errorMessageCollector.onOutputLine("{ 'verbosity': 'error', 'message': '  ' }");
+    assertThat(errorMessageCollector.getErrorMessages(),
+        equalTo(Arrays.asList("no error message provided")));
+  }
+
+  @Test
   public void testIgonreNonErrorVerbosity() {
     errorMessageCollector.onOutputLine("{ 'verbosity': 'warning', 'message': 'ignored' }");
     assertThat(errorMessageCollector.getErrorMessages(), empty());
