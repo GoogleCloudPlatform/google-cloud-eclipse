@@ -52,10 +52,11 @@ public class CloudSdkProcessWrapper {
   private boolean interrupted;
   private IStatus exitStatus = Status.OK_STATUS;
   private ProcessOutputLineListener stdOutCaptor;
+
   /**
-   * Collects messages of any gcloud structure log lines whose severity is ERROR.
+   * Collects messages of any gcloud structure log lines whose severity is ERROR. Note that the
+   * collector is not used for staging, as the staging does not invoke gcloud.
    */
-  // Note that the collector is not used for staging, as the staging does not invoke gcloud.
   private GcloudStructuredLogErrorMessageCollector gcloudErrorMessageCollector;
 
   /**
