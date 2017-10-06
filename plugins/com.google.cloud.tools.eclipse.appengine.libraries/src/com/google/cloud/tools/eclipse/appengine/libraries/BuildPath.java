@@ -80,9 +80,10 @@ public class BuildPath {
     
     SubMonitor subMonitor = SubMonitor.convert(monitor,
         Messages.getString("adding.app.engine.libraries"), //$NON-NLS-1$
-        2);
+        3);
     
     Library masterLibrary = collectLibraryFiles(javaProject, libraries);
+    subMonitor.worked(1);
     List<IClasspathEntry> newEntries = computeEntries(javaProject, masterLibrary);
     subMonitor.worked(1);
 

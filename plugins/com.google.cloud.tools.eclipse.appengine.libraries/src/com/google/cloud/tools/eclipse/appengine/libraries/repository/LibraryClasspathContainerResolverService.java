@@ -126,6 +126,7 @@ public class LibraryClasspathContainerResolverService
           if (referencedLibrary != null) {
             referencedLibraries.add(referencedLibrary);
           } else {
+            // todo this might deserve a non-OK status
             logger.severe("Referenced library not found: " + referencedId);
           }
         }
