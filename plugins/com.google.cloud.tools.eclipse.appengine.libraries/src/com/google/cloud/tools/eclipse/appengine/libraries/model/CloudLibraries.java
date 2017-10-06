@@ -28,7 +28,6 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
-import javax.json.JsonReaderFactory;
 import javax.json.JsonString;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -88,13 +87,13 @@ public class CloudLibraries {
   }
 
   private final static Supplier<List<Library>> clientApis = Suppliers.memoize(new Supplier<List<Library>>() {
+    @Override
     public List<Library> get() {
       Bundle bundle = FrameworkUtil.getBundle(CloudSdk.class);
       URL url = bundle.getResource("/com/google/cloud/tools/libraries/libraries.json");
       
       try (InputStream in = url.openStream()) {
-        JsonReaderFactory factory = Json.createReaderFactory(null);
-        JsonReader reader = factory.createReader(in); 
+        JsonReader reader = Json.createReader(in); 
         JsonObject[] apis = reader.readArray().toArray(new JsonObject[0]); 
         List<Library> clientApis = new ArrayList<>(apis.length);
         for (JsonObject api : apis) {
