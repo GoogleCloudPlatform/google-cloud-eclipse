@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.appengine.localserver;
 import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
-import com.google.common.collect.ObjectArrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Inject;
@@ -82,21 +81,17 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
   private IClasspathEntry[] doResolveClasspathContainer(IProjectFacetVersion dynamicWebVersion) {
 
     String servletApiId;
-    String jspApiId;
     if (WebFacetUtils.WEB_31.equals(dynamicWebVersion)
         || WebFacetUtils.WEB_30.equals(dynamicWebVersion)) {
-      servletApiId = "servlet-api-3.1";
-      jspApiId = "jsp-api-2.3";
+      servletApiId = "appengine-servlet-3.1";
     } else {
-      servletApiId = "servlet-api-2.5";
-      jspApiId = "jsp-api-2.1";
+      servletApiId = "appengine-servlet-2.5";
     }
 
     try {
       IClasspathEntry[] apiEntries =
           resolverService.resolveLibraryAttachSourcesSync(servletApiId);
-      IClasspathEntry[] jspApiEntries = resolverService.resolveLibraryAttachSourcesSync(jspApiId);
-      return ObjectArrays.concat(apiEntries, jspApiEntries, IClasspathEntry.class);
+      return apiEntries;
     } catch (CoreException ex) {
       logger.log(Level.WARNING, "Failed to initialize libraries", ex);
     }
