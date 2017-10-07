@@ -92,7 +92,7 @@
           siteUri="http://www.oracle.com/technetwork/java/javaee/servlet/index.html"
           export="false"
           recommendation="required">
-      <libraryDepency id="appengine-api"/>
+      <libraryDependency id="appengine-api"/>
       <libraryFile>
         <mavenCoordinates
               groupId="javax.servlet"

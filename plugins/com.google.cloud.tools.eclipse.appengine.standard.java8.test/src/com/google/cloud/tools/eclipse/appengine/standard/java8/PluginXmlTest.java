@@ -19,5 +19,4 @@ package com.google.cloud.tools.eclipse.appengine.standard.java8;
 import com.google.cloud.tools.eclipse.test.util.BasePluginXmlTest;
 
 public class PluginXmlTest extends BasePluginXmlTest {
-
 }

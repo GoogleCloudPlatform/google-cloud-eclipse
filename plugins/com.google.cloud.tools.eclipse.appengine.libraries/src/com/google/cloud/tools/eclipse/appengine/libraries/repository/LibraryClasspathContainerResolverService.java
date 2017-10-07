@@ -105,6 +105,15 @@ public class LibraryClasspathContainerResolverService
     for (LibraryFile libraryFile : library.getLibraryFiles()) {
       resolvedEntries.add(resolveLibraryFileAttachSourceSync(libraryFile));
     }
+    // only go one level deep for now
+    for (String dependencyId : library.getLibraryDependencies()) {
+      Library dependency = CloudLibraries.getLibrary(dependencyId);
+      if (dependency != null) {
+        for (LibraryFile libraryFile : dependency.getLibraryFiles()) {
+          resolvedEntries.add(resolveLibraryFileAttachSourceSync(libraryFile));
+        }
+      }
+    }
     return resolvedEntries.toArray(new IClasspathEntry[0]);
   }
 

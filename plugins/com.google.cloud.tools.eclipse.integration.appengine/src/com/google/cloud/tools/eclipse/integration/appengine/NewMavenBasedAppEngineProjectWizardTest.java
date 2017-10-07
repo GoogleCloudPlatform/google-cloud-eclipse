@@ -141,6 +141,14 @@ public class NewMavenBasedAppEngineProjectWizardTest extends BaseProjectTest {
     ProjectUtils.failIfBuildErrors("New Maven project has errors", project);
 
     ArrayAssertions.assertIsEmpty("runtime classpath should be empty for Maven projects", getAppEngineServerRuntimeClasspathEntries(project));
+
+    // check that some standard JSP, JSTL, EL types can be resolved
+    verifyTypesResolved(project, "javax.servlet.jsp.JspApplicationContext"); // JSP
+    verifyTypesResolved(project, "javax.servlet.jsp.jstl.core.Config"); // JSTL
+    verifyTypesResolved(project, "javax.el.ELContext");// EL
+
+    // App Engine SDK is now included by default
+    verifyTypesResolved(project, "com.google.appengine.api.datastore.DatastoreServiceFactory");
   }
 
   static IClasspathEntry[] getAppEngineServerRuntimeClasspathEntries(IProject project) {

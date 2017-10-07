@@ -16,11 +16,18 @@
 
 package com.google.cloud.tools.eclipse.integration.appengine;
 
+import static org.junit.Assert.assertNotNull;
+
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotWorkbenchActions;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.widgets.TimeoutException;
@@ -81,4 +88,25 @@ public class BaseProjectTest {
     IProject project = findProject(projectName);
     return project.exists();
   }
+
+  /** Verify that the given type-names (with '.' delimiters) can be resolved for the project. */
+  protected static void verifyTypesResolved(IProject project, String... fullyQualifiedTypeNames) {
+    IJavaProject javaProject = JavaCore.create(project);
+    verifyTypesResolved(javaProject, fullyQualifiedTypeNames);
+  }
+
+  /** Verify that the given type-names (with '.' delimiters) can be resolved for the project. */
+  protected static void verifyTypesResolved(IJavaProject javaProject,
+      String[] fullyQualifiedTypeNames) {
+    for (String fullyQualifiedTypeName : fullyQualifiedTypeNames) {
+      try {
+        IType type = javaProject.findType(fullyQualifiedTypeName, new NullProgressMonitor());
+        assertNotNull(String.format("Cannot resolve %s in %s", fullyQualifiedTypeName,
+            javaProject.getElementName()), type);
+      } catch (JavaModelException ex) {
+        throw new AssertionError("Error resolving type: " + fullyQualifiedTypeName, ex);
+      }
+    }
+  }
+
 }
