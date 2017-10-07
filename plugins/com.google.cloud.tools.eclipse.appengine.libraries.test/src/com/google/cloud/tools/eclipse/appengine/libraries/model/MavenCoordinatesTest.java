@@ -17,8 +17,11 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -159,6 +162,18 @@ public class MavenCoordinatesTest {
         .setArtifactId("a")
         .setClassifier("")
         .build();
-    assertThat(mavenCoordinates.getClassifier(), is(""));
+    assertTrue(mavenCoordinates.getClassifier().isEmpty());
+  }
+  
+  @Test
+  public void testUpdateVersion() {
+    MavenCoordinates mavenCoordinates = new MavenCoordinates.Builder()
+        .setGroupId("com.google.guava")
+        .setArtifactId("guava")
+        .setVersion("15.0")
+        .build();
+    mavenCoordinates.updateVersion();
+    assertFalse(mavenCoordinates.getVersion().isEmpty());
+    assertNotEquals("15.0", mavenCoordinates.getVersion());
   }
 }

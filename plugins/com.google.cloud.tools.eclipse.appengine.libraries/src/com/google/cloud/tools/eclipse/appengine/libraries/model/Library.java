@@ -181,6 +181,8 @@ public final class Library {
       List<LibraryFile> transitiveDependencies = new ArrayList<>();
       for (LibraryFile artifact : this.libraryFiles) {
         MavenCoordinates coordinates = artifact.getMavenCoordinates();
+        coordinates.updateVersion();
+        
         Collection<LibraryFile> dependencies = LibraryFactory.loadTransitiveDependencies(coordinates);
         transitiveDependencies.addAll(dependencies);
       }

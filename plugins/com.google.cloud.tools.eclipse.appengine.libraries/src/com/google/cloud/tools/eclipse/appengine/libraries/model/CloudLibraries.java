@@ -30,14 +30,12 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonString;
 
-import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.RegistryFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
@@ -103,16 +101,8 @@ public class CloudLibraries {
             JsonObject coordinates = client.getJsonObject("mavenCoordinates");
             String groupId = coordinates.getString("groupId");
             String artifactId = coordinates.getString("artifactId");
-            ArtifactVersion version =
-                ArtifactRetriever.DEFAULT.getLatestArtifactVersion(groupId, artifactId);
-            String versionString;
-            if (version == null) {
-              versionString = coordinates.getString("version");
-              // todo need method to get latest nonrelease version instead for alphas and betas
-            } else {
-              versionString = version.toString();
-            }
-            
+            String versionString = coordinates.getString("version");
+
             MavenCoordinates mavenCoordinates = new MavenCoordinates.Builder()
                 .setGroupId(groupId)
                 .setArtifactId(artifactId)

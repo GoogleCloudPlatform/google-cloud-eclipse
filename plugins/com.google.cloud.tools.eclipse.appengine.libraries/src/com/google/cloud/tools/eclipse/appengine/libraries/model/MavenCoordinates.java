@@ -18,6 +18,10 @@ package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import java.text.MessageFormat;
 
+import org.apache.maven.artifact.versioning.ArtifactVersion;
+
+import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
 /**
@@ -35,11 +39,15 @@ public class MavenCoordinates {
   private String version = LATEST_VERSION;
   private String type = JAR_TYPE;
   private String classifier;
+  
+  /** Version has been checked against Maven Central **/
+  private boolean fixedVersion = false;
 
   /**
    * @param groupId the Maven group ID, cannot be <code>null</code>
    * @param artifactId the Maven artifact ID, cannot be <code>null</code>
    */
+  @VisibleForTesting
   public MavenCoordinates(String groupId, String artifactId) {
     Preconditions.checkNotNull(groupId, "groupId null");
     Preconditions.checkNotNull(artifactId, "artifactId null");
@@ -193,6 +201,22 @@ public class MavenCoordinates {
       return this;
     }
     
+  }
+
+  /**
+   * Check Maven Central to find the latest release version of this artifact.
+   * This check is made at most once. Subsequent checks are no-ops.
+   */
+  public void updateVersion() {
+    if (!fixedVersion) {
+      // todo need method to get latest nonrelease version instead for alphas and betas
+      ArtifactVersion remoteVersion =
+          ArtifactRetriever.DEFAULT.getLatestArtifactVersion(groupId, artifactId);
+      if (version != null) {
+        this.version = remoteVersion.toString();  
+      }
+      fixedVersion = true;
+    }
   }  
 
 }
