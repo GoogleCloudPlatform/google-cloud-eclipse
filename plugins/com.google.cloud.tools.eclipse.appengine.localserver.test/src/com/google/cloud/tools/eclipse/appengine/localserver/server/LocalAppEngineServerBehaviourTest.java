@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -216,10 +217,15 @@ public class LocalAppEngineServerBehaviourTest {
   }
 
   @Test
-  public void testStartDevServer_adminPortIsServerPortWhenDevAppserver1() throws CoreException {
+  public void testStartDevServer_ignoresAdminPortWhenDevAppserver1() throws CoreException {
     Assume.assumeFalse(LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2);
 
-    serverBehavior.checkAndSetPorts(new DefaultRunConfiguration(), alwaysFalse);
-    assertEquals(8080, serverBehavior.getAdminPort());
+    DefaultRunConfiguration runConfig = new DefaultRunConfiguration();
+    runConfig.setAdminPort(8000);
+    when(portProber.isInUse(any(InetAddress.class), eq(8000))).thenReturn(true);
+
+    serverBehavior.checkPorts(runConfig, portProber);
+    assertEquals(-1, serverBehavior.adminPort);
+    verify(portProber, never()).isInUse(any(InetAddress.class), eq(8000));
   }
 }

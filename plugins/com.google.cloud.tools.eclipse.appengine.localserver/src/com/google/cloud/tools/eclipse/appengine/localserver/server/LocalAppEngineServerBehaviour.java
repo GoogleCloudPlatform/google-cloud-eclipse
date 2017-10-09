@@ -237,7 +237,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   }
 
   @VisibleForTesting
-  void checkAndSetPorts(DefaultRunConfiguration devServerRunConfiguration, PortChecker portInUse)
+  void checkPorts(DefaultRunConfiguration devServerRunConfiguration, PortChecker portInUse)
       throws CoreException {
     InetAddress serverHost = InetAddress.getLoopbackAddress();
     if (devServerRunConfiguration.getHost() != null) {
@@ -255,8 +255,6 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
       }
       adminPort = checkPort(adminHost,
           ifNull(devServerRunConfiguration.getAdminPort(), DEFAULT_ADMIN_PORT), portInUse);
-    } else {
-      adminPort = serverPort;
     }
 
     // API port seems on localhost in practice
@@ -341,7 +339,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
       }
     };
 
-    checkAndSetPorts(devServerRunConfiguration, portInUse);
+    checkPorts(devServerRunConfiguration, portInUse);
 
     setServerState(IServer.STATE_STARTING);
     setMode(mode);
