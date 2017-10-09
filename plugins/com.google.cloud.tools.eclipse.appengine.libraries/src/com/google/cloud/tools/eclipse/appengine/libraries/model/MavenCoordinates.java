@@ -41,6 +41,8 @@ public class MavenCoordinates {
   private String classifier;
   
   /** Version has been checked against Maven Central **/
+  // todo could mark this transient and on deserialization set depending on whether
+  // version is still LATEST_VERSION or not
   private boolean fixedVersion = false;
 
   /**
@@ -212,7 +214,7 @@ public class MavenCoordinates {
       // todo need method to get latest nonrelease version instead for alphas and betas
       ArtifactVersion remoteVersion =
           ArtifactRetriever.DEFAULT.getLatestArtifactVersion(groupId, artifactId);
-      if (version != null) {
+      if (remoteVersion != null) {
         this.version = remoteVersion.toString();  
       }
       fixedVersion = true;
