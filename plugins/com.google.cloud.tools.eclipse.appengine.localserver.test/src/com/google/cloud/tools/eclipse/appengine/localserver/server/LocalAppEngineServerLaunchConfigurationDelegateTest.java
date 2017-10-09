@@ -277,35 +277,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
   }
 
   @Test
-  public void testGenerateRunConfiguration_adminHostIsServerHostWhenDevAppserver1()
-      throws CoreException {
-    Assume.assumeFalse(LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2);
-
-    when(server.getHost()).thenReturn("example.com");
-
-    DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
-        .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
-    assertEquals("example.com", config.getHost());
-    assertEquals("example.com", config.getAdminHost());
-  }
-
-  @Test
-  public void testGenerateRunConfiguration_adminPortIServerPortWhenDevAppserver1()
-      throws CoreException {
-    Assume.assumeFalse(LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2);
-
-    when(launchConfiguration
-        .getAttribute(eq(LocalAppEngineServerBehaviour.SERVER_PORT_ATTRIBUTE_NAME), anyInt()))
-        .thenReturn(9999);
-
-    DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
-        .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
-
-    assertEquals(9999, (int) config.getPort());
-    assertEquals(9999, (int) config.getAdminPort());
-  }
-
-  @Test
   public void testGenerateRunConfiguration_withVMArgs() throws CoreException {
     // DebugPlugin.parseArguments() only supports double-quotes on Windows
     when(launchConfiguration.getAttribute(eq(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS),
