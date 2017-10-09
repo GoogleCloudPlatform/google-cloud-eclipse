@@ -48,6 +48,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.wst.server.core.IServer;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -242,7 +243,9 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
   }
 
   @Test
-  public void testGenerateRunConfiguration_withAdminPort() throws CoreException {
+  public void testGenerateRunConfiguration_withAdminPortWhenDevAppserver2() throws CoreException {
+    Assume.assumeTrue(LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2);
+
     when(launchConfiguration.getAttribute(anyString(), anyString()))
         .thenAnswer(AdditionalAnswers.returnsSecondArg());
     when(launchConfiguration
@@ -262,6 +265,8 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
   @Test
   public void testGenerateRunConfiguration_withAdminPortFailover()
       throws CoreException, IOException {
+    Assume.assumeTrue(LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2);
+
     // dev_appserver waits on localhost by default
     try (ServerSocket socket = new ServerSocket(8080, 100, InetAddress.getLoopbackAddress())) {
       DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
@@ -269,6 +274,33 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
 
       assertNull(config.getAdminPort());
     }
+  }
+
+  @Test
+  public void testGenerateRunConfiguration_devAppserver1AdminHostIsServerHost()
+      throws CoreException {
+    Assume.assumeFalse(LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2);
+
+    when(server.getHost()).thenReturn("example.com");
+
+    DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
+        .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
+    assertEquals("example.com", config.getAdminHost());
+  }
+
+  @Test
+  public void testGenerateRunConfiguration_devAppserver1AdminPortIServerPort()
+      throws CoreException {
+    Assume.assumeFalse(LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2);
+
+    when(launchConfiguration
+        .getAttribute(eq(LocalAppEngineServerBehaviour.SERVER_PORT_ATTRIBUTE_NAME), anyInt()))
+        .thenReturn(9999);
+
+    DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
+        .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
+
+    assertEquals(9999, (int) config.getPort());
   }
 
   @Test

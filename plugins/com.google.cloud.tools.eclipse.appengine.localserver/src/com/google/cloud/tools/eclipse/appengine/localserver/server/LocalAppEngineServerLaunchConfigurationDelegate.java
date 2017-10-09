@@ -284,6 +284,10 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
           devServerRunConfiguration.setAdminPort(0);
         }
       }
+    } else {
+      // dev_appserver1 uses the server host and port for the admin page at ('/_ah/admin').
+      devServerRunConfiguration.setAdminHost(server.getHost());
+      devServerRunConfiguration.setAdminPort(serverPort);
     }
 
     // TODO: apiPort?
@@ -687,7 +691,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       super(null);
       this.launch = launch;
       this.serverBehaviour = serverBehaviour;
-      this.server = serverBehaviour.getServer();
+      server = serverBehaviour.getServer();
       this.console = console;
     }
 
