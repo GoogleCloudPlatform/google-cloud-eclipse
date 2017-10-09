@@ -31,9 +31,9 @@
         "groupId": "com.google",
         "artifactId": "jarartifact",
         "version": "LATEST",
-        "type": "jar",
-        "fixedVersion": false
-      },
+        "type": "jar"
+    },
+      "fixedVersion": false,
       "export": true
     }
   ]
