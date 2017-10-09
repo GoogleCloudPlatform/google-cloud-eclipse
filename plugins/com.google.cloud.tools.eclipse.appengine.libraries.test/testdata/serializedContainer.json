@@ -32,7 +32,7 @@
         "artifactId": "jarartifact",
         "version": "LATEST",
         "type": "jar"
-    },
+      },
       "fixedVersion": false,
       "export": true
     }
