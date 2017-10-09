@@ -25,10 +25,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.cloud.tools.appengine.api.devserver.DefaultRunConfiguration;
 import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour.PortChecker;
 import java.net.InetAddress;
-
 import org.eclipse.core.runtime.CoreException;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -212,5 +213,13 @@ public class LocalAppEngineServerBehaviourTest {
     for (String line : output) {
       outputListener.onOutputLine(line);
     }
+  }
+
+  @Test
+  public void testStartDevServer_adminPortIsServerPortWhenDevAppserver1() throws CoreException {
+    Assume.assumeFalse(LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2);
+
+    serverBehavior.checkAndSetPorts(new DefaultRunConfiguration(), alwaysFalse);
+    assertEquals(8080, serverBehavior.getAdminPort());
   }
 }
