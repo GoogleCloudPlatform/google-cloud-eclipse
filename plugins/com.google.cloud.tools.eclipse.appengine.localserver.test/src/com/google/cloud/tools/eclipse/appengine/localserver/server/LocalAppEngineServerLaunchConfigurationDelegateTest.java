@@ -285,6 +285,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
 
     DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
         .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
+    assertEquals("example.com", config.getHost());
     assertEquals("example.com", config.getAdminHost());
   }
 
@@ -301,6 +302,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
         .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
 
     assertEquals(9999, (int) config.getPort());
+    assertEquals(9999, (int) config.getAdminPort());
   }
 
   @Test
