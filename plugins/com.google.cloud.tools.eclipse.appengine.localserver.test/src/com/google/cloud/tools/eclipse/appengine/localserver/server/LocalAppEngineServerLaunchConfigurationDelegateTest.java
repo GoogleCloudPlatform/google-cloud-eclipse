@@ -263,7 +263,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
   }
 
   @Test
-  public void testGenerateRunConfiguration_withAdminPortFailover()
+  public void testGenerateRunConfiguration_withAdminPortFailoverWhenDevAppserver2()
       throws CoreException, IOException {
     Assume.assumeTrue(LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2);
 
@@ -277,7 +277,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
   }
 
   @Test
-  public void testGenerateRunConfiguration_devAppserver1AdminHostIsServerHost()
+  public void testGenerateRunConfiguration_adminHostIsServerHostWhenDevAppserver1()
       throws CoreException {
     Assume.assumeFalse(LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2);
 
@@ -289,7 +289,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
   }
 
   @Test
-  public void testGenerateRunConfiguration_devAppserver1AdminPortIServerPort()
+  public void testGenerateRunConfiguration_adminPortIServerPortWhenDevAppserver1()
       throws CoreException {
     Assume.assumeFalse(LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2);
 
