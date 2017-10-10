@@ -143,15 +143,6 @@ limitations under the License.
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
-         <xs:attribute name="recommendation" type="recommendationType">
-            <xs:annotation>
-               <xs:documentation>
-                  Recommendation of the library. E.g.: if the library is required,
-                  it must always be added to the
-                  classpath of projects. Defaults to &lt;tt&gt;optional&lt;/tt&gt;.
-               </xs:documentation>
-            </xs:annotation>
-         </xs:attribute>
          <xs:attribute name="siteUri" type="xs:anyURI">
             <xs:annotation>
                <xs:documentation>
