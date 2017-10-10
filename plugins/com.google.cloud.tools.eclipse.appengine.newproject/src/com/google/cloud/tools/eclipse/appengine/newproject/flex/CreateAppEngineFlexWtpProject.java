@@ -66,9 +66,8 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
   private static final List<MavenCoordinates> PROJECT_DEPENDENCIES;
 
   static {
-    MavenCoordinates.Builder servletApi = new MavenCoordinates.Builder()
-        .setGroupId("javax.servlet") //$NON-NLS-1$
-        .setArtifactId("javax.servlet-api") //$NON-NLS-1$
+    MavenCoordinates.Builder servletApi = new MavenCoordinates
+        .Builder("javax.servlet", "javax.servlet-api") //$NON-NLS-1$ //$NON-NLS-2$
         .setVersion("3.1.0"); //$NON-NLS-1$
     PROJECT_DEPENDENCIES = Collections.singletonList(servletApi.build());
   }

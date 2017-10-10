@@ -34,7 +34,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
 import org.junit.Test;
 
 public class LibraryFileTest {
@@ -148,11 +147,11 @@ public class LibraryFileTest {
   
   @Test
   public void testCompareTo() {
-    MavenCoordinates m1 = new MavenCoordinates.Builder().setArtifactId("A1").setGroupId("G1").setVersion("1").build();
-    MavenCoordinates m2 = new MavenCoordinates.Builder().setArtifactId("B1").setGroupId("G1").setVersion("2").build();
-    MavenCoordinates m3 = new MavenCoordinates.Builder().setArtifactId("A1").setGroupId("E1").setVersion("1").build();
-    MavenCoordinates m4 = new MavenCoordinates.Builder().setArtifactId("A1").setGroupId("G1").setVersion("2").build();
-    MavenCoordinates m5 = new MavenCoordinates.Builder().setArtifactId("A1").setGroupId("G1").setVersion("1").build();
+    MavenCoordinates m1 = new MavenCoordinates.Builder("A1", "G1").setVersion("1").build();
+    MavenCoordinates m2 = new MavenCoordinates.Builder("B1", "G1").setVersion("2").build();
+    MavenCoordinates m3 = new MavenCoordinates.Builder("A1", "E1").setVersion("1").build();
+    MavenCoordinates m4 = new MavenCoordinates.Builder("A1", "G1").setVersion("2").build();
+    MavenCoordinates m5 = new MavenCoordinates.Builder("A1", "G1").setVersion("1").build();
     
     LibraryFile libraryFile1 = new LibraryFile(m1);
     LibraryFile libraryFile2 = new LibraryFile(m2);
@@ -181,7 +180,7 @@ public class LibraryFileTest {
   
   @Test
   public void testEquals() {
-    MavenCoordinates m1 = new MavenCoordinates.Builder().setArtifactId("A1").setGroupId("G1").setVersion("1").build();
+    MavenCoordinates m1 = new MavenCoordinates.Builder("A1", "G1").setVersion("1").build();
     LibraryFile libraryFile1 = new LibraryFile(m1);
 
     assertNotEquals(libraryFile1, null);
@@ -190,9 +189,7 @@ public class LibraryFileTest {
   
   @Test
   public void testUpdateVersion() {
-    MavenCoordinates mavenCoordinates = new MavenCoordinates.Builder()
-        .setGroupId("com.google.guava")
-        .setArtifactId("guava")
+    MavenCoordinates mavenCoordinates = new MavenCoordinates.Builder("com.google.guava", "guava")
         .setVersion("15.0")
         .build();
     

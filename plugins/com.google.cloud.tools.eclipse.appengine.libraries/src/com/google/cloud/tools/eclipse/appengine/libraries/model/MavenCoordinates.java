@@ -16,10 +16,9 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
-import java.text.MessageFormat;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import java.text.MessageFormat;
 
 /**
  * Describes a Maven artifact.
@@ -109,8 +108,7 @@ public class MavenCoordinates {
   }
   
   public Builder toBuilder() {
-    Builder builder = new Builder();
-    builder.groupId = groupId;
+    Builder builder = new Builder(groupId, artifactId);
     builder.artifactId = artifactId;
     builder.repository = repository;
     builder.version = version;
@@ -126,6 +124,19 @@ public class MavenCoordinates {
     private String version = LATEST_VERSION;
     private String type = JAR_TYPE;
     private String classifier;
+    
+    /**
+     * @param groupId the Maven group ID
+     * @param artifactId the Maven artifact ID
+     */
+    public Builder(String groupId, String artifactId) {
+      Preconditions.checkNotNull(groupId, "groupId null");
+      Preconditions.checkArgument(!groupId.isEmpty(), "groupId is empty");
+      Preconditions.checkNotNull(artifactId, "artifactId null");
+      Preconditions.checkArgument(!artifactId.isEmpty(), "artifactId is empty");
+      this.groupId = groupId;
+      this.artifactId = artifactId;
+    }
 
     public MavenCoordinates build() {
       MavenCoordinates coordinates = new MavenCoordinates(groupId, artifactId); 
@@ -135,26 +146,6 @@ public class MavenCoordinates {
       coordinates.classifier = classifier;
       return coordinates;
     }
-    
-    /**
-     * @param groupId the Maven group ID
-     */
-    public Builder setGroupId(String groupId) {
-      Preconditions.checkNotNull(groupId, "groupId null");
-      Preconditions.checkArgument(!groupId.isEmpty(), "groupId is empty");
-      this.groupId = groupId;
-      return this;
-    }
-
-    /**
-     * @param artifactId the Maven artifact ID
-     */
-    public Builder setArtifactId(String artifactId) {
-      Preconditions.checkNotNull(artifactId, "artifactId null");
-      Preconditions.checkArgument(!artifactId.isEmpty(), "artifactId is empty");
-      this.artifactId = artifactId;
-      return this;
-    }    
     
     /**
      * @param repository the URI or the identifier of the repository used to download the artifact

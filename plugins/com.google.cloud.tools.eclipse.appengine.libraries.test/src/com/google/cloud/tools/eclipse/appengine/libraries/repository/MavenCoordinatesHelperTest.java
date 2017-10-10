@@ -30,13 +30,11 @@ import org.junit.Test;
 
 public class MavenCoordinatesHelperTest {
 
-  private MavenCoordinates.Builder builder = new MavenCoordinates.Builder();
+  private MavenCoordinates.Builder builder = new MavenCoordinates.Builder("groupId", "artifactId");
 
   @Before
   public void setUp() {
-    builder.setGroupId("groupId")
-        .setArtifactId("artifactId")
-        .setRepository("testRepo")
+    builder.setRepository("testRepo")
         .setType("war")
         .setVersion(MavenCoordinates.LATEST_VERSION);
   }
