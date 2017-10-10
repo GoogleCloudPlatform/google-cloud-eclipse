@@ -82,12 +82,15 @@ public class PomTest {
     list0.add(file0);
     
     List<LibraryFile> list1 = new ArrayList<>();
-    LibraryFile file1 = new LibraryFile(new MavenCoordinates("com.example.group1", "artifact1"));
+    LibraryFile file1 = new LibraryFile(
+        new MavenCoordinates.Builder("com.example.group1", "artifact1").build());
     list1.add(file1);
     
     List<LibraryFile> list2 = new ArrayList<>();
-    LibraryFile file2 = new LibraryFile(new MavenCoordinates("com.example.group2", "artifact2"));
-    LibraryFile file3 = new LibraryFile(new MavenCoordinates("com.example.group3", "artifact3"));
+    LibraryFile file2 = new LibraryFile(
+        new MavenCoordinates.Builder("com.example.group2", "artifact2").build());
+    LibraryFile file3 = new LibraryFile(
+        new MavenCoordinates.Builder("com.example.group3", "artifact3").build());
     list2.add(file2);
     list2.add(file3);
     
@@ -136,11 +139,13 @@ public class PomTest {
       throws CoreException, ParserConfigurationException, IOException, SAXException {
         
     List<LibraryFile> list1 = new ArrayList<>();
-    LibraryFile file1 = new LibraryFile(new MavenCoordinates("com.example.group1", "artifact1"));
+    LibraryFile file1 = new LibraryFile(
+        new MavenCoordinates.Builder("com.example.group1", "artifact1").build());
     list1.add(file1);
     
     List<LibraryFile> list2 = new ArrayList<>();
-    LibraryFile file2 = new LibraryFile(new MavenCoordinates("com.example.group2", "artifact2"));
+    LibraryFile file2 = new LibraryFile(
+        new MavenCoordinates.Builder("com.example.group2", "artifact2").build());
     list2.add(file1);
     list2.add(file2);
     
