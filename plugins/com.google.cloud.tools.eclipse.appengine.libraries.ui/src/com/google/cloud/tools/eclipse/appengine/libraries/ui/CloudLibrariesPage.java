@@ -103,13 +103,15 @@ public abstract class CloudLibrariesPage extends WizardPage implements IClasspat
       return null;
     }
 
+    // todo how do we get a real monitor here?
+    NullProgressMonitor monitor = new NullProgressMonitor();
     try {
       if (MavenUtils.hasMavenNature(project.getProject())) {
-        BuildPath.addMavenLibraries(project.getProject(), libraries, new NullProgressMonitor());
+        BuildPath.addMavenLibraries(project.getProject(), libraries, monitor);
         return new IClasspathEntry[0];
       } else {
-        Library masterLibrary = BuildPath.collectLibraryFiles(project, libraries);
-        IClasspathEntry[] added = BuildPath.listNativeLibrary(project, masterLibrary);
+        Library masterLibrary = BuildPath.collectLibraryFiles(project, libraries, monitor);
+        IClasspathEntry[] added = BuildPath.listNativeLibrary(project, masterLibrary, monitor);
         return added;
       }
     } catch (CoreException ex) {

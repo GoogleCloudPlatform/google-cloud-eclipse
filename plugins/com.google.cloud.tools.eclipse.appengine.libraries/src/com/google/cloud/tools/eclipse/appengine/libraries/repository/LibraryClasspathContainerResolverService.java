@@ -113,7 +113,7 @@ public class LibraryClasspathContainerResolverService
                                   IProgressMonitor monitor) {
     Preconditions.checkArgument(containerPath.segment(0).equals(Library.CONTAINER_PATH_PREFIX));
     
-    SubMonitor subMonitor = SubMonitor.convert(monitor, 10);
+    SubMonitor subMonitor = SubMonitor.convert(monitor, 19);
     
     try {
       String libraryId = containerPath.segment(1);
@@ -130,7 +130,8 @@ public class LibraryClasspathContainerResolverService
             logger.severe("Referenced library not found: " + referencedId);
           }
         }
-        library = BuildPath.collectLibraryFiles(javaProject, referencedLibraries);
+        library =
+            BuildPath.collectLibraryFiles(javaProject, referencedLibraries, subMonitor.newChild(9));
       } else {
         library = CloudLibraries.getLibrary(libraryId);
       }

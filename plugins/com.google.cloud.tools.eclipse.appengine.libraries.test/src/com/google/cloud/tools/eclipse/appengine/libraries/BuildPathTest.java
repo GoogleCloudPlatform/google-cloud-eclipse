@@ -69,7 +69,8 @@ public class BuildPathTest {
   @Test
   public void testListNativeLibrary() throws CoreException {
     Library library = new Library("libraryId");
-    IClasspathEntry[] result = BuildPath.listNativeLibrary(project, library);
+    IClasspathEntry[] result =
+        BuildPath.listNativeLibrary(project, library, new NullProgressMonitor());
     Assert.assertEquals(1, result.length);
     Assert.assertEquals(initialClasspathSize, project.getRawClasspath().length);
   }
