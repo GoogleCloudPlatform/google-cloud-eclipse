@@ -257,7 +257,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
           ifNull(devServerRunConfiguration.getAdminPort(), DEFAULT_ADMIN_PORT), portInUse);
     }
 
-    // API port seems on localhost in practice
+    // API port seems to be bound on localhost in practice
     checkPort(InetAddress.getLoopbackAddress(),
         ifNull(devServerRunConfiguration.getApiPort(), DEFAULT_API_PORT), portInUse);
   }
