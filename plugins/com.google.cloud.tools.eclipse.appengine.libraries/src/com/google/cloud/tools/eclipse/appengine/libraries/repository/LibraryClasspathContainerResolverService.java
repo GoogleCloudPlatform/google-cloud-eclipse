@@ -105,6 +105,15 @@ public class LibraryClasspathContainerResolverService
     for (LibraryFile libraryFile : library.getLibraryFiles()) {
       resolvedEntries.add(resolveLibraryFileAttachSourceSync(libraryFile));
     }
+    // only go one level deep for now
+    for (String dependencyId : library.getLibraryDependencies()) {
+      Library dependency = CloudLibraries.getLibrary(dependencyId);
+      if (dependency != null) {
+        for (LibraryFile libraryFile : dependency.getLibraryFiles()) {
+          resolvedEntries.add(resolveLibraryFileAttachSourceSync(libraryFile));
+        }
+      }
+    }
     return resolvedEntries.toArray(new IClasspathEntry[0]);
   }
 
@@ -164,14 +173,12 @@ public class LibraryClasspathContainerResolverService
 
   private IStatus checkAppEngineStandardJava7(IProgressMonitor monitor) {
     try {
-      for (String libraryId : new String[] {"servlet-api-2.5", "jsp-api-2.1"}) {
-        Library library = CloudLibraries.getLibrary(libraryId);
-        for (LibraryFile libraryFile : library.getLibraryFiles()) {
-          if (monitor.isCanceled()) {
-            return Status.CANCEL_STATUS;
-          }
-          repositoryService.makeArtifactAvailable(libraryFile, monitor);
+      Library library = CloudLibraries.getLibrary("appengine-servlet-2.5");
+      for (LibraryFile libraryFile : library.getLibraryFiles()) {
+        if (monitor.isCanceled()) {
+          return Status.CANCEL_STATUS;
         }
+        repositoryService.makeArtifactAvailable(libraryFile, monitor);
       }
       return Status.OK_STATUS;
     } catch (CoreException ex) {

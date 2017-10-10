@@ -109,5 +109,13 @@ public class NewNativeAppEngineStandardProjectTest extends BaseProjectTest {
     }
     ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
     ProjectUtils.failIfBuildErrors("New native project has errors", project);
+
+    // check that some standard JSP, JSTL, EL types can be resolved
+    verifyTypesResolved(project, "javax.servlet.jsp.JspApplicationContext"); // JSP
+    verifyTypesResolved(project, "javax.servlet.jsp.jstl.core.Config"); // JSTL
+    verifyTypesResolved(project, "javax.el.ELContext");// EL
+
+    // App Engine SDK is now included by default
+    verifyTypesResolved(project, "com.google.appengine.api.datastore.DatastoreServiceFactory");
   }
 }

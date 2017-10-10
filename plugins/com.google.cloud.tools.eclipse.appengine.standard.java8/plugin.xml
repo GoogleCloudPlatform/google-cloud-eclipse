@@ -86,38 +86,36 @@
   <extension point="com.google.cloud.tools.eclipse.appengine.libraries"
              id="com.google.cloud.tools.eclipse.appengine.standard.java8.apis">   
     <library
-          id="servlet-api-3.1"
-          name="Servlet API 3.1"
+          id="appengine-servlet-3.1"
+          name="App Engine: Servlet API 3.1"
           group="servlet"
           siteUri="http://www.oracle.com/technetwork/java/javaee/servlet/index.html"
           export="false"
           recommendation="required">
-    
+      <libraryDependency id="appengine-api"/>
       <libraryFile>
         <mavenCoordinates
               groupId="javax.servlet"
               artifactId="javax.servlet-api"
               version="3.1.0" />
       </libraryFile>
-    </library>
-    <library
-          id="jsp-api-2.3"
-          group="servlet"
-          name="Java Server Pages API 2.3"
-          siteUri="http://www.oracle.com/technetwork/java/javaee/jsp/index.html"
-          export="false"
-          recommendation="optional" >
       <libraryFile>
         <mavenCoordinates
               groupId="javax.servlet.jsp"
               artifactId="javax.servlet.jsp-api"
-              version="2.3.0" />
+              version="2.3.1" />
       </libraryFile>
       <libraryFile>
         <mavenCoordinates
-              groupId="javax.servlet"
-              artifactId="jstl"
-              version="1.2" />
+              groupId="javax.servlet.jsp.jstl"
+              artifactId="javax.servlet.jsp.jstl-api"
+              version="1.2.1" />
+      </libraryFile>
+      <libraryFile>
+        <mavenCoordinates
+              groupId="javax.el"
+              artifactId="javax.el-api"
+              version="3.0.0" />
       </libraryFile>
     </library>
   </extension>
