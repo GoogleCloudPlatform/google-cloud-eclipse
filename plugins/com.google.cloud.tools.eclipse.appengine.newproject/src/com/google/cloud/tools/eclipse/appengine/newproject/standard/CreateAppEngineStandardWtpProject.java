@@ -17,11 +17,24 @@
 package com.google.cloud.tools.eclipse.appengine.newproject.standard;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
+import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfig;
 import com.google.cloud.tools.eclipse.appengine.newproject.CodeTemplates;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
+import com.google.common.collect.ImmutableList;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -34,10 +47,22 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
  * Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.
  */
 public class CreateAppEngineStandardWtpProject extends CreateAppEngineWtpProject {
-  
+  private static final Logger logger =
+      Logger.getLogger(CreateAppEngineStandardWtpProject.class.getName());
+
+  private static final List<MavenCoordinates> PROJECT_DEPENDENCIES;
+
+  static {
+    MavenCoordinates jstl = new MavenCoordinates.Builder().setGroupId("jstl") //$NON-NLS-1$
+        .setArtifactId("jstl") //$NON-NLS-1$
+        .setVersion("1.2") //$NON-NLS-1$
+        .build();
+    PROJECT_DEPENDENCIES = ImmutableList.of(jstl);
+  }
+
   public CreateAppEngineStandardWtpProject(AppEngineProjectConfig config,
-      IAdaptable uiInfoAdapter) {
-    super(config, uiInfoAdapter);
+      IAdaptable uiInfoAdapter, ILibraryRepositoryService repositoryService) {
+    super(config, uiInfoAdapter, repositoryService);
   }
 
   @Override
@@ -60,6 +85,43 @@ public class CreateAppEngineStandardWtpProject extends CreateAppEngineWtpProject
   public IFile createAndConfigureProjectContent(IProject newProject, AppEngineProjectConfig config,
       IProgressMonitor monitor) throws CoreException {
     return CodeTemplates.materializeAppEngineStandardFiles(newProject, config, monitor);
+  }
+
+  /**
+   * Install dependencies into {@code WEB-INF/lib}.
+   */
+  @Override
+  protected void addAdditionalDependencies(IProject newProject, IProgressMonitor monitor)
+      throws CoreException {
+    SubMonitor progress = SubMonitor.convert(monitor, 20);
+    super.addAdditionalDependencies(newProject, progress.newChild(10));
+
+    IFolder webInfFolder = WebProjectUtil.getWebInfDirectory(newProject);
+    IFolder libFolder = webInfFolder.getFolder("lib"); //$NON-NLS-1$
+    if (!libFolder.exists()) {
+      libFolder.create(true, true, progress.newChild(5));
+    }
+
+    // Download the dependencies from maven
+    progress.setWorkRemaining(10 * PROJECT_DEPENDENCIES.size());
+    for (MavenCoordinates dependency : PROJECT_DEPENDENCIES) {
+      LibraryFile libraryFile = new LibraryFile(dependency);
+      File artifactFile = null;
+      try {
+        Artifact artifact =
+            repositoryService.resolveArtifact(libraryFile, progress.newChild(5));
+        artifactFile = artifact.getFile();
+        IFile destFile = libFolder.getFile(artifactFile.getName());
+        destFile.create(Files.newInputStream(artifactFile.toPath()), true, progress.newChild(5));
+      } catch (CoreException ex) {
+        logger.log(Level.WARNING, "Error downloading " + //$NON-NLS-1$
+            libraryFile.getMavenCoordinates().toString() + " from maven", ex); //$NON-NLS-1$
+      } catch (IOException ex) {
+        logger.log(Level.WARNING, "Error copying over " + artifactFile.toString() + " to " + //$NON-NLS-1$ //$NON-NLS-2$
+            libFolder.getFullPath().toPortableString(), ex);
+      }
+    }
+
   }
 
 }

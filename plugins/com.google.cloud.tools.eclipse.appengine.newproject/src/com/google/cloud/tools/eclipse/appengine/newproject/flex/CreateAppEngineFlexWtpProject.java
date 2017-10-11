@@ -26,11 +26,11 @@ import com.google.cloud.tools.eclipse.appengine.newproject.CodeTemplates;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
 import com.google.cloud.tools.eclipse.util.ClasspathUtil;
+import com.google.common.collect.ImmutableList;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -66,19 +66,26 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
   private static final List<MavenCoordinates> PROJECT_DEPENDENCIES;
 
   static {
-    MavenCoordinates.Builder servletApi = new MavenCoordinates.Builder()
+    // FIXME: servlet-api and jsp-api should be provided by the servlet container and not included
+    MavenCoordinates servletApi = new MavenCoordinates.Builder()
         .setGroupId("javax.servlet") //$NON-NLS-1$
         .setArtifactId("javax.servlet-api") //$NON-NLS-1$
-        .setVersion("3.1.0"); //$NON-NLS-1$
-    PROJECT_DEPENDENCIES = Collections.singletonList(servletApi.build());
+        .setVersion("3.1.0") //$NON-NLS-1$
+        .build();
+    MavenCoordinates jsp = new MavenCoordinates.Builder().setGroupId("javax.servlet.jsp") //$NON-NLS-1$
+        .setArtifactId("javax.servlet.jsp-api") //$NON-NLS-1$
+        .setVersion("2.3.1") //$NON-NLS-1$
+        .build();
+    MavenCoordinates jstl = new MavenCoordinates.Builder().setGroupId("jstl") //$NON-NLS-1$
+        .setArtifactId("jstl") //$NON-NLS-1$
+        .setVersion("1.2") //$NON-NLS-1$
+        .build();
+    PROJECT_DEPENDENCIES = ImmutableList.of(servletApi, jsp, jstl);
   }
-
-  private ILibraryRepositoryService repositoryService;
 
   CreateAppEngineFlexWtpProject(AppEngineProjectConfig config, IAdaptable uiInfoAdapter,
       ILibraryRepositoryService repositoryService) {
-    super(config, uiInfoAdapter);
-    this.repositoryService = repositoryService;
+    super(config, uiInfoAdapter, repositoryService);
   }
 
   @Override

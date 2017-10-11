@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.util.ClasspathUtil;
 import com.google.common.annotations.VisibleForTesting;
 import java.lang.reflect.InvocationTargetException;
@@ -61,6 +62,8 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
 
   private static final Logger logger = Logger.getLogger(CreateAppEngineWtpProject.class.getName());
 
+  protected final ILibraryRepositoryService repositoryService;
+
   private final AppEngineProjectConfig config;
   private final IAdaptable uiInfoAdapter;
   private IFile mostImportant = null;
@@ -92,12 +95,13 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
   }
 
   protected CreateAppEngineWtpProject(AppEngineProjectConfig config,
-      IAdaptable uiInfoAdapter) {
+      IAdaptable uiInfoAdapter, ILibraryRepositoryService repositoryService) {
     if (config == null) {
       throw new NullPointerException("Null App Engine configuration"); //$NON-NLS-1$
     }
     this.config = config;
     this.uiInfoAdapter = uiInfoAdapter;
+    this.repositoryService = repositoryService;
   }
 
   @Override
@@ -121,20 +125,24 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
     }
 
     addAppEngineFacet(newProject, subMonitor.newChild(6));
+    addAdditionalDependencies(newProject, subMonitor.newChild(10));
 
+    fixTestSourceDirectorySettings(newProject, subMonitor.newChild(5));
+  }
+
+  protected void addAdditionalDependencies(IProject newProject, IProgressMonitor monitor)
+      throws CoreException {
+    SubMonitor progress = SubMonitor.convert(monitor, 10);
     if (config.getUseMaven()) {
-      enableMavenNature(newProject, subMonitor.newChild(4));
-      BuildPath.addMavenLibraries(newProject, config.getAppEngineLibraries(), subMonitor.newChild(5));
+      enableMavenNature(newProject, progress.newChild(4));
+      BuildPath.addMavenLibraries(newProject, config.getAppEngineLibraries(), progress.newChild(5));
     } else {
-      addJunit4ToClasspath(newProject, subMonitor.newChild(2));
+      addJunit4ToClasspath(newProject, progress.newChild(2));
       IJavaProject javaProject = JavaCore.create(newProject);
       
       List<Library> libraries = config.getAppEngineLibraries();
-      
-      BuildPath.addNativeLibrary(javaProject, libraries, subMonitor.newChild(5));
+      BuildPath.addNativeLibrary(javaProject, libraries, progress.newChild(8));
     }
-
-    fixTestSourceDirectorySettings(newProject, subMonitor.newChild(5));
   }
 
   private void fixTestSourceDirectorySettings(IProject newProject, IProgressMonitor monitor)
