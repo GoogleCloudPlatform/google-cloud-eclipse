@@ -42,7 +42,8 @@ public class M2RepositoryServiceTest {
       assertEquals("URI is not absolute", ex.getMessage());
     }
 
-    LibraryFile library = new LibraryFile(new MavenCoordinates("groupId", "artifactId"));
+    LibraryFile library = new LibraryFile(
+        new MavenCoordinates.Builder("groupId", "artifactId").build());
     library.setSourceUri(noSchemeUri);
 
     IPath sourcePath = new M2RepositoryService()

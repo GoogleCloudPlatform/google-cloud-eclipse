@@ -107,8 +107,8 @@ public class LibraryTest {
 
   @Test
   public void setLibraryFiles() {
-    library.setLibraryFiles(
-        Arrays.asList(new LibraryFile(new MavenCoordinates("groupId", "artifactId"))));
+    library.setLibraryFiles(Arrays.asList(
+        new LibraryFile(new MavenCoordinates.Builder("groupId", "artifactId").build())));
     assertNotNull(library.getLibraryFiles());
     assertThat(library.getLibraryFiles().size(), is(1));
     LibraryFile actual = library.getLibraryFiles().get(0);
