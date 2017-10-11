@@ -166,7 +166,7 @@ public final class Library {
   }
 
   public String getTransport() {
-    return this.transport ;
+    return this.transport;
   }
 
   void setTransport(String transport) {
