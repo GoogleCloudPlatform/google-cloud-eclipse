@@ -187,4 +187,19 @@ public class LibraryFileTest {
     assertNotEquals(libraryFile1, null);
     assertNotEquals(libraryFile1, libraryFile1.getMavenCoordinates().toStringCoordinates());
   }
+  
+  @Test
+  public void testUpdateVersion() {
+    MavenCoordinates mavenCoordinates = new MavenCoordinates.Builder()
+        .setGroupId("com.google.guava")
+        .setArtifactId("guava")
+        .setVersion("15.0")
+        .build();
+    
+    LibraryFile file = new LibraryFile(mavenCoordinates);
+    file.updateVersion();
+
+    assertFalse(file.getMavenCoordinates().getVersion().isEmpty());
+    assertNotEquals("15.0", file.getMavenCoordinates().getVersion());
+  }
 }

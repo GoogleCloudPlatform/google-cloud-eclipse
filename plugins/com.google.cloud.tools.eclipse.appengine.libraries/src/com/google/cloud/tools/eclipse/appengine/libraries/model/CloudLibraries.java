@@ -16,14 +16,28 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonString;
+
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.RegistryFactory;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
+
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 
 public class CloudLibraries {
 
@@ -64,6 +78,53 @@ public class CloudLibraries {
     return libraries.get(id);
   }
 
+  private static List<Library> loadClientApis() {
+    Bundle bundle = FrameworkUtil.getBundle(CloudSdk.class);
+    URL url = bundle.getResource("/com/google/cloud/tools/libraries/libraries.json");
+    
+    try (InputStream in = url.openStream()) {
+      JsonReader reader = Json.createReader(in); 
+      JsonObject[] apis = reader.readArray().toArray(new JsonObject[0]); 
+      List<Library> clientApis = new ArrayList<>(apis.length);
+      for (JsonObject api : apis) {
+        String name = api.getString("name");
+        String id = api.getString("id");
+        Library library = new Library(id);
+        library.setGroup(CLIENT_APIS_GROUP);
+        library.setName(name);
+        JsonArray clients = api.getJsonArray("clients");
+        for (JsonObject client : clients.toArray(new JsonObject[0])) {
+          JsonString language = client.getJsonString("language");
+          if (language != null && "java".equals(language.getString())) {
+            String toolTip = client.getString("infotip");
+            library.setToolTip(toolTip);
+            JsonObject coordinates = client.getJsonObject("mavenCoordinates");
+            String groupId = coordinates.getString("groupId");
+            String artifactId = coordinates.getString("artifactId");
+            String versionString = coordinates.getString("version");
+
+            MavenCoordinates mavenCoordinates = new MavenCoordinates.Builder()
+                .setGroupId(groupId)
+                .setArtifactId(artifactId)
+                .setVersion(versionString)
+                .build();
+            LibraryFile file = new LibraryFile(mavenCoordinates);
+            List<LibraryFile> libraryFiles = new ArrayList<>();
+            libraryFiles.add(file);
+            library.setLibraryFiles(libraryFiles);
+            library.setResolved(false);
+            break;
+          }
+        }
+        clientApis.add(library);
+      }
+      
+      return clientApis;
+    } catch (IOException ex) {
+      throw new RuntimeException("Could not read libraries.json", ex);
+    }
+  }
+  
   private static ImmutableMap<String, Library> loadLibraryDefinitions() {
     IConfigurationElement[] elements = RegistryFactory.getRegistry().getConfigurationElementsFor(
         "com.google.cloud.tools.eclipse.appengine.libraries"); //$NON-NLS-1$
@@ -77,6 +138,10 @@ public class CloudLibraries {
       }
     }
 
+    for (Library library : loadClientApis()) {   
+      builder.put(library.getId(), library);
+    }
+    
     ImmutableMap<String, Library> map = builder.build();
 
     resolveTransitiveDependencies(map);

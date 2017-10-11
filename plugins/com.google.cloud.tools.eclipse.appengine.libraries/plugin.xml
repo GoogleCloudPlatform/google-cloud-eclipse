@@ -41,6 +41,7 @@
         <exclusionFilter pattern="com/google/appengine/repackaged/**" />
       </libraryFile>
     </library>
+    
     <library
           id="objectify"
           group="appengine"
@@ -100,56 +101,7 @@
               version="1.2" />
       </libraryFile>
     </library>
-    
-    <library
-          id="googlecloudstorage"
-          group="clientapis"
-          name="%googlecloudstorage.name"
-          tooltip="%googlecloudstorage.tooltip"
-          dependencies="include"
-          siteUri="https://cloud.google.com/storage/docs/reference/libraries#client-libraries-install-java" >
-      <libraryFile
-            javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.21.0/apidocs/">
-        <mavenCoordinates
-              artifactId="google-cloud-storage"
-              groupId="com.google.cloud"
-              version="LATEST" />
-      </libraryFile>
-    </library>
-    
-    <library
-          id="clouddatastore"
-          group="clientapis"
-          name="%clouddatastore.name"
-          tooltip="%clouddatastore.tooltip"
-          javaVersion="1.8"
-          dependencies="include"     
-          siteUri="https://cloud.google.com/datastore/docs/reference/libraries#client-libraries-install-java" >
-      <libraryFile
-            javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.21.0/apidocs/index.html?com/google/cloud/datastore/package-summary.html">    
-        <mavenCoordinates
-              artifactId="google-cloud-datastore"
-              groupId="com.google.cloud"
-              version="LATEST" />
-      </libraryFile>
-    </library>
-    
-     <library       
-         id="cloudtranslation"       
-         group="clientapis"      
-         name="%cloudtranslation.name"       
-         tooltip="%cloudtranslation.tooltip"     
-         javaVersion="1.8"       
-         siteUri="https://cloud.google.com/translate/docs/reference/libraries"       
-         dependencies="include">     
-       <libraryFile        
-           javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.21.0/apidocs/index.html?com/google/cloud/translate/package-summary.html">         
-         <mavenCoordinates     
-             artifactId="google-cloud-translate"
-             groupId="com.google.cloud"      
-             version="LATEST" />      
-      </libraryFile>      
-    </library>
+
   </extension>
 
   <extension point="org.eclipse.jdt.core.classpathContainerInitializer">

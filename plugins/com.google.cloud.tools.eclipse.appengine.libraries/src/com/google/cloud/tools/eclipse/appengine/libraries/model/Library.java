@@ -24,6 +24,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -34,8 +37,11 @@ import org.eclipse.core.runtime.Path;
  *
  */
 public final class Library {
+
   public static final String CONTAINER_PATH_PREFIX =
       "com.google.cloud.tools.eclipse.appengine.libraries";
+  
+  private static final Logger logger = Logger.getLogger(Library.class.getName());
 
   private final String id;
   private String name;
@@ -168,7 +174,7 @@ public final class Library {
   synchronized void setResolved(boolean resolved) {
     this.resolved = resolved;
   }
-  
+    
   /**
    * A potentially long running operation that connects to the
    * local and remote Maven repos and adds all library files in the
@@ -180,9 +186,17 @@ public final class Library {
     if (!resolved) {
       List<LibraryFile> transitiveDependencies = new ArrayList<>();
       for (LibraryFile artifact : this.libraryFiles) {
+        artifact.updateVersion();
         MavenCoordinates coordinates = artifact.getMavenCoordinates();
-        Collection<LibraryFile> dependencies = LibraryFactory.loadTransitiveDependencies(coordinates);
-        transitiveDependencies.addAll(dependencies);
+
+        try {
+          Collection<LibraryFile> dependencies =
+              LibraryFactory.loadTransitiveDependencies(coordinates);
+          transitiveDependencies.addAll(dependencies);
+        } catch (CoreException ex) {
+          logger.log(Level.SEVERE,
+              "Could not load library " + artifact.getMavenCoordinates().toString(), ex);
+        }
       }
       
       this.libraryFiles = resolveDuplicates(transitiveDependencies);
