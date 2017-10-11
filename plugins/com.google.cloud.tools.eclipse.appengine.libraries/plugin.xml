@@ -94,12 +94,6 @@
               artifactId="jsp-api"
               version="2.1" />
       </libraryFile>
-      <libraryFile javadocUri="https://tomcat.apache.org/taglibs/standard/apidocs/">
-        <mavenCoordinates
-              groupId="javax.servlet"
-              artifactId="jstl"
-              version="1.2" />
-      </libraryFile>
     </library>
 
   </extension>
