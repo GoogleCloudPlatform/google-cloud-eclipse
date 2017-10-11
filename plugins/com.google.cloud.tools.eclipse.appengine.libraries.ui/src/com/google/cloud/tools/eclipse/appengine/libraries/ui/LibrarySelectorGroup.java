@@ -70,7 +70,7 @@ public class LibrarySelectorGroup implements ISelectionProvider {
     Collection<Library> availableLibraries = CloudLibraries.getLibraries(groupName);
     this.availableLibraries = new LinkedHashMap<>();
     for (Library library : availableLibraries) {
-      if (!restrictedEnvironment || !library.getJavaVersion().equals("1.8")) {
+      if (!restrictedEnvironment || "http".equals(library.getTransport())) {
         this.availableLibraries.put(library.getId(), library);
       }
     }
