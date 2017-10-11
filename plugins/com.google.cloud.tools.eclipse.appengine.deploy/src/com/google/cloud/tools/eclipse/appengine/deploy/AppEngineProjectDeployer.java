@@ -35,9 +35,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.ui.console.ConsolePlugin;
-import org.eclipse.ui.console.IConsoleManager;
-import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 
 /**
@@ -52,11 +49,6 @@ public class AppEngineProjectDeployer {
       "cron.yaml", "dispatch.yaml", "dos.yaml", "index.yaml", "queue.yaml"));
 
   private final CloudSdkProcessWrapper cloudSdkProcessWrapper = new CloudSdkProcessWrapper();
-  private final MessageConsole messageConsole;
-
-  public AppEngineProjectDeployer(MessageConsole messageConsole) {
-    this.messageConsole = messageConsole;
-  }
 
   /**
    * @param optionalConfigurationFilesDirectory if not {@code null}, searches optional configuration
@@ -65,10 +57,6 @@ public class AppEngineProjectDeployer {
   public IStatus deploy(IPath stagingDirectory, Path credentialFile,
       DeployPreferences deployPreferences, IPath optionalConfigurationFilesDirectory,
       MessageConsoleStream stdoutOutputStream, IProgressMonitor monitor) {
-    // Bring the deploy console to the front. Apparently, this can be done in a non-UI thread.
-    IConsoleManager consoleManager = ConsolePlugin.getDefault().getConsoleManager();
-    consoleManager.showConsoleView(messageConsole);
-
     if (monitor.isCanceled()) {
       throw new OperationCanceledException();
     }

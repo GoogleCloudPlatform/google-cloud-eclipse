@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
 import com.google.cloud.tools.eclipse.appengine.deploy.CleanupOldDeploysJob;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployJob;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
@@ -161,10 +160,9 @@ public abstract class DeployCommandHandler extends AbstractHandler {
     errorStream.setColor(colorProvider.getColor(IDebugUIConstants.ID_STANDARD_ERROR_STREAM));
 
     StagingDelegate stagingDelegate = getStagingDelegate(project);
-    AppEngineProjectDeployer deployer = new AppEngineProjectDeployer(messageConsole);
 
     DeployJob deploy = new DeployJob(deployPreferences, credential, workDirectory,
-        outputStream, errorStream, stagingDelegate, deployer);
+        outputStream, errorStream, stagingDelegate);
     messageConsole.setJob(deploy);
     deploy.addJobChangeListener(new JobChangeAdapter() {
 

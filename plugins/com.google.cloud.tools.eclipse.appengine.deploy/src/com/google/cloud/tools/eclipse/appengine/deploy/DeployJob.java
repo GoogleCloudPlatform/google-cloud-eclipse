@@ -60,7 +60,7 @@ public class DeployJob extends WorkspaceJob {
   private final MessageConsoleStream stderrOutputStream;
   private final DeployPreferences deployPreferences;
   private final StagingDelegate stager;
-  private final AppEngineProjectDeployer deployer;
+  private final AppEngineProjectDeployer deployer = new AppEngineProjectDeployer();
 
   /**
    * @param workDirectory temporary work directory the job can safely use (e.g., for creating and
@@ -68,7 +68,7 @@ public class DeployJob extends WorkspaceJob {
    */
   public DeployJob(DeployPreferences deployPreferences, Credential credential, IPath workDirectory,
       MessageConsoleStream stdoutOutputStream, MessageConsoleStream stderrOutputStream,
-      StagingDelegate stager, AppEngineProjectDeployer deployer) {
+      StagingDelegate stager) {
     super(Messages.getString("deploy.job.name")); //$NON-NLS-1$
     Preconditions.checkNotNull(deployPreferences.getProjectId());
     Preconditions.checkArgument(!deployPreferences.getProjectId().isEmpty());
@@ -78,7 +78,6 @@ public class DeployJob extends WorkspaceJob {
     this.stdoutOutputStream = stdoutOutputStream;
     this.stderrOutputStream = stderrOutputStream;
     this.stager = stager;
-    this.deployer = deployer;
   }
 
   @Override
@@ -145,8 +144,7 @@ public class DeployJob extends WorkspaceJob {
     }
   }
 
-  private IStatus deployProject(Path credentialFile, IPath stagingDirectory,
-      IProgressMonitor monitor) {
+  private IStatus deployProject(Path credentialFile, IPath stagingDirectory, IProgressMonitor monitor) {
     IPath optionalConfigurationFilesDirectory = null;
     if (deployPreferences.isIncludeOptionalConfigurationFiles()) {
       optionalConfigurationFilesDirectory = stager.getOptionalConfigurationFilesDirectory();
