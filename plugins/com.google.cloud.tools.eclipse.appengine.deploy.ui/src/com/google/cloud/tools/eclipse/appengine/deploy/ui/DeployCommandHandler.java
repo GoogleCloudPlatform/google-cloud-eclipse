@@ -156,6 +156,8 @@ public abstract class DeployCommandHandler extends AbstractHandler {
     ConsoleColorProvider colorProvider = new ConsoleColorProvider();
     MessageConsoleStream outputStream = messageConsole.newMessageStream();
     MessageConsoleStream errorStream = messageConsole.newMessageStream();
+    outputStream.setActivateOnWrite(true);
+    errorStream.setActivateOnWrite(true);
     outputStream.setColor(colorProvider.getColor(IDebugUIConstants.ID_STANDARD_OUTPUT_STREAM));
     errorStream.setColor(colorProvider.getColor(IDebugUIConstants.ID_STANDARD_ERROR_STREAM));
 
