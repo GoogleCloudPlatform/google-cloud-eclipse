@@ -18,16 +18,23 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.util.ClasspathUtil;
 import com.google.common.annotations.VisibleForTesting;
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
@@ -211,5 +218,32 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
         false);
     ClasspathUtil.addClasspathEntry(newProject, junit4Container, monitor);
   }
+
+  /**
+   * Download and install the given dependency in the provided folder. Returns the resulting file,
+   * or {@code null} if it was unable to install the file.
+   */
+  protected IFile installArtifact(MavenCoordinates dependency, IFolder destination,
+      IProgressMonitor monitor) {
+    SubMonitor progress = SubMonitor.convert(monitor, 10);
+    LibraryFile libraryFile = new LibraryFile(dependency);
+    File artifactFile = null;
+    try {
+      Artifact artifact = repositoryService.resolveArtifact(libraryFile, progress.newChild(5));
+      artifactFile = artifact.getFile();
+      IFile destinationFile = destination.getFile(artifactFile.getName());
+      destinationFile.create(Files.newInputStream(artifactFile.toPath()), true,
+          progress.newChild(5));
+      return destinationFile;
+    } catch (CoreException ex) {
+      logger.log(Level.WARNING, "Error downloading " + //$NON-NLS-1$
+          libraryFile.getMavenCoordinates().toString() + " from maven", ex); //$NON-NLS-1$
+    } catch (IOException ex) {
+      logger.log(Level.WARNING, "Error copying over " + artifactFile.toString() + " to " + //$NON-NLS-1$ //$NON-NLS-2$
+          destination.getFullPath().toPortableString(), ex);
+    }
+    return null;
+  }
+
 
 }

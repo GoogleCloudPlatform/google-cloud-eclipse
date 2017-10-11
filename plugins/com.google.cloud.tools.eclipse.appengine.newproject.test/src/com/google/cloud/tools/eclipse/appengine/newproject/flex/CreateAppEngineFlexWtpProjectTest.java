@@ -134,7 +134,7 @@ public class CreateAppEngineFlexWtpProjectTest extends CreateAppEngineWtpProject
     CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
     creator.execute(monitor);
 
-    assertTrue(project.getFile("lib/fake-jstl-1.2.jar").exists());
+    assertTrue(project.getFile("src/main/webapp/WEB-INF/lib/fake-jstl-1.2.jar").exists());
   }
 
   @Test

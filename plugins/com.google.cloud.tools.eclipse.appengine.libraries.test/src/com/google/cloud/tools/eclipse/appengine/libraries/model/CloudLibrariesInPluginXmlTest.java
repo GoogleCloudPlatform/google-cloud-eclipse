@@ -228,7 +228,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertNotNull(jspApiLibrary.getLibraryDependencies());
     assertTrue(jspApiLibrary.getLibraryDependencies().isEmpty());
 
-    assertThat(jspApiLibrary.getLibraryFiles().size(), is(2));
+    assertThat(jspApiLibrary.getLibraryFiles().size(), is(1));
     LibraryFile jspApi = jspApiLibrary.getLibraryFiles().get(0);
     assertThat(jspApi.getJavadocUri(), is(new URI(
         "http://docs.oracle.com/cd/E17802_01/products/products/jsp/2.1/docs/jsp-2_1-pfd2/")));
@@ -244,22 +244,5 @@ public class CloudLibrariesInPluginXmlTest {
     assertNull(mavenCoordinates.getClassifier());
 
     assertTrue(jspApi.getFilters().isEmpty());
-
-    LibraryFile jstlApi = jspApiLibrary.getLibraryFiles().get(1);
-    assertThat(jstlApi.getJavadocUri(), 
-        is(new URI("https://tomcat.apache.org/taglibs/standard/apidocs/")));
-    assertNull(jstlApi.getSourceUri());
-
-    assertNotNull(jstlApi.getMavenCoordinates());
-    MavenCoordinates jstlCoordinates = jstlApi.getMavenCoordinates();
-    assertThat(jstlCoordinates.getRepository(), is("central"));
-    assertThat(jstlCoordinates.getGroupId(), is("javax.servlet"));
-    assertThat(jstlCoordinates.getArtifactId(), is("jstl"));
-    assertThat(jstlCoordinates.getVersion(), is("1.2"));
-    assertThat(jstlCoordinates.getType(), is("jar"));
-    assertNull(jstlCoordinates.getClassifier());
-
-    assertTrue(jstlApi.getFilters().isEmpty());
   }
-
 }
