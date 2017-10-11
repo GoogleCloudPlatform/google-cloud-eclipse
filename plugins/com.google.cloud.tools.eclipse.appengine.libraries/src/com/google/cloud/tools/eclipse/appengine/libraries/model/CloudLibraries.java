@@ -93,6 +93,8 @@ public class CloudLibraries {
         Library library = new Library(id);
         library.setGroup(CLIENT_APIS_GROUP);
         library.setName(name);
+        // Currently there is exactly one transport per API.
+        // This might or might not change in the future.
         library.setTransport(transports.getString(0));
         JsonArray clients = api.getJsonArray("clients");
         for (JsonObject client : clients.toArray(new JsonObject[0])) {
