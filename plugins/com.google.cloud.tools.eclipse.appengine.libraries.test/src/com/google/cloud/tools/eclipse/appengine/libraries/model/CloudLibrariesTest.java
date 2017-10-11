@@ -39,25 +39,26 @@ public class CloudLibrariesTest {
     List<Library> libraries = CloudLibraries.getLibraries("clientapis");
     Assert.assertTrue(libraries.size() > 10);
     
-    Library datalossPrevention = null;
-    Library cloudStorage = null;
-    
     for (Library library : libraries) {
       String tooltip = library.getToolTip();
-      if ("googlecloudstorage".equals(library.getId())) {
-        cloudStorage = library;
-      } else if ("datalossprevention".equals(library.getId())) {
-        datalossPrevention = library;
-      }
       
       Assert.assertNotNull(library.getName() + " has no tooltip", tooltip);
       Assert.assertFalse(tooltip.isEmpty());
       Assert.assertFalse(library.getName() + " has no files", library.getLibraryFiles().isEmpty());
       Assert.assertEquals("clientapis", library.getGroup());
     }
-    
-    Assert.assertEquals("grpc", datalossPrevention.getTransport());
-    Assert.assertEquals("http", cloudStorage.getTransport());
+  }
+  
+  @Test
+  public void testGrpcTransport() {
+    Library library = CloudLibraries.getLibrary("datalossprevention");
+    Assert.assertEquals("grpc", library.getTransport());
+  }
+  
+  @Test
+  public void testHttpTransport() {
+    Library library = CloudLibraries.getLibrary("googlecloudstorage");
+    Assert.assertEquals("http", library.getTransport());
   }
   
   @Test

@@ -62,7 +62,9 @@ public class LibrarySelectorGroup implements ISelectionProvider {
   }
   
   /**
-   * @param restrictedEnvironment white-listed App Engine Standard Java JRE, android, etc.
+   * @param restrictedEnvironment whether project is targeted to an environment 
+   *     that cannot handle GRPC such as the white-listed App Engine Standard Java 7 JRE,
+   *     android, etc.
    */
   LibrarySelectorGroup(Composite parentContainer, String groupName, boolean restrictedEnvironment) {
     Preconditions.checkNotNull(parentContainer, "parentContainer is null");
