@@ -687,7 +687,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       super(null);
       this.launch = launch;
       this.serverBehaviour = serverBehaviour;
-      this.server = serverBehaviour.getServer();
+      server = serverBehaviour.getServer();
       this.console = console;
     }
 

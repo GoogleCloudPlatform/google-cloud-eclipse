@@ -16,12 +16,15 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
+import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 
 /**
  * A jar file that is downloaded from the location defined by {@link MavenCoordinates}. It can have
@@ -34,6 +37,11 @@ public class LibraryFile implements Comparable<LibraryFile> {
   private URI javadocUri;
   private URI sourceUri;
   private boolean export = true;
+  
+  /** Version has been checked against Maven Central **/
+  // todo could mark this transient and on deserialization set depending on whether
+  // version is still LATEST_VERSION or not
+  private boolean fixedVersion = false;
 
   public LibraryFile(MavenCoordinates mavenCoordinates) {
     Preconditions.checkNotNull(mavenCoordinates, "mavenCoordinates is null");
@@ -102,6 +110,23 @@ public class LibraryFile implements Comparable<LibraryFile> {
   @Override
   public int hashCode() {
     return this.mavenCoordinates.toStringCoordinates().hashCode();
+  }
+
+  /**
+   * Check Maven Central to find the latest release version of this artifact.
+   * This check is made at most once. Subsequent checks are no-ops.
+   */
+  void updateVersion() {
+    if (!fixedVersion) {
+      // todo need method to get latest nonrelease version instead for alphas and betas
+      ArtifactVersion remoteVersion = ArtifactRetriever.DEFAULT.getLatestArtifactVersion(
+          mavenCoordinates.getGroupId(), mavenCoordinates.getArtifactId());
+      if (remoteVersion != null) {
+        String updatedVersion = remoteVersion.toString(); 
+        mavenCoordinates = mavenCoordinates.toBuilder().setVersion(updatedVersion).build();
+      }
+      fixedVersion = true;
+    }
   }
 
 }

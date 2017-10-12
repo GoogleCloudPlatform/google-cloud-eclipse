@@ -113,7 +113,7 @@ public class LibraryClasspathContainerResolverService
                                   IProgressMonitor monitor) {
     Preconditions.checkArgument(containerPath.segment(0).equals(Library.CONTAINER_PATH_PREFIX));
     
-    SubMonitor subMonitor = SubMonitor.convert(monitor, 10);
+    SubMonitor subMonitor = SubMonitor.convert(monitor, 19);
     
     try {
       String libraryId = containerPath.segment(1);
@@ -126,10 +126,12 @@ public class LibraryClasspathContainerResolverService
           if (referencedLibrary != null) {
             referencedLibraries.add(referencedLibrary);
           } else {
+            // todo this might deserve a non-OK status
             logger.severe("Referenced library not found: " + referencedId);
           }
         }
-        library = BuildPath.collectLibraryFiles(javaProject, referencedLibraries);
+        library =
+            BuildPath.collectLibraryFiles(javaProject, referencedLibraries, subMonitor.newChild(9));
       } else {
         library = CloudLibraries.getLibrary(libraryId);
       }
@@ -241,8 +243,16 @@ public class LibraryClasspathContainerResolverService
 
     Artifact artifact = repositoryService.resolveArtifact(libraryFile, new NullProgressMonitor());
     IPath libraryPath = new Path(artifact.getFile().getAbsolutePath());
-    IPath sourceAttachmentPath = repositoryService.resolveSourceArtifact(libraryFile,
-        artifact.getVersion(), new NullProgressMonitor());
+    
+    // Not all artifacts have sources; need to work if no source artifact is available
+    // e.g. appengine-api-sdk doesn't
+    IPath sourceAttachmentPath = null;
+    try {
+      sourceAttachmentPath = repositoryService.resolveSourceArtifact(libraryFile,
+          artifact.getVersion(), new NullProgressMonitor());
+    } catch (CoreException ex) {
+      // continue without source
+    }
     
     IClasspathEntry newLibraryEntry =
         JavaCore.newLibraryEntry(libraryPath,

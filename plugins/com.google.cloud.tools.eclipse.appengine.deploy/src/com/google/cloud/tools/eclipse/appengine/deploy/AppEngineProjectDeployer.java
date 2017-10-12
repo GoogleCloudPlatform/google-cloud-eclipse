@@ -16,10 +16,12 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
+import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDeployment;
 import com.google.cloud.tools.eclipse.appengine.deploy.util.CloudSdkProcessWrapper;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.io.File;
@@ -72,7 +74,11 @@ public class AppEngineProjectDeployer {
           DeployPreferencesConverter.toDeployConfiguration(deployPreferences);
       configuration.setDeployables(deployables);
       CloudSdkAppEngineDeployment deployment = new CloudSdkAppEngineDeployment(cloudSdk);
-      deployment.deploy(configuration);
+      try { 
+        deployment.deploy(configuration);
+      } catch (AppEngineException ex) {
+        return StatusUtil.error(this, "Error deploying project: " + ex.getMessage(), ex);
+      }
       return cloudSdkProcessWrapper.getExitStatus();
     } finally {
       progress.worked(1);

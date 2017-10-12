@@ -48,6 +48,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.wst.server.core.IServer;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -242,7 +243,9 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
   }
 
   @Test
-  public void testGenerateRunConfiguration_withAdminPort() throws CoreException {
+  public void testGenerateRunConfiguration_withAdminPortWhenDevAppserver2() throws CoreException {
+    Assume.assumeTrue(LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2);
+
     when(launchConfiguration.getAttribute(anyString(), anyString()))
         .thenAnswer(AdditionalAnswers.returnsSecondArg());
     when(launchConfiguration
@@ -260,8 +263,10 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
   }
 
   @Test
-  public void testGenerateRunConfiguration_withAdminPortFailover()
+  public void testGenerateRunConfiguration_withAdminPortFailoverWhenDevAppserver2()
       throws CoreException, IOException {
+    Assume.assumeTrue(LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2);
+
     // dev_appserver waits on localhost by default
     try (ServerSocket socket = new ServerSocket(8080, 100, InetAddress.getLoopbackAddress())) {
       DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()

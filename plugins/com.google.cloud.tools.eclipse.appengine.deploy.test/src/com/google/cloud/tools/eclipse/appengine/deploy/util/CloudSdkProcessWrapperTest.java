@@ -21,15 +21,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.util.CloudSdkProcessWrapper.ProcessExitRecorder;
-import com.google.cloud.tools.eclipse.sdk.CollectingLineListener;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import org.eclipse.core.runtime.Status;
 import org.junit.Rule;
 import org.junit.Test;
@@ -114,7 +110,7 @@ public class CloudSdkProcessWrapperTest {
   public void testProcessExitRecorder_onErrorExitWithNullErrorMessageCollector() {
     wrapper.setUpStandardStagingCloudSdk(null, null, null);
 
-    ProcessExitRecorder recorder = wrapper.new ProcessExitRecorder(null /* errorMessageCollector */);
+    ProcessExitRecorder recorder = wrapper.new ProcessExitRecorder();
     recorder.onExit(15);
 
     assertEquals(Status.ERROR, wrapper.getExitStatus().getSeverity());
@@ -124,21 +120,18 @@ public class CloudSdkProcessWrapperTest {
   @Test
   public void testProcessExitRecorder_onErrorExit() {
     wrapper.setUpStandardStagingCloudSdk(null, null, null);
-    CollectingLineListener errorMessageCollector = mock(CollectingLineListener.class);
-    when(errorMessageCollector.getCollectedMessages()).thenReturn(Arrays.asList("got ", " errors"));
 
-    ProcessExitRecorder recorder = wrapper.new ProcessExitRecorder(errorMessageCollector);
+    ProcessExitRecorder recorder = wrapper.new ProcessExitRecorder();
     recorder.onExit(23);
 
     assertEquals(Status.ERROR, wrapper.getExitStatus().getSeverity());
-    assertEquals("got \n errors", wrapper.getExitStatus().getMessage());
   }
 
   @Test
   public void testProcessExitRecorder_onOkExit() {
     wrapper.setUpStandardStagingCloudSdk(null, null, null);
 
-    ProcessExitRecorder recorder = wrapper.new ProcessExitRecorder(null /* errorMessageCollector */);
+    ProcessExitRecorder recorder = wrapper.new ProcessExitRecorder();
     recorder.onExit(0);
 
     assertTrue(wrapper.getExitStatus().isOK());

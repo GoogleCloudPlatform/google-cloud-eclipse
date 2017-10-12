@@ -115,4 +115,8 @@ public class StatusUtil {
     }
     return newStatus;
   }
+
+  public static IStatus error(Object origin, String message, int code) {
+    return new Status(IStatus.ERROR, getBundleId(origin), code, message, null);
+  }
 }

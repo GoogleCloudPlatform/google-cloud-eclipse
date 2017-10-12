@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import java.text.MessageFormat;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
 /**
@@ -40,6 +41,9 @@ public class MavenCoordinates {
    * @param groupId the Maven group ID, cannot be <code>null</code>
    * @param artifactId the Maven artifact ID, cannot be <code>null</code>
    */
+  // that this is public is only for legacy tests. We can easily convert those to use
+  // the builder instead
+  @VisibleForTesting
   public MavenCoordinates(String groupId, String artifactId) {
     Preconditions.checkNotNull(groupId, "groupId null");
     Preconditions.checkNotNull(artifactId, "artifactId null");
@@ -175,8 +179,8 @@ public class MavenCoordinates {
     }
 
     /**
-     * @param version the Maven version of the artifact, defaults to special value
-     *     {@link MavenCoordinates#LATEST_VERSION}, cannot be <code>null</code> or empty string.
+     * @param version the Maven version of the artifact. Defaults to special value
+     *     {@link MavenCoordinates#LATEST_VERSION}. Cannot be <code>null</code> or empty string.
      */
     public Builder setVersion(String version) {
       Preconditions.checkNotNull(version, "version is null");
@@ -193,6 +197,6 @@ public class MavenCoordinates {
       return this;
     }
     
-  }  
+  }
 
 }

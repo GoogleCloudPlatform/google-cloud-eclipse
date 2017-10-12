@@ -236,13 +236,39 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     workingCopy.setMappedResources(projects.toArray(new IResource[projects.size()]));
   }
 
+  @VisibleForTesting
+  void checkPorts(DefaultRunConfiguration devServerRunConfiguration, PortChecker portInUse)
+      throws CoreException {
+    InetAddress serverHost = InetAddress.getLoopbackAddress();
+    if (devServerRunConfiguration.getHost() != null) {
+      serverHost = LocalAppEngineServerLaunchConfigurationDelegate
+          .resolveAddress(devServerRunConfiguration.getHost());
+    }
+    serverPort = checkPort(serverHost,
+        ifNull(devServerRunConfiguration.getPort(), DEFAULT_SERVER_PORT), portInUse);
+
+    if (LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2) {
+      InetAddress adminHost = InetAddress.getLoopbackAddress();
+      if (devServerRunConfiguration.getAdminHost() != null) {
+        adminHost = LocalAppEngineServerLaunchConfigurationDelegate
+            .resolveAddress(devServerRunConfiguration.getAdminHost());
+      }
+      adminPort = checkPort(adminHost,
+          ifNull(devServerRunConfiguration.getAdminPort(), DEFAULT_ADMIN_PORT), portInUse);
+    }
+
+    // API port seems to be bound on localhost in practice
+    checkPort(InetAddress.getLoopbackAddress(),
+        ifNull(devServerRunConfiguration.getApiPort(), DEFAULT_API_PORT), portInUse);
+  }
+
   /**
    * Check whether the provided port is in use. Returns the port if not, or throws an exception if
    * the port is in use.
    * 
    * @param addr a machine address or {@code null} for all addresses
    * @param portInUse returns true if the (host,port) is in use
-   * @return the port value ⊂ [0, 65535]
+   * @return the value of the {@code port} parameter
    * @throws CoreException if the port is in use
    */
   @VisibleForTesting
@@ -304,7 +330,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   void startDevServer(String mode, DefaultRunConfiguration devServerRunConfiguration,
       Path javaHomePath, MessageConsoleStream outputStream, MessageConsoleStream errorStream)
       throws CoreException {
-    
+
     PortChecker portInUse = new PortChecker() {
       @Override
       public boolean isInUse(InetAddress addr, int port) {
@@ -313,25 +339,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
       }
     };
 
-    InetAddress serverHost = InetAddress.getLoopbackAddress();
-    if (devServerRunConfiguration.getHost() != null) {
-      serverHost = LocalAppEngineServerLaunchConfigurationDelegate
-          .resolveAddress(devServerRunConfiguration.getHost());
-    }
-    serverPort = checkPort(serverHost,
-        ifNull(devServerRunConfiguration.getPort(), DEFAULT_SERVER_PORT), portInUse);
-
-    InetAddress adminHost = InetAddress.getLoopbackAddress();
-    if (devServerRunConfiguration.getAdminHost() != null) {
-      adminHost = LocalAppEngineServerLaunchConfigurationDelegate
-          .resolveAddress(devServerRunConfiguration.getAdminHost());
-    }
-    adminPort = checkPort(adminHost,
-        ifNull(devServerRunConfiguration.getAdminPort(), DEFAULT_ADMIN_PORT), portInUse);
-
-    // API port seems on localhost in practice
-    checkPort(InetAddress.getLoopbackAddress(),
-        ifNull(devServerRunConfiguration.getApiPort(), DEFAULT_API_PORT), portInUse);
+    checkPorts(devServerRunConfiguration, portInUse);
 
     setServerState(IServer.STATE_STARTING);
     setMode(mode);

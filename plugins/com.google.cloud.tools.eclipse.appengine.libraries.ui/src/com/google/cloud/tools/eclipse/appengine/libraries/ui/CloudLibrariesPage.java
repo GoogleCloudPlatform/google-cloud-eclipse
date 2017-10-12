@@ -22,7 +22,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.ui.wizards.IClasspathContainerPage;
@@ -103,13 +103,14 @@ public abstract class CloudLibrariesPage extends WizardPage implements IClasspat
       return null;
     }
 
+    SubMonitor monitor = SubMonitor.convert(null, 10);
     try {
       if (MavenUtils.hasMavenNature(project.getProject())) {
-        BuildPath.addMavenLibraries(project.getProject(), libraries, new NullProgressMonitor());
+        BuildPath.addMavenLibraries(project.getProject(), libraries, monitor.newChild(10));
         return new IClasspathEntry[0];
       } else {
-        Library masterLibrary = BuildPath.collectLibraryFiles(project, libraries);
-        IClasspathEntry[] added = BuildPath.listNativeLibrary(project, masterLibrary);
+        Library masterLibrary = BuildPath.collectLibraryFiles(project, libraries, monitor.newChild(7));
+        IClasspathEntry[] added = BuildPath.listNativeLibrary(project, masterLibrary, monitor.newChild(3));
         return added;
       }
     } catch (CoreException ex) {

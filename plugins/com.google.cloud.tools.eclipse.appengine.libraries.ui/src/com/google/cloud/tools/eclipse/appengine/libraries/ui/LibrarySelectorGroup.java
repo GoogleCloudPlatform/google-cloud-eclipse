@@ -62,7 +62,9 @@ public class LibrarySelectorGroup implements ISelectionProvider {
   }
   
   /**
-   * @param restrictedEnvironment white-listed App Engine Standard Java JRE, android, etc.
+   * @param restrictedEnvironment whether project is targeted to an environment 
+   *     that cannot handle GRPC such as the white-listed App Engine Standard Java 7 JRE,
+   *     android, etc.
    */
   LibrarySelectorGroup(Composite parentContainer, String groupName, boolean restrictedEnvironment) {
     Preconditions.checkNotNull(parentContainer, "parentContainer is null");
@@ -70,7 +72,7 @@ public class LibrarySelectorGroup implements ISelectionProvider {
     Collection<Library> availableLibraries = CloudLibraries.getLibraries(groupName);
     this.availableLibraries = new LinkedHashMap<>();
     for (Library library : availableLibraries) {
-      if (!restrictedEnvironment || !library.getJavaVersion().equals("1.8")) {
+      if (!restrictedEnvironment || "http".equals(library.getTransport())) {
         this.availableLibraries.put(library.getId(), library);
       }
     }
