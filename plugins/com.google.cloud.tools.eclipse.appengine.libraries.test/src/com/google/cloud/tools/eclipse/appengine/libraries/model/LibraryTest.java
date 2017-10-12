@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
 import org.eclipse.core.runtime.CoreException;
 import org.junit.Test;
 
@@ -132,10 +133,14 @@ public class LibraryTest {
 
   @Test
   public void testResolvedDuplicates() throws CoreException {
-    MavenCoordinates coordinates19 = new MavenCoordinates.Builder("com.google.guava", "guava")
+    MavenCoordinates coordinates19 = new MavenCoordinates.Builder()
+        .setGroupId("com.google.guava")
+        .setArtifactId("guava")
         .setVersion("19.0")
         .build();    
-    MavenCoordinates coordinates20 = new MavenCoordinates.Builder("com.google.guava", "guava")
+    MavenCoordinates coordinates20 = new MavenCoordinates.Builder()
+        .setGroupId("com.google.guava")
+        .setArtifactId("guava")
         .setVersion("20.0")
         .build();    
     
@@ -153,13 +158,19 @@ public class LibraryTest {
   
   @Test
   public void testResolvedDuplicates_semanticVersioning() throws CoreException {
-    MavenCoordinates coordinates1 = new MavenCoordinates.Builder("com.google.guava", "guava")
+    MavenCoordinates coordinates1 = new MavenCoordinates.Builder()
+        .setGroupId("com.google.guava")
+        .setArtifactId("guava")
         .setVersion("19.0.1")
         .build();    
-    MavenCoordinates coordinates2 = new MavenCoordinates.Builder("com.google.guava", "guava")
+    MavenCoordinates coordinates2 = new MavenCoordinates.Builder()
+        .setGroupId("com.google.guava")
+        .setArtifactId("guava")
         .setVersion("19.0.3")
         .build();
-    MavenCoordinates coordinates3 = new MavenCoordinates.Builder("com.google.guava", "guava")
+    MavenCoordinates coordinates3 = new MavenCoordinates.Builder()
+        .setGroupId("com.google.guava")
+        .setArtifactId("guava")
         .setVersion("19.0.2")
         .build();
     

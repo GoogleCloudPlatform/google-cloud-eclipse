@@ -83,7 +83,9 @@ public class MavenCoordinatesHelper {
       throw new IllegalArgumentException("Attribute value for Maven artifact ID not found");
     }
     
-    MavenCoordinates.Builder builder = new MavenCoordinates.Builder(groupId, artifactId);
+    MavenCoordinates.Builder builder = new MavenCoordinates.Builder();
+    builder.setGroupId(groupId);
+    builder.setArtifactId(artifactId);
     
     if (attributeMap.containsKey(CLASSPATH_ATTRIBUTE_REPOSITORY)) {
       builder.setRepository(attributeMap.get(CLASSPATH_ATTRIBUTE_REPOSITORY));

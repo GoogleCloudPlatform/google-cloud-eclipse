@@ -121,8 +121,9 @@ class LibraryFactory {
     Collection<Artifact> artifacts = DependencyResolver.getTransitiveDependencies(
         root.getGroupId(), root.getArtifactId(), root.getVersion(), null);
     for (Artifact artifact : artifacts) {
-      MavenCoordinates coordinates = new MavenCoordinates.Builder(
-          artifact.getGroupId(), artifact.getArtifactId())
+      MavenCoordinates coordinates = new MavenCoordinates.Builder()
+          .setGroupId(artifact.getGroupId())
+          .setArtifactId(artifact.getArtifactId())
           .setVersion(artifact.getVersion())
           .build();
       LibraryFile file = new LibraryFile(coordinates);
@@ -165,7 +166,9 @@ class LibraryFactory {
     String groupId = mavenCoordinatesElement.getAttribute(ATTRIBUTE_NAME_GROUP_ID);
     String artifactId = mavenCoordinatesElement.getAttribute(ATTRIBUTE_NAME_ARTIFACT_ID);
 
-    MavenCoordinates.Builder builder = new MavenCoordinates.Builder(groupId, artifactId);
+    MavenCoordinates.Builder builder = new MavenCoordinates.Builder()
+        .setGroupId(groupId)
+        .setArtifactId(artifactId);
 
     String repository = mavenCoordinatesElement.getAttribute(ATTRIBUTE_NAME_REPOSITORY_URI);
     if (!Strings.isNullOrEmpty(repository)) {

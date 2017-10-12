@@ -16,19 +16,17 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
-import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -42,6 +40,11 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 
 public class PomTest {
   
@@ -72,8 +75,9 @@ public class PomTest {
   public void testAddDependencies() 
       throws CoreException, ParserConfigurationException, IOException, SAXException {
     
-    MavenCoordinates.Builder builder = new MavenCoordinates
-        .Builder("com.example.group0", "artifact0")
+    MavenCoordinates.Builder builder = new MavenCoordinates.Builder()
+        .setGroupId("com.example.group0")
+        .setArtifactId("artifact0")
         .setVersion("1.2.3"); 
 
     MavenCoordinates coordinates0 = builder.build();
