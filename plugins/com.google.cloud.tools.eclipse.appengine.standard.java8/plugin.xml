@@ -111,12 +111,6 @@
               artifactId="javax.servlet.jsp-api"
               version="2.3.0" />
       </libraryFile>
-      <libraryFile>
-        <mavenCoordinates
-              groupId="javax.servlet"
-              artifactId="jstl"
-              version="1.2" />
-      </libraryFile>
     </library>
   </extension>
   <extension

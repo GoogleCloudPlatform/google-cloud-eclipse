@@ -50,8 +50,8 @@ public class CloudLibraries {
   public static final String APP_ENGINE_GROUP = "appengine";   //$NON-NLS-1$
 
   /**
-   * Library files for Google Client APIs for Java; specifically
-   * google-api-client, oAuth, and google-http-client.
+   * Library files for the Google Cloud Client Library for Java. E.g.
+   * Stackdriver Logging, Cloud Datastore, Cloud Storage, Cloud Translation, etc.
    */
   public static final String CLIENT_APIS_GROUP = "clientapis"; //$NON-NLS-1$
 
@@ -89,31 +89,39 @@ public class CloudLibraries {
       for (JsonObject api : apis) {
         String name = api.getString("name");
         String id = api.getString("id");
+        JsonArray transports = api.getJsonArray("transports");
         Library library = new Library(id);
         library.setGroup(CLIENT_APIS_GROUP);
         library.setName(name);
+        // Currently there is exactly one transport per API.
+        // This might or might not change in the future.
+        library.setTransport(transports.getString(0));
         JsonArray clients = api.getJsonArray("clients");
         for (JsonObject client : clients.toArray(new JsonObject[0])) {
-          JsonString language = client.getJsonString("language");
-          if (language != null && "java".equals(language.getString())) {
-            String toolTip = client.getString("infotip");
-            library.setToolTip(toolTip);
-            JsonObject coordinates = client.getJsonObject("mavenCoordinates");
-            String groupId = coordinates.getString("groupId");
-            String artifactId = coordinates.getString("artifactId");
-            String versionString = coordinates.getString("version");
-
-            MavenCoordinates mavenCoordinates = new MavenCoordinates.Builder()
-                .setGroupId(groupId)
-                .setArtifactId(artifactId)
-                .setVersion(versionString)
-                .build();
-            LibraryFile file = new LibraryFile(mavenCoordinates);
-            List<LibraryFile> libraryFiles = new ArrayList<>();
-            libraryFiles.add(file);
-            library.setLibraryFiles(libraryFiles);
-            library.setResolved(false);
-            break;
+          try {
+            JsonString language = client.getJsonString("language");
+            if (language != null && "java".equals(language.getString())) {
+              String toolTip = client.getString("infotip");
+              library.setToolTip(toolTip);
+              JsonObject coordinates = client.getJsonObject("mavenCoordinates");
+              String groupId = coordinates.getString("groupId");
+              String artifactId = coordinates.getString("artifactId");
+              String versionString = coordinates.getString("version");
+  
+              MavenCoordinates mavenCoordinates = new MavenCoordinates.Builder()
+                  .setGroupId(groupId)
+                  .setArtifactId(artifactId)
+                  .setVersion(versionString)
+                  .build();
+              LibraryFile file = new LibraryFile(mavenCoordinates);
+              List<LibraryFile> libraryFiles = new ArrayList<>();
+              libraryFiles.add(file);
+              library.setLibraryFiles(libraryFiles);
+              library.setResolved(false);
+              break;
+            }
+          } catch (ClassCastException ex) {
+            logger.log(Level.SEVERE, "Invalid libraries.json");
           }
         }
         clientApis.add(library);

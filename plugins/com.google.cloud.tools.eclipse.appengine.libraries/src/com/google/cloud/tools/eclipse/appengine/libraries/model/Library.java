@@ -51,6 +51,7 @@ public final class Library {
   private List<LibraryFile> libraryFiles = Collections.emptyList();
   private String group;
   private String javaVersion="1.7";
+  private String transport = "http";
   
   // true if the dependencies for this library have been loaded
   private boolean resolved = true;
@@ -162,6 +163,14 @@ public final class Library {
    */
   public String getGroup() {
     return group;
+  }
+
+  public String getTransport() {
+    return this.transport;
+  }
+
+  void setTransport(String transport) {
+    this.transport = transport;
   }
   
   public synchronized boolean isResolved() {

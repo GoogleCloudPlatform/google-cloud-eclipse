@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.newproject.standard;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService;
+import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfig;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectWizard;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
@@ -37,6 +38,9 @@ public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
 
   @Inject
   private ILibraryClasspathContainerResolverService resolverService;
+
+  @Inject
+  private ILibraryRepositoryService repositoryService;
 
   public AppEngineStandardProjectWizard() {
     setWindowTitle(Messages.getString("new.app.engine.standard.project"));
@@ -76,7 +80,7 @@ public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
   @Override
   public CreateAppEngineWtpProject getAppEngineProjectCreationOperation(
       AppEngineProjectConfig config, IAdaptable uiInfoAdapter) {
-    return new CreateAppEngineStandardWtpProject(config, uiInfoAdapter);
+    return new CreateAppEngineStandardWtpProject(config, uiInfoAdapter, repositoryService);
   }
 
   @Override

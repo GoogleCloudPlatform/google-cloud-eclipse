@@ -18,20 +18,29 @@ package com.google.cloud.tools.eclipse.appengine.newproject.standard;
 
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
+import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProjectTest;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -42,13 +51,58 @@ import org.hamcrest.CustomTypeSafeMatcher;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
+@RunWith(MockitoJUnitRunner.class)
 public class CreateAppEngineStandardWtpProjectTest extends CreateAppEngineWtpProjectTest {
+  @Rule
+  public TemporaryFolder tempFolder = new TemporaryFolder();
+
+  @Mock
+  private ILibraryRepositoryService repositoryService;
+
+  @Before
+  public void setUp() throws Exception {
+    super.setUp();
+    mockRepositoryService();
+  }
+
+  private void mockRepositoryService() throws IOException, CoreException {
+    final Artifact someArtifact = mock(Artifact.class);
+    when(someArtifact.getFile()).thenReturn(tempFolder.newFile());
+
+    final Artifact jstl12 = mock(Artifact.class);
+    File jstl12Jar = tempFolder.newFile("fake-jstl-1.2.jar");
+    when(jstl12.getFile()).thenReturn(jstl12Jar);
+
+    when(repositoryService.resolveArtifact(any(LibraryFile.class), any(IProgressMonitor.class)))
+        .thenAnswer(new Answer<Artifact>() {
+          @Override
+          public Artifact answer(InvocationOnMock invocation) throws Throwable {
+            LibraryFile libraryFile = invocation.getArgumentAt(0, LibraryFile.class);
+            MavenCoordinates coordinates = libraryFile.getMavenCoordinates();
+            if ("jstl".equals(coordinates.getGroupId())
+                && "jstl".equals(coordinates.getArtifactId())
+                && "1.2".equals(coordinates.getVersion())) {
+              return jstl12;
+            } else {
+              return someArtifact;
+            }
+          }
+        });
+  }
 
   @Override
   protected CreateAppEngineWtpProject newCreateAppEngineWtpProject() {
-    return new CreateAppEngineStandardWtpProject(config, mock(IAdaptable.class));
+    return new CreateAppEngineStandardWtpProject(config, mock(IAdaptable.class), repositoryService);
   }
 
   @Test
@@ -80,6 +134,14 @@ public class CreateAppEngineStandardWtpProjectTest extends CreateAppEngineWtpPro
     assertAppEngineApiSdkOnClasspath();
   }
 
+  @Test
+  public void testJstlAdded() throws InvocationTargetException, CoreException {
+    CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
+    creator.execute(monitor);
+
+    assertTrue(project.getFile("src/main/webapp/WEB-INF/lib/fake-jstl-1.2.jar").exists());
+  }
+
   private void assertAppEngineApiSdkOnClasspath() throws CoreException {
     IJavaProject javaProject = JavaCore.create(project);
     Matcher<IClasspathEntry> masterLibraryEntryMatcher =
@@ -105,7 +167,8 @@ public class CreateAppEngineStandardWtpProjectTest extends CreateAppEngineWtpPro
   @Test
   public void testNullConfig() {
     try {
-      new CreateAppEngineStandardWtpProject(null, mock(IAdaptable.class));
+      new CreateAppEngineStandardWtpProject(null, mock(IAdaptable.class),
+          mock(ILibraryRepositoryService.class));
       Assert.fail("allowed null config");
     } catch (NullPointerException ex) {
       // success

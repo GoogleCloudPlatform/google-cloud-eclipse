@@ -18,15 +18,23 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
+import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.util.ClasspathUtil;
 import com.google.common.annotations.VisibleForTesting;
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
@@ -61,6 +69,8 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
 
   private static final Logger logger = Logger.getLogger(CreateAppEngineWtpProject.class.getName());
 
+  protected final ILibraryRepositoryService repositoryService;
+
   private final AppEngineProjectConfig config;
   private final IAdaptable uiInfoAdapter;
   private IFile mostImportant = null;
@@ -92,12 +102,13 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
   }
 
   protected CreateAppEngineWtpProject(AppEngineProjectConfig config,
-      IAdaptable uiInfoAdapter) {
+      IAdaptable uiInfoAdapter, ILibraryRepositoryService repositoryService) {
     if (config == null) {
       throw new NullPointerException("Null App Engine configuration"); //$NON-NLS-1$
     }
     this.config = config;
     this.uiInfoAdapter = uiInfoAdapter;
+    this.repositoryService = repositoryService;
   }
 
   @Override
@@ -121,20 +132,24 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
     }
 
     addAppEngineFacet(newProject, subMonitor.newChild(6));
+    addAdditionalDependencies(newProject, subMonitor.newChild(10));
 
+    fixTestSourceDirectorySettings(newProject, subMonitor.newChild(5));
+  }
+
+  protected void addAdditionalDependencies(IProject newProject, IProgressMonitor monitor)
+      throws CoreException {
+    SubMonitor progress = SubMonitor.convert(monitor, 10);
     if (config.getUseMaven()) {
-      enableMavenNature(newProject, subMonitor.newChild(4));
-      BuildPath.addMavenLibraries(newProject, config.getAppEngineLibraries(), subMonitor.newChild(5));
+      enableMavenNature(newProject, progress.newChild(4));
+      BuildPath.addMavenLibraries(newProject, config.getAppEngineLibraries(), progress.newChild(5));
     } else {
-      addJunit4ToClasspath(newProject, subMonitor.newChild(2));
+      addJunit4ToClasspath(newProject, progress.newChild(2));
       IJavaProject javaProject = JavaCore.create(newProject);
       
       List<Library> libraries = config.getAppEngineLibraries();
-      
-      BuildPath.addNativeLibrary(javaProject, libraries, subMonitor.newChild(5));
+      BuildPath.addNativeLibrary(javaProject, libraries, progress.newChild(8));
     }
-
-    fixTestSourceDirectorySettings(newProject, subMonitor.newChild(5));
   }
 
   private void fixTestSourceDirectorySettings(IProject newProject, IProgressMonitor monitor)
@@ -203,5 +218,32 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
         false);
     ClasspathUtil.addClasspathEntry(newProject, junit4Container, monitor);
   }
+
+  /**
+   * Download and install the given dependency in the provided folder. Returns the resulting file,
+   * or {@code null} if it was unable to install the file.
+   */
+  protected IFile installArtifact(MavenCoordinates dependency, IFolder destination,
+      IProgressMonitor monitor) {
+    SubMonitor progress = SubMonitor.convert(monitor, 10);
+    LibraryFile libraryFile = new LibraryFile(dependency);
+    File artifactFile = null;
+    try {
+      Artifact artifact = repositoryService.resolveArtifact(libraryFile, progress.newChild(5));
+      artifactFile = artifact.getFile();
+      IFile destinationFile = destination.getFile(artifactFile.getName());
+      destinationFile.create(Files.newInputStream(artifactFile.toPath()), true,
+          progress.newChild(5));
+      return destinationFile;
+    } catch (CoreException ex) {
+      logger.log(Level.WARNING, "Error downloading " + //$NON-NLS-1$
+          libraryFile.getMavenCoordinates().toString() + " from maven", ex); //$NON-NLS-1$
+    } catch (IOException ex) {
+      logger.log(Level.WARNING, "Error copying over " + artifactFile.toString() + " to " + //$NON-NLS-1$ //$NON-NLS-2$
+          destination.getFullPath().toPortableString(), ex);
+    }
+    return null;
+  }
+
 
 }

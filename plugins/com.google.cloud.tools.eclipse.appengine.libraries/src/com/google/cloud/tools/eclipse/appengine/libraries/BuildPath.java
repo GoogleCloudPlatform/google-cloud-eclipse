@@ -80,11 +80,11 @@ public class BuildPath {
     
     SubMonitor subMonitor = SubMonitor.convert(monitor,
         Messages.getString("adding.app.engine.libraries"), //$NON-NLS-1$
-        3);
+        18);
     
-    Library masterLibrary = collectLibraryFiles(javaProject, libraries);
+    Library masterLibrary = collectLibraryFiles(javaProject, libraries, subMonitor.newChild(8));
     subMonitor.worked(1);
-    List<IClasspathEntry> newEntries = computeEntries(javaProject, masterLibrary);
+    List<IClasspathEntry> newEntries = computeEntries(javaProject, masterLibrary, subMonitor.newChild(8));
     subMonitor.worked(1);
 
     List<String> libraryIds = new ArrayList<>();
@@ -113,8 +113,13 @@ public class BuildPath {
    * 
    * @return the master library
    */
-  public static Library collectLibraryFiles(IJavaProject javaProject, List<Library> libraries)
-      throws CoreException {
+  public static Library collectLibraryFiles(IJavaProject javaProject, List<Library> libraries,
+      IProgressMonitor monitor) throws CoreException {
+    
+    SubMonitor subMonitor = SubMonitor.convert(monitor,
+        Messages.getString("calculating.dependencies"), //$NON-NLS-1$
+        10 + libraries.size());
+    
     SortedSet<LibraryFile> masterFiles = new TreeSet<>();
     List<String> dependentIds = new ArrayList<>();
     for (Library library : libraries) {
@@ -123,43 +128,59 @@ public class BuildPath {
       }
       dependentIds.add(library.getId());
       masterFiles.addAll(library.getLibraryFiles());
+      subMonitor.worked(1);
     }
 
     Library masterLibrary = new Library(CloudLibraries.MASTER_CONTAINER_ID);
     masterLibrary.setName("Google APIs"); //$NON-NLS-1$
     masterLibrary.setLibraryDependencies(dependentIds);
+    subMonitor.worked(1);
     
     List<LibraryFile> resolved = Library.resolveDuplicates(new ArrayList<LibraryFile>(masterFiles));
+    subMonitor.worked(8);
     masterLibrary.setLibraryFiles(resolved);
+    subMonitor.worked(1);
+
     return masterLibrary;
   }
 
-  private static List<IClasspathEntry> computeEntries(IJavaProject javaProject, Library library)
-      throws CoreException {
+  private static List<IClasspathEntry> computeEntries(IJavaProject javaProject, Library library,
+      IProgressMonitor monitor) throws CoreException {
+
+    SubMonitor subMonitor = SubMonitor.convert(monitor,
+        Messages.getString("computing.entries"), //$NON-NLS-1$
+        12);
+    
     List<IClasspathEntry> rawClasspath = Lists.newArrayList(javaProject.getRawClasspath());
     List<IClasspathEntry> newEntries = new ArrayList<>();
     IClasspathEntry libraryContainer = makeClasspathEntry(library);
+    subMonitor.worked(1);
+    
     if (CloudLibraries.MASTER_CONTAINER_ID.equals(library.getId())) {
       try {
         LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer();
         serializer.saveLibraryIds(javaProject, library.getLibraryDependencies());
       } catch (IOException ex) {
         throw new CoreException(
-            StatusUtil.error(BuildPath.class, "Error saving master library list", ex));
+            StatusUtil.error(BuildPath.class, "Error saving master library list", ex)); //$NON-NLS-1$
       }
     }
+    subMonitor.worked(10);
+
     if (!rawClasspath.contains(libraryContainer)) {
       newEntries.add(libraryContainer);
     }
+    subMonitor.worked(1);
+
     return newEntries;
   }
   
   /**
    * Returns the entries to be added to the classpath. Does not add them to the classpath.
    */
-  public static IClasspathEntry[] listNativeLibrary(IJavaProject javaProject, Library library)
-      throws CoreException {
-    List<IClasspathEntry> newEntries = computeEntries(javaProject, library);
+  public static IClasspathEntry[] listNativeLibrary(IJavaProject javaProject, Library library,
+      IProgressMonitor monitor) throws CoreException {
+    List<IClasspathEntry> newEntries = computeEntries(javaProject, library, monitor);
     runContainerResolverJob(javaProject);
     return newEntries.toArray(new IClasspathEntry[0]);
   }

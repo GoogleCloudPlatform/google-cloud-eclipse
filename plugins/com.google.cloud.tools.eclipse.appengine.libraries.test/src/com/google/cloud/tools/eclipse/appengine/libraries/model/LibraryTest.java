@@ -64,6 +64,11 @@ public class LibraryTest {
     library.setName(null);
     assertNull(library.getName());
   }
+  
+  @Test
+  public void testTransportDefaultsToHttp() {
+    assertEquals("http", library.getTransport());
+  }
 
   @Test
   public void testSetName() {

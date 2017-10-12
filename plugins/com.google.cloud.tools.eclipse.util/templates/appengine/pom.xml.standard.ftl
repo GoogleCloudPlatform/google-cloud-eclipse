@@ -25,17 +25,33 @@
 
   <dependencies>
     <!-- Compile/runtime dependencies -->
+<#if servletVersion == "2.5">
     <dependency>
       <groupId>javax.servlet</groupId>
-<#if servletVersion == "2.5">
       <artifactId>servlet-api</artifactId>
       <version>2.5</version>
-<#else>
-      <artifactId>javax.servlet-api</artifactId>
-      <version>3.1.0</version>
-</#if>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>javax.servlet.jsp</groupId>
+      <artifactId>jsp-api</artifactId>
+      <version>2.1</version>
+      <scope>provided</scope>
+    </dependency>
+<#else>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <version>3.1.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet.jsp</groupId>
+      <artifactId>javax.servlet.jsp-api</artifactId>
+      <version>2.3.1</version>
+      <scope>provided</scope>
+    </dependency>
+</#if>
     <dependency>
       <groupId>com.google.appengine</groupId>
       <artifactId>appengine-api-1.0-sdk</artifactId>
