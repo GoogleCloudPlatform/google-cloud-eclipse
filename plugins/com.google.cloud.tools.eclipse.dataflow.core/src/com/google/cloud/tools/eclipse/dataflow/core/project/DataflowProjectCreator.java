@@ -24,6 +24,7 @@ import com.google.cloud.tools.eclipse.dataflow.core.preferences.WritableDataflow
 import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
 import com.google.cloud.tools.eclipse.util.JavaPackageValidator;
 import com.google.cloud.tools.eclipse.util.MavenCoordinatesValidator;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Strings;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -194,31 +195,34 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
             mavenGroupId, mavenArtifactId, "0.0.1-SNAPSHOT", packageString, archetypeProperties,
             projectImportConfiguration, progress.newChild(4));
         break;
-      } catch (CoreException e) {
-        failures.add(e);
+      } catch (CoreException ex) {
+        // todo should we use a MultiStatus here?
+        failures.add(ex);
       }
     }
-    if (projects.isEmpty()) {
+    if (!failures.isEmpty()) {
+      StatusUtil.setErrorStatus(this, "Error loading dataflow archetypes", failures.get(0));
       for (CoreException failure : failures) {
         DataflowCorePlugin.logError(failure, "CoreException while creating new Dataflow Project");
       }
-    }
-
-    SubMonitor natureMonitor = SubMonitor.convert(progress.newChild(1), projects.size());
-    for (IProject project : projects) {
-      try {
-        DataflowJavaProjectNature.addDataflowJavaNatureToProject(
-            project, natureMonitor.newChild(1));
-        setPreferences(project);
-      } catch (CoreException e) {
-        DataflowCorePlugin.logError(e,
-            "CoreException while adding Dataflow Nature to created project %s", project.getName());
+    } else {
+      SubMonitor natureMonitor = SubMonitor.convert(progress.newChild(1), projects.size());
+      for (IProject project : projects) {
+        try {
+          DataflowJavaProjectNature.addDataflowJavaNatureToProject(
+              project, natureMonitor.newChild(1));
+          setPreferences(project);
+        } catch (CoreException e) {
+          DataflowCorePlugin.logError(e,
+              "CoreException while adding Dataflow Nature to created project %s", project.getName());
+        }
       }
     }
     monitor.done();
   }
 
-  private Set<ArtifactVersion> defaultArchetypeVersions(DataflowProjectArchetype template, MajorVersion version) {
+  private Set<ArtifactVersion> defaultArchetypeVersions(DataflowProjectArchetype template,
+      MajorVersion version) {
     checkArgument(template.getSdkVersions().contains(majorVersion));
 
     String artifactId = template.getArtifactId();
