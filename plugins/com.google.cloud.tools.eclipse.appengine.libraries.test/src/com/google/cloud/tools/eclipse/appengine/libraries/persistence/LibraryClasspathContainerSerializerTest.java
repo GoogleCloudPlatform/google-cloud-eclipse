@@ -84,8 +84,8 @@ public class LibraryClasspathContainerSerializerTest {
             true));
     when(binaryBaseLocationProvider.getBaseLocation()).thenReturn(new Path("/test"));
     when(sourceBaseLocationProvider.getBaseLocation()).thenReturn(new Path("/test"));
-    MavenCoordinates coordinates =
-        new MavenCoordinates.Builder("com.google", "jarartifact").build();
+    MavenCoordinates coordinates = new MavenCoordinates.Builder()
+        .setGroupId("com.google").setArtifactId("jarartifact").build();
     LibraryFile libraryFile = new LibraryFile(coordinates);
     List<LibraryFile> libraryFiles = new ArrayList<>();
     libraryFiles.add(libraryFile);

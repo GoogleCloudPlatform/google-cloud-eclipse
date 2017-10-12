@@ -147,15 +147,22 @@ public class PomTest {
   @Test
   public void testAddDependencies_withDuplicates() 
       throws CoreException, ParserConfigurationException, IOException, SAXException {
-        
+
+    MavenCoordinates cooridnates1 = new MavenCoordinates.Builder()
+        .setGroupId("com.example.group1")
+        .setArtifactId("artifact1")
+        .build();
+    MavenCoordinates cooridnates2 = new MavenCoordinates.Builder()
+        .setGroupId("com.example.group2")
+        .setArtifactId("artifact2")
+        .build();
+
     List<LibraryFile> list1 = new ArrayList<>();
-    LibraryFile file1 = new LibraryFile(
-        new MavenCoordinates.Builder("com.example.group1", "artifact1").build());
+    LibraryFile file1 = new LibraryFile(cooridnates1);
     list1.add(file1);
     
     List<LibraryFile> list2 = new ArrayList<>();
-    LibraryFile file2 = new LibraryFile(
-        new MavenCoordinates.Builder("com.example.group2", "artifact2").build());
+    LibraryFile file2 = new LibraryFile(cooridnates2);
     list2.add(file1);
     list2.add(file2);
     

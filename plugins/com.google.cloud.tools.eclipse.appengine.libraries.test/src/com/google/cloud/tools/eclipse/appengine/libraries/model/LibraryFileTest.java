@@ -43,7 +43,10 @@ public class LibraryFileTest {
 
   @Before
   public void setUp() {
-    mavenCoordinates = new MavenCoordinates.Builder("groupId", "artifactId").build();
+    mavenCoordinates = new MavenCoordinates.Builder()
+        .setGroupId("groupId")
+        .setArtifactId("artifactId")
+        .build();
   }
 
   @Test(expected = NullPointerException.class)
