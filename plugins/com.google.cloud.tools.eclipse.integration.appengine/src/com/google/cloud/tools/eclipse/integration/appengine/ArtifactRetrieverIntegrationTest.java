@@ -56,5 +56,16 @@ public class ArtifactRetrieverIntegrationTest {
     Assert.assertEquals(19, guava.getMajorVersion());
     Assert.assertEquals(0, guava.getMinorVersion());
   }
+  
+  @Test
+  public void testGetLatestArtifactVersion() {
+    ArtifactVersion version = ArtifactRetriever.DEFAULT.getLatestArtifactVersion(
+        "com.google.cloud", "google-cloud-pubsub");
+    if (version == null) {
+      // No release version. This is success.
+      return; 
+    }
+    Assert.assertTrue(version.getMajorVersion() > 0);
+  }
 
 }

@@ -34,6 +34,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -201,4 +204,14 @@ public class LibraryFileTest {
     assertFalse(file.getMavenCoordinates().getVersion().isEmpty());
     assertNotEquals("15.0", file.getMavenCoordinates().getVersion());
   }
+  
+  // DefaultArtifactVersion.compareTo isn't well documented so test it here since we depend on this
+  // logic.
+  @Test
+  public void testCompareVersions() {
+    DefaultArtifactVersion newer = new DefaultArtifactVersion("0.25.0-alpha");
+    DefaultArtifactVersion older = new DefaultArtifactVersion("0.8.0");
+    Assert.assertTrue(newer.compareTo(older) > 0);
+  }
+
 }
