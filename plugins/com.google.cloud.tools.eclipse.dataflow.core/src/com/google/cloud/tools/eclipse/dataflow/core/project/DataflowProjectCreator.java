@@ -44,6 +44,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
@@ -185,6 +187,9 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
 
     List<IProject> projects = Collections.emptyList();
     List<CoreException> failures = new ArrayList<>();
+    MultiStatus status = new MultiStatus(DataflowCorePlugin.PLUGIN_ID, 38, 
+        "Creating loading dataflow maven archetypes", null);
+
     for (ArtifactVersion attemptedVersion : archetypeVersions) {
       checkCancelled(progress);
       // TODO: See if this can be done without using the toString method
@@ -196,12 +201,13 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
             projectImportConfiguration, progress.newChild(4));
         break;
       } catch (CoreException ex) {
-        // todo should we use a MultiStatus here?
+        IStatus child = StatusUtil.error(this, ex.getMessage(), ex);
+        status.merge(child);
         failures.add(ex);
       }
     }
-    if (!failures.isEmpty()) {
-      StatusUtil.setErrorStatus(this, "Error loading dataflow archetypes", failures.get(0));
+    if (projects.isEmpty()) { // failures only matter if no version succeeded
+      StatusUtil.setErrorStatus(this, "Error loading dataflow archetypes", status);
       for (CoreException failure : failures) {
         DataflowCorePlugin.logError(failure, "CoreException while creating new Dataflow Project");
       }
