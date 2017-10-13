@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.net.URI;
 import java.util.ArrayList;
@@ -169,11 +168,6 @@ public final class Library {
 
   void setTransport(String transport) {
     this.transport = transport;
-  }
-  
-  @VisibleForTesting
-  synchronized boolean isResolved() {
-    return transitiveDependencies != null;
   }
   
   /**

@@ -130,11 +130,6 @@ public class LibraryTest {
   }
 
   @Test
-  public void testResolvedDefaultsToFalse() {
-    assertFalse(library.isResolved());
-  }
-
-  @Test
   public void testDirectDependencies() throws CoreException {
     // objectify depends on guava
     MavenCoordinates mavenCoordinates =

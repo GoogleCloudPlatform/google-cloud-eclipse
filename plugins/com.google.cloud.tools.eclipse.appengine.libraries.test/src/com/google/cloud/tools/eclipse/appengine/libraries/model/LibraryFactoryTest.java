@@ -84,7 +84,6 @@ public class LibraryFactoryTest {
     Library library = LibraryFactory.create(configuration);
     Assert.assertEquals("com.google.guava", library.getGroup());
     Assert.assertEquals("1.8", library.getJavaVersion());
-    Assert.assertTrue(library.isResolved());
     Assert.assertTrue(library.isExport());
   }
 
@@ -95,7 +94,6 @@ public class LibraryFactoryTest {
     Mockito.when(configuration.getAttribute("export")).thenReturn("false");
 
     Library library = LibraryFactory.create(configuration);
-    Assert.assertFalse(library.isResolved());
     Assert.assertFalse(library.isExport());
   }
 
