@@ -17,12 +17,12 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -134,24 +134,22 @@ public class CloudLibraries {
     }
   }
   
-  private static ImmutableMap<String, Library> loadLibraryDefinitions() {
+  private static Map<String, Library> loadLibraryDefinitions() {
     IConfigurationElement[] elements = RegistryFactory.getRegistry().getConfigurationElementsFor(
         "com.google.cloud.tools.eclipse.appengine.libraries"); //$NON-NLS-1$
-    ImmutableMap.Builder<String, Library> builder = ImmutableMap.builder();
+    Map<String, Library> map = new HashMap<>();
     for (IConfigurationElement element : elements) {
       try {
         Library library = LibraryFactory.create(element);
-        builder.put(library.getId(), library);
+        map.put(library.getId(), library);
       } catch (LibraryFactoryException ex) {
         logger.log(Level.SEVERE, "Error loading library definition", ex); //$NON-NLS-1$
       }
     }
 
     for (Library library : loadClientApis()) {   
-      builder.put(library.getId(), library);
+      map.put(library.getId(), library);
     }
-    
-    ImmutableMap<String, Library> map = builder.build();
 
     resolveTransitiveDependencies(map);
 
@@ -160,7 +158,7 @@ public class CloudLibraries {
 
   // Only goes one level deeper, which is all we need for now.
   // Does not recurse.
-  private static void resolveTransitiveDependencies(ImmutableMap<String, Library> map) {
+  private static void resolveTransitiveDependencies(Map<String, Library> map) {
     for (Library library : map.values()) {
       List<String> directDependencies = library.getLibraryDependencies();
       List<String> transitiveDependencies = Lists.newArrayList(directDependencies);
