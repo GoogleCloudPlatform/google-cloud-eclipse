@@ -137,8 +137,9 @@ public class BuildPath {
       List<String> previouslyAddedLibraries = serializer.loadLibraryIds(javaProject, null);
       for (String id : previouslyAddedLibraries) {
         Library library = CloudLibraries.getLibrary(id);
-        if (library != null) { // happens mostly in tests but could also be null
-                               // if someone edited the serialized data behind Eclipse's back
+        // null happens mostly in tests but could also be null
+        // if someone edited the serialized data behind Eclipse's back
+        if (library != null && !dependentIds.contains(id)) { 
           if (!library.isResolved()) {
             library.resolveDependencies();
           }
