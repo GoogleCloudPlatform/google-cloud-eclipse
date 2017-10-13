@@ -107,6 +107,7 @@ public final class Library {
 
   /**
    * Returns the complete list of all transitive dependencies for this library.
+   * This can generate large amounts of network traffic.
    */
   public synchronized List<LibraryFile> getAllDependencies() {
     if (transitiveDependencies == null) {

@@ -242,7 +242,6 @@ public class PomTest {
   private static Document parse(InputStream in)
       throws ParserConfigurationException, IOException, SAXException {
     DocumentBuilder builder = factory.newDocumentBuilder();
-    factory.setNamespaceAware(true);
     Document actual = builder.parse(in);
     return actual;
   }
