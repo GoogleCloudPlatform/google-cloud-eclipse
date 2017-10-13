@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.net.URI;
 import java.util.ArrayList;
@@ -55,7 +54,7 @@ public final class Library {
   private String transport = "http";
   
   // true if the dependencies for this library have been loaded
-  private boolean resolved = true;
+  private boolean resolved = false;
 
   // IDs of other libraries that also need to be added to the build path with this library
   private List<String> libraryDependencies = new ArrayList<>();
@@ -176,12 +175,10 @@ public final class Library {
   /**
    * @param resolved true iff this library contains its complete dependency graph
    */
-  @VisibleForTesting
-  public synchronized void setResolved(boolean resolved) {
+  synchronized void setResolved(boolean resolved) {
     this.resolved = resolved;
   }
 
-  // todo immediate dependencies?
   /**
    * Returns the non-transitive dependencies of this library. Useful when a separate system such as
    * Maven will resolve the transitive dependencies later. 

@@ -129,9 +129,11 @@ public class LibraryTest {
   }
 
   @Test
-  public void testResolvedDefaultsToTrue() throws CoreException {
-    assertTrue(library.isResolved());
+  public void testResolvedDefaultsToFalse() throws CoreException {
+    assertFalse(library.isResolved());
     library.resolveDependencies(); // no-op because the library is marked resolved
+    library.setResolved(true);
+    assertTrue(library.isResolved());
     library.setResolved(false);
     assertFalse(library.isResolved());
   }
@@ -146,7 +148,6 @@ public class LibraryTest {
             .setVersion("5.1.21").build();
     library.setLibraryFiles(Arrays.asList(new LibraryFile(mavenCoordinates)));
 
-    library.setResolved(false);
     library.resolveDependencies();
 
     List<LibraryFile> directFiles = library.getDirectDependencies();
