@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.json.Json;
@@ -53,7 +54,10 @@ public class CloudLibraries {
   public static final String CLIENT_APIS_GROUP = "clientapis"; //$NON-NLS-1$
 
   private static final Logger logger = Logger.getLogger(CloudLibraries.class.getName());
-  private static final ImmutableMap<String, Library> libraries = loadLibraryDefinitions();
+
+  // Mostly immutable info of libraries loaded from plugin.xml, but LibraryFile versions can be
+  // updated dynamically.
+  private static final Map<String, Library> libraries = loadLibraryDefinitions();
 
   /**
    * Returns libraries in the named group.
