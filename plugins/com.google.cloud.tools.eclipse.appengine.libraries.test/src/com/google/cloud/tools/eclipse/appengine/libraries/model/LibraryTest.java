@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
 import org.eclipse.core.runtime.CoreException;
 import org.junit.Test;
 
@@ -113,8 +112,9 @@ public class LibraryTest {
 
   @Test
   public void setLibraryFiles() {
-    library.setLibraryFiles(
-        Arrays.asList(new LibraryFile(new MavenCoordinates("groupId", "artifactId"))));
+    MavenCoordinates mavenCoordinates =
+        new MavenCoordinates.Builder().setGroupId("groupId").setArtifactId("artifactId").build();
+    library.setLibraryFiles(Arrays.asList(new LibraryFile(mavenCoordinates)));
     assertNotNull(library.getLibraryFiles());
     assertThat(library.getLibraryFiles().size(), is(1));
     LibraryFile actual = library.getLibraryFiles().get(0);
@@ -137,7 +137,7 @@ public class LibraryTest {
   }
 
   @Test
-  public void testResolvedDuplicates() throws CoreException {
+  public void testResolvedDuplicates() {
     MavenCoordinates coordinates19 = new MavenCoordinates.Builder()
         .setGroupId("com.google.guava")
         .setArtifactId("guava")
@@ -162,7 +162,7 @@ public class LibraryTest {
   }
   
   @Test
-  public void testResolvedDuplicates_semanticVersioning() throws CoreException {
+  public void testResolvedDuplicates_semanticVersioning() {
     MavenCoordinates coordinates1 = new MavenCoordinates.Builder()
         .setGroupId("com.google.guava")
         .setArtifactId("guava")

@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 /**
  * A jar file that is downloaded from the location defined by {@link MavenCoordinates}. It can have
@@ -122,8 +123,11 @@ public class LibraryFile implements Comparable<LibraryFile> {
       ArtifactVersion remoteVersion = ArtifactRetriever.DEFAULT.getLatestArtifactVersion(
           mavenCoordinates.getGroupId(), mavenCoordinates.getArtifactId());
       if (remoteVersion != null) {
-        String updatedVersion = remoteVersion.toString(); 
-        mavenCoordinates = mavenCoordinates.toBuilder().setVersion(updatedVersion).build();
+        DefaultArtifactVersion localVersion = new DefaultArtifactVersion(mavenCoordinates.getVersion());
+        if (remoteVersion.compareTo(localVersion) > 0) {
+          String updatedVersion = remoteVersion.toString(); 
+          mavenCoordinates = mavenCoordinates.toBuilder().setVersion(updatedVersion).build();
+        }
       }
       fixedVersion = true;
     }

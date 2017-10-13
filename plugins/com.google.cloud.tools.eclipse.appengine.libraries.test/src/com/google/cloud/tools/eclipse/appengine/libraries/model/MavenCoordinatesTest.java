@@ -27,34 +27,36 @@ public class MavenCoordinatesTest {
 
   @Test(expected = NullPointerException.class)
   public void testConstructorGroupIdNull() {
-    new MavenCoordinates(null, "artifactId");
+    new MavenCoordinates.Builder().setArtifactId("artifactId").build();
   }
 
   @Test(expected = NullPointerException.class)
   public void testConstructorArtifactIdNull() {
-    new MavenCoordinates("groupId", null);
+    new MavenCoordinates.Builder().setGroupId("groupId").build();
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testConstructorEmptyGroupId() {
-    new MavenCoordinates("", "artifactId");
+    new MavenCoordinates.Builder().setGroupId("").setArtifactId("artifactId").build();
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testConstructorEmptyArtifactId() {
-    new MavenCoordinates("groupId", "");
+    new MavenCoordinates.Builder().setGroupId("groupId").setArtifactId("").build();
   }
 
   @Test
   public void testConstructorValidArguments() {
-    MavenCoordinates mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
+    MavenCoordinates mavenCoordinates =
+        new MavenCoordinates.Builder().setGroupId("groupId").setArtifactId("artifactId").build();
     assertThat(mavenCoordinates.getGroupId(), is("groupId"));
     assertThat(mavenCoordinates.getArtifactId(), is("artifactId"));
   }
 
   @Test
   public void testRepositoryDefaultsToCentral() {
-    MavenCoordinates mavenCoordinates = new MavenCoordinates("b", "c");
+    MavenCoordinates mavenCoordinates =
+        new MavenCoordinates.Builder().setGroupId("b").setArtifactId("c").build();
     assertThat(mavenCoordinates.getRepository(), is(MavenCoordinates.MAVEN_CENTRAL_REPO));
   }
 
@@ -70,7 +72,8 @@ public class MavenCoordinatesTest {
 
   @Test
   public void testVersionDefaultsToLatest() {
-    MavenCoordinates mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
+    MavenCoordinates mavenCoordinates =
+        new MavenCoordinates.Builder().setGroupId("groupId").setArtifactId("artifactId").build();
     assertThat(mavenCoordinates.getVersion(), is(MavenCoordinates.LATEST_VERSION));
   }
 
@@ -129,7 +132,8 @@ public class MavenCoordinatesTest {
 
   @Test
   public void testClassifierDefaultsToNull() {
-    MavenCoordinates mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
+    MavenCoordinates mavenCoordinates =
+        new MavenCoordinates.Builder().setGroupId("groupId").setArtifactId("artifactId").build();
     assertNull(mavenCoordinates.getClassifier());
   }
 

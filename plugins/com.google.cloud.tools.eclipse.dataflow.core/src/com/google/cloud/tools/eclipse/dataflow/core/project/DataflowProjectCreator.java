@@ -24,6 +24,7 @@ import com.google.cloud.tools.eclipse.dataflow.core.preferences.WritableDataflow
 import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
 import com.google.cloud.tools.eclipse.util.JavaPackageValidator;
 import com.google.cloud.tools.eclipse.util.MavenCoordinatesValidator;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Strings;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -43,6 +44,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
@@ -184,6 +187,9 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
 
     List<IProject> projects = Collections.emptyList();
     List<CoreException> failures = new ArrayList<>();
+    MultiStatus status = new MultiStatus(DataflowCorePlugin.PLUGIN_ID, 38, 
+        "Creating loading dataflow maven archetypes", null);
+
     for (ArtifactVersion attemptedVersion : archetypeVersions) {
       checkCancelled(progress);
       // TODO: See if this can be done without using the toString method
@@ -194,31 +200,35 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
             mavenGroupId, mavenArtifactId, "0.0.1-SNAPSHOT", packageString, archetypeProperties,
             projectImportConfiguration, progress.newChild(4));
         break;
-      } catch (CoreException e) {
-        failures.add(e);
+      } catch (CoreException ex) {
+        IStatus child = StatusUtil.error(this, ex.getMessage(), ex);
+        status.merge(child);
+        failures.add(ex);
       }
     }
-    if (projects.isEmpty()) {
+    if (projects.isEmpty()) { // failures only matter if no version succeeded
+      StatusUtil.setErrorStatus(this, "Error loading dataflow archetypes", status);
       for (CoreException failure : failures) {
         DataflowCorePlugin.logError(failure, "CoreException while creating new Dataflow Project");
       }
-    }
-
-    SubMonitor natureMonitor = SubMonitor.convert(progress.newChild(1), projects.size());
-    for (IProject project : projects) {
-      try {
-        DataflowJavaProjectNature.addDataflowJavaNatureToProject(
-            project, natureMonitor.newChild(1));
-        setPreferences(project);
-      } catch (CoreException e) {
-        DataflowCorePlugin.logError(e,
-            "CoreException while adding Dataflow Nature to created project %s", project.getName());
+    } else {
+      SubMonitor natureMonitor = SubMonitor.convert(progress.newChild(1), projects.size());
+      for (IProject project : projects) {
+        try {
+          DataflowJavaProjectNature.addDataflowJavaNatureToProject(
+              project, natureMonitor.newChild(1));
+          setPreferences(project);
+        } catch (CoreException e) {
+          DataflowCorePlugin.logError(e,
+              "CoreException while adding Dataflow Nature to created project %s", project.getName());
+        }
       }
     }
     monitor.done();
   }
 
-  private Set<ArtifactVersion> defaultArchetypeVersions(DataflowProjectArchetype template, MajorVersion version) {
+  private Set<ArtifactVersion> defaultArchetypeVersions(DataflowProjectArchetype template,
+      MajorVersion version) {
     checkArgument(template.getSdkVersions().contains(majorVersion));
 
     String artifactId = template.getArtifactId();
@@ -242,7 +252,6 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
    * platform. If not supported, throw a {@link ProjectCreationException}.
    */
   private String getTargetPlatform() throws ProjectCreationException {
-    // Safe cast by API Contract
     String targetPlatform = JavaCore.getOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM);
     if (targetPlatform == null || JAVA_VERSION_BLACKLIST.contains(targetPlatform)) {
       DataflowCorePlugin.logWarning(

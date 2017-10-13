@@ -16,17 +16,19 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -40,11 +42,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
-import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
-import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 
 public class PomTest {
   
@@ -85,13 +82,25 @@ public class PomTest {
     List<LibraryFile> list0 = new ArrayList<>();
     list0.add(file0);
     
+    MavenCoordinates cooridnates1 = new MavenCoordinates.Builder()
+        .setGroupId("com.example.group1")
+        .setArtifactId("artifact1")
+        .build();
     List<LibraryFile> list1 = new ArrayList<>();
-    LibraryFile file1 = new LibraryFile(new MavenCoordinates("com.example.group1", "artifact1"));
+    LibraryFile file1 = new LibraryFile(cooridnates1);
     list1.add(file1);
     
+    MavenCoordinates cooridnates2 = new MavenCoordinates.Builder()
+        .setGroupId("com.example.group2")
+        .setArtifactId("artifact2")
+        .build();
+    MavenCoordinates cooridnates3 = new MavenCoordinates.Builder()
+        .setGroupId("com.example.group3")
+        .setArtifactId("artifact3")
+        .build();
     List<LibraryFile> list2 = new ArrayList<>();
-    LibraryFile file2 = new LibraryFile(new MavenCoordinates("com.example.group2", "artifact2"));
-    LibraryFile file3 = new LibraryFile(new MavenCoordinates("com.example.group3", "artifact3"));
+    LibraryFile file2 = new LibraryFile(cooridnates2);
+    LibraryFile file3 = new LibraryFile(cooridnates3);
     list2.add(file2);
     list2.add(file3);
     
@@ -138,13 +147,22 @@ public class PomTest {
   @Test
   public void testAddDependencies_withDuplicates() 
       throws CoreException, ParserConfigurationException, IOException, SAXException {
-        
+
+    MavenCoordinates cooridnates1 = new MavenCoordinates.Builder()
+        .setGroupId("com.example.group1")
+        .setArtifactId("artifact1")
+        .build();
+    MavenCoordinates cooridnates2 = new MavenCoordinates.Builder()
+        .setGroupId("com.example.group2")
+        .setArtifactId("artifact2")
+        .build();
+
     List<LibraryFile> list1 = new ArrayList<>();
-    LibraryFile file1 = new LibraryFile(new MavenCoordinates("com.example.group1", "artifact1"));
+    LibraryFile file1 = new LibraryFile(cooridnates1);
     list1.add(file1);
     
     List<LibraryFile> list2 = new ArrayList<>();
-    LibraryFile file2 = new LibraryFile(new MavenCoordinates("com.example.group2", "artifact2"));
+    LibraryFile file2 = new LibraryFile(cooridnates2);
     list2.add(file1);
     list2.add(file2);
     
