@@ -65,13 +65,6 @@ public final class Library {
     Preconditions.checkArgument(!id.isEmpty(), "id empty");
     this.id = id;
   }
-
-  @VisibleForTesting
-  public Library(String id, List<LibraryFile> libraryFiles) {
-    this.id = id;
-    this.transitiveDependencies = libraryFiles;
-    this.directDependencies = libraryFiles;
-  }
   
   public String getId() {
     return id;

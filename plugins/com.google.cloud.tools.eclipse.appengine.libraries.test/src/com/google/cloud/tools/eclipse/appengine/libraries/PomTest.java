@@ -104,9 +104,12 @@ public class PomTest {
     list2.add(file2);
     list2.add(file3);
     
-    Library library0 = new Library("id0", list0);
-    Library library1 = new Library("id1", list1);
-    Library library2 = new Library("id2", list2);
+    Library library0 = new Library("id0");
+    library0.setLibraryFiles(list0);
+    Library library1 = new Library("id1");
+    library1.setLibraryFiles(list1);
+    Library library2 = new Library("id2");
+    library2.setLibraryFiles(list2);
     List<Library> libraries = new ArrayList<>();
     libraries.add(library0);
     libraries.add(library1);
@@ -166,8 +169,11 @@ public class PomTest {
     list2.add(file1);
     list2.add(file2);
     
-    Library library1 = new Library("id1", list1);
-    Library library2 = new Library("id2", list2);
+    Library library1 = new Library("id1");
+    library1.setLibraryFiles(list1);
+    Library library2 = new Library("id2");
+    library2.setLibraryFiles(list2);
+
     List<Library> libraries = new ArrayList<>();
     libraries.add(library1);
     libraries.add(library2);
@@ -210,7 +216,7 @@ public class PomTest {
     LibraryFile file = new LibraryFile(coordinates);
     files.add(file);
     
-    Library library = new Library("objectify", files);
+    Library library = new Library("objectify");
     library.setLibraryFiles(files);
     library.setResolved(false);
     library.resolveDependencies();
