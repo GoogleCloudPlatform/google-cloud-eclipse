@@ -137,6 +137,29 @@ public class LibraryTest {
   }
 
   @Test
+  public void testDirectDependencies() throws CoreException {
+    // objectify depends on guava
+    MavenCoordinates mavenCoordinates =
+        new MavenCoordinates.Builder()
+            .setGroupId("com.googlecode.objectify")
+            .setArtifactId("objectify")
+            .setVersion("5.1.21").build();
+    library.setLibraryFiles(Arrays.asList(new LibraryFile(mavenCoordinates)));
+
+    library.setResolved(false);
+    library.resolveDependencies();
+
+    List<LibraryFile> directFiles = library.getDirectDependencies();
+    assertEquals(1, directFiles.size()); 
+    assertEquals(mavenCoordinates.getArtifactId(),
+        directFiles.get(0).getMavenCoordinates().getArtifactId());
+    
+    List<LibraryFile> transitiveDependencies = library.getLibraryFiles();
+    assertTrue(transitiveDependencies.size() > directFiles.size()); 
+  }
+
+  
+  @Test
   public void testResolvedDuplicates() {
     MavenCoordinates coordinates19 = new MavenCoordinates.Builder()
         .setGroupId("com.google.guava")

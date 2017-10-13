@@ -89,7 +89,7 @@ class Pom {
     }
     
     for (Library library : libraries) {
-      for (LibraryFile artifact : library.getLibraryFiles()) {
+      for (LibraryFile artifact : library.getDirectDependencies()) {
         Element dependency = document.createElement("dependency");
         MavenCoordinates coordinates = artifact.getMavenCoordinates();
         

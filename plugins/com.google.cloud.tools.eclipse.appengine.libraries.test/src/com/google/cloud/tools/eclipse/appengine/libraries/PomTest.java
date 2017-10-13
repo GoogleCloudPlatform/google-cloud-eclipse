@@ -82,25 +82,25 @@ public class PomTest {
     List<LibraryFile> list0 = new ArrayList<>();
     list0.add(file0);
     
-    MavenCoordinates cooridnates1 = new MavenCoordinates.Builder()
+    MavenCoordinates coordinates1 = new MavenCoordinates.Builder()
         .setGroupId("com.example.group1")
         .setArtifactId("artifact1")
         .build();
     List<LibraryFile> list1 = new ArrayList<>();
-    LibraryFile file1 = new LibraryFile(cooridnates1);
+    LibraryFile file1 = new LibraryFile(coordinates1);
     list1.add(file1);
     
-    MavenCoordinates cooridnates2 = new MavenCoordinates.Builder()
+    MavenCoordinates coordinates2 = new MavenCoordinates.Builder()
         .setGroupId("com.example.group2")
         .setArtifactId("artifact2")
         .build();
-    MavenCoordinates cooridnates3 = new MavenCoordinates.Builder()
+    MavenCoordinates coordinates3 = new MavenCoordinates.Builder()
         .setGroupId("com.example.group3")
         .setArtifactId("artifact3")
         .build();
     List<LibraryFile> list2 = new ArrayList<>();
-    LibraryFile file2 = new LibraryFile(cooridnates2);
-    LibraryFile file3 = new LibraryFile(cooridnates3);
+    LibraryFile file2 = new LibraryFile(coordinates2);
+    LibraryFile file3 = new LibraryFile(coordinates3);
     list2.add(file2);
     list2.add(file3);
     
@@ -148,21 +148,21 @@ public class PomTest {
   public void testAddDependencies_withDuplicates() 
       throws CoreException, ParserConfigurationException, IOException, SAXException {
 
-    MavenCoordinates cooridnates1 = new MavenCoordinates.Builder()
+    MavenCoordinates coordinates1 = new MavenCoordinates.Builder()
         .setGroupId("com.example.group1")
         .setArtifactId("artifact1")
         .build();
-    MavenCoordinates cooridnates2 = new MavenCoordinates.Builder()
+    MavenCoordinates coordinates2 = new MavenCoordinates.Builder()
         .setGroupId("com.example.group2")
         .setArtifactId("artifact2")
         .build();
 
     List<LibraryFile> list1 = new ArrayList<>();
-    LibraryFile file1 = new LibraryFile(cooridnates1);
+    LibraryFile file1 = new LibraryFile(coordinates1);
     list1.add(file1);
     
     List<LibraryFile> list2 = new ArrayList<>();
-    LibraryFile file2 = new LibraryFile(cooridnates2);
+    LibraryFile file2 = new LibraryFile(coordinates2);
     list2.add(file1);
     list2.add(file2);
     
@@ -194,10 +194,51 @@ public class PomTest {
     Element artifactId1 = getOnlyChild(child1, "artifactId");
     Assert.assertEquals("artifact2", artifactId1.getTextContent());
   }
+  
+  @Test
+  public void testAddDependencies_areDirect() 
+      throws CoreException, ParserConfigurationException, IOException, SAXException {
+    
+    // objectify depends on guava
+    MavenCoordinates coordinates =
+        new MavenCoordinates.Builder()
+            .setGroupId("com.googlecode.objectify")
+            .setArtifactId("objectify")
+            .setVersion("5.1.21").build();
+    
+    List<LibraryFile> files = new ArrayList<>();
+    LibraryFile file = new LibraryFile(coordinates);
+    files.add(file);
+    
+    Library library = new Library("objectify", files);
+    library.setLibraryFiles(files);
+    library.setResolved(false);
+    library.resolveDependencies();
+    
+    List<Library> libraries = new ArrayList<>();
+    libraries.add(library);
+    
+    pom.addDependencies(libraries);
+    
+    InputStream contents = pomFile.getContents();
+    Document actual = parse(contents);
+    
+    NodeList dependencies = actual.getElementsByTagName("dependencies");
+    Assert.assertEquals(1, dependencies.getLength());    
+    
+    Element dependency = getOnlyChild(((Element) dependencies.item(0)), "dependency");
+    Element groupId = getOnlyChild(dependency, "groupId");
+    Assert.assertEquals("com.googlecode.objectify", groupId.getTextContent());
+    Element artifactId = getOnlyChild(dependency, "artifactId");
+    Assert.assertEquals("objectify", artifactId.getTextContent());
+    Element version = getOnlyChild(dependency, "version");
+    Assert.assertEquals("5.1.21", version.getTextContent());
+  }
 
   private static Document parse(InputStream in)
       throws ParserConfigurationException, IOException, SAXException {
     DocumentBuilder builder = factory.newDocumentBuilder();
+    factory.setNamespaceAware(true);
     Document actual = builder.parse(in);
     return actual;
   }

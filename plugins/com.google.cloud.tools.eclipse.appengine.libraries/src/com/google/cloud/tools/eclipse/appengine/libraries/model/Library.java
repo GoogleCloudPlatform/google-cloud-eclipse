@@ -48,7 +48,8 @@ public final class Library {
   private String toolTip;
   private URI siteUri;
   private boolean export = true;
-  private List<LibraryFile> libraryFiles = Collections.emptyList();
+  private List<LibraryFile> transitiveDependencies = Collections.emptyList();
+  private List<LibraryFile> directDependencies = Collections.emptyList();
   private String group;
   private String javaVersion="1.7";
   private String transport = "http";
@@ -68,7 +69,8 @@ public final class Library {
   @VisibleForTesting
   public Library(String id, List<LibraryFile> libraryFiles) {
     this.id = id;
-    this.libraryFiles = libraryFiles;
+    this.transitiveDependencies = libraryFiles;
+    this.directDependencies = libraryFiles;
   }
   
   public String getId() {
@@ -115,7 +117,7 @@ public final class Library {
   }
 
   public synchronized List<LibraryFile> getLibraryFiles() {
-    return new ArrayList<>(libraryFiles);
+    return new ArrayList<>(transitiveDependencies);
   }
 
   /**
@@ -123,7 +125,8 @@ public final class Library {
    */
   public synchronized void setLibraryFiles(List<LibraryFile> libraryFiles) {
     Preconditions.checkNotNull(libraryFiles);
-    this.libraryFiles = new ArrayList<>(libraryFiles);
+    this.directDependencies = new ArrayList<>(libraryFiles);
+    this.transitiveDependencies = this.directDependencies;
   }
 
   public boolean isExport() {
@@ -180,8 +183,18 @@ public final class Library {
   /**
    * @param resolved true iff this library contains its complete dependency graph
    */
-  synchronized void setResolved(boolean resolved) {
+  @VisibleForTesting
+  public synchronized void setResolved(boolean resolved) {
     this.resolved = resolved;
+  }
+
+  // todo immediate dependencies?
+  /**
+   * Returns the non-transitive dependencies of this library. Useful when a separate system such as
+   * Maven will resolve the transitive dependencies later. 
+   */
+  public List<LibraryFile> getDirectDependencies() {
+    return new ArrayList<>(this.directDependencies);
   }
     
   /**
@@ -194,7 +207,7 @@ public final class Library {
   public synchronized void resolveDependencies() throws CoreException {
     if (!resolved) {
       List<LibraryFile> transitiveDependencies = new ArrayList<>();
-      for (LibraryFile artifact : this.libraryFiles) {
+      for (LibraryFile artifact : this.transitiveDependencies) {
         artifact.updateVersion();
         MavenCoordinates coordinates = artifact.getMavenCoordinates();
 
@@ -208,7 +221,7 @@ public final class Library {
         }
       }
       
-      this.libraryFiles = resolveDuplicates(transitiveDependencies);
+      this.transitiveDependencies = resolveDuplicates(transitiveDependencies);
       this.resolved = true;
     }
   }  
