@@ -28,6 +28,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -51,6 +54,8 @@ import org.xml.sax.SAXException;
 
 public class BuildPath {
 
+  private static final Logger logger = Logger.getLogger(BuildPath.class.getName());
+  
   public static void addMavenLibraries(IProject project, List<Library> libraries,
       IProgressMonitor monitor) throws CoreException {
     
@@ -137,16 +142,13 @@ public class BuildPath {
         // null happens mostly in tests but could also be null
         // if someone edited the serialized data behind Eclipse's back
         if (library != null && !dependentIds.contains(id)) { 
-          if (!library.isResolved()) {
-            library.resolveDependencies();
-          }
           dependentIds.add(library.getId());
-          masterFiles.addAll(library.getLibraryFiles());
+          masterFiles.addAll(library.getAllDependencies());
           subMonitor.worked(1);
         }
       }
-    } catch (IOException ex) {
-      //
+    } catch (IOException | CoreException ex) {
+      logger.log(Level.WARNING, "Error loading previous libraries", ex);
     }
     
     Library masterLibrary = new Library(CloudLibraries.MASTER_CONTAINER_ID);
