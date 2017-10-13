@@ -26,7 +26,7 @@ public class CloudLibrariesTest {
   public void testGetLibraries() {
     List<Library> libraries = CloudLibraries.getLibraries("appengine");
     for (Library library : libraries) {
-      Assert.assertFalse(library.getLibraryFiles().isEmpty());
+      Assert.assertFalse(library.getAllDependencies().isEmpty());
       String tooltip = library.getToolTip();
       Assert.assertFalse(tooltip.isEmpty());
       Assert.assertFalse(tooltip, tooltip.startsWith("!"));
@@ -44,7 +44,7 @@ public class CloudLibrariesTest {
       
       Assert.assertNotNull(library.getName() + " has no tooltip", tooltip);
       Assert.assertFalse(tooltip.isEmpty());
-      Assert.assertFalse(library.getName() + " has no files", library.getLibraryFiles().isEmpty());
+      Assert.assertFalse(library.getName() + " has no files", library.getAllDependencies().isEmpty());
       Assert.assertEquals("clientapis", library.getGroup());
     }
   }

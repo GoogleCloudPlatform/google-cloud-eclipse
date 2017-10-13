@@ -127,7 +127,7 @@ public class BuildPath {
         library.resolveDependencies();
       }
       dependentIds.add(library.getId());
-      masterFiles.addAll(library.getLibraryFiles());
+      masterFiles.addAll(library.getAllDependencies());
       subMonitor.worked(1);
     }
 

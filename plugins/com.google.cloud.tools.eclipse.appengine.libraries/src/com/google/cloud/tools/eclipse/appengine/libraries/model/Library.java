@@ -108,7 +108,10 @@ public final class Library {
     this.siteUri = siteUri;
   }
 
-  public synchronized List<LibraryFile> getLibraryFiles() {
+  /**
+   * Returns the complete list of all transitive dependencies for this library.
+   */
+  public synchronized List<LibraryFile> getAllDependencies() {
     return new ArrayList<>(transitiveDependencies);
   }
 

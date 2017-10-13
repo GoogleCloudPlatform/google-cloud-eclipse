@@ -101,8 +101,8 @@ public class LibraryTest {
 
   @Test
   public void testLibraryFilesDefaultsToEmpty() {
-    assertNotNull(library.getLibraryFiles());
-    assertTrue(library.getLibraryFiles().isEmpty());
+    assertNotNull(library.getAllDependencies());
+    assertTrue(library.getAllDependencies().isEmpty());
   }
 
   @Test(expected = NullPointerException.class)
@@ -115,9 +115,9 @@ public class LibraryTest {
     MavenCoordinates mavenCoordinates =
         new MavenCoordinates.Builder().setGroupId("groupId").setArtifactId("artifactId").build();
     library.setLibraryFiles(Arrays.asList(new LibraryFile(mavenCoordinates)));
-    assertNotNull(library.getLibraryFiles());
-    assertThat(library.getLibraryFiles().size(), is(1));
-    LibraryFile actual = library.getLibraryFiles().get(0);
+    assertNotNull(library.getAllDependencies());
+    assertThat(library.getAllDependencies().size(), is(1));
+    LibraryFile actual = library.getAllDependencies().get(0);
     assertThat(actual.getMavenCoordinates().getRepository(), is("central"));
     assertThat(actual.getMavenCoordinates().getGroupId(), is("groupId"));
     assertThat(actual.getMavenCoordinates().getArtifactId(), is("artifactId"));
@@ -155,7 +155,7 @@ public class LibraryTest {
     assertEquals(mavenCoordinates.getArtifactId(),
         directFiles.get(0).getMavenCoordinates().getArtifactId());
     
-    List<LibraryFile> transitiveDependencies = library.getLibraryFiles();
+    List<LibraryFile> transitiveDependencies = library.getAllDependencies();
     assertTrue(transitiveDependencies.size() > directFiles.size()); 
   }
 
