@@ -131,6 +131,26 @@ public class BuildPath {
       subMonitor.worked(1);
     }
 
+    // need to get old master library entries first if they exist
+    try {
+      LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer();
+      List<String> previouslyAddedLibraries = serializer.loadLibraryIds(javaProject, null);
+      for (String id : previouslyAddedLibraries) {
+        Library library = CloudLibraries.getLibrary(id);
+        if (library != null) { // happens mostly in tests but could also be null
+                               // if someone edited the serialized data behind Eclipse's back
+          if (!library.isResolved()) {
+            library.resolveDependencies();
+          }
+          dependentIds.add(library.getId());
+          masterFiles.addAll(library.getLibraryFiles());
+          subMonitor.worked(1);
+        }
+      }
+    } catch (IOException ex) {
+      //
+    }
+    
     Library masterLibrary = new Library(CloudLibraries.MASTER_CONTAINER_ID);
     masterLibrary.setName("Google APIs"); //$NON-NLS-1$
     masterLibrary.setLibraryDependencies(dependentIds);
