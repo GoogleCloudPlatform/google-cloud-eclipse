@@ -56,7 +56,7 @@ public class CloudLibraries {
   private static final Logger logger = Logger.getLogger(CloudLibraries.class.getName());
 
   // Mostly immutable info of libraries loaded from plugin.xml, but LibraryFile versions can be
-  // updated dynamically.
+  // updated dynamically, e.g., to latest available release versions.
   private static final Map<String, Library> libraries = loadLibraryDefinitions();
 
   /**
