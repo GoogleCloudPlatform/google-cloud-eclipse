@@ -177,10 +177,10 @@ public final class Library {
   }
   
   /**
-   * @param resolved true iff this library contains its complete dependency graph
+   * Direct dependencies only. Do not attempt to load dependencies from Maven Central.
    */
-  synchronized void setResolved(boolean resolved) {
-    if (resolved && transitiveDependencies == null) {
+  synchronized void setResolved() {
+    if (transitiveDependencies == null) {
       transitiveDependencies = directDependencies;
     }
   }

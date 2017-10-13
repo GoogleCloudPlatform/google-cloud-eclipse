@@ -82,8 +82,7 @@ class LibraryFactory {
         }
         String dependencies = configurationElement.getAttribute("dependencies"); //$NON-NLS-1$
         if (!"include".equals(dependencies)) { //$NON-NLS-1$
-          // Load the dependencies from Maven Central later
-          library.setResolved(true);
+          library.setResolved();
         }
         String versionString = configurationElement.getAttribute("javaVersion"); //$NON-NLS-1$
         if (versionString != null) {

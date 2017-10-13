@@ -108,8 +108,8 @@ public class CloudLibrariesInPluginXmlTest {
     assertTrue(endpointsLibrary.isExport());
     assertTrue(endpointsLibrary.getToolTip().contains("v2"));
 
-    assertThat(endpointsLibrary.getAllDependencies().size(), is(1));
-    LibraryFile libraryFile = endpointsLibrary.getAllDependencies().get(0);
+    assertThat(endpointsLibrary.getDirectDependencies().size(), is(1));
+    LibraryFile libraryFile = endpointsLibrary.getDirectDependencies().get(0);
     assertNull(libraryFile.getSourceUri());
     assertTrue("Endpoints library not exported", libraryFile.isExport());
 
