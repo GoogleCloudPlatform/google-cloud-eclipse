@@ -115,9 +115,10 @@ public class LibraryTest {
     MavenCoordinates mavenCoordinates =
         new MavenCoordinates.Builder().setGroupId("groupId").setArtifactId("artifactId").build();
     library.setLibraryFiles(Arrays.asList(new LibraryFile(mavenCoordinates)));
-    assertNotNull(library.getAllDependencies());
-    assertThat(library.getAllDependencies().size(), is(1));
-    LibraryFile actual = library.getAllDependencies().get(0);
+    List<LibraryFile> allDependencies = library.getAllDependencies();
+    assertNotNull(allDependencies);
+    assertThat(allDependencies.size(), is(1));
+    LibraryFile actual = allDependencies.get(0);
     assertThat(actual.getMavenCoordinates().getRepository(), is("central"));
     assertThat(actual.getMavenCoordinates().getGroupId(), is("groupId"));
     assertThat(actual.getMavenCoordinates().getArtifactId(), is("artifactId"));
@@ -129,12 +130,7 @@ public class LibraryTest {
   }
 
   @Test
-  public void testResolvedDefaultsToFalse() throws CoreException {
-    assertFalse(library.isResolved());
-    library.resolveDependencies(); // no-op because the library is marked resolved
-    library.setResolved(true);
-    assertTrue(library.isResolved());
-    library.setResolved(false);
+  public void testResolvedDefaultsToFalse() {
     assertFalse(library.isResolved());
   }
 
@@ -147,8 +143,6 @@ public class LibraryTest {
             .setArtifactId("objectify")
             .setVersion("5.1.21").build();
     library.setLibraryFiles(Arrays.asList(new LibraryFile(mavenCoordinates)));
-
-    library.resolveDependencies();
 
     List<LibraryFile> directFiles = library.getDirectDependencies();
     assertEquals(1, directFiles.size()); 

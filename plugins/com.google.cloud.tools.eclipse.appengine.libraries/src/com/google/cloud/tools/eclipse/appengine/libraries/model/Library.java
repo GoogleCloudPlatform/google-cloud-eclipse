@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.net.URI;
 import java.util.ArrayList;
@@ -47,14 +48,11 @@ public final class Library {
   private String toolTip;
   private URI siteUri;
   private boolean export = true;
-  private List<LibraryFile> transitiveDependencies = Collections.emptyList();
+  private List<LibraryFile> transitiveDependencies = null;
   private List<LibraryFile> directDependencies = Collections.emptyList();
   private String group;
   private String javaVersion="1.7";
   private String transport = "http";
-  
-  // true if the dependencies for this library have been loaded
-  private boolean resolved = false;
 
   // IDs of other libraries that also need to be added to the build path with this library
   private List<String> libraryDependencies = new ArrayList<>();
@@ -112,6 +110,9 @@ public final class Library {
    * Returns the complete list of all transitive dependencies for this library.
    */
   public synchronized List<LibraryFile> getAllDependencies() {
+    if (transitiveDependencies == null) {
+      transitiveDependencies = resolveDependencies();
+    }
     return new ArrayList<>(transitiveDependencies);
   }
 
@@ -121,7 +122,6 @@ public final class Library {
   public synchronized void setLibraryFiles(List<LibraryFile> libraryFiles) {
     Preconditions.checkNotNull(libraryFiles);
     this.directDependencies = new ArrayList<>(libraryFiles);
-    this.transitiveDependencies = this.directDependencies;
   }
 
   public boolean isExport() {
@@ -171,15 +171,18 @@ public final class Library {
     this.transport = transport;
   }
   
-  public synchronized boolean isResolved() {
-    return this.resolved;
+  @VisibleForTesting
+  synchronized boolean isResolved() {
+    return transitiveDependencies != null;
   }
   
   /**
    * @param resolved true iff this library contains its complete dependency graph
    */
   synchronized void setResolved(boolean resolved) {
-    this.resolved = resolved;
+    if (resolved && transitiveDependencies == null) {
+      transitiveDependencies = directDependencies;
+    }
   }
 
   /**
@@ -192,31 +195,29 @@ public final class Library {
     
   /**
    * A potentially long running operation that connects to the
-   * local and remote Maven repos and adds all library files in the
-   * transitive dependency graph to the list.
-   *  
-   * @throws CoreException error loading transitive dependencies
+   * local and remote Maven repos and returns a list of all library files in the
+   * transitive dependency graph.
    */
-  public synchronized void resolveDependencies() throws CoreException {
-    if (!resolved) {
-      List<LibraryFile> transitiveDependencies = new ArrayList<>();
-      for (LibraryFile artifact : this.transitiveDependencies) {
-        artifact.updateVersion();
-        MavenCoordinates coordinates = artifact.getMavenCoordinates();
-
-        try {
-          Collection<LibraryFile> dependencies =
-              LibraryFactory.loadTransitiveDependencies(coordinates);
-          transitiveDependencies.addAll(dependencies);
-        } catch (CoreException ex) {
-          logger.log(Level.SEVERE,
-              "Could not load library " + artifact.getMavenCoordinates().toString(), ex);
-        }
-      }
+  private synchronized List<LibraryFile> resolveDependencies() {
+    List<LibraryFile> transitiveDependencies = new ArrayList<>();
+    for (LibraryFile artifact : directDependencies) {
+      artifact.updateVersion();
+      MavenCoordinates coordinates = artifact.getMavenCoordinates();
       
-      this.transitiveDependencies = resolveDuplicates(transitiveDependencies);
-      this.resolved = true;
+      // include the artifact in its own list in case we can't find it in the repo
+      transitiveDependencies.add(artifact);
+      
+      try {
+        Collection<LibraryFile> dependencies =
+            LibraryFactory.loadTransitiveDependencies(coordinates);
+        transitiveDependencies.addAll(dependencies);
+      } catch (CoreException ex) {
+        logger.log(Level.SEVERE,
+            "Could not load library " + artifact.getMavenCoordinates().toString(), ex);
+      }
     }
+    
+    return resolveDuplicates(transitiveDependencies);
   }  
   
   /**

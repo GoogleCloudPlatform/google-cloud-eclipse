@@ -218,7 +218,6 @@ public class PomTest {
     
     Library library = new Library("objectify");
     library.setLibraryFiles(files);
-    library.resolveDependencies();
     
     List<Library> libraries = new ArrayList<>();
     libraries.add(library);
