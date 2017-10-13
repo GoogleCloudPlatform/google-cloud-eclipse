@@ -123,11 +123,8 @@ public class BuildPath {
     SortedSet<LibraryFile> masterFiles = new TreeSet<>();
     List<String> dependentIds = new ArrayList<>();
     for (Library library : libraries) {
-      if (!library.isResolved()) {
-        library.resolveDependencies();
-      }
       dependentIds.add(library.getId());
-      masterFiles.addAll(library.getLibraryFiles());
+      masterFiles.addAll(library.getAllDependencies());
       subMonitor.worked(1);
     }
 

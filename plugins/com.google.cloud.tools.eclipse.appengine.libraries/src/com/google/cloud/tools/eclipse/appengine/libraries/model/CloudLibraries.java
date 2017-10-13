@@ -117,7 +117,6 @@ public class CloudLibraries {
               List<LibraryFile> libraryFiles = new ArrayList<>();
               libraryFiles.add(file);
               library.setLibraryFiles(libraryFiles);
-              library.setResolved(false);
               break;
             }
           } catch (ClassCastException ex) {

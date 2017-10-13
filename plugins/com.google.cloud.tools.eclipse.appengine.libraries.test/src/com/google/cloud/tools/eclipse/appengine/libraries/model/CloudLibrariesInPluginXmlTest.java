@@ -66,8 +66,8 @@ public class CloudLibrariesInPluginXmlTest {
         is(new URI("https://cloud.google.com/appengine/docs/java/")));
     assertTrue(appEngineLibrary.isExport());
 
-    assertThat(appEngineLibrary.getLibraryFiles().size(), is(1));
-    LibraryFile libraryFile = appEngineLibrary.getLibraryFiles().get(0);
+    assertThat(appEngineLibrary.getAllDependencies().size(), is(1));
+    LibraryFile libraryFile = appEngineLibrary.getAllDependencies().get(0);
     assertThat(libraryFile.getJavadocUri(),
         is(new URI("https://cloud.google.com/appengine/docs/java/javadoc/")));
     assertNull(libraryFile.getSourceUri());
@@ -108,8 +108,8 @@ public class CloudLibrariesInPluginXmlTest {
     assertTrue(endpointsLibrary.isExport());
     assertTrue(endpointsLibrary.getToolTip().contains("v2"));
 
-    assertThat(endpointsLibrary.getLibraryFiles().size(), is(1));
-    LibraryFile libraryFile = endpointsLibrary.getLibraryFiles().get(0);
+    assertThat(endpointsLibrary.getDirectDependencies().size(), is(1));
+    LibraryFile libraryFile = endpointsLibrary.getDirectDependencies().get(0);
     assertNull(libraryFile.getSourceUri());
     assertTrue("Endpoints library not exported", libraryFile.isExport());
 
@@ -143,8 +143,8 @@ public class CloudLibrariesInPluginXmlTest {
         is(new URI("https://github.com/objectify/objectify/wiki")));
     assertTrue(objectifyLibrary.isExport());
 
-    assertThat(objectifyLibrary.getLibraryFiles().size(), is(2));
-    LibraryFile objectifyLibraryFile = objectifyLibrary.getLibraryFiles().get(0);
+    assertThat(objectifyLibrary.getAllDependencies().size(), is(2));
+    LibraryFile objectifyLibraryFile = objectifyLibrary.getAllDependencies().get(0);
     assertNull(objectifyLibraryFile.getSourceUri());
     assertTrue("Objectify not exported", objectifyLibraryFile.isExport());
 
@@ -162,7 +162,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(objectifyLibraryFile.getJavadocUri(),
         is(new URI("https://www.javadoc.io/doc/com.googlecode.objectify/objectify/5.1.21")));
 
-    LibraryFile guavaLibraryFile = objectifyLibrary.getLibraryFiles().get(1);
+    LibraryFile guavaLibraryFile = objectifyLibrary.getAllDependencies().get(1);
     assertThat(guavaLibraryFile.getJavadocUri(),
         is(new URI("https://google.github.io/guava/releases/20.0/api/docs/")));
     assertNull(guavaLibraryFile.getSourceUri());
@@ -195,8 +195,8 @@ public class CloudLibrariesInPluginXmlTest {
     assertNotNull(servletApiLibrary.getLibraryDependencies());
     assertTrue(servletApiLibrary.getLibraryDependencies().isEmpty());
 
-    assertThat(servletApiLibrary.getLibraryFiles().size(), is(1));
-    LibraryFile libraryFile = servletApiLibrary.getLibraryFiles().get(0);
+    assertThat(servletApiLibrary.getAllDependencies().size(), is(1));
+    LibraryFile libraryFile = servletApiLibrary.getAllDependencies().get(0);
     assertThat(libraryFile.getJavadocUri(), is(new URI(
         "https://docs.oracle.com/cd/E17802_01/products/products/servlet/2.5/docs/servlet-2_5-mr2/")));
     assertNull(libraryFile.getSourceUri());
@@ -228,8 +228,8 @@ public class CloudLibrariesInPluginXmlTest {
     assertNotNull(jspApiLibrary.getLibraryDependencies());
     assertTrue(jspApiLibrary.getLibraryDependencies().isEmpty());
 
-    assertThat(jspApiLibrary.getLibraryFiles().size(), is(1));
-    LibraryFile jspApi = jspApiLibrary.getLibraryFiles().get(0);
+    assertThat(jspApiLibrary.getAllDependencies().size(), is(1));
+    LibraryFile jspApi = jspApiLibrary.getAllDependencies().get(0);
     assertThat(jspApi.getJavadocUri(), is(new URI(
         "http://docs.oracle.com/cd/E17802_01/products/products/jsp/2.1/docs/jsp-2_1-pfd2/")));
     assertNull(jspApi.getSourceUri());
