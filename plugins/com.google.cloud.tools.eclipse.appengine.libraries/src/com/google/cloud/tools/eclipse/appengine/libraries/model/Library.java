@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -95,7 +94,7 @@ public final class Library {
   }
 
   void setJavaVersion(String version) {
-    this.javaVersion = version;
+    javaVersion = version;
   }
   
   public String getToolTip() {
@@ -166,7 +165,7 @@ public final class Library {
   }
 
   public String getTransport() {
-    return this.transport;
+    return transport;
   }
 
   void setTransport(String transport) {
@@ -174,7 +173,7 @@ public final class Library {
   }
   
   public synchronized boolean isResolved() {
-    return this.resolved;
+    return resolved;
   }
   
   /**
@@ -191,10 +190,10 @@ public final class Library {
    *  
    * @throws CoreException error loading transitive dependencies
    */
-  public synchronized void resolveDependencies() throws CoreException {
+  public synchronized void resolveDependencies() {
     if (!resolved) {
       List<LibraryFile> transitiveDependencies = new ArrayList<>();
-      for (LibraryFile artifact : this.libraryFiles) {
+      for (LibraryFile artifact : libraryFiles) {
         artifact.updateVersion();
         MavenCoordinates coordinates = artifact.getMavenCoordinates();
 
@@ -208,8 +207,8 @@ public final class Library {
         }
       }
       
-      this.libraryFiles = resolveDuplicates(transitiveDependencies);
-      this.resolved = true;
+      libraryFiles = resolveDuplicates(transitiveDependencies);
+      resolved = true;
     }
   }  
   

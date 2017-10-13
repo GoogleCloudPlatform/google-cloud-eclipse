@@ -114,7 +114,7 @@ public class BuildPath {
    * @return the master library
    */
   public static Library collectLibraryFiles(IJavaProject javaProject, List<Library> libraries,
-      IProgressMonitor monitor) throws CoreException {
+      IProgressMonitor monitor) {
     
     SubMonitor subMonitor = SubMonitor.convert(monitor,
         Messages.getString("calculating.dependencies"), //$NON-NLS-1$
@@ -136,7 +136,7 @@ public class BuildPath {
     masterLibrary.setLibraryDependencies(dependentIds);
     subMonitor.worked(1);
     
-    List<LibraryFile> resolved = Library.resolveDuplicates(new ArrayList<LibraryFile>(masterFiles));
+    List<LibraryFile> resolved = Library.resolveDuplicates(new ArrayList<>(masterFiles));
     subMonitor.worked(8);
     masterLibrary.setLibraryFiles(resolved);
     subMonitor.worked(1);
