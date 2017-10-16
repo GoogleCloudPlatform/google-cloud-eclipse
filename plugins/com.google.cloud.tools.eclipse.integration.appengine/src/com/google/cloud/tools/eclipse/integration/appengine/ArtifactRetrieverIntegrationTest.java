@@ -74,5 +74,19 @@ public class ArtifactRetrieverIntegrationTest {
         "io.netty", "netty-handler");
     Assert.assertNotNull(version);
   }
+  
+  @Test
+  public void testGrps() {
+    ArtifactVersion version = ArtifactRetriever.DEFAULT.getLatestArtifactVersion(
+        "io.grpc", "grpc-auth");
+    Assert.assertNotNull(version);
+  }
+  
+  @Test
+  public void testGrpcNetty() {
+    ArtifactVersion version = ArtifactRetriever.DEFAULT.getLatestArtifactVersion(
+        "io.grpc", "grpc-netty");
+    Assert.assertNotNull(version);
+  }
 
 }
