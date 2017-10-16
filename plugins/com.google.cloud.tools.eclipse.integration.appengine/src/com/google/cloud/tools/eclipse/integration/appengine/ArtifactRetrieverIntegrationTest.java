@@ -67,5 +67,12 @@ public class ArtifactRetrieverIntegrationTest {
     }
     Assert.assertTrue(version.getMajorVersion() > 0);
   }
+  
+  @Test
+  public void testGetNetty() {
+    ArtifactVersion version = ArtifactRetriever.DEFAULT.getLatestArtifactVersion(
+        "io.netty", "netty-handler");
+    Assert.assertNotNull(version);
+  }
 
 }
