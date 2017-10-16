@@ -106,6 +106,7 @@ class Pom {
           dependency.appendChild(artifactIdElement);
 
           String version = coordinates.getVersion();
+          // todo latest version may not be needed anymore.
           if (!MavenCoordinates.LATEST_VERSION.equals(version)) {
             Element versionElement = document.createElement("version");
             versionElement.setTextContent(version);
