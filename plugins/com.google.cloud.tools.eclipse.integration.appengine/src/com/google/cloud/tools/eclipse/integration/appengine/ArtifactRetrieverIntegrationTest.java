@@ -76,7 +76,7 @@ public class ArtifactRetrieverIntegrationTest {
   }
   
   @Test
-  public void testGrps() {
+  public void testGrpc() {
     ArtifactVersion version = ArtifactRetriever.DEFAULT.getLatestArtifactVersion(
         "io.grpc", "grpc-auth");
     Assert.assertNotNull(version);
