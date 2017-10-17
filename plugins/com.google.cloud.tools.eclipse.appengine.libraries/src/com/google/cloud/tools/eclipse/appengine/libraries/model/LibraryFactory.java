@@ -81,9 +81,8 @@ class LibraryFactory {
           library.setExport(Boolean.parseBoolean(exportString));
         }
         String dependencies = configurationElement.getAttribute("dependencies"); //$NON-NLS-1$
-        if ("include".equals(dependencies)) { //$NON-NLS-1$
-          // Load the dependencies from Maven Central later
-          library.setResolved(false);
+        if (!"include".equals(dependencies)) { //$NON-NLS-1$
+          library.setResolved();
         }
         String versionString = configurationElement.getAttribute("javaVersion"); //$NON-NLS-1$
         if (versionString != null) {
@@ -117,7 +116,6 @@ class LibraryFactory {
   static Collection<LibraryFile> loadTransitiveDependencies(MavenCoordinates root)
       throws CoreException {
     Set<LibraryFile> dependencies = new HashSet<>();
-    // todo need a progress monitor here
     Collection<Artifact> artifacts = DependencyResolver.getTransitiveDependencies(
         root.getGroupId(), root.getArtifactId(), root.getVersion(), null);
     for (Artifact artifact : artifacts) {
