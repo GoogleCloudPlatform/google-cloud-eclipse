@@ -56,7 +56,7 @@ public class CloudToolsEclipseProjectNotifier implements IStartup {
     workbench = PlatformUI.getWorkbench();
     workspace = ResourcesPlugin.getWorkspace();
 
-    Job projectNotification = new WorkspaceJob("Updating projects for Cloud Tools for Eclipse") {
+    Job projectUpdater = new WorkspaceJob("Updating projects for Cloud Tools for Eclipse") {
       @Override
       public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
         SubMonitor progress = SubMonitor.convert(monitor, 40);
@@ -73,9 +73,9 @@ public class CloudToolsEclipseProjectNotifier implements IStartup {
         return upgradeProjects(projects, progress.newChild(25));
       }
     };
-    projectNotification.setRule(workspace.getRoot());
-    projectNotification.setUser(true);
-    projectNotification.schedule(500);
+    projectUpdater.setRule(workspace.getRoot());
+    projectUpdater.setUser(true);
+    projectUpdater.schedule(500);
   }
 
   /**
@@ -104,18 +104,21 @@ public class CloudToolsEclipseProjectNotifier implements IStartup {
       SubMonitor progress) {
     Preconditions.checkArgument(!projects.isEmpty(), "no projects specified!"); // $NON-NLS-1$
     progress.setBlocked(StatusUtil.info(this, "Prompting user to upgrade"));
+    final boolean[] proceed = new boolean[1];
     workbench.getDisplay().syncExec(new Runnable() {
       public void run() {
         StringBuilder sb = new StringBuilder(
-            "The following projects must be updated for Cloud Tools for Eclipse:");
+            "The following projects must be updated for Cloud Tools for Eclipse:\n");
         for (IProject project : projects) {
-          sb.append("\n  ").append(project.getName());
+          sb.append("\n    ").append(project.getName());
         }
-        MessageDialog.openInformation(getShell(), "Cloud Tools for Eclipse", sb.toString());
+        sb.append("\n\nUpdate now?");
+        proceed[0] =
+            MessageDialog.openQuestion(getShell(), "Cloud Tools for Eclipse", sb.toString());
       }
     });
     progress.clearBlocked();
-    return projects;
+    return proceed[0] ? projects : Collections.<IProject>emptyList();
   }
 
   /**
