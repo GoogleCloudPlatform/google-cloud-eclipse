@@ -267,7 +267,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
    *   <li> Binds {@code master} to the property with the name {@code masterModelPropertyName}
    *       in the {@link #model}.
    *   <li> Binds {@code dependent} to the property with the name {@code dependantModelPropertyName}
-   *       in the {#link model}.
+   *       in the {@link #model}.
    *   <li> Binds {@code master} and {@code dependent} in a way that {@code dependent} is disabled
    *       and unchecked when {@code master} is unchecked. When {@code master} is checked back,
    *       {@code dependent} restores its previous check state.
