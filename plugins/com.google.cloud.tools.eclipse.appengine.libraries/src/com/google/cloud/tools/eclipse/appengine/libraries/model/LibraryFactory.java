@@ -177,7 +177,7 @@ class LibraryFactory {
     String version = mavenCoordinatesElement.getAttribute(ATTRIBUTE_NAME_VERSION);
     if (Strings.isNullOrEmpty(version) || "LATEST".equals(version)) {
       ArtifactVersion artifactVersion =
-          ArtifactRetriever.DEFAULT.getLatestArtifactVersion(groupId, artifactId);
+          ArtifactRetriever.DEFAULT.getLatestReleaseVersion(groupId, artifactId);
       if (artifactVersion != null) {
         version = artifactVersion.toString();
       }

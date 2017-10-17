@@ -79,7 +79,7 @@ public class DataflowDependencyManager {
    * The version is [Current Version, Next Major Version).
    */
   public ArtifactVersion getLatestDataflowDependencyInRange(VersionRange currentVersionRange) {
-    return artifactRetriever.getLatestArtifactVersion(
+    return artifactRetriever.getLatestReleaseVersion(
         DataflowMavenCoordinates.GROUP_ID,
         DataflowMavenCoordinates.ARTIFACT_ID,
         currentVersionRange);

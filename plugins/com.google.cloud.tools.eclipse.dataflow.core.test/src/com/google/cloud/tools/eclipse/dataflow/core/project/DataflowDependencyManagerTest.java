@@ -77,7 +77,7 @@ public class DataflowDependencyManagerTest {
   @Test
   public void testGetDataflowDependencyNoTrackDependsUpToNextMajorVersion() {
     ArtifactVersion baseVersion = new DefaultArtifactVersion("1.2.3");
-    when(artifactRetriever.getLatestArtifactVersion(DataflowMavenCoordinates.GROUP_ID,
+    when(artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
         DataflowMavenCoordinates.ARTIFACT_ID, MajorVersion.ONE.getVersionRange()))
         .thenReturn(baseVersion);
 
@@ -89,7 +89,7 @@ public class DataflowDependencyManagerTest {
 
   @Test
   public void testGetDataflowDependencyNoTrackNoVersionInRangeDependsOnUnstableMajorVersionRange() {
-    when(artifactRetriever.getLatestArtifactVersion(DataflowMavenCoordinates.GROUP_ID,
+    when(artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
         DataflowMavenCoordinates.ARTIFACT_ID, MajorVersion.QUALIFIED_TWO.getVersionRange()))
         .thenReturn(null);
 
@@ -101,7 +101,7 @@ public class DataflowDependencyManagerTest {
 
   @Test
   public void testGetDataflowDependencyNoTrackNoVersionInRangeDependsOnMajorVersionRange() {
-    when(artifactRetriever.getLatestArtifactVersion(DataflowMavenCoordinates.GROUP_ID,
+    when(artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
         DataflowMavenCoordinates.ARTIFACT_ID, MajorVersion.TWO.getVersionRange()))
         .thenReturn(null);
 
@@ -117,7 +117,7 @@ public class DataflowDependencyManagerTest {
     when(model.getDependencies()).thenReturn(ImmutableList.of(pinnedDep));
     DefaultArtifactVersion latestVersion = new DefaultArtifactVersion("1.2.3");
     when(
-        artifactRetriever.getLatestArtifactVersion(DataflowMavenCoordinates.GROUP_ID,
+        artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
             DataflowMavenCoordinates.ARTIFACT_ID, 
             VersionRange.createFromVersionSpec(pinnedDep.getVersion()))).thenReturn(latestVersion);
 
@@ -127,11 +127,11 @@ public class DataflowDependencyManagerTest {
   @Test
   public void testGetLatestVersions() {
     DefaultArtifactVersion latestVersionOne = new DefaultArtifactVersion("1.2.3");
-    when(artifactRetriever.getLatestArtifactVersion(DataflowMavenCoordinates.GROUP_ID,
+    when(artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
         DataflowMavenCoordinates.ARTIFACT_ID, MajorVersion.ONE.getVersionRange()))
         .thenReturn(latestVersionOne);
     ArtifactVersion latestVersionTwo = new DefaultArtifactVersion("2.0.0");
-    when(artifactRetriever.getLatestArtifactVersion(DataflowMavenCoordinates.GROUP_ID,
+    when(artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
         DataflowMavenCoordinates.ARTIFACT_ID, MajorVersion.TWO.getVersionRange()))
         .thenReturn(latestVersionTwo);
 
@@ -148,10 +148,10 @@ public class DataflowDependencyManagerTest {
   @Test
   public void testGetLatestVersionUnstableNoReleasedStableVersion() {
     DefaultArtifactVersion latestVersion = new DefaultArtifactVersion("2.0.0-beta2");
-    when(artifactRetriever.getLatestArtifactVersion(DataflowMavenCoordinates.GROUP_ID,
+    when(artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
         DataflowMavenCoordinates.ARTIFACT_ID, MajorVersion.QUALIFIED_TWO.getVersionRange()))
         .thenReturn(latestVersion);
-    when(artifactRetriever.getLatestArtifactVersion(DataflowMavenCoordinates.GROUP_ID,
+    when(artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
         DataflowMavenCoordinates.ARTIFACT_ID, MajorVersion.TWO.getVersionRange()))
         .thenReturn(null);
 
@@ -164,11 +164,11 @@ public class DataflowDependencyManagerTest {
   @Test
   public void testGetLatestVersionUnstableWithStableVersionInMap() {
     DefaultArtifactVersion latestQualified = new DefaultArtifactVersion("2.0.0-beta2");
-    when(artifactRetriever.getLatestArtifactVersion(DataflowMavenCoordinates.GROUP_ID,
+    when(artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
         DataflowMavenCoordinates.ARTIFACT_ID, MajorVersion.QUALIFIED_TWO.getVersionRange()))
         .thenReturn(latestQualified);
     DefaultArtifactVersion latestMajor = new DefaultArtifactVersion("2.0.0");
-    when(artifactRetriever.getLatestArtifactVersion(DataflowMavenCoordinates.GROUP_ID,
+    when(artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
         DataflowMavenCoordinates.ARTIFACT_ID, MajorVersion.TWO.getVersionRange()))
         .thenReturn(latestMajor);
 
@@ -181,11 +181,11 @@ public class DataflowDependencyManagerTest {
   @Test
   public void testGetLatestVersionUnstableWithNoStableVersion() {
     DefaultArtifactVersion latestOne = new DefaultArtifactVersion("1.9.0");
-    when(artifactRetriever.getLatestArtifactVersion(DataflowMavenCoordinates.GROUP_ID,
+    when(artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
         DataflowMavenCoordinates.ARTIFACT_ID, MajorVersion.ONE.getVersionRange()))
         .thenReturn(latestOne);
     DefaultArtifactVersion latestQualifiedTwo = new DefaultArtifactVersion("2.0.0-beta2");
-    when(artifactRetriever.getLatestArtifactVersion(DataflowMavenCoordinates.GROUP_ID,
+    when(artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
         DataflowMavenCoordinates.ARTIFACT_ID, MajorVersion.QUALIFIED_TWO.getVersionRange()))
         .thenReturn(latestQualifiedTwo);
 

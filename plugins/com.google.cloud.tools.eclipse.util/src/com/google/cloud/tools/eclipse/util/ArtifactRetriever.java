@@ -136,15 +136,16 @@ public class ArtifactRetriever {
   /**
    * Returns the latest published release artifact version, or null if there is no such version.
    */
-  public ArtifactVersion getLatestArtifactVersion(String groupId, String artifactId) {
-    return getLatestReleaseVersion(idToKey(groupId, artifactId), null);
+  public ArtifactVersion getLatestReleaseVersion(String groupId, String artifactId) {
+    VersionRange range = null;
+    return getLatestReleaseVersion(idToKey(groupId, artifactId), range);
   }
 
   /**
    * Returns the latest published release artifact version in the version range,
    * or null if there is no such version.
    */
-  public ArtifactVersion getLatestArtifactVersion(
+  public ArtifactVersion getLatestReleaseVersion(
       String groupId, String artifactId, VersionRange range) {
     return getLatestReleaseVersion(idToKey(groupId, artifactId), range);
   }
