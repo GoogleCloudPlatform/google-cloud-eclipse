@@ -194,14 +194,8 @@ public final class Library {
    * transitive dependency graph.
    */
   private synchronized List<LibraryFile> resolveDependencies() {
-    
-    if (transitiveDependencies != null) {
-      return transitiveDependencies; 
-    }
-    
     List<LibraryFile> transitiveDependencies = new ArrayList<>();
     
-    // todo check resolved
     for (LibraryFile artifact : directDependencies) {
       artifact.updateVersion();
       MavenCoordinates coordinates = artifact.getMavenCoordinates();

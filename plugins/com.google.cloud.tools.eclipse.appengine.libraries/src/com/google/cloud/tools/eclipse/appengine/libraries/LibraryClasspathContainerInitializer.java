@@ -101,7 +101,7 @@ public class LibraryClasspathContainerInitializer extends ClasspathContainerInit
     return true;
   }
 
-  // todo may be unused
+  @Override
   public Object getComparisonID(IPath containerPath, IJavaProject project) {
     // used to collapse duplicate classpath entries; we use the full path to identify libraries
     return containerPath;
