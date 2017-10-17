@@ -136,7 +136,7 @@ public class BuildPath {
     masterLibrary.setLibraryDependencies(dependentIds);
     subMonitor.worked(1);
     
-    List<LibraryFile> resolved = Library.resolveDuplicates(new ArrayList<LibraryFile>(masterFiles));
+    List<LibraryFile> resolved = Library.resolveDuplicates(new ArrayList<>(masterFiles));
     subMonitor.worked(8);
     masterLibrary.setLibraryFiles(resolved);
     subMonitor.worked(1);
@@ -145,7 +145,7 @@ public class BuildPath {
   }
 
   /**
-   * @return a {@link IClasspathEntry} created from {@code library} if {@code javaProject} does not
+   * @return an {@link IClasspathEntry} created from {@code library} if {@code javaProject} does not
    *     already have the entry; otherwise, {@code null}
    */
   private static IClasspathEntry computeEntry(IJavaProject javaProject, Library library,
