@@ -60,7 +60,7 @@ public class LibraryFactoryTest {
     Mockito.when(configuration.getChildren("libraryFile")).thenReturn(libraryFiles);
     
     Library library = LibraryFactory.create(configuration);
-    String version = library.getLibraryFiles().get(0).getMavenCoordinates().getVersion();
+    String version = library.getAllDependencies().get(0).getMavenCoordinates().getVersion();
     DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(version);
     int majorVersion = artifactVersion.getMajorVersion();
     Assert.assertTrue(majorVersion >= 22);
@@ -72,7 +72,7 @@ public class LibraryFactoryTest {
     Mockito.when(mavenCoordinates[0].getAttribute("version")).thenReturn("19.0");
     
     Library library = LibraryFactory.create(configuration);
-    String version = library.getLibraryFiles().get(0).getMavenCoordinates().getVersion();
+    String version = library.getAllDependencies().get(0).getMavenCoordinates().getVersion();
     int majorVersion = new DefaultArtifactVersion(version).getMajorVersion();
     Assert.assertEquals(19, majorVersion);
   }
@@ -84,7 +84,6 @@ public class LibraryFactoryTest {
     Library library = LibraryFactory.create(configuration);
     Assert.assertEquals("com.google.guava", library.getGroup());
     Assert.assertEquals("1.8", library.getJavaVersion());
-    Assert.assertTrue(library.isResolved());
     Assert.assertTrue(library.isExport());
   }
 
@@ -95,7 +94,6 @@ public class LibraryFactoryTest {
     Mockito.when(configuration.getAttribute("export")).thenReturn("false");
 
     Library library = LibraryFactory.create(configuration);
-    Assert.assertFalse(library.isResolved());
     Assert.assertFalse(library.isExport());
   }
 

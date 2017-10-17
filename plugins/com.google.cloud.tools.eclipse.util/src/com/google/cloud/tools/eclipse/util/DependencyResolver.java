@@ -84,10 +84,10 @@ public class DependencyResolver {
           }
           return dependencies;
         } catch (DependencyResolutionException ex) {
-          throw new CoreException(StatusUtil.error(ex, "Could not resolve dependencies"));
+          throw new CoreException(StatusUtil.error(this, "Could not resolve dependencies", ex));
         } catch (NullPointerException ex) {
-          throw new CoreException(StatusUtil.error(ex,
-              "Possible corrupt artifact in local .m2 repository for " + artifact));
+          throw new CoreException(StatusUtil.error(this,
+              "Possible corrupt artifact in local .m2 repository for " + artifact, ex));
         }
       }
 

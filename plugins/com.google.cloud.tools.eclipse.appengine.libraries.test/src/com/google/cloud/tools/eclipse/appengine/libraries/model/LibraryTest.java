@@ -101,8 +101,8 @@ public class LibraryTest {
 
   @Test
   public void testLibraryFilesDefaultsToEmpty() {
-    assertNotNull(library.getLibraryFiles());
-    assertTrue(library.getLibraryFiles().isEmpty());
+    assertNotNull(library.getAllDependencies());
+    assertTrue(library.getAllDependencies().isEmpty());
   }
 
   @Test(expected = NullPointerException.class)
@@ -115,9 +115,10 @@ public class LibraryTest {
     MavenCoordinates mavenCoordinates =
         new MavenCoordinates.Builder().setGroupId("groupId").setArtifactId("artifactId").build();
     library.setLibraryFiles(Arrays.asList(new LibraryFile(mavenCoordinates)));
-    assertNotNull(library.getLibraryFiles());
-    assertThat(library.getLibraryFiles().size(), is(1));
-    LibraryFile actual = library.getLibraryFiles().get(0);
+    List<LibraryFile> allDependencies = library.getAllDependencies();
+    assertNotNull(allDependencies);
+    assertThat(allDependencies.size(), is(1));
+    LibraryFile actual = allDependencies.get(0);
     assertThat(actual.getMavenCoordinates().getRepository(), is("central"));
     assertThat(actual.getMavenCoordinates().getGroupId(), is("groupId"));
     assertThat(actual.getMavenCoordinates().getArtifactId(), is("artifactId"));
@@ -129,13 +130,25 @@ public class LibraryTest {
   }
 
   @Test
-  public void testResolvedDefaultsToTrue() throws CoreException {
-    assertTrue(library.isResolved());
-    library.resolveDependencies(); // no-op because the library is marked resolved
-    library.setResolved(false);
-    assertFalse(library.isResolved());
+  public void testDirectDependencies() throws CoreException {
+    // objectify depends on guava
+    MavenCoordinates mavenCoordinates =
+        new MavenCoordinates.Builder()
+            .setGroupId("com.googlecode.objectify")
+            .setArtifactId("objectify")
+            .setVersion("5.1.21").build();
+    library.setLibraryFiles(Arrays.asList(new LibraryFile(mavenCoordinates)));
+
+    List<LibraryFile> directFiles = library.getDirectDependencies();
+    assertEquals(1, directFiles.size()); 
+    assertEquals(mavenCoordinates.getArtifactId(),
+        directFiles.get(0).getMavenCoordinates().getArtifactId());
+    
+    List<LibraryFile> transitiveDependencies = library.getAllDependencies();
+    assertTrue(transitiveDependencies.size() > directFiles.size()); 
   }
 
+  
   @Test
   public void testResolvedDuplicates() {
     MavenCoordinates coordinates19 = new MavenCoordinates.Builder()

@@ -102,7 +102,7 @@ public class LibraryClasspathContainerResolverService
     }
 
     List<IClasspathEntry> resolvedEntries = new ArrayList<>();
-    for (LibraryFile libraryFile : library.getLibraryFiles()) {
+    for (LibraryFile libraryFile : library.getAllDependencies()) {
       resolvedEntries.add(resolveLibraryFileAttachSourceSync(libraryFile));
     }
     return resolvedEntries.toArray(new IClasspathEntry[0]);
@@ -110,7 +110,8 @@ public class LibraryClasspathContainerResolverService
 
   @Override
   public IStatus resolveContainer(IJavaProject javaProject, IPath containerPath,
-                                  IProgressMonitor monitor) {
+      IProgressMonitor monitor) {
+    
     Preconditions.checkArgument(containerPath.segment(0).equals(Library.CONTAINER_PATH_PREFIX));
     
     SubMonitor subMonitor = SubMonitor.convert(monitor, 19);
@@ -167,7 +168,7 @@ public class LibraryClasspathContainerResolverService
     try {
       for (String libraryId : new String[] {"servlet-api-2.5", "jsp-api-2.1"}) {
         Library library = CloudLibraries.getLibrary(libraryId);
-        for (LibraryFile libraryFile : library.getLibraryFiles()) {
+        for (LibraryFile libraryFile : library.getAllDependencies()) {
           if (monitor.isCanceled()) {
             return Status.CANCEL_STATUS;
           }
@@ -184,7 +185,7 @@ public class LibraryClasspathContainerResolverService
       IPath containerPath, Library library, List<Job> sourceAttacherJobs, IProgressMonitor monitor)
       throws CoreException {
     
-    List<LibraryFile> libraryFiles = library.getLibraryFiles();
+    List<LibraryFile> libraryFiles = library.getAllDependencies();
     SubMonitor subMonitor = SubMonitor.convert(monitor, libraryFiles.size());
     subMonitor.subTask(Messages.getString("TaskResolveArtifacts", getLibraryDescription(library)));
     SubMonitor child = subMonitor.newChild(libraryFiles.size());

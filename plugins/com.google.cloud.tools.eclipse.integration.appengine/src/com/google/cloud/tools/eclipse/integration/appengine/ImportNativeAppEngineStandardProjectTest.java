@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.eclipse.appengine.compat.cte13.CloudToolsEclipseProjectUpdater;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.ZipUtil;
@@ -30,6 +31,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
@@ -60,6 +63,8 @@ public class ImportNativeAppEngineStandardProjectTest extends BaseProjectTest {
     project = SwtBotAppEngineActions.importNativeProject(bot, "AESv7", tempFolder.getRoot());
     assertTrue(project.exists());
 
+    updateOldContainers();
+
     ProjectUtils.failIfBuildErrors("Imported App Engine standard Java 7 project has errors",
         project);
 
@@ -86,6 +91,8 @@ public class ImportNativeAppEngineStandardProjectTest extends BaseProjectTest {
     project = SwtBotAppEngineActions.importNativeProject(bot, "AESv8", tempFolder.getRoot());
     assertTrue(project.exists());
 
+    updateOldContainers();
+
     ProjectUtils.failIfBuildErrors("Imported App Engine standard Java 8 project has errors",
         project);
 
@@ -100,6 +107,14 @@ public class ImportNativeAppEngineStandardProjectTest extends BaseProjectTest {
     assertEquals(JavaFacet.VERSION_1_8, facetedProject.getProjectFacetVersion(JavaFacet.FACET));
     assertEquals(WebFacetUtils.WEB_31,
         facetedProject.getProjectFacetVersion(WebFacetUtils.WEB_FACET));
+  }
+
+  private void updateOldContainers() {
+    assertTrue(CloudToolsEclipseProjectUpdater.hasOldContainers(project));
+    IStatus updateStatus =
+        CloudToolsEclipseProjectUpdater.updateProject(project, SubMonitor.convert(null));
+    assertTrue("Update failed: " + updateStatus.getMessage(), updateStatus.isOK());
+    assertFalse(CloudToolsEclipseProjectUpdater.hasOldContainers(project));
   }
 
 }

@@ -29,6 +29,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Locale;
 import java.util.NavigableSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -158,7 +159,7 @@ public class ArtifactRetriever {
     try {
       NavigableSet<ArtifactVersion> versions = availableVersions.get(coordinates);
       for (ArtifactVersion version : versions.descendingSet()) {
-        if (version.getMajorVersion() > 0 && Strings.isNullOrEmpty(version.getQualifier())) {
+        if (isReleased(version)) {
           if (range == null || range.containsVersion(version)) {
             return version;
           }
@@ -171,6 +172,19 @@ public class ArtifactRetriever {
           ex.getCause());
     }
     return null;
+  }
+
+  private static boolean isReleased(ArtifactVersion version) {
+    String qualifier = version.getQualifier();
+    if (version.getMajorVersion() <= 0) {
+      return false;
+    } else if (Strings.isNullOrEmpty(qualifier)) {
+      return true; 
+    } else if ("final".equalsIgnoreCase(qualifier.toLowerCase(Locale.US))) {
+      return true; 
+    }
+    
+    return false;
   }
 
   private Document getMetadataDocument(String coordinates) throws IOException {
