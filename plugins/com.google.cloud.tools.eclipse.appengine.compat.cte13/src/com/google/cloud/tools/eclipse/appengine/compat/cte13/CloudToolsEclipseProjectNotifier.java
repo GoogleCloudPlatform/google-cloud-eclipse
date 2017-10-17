@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Logger;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -46,8 +45,6 @@ import org.eclipse.ui.PlatformUI;
  * Cloud Tools for Eclipse 1.4, and notifies the user to upgrade.
  */
 public class CloudToolsEclipseProjectNotifier implements IStartup {
-  private static final Logger logger =
-      Logger.getLogger(CloudToolsEclipseProjectNotifier.class.getName());
   private IWorkbench workbench;
   private IWorkspace workspace;
 
@@ -56,11 +53,11 @@ public class CloudToolsEclipseProjectNotifier implements IStartup {
     workbench = PlatformUI.getWorkbench();
     workspace = ResourcesPlugin.getWorkspace();
 
-    Job projectUpdater = new WorkspaceJob("Updating projects for Cloud Tools for Eclipse") {
+    Job projectUpdater = new WorkspaceJob(Messages.getString("updating.projects.jobname")) { //$NON-NLS-1$
       @Override
       public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
         SubMonitor progress = SubMonitor.convert(monitor, 40);
-        progress.subTask("Searching for projects requiring updating");
+        progress.subTask(Messages.getString("searching.for.projects")); //$NON-NLS-1$
         Collection<IProject> projects = findCandidates(progress.newChild(10));
         if (projects.isEmpty()) {
           return Status.OK_STATUS;
@@ -69,7 +66,7 @@ public class CloudToolsEclipseProjectNotifier implements IStartup {
         if (projects.isEmpty()) {
           return Status.OK_STATUS;
         }
-        progress.subTask("Updating projects");
+        progress.subTask(Messages.getString("updating.projects")); //$NON-NLS-1$
         return upgradeProjects(projects, progress.newChild(25));
       }
     };
@@ -81,7 +78,7 @@ public class CloudToolsEclipseProjectNotifier implements IStartup {
   /**
    * Scan the current projects to identify those requiring upgrading.
    */
-  protected Collection<IProject> findCandidates(SubMonitor progress) {
+  private Collection<IProject> findCandidates(SubMonitor progress) {
     List<IProject> projects = new ArrayList<>();
 
     IProject[] allProjects = workspace.getRoot().getProjects();
@@ -100,21 +97,24 @@ public class CloudToolsEclipseProjectNotifier implements IStartup {
   /**
    * Prompt the user to select the projects to upgrade.
    */
-  protected Collection<IProject> promptUser(final Collection<IProject> projects,
+  private Collection<IProject> promptUser(final Collection<IProject> projects,
       SubMonitor progress) {
-    Preconditions.checkArgument(!projects.isEmpty(), "no projects specified!"); // $NON-NLS-1$
-    progress.setBlocked(StatusUtil.info(this, "Prompting user to upgrade"));
+    Preconditions.checkArgument(!projects.isEmpty(), "no projects specified!"); // $NON-NLS-1$ //$NON-NLS-1$
+    progress.setBlocked(StatusUtil.info(this, Messages.getString("waiting.for.user"))); //$NON-NLS-1$
     final boolean[] proceed = new boolean[1];
     workbench.getDisplay().syncExec(new Runnable() {
+      @Override
       public void run() {
         StringBuilder sb = new StringBuilder(
-            "The following projects must be updated for Cloud Tools for Eclipse:\n");
+            Messages.getString("following.projects.must.be.updated")); //$NON-NLS-1$
+        sb.append("\n"); //$NON-NLS-1$
         for (IProject project : projects) {
-          sb.append("\n    ").append(project.getName());
+          sb.append("\n    ").append(project.getName()); //$NON-NLS-1$
         }
-        sb.append("\n\nUpdate now?");
+        sb.append("\n\n"); //$NON-NLS-1$
+        sb.append(Messages.getString("update.now")); //$NON-NLS-1$
         proceed[0] =
-            MessageDialog.openQuestion(getShell(), "Cloud Tools for Eclipse", sb.toString());
+            MessageDialog.openQuestion(getShell(), Messages.getString("cloud.tools.for.eclipse"), sb.toString()); //$NON-NLS-1$
       }
     });
     progress.clearBlocked();
@@ -124,7 +124,7 @@ public class CloudToolsEclipseProjectNotifier implements IStartup {
   /**
    * Find a shell for the projects-require-updating prompt. May return {@code null}.
    */
-  protected Shell getShell() {
+  private Shell getShell() {
     if (workbench.getWorkbenchWindowCount() > 0) {
       if (workbench.getActiveWorkbenchWindow() != null) {
         return workbench.getActiveWorkbenchWindow().getShell();
@@ -135,17 +135,15 @@ public class CloudToolsEclipseProjectNotifier implements IStartup {
 
   /**
    * Perform the upgrade.
-   * 
    */
-  protected IStatus upgradeProjects(Collection<IProject> projects, SubMonitor progress) {
+  private IStatus upgradeProjects(Collection<IProject> projects, SubMonitor progress) {
     progress.setWorkRemaining(projects.size());
-    MultiStatus status = StatusUtil.multi(this, "Updating projects for Cloud Tools for Eclipse");
+    MultiStatus status = StatusUtil.multi(this, Messages.getString("updating.projects.jobname")); //$NON-NLS-1$
     for (IProject project : projects) {
-      progress.subTask("Updating " + project.getName());
+      progress.subTask(Messages.getString("updating.project", project.getName())); //$NON-NLS-1$
       IStatus result = CloudToolsEclipseProjectUpdater.updateProject(project, progress.newChild(1));
       status.merge(result);
     }
     return status;
   }
-
 }

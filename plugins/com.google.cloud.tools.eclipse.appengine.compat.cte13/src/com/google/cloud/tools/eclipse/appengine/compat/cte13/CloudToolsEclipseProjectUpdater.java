@@ -36,7 +36,6 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 
 /**
  * Fix older projects that have a per-library classpath container.
@@ -53,23 +52,16 @@ public class CloudToolsEclipseProjectUpdater {
       if (!project.hasNature(JavaCore.NATURE_ID)) {
         return false;
       }
-    } catch (CoreException ex) {
-      logger.log(Level.WARNING, "Skipping project: " + project.getName(), ex);
-      return false;
-    }
-    IJavaProject javaProject = JavaCore.create(project);
-    try {
+      IJavaProject javaProject = JavaCore.create(project);
       for (IClasspathEntry entry : javaProject.getRawClasspath()) {
         IPath containerPath = entry.getPath();
-        if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER
-            && containerPath.segmentCount() == 2
-            && Library.CONTAINER_PATH_PREFIX.equals(containerPath.segment(0))
+        if (isLibraryContainer(entry, containerPath)
             && !CloudLibraries.MASTER_CONTAINER_ID.equals(containerPath.segment(1))) {
           return true;
         }
       }
-    } catch (JavaModelException ex) {
-      logger.log(Level.WARNING, "Skipping project: " + project.getName(), ex);
+    } catch (CoreException ex) {
+      logger.log(Level.WARNING, "Skipping project: " + project.getName(), ex); //$NON-NLS-1$
     }
     return false;
   }
@@ -78,7 +70,7 @@ public class CloudToolsEclipseProjectUpdater {
    * Upgrade this specific project.
    */
   public static IStatus updateProject(IProject project, SubMonitor progress) {
-    progress.beginTask("Updating " + project.getName(), 50);
+    progress.beginTask(Messages.getString("updating.project", project.getName()), 50); //$NON-NLS-1$
     IJavaProject javaProject = JavaCore.create(project);
 
     try {
@@ -87,9 +79,7 @@ public class CloudToolsEclipseProjectUpdater {
       Set<String> libraryIds = new HashSet<>();
       for (IClasspathEntry entry : javaProject.getRawClasspath()) {
         IPath containerPath = entry.getPath();
-        if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER
-            && containerPath.segmentCount() == 2
-            && Library.CONTAINER_PATH_PREFIX.equals(containerPath.segment(0))
+        if (isLibraryContainer(entry, containerPath)
             && !CloudLibraries.MASTER_CONTAINER_ID.equals(containerPath.segment(1))) {
           libraryIds.add(containerPath.segment(1));
         } else {
@@ -98,15 +88,15 @@ public class CloudToolsEclipseProjectUpdater {
       }
 
       // Update classpath to remove the old entries
-      progress.subTask("Removing old library containers");
+      progress.subTask(Messages.getString("removing.old.library.classpath.containers")); //$NON-NLS-1$
       javaProject.setRawClasspath(
           remainingEntries.toArray(new IClasspathEntry[remainingEntries.size()]),
           progress.newChild(10));
 
-      progress.subTask("Removing old library container definitions");
+      progress.subTask(Messages.getString("removing.old.library.container.definitions")); //$NON-NLS-1$
       for (String libraryId : libraryIds) {
-        IFile definition = project.getFolder(".settings").getFolder(Library.CONTAINER_PATH_PREFIX)
-            .getFile(libraryId + ".container");
+        IFile definition = project.getFolder(".settings").getFolder(Library.CONTAINER_PATH_PREFIX) //$NON-NLS-1$
+            .getFile(libraryId + ".container"); //$NON-NLS-1$
         if (definition.exists()) {
           definition.delete(true, null);
         }
@@ -114,11 +104,11 @@ public class CloudToolsEclipseProjectUpdater {
       progress.worked(5);
 
       // remove "appengine-api" as appengine-api-1.0-sdk now included in the servlet container
-      libraryIds.remove("appengine-api"); // $NON-NLS-1$
+      libraryIds.remove("appengine-api"); //$NON-NLS-1$
       // remove "googlecloudcore" and "googleapiclient" as they were utility definitions, now from
       // dependencies
-      libraryIds.remove("googlecloudcore"); // $NON-NLS-1$
-      libraryIds.remove("googleapiclient"); // $NON-NLS-1$
+      libraryIds.remove("googlecloudcore"); //$NON-NLS-1$
+      libraryIds.remove("googleapiclient"); //$NON-NLS-1$
 
       // add the master-library container
       List<Library> libraries = new ArrayList<>();
@@ -127,17 +117,22 @@ public class CloudToolsEclipseProjectUpdater {
         if (library != null) {
           libraries.add(library);
         } else {
-          logger.warning("Library not found: " + libraryId);
+          logger.warning("Library not found: " + libraryId); //$NON-NLS-1$
         }
       }
       progress.worked(5);
       BuildPath.addNativeLibrary(javaProject, libraries, progress.newChild(30));
+      return Status.OK_STATUS;
     } catch (CoreException ex) {
       return StatusUtil.error(CloudToolsEclipseProjectUpdater.class,
-          "Unable to update " + project.getName(), ex);
+          Messages.getString("unable.to.update.project", project.getName()), ex); //$NON-NLS-1$
     }
+  }
 
-    return Status.OK_STATUS;
+  private static boolean isLibraryContainer(IClasspathEntry entry, IPath containerPath) {
+    return entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER
+        && containerPath.segmentCount() == 2
+        && Library.CONTAINER_PATH_PREFIX.equals(containerPath.segment(0));
   }
 
 
