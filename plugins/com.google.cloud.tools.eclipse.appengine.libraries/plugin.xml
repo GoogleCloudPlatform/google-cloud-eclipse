@@ -47,6 +47,7 @@
           group="appengine"
           name="Objectify"
           tooltip="%objectify.tooltip"
+          dependencies="include"
           siteUri="https://github.com/objectify/objectify/wiki" >
       <libraryFile
           export="true"
@@ -55,14 +56,6 @@
               artifactId="objectify"
               groupId="com.googlecode.objectify"
               version="5.1.21" />
-      </libraryFile>
-      <libraryFile
-          export="true" 
-          javadocUri="https://google.github.io/guava/releases/20.0/api/docs/">
-        <mavenCoordinates
-              artifactId="guava"
-              groupId="com.google.guava"
-              version="20.0" />
       </libraryFile>
     </library>
 

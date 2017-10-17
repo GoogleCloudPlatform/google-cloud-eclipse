@@ -210,7 +210,7 @@ public class PomTest {
         new MavenCoordinates.Builder()
             .setGroupId("com.googlecode.objectify")
             .setArtifactId("objectify")
-            .setVersion("5.1.21").build();
+            .setVersion("5.1.10").build(); // to be upgraded
     
     List<LibraryFile> files = new ArrayList<>();
     LibraryFile file = new LibraryFile(coordinates);
@@ -236,7 +236,7 @@ public class PomTest {
     Element artifactId = getOnlyChild(dependency, "artifactId");
     Assert.assertEquals("objectify", artifactId.getTextContent());
     Element version = getOnlyChild(dependency, "version");
-    Assert.assertEquals("5.1.21", version.getTextContent());
+    Assert.assertNotEquals("5.1.10", version.getTextContent());
   }
 
   private static Document parse(InputStream in)

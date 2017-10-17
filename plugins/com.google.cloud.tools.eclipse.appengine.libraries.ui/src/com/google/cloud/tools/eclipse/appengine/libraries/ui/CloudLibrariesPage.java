@@ -16,11 +16,15 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.ui;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
+import com.google.cloud.tools.eclipse.util.MavenUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -33,12 +37,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
-
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
-import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
-import com.google.cloud.tools.eclipse.util.MavenUtils;
 
 public abstract class CloudLibrariesPage extends WizardPage implements IClasspathContainerPage,
     IClasspathContainerPageExtension, IClasspathContainerPageExtension2 {
@@ -110,8 +108,12 @@ public abstract class CloudLibrariesPage extends WizardPage implements IClasspat
         return new IClasspathEntry[0];
       } else {
         Library masterLibrary = BuildPath.collectLibraryFiles(project, libraries, monitor.newChild(7));
-        IClasspathEntry[] added = BuildPath.listNativeLibrary(project, masterLibrary, monitor.newChild(3));
-        return added;
+        IClasspathEntry masterEntry = BuildPath.listNativeLibrary(project, masterLibrary, monitor.newChild(3));
+        if (masterEntry != null) {
+          return new IClasspathEntry[] {masterEntry};
+        } else {
+          return new IClasspathEntry[0];
+        }
       }
     } catch (CoreException ex) {
       return new IClasspathEntry[0];

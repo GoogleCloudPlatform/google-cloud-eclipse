@@ -61,17 +61,16 @@ public class BuildPathTest {
     List<Library> libraries = new ArrayList<>();
     libraries.add(library);
 
-    IClasspathEntry[] result = BuildPath.addNativeLibrary(project, libraries, monitor);
-    Assert.assertEquals(1, result.length);
+    BuildPath.addNativeLibrary(project, libraries, monitor);
     Assert.assertEquals(initialClasspathSize + 1, project.getRawClasspath().length);
   }
   
   @Test
   public void testListNativeLibrary() throws CoreException {
     Library library = new Library("libraryId");
-    IClasspathEntry[] result =
+    IClasspathEntry result =
         BuildPath.listNativeLibrary(project, library, new NullProgressMonitor());
-    Assert.assertEquals(1, result.length);
+    Assert.assertNotNull(result);
     Assert.assertEquals(initialClasspathSize, project.getRawClasspath().length);
   }
 
@@ -80,11 +79,10 @@ public class BuildPathTest {
     Library library = new Library("libraryId");
     List<Library> libraries = new ArrayList<>();
     libraries.add(library);
-    IClasspathEntry[] setup = BuildPath.addNativeLibrary(project, libraries, monitor);
-    Assert.assertEquals(1, setup.length);
+    BuildPath.addNativeLibrary(project, libraries, monitor);
+    Assert.assertEquals(initialClasspathSize + 1, project.getRawClasspath().length);
 
-    IClasspathEntry[] result = BuildPath.addNativeLibrary(project, libraries, monitor);
-    Assert.assertEquals(0, result.length);
+    BuildPath.addNativeLibrary(project, libraries, monitor);
     Assert.assertEquals(initialClasspathSize + 1, project.getRawClasspath().length);
   }
 
