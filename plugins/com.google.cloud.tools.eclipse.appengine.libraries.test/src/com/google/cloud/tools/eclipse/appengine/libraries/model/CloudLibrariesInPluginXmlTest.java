@@ -143,12 +143,21 @@ public class CloudLibrariesInPluginXmlTest {
         is(new URI("https://github.com/objectify/objectify/wiki")));
     assertTrue(objectifyLibrary.isExport());
 
-    assertThat(objectifyLibrary.getAllDependencies().size(), is(2));
-    LibraryFile objectifyLibraryFile = objectifyLibrary.getAllDependencies().get(0);
-    assertNull(objectifyLibraryFile.getSourceUri());
+    List<LibraryFile> allDependencies = objectifyLibrary.getAllDependencies();
+    assertTrue(allDependencies.size() > 2);
+    
+    LibraryFile objectifyLibraryFile = null;
+    LibraryFile guavaLibraryFile = null;
+    for (LibraryFile file : allDependencies) {
+      if (file.getMavenCoordinates().getArtifactId().equals("objectify")) {
+        objectifyLibraryFile = file;
+      } else if (file.getMavenCoordinates().getArtifactId().equals("guava")) {
+        guavaLibraryFile = file;
+      }
+    }
+    
     assertTrue("Objectify not exported", objectifyLibraryFile.isExport());
 
-    assertNotNull(objectifyLibraryFile.getMavenCoordinates());
     MavenCoordinates objectifyMavenCoordinates = objectifyLibraryFile.getMavenCoordinates();
     assertThat(objectifyMavenCoordinates.getRepository(), is("central"));
     assertThat(objectifyMavenCoordinates.getGroupId(), is("com.googlecode.objectify"));
@@ -161,14 +170,10 @@ public class CloudLibrariesInPluginXmlTest {
     assertTrue(objectifyLibraryFile.getFilters().isEmpty());
     assertThat(objectifyLibraryFile.getJavadocUri(),
         is(new URI("https://www.javadoc.io/doc/com.googlecode.objectify/objectify/5.1.21")));
-
-    LibraryFile guavaLibraryFile = objectifyLibrary.getAllDependencies().get(1);
-    assertThat(guavaLibraryFile.getJavadocUri(),
-        is(new URI("https://google.github.io/guava/releases/20.0/api/docs/")));
+    
     assertNull(guavaLibraryFile.getSourceUri());
     assertTrue("Guava not exported", guavaLibraryFile.isExport());
 
-    assertNotNull(guavaLibraryFile.getMavenCoordinates());
     MavenCoordinates guavaMavenCoordinates = guavaLibraryFile.getMavenCoordinates();
     assertThat(guavaMavenCoordinates.getRepository(), is("central"));
     assertThat(guavaMavenCoordinates.getGroupId(), is("com.google.guava"));
