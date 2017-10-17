@@ -137,8 +137,7 @@ public class ArtifactRetriever {
    * Returns the latest published release artifact version, or null if there is no such version.
    */
   public ArtifactVersion getLatestReleaseVersion(String groupId, String artifactId) {
-    VersionRange range = null;
-    return getLatestReleaseVersion(idToKey(groupId, artifactId), range);
+    return getLatestReleaseVersion(groupId, artifactId, null);
   }
 
   /**
@@ -147,16 +146,7 @@ public class ArtifactRetriever {
    */
   public ArtifactVersion getLatestReleaseVersion(
       String groupId, String artifactId, VersionRange range) {
-    return getLatestReleaseVersion(idToKey(groupId, artifactId), range);
-  }
-
-  /**
-   * Returns the latest release version of the specified artifact in the version range,
-   * or null if there is no such version.
-   *
-   * @param coordinates Maven coordinates in the form groupId:artifactId
-   */
-  private ArtifactVersion getLatestReleaseVersion(String coordinates, VersionRange range) {
+    String coordinates = idToKey(groupId, artifactId);
     try {
       NavigableSet<ArtifactVersion> versions = availableVersions.get(coordinates);
       for (ArtifactVersion version : versions.descendingSet()) {
