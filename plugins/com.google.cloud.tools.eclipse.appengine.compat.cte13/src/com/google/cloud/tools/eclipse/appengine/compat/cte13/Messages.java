@@ -20,10 +20,6 @@ import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-/**
- * @author bsd
- *
- */
 public class Messages {
   private static final String BUNDLE_NAME =
       "com.google.cloud.tools.eclipse.appengine.compat.cte13.messages"; //$NON-NLS-1$
