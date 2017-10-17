@@ -143,9 +143,6 @@ public class BuildPath {
         // if someone edited the serialized data behind Eclipse's back
         if (library != null && !dependentIds.contains(id)) { 
           dependentIds.add(library.getId());
-          // todo we're not distinguishing direct here;
-          // we should be setting all transitive and separately direct. 
-          //
           masterFiles.addAll(library.getAllDependencies());
           subMonitor.worked(1);
         }
