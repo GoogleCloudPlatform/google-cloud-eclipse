@@ -110,7 +110,8 @@ public class LibraryClasspathContainerResolverService
 
   @Override
   public IStatus resolveContainer(IJavaProject javaProject, IPath containerPath,
-                                  IProgressMonitor monitor) {
+      IProgressMonitor monitor) {
+    
     Preconditions.checkArgument(containerPath.segment(0).equals(Library.CONTAINER_PATH_PREFIX));
     
     SubMonitor subMonitor = SubMonitor.convert(monitor, 19);

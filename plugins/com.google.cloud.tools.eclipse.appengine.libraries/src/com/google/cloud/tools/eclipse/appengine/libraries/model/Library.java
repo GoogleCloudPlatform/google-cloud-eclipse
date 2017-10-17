@@ -174,7 +174,7 @@ public final class Library {
   /**
    * Direct dependencies only. Do not attempt to load dependencies from Maven Central.
    */
-  synchronized void setResolved() {
+  public synchronized void setResolved() {
     if (transitiveDependencies == null) {
       transitiveDependencies = directDependencies;
     }
@@ -194,7 +194,14 @@ public final class Library {
    * transitive dependency graph.
    */
   private synchronized List<LibraryFile> resolveDependencies() {
+    
+    if (transitiveDependencies != null) {
+      return transitiveDependencies; 
+    }
+    
     List<LibraryFile> transitiveDependencies = new ArrayList<>();
+    
+    // todo check resolved
     for (LibraryFile artifact : directDependencies) {
       artifact.updateVersion();
       MavenCoordinates coordinates = artifact.getMavenCoordinates();

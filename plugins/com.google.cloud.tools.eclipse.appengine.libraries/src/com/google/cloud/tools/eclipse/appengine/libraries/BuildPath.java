@@ -143,6 +143,9 @@ public class BuildPath {
         // if someone edited the serialized data behind Eclipse's back
         if (library != null && !dependentIds.contains(id)) { 
           dependentIds.add(library.getId());
+          // todo we're not distinguishing direct here;
+          // we should be setting all transitive and separately direct. 
+          //
           masterFiles.addAll(library.getAllDependencies());
           subMonitor.worked(1);
         }
@@ -158,7 +161,11 @@ public class BuildPath {
     
     List<LibraryFile> resolved = Library.resolveDuplicates(new ArrayList<LibraryFile>(masterFiles));
     subMonitor.worked(8);
+    
     masterLibrary.setLibraryFiles(resolved);
+    
+    masterLibrary.setResolved();
+    
     subMonitor.worked(1);
 
     return masterLibrary;
