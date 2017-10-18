@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <!-- Migration from Google Plugin for Eclipse (GPE) -->
+  <extension point="org.eclipse.ui.handlers">
+    <handler commandId="com.google.cloud.tools.eclipse.appengine.facets.convertToStandard"
+        class="com.google.cloud.tools.eclipse.appengine.compat.gpe.GpeConvertCommandHandler">
+      <enabledWhen>
+        <and>
+          <count value="1" />  <!-- enabled when exactly one project is selected -->
+          <iterate>
+            <adapt type="org.eclipse.core.resources.IProject">
+              <test property="org.eclipse.core.resources.projectNature"
+                 value="com.google.appengine.eclipse.core.gaeNature" />
+            </adapt>
+          </iterate>
+        </and>
+      </enabledWhen>
+       <activeWhen>
+          <iterate
+                ifEmpty="false">
+             <adapt
+                   type="org.eclipse.core.resources.IProject">
+                <test
+                      property="org.eclipse.core.resources.projectNature"
+                      value="com.google.appengine.eclipse.core.gaeNature">
+                </test>
+             </adapt>
+          </iterate>
+       </activeWhen>
+    </handler>
+  </extension>
+
+  <!-- Migration from older versions of Cloud Tools for Eclipse -->
+  <extension point="org.eclipse.ui.startup">
+    <startup class="com.google.cloud.tools.eclipse.appengine.compat.cte13.CloudToolsEclipseProjectNotifier"/>
+  </extension>
+  <extension point="org.eclipse.core.expressions.propertyTesters">
+    <propertyTester id="com.google.cloud.tools.eclipse.appengine.compat.requiresCteUpdate"
+        class="com.google.cloud.tools.eclipse.appengine.compat.cte13.RequiresUpdatePropertyTester"
+        namespace="com.google.cloud.tools.eclipse.appengine.compat.cte13"
+        properties="requiresUpdate"
+        type="org.eclipse.core.resources.IProject" />
+  </extension>
+  <extension point="org.eclipse.ui.commands">
+    <command id="com.google.cloud.tools.eclipse.appengine.compat.cte13.updateProject"
+        name="Update Project for Cloud Tools for Eclipse" />
+  </extension>
+  <extension point="org.eclipse.ui.handlers">
+    <handler commandId="com.google.cloud.tools.eclipse.appengine.compat.cte13.updateProject"
+        class="com.google.cloud.tools.eclipse.appengine.compat.cte13.UpdateCloudToolsEclipseProjectHandler">
+      <enabledWhen>
+        <and>
+          <count value="1" />  <!-- enabled when exactly one project is selected -->
+          <iterate>
+            <adapt type="org.eclipse.core.resources.IProject">
+              <test property="com.google.cloud.tools.eclipse.appengine.compat.cte13.requiresUpdate" />
+            </adapt>
+          </iterate>
+         </and>
+       </enabledWhen>
+     </handler>
+  </extension>
+  <extension point="org.eclipse.ui.menus">
+    <menuContribution allPopups="false"
+        locationURI="popup:org.eclipse.ui.projectConfigure?after=additions">
+      <command commandId="com.google.cloud.tools.eclipse.appengine.compat.cte13.updateProject"
+          style="push">
+        <visibleWhen checkEnabled="true"/>
+      </command>
+    </menuContribution>
+  </extension>
+</plugin>

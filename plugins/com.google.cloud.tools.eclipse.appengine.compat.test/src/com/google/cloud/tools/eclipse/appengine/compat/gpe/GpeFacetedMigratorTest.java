@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.compat;
+package com.google.cloud.tools.eclipse.appengine.compat.gpe;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.eclipse.appengine.compat.gpe.GpeMigrator;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.io.IOException;
 import java.util.List;

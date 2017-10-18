@@ -36,7 +36,6 @@
 
     <module>plugins/com.google.cloud.tools.eclipse.appengine.compat</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.compat.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.compat.cte13</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy.ui</module>
