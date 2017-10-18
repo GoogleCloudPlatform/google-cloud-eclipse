@@ -65,7 +65,6 @@ public class ImportNativeAppEngineStandardProjectTest extends BaseProjectTest {
 
     updateOldContainers();
 
-    ProjectUtils.waitForProjects(project);
     ProjectUtils.failIfBuildErrors("Imported App Engine standard Java 7 project has errors",
         project);
 
@@ -94,7 +93,6 @@ public class ImportNativeAppEngineStandardProjectTest extends BaseProjectTest {
 
     updateOldContainers();
 
-    ProjectUtils.waitForProjects(project);
     ProjectUtils.failIfBuildErrors("Imported App Engine standard Java 8 project has errors",
         project);
 
