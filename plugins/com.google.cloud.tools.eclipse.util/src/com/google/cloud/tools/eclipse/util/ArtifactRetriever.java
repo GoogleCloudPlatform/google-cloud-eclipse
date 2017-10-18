@@ -165,6 +165,24 @@ public class ArtifactRetriever {
     return null;
   }
 
+  /**
+   * Returns the most recent version of the artifact in the repo,
+   * possibly a beta, alpha, or pre-release version.
+   */
+  public ArtifactVersion getLatestVersion(String groupId, String artifactId) {
+    String coordinates = idToKey(groupId, artifactId);
+    try {
+      NavigableSet<ArtifactVersion> versions = availableVersions.get(coordinates);
+      return versions.descendingSet().first();
+    } catch (ExecutionException ex) {
+      logger.log(
+          Level.WARNING,
+          "Could not retrieve version for artifact " + coordinates,
+          ex.getCause());
+      return null;
+    }
+  }
+
   private static boolean isReleased(ArtifactVersion version) {
     String qualifier = version.getQualifier();
     if (version.getMajorVersion() <= 0) {
