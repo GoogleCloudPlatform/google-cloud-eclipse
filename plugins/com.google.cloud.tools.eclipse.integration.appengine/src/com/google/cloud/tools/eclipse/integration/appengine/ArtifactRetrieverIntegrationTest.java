@@ -62,6 +62,10 @@ public class ArtifactRetrieverIntegrationTest {
     ArtifactVersion version = ArtifactRetriever.DEFAULT.getLatestVersion(
         "com.google.cloud", "google-cloud-dns");
     Assert.assertNotNull(version);
+    
+    // version 0.26 or later
+    double x = Double.parseDouble(version.getMajorVersion() + "." + version.getMinorVersion());
+    Assert.assertTrue(x > 0.25);
   }
   
   @Test

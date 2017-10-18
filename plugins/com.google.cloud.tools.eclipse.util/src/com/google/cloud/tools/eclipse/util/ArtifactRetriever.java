@@ -173,7 +173,7 @@ public class ArtifactRetriever {
     String coordinates = idToKey(groupId, artifactId);
     try {
       NavigableSet<ArtifactVersion> versions = availableVersions.get(coordinates);
-      return versions.descendingSet().first();
+      return versions.last();
     } catch (ExecutionException ex) {
       logger.log(
           Level.WARNING,
