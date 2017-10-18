@@ -168,7 +168,7 @@ public class ArtifactRetriever {
 
   /**
    * Returns the most recent version of the artifact in the repo,
-   * possibly a beta, alpha, or pre-release version.
+   * possibly a beta, alpha, or pre-release but not a snapshot version.
    */
   public ArtifactVersion getLatestVersion(String groupId, String artifactId) {
     String coordinates = idToKey(groupId, artifactId);
