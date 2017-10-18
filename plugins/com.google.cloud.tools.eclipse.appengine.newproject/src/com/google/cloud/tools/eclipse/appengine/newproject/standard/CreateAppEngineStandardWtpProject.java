@@ -26,7 +26,6 @@ import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpPro
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
-import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -41,8 +40,6 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
  * Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.
  */
 public class CreateAppEngineStandardWtpProject extends CreateAppEngineWtpProject {
-  private static final Logger logger =
-      Logger.getLogger(CreateAppEngineStandardWtpProject.class.getName());
 
   private static final List<MavenCoordinates> PROJECT_DEPENDENCIES;
 

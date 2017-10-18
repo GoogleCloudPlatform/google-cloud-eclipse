@@ -32,6 +32,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -44,6 +45,7 @@ import org.xml.sax.SAXException;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
+import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Preconditions;
 
@@ -106,6 +108,13 @@ class Pom {
           dependency.appendChild(artifactIdElement);
 
           String version = coordinates.getVersion();
+          ArtifactVersion latestVersion =
+              ArtifactRetriever.DEFAULT.getLatestArtifactVersion(groupId, artifactId);
+          if (latestVersion != null) {
+            version = latestVersion.toString(); 
+          }
+          
+          // todo latest version may not be needed anymore.
           if (!MavenCoordinates.LATEST_VERSION.equals(version)) {
             Element versionElement = document.createElement("version");
             versionElement.setTextContent(version);

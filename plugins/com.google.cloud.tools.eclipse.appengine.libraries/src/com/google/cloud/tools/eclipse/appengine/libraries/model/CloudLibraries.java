@@ -16,6 +16,9 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -23,21 +26,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonString;
-
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.RegistryFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
-
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 
 public class CloudLibraries {
 
@@ -56,6 +53,9 @@ public class CloudLibraries {
   public static final String CLIENT_APIS_GROUP = "clientapis"; //$NON-NLS-1$
 
   private static final Logger logger = Logger.getLogger(CloudLibraries.class.getName());
+
+  // Note: LibraryFile versions of Libraries in the map can be updated dynamically, e.g., to latest
+  // available release versions.
   private static final ImmutableMap<String, Library> libraries = loadLibraryDefinitions();
 
   /**

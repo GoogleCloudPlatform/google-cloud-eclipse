@@ -34,8 +34,8 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.server.core.IRuntime;
 
 /**
- * Supply Java servlet container classes, specifically servlet-api.jar and jsp-api.jar,
- * to non-Maven projects.
+ * Supply Java servlet container classes, specifically servlet-api.jar, jsp-api.jar, and
+ * appengine-api-1.0-sdk.jar to non-Maven projects.
  * <p>
  * The jars are resolved using {@link ILibraryRepositoryService}.
  */
