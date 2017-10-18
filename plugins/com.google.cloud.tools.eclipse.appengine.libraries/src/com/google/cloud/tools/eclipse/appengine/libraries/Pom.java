@@ -109,7 +109,7 @@ class Pom {
 
           String version = coordinates.getVersion();
           ArtifactVersion latestVersion =
-              ArtifactRetriever.DEFAULT.getLatestArtifactVersion(groupId, artifactId);
+              ArtifactRetriever.DEFAULT.getLatestReleaseVersion(groupId, artifactId);
           if (latestVersion != null) {
             version = latestVersion.toString(); 
           }
