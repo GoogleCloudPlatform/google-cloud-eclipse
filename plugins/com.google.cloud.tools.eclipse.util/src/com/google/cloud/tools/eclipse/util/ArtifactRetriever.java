@@ -62,6 +62,7 @@ public class ArtifactRetriever {
 
   private final String repositoryUrl;
 
+  // see https://maven.apache.org/ref/3.5.0/maven-repository-metadata/repository-metadata.html
   @VisibleForTesting
   URL getMetadataUrl(String groupId, String artifactId) {
     String groupPath = groupId.replace('.', '/');
