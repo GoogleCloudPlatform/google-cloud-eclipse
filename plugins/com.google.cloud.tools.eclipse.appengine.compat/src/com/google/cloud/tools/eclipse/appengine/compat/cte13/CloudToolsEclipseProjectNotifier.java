@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.compat.cte13;
 
+import com.google.cloud.tools.eclipse.appengine.compat.Messages;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Ordering;

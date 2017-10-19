@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.compat.cte13;
+package com.google.cloud.tools.eclipse.appengine.compat;
 
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
