@@ -50,7 +50,7 @@ public class CloudToolsEclipseProjectUpdater {
    */
   public static boolean hasOldContainers(IProject project) {
     try {
-      if (!project.hasNature(JavaCore.NATURE_ID)) {
+      if (!project.exists() || !project.hasNature(JavaCore.NATURE_ID)) {
         return false;
       }
       IJavaProject javaProject = JavaCore.create(project);
