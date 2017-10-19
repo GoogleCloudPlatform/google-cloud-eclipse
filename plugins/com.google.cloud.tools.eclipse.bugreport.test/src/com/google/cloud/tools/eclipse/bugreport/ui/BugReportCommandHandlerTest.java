@@ -16,7 +16,10 @@
 
 package com.google.cloud.tools.eclipse.bugreport.ui;
 
+import static org.hamcrest.CoreMatchers.anyOf;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.appengine.cloudsdk.serialization.CloudSdkVersion;
@@ -42,6 +45,7 @@ public class BugReportCommandHandlerTest {
         + "%28please\\+ensure\\+you\\+are\\+running\\+the\\+latest\\+version\\+of\\+CT4E\\+with\\+_Help\\+%3E\\+Check\\+for\\+Updates_%29%0A"
         + "-\\+Cloud\\+Tools\\+for\\+Eclipse\\+version%3A\\+(?<toolVersion>.*)%0A"
         + "-\\+Google\\+Cloud\\+SDK\\+version%3A\\+(?<gcloudVersion>.*)%0A"
+        + "-\\+Eclipse\\+version%3A\\+(?<eclipseVersion>.*)%0A"
         + "-\\+OS%3A\\+(?<os>.*)%0A"
         + "-\\+Java\\+version%3A\\+(?<javaVersion>.*)%0A%0A"
         + "\\*\\*What\\+did\\+you\\+do%3F\\*\\*%0A%0A" 
@@ -53,12 +57,14 @@ public class BugReportCommandHandlerTest {
     assertTrue(matcher.matches());
     String toolVersion = matcher.group("toolVersion");
     String gcloudVersion = matcher.group("gcloudVersion");
+    String eclipseVersion = matcher.group("eclipseVersion");
     String os = matcher.group("os");
     String javaVersion = matcher.group("javaVersion");
 
     assertTrue(Pattern.compile("^\\d+\\.\\d+\\.\\d+").matcher(toolVersion).find());
-    assertTrue(javaVersion.startsWith("1.7.") || javaVersion.startsWith("1.8."));
-    assertTrue(os.startsWith("Linux") || os.startsWith("Mac") || os.startsWith("Windows"));
+    assertThat(javaVersion, anyOf(startsWith("1.7."), startsWith("1.8.")));
+    assertThat(os, anyOf(startsWith("Linux"), startsWith("Mac"), startsWith("Windows")));
+    assertTrue(Pattern.compile("^\\d+\\.\\d+").matcher(eclipseVersion).find());
     new CloudSdkVersion(gcloudVersion); // throws IllegalArgumentException if invalid
   }
 }
