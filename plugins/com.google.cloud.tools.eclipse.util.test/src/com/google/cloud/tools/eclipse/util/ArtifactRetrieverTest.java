@@ -29,7 +29,7 @@ public class ArtifactRetrieverTest {
   public void testGetInstance() throws URISyntaxException {
     ArtifactRetriever retriever1 = ArtifactRetriever.getInstance("http://www.example.com/");
     Assert.assertNotNull(retriever1);
-    ArtifactRetriever retriever2 = ArtifactRetriever.getInstance("http://www.example.com/");
+    ArtifactRetriever retriever2 = ArtifactRetriever.getInstance("http://www.example.com");
     Assert.assertSame(retriever1, retriever2);
   }
 

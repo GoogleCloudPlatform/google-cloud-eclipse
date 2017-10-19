@@ -126,10 +126,6 @@ public class ArtifactRetriever {
    *     "https://repo1.maven.org/maven2/"
    */
   private ArtifactRetriever(String repositoryUrl) {
-    if (!repositoryUrl.endsWith("/")) {
-      repositoryUrl = repositoryUrl + "/";
-    }
-
     this.repositoryUrl = repositoryUrl;
   }
 
@@ -212,6 +208,11 @@ public class ArtifactRetriever {
     Preconditions.checkNotNull(url);
     // check for URL syntax
     new URI(url);
+
+    if (!url.endsWith("/")) {
+      url = url + "/";
+    }
+    
     return retrievers.getUnchecked(url);
   }
 }
