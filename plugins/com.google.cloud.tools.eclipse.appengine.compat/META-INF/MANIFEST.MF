@@ -8,6 +8,7 @@ Bundle-Vendor: Google Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Import-Package: com.google.cloud.tools.eclipse.appengine.facets,
+ com.google.cloud.tools.eclipse.appengine.facets.convert,
  com.google.cloud.tools.eclipse.appengine.libraries,
  com.google.cloud.tools.eclipse.appengine.libraries.model,
  com.google.cloud.tools.eclipse.sdk.ui.preferences,
