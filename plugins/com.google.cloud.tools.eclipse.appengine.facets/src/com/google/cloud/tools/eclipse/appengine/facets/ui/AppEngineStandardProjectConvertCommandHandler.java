@@ -28,7 +28,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.eclipse.ui.statushandlers.StatusManager;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
@@ -60,8 +59,7 @@ public class AppEngineStandardProjectConvertCommandHandler extends AbstractHandl
       job.setUser(true);
       job.schedule();
     } catch (CoreException ex) {
-      StatusManager.getManager()
-          .handle(StatusUtil.error(this, "Failed to convert to a faceted project", ex));
+      StatusUtil.setErrorStatus(this, "Failed to convert to a faceted project", ex);
     }
     return null; // Must return null per method Javadoc.
   }
