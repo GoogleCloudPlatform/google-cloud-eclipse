@@ -16,11 +16,18 @@
 
 package com.google.cloud.tools.eclipse.test.util;
 
+import static org.junit.Assert.assertTrue;
+
 import com.google.common.collect.Sets;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Locale;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.RegistryFactory;
@@ -156,4 +163,32 @@ public abstract class BasePluginXmlTest {
     }
   }
 
+  @Test
+  public final void testPropertiesDefinedInManifestMf() throws IOException {
+    boolean localizedMessageExists = false;
+    boolean bundleLocalizationDefined = false;
+
+    Attributes attributes = getManifestAttributes();
+    for (Entry<?, ?> entry : attributes.entrySet()) {
+      String key = entry.getKey().toString();
+      String value = entry.getValue().toString();
+      assertPropertyDefined(value);
+
+      localizedMessageExists |= value.startsWith("%");
+      bundleLocalizationDefined |= "bundle-localization".equals(key.toLowerCase(Locale.US));
+    }
+
+    if (localizedMessageExists) {
+      assertTrue(bundleLocalizationDefined);
+    }
+  }
+
+  private Attributes getManifestAttributes() throws IOException {
+    String bundlePath = EclipseProperties.getHostBundlePath();
+    String manifestLocation = bundlePath + "/META-INF/MANIFEST.MF";
+
+    try (InputStream in = Files.newInputStream(Paths.get(manifestLocation))) {
+      return new Manifest(in).getMainAttributes();
+    }
+  }
 }
