@@ -28,6 +28,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.program.Program;
+import org.osgi.framework.Bundle;
 
 public class BugReportCommandHandler extends AbstractHandler {
 
@@ -80,6 +81,11 @@ public class BugReportCommandHandler extends AbstractHandler {
   }
 
   private static String getEclipseVersion() {
-    return Platform.getBundle("org.eclipse.platform").getVersion().toString();
+    Bundle bundle = Platform.getBundle("org.eclipse.platform");
+    if (bundle != null) {
+      return bundle.getVersion().toString();
+    } else {
+      return "_(failed to get bundle \"org.eclipse.platform\")_";
+    }
   }
 }
