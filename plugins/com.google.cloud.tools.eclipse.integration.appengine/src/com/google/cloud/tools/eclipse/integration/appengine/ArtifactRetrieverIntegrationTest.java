@@ -64,8 +64,7 @@ public class ArtifactRetrieverIntegrationTest {
     Assert.assertNotNull(version);
     
     // version 0.26 or later
-    double x = Double.parseDouble(version.getMajorVersion() + "." + version.getMinorVersion());
-    Assert.assertTrue(x > 0.25);
+    Assert.assertTrue(version.getMajorVersion() > 0 || version.getMinorVersion() > 25);
   }
   
   @Test
