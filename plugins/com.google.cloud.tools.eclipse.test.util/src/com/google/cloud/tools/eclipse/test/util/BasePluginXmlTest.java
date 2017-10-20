@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.test.util;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import com.google.common.collect.Sets;
 import java.io.IOException;
@@ -166,7 +166,7 @@ public abstract class BasePluginXmlTest {
   @Test
   public final void testPropertiesDefinedInManifestMf() throws IOException {
     boolean localizedMessageExists = false;
-    boolean bundleLocalizationDefined = false;
+    String bundleLocalization = null;
 
     Attributes attributes = getManifestAttributes();
     for (Entry<?, ?> entry : attributes.entrySet()) {
@@ -174,12 +174,16 @@ public abstract class BasePluginXmlTest {
       String value = entry.getValue().toString();
       assertPropertyDefined(value);
 
-      localizedMessageExists |= value.startsWith("%");
-      bundleLocalizationDefined |= "bundle-localization".equals(key.toLowerCase(Locale.US));
+      if (value.startsWith("%")) {
+        localizedMessageExists = true;
+      }
+      if ("bundle-localization".equals(key.toLowerCase(Locale.US))) {
+        bundleLocalization = value;
+      }
     }
 
     if (localizedMessageExists) {
-      assertTrue(bundleLocalizationDefined);
+      assertEquals("plugin", bundleLocalization);
     }
   }
 
