@@ -17,16 +17,15 @@
 package com.google.cloud.tools.eclipse.dataflow.ui.wizard;
 
 import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowProjectCreator;
-import com.google.cloud.tools.eclipse.dataflow.ui.page.NewDataflowProjectWizardLandingPage;
 import com.google.cloud.tools.eclipse.dataflow.ui.DataflowUiPlugin;
+import com.google.cloud.tools.eclipse.dataflow.ui.Messages;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.NewDataflowProjectWizardDefaultRunOptionsPage;
-
+import com.google.cloud.tools.eclipse.dataflow.ui.page.NewDataflowProjectWizardLandingPage;
+import java.lang.reflect.InvocationTargetException;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
-
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * A Wizard to create a new Google Cloud Dataflow Project.
@@ -39,19 +38,25 @@ public class NewDataflowProjectWizard extends Wizard implements INewWizard {
 
   @Override
   public boolean performFinish() {
+    creator.setDefaultAccountEmail(defaultRunOptionsPage.getAccountEmail());
+    creator.setDefaultProject(defaultRunOptionsPage.getProjectId());
+    creator.setDefaultStagingLocation(defaultRunOptionsPage.getStagingLocation());
+
     if (!creator.isValid()) {
       String message =
-          "Tried to finish the New Dataflow Project Wizard "
-              + "when the project creator is not valid. Reasons: " + creator.validate();
+          "Tried to finish the New Dataflow Project Wizard " //$NON-NLS-1$
+              + "when the project creator is not valid. Reasons: " //$NON-NLS-1$ 
+              + creator.validate();
       IllegalStateException ex = new IllegalStateException(message);
       DataflowUiPlugin.logError(ex, message);
       throw ex;
     }
     try {
       getContainer().run(true, true, creator);
-    } catch (InvocationTargetException | InterruptedException e) {
+    } catch (InvocationTargetException | InterruptedException ex) {
       // TODO: handle
-      DataflowUiPlugin.logError(e, "Error encountered when trying to create project");
+      DataflowUiPlugin.logError(ex, 
+          "Error encountered when trying to create project"); //$NON-NLS-1$
       return false;
     }
     return true;
@@ -62,14 +67,14 @@ public class NewDataflowProjectWizard extends Wizard implements INewWizard {
     landingPage = new NewDataflowProjectWizardLandingPage(creator);
     addPage(landingPage);
 
-    defaultRunOptionsPage = new NewDataflowProjectWizardDefaultRunOptionsPage(creator);
+    defaultRunOptionsPage = new NewDataflowProjectWizardDefaultRunOptionsPage();
     addPage(defaultRunOptionsPage);
   }
 
   @Override
   public void init(IWorkbench workbench, IStructuredSelection selection) {
-    setHelpAvailable(false);
-    setWindowTitle("New Cloud Dataflow Project");
+    setHelpAvailable(true);
+    setWindowTitle(Messages.getString("new.cloud.dataflow.project")); //$NON-NLS-1$
     setNeedsProgressMonitor(true);
   }
 }

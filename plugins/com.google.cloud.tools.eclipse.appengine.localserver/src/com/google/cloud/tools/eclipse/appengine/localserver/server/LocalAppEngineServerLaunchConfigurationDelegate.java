@@ -25,6 +25,7 @@ import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.appengine.localserver.PreferencesInitializer;
 import com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsole;
+import com.google.cloud.tools.eclipse.appengine.localserver.ui.StaleResourcesStatusHandler;
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
@@ -37,10 +38,10 @@ import com.google.common.net.InetAddresses;
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.file.Paths;
-import java.text.MessageFormat;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -50,6 +51,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.resources.IMarkerDelta;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -57,6 +59,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.variables.IStringVariableManager;
+import org.eclipse.core.variables.VariablesPlugin;
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
@@ -65,12 +71,17 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.ILaunchesListener2;
+import org.eclipse.debug.core.IStatusHandler;
 import org.eclipse.debug.core.model.DebugElement;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IMemoryBlock;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IThread;
+import org.eclipse.debug.internal.ui.DebugUIPlugin;
+import org.eclipse.debug.internal.ui.preferences.IDebugPreferenceConstants;
+import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.debug.ui.console.ConsoleColorProvider;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
@@ -79,17 +90,24 @@ import org.eclipse.jdt.launching.IVMConnector;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.SocketUtil;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.ui.console.ConsolePlugin;
+import org.eclipse.ui.console.IConsole;
+import org.eclipse.ui.console.IConsoleManager;
+import org.eclipse.ui.console.IOConsole;
+import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerListener;
+import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.ServerEvent;
 import org.eclipse.wst.server.core.ServerUtil;
 
 public class LocalAppEngineServerLaunchConfigurationDelegate
     extends AbstractJavaLaunchConfigurationDelegate {
 
-  private static final boolean DEV_APPSERVER2 = false;
-  
+  static final boolean DEV_APPSERVER2 = false;
+
   private static final Logger logger =
       Logger.getLogger(LocalAppEngineServerLaunchConfigurationDelegate.class.getName());
 
@@ -122,16 +140,75 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   @Override
   public ILaunch getLaunch(ILaunchConfiguration configuration, String mode) throws CoreException {
     IServer server = ServerUtil.getServer(configuration);
-    DefaultRunConfiguration runConfig = generateServerRunConfiguration(configuration, server);
+    DefaultRunConfiguration runConfig = generateServerRunConfiguration(configuration, server, mode);
     ILaunch[] launches = getLaunchManager().getLaunches();
-    checkConflictingLaunches(configuration.getType(), runConfig, launches);
+    checkConflictingLaunches(configuration.getType(), mode, runConfig, launches);
     return super.getLaunch(configuration, mode);
   }
 
+  @Override
+  public boolean finalLaunchCheck(ILaunchConfiguration configuration, String mode,
+      IProgressMonitor monitor) throws CoreException {
+    SubMonitor progress = SubMonitor.convert(monitor, 40);
+    if (!super.finalLaunchCheck(configuration, mode, progress.newChild(20))) {
+      return false;
+    }
+
+    // If we're auto-publishing before launch, check if there may be stale
+    // resources not yet published. See
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1832
+    if (ServerCore.isAutoPublishing() && ResourcesPlugin.getWorkspace().isAutoBuilding()) {
+      // Must wait for any current autobuild to complete so resource changes are triggered
+      // and WTP will kick off ResourceChangeJobs. Note that there may be builds
+      // pending that are unrelated to our resource changes, so simply checking
+      // <code>JobManager.find(FAMILY_AUTO_BUILD).length > 0</code> produces too many
+      // false positives.
+      try {
+        Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, progress.newChild(20));
+      } catch (InterruptedException ex) {
+        /* ignore */
+      }
+      IServer server = ServerUtil.getServer(configuration);
+      if (server.shouldPublish() || hasPendingChangesToPublish()) {
+        IStatusHandler prompter = DebugPlugin.getDefault().getStatusHandler(promptStatus);
+        if (prompter != null) {
+          Object continueLaunch = prompter
+              .handleStatus(StaleResourcesStatusHandler.CONTINUE_LAUNCH_REQUEST, configuration);
+          if (!(Boolean) continueLaunch) {
+            // cancel the launch so Server.StartJob won't raise an error dialog, since the
+            // server won't have been started
+            monitor.setCanceled(true);
+            return false;
+          }
+          return true;
+        }
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Check if there are pending changes to be published: this is a nasty condition that can occur if
+   * the user saves changes as part of launching the server.
+   */
+  private boolean hasPendingChangesToPublish() {
+    Job[] serverJobs = Job.getJobManager().find(ServerUtil.SERVER_JOB_FAMILY);
+    Job currentJob = Job.getJobManager().currentJob();
+    for (Job job : serverJobs) {
+      // Launching from Server#start() means this will be running within a
+      // Server.StartJob. All other jobs should be ResourceChangeJob or
+      // PublishJob, both of which indicate unpublished changes.
+      if (job != currentJob) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   @VisibleForTesting
-  void checkConflictingLaunches(ILaunchConfigurationType launchConfigType,
+  void checkConflictingLaunches(ILaunchConfigurationType launchConfigType, String mode,
       DefaultRunConfiguration runConfig, ILaunch[] launches) throws CoreException {
-    
+
     for (ILaunch launch : launches) {
       if (launch.isTerminated()
           || launch.getLaunchConfiguration() == null
@@ -140,10 +217,10 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       }
       IServer otherServer = ServerUtil.getServer(launch.getLaunchConfiguration());
       DefaultRunConfiguration otherRunConfig =
-          generateServerRunConfiguration(launch.getLaunchConfiguration(), otherServer);
+          generateServerRunConfiguration(launch.getLaunchConfiguration(), otherServer, mode);
       IStatus conflicts = checkConflicts(runConfig, otherRunConfig,
           new MultiStatus(Activator.PLUGIN_ID, 0,
-              MessageFormat.format("Conflicts with running server \"{0}\"", otherServer.getName()),
+              Messages.getString("conflicts.with.running.server", otherServer.getName()), //$NON-NLS-1$
               null));
       if (!conflicts.isOK()) {
         throw new CoreException(StatusUtil.filter(conflicts));
@@ -158,7 +235,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
    */
   @VisibleForTesting
   DefaultRunConfiguration generateServerRunConfiguration(ILaunchConfiguration configuration,
-      IServer server) throws CoreException {
+      IServer server, String mode) throws CoreException {
 
     DefaultRunConfiguration devServerRunConfiguration = new DefaultRunConfiguration();
     // Iterate through our different configurable parameters
@@ -168,26 +245,29 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     if (server.getHost() != null) {
       devServerRunConfiguration.setHost(server.getHost());
     }
-    
+
     int serverPort = getPortAttribute(LocalAppEngineServerBehaviour.SERVER_PORT_ATTRIBUTE_NAME,
         LocalAppEngineServerBehaviour.DEFAULT_SERVER_PORT, configuration, server);
     if (serverPort >= 0) {
       devServerRunConfiguration.setPort(serverPort);
     }
 
-    if (DEV_APPSERVER2) {
-      // default to 1 instance to simplify debugging
-      devServerRunConfiguration.setMaxModuleInstances(1);
 
-      // don't restart server when on-disk changes detected
-      devServerRunConfiguration.setAutomaticRestart(false);
-      
+    // only restart server on on-disk changes detected when in RUN mode
+    devServerRunConfiguration.setAutomaticRestart(ILaunchManager.RUN_MODE.equals(mode));
+
+    if (DEV_APPSERVER2) {
+      if (ILaunchManager.DEBUG_MODE.equals(mode)) {
+        // default to 1 instance to simplify debugging
+        devServerRunConfiguration.setMaxModuleInstances(1);
+      }
+
       String adminHost = getAttribute(LocalAppEngineServerBehaviour.ADMIN_HOST_ATTRIBUTE_NAME,
           LocalAppEngineServerBehaviour.DEFAULT_ADMIN_HOST, configuration, server);
       if (!Strings.isNullOrEmpty(adminHost)) {
         devServerRunConfiguration.setAdminHost(adminHost);
       }
-  
+
       int adminPort = getPortAttribute(LocalAppEngineServerBehaviour.ADMIN_PORT_ATTRIBUTE_NAME,
           -1, configuration, server);
       if (adminPort >= 0) {
@@ -199,8 +279,8 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
         InetAddress addr = resolveAddress(devServerRunConfiguration.getAdminHost());
         if (org.eclipse.wst.server.core.util.SocketUtil.isPortInUse(addr,
             devServerRunConfiguration.getAdminPort())) {
-          logger.log(Level.INFO, "default admin port " + devServerRunConfiguration.getAdminPort()
-              + " in use. Picking an unused port.");
+          logger.log(Level.INFO, "default admin port " + devServerRunConfiguration.getAdminPort() //$NON-NLS-1$
+              + " in use. Picking an unused port."); //$NON-NLS-1$
           devServerRunConfiguration.setAdminPort(0);
         }
       }
@@ -213,6 +293,32 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     if (!vmArguments.isEmpty()) {
       devServerRunConfiguration.setJvmFlags(vmArguments);
     }
+    // programArguments is exactly as supplied by the user in the dialog box
+    String programArgumentString = getProgramArguments(configuration);
+    List<String> programArguments =
+        Arrays.asList(DebugPlugin.parseArguments(programArgumentString));
+    if (!programArguments.isEmpty()) {
+      devServerRunConfiguration.setAdditionalArguments(programArguments);
+    }
+
+    boolean environmentAppend =
+        configuration.getAttribute(ILaunchManager.ATTR_APPEND_ENVIRONMENT_VARIABLES, true);
+    if (!environmentAppend) {
+      // not externalized as this may change due to
+      // https://github.com/GoogleCloudPlatform/appengine-plugins-core/issues/446
+      throw new CoreException(
+          StatusUtil.error(this, "'Environment > Replace environment' not yet supported")); //$NON-NLS-1$
+    }
+    // Could use getEnvironment(), but it does `append` processing and joins as key-value pairs
+    Map<String, String> environment = configuration.getAttribute(
+        ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, Collections.<String, String>emptyMap());
+    Map<String, String> expanded = new HashMap<>();
+    IStringVariableManager variableEngine = VariablesPlugin.getDefault().getStringVariableManager();
+    for (Map.Entry<String, String> entry : environment.entrySet()) {
+      // expand any variable references
+      expanded.put(entry.getKey(), variableEngine.performStringSubstitution(entry.getValue()));
+    }
+    devServerRunConfiguration.setEnvironment(expanded);
 
     return devServerRunConfiguration;
   }
@@ -224,13 +330,13 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       ILaunchConfiguration configuration, IServer server) {
     try {
       if (configuration.hasAttribute(attributeName)) {
-        String result = configuration.getAttribute(attributeName, "");
+        String result = configuration.getAttribute(attributeName, ""); //$NON-NLS-1$
         if (result != null) {
           return result;
         }
       }
     } catch (CoreException ex) {
-      logger.log(Level.WARNING, "Unable to retrieve " + attributeName, ex);
+      logger.log(Level.WARNING, "Unable to retrieve " + attributeName, ex); //$NON-NLS-1$
     }
     return server.getAttribute(attributeName, defaultValue);
   }
@@ -250,7 +356,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
         InetAddress[] addresses = InetAddress.getAllByName(ipOrHost);
         return addresses[0];
       } catch (UnknownHostException ex) {
-        logger.info("Unable to resolve '" + ipOrHost + "' to an address");
+        logger.info("Unable to resolve '" + ipOrHost + "' to an address"); //$NON-NLS-1$ //$NON-NLS-2$
       }
     }
     return null;
@@ -270,7 +376,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     try {
       port = configuration.getAttribute(attributeName, -1);
     } catch (CoreException ex) {
-      logger.log(Level.WARNING, "Unable to retrieve " + attributeName, ex);
+      logger.log(Level.WARNING, "Unable to retrieve " + attributeName, ex); //$NON-NLS-1$
     }
     if (port < 0) {
       port = server.getAttribute(attributeName, defaultPort);
@@ -289,14 +395,13 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     if (equalPorts(ours.getPort(), theirs.getPort(),
         LocalAppEngineServerBehaviour.DEFAULT_SERVER_PORT)) {
       status.add(StatusUtil.error(clazz,
-          MessageFormat.format("server port: {0,number,#}",
+          Messages.getString("server.port", //$NON-NLS-1$
               ifNull(ours.getPort(), LocalAppEngineServerBehaviour.DEFAULT_SERVER_PORT))));
     }
     if (equalPorts(ours.getApiPort(), theirs.getApiPort(), 0)) {
       // ours.getAdminPort() will never be null with a 0 default
       Preconditions.checkNotNull(ours.getApiPort());
-      status.add(StatusUtil.error(clazz,
-          MessageFormat.format("API port: {0,number,#}", ours.getAdminPort())));
+      status.add(StatusUtil.error(clazz, Messages.getString("api.port", ours.getAdminPort()))); //$NON-NLS-1$
     }
 
     return status;
@@ -327,11 +432,11 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
     IServer server = ServerUtil.getServer(configuration);
     if (server == null) {
-      String message = "There is no App Engine development server available";
+      String message = Messages.getString("devappserver.not.available"); //$NON-NLS-1$
       Status status = new Status(IStatus.ERROR, Activator.PLUGIN_ID, message);
       throw new CoreException(status);
     } else if (server.getServerState() != IServer.STATE_STOPPED) {
-      String message = "Server is already in operation";
+      String message = Messages.getString("server.already.in.operation"); //$NON-NLS-1$
       Status status = new Status(IStatus.ERROR, Activator.PLUGIN_ID, message);
       throw new CoreException(status);
     }
@@ -342,7 +447,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
     LocalAppEngineServerBehaviour serverBehaviour = (LocalAppEngineServerBehaviour) server
         .loadAdapter(LocalAppEngineServerBehaviour.class, null);
-   
+
     setDefaultSourceLocator(launch, configuration);
 
     List<File> runnables = new ArrayList<>();
@@ -351,36 +456,45 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       runnables.add(deployPath.toFile());
     }
 
-    LocalAppEngineConsole console =
-        MessageConsoleUtilities.findOrCreateConsole(configuration.getName(),
-            new LocalAppEngineConsole.Factory(serverBehaviour));
+    // configure the console for output
+    IPreferenceStore store = DebugUIPlugin.getDefault().getPreferenceStore();
+    ConsoleColorProvider colorProvider = new ConsoleColorProvider();
+    LocalAppEngineConsole console = MessageConsoleUtilities.findOrCreateConsole(
+        configuration.getName(), new LocalAppEngineConsole.Factory(serverBehaviour));
     console.clearConsole();
     console.activate();
+    MessageConsoleStream outputStream = console.newMessageStream();
+    outputStream.setColor(colorProvider.getColor(IDebugUIConstants.ID_STANDARD_OUTPUT_STREAM));
+    outputStream
+        .setActivateOnWrite(store.getBoolean(IDebugPreferenceConstants.CONSOLE_OPEN_ON_OUT));
+    MessageConsoleStream errorStream = console.newMessageStream();
+    errorStream.setColor(colorProvider.getColor(IDebugUIConstants.ID_STANDARD_ERROR_STREAM));
+    errorStream.setActivateOnWrite(store.getBoolean(IDebugPreferenceConstants.CONSOLE_OPEN_ON_ERR));
 
     // A launch must have at least one debug target or process, or it becomes a zombie
-    CloudSdkDebugTarget target = new CloudSdkDebugTarget(launch, serverBehaviour);
+    CloudSdkDebugTarget target = new CloudSdkDebugTarget(launch, serverBehaviour, console);
     launch.addDebugTarget(target);
     target.engage();
 
     // todo: programArguments is currently ignored
     if (!Strings.isNullOrEmpty(getProgramArguments(configuration))) {
-      logger.warning("App Engine Local Server currently ignores program arguments");
+      logger.warning("App Engine Local Server currently ignores program arguments"); //$NON-NLS-1$
     }
     try {
       DefaultRunConfiguration devServerRunConfiguration =
-          generateServerRunConfiguration(configuration, server);
+          generateServerRunConfiguration(configuration, server, mode);
       devServerRunConfiguration.setServices(runnables);
       if (ILaunchManager.DEBUG_MODE.equals(mode)) {
         int debugPort = getDebugPort();
         setupDebugTarget(devServerRunConfiguration, launch, debugPort, monitor);
       }
-      
+
       IJavaProject javaProject = JavaCore.create(modules[0].getProject());
       IVMInstall vmInstall = JavaRuntime.getVMInstall(javaProject);
-      
-      String javaHome = vmInstall.getInstallLocation().getAbsolutePath();
-      serverBehaviour.startDevServer(devServerRunConfiguration, Paths.get(javaHome),
-          console.newMessageStream());
+
+      Path javaHome = vmInstall.getInstallLocation().toPath();
+      serverBehaviour.startDevServer(mode, devServerRunConfiguration, javaHome,
+          outputStream, errorStream);
     } catch (CoreException ex) {
       launch.terminate();
       throw ex;
@@ -503,9 +617,10 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
    * </ul>
    */
   private class CloudSdkDebugTarget extends DebugElement implements IDebugTarget {
-    private ILaunch launch;
-    private LocalAppEngineServerBehaviour serverBehaviour;
-    private IServer server;
+    private final ILaunch launch;
+    private final LocalAppEngineServerBehaviour serverBehaviour;
+    private final IServer server;
+    private final IOConsole console;
 
     // Fire a {@link DebugEvent#TERMINATED} event when the server is stopped
     private IServerListener serverEventsListener = new IServerListener() {
@@ -519,7 +634,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
             return;
 
           case IServer.STATE_STOPPED:
-            disengage();
+            server.removeServerListener(serverEventsListener);
             fireTerminateEvent();
             try {
               logger.fine("Server stopped; terminating launch"); //$NON-NLS-1$
@@ -541,7 +656,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       public void launchesTerminated(ILaunch[] launches) {
         for (ILaunch terminated : launches) {
           if (terminated == launch) {
-            disengage();
             if (server.getServerState() == IServer.STATE_STARTED) {
               logger.fine("Launch terminated; stopping server"); //$NON-NLS-1$
               server.stop(false);
@@ -558,26 +672,36 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       public void launchesChanged(ILaunch[] launches) {}
 
       @Override
-      public void launchesRemoved(ILaunch[] launches) {}
+      public void launchesRemoved(ILaunch[] launches) {
+        for (ILaunch removed : launches) {
+          if (removed == launch) {
+            getLaunchManager().removeLaunchListener(launchesListener);
+            removeConsole();
+          }
+        }
+      }
     };
 
-    CloudSdkDebugTarget(ILaunch launch, LocalAppEngineServerBehaviour serverBehaviour) {
+    private CloudSdkDebugTarget(ILaunch launch, LocalAppEngineServerBehaviour serverBehaviour,
+        IOConsole console) {
       super(null);
       this.launch = launch;
       this.serverBehaviour = serverBehaviour;
-      this.server = serverBehaviour.getServer();
+      server = serverBehaviour.getServer();
+      this.console = console;
+    }
+
+    private void removeConsole() {
+      ConsolePlugin plugin = ConsolePlugin.getDefault();
+      IConsoleManager manager = plugin.getConsoleManager();
+      manager.removeConsoles(new IConsole[] {console});
+      console.destroy();
     }
 
     /** Add required listeners */
     private void engage() {
       getLaunchManager().addLaunchListener(launchesListener);
       server.addServerListener(serverEventsListener);
-    }
-
-    /** Remove any installed listeners */
-    private void disengage() {
-      getLaunchManager().removeLaunchListener(launchesListener);
-      server.removeServerListener(serverEventsListener);
     }
 
     @Override
@@ -592,7 +716,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
      */
     @Override
     public String getModelIdentifier() {
-      return "com.google.cloud.tools.eclipse.appengine.localserver.cloudSdkDebugTarget";
+      return "com.google.cloud.tools.eclipse.appengine.localserver.cloudSdkDebugTarget"; //$NON-NLS-1$
     }
 
     @Override

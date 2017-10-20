@@ -20,7 +20,6 @@ import com.google.cloud.tools.appengine.cloudsdk.AppEngineJavaComponentsNotInsta
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
-import com.google.cloud.tools.eclipse.appengine.newproject.flex.AppEngineFlexWizardPage;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineJavaComponentMissingPage;
 import com.google.cloud.tools.eclipse.appengine.ui.CloudSdkMissingPage;
 import com.google.cloud.tools.eclipse.appengine.ui.CloudSdkOutOfDatePage;
@@ -41,7 +40,7 @@ import org.eclipse.ui.ide.undo.WorkspaceUndoUtil;
 
 public abstract class AppEngineProjectWizard extends Wizard implements INewWizard {
 
-  private AppEngineWizardPage page = null;
+  protected AppEngineWizardPage page = null;
   protected final AppEngineProjectConfig config = new AppEngineProjectConfig();
   private IWorkbench workbench;
 
@@ -59,6 +58,9 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
   @Override
   public void addPages() {
     try {
+      // Clear interrupted state
+      // (https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2064)
+      Thread.interrupted();
       CloudSdk sdk = new CloudSdk.Builder().build();
       sdk.validateCloudSdk();
       sdk.validateAppEngineJavaComponents();
@@ -83,24 +85,7 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
       return false;
     }
 
-    config.setServiceName(page.getServiceName());
-    config.setPackageName(page.getPackageName());
-    config.setProject(page.getProjectHandle());
-    if (!page.useDefaults()) {
-      config.setEclipseProjectLocationUri(page.getLocationURI());
-    }
-
-    config.setAppEngineLibraries(page.getSelectedLibraries());
-
-    // TODO: we won't need this "instanceof" check once we implement a unified wizard:
-    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1326
-    if (page instanceof AppEngineFlexWizardPage) {
-      AppEngineFlexWizardPage flexPage = (AppEngineFlexWizardPage) page;
-      if (flexPage.asMavenProject()) {
-        config.setUseMaven(flexPage.getMavenGroupId(), flexPage.getMavenArtifactId(),
-            flexPage.getMavenVersion());
-      }
-    }
+    retrieveConfigurationValues();
 
     // todo set up
     IAdaptable uiInfoAdapter = WorkspaceUndoUtil.getUIInfoAdapter(getShell());
@@ -122,6 +107,22 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
       String message = Messages.getString("project.creation.failed"); //$NON-NLS-1$
       StatusUtil.setErrorStatus(this, message, ex.getCause());
       return false;
+    }
+  }
+
+  protected void retrieveConfigurationValues() {
+    config.setServiceName(page.getServiceName());
+    config.setPackageName(page.getPackageName());
+    config.setRuntimeId(page.getRuntimeId());
+    config.setProject(page.getProjectHandle());
+    if (!page.useDefaults()) {
+      config.setEclipseProjectLocationUri(page.getLocationURI());
+    }
+
+    config.setAppEngineLibraries(page.getSelectedLibraries());
+
+    if (page.asMavenProject()) {
+      config.setUseMaven(page.getMavenGroupId(), page.getMavenArtifactId(), page.getMavenVersion());
     }
   }
 

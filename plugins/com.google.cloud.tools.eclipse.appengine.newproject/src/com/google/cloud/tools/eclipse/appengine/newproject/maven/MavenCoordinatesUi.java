@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
+import com.google.cloud.tools.eclipse.util.MavenCoordinatesValidator;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -47,21 +48,15 @@ public class MavenCoordinatesUi {
   private Label artifactIdLabel;
   private Label versionLabel;
 
-  /**
-   * @param dynamicEnabling if {@code true}, creates a master check box that enables or disables
-   *     the Maven coordinate area; otherwise, always enables the area
-   */
-  public MavenCoordinatesUi(Composite container, boolean dynamicEnabling) {
-    if (dynamicEnabling) {
-      asMavenProjectButton = new Button(container, SWT.CHECK);
-      asMavenProjectButton.setText(Messages.getString("CREATE_AS_MAVEN_PROJECT")); //$NON-NLS-1$
-      asMavenProjectButton.addSelectionListener(new SelectionAdapter() {
-        @Override
-        public void widgetSelected(SelectionEvent event) {
-          updateEnablement();
-        }
-      });
-    }
+  public MavenCoordinatesUi(Composite container) {
+    asMavenProjectButton = new Button(container, SWT.CHECK);
+    asMavenProjectButton.setText(Messages.getString("CREATE_AS_MAVEN_PROJECT")); //$NON-NLS-1$
+    asMavenProjectButton.addSelectionListener(new SelectionAdapter() {
+      @Override
+      public void widgetSelected(SelectionEvent event) {
+        updateEnablement();
+      }
+    });
 
     coordinatesGroup = new Group(container, SWT.NONE);
     coordinatesGroup.setText(Messages.getString("MAVEN_PROJECT_COORDINATES")); //$NON-NLS-1$
@@ -81,15 +76,13 @@ public class MavenCoordinatesUi {
     versionField = new Text(coordinatesGroup, SWT.BORDER);
     versionField.setText(DEFAULT_VERSION);
 
-    if (dynamicEnabling) {
-      updateEnablement();
-    }
+    updateEnablement();
 
     GridLayoutFactory.swtDefaults().numColumns(2).generateLayout(coordinatesGroup);
   }
 
   public boolean uiEnabled() {
-    return asMavenProjectButton == null || asMavenProjectButton.getSelection();
+    return asMavenProjectButton.getSelection();
   }
 
   public String getGroupId() {

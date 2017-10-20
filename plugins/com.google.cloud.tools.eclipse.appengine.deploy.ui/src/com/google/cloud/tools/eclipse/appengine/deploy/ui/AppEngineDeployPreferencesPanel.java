@@ -38,6 +38,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
+import com.google.common.net.UrlEscapers;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -47,6 +48,7 @@ import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.ObservablesManager;
 import org.eclipse.core.databinding.UpdateValueStrategy;
+import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.databinding.beans.PojoProperties;
 import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.value.ComputedValue;
@@ -66,6 +68,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
@@ -88,8 +92,12 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
 
   private static final String APPENGINE_VERSIONS_URL =
       "https://console.cloud.google.com/appengine/versions";
-  private static final String CREATE_GCP_PROJECT_WITH_GAE_URL =
-      "https://console.cloud.google.com/projectselector/appengine/create?lang=java";
+  private static final String APP_ENGINE_APPLICATION_CREATE_PATH =
+      "/projectselector/appengine/create?lang=java";
+  @VisibleForTesting
+  static final String CREATE_GCP_PROJECT_URL =
+      "https://console.cloud.google.com/projectcreate?previousPage="
+          + UrlEscapers.urlFormParameterEscaper().escape(APP_ENGINE_APPLICATION_CREATE_PATH);
 
   private static final Logger logger = Logger.getLogger(
       AppEngineDeployPreferencesPanel.class.getName());
@@ -111,12 +119,12 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
   private final Image refreshIcon = SharedImages.REFRESH_IMAGE_DESCRIPTOR.createImage(getDisplay());
 
   protected final IProject project;
-  protected final DeployPreferences model;
+  private final DeployPreferences model;
   private final ObservablesManager observables = new ObservablesManager();
-  protected final DataBindingContext bindingContext = new DataBindingContext();
+  private final DataBindingContext bindingContext = new DataBindingContext();
 
   private final Runnable layoutChangedHandler;
-  protected final boolean requireValues;
+  private final boolean requireValues;
 
   private final ProjectRepository projectRepository;
   private final FormToolkit formToolkit;
@@ -216,14 +224,42 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
         gcpProjectToProjectId, projectIdToGcpProject);
   }
 
-  private void setupTextFieldDataBinding(Control control, String modelPropertyName,
-      IValidator setAfterGetValidator) {
-    ISWTObservableValue controlValue = WidgetProperties.text(SWT.Modify).observe(control);
+  /**
+   * Binds a {@link Text} field with a property of the {@link DeployPreferences deploy
+   * preferences model} given to the panel. This method honors the panel's validation mode (set
+   * through the {@code requireValues} parameter when this panel was instantiated) such that {@code
+   * validator} is ignored if {@code requireValues} is {@code false}.
+   *
+   * @see #AppEngineDeployPreferencesPanel
+   */
+  protected void setupPossiblyUnvalidatedTextFieldDataBinding(Text text, String modelPropertyName,
+      ValidationStatusProvider validator) {
+    ISWTObservableValue textValue = WidgetProperties.text(SWT.Modify).observe(text);
     IObservableValue modelValue = PojoProperties.value(modelPropertyName).observe(model);
 
-    bindingContext.bindValue(controlValue, modelValue,
-        new UpdateValueStrategy().setAfterGetValidator(setAfterGetValidator),
-        new UpdateValueStrategy().setAfterGetValidator(setAfterGetValidator));
+    bindingContext.bindValue(textValue, modelValue);
+    if (requireValues) {
+      bindingContext.addValidationStatusProvider(validator);
+    }
+  }
+
+  /**
+   * Binds a {@link Text} field with a property of the {@link DeployPreferences deploy
+   * preferences model} given to the panel.
+   *
+   * Unlike {@link #setupFileFieldDataBinding}, {@code setAfterGetValidator} is always enforced
+   * regardless of the panel's validation mode.
+   *
+   * @see #setupTextFieldDataBinding
+   */
+  private void setupTextFieldDataBinding(Text text, String modelPropertyName,
+      IValidator afterGetValidator) {
+    ISWTObservableValue textValue = WidgetProperties.text(SWT.Modify).observe(text);
+    IObservableValue modelValue = PojoProperties.value(modelPropertyName).observe(model);
+
+    bindingContext.bindValue(textValue, modelValue,
+        new UpdateValueStrategy().setAfterGetValidator(afterGetValidator),
+        new UpdateValueStrategy().setAfterGetValidator(afterGetValidator));
   }
 
   /**
@@ -231,7 +267,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
    *   <li> Binds {@code master} to the property with the name {@code masterModelPropertyName}
    *       in the {@link #model}.
    *   <li> Binds {@code dependent} to the property with the name {@code dependantModelPropertyName}
-   *       in the {#link model}.
+   *       in the {@link #model}.
    *   <li> Binds {@code master} and {@code dependent} in a way that {@code dependent} is disabled
    *       and unchecked when {@code master} is unchecked. When {@code master} is checked back,
    *       {@code dependent} restores its previous check state.
@@ -333,7 +369,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     Composite linkComposite = new Composite(this, SWT.NONE);
     Link createNewProject = new Link(linkComposite, SWT.WRAP);
     createNewProject.setText(Messages.getString("projectselector.createproject",
-                                                CREATE_GCP_PROJECT_WITH_GAE_URL));
+                                                CREATE_GCP_PROJECT_URL));
     createNewProject.setToolTipText(Messages.getString("projectselector.createproject.tooltip"));
     FontUtil.convertFontToItalic(createNewProject);
     createNewProject.addSelectionListener(
@@ -353,6 +389,13 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     Composite projectSelectorComposite = new Composite(this, SWT.NONE);
     GridLayoutFactory.fillDefaults().numColumns(2).spacing(0, 0).applyTo(projectSelectorComposite);
     GridDataFactory.fillDefaults().grab(true, false).applyTo(projectSelectorComposite);
+
+    final Text filterField = new Text(projectSelectorComposite,
+        SWT.BORDER | SWT.SEARCH | SWT.ICON_SEARCH | SWT.ICON_CANCEL);
+    filterField.setMessage(Messages.getString("projectselector.filter"));
+    GridDataFactory.fillDefaults().applyTo(filterField);
+
+    new Label(projectSelectorComposite, SWT.NONE); // spacer
 
     projectSelector = new ProjectSelector(projectSelectorComposite);
     GridDataFactory.fillDefaults().grab(true, false).hint(SWT.DEFAULT, 200)
@@ -375,6 +418,12 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
         new ProjectSelectorSelectionChangedListener(accountSelector,
                                                     projectRepository,
                                                     projectSelector));
+    filterField.addModifyListener(new ModifyListener() {
+      @Override
+      public void modifyText(ModifyEvent event) {
+        projectSelector.setFilter(filterField.getText());
+      }
+    });
   }
 
   private void createProjectVersionSection() {

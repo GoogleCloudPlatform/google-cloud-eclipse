@@ -23,24 +23,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.xml.XMLConstants;
-import javax.xml.transform.Source;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.validation.AbstractValidator;
 import org.eclipse.wst.validation.ValidationEvent;
@@ -52,12 +44,10 @@ import org.xml.sax.SAXException;
 /**
  * Contains the logic for build validation and marker creation.
  */
-public class XmlValidator
-    extends AbstractValidator implements IExecutableExtension {
+public class XmlValidator extends AbstractValidator implements IExecutableExtension {
 
   private static final Logger logger = Logger.getLogger(XmlValidator.class.getName());
-  private static final SchemaFactory FACTORY =
-      SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+
   private XmlValidationHelper helper;
 
   /**
@@ -70,7 +60,6 @@ public class XmlValidator
     try (InputStream in = file.getContents()) {
         byte[] bytes = ByteStreams.toByteArray(in);
         validate(file, bytes);
-        xsdValidation(event.getResource());
     } catch (IOException | CoreException ex) {
       logger.log(Level.SEVERE, ex.getMessage());
     }
@@ -95,26 +84,7 @@ public class XmlValidator
         }
       }
     } catch (SAXException ex) {
-      // Do nothing, handled in XmlValidator#xsdValidation
-    }
-  }
-
-  void xsdValidation(IResource resource) {
-    String xsd = helper.getXsd();
-    if (xsd != null) {
-      URL xsdPath = AppEngineWebXmlValidator.class.getResource(xsd);
-      try (InputStream stream = xsdPath.openStream()) {
-        Source source = new StreamSource(stream);
-        Schema schema = FACTORY.newSchema(source);
-        Validator validator = schema.newValidator();
-        validator.setErrorHandler(new SaxErrorHandler(resource));
-        IPath path = resource.getLocation();
-        validator.validate(new StreamSource(path.toFile()));
-      } catch (IOException ex) {
-        logger.log(Level.SEVERE, ex.getMessage());
-      } catch (SAXException ex) {
-        // Do nothing, handled by {@link SaxErrorHandler}
-      }
+      // Do nothing; Eclipse notifies users of general SAX errors.
     }
   }
 

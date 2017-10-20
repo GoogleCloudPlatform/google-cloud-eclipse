@@ -14,21 +14,56 @@
    </extension>
 
    <extension
-         point="org.eclipse.wst.common.project.facet.core.groups">
-      <members
-            group="com.google.cloud.tools.eclipse.appengine.facets.standard.constraints.servlet">
-         <include
-               facet="jst.web"
-               versions="[2.5-3.1]">
-         </include>
-      </members>
-      <members
-            group="com.google.cloud.tools.eclipse.appengine.facets.standard.constraints.jre">
-         <include
-               facet="java"
-               versions="1.8">
-         </include>
-      </members>
+         point="org.eclipse.wst.common.project.facet.core.facets">
+    <project-facet-version facet="com.google.cloud.tools.eclipse.appengine.facets.standard" version="JRE8">
+       <constraint>
+          <and>
+             <requires
+                   facet="java"
+                   version="1.8">
+             </requires>
+             <requires
+                   facet="jst.web"
+                   version="[2.5-3.1]">
+             </requires>
+          </and>
+        </constraint>
+    </project-facet-version>
+   </extension>
+
+   <extension
+        point="org.eclipse.wst.common.project.facet.core.presets">
+     <static-preset
+           id="com.google.cloud.tools.eclipse.appengine.standard.jre8.preset">
+        <label>%appengine.standard.jre8.preset</label>
+        <facet
+              id="com.google.cloud.tools.eclipse.appengine.facets.standard"
+              version="JRE8">
+        </facet>
+        <facet
+              id="java"
+              version="1.8">
+        </facet>
+        <facet
+              id="jst.web"
+              version="3.1">
+        </facet>
+     </static-preset>
+   </extension>
+   
+   <!-- allow downgrading from 3.1 to 2.5 for App Engine apps -->
+   <extension
+         point="org.eclipse.wst.common.project.facet.core.facets">
+    <action
+          facet="jst.web"
+          id="aes8.to.aes7"
+          type="version-change"
+          version="[2.5-3.1]">
+       <delegate
+             class="org.eclipse.jst.j2ee.project.facet.J2EEFacetVersionChangeDelegate">
+       </delegate>
+       <property name="from.versions" value="3.0,3.1"/>
+    </action>
    </extension>
 
    <extension
@@ -55,8 +90,7 @@
           name="Servlet API 3.1"
           group="servlet"
           siteUri="http://www.oracle.com/technetwork/java/javaee/servlet/index.html"
-          export="false"
-          recommendation="required">
+          export="false">
     
       <libraryFile>
         <mavenCoordinates
@@ -70,32 +104,25 @@
           group="servlet"
           name="Java Server Pages API 2.3"
           siteUri="http://www.oracle.com/technetwork/java/javaee/jsp/index.html"
-          export="false"
-          recommendation="optional" >
+          export="false">
       <libraryFile>
         <mavenCoordinates
               groupId="javax.servlet.jsp"
               artifactId="javax.servlet.jsp-api"
               version="2.3.0" />
       </libraryFile>
-      <libraryFile>
-        <mavenCoordinates
-              groupId="javax.servlet"
-              artifactId="jstl"
-              version="1.2" />
-      </libraryFile>
     </library>
   </extension>
   <extension
         point="org.eclipse.wst.common.project.facet.core.listeners">
      <listener
-           class="com.google.cloud.tools.eclipse.appengine.standard.java8.FacetChangeListener"
+           class="com.google.cloud.tools.eclipse.appengine.standard.java8.AppEngineStandardFacetChangeListener"
            eventTypes="AVAILABLE_FACETS_CHANGED,POST_INSTALL,POST_VERSION_CHANGE,POST_UNINSTALL">
      </listener>
   </extension>
   <extension
         id="appengineWeb"
-        name="App Engine Standard Java 8"
+        name="%appengine.standard.builder.name"
         point="org.eclipse.core.resources.builders">
      <builder
            callOnEmptyDelta="false">
@@ -103,5 +130,23 @@
               class="com.google.cloud.tools.eclipse.appengine.standard.java8.AppEngineWebBuilder">
         </run>
      </builder>
+  </extension>
+  <extension
+        point="org.eclipse.wst.common.project.facet.core.detectors">
+     <detector
+           class="com.google.cloud.tools.eclipse.appengine.standard.java8.AppEngineStandardJre8ProjectFacetDetector">
+     </detector>
+  </extension>
+  <extension
+        point="org.eclipse.m2e.core.lifecycleMappingMetadataSource">
+  </extension>
+  <extension
+        point="org.eclipse.m2e.core.projectConfigurators">
+     <configurator
+           class="com.google.cloud.tools.eclipse.appengine.standard.java8.m2e.AppEngineStandardProjectDetector"
+           id="com.google.cloud.tools.eclipse.appengine.standard.m2e.configurator"
+           name="%appengine.standard.configurator.name"
+           runsAfter="org.eclipse.m2e.jdt.javaConfigurator,org.maven.ide.eclipse.configuration.wtp.configurator">
+     </configurator>
   </extension>
 </plugin>

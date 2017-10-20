@@ -16,21 +16,22 @@
 
 package com.google.cloud.tools.eclipse.dataflow.core.project;
 
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.googleapis.json.GoogleJsonError;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.Bucket;
 import com.google.api.services.storage.model.Buckets;
-import com.google.cloud.tools.eclipse.dataflow.core.util.CouldNotCreateCredentialsException;
-import com.google.cloud.tools.eclipse.dataflow.core.util.Transport;
-import com.google.common.annotations.VisibleForTesting;
+import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
-
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubMonitor;
-
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 /**
  * A client that interacts directly with Google Cloud Storage to provide Dataflow-plugin specific
@@ -41,25 +42,26 @@ public class GcsDataflowProjectClient {
 
   private final Storage gcsClient;
 
-  public static GcsDataflowProjectClient createWithDefaultClient()
-      throws CouldNotCreateCredentialsException {
-    return new GcsDataflowProjectClient(Transport.newStorageClient().build());
+  public static GcsDataflowProjectClient create(
+      IGoogleApiFactory apiFactory, Credential credential) {
+    return new GcsDataflowProjectClient(apiFactory.newStorageApi(credential));
   }
 
-  @VisibleForTesting
-  GcsDataflowProjectClient(Storage gcsClient) {
+  private GcsDataflowProjectClient(Storage gcsClient) {
     this.gcsClient = gcsClient;
   }
 
   /**
    * Gets a collection of potential Staging Locations.
    */
-  public SortedSet<String> getPotentialStagingLocations(String projectName) throws IOException {
+  public SortedSet<String> getPotentialStagingLocations(String projectId) throws IOException {
     SortedSet<String> result = new TreeSet<>();
-    Buckets buckets = gcsClient.buckets().list(projectName).execute();
+    Buckets buckets = gcsClient.buckets().list(projectId).execute();
     List<Bucket> bucketList = buckets.getItems();
-    for (Bucket bucket : bucketList) {
-      result.add(GCS_PREFIX + bucket.getName());
+    if (bucketList != null) {
+      for (Bucket bucket : bucketList) {
+        result.add(GCS_PREFIX + bucket.getName());
+      }
     }
     return result;
   }
@@ -69,7 +71,7 @@ public class GcsDataflowProjectClient {
    * exist. This may be a long-running blocking operation.
    */
   public StagingLocationVerificationResult createStagingLocation(
-      String projectName, String stagingLocation, IProgressMonitor progressMonitor) {
+      String projectId, String stagingLocation, IProgressMonitor progressMonitor) {
     SubMonitor monitor = SubMonitor.convert(progressMonitor, 2);
     String bucketName = toGcsBucketName(stagingLocation);
     if (locationIsAccessible(stagingLocation)) { // bucket already exists
@@ -77,41 +79,49 @@ public class GcsDataflowProjectClient {
           String.format("Bucket %s exists", bucketName), true);
     }
     monitor.worked(1);
-    
+
     // else create the bucket
     try {
       Bucket newBucket = new Bucket();
       newBucket.setName(bucketName);
-      gcsClient.buckets().insert(projectName, newBucket).execute();
+      gcsClient.buckets().insert(projectId, newBucket).execute();
+      return new StagingLocationVerificationResult(
+          String.format("Bucket %s created", bucketName), true);
+    } catch (GoogleJsonResponseException ex) {
+      GoogleJsonError error = ex.getDetails();
+      return new StagingLocationVerificationResult(error.getMessage(), false);
     } catch (IOException e) {
       return new StagingLocationVerificationResult(e.getMessage(), false);
     } finally {
-      monitor.worked(1);
       monitor.done();
     }
-    return new StagingLocationVerificationResult(
-        String.format("Bucket %s created", bucketName), true);
   }
 
-  private static String toGcsBucketName(String stagingLocation) {
-    String gcsLocation;
-    if (stagingLocation.startsWith(GCS_PREFIX)) {
-      gcsLocation = stagingLocation.substring(GCS_PREFIX.length());
+  /**
+   * Extracts a bucket name from a given GCS URL. For example, {@code "/bucket/object"} returns
+   * {@code "bucket"}. The method assumes that the input is a valid GCS URL. (It just returns
+   * the first segment split by {@code '/'}, ignoring leading {@code '/'}s and empty segments.)
+   *
+   * @param gcsUrl GCS URL, which may or may not start with case-insensitive {@link #GCS_PREFIX}
+   * @return bucket name, which can be an empty string
+   */
+  public static String toGcsBucketName(String gcsUrl) {
+    String noPrefixUrl;
+    if (gcsUrl.toLowerCase(Locale.US).startsWith(GCS_PREFIX)) {
+      noPrefixUrl = gcsUrl.substring(GCS_PREFIX.length());
     } else {
-      gcsLocation = stagingLocation;
+      noPrefixUrl = gcsUrl;
     }
-    String bucketName;
-    if (gcsLocation.indexOf('/') < 0) {
-      bucketName = gcsLocation;
-    } else {
-      bucketName = gcsLocation.substring(0, gcsLocation.indexOf('/'));
-    }
-    return bucketName;
+
+    List<String> splitted = Splitter.on('/').omitEmptyStrings().splitToList(noPrefixUrl);
+    return splitted.isEmpty() ? "" : splitted.get(0);
   }
 
   public static String toGcsLocationUri(String location) {
-    if (Strings.isNullOrEmpty(location) || location.startsWith(GCS_PREFIX)) {
+    if (Strings.isNullOrEmpty(location)) {
       return location;
+    } else if (location.toLowerCase(Locale.US).startsWith(GCS_PREFIX)) {
+      return GCS_PREFIX + location.substring(GCS_PREFIX.length());
     }
     return GCS_PREFIX + location;
   }
@@ -145,7 +155,7 @@ public class GcsDataflowProjectClient {
     /**
      * Gets the message associated with this attempt to create a staging location.
      */
-    String getMessage() {
+    public String getMessage() {
       return message;
     }
 

@@ -16,9 +16,11 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
-import java.io.ByteArrayInputStream;
+import com.google.cloud.tools.eclipse.util.Xslt;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,13 +37,11 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.ResourceUtil;
 
-import com.google.cloud.tools.eclipse.util.Xslt;
-
 /**
- * Applies Xslt quick fix.
+ * Applies XSLT quick fix.
  */
 public class XsltQuickFix implements IMarkerResolution {
-  
+
   private static final Logger logger = Logger.getLogger(XsltQuickFix.class.getName());
   private String xsltPath;
   private String message;
@@ -50,12 +50,12 @@ public class XsltQuickFix implements IMarkerResolution {
     this.xsltPath = xsltPath;
     this.message = message;
   }
-  
+
   @Override
   public String getLabel() {
     return message;
   }
-  
+
   /**
    * Attempts to edit the {@link IDocument} in the open editor. If the editor is not open,
    * reads the file from memory and transforms in place.
@@ -68,11 +68,13 @@ public class XsltQuickFix implements IMarkerResolution {
       URL xslPath = ApplicationQuickFix.class.getResource(xsltPath);
       if (document != null) {
         String currentContents = document.get();
-        String encoding = file.getCharset();
-        InputStream documentStream = new ByteArrayInputStream(currentContents.getBytes(encoding));
-        InputStream transformed = Xslt.applyXslt(documentStream, xslPath.openStream());
-        String newDoc = ValidationUtils.convertStreamToString(transformed, encoding);
-        document.set(newDoc);
+        try (Reader documentReader = new StringReader(currentContents);
+            InputStream stylesheet = xslPath.openStream();
+            InputStream transformed = Xslt.applyXslt(documentReader, stylesheet)) {
+          String encoding = file.getCharset();
+          String newDoc = ValidationUtils.convertStreamToString(transformed, encoding);
+          document.set(newDoc);
+        }
       } else {
         Xslt.transformInPlace(file, xslPath);
       }
@@ -80,7 +82,7 @@ public class XsltQuickFix implements IMarkerResolution {
       logger.log(Level.SEVERE, ex.getMessage());
     }
   }
-  
+
   /**
    * Returns {@link IDocument} in the open editor, or null if the editor
    * is not open.
@@ -101,5 +103,5 @@ public class XsltQuickFix implements IMarkerResolution {
       return null;
     }
   }
-  
+
 }

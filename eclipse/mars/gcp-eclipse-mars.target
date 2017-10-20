@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde?>
 <!-- generated with https://github.com/mbarbero/fr.obeo.releng.targetplatform -->
-<target name="GCP for Eclipse Mars" sequenceNumber="1496847119">
+<target name="GCP for Eclipse Mars" sequenceNumber="1500606966">
   <locations>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
       <unit id="org.eclipse.license.feature.group" version="1.0.1.v20140414-1359"/>
@@ -25,11 +25,6 @@
       <repository location="http://download.eclipse.org/releases/mars/"/>
     </location>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
-      <unit id="org.eclipse.epp.logging.aeri.feature.feature.group" version="2.0.4.v20170307-1435"/>
-      <unit id="org.eclipse.epp.logging.aeri.feature.source.feature.group" version="2.0.4.v20170307-1435"/>
-      <repository location="http://download.eclipse.org/technology/epp/logging/stable/"/>
-    </location>
-    <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
       <unit id="org.eclipse.jst.web_sdk.feature.feature.group" version="3.7.1.v201512021921"/>
       <unit id="org.eclipse.jst.server_sdk.feature.feature.group" version="3.4.200.v201512031711"/>
       <unit id="org.eclipse.jst.common.fproj.enablement.jdt.sdk.feature.group" version="3.6.3.v201501141810"/>
@@ -40,7 +35,9 @@
       <repository location="http://download.eclipse.org/webtools/repository/mars/"/>
     </location>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
-      <unit id="org.hamcrest" version="1.1.0.v20090501071000"/>
+      <unit id="org.hamcrest.core" version="1.3.0.v201303031735"/>
+      <unit id="org.hamcrest.integration" version="1.3.0.v201305210900"/>
+      <unit id="org.hamcrest.library" version="1.3.0.v201505072020"/>
       <unit id="ch.qos.logback.slf4j" version="1.0.7.v201505121915"/>
       <unit id="org.slf4j.log4j" version="1.7.2.v20130115-1340"/>
       <repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20160221192158/repository/"/>

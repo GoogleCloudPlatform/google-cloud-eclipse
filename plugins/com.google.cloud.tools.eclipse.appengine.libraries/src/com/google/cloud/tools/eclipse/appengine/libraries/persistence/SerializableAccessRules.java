@@ -23,17 +23,17 @@ import org.eclipse.jdt.core.JavaCore;
 /**
  * Represents a {@link IAccessRule} in such a way that it can be easily transformed into JSON.
  */
-public class SerializableAccessRules {
+class SerializableAccessRules {
 
   private final AccessRuleKind ruleKind;
   private final String pattern;
 
-  public SerializableAccessRules(IAccessRule rule) {
+  SerializableAccessRules(IAccessRule rule) {
     ruleKind = AccessRuleKind.forInt(rule.getKind());
     pattern = rule.getPattern().toString();
   }
 
-  public IAccessRule toAccessRule() {
+  IAccessRule toAccessRule() {
     return JavaCore.newAccessRule(new Path(pattern), ruleKind.kind);
   }
 
@@ -48,7 +48,7 @@ public class SerializableAccessRules {
       this.kind = kind;
     }
 
-    public static AccessRuleKind forInt(int kind) {
+    static AccessRuleKind forInt(int kind) {
       switch (kind) {
         case IAccessRule.K_ACCESSIBLE:
           return ACCESSIBLE;

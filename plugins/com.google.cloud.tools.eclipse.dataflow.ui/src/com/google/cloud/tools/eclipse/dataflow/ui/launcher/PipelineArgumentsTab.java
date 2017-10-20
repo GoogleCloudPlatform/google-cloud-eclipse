@@ -30,15 +30,20 @@ import com.google.cloud.tools.eclipse.dataflow.core.preferences.ProjectOrWorkspa
 import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowDependencyManager;
 import com.google.cloud.tools.eclipse.dataflow.core.project.MajorVersion;
 import com.google.cloud.tools.eclipse.dataflow.ui.DataflowUiPlugin;
+import com.google.cloud.tools.eclipse.dataflow.ui.Messages;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.MessageTarget;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.component.LabeledTextMapComponent;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.component.TextAndButtonComponent;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.component.TextAndButtonSelectionListener;
-import com.google.cloud.tools.eclipse.dataflow.ui.util.DisplayExecutor;
+import com.google.cloud.tools.eclipse.ui.util.DisplayExecutor;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.SettableFuture;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -50,15 +55,14 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -79,11 +83,11 @@ import org.eclipse.ui.forms.events.IExpansionListener;
  * A tab specifying arguments required to run a Dataflow Pipeline.
  */
 public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
-  private static final Joiner MISSING_GROUP_MEMBER_JOINER = Joiner.on(", ");
+  private static final Joiner MISSING_GROUP_MEMBER_JOINER = Joiner.on(", "); //$NON-NLS-1$
 
-  private static final String ARGUMENTS_SEPARATOR = "=";
+  private static final String ARGUMENTS_SEPARATOR = "="; //$NON-NLS-1$
 
-  private Executor executor;
+  private Executor displayExecutor;
 
   private ScrolledComposite composite;
   private Composite internalComposite;
@@ -98,8 +102,9 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
   private PipelineLaunchConfiguration launchConfiguration;
 
-  private final DataflowDependencyManager dependencyManager;
-  private final PipelineOptionsHierarchyFactory pipelineOptionsHierarchyFactory;
+  private final DataflowDependencyManager dependencyManager = DataflowDependencyManager.create();
+  private final PipelineOptionsHierarchyFactory pipelineOptionsHierarchyFactory =
+      new ClasspathPipelineOptionsHierarchyFactory();
 
   /*
    * TODO: By default, this may include all PipelineOptions types, including custom user types that
@@ -109,29 +114,22 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
    */
   private PipelineOptionsHierarchy hierarchy;
 
-  private IWorkspaceRoot workspaceRoot;
+  private final IWorkspaceRoot workspaceRoot;
 
   public PipelineArgumentsTab() {
-    this(
-        DataflowDependencyManager.create(),
-        new ClasspathPipelineOptionsHierarchyFactory(),
-        ResourcesPlugin.getWorkspace().getRoot());
+    this(ResourcesPlugin.getWorkspace().getRoot());
   }
 
-  private PipelineArgumentsTab(
-      DataflowDependencyManager dependencyManager,
-      PipelineOptionsHierarchyFactory retrieverFactory,
-      IWorkspaceRoot workspaceRoot) {
-    this.dependencyManager = dependencyManager;
-    this.pipelineOptionsHierarchyFactory = retrieverFactory;
+  @VisibleForTesting
+  PipelineArgumentsTab(IWorkspaceRoot workspaceRoot) {
     this.workspaceRoot = workspaceRoot;
-    hierarchy = retrieverFactory.global(new NullProgressMonitor());
+    hierarchy = pipelineOptionsHierarchyFactory.global(new NullProgressMonitor());
   }
 
   @Override
   public void createControl(Composite parent) {
     launchConfiguration = PipelineLaunchConfiguration.createDefault();
-    executor = DisplayExecutor.create(parent.getDisplay());
+    displayExecutor = DisplayExecutor.create(parent.getDisplay());
     composite = new ScrolledComposite(parent, SWT.V_SCROLL);
     composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     composite.setLayout(new GridLayout(1, false));
@@ -143,7 +141,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     internalComposite.setLayout(new GridLayout(1, false));
 
     runnerGroup = new Group(internalComposite, SWT.NULL);
-    runnerGroup.setText("Runner:");
+    runnerGroup.setText(Messages.getString("runner")); //$NON-NLS-1$
     runnerGroup.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
     runnerGroup.setLayout(new GridLayout(2, false));
 
@@ -156,21 +154,23 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     Set<String> filterProperties =
         ImmutableSet.<String>builder()
             .addAll(DataflowPreferences.SUPPORTED_DEFAULT_PROPERTIES)
-            .add("runner")
+            .add("runner") //$NON-NLS-1$
             .build();
 
     Group runnerOptionsGroup = new Group(inputsComposite, SWT.NULL);
-    runnerOptionsGroup.setText("Pipeline Options:");
+    runnerOptionsGroup.setText(Messages.getString("pipeline.options")); //$NON-NLS-1$
     runnerOptionsGroup.setLayout(new GridLayout());
 
     userOptionsSelector = new TextAndButtonComponent(
-        runnerOptionsGroup, new GridData(SWT.FILL, SWT.BEGINNING, true, false), "&Search...");
+        runnerOptionsGroup,
+        new GridData(SWT.FILL, SWT.BEGINNING, true, false), 
+        Messages.getString("search")); //$NON-NLS-1$
     userOptionsSelector.addButtonSelectionListener(openPipelineOptionsSearchListener());
 
     pipelineOptionsForm =
         new PipelineOptionsFormComponent(runnerOptionsGroup, ARGUMENTS_SEPARATOR, filterProperties);
-    pipelineOptionsForm.addModifyListener(new UpdateLaunchConfigurationDialogTextChangedListener());
-    pipelineOptionsForm.addExpandListener(new UpdateLaunchConfigurationDialogExpandListener());
+    pipelineOptionsForm.addModifyListener(new UpdateLaunchConfigurationDialogChangedListener());
+    pipelineOptionsForm.addExpandListener(new UpdateLaunchConfigurationDialogChangedListener());
 
     composite.setContent(internalComposite);
     composite.setExpandHorizontal(true);
@@ -185,12 +185,12 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   private TextAndButtonSelectionListener openPipelineOptionsSearchListener() {
     return new TextAndButtonSelectionListener() {
       @Override
-      public void widgetSelected(SelectionEvent e) {
+      public void widgetSelected(SelectionEvent event) {
         Map<String, PipelineOptionsType> optionsTypes = hierarchy.getAllPipelineOptionsTypes();
         PipelineOptionsSelectionDialog dialog =
             new PipelineOptionsSelectionDialog(getShell(), optionsTypes);
         dialog.setBlockOnOpen(true);
-        dialog.setInitialPattern("**");
+        dialog.setInitialPattern("**"); //$NON-NLS-1$
         if (dialog.open() == Window.OK) {
           String userOptionsName = dialog.getFirstResult().toString();
           setTextValue(userOptionsName);
@@ -201,7 +201,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
       }
 
       @Override
-      public void widgetDefaultSelected(SelectionEvent e) {}
+      public void widgetDefaultSelected(SelectionEvent event) {}
     };
   }
 
@@ -234,11 +234,13 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
       @Override
       public void setInfo(String message) {
         setMessage(message);
+        getLaunchConfigurationDialog().updateMessage();
       }
 
       @Override
       public void setError(String message) {
         setErrorMessage(message);
+        getLaunchConfigurationDialog().updateMessage();
       }
 
       @Override
@@ -251,10 +253,11 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     defaultOptionsComponent =
         new DefaultedPipelineOptionsComponent(composite, layoutData, target, getPreferences());
 
-    defaultOptionsComponent.addButtonSelectionListener(
-        new UpdateLaunchConfigurationDialogSelectionListener());
-    defaultOptionsComponent.addModifyListener(
-        new UpdateLaunchConfigurationDialogTextChangedListener());
+    UpdateLaunchConfigurationDialogChangedListener dialogChangedListener =
+        new UpdateLaunchConfigurationDialogChangedListener();
+    defaultOptionsComponent.addAccountSelectionListener(dialogChangedListener);
+    defaultOptionsComponent.addButtonSelectionListener(dialogChangedListener);
+    defaultOptionsComponent.addModifyListener(dialogChangedListener);
   }
 
   @Override
@@ -274,22 +277,22 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     if (!defaultOptionsComponent.isUseDefaultOptions()) {
       overallArgValues.putAll(defaultOptionsComponent.getValues());
     }
-
     overallArgValues.putAll(getNonDefaultOptions());
-    launchConfiguration.setUserOptionsName(userOptionsSelector.getText());
-
     launchConfiguration.setArgumentValues(overallArgValues);
+
+    launchConfiguration.setUserOptionsName(userOptionsSelector.getText());
 
     launchConfiguration.toLaunchConfiguration(configuration);
   }
 
-  private PipelineRunner getSelectedRunner() {
+  @VisibleForTesting
+  PipelineRunner getSelectedRunner() {
     for (Map.Entry<PipelineRunner, Button> runnerButton : runnerButtons.entrySet()) {
       if (runnerButton.getValue().getSelection()) {
         return runnerButton.getKey();
       }
     }
-    throw new IllegalStateException("No runner selected, but a runner starts selected");
+    throw new IllegalStateException("No runner selected, but a runner starts selected"); //$NON-NLS-1$
   }
 
   @Override
@@ -299,13 +302,13 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
       IProject project = getProject();
       MajorVersion majorVersion = MajorVersion.ONE;
-      if (project != null) {
+      if (project != null && project.isAccessible()) {
          majorVersion = dependencyManager.getProjectMajorVersion(project);
          if (majorVersion == null) {
             majorVersion = MajorVersion.ONE;
          }
       }
-      
+
       updateRunnerButtons(majorVersion);
       updateHierarchy(majorVersion);
 
@@ -314,16 +317,18 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
       defaultOptionsComponent.setCustomValues(launchConfiguration.getArgumentValues());
 
       String userOptionsName = launchConfiguration.getUserOptionsName();
-      userOptionsSelector.setText(userOptionsName == null ? "" : userOptionsName);
+      userOptionsSelector.setText(Strings.nullToEmpty(userOptionsName));
 
       updatePipelineOptionsForm();
-    } catch (CoreException e) {
+    } catch (CoreException | InvocationTargetException | InterruptedException ex) {
       // TODO: Handle
-      DataflowUiPlugin.logError(e, "Error while initializing from existing configuration");
+      DataflowUiPlugin.logError(ex, 
+          "Error while initializing from existing configuration"); //$NON-NLS-1$
     }
   }
 
-  private void updateRunnerButtons(MajorVersion majorVersion) {
+  @VisibleForTesting
+  void updateRunnerButtons(MajorVersion majorVersion) {
     populateRunners(majorVersion);
     for (Button button : runnerButtons.values()) {
       button.setSelection(false);
@@ -332,27 +337,29 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     PipelineRunner runner = launchConfiguration.getRunner();
     Button runnerButton = runnerButtons.get(runner);
     if (runnerButton == null) {
-      runnerButtons
-          .get(PipelineLaunchConfiguration.defaultRunner(majorVersion))
-          .setSelection(true);
-    } else {
-      runnerButton.setSelection(true);
+      runnerButton = runnerButtons.get(PipelineLaunchConfiguration.defaultRunner(majorVersion));
     }
+    Preconditions.checkNotNull(runnerButton,
+        "runners for %s should always include the default runner", majorVersion); //$NON-NLS-1$
+    runnerButton.setSelection(true);
     runnerGroup.getParent().redraw();
   }
 
   /**
    * Asynchronously updates the project hierarchy.
+   * 
+   * @throws InterruptedException if the update is interrupted
+   * @throws InvocationTargetException if an exception occurred during the update
    */
-  private void updateHierarchy(final MajorVersion majorVersion) {
-    Job job = new Job("Update Hierarchy") {
+  private void updateHierarchy(final MajorVersion majorVersion)
+      throws InvocationTargetException, InterruptedException {
+    getLaunchConfigurationDialog().run(true, true, new IRunnableWithProgress() {
       @Override
-      public IStatus run(IProgressMonitor progress) {
-        hierarchy = getPipelineOptionsHierarchy(majorVersion, progress);
-        return Status.OK_STATUS;
+      public void run(IProgressMonitor monitor)
+          throws InvocationTargetException, InterruptedException {
+        hierarchy = getPipelineOptionsHierarchy(majorVersion, monitor);
       }
-    };
-    job.schedule();
+    });
   }
 
   private DataflowPreferences getPreferences() {
@@ -372,7 +379,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
         return pipelineOptionsHierarchyFactory.forProject(project, majorVersion, monitor);
       } catch (PipelineOptionsRetrievalException e) {
         DataflowUiPlugin.logWarning(
-            "Couldn't retrieve Pipeline Options Hierarchy for project %s", project);
+            "Couldn't retrieve Pipeline Options Hierarchy for project %s", project); //$NON-NLS-1$
         return pipelineOptionsHierarchyFactory.global(monitor);
       }
     }
@@ -389,33 +396,42 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
   @Override
   public String getName() {
-    return "Pipeline Arguments";
+    return Messages.getString("pipeline.arguments"); //$NON-NLS-1$
   }
 
   private void updatePipelineOptionsForm() {
-    final SettableFuture<Map<PipelineOptionsType, Set<PipelineOptionsProperty>>>
-        optionsHierarchyFuture = SettableFuture.create();
-    Job job = new Job("Update Pipeline Options Form") {
+    final SettableFuture<Map<PipelineOptionsType, Set<PipelineOptionsProperty>>> optionsHierarchyFuture =
+        SettableFuture.create();
+    optionsHierarchyFuture.addListener(new Runnable() {
       @Override
-      protected IStatus run(IProgressMonitor monitor) {
-        optionsHierarchyFuture.set(launchConfiguration.getOptionsHierarchy(hierarchy));
-        return Status.OK_STATUS;
-      }
-    };
-    job.schedule();
-    optionsHierarchyFuture.addListener(
-        new Runnable() {
+      public void run() {
+        if (internalComposite.isDisposed()) {
+          return;
+        }
+        BusyIndicator.showWhile(internalComposite.getDisplay(), new Runnable() {
           @Override
           public void run() {
             try {
               pipelineOptionsForm.updateForm(launchConfiguration, optionsHierarchyFuture.get());
               updateLaunchConfigurationDialog();
-            } catch (InterruptedException | ExecutionException e) {
-              DataflowUiPlugin.logError(e, "Exception while updating available Pipeline Options");
+            } catch (InterruptedException | ExecutionException ex) {
+              DataflowUiPlugin.logError(ex, "Exception while updating available Pipeline Options"); //$NON-NLS-1$
             }
           }
-        },
-        executor);
+        });
+      }
+    }, displayExecutor);
+    try {
+      getLaunchConfigurationDialog().run(true, true, new IRunnableWithProgress() {
+        @Override
+        public void run(IProgressMonitor monitor)
+            throws InvocationTargetException, InterruptedException {
+          optionsHierarchyFuture.set(launchConfiguration.getOptionsHierarchy(hierarchy));
+        }
+      });
+    } catch (InvocationTargetException | InterruptedException ex) {
+      DataflowUiPlugin.logError(ex, "Exception occurred while updating available Pipeline Options");
+    }
   }
 
   private Map<String, String> getNonDefaultOptions() {
@@ -436,18 +452,18 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   }
 
   private boolean validateRequiredGroups(MissingRequiredProperties validationFailures) {
-    if (!validationFailures.getMissingGroups().isEmpty()) {
-      Map.Entry<String, Set<PipelineOptionsProperty>> missingGroupEntry =
-          Iterables.getFirst(validationFailures.getMissingGroups().entrySet(), null);
-      StringBuilder errorBuilder = new StringBuilder("Missing value for group ");
+    Map.Entry<String, Set<PipelineOptionsProperty>> missingGroupEntry =
+        Iterables.getFirst(validationFailures.getMissingGroups().entrySet(), null);
+    if (missingGroupEntry != null) {
+      StringBuilder errorBuilder = new StringBuilder("Missing value for group "); //$NON-NLS-1$
       errorBuilder.append(missingGroupEntry.getKey());
-      errorBuilder.append(". Properties satisfying group requirement are ");
+      errorBuilder.append(". Properties satisfying group requirement are "); //$NON-NLS-1$
       Set<String> groupMembers = new HashSet<>();
       for (PipelineOptionsProperty missingProperty : missingGroupEntry.getValue()) {
         groupMembers.add(missingProperty.getName());
       }
       errorBuilder.append(MISSING_GROUP_MEMBER_JOINER.join(groupMembers));
-      errorBuilder.append(".");
+      errorBuilder.append("."); //$NON-NLS-1$
       setErrorMessage(errorBuilder.toString());
       return false;
     }
@@ -455,10 +471,10 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   }
 
   private boolean validateRequiredProperties(MissingRequiredProperties validationFailures) {
-    if (!validationFailures.getMissingProperties().isEmpty()) {
-      PipelineOptionsProperty missingProperty =
-          Iterables.getFirst(validationFailures.getMissingProperties(), null);
-      setErrorMessage("Missing required property " + missingProperty.getName());
+    PipelineOptionsProperty missingProperty =
+        Iterables.getFirst(validationFailures.getMissingProperties(), null);
+    if (missingProperty != null) {
+      setErrorMessage(Messages.getString("missing.required.property", missingProperty.getName())); //$NON-NLS-1$
       return false;
     }
     return true;
@@ -477,8 +493,8 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   }
 
   /**
-   * When the Runner selectino is changed, update the underlying launch configuration, update the
-   * PipelineOptionsForm to show all available inputs, and rerender the tab.
+   * When the Runner selection is changed, update the underlying launch configuration, update the
+   * PipelineOptionsForm to show all available inputs, and re-render the tab.
    */
   private class UpdateLaunchConfigAndRequiredArgsSelectionListener extends SelectionAdapter {
     private final PipelineRunner runner;
@@ -496,37 +512,34 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   }
 
   /**
-   * When a launch configuration property changes, ensure the validation state is reflected in the
-   * arguments tab.
+   * When 1) the default options button is selected; or 2) a launch configuration property changes;
+   * or 3) account selection changes, then ensure 1) the validation state is reflected in the
+   * arguments tab; and 2) the min size of the {@code ScrolledComposite} is updated to fit the
+   * entire form.
    */
-  private class UpdateLaunchConfigurationDialogTextChangedListener implements ModifyListener {
+  private class UpdateLaunchConfigurationDialogChangedListener
+      extends SelectionAdapter implements ModifyListener, IExpansionListener, Runnable {
     @Override
-    public void modifyText(ModifyEvent e) {
-      updateLaunchConfigurationDialog();
+    public void widgetSelected(SelectionEvent event) {
+      run();
     }
-  }
 
-  /**
-   * When the default options button is selected, ensure the validation state is refelected in the
-   * arguments tab.
-   */
-  private class UpdateLaunchConfigurationDialogSelectionListener extends SelectionAdapter {
     @Override
-    public void widgetSelected(SelectionEvent e) {
-      updateLaunchConfigurationDialog();
+    public void modifyText(ModifyEvent event) {
+      run();
     }
-  }
-
-  /**
-   * Whenever a {@link PipelineOptionsType} header is expanded, ensure the min size of the {@code
-   * ScrolledComposite} is updated to fit the entire form.
-   */
-  private class UpdateLaunchConfigurationDialogExpandListener implements IExpansionListener {
-    @Override
-    public void expansionStateChanging(ExpansionEvent e) {}
 
     @Override
-    public void expansionStateChanged(ExpansionEvent e) {
+    public void expansionStateChanging(ExpansionEvent event) {  // ignored
+    }
+
+    @Override
+    public void expansionStateChanged(ExpansionEvent event) {
+      run();
+    }
+
+    @Override
+    public void run() {
       updateLaunchConfigurationDialog();
     }
   }

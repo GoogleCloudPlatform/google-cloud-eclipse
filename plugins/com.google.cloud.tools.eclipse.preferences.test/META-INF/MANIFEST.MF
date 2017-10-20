@@ -8,7 +8,4 @@ Bundle-Vendor: Google Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Fragment-Host: com.google.cloud.tools.eclipse.preferences
-Import-Package: org.junit;version="4.12.0",
- org.junit.runner;version="4.12.0",
- org.mockito;provider=google;version="1.10.19",
- org.mockito.runners;provider=google;version="1.10.19"
+Require-Bundle: com.google.cloud.tools.eclipse.test.dependencies

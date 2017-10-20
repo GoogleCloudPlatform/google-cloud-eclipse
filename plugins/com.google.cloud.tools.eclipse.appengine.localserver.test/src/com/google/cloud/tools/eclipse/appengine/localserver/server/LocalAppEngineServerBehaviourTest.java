@@ -21,14 +21,16 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.cloud.tools.appengine.api.devserver.DefaultRunConfiguration;
 import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour.PortChecker;
 import java.net.InetAddress;
-
 import org.eclipse.core.runtime.CoreException;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -212,5 +214,18 @@ public class LocalAppEngineServerBehaviourTest {
     for (String line : output) {
       outputListener.onOutputLine(line);
     }
+  }
+
+  @Test
+  public void testStartDevServer_ignoresAdminPortWhenDevAppserver1() throws CoreException {
+    Assume.assumeFalse(LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2);
+
+    DefaultRunConfiguration runConfig = new DefaultRunConfiguration();
+    runConfig.setAdminPort(8000);
+    when(portProber.isInUse(any(InetAddress.class), eq(8000))).thenReturn(true);
+
+    serverBehavior.checkPorts(runConfig, portProber);
+    assertEquals(-1, serverBehavior.adminPort);
+    verify(portProber, never()).isInUse(any(InetAddress.class), eq(8000));
   }
 }

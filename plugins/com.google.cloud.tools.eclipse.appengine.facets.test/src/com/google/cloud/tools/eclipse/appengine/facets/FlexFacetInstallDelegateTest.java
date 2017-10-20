@@ -16,13 +16,13 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets;
 
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexFacet;
-import com.google.cloud.tools.eclipse.appengine.facets.FlexFacetInstallDelegate;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jst.common.project.facet.core.JavaFacet;
+import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacet;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
@@ -31,24 +31,22 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 
-/**
- * Tests for {@link FlexFacetInstallDelegate}
- */
 public class FlexFacetInstallDelegateTest {
-  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacetVersions(
+          JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
 
   @Test
   public void testFacetInstall() throws CoreException {
     IProject project = projectCreator.getProject();
 
     IProgressMonitor monitor = new NullProgressMonitor();
-    IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
+    IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexWarFacet.ID);
     IProjectFacetVersion appEngineFacetVersion =
-        appEngineFacet.getVersion(AppEngineFlexFacet.VERSION);
+        appEngineFacet.getVersion(AppEngineFlexWarFacet.VERSION);
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     facetedProject.installProjectFacet(appEngineFacetVersion, null /* config */, monitor);
 
-    Assert.assertTrue(AppEngineFlexFacet.hasFacet(facetedProject));
+    Assert.assertTrue(AppEngineFlexWarFacet.hasFacet(facetedProject));
     Assert.assertTrue(project.getFile("src/main/appengine/app.yaml").exists());
   }
 }

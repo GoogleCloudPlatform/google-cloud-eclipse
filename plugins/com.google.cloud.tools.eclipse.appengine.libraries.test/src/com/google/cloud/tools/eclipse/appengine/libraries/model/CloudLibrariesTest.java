@@ -26,14 +26,41 @@ public class CloudLibrariesTest {
   public void testGetLibraries() {
     List<Library> libraries = CloudLibraries.getLibraries("appengine");
     for (Library library : libraries) {
-      Assert.assertFalse(library.getLibraryFiles().isEmpty());
+      Assert.assertFalse(library.getAllDependencies().isEmpty());
       String tooltip = library.getToolTip();
       Assert.assertFalse(tooltip.isEmpty());
       Assert.assertFalse(tooltip, tooltip.startsWith("!"));
     }
-    Assert.assertEquals(3, libraries.size());
+    Assert.assertEquals(2, libraries.size());
   }
 
+  @Test
+  public void testGetClientApis() {
+    List<Library> libraries = CloudLibraries.getLibraries("clientapis");
+    Assert.assertTrue(libraries.size() > 10);
+    
+    for (Library library : libraries) {
+      String tooltip = library.getToolTip();
+      
+      Assert.assertNotNull(library.getName() + " has no tooltip", tooltip);
+      Assert.assertFalse(tooltip.isEmpty());
+      Assert.assertFalse(library.getName() + " has no files", library.getAllDependencies().isEmpty());
+      Assert.assertEquals("clientapis", library.getGroup());
+    }
+  }
+  
+  @Test
+  public void testGrpcTransport() {
+    Library library = CloudLibraries.getLibrary("datalossprevention");
+    Assert.assertEquals("grpc", library.getTransport());
+  }
+  
+  @Test
+  public void testHttpTransport() {
+    Library library = CloudLibraries.getLibrary("googlecloudstorage");
+    Assert.assertEquals("http", library.getTransport());
+  }
+  
   @Test
   public void testGetLibraries_null() {
     List<Library> libraries = CloudLibraries.getLibraries(null);
@@ -43,17 +70,7 @@ public class CloudLibrariesTest {
   @Test
   public void testGetLibrary() {
     Library library = CloudLibraries.getLibrary("objectify");
-    Assert.assertEquals(library.getGroup(), "appengine");
-    Assert.assertEquals(library.getName(), "Objectify");
+    Assert.assertEquals("appengine", library.getGroup());
+    Assert.assertEquals("Objectify", library.getName());
   }
-  
-  @Test
-  public void testTransitiveDependencies() {
-    Library library = CloudLibraries.getLibrary("googlecloudstorage");
-    List<String> dependencies = library.getLibraryDependencies();
-    Assert.assertEquals(2, dependencies.size());
-    Assert.assertEquals("googlecloudcore", dependencies.get(0));
-    Assert.assertEquals("googleapiclient", dependencies.get(1));
-  }
-
 }

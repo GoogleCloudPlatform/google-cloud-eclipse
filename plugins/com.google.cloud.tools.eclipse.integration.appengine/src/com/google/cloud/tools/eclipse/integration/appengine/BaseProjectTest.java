@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.integration.appengine;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotWorkbenchActions;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
@@ -52,6 +51,9 @@ public class BaseProjectTest {
   @After
   public void tearDown() {
     if (project != null) {
+      // close editors, so no property changes are dispatched on delete
+      bot.closeAllEditors();
+
       // ensure there are no jobs
       SwtBotWorkbenchActions.waitForProjects(bot, project);
       try {
@@ -68,14 +70,14 @@ public class BaseProjectTest {
   /**
    * Returns the named project; it may not yet exist.
    */
-  protected IProject findProject(String projectName) {
+  protected static IProject findProject(String projectName) {
     return ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
   }
 
   /**
    * Return true if a project with the given name exists.
    */
-  protected boolean projectExists(String projectName) {
+  protected static boolean projectExists(String projectName) {
     IProject project = findProject(projectName);
     return project.exists();
   }

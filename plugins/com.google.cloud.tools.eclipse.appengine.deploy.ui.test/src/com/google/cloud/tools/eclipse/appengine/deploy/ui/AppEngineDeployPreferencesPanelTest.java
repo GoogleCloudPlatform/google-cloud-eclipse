@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -52,11 +53,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Table;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotCheckBox;
 import org.junit.Before;
 import org.junit.Rule;
@@ -73,6 +74,7 @@ public class AppEngineDeployPreferencesPanelTest {
   private static final String EMAIL_1 = "some-email-1@example.com";
 
   private Composite parent;
+  private DeployPreferences model;
   private AppEngineDeployPreferencesPanel deployPanel;
   private HashSet<Account> oneAccountSet;
   private HashSet<Account> twoAccountSet;
@@ -95,6 +97,13 @@ public class AppEngineDeployPreferencesPanelTest {
     when(account2.getOAuth2Credential()).thenReturn(mock(Credential.class));
     oneAccountSet = new HashSet<>(Arrays.asList(account1));
     twoAccountSet = new HashSet<>(Arrays.asList(account1, account2));
+    model = new DeployPreferences(project);
+  }
+
+  @Test
+  public void testCreateGcpProjectUrl() {
+    assertEquals("https://console.cloud.google.com/projectcreate?previousPage=%2Fprojectselector%2Fappengine%2Fcreate%3Flang%3Djava",
+        AppEngineDeployPreferencesPanel.CREATE_GCP_PROJECT_URL);
   }
 
   @Test
@@ -108,7 +117,7 @@ public class AppEngineDeployPreferencesPanelTest {
     assertTrue("account selector is in error: " + status.getMessage(), status.isOK());
 
     assertThat("auto-selected value should be propagated back to model",
-        deployPanel.model.getAccountEmail(), is(account1.getEmail()));
+        model.getAccountEmail(), is(account1.getEmail()));
   }
 
   @Test
@@ -120,8 +129,7 @@ public class AppEngineDeployPreferencesPanelTest {
     assertNotNull(deployPanel.latestGcpProjectQueryJob);
     deployPanel.latestGcpProjectQueryJob.join();
 
-    Table projectTable = getProjectSelector().getViewer().getTable();
-    assertThat(projectTable.getItemCount(), is(2));
+    assertThat(getProjectSelector().getProjectCount(), is(2));
   }
 
   @Test
@@ -190,6 +198,8 @@ public class AppEngineDeployPreferencesPanelTest {
     try {
       node.put("project.id", "projectId1");
       node.put("account.email", EMAIL_1);
+      model = new DeployPreferences(project);
+
       initializeProjectRepository();
       when(loginService.getAccounts()).thenReturn(twoAccountSet);
       deployPanel = createPanel(true /* requireValues */);
@@ -238,16 +248,15 @@ public class AppEngineDeployPreferencesPanelTest {
     initializeProjectRepository();
 
     deployPanel = createPanel(false /* requireValues */);
-    Table projectTable = getProjectSelector().getViewer().getTable();
     assertNull(deployPanel.latestGcpProjectQueryJob);
-    assertThat(projectTable.getItemCount(), is(0));
+    assertThat(getProjectSelector().getProjectCount(), is(0));
 
     selectAccount(account1);
     assertNotNull(deployPanel.latestGcpProjectQueryJob);
     deployPanel.latestGcpProjectQueryJob.join();
-    assertThat(projectTable.getItemCount(), is(2));
-    assertThat(((GcpProject) projectTable.getItem(0).getData()).getId(), is("projectId1"));
-    assertThat(((GcpProject) projectTable.getItem(1).getData()).getId(), is("projectId2"));
+    assertThat(getProjectSelector().getProjectCount(), is(2));
+    assertThat(getProjectSelector().getProjects().get(0).getId(), is("projectId1"));
+    assertThat(getProjectSelector().getProjects().get(1).getId(), is("projectId2"));
   }
 
   @Test
@@ -257,20 +266,19 @@ public class AppEngineDeployPreferencesPanelTest {
     initializeProjectRepository();
 
     deployPanel = createPanel(false /* requireValues */);
-    Table projectTable = getProjectSelector().getViewer().getTable();
     assertNull(deployPanel.latestGcpProjectQueryJob);
-    assertThat(projectTable.getItemCount(), is(0));
+    assertThat(getProjectSelector().getProjectCount(), is(0));
 
     selectAccount(account1);
     Job jobForAccount1 = deployPanel.latestGcpProjectQueryJob;
     jobForAccount1.join();
-    assertThat(projectTable.getItemCount(), is(2));
+    assertThat(getProjectSelector().getProjectCount(), is(2));
 
     selectAccount(account2);
     assertNotEquals(jobForAccount1, deployPanel.latestGcpProjectQueryJob);
     deployPanel.latestGcpProjectQueryJob.join();
-    assertThat(projectTable.getItemCount(), is(1));
-    assertThat(((GcpProject) projectTable.getItem(0).getData()).getId(), is("projectId2"));
+    assertThat(getProjectSelector().getProjectCount(), is(1));
+    assertThat(getProjectSelector().getProjects().get(0).getId(), is("projectId2"));
   }
 
   // "AppEngineApplicationQueryJob" assumes no project gets selected when switching accounts.
@@ -284,16 +292,16 @@ public class AppEngineDeployPreferencesPanelTest {
     selectAccount(account1);
     deployPanel.latestGcpProjectQueryJob.join();
 
-    Table projectTable = getProjectSelector().getViewer().getTable();
-    assertThat(projectTable.getItemCount(), is(2));
-    projectTable.setSelection(0);
-    assertThat(projectTable.getSelectionCount(), is(1));
+    assertThat(getProjectSelector().getProjectCount(), is(2));
+    getProjectSelector()
+        .setSelection(new StructuredSelection(getProjectSelector().getProjects().get(0)));
+    assertThat(getProjectSelector().getSelection().size(), is(1));
 
     selectAccount(account2);
     deployPanel.latestGcpProjectQueryJob.join();
 
-    assertThat(projectTable.getItemCount(), is(1));
-    assertThat(projectTable.getSelectionCount(), is(0));
+    assertThat(getProjectSelector().getProjectCount(), is(1));
+    assertThat(getProjectSelector().getSelection().size(), is(0));
   }
 
   private Button getButtonWithText(final String text) {
@@ -312,7 +320,7 @@ public class AppEngineDeployPreferencesPanelTest {
 
   private AppEngineDeployPreferencesPanel createPanel(boolean requireValues) {
     return new AppEngineDeployPreferencesPanel(parent, project, loginService, layoutChangedHandler,
-        requireValues, projectRepository, new DeployPreferences(project)) {
+        requireValues, projectRepository, model) {
           @Override
           protected String getHelpContextId() {
             return null;

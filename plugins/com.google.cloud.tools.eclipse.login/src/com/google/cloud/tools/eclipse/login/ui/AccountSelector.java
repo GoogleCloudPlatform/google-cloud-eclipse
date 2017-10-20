@@ -96,7 +96,7 @@ public class AccountSelector extends Composite {
   }
 
   /**
-   * @exception IllegalArgumentException if there is no account logged in
+   * @throws IllegalArgumentException if there is no account logged in
    */
   public String getFirstEmail() {
     Preconditions.checkState(getAccountCount() > 0);
@@ -189,5 +189,20 @@ public class AccountSelector extends Composite {
   @Override
   public void setToolTipText(String string) {
     combo.setToolTipText(string);
+  }
+
+  @Override
+  public String getToolTipText() {
+    return combo.getToolTipText();
+  }
+
+  @Override
+  public void setEnabled(boolean enabled) {
+    combo.setEnabled(enabled);
+  }
+
+  @Override
+  public boolean getEnabled() {
+    return combo.getEnabled();
   }
 }

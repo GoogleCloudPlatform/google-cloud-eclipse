@@ -223,14 +223,19 @@ echo "# into 'gs://cloud-tools-for-eclipse/<VERSION>/'."
 echo "#"
 echo -n "Enter version: "
 read VERSION
+
+DESTINATION=gs://cloud-tools-for-eclipse/$VERSION
+echo
+echo "THIS WILL DELETE ALL FILES IN '$DESTINATION' IF THEY EXIST!"
 ask_proceed
 
 set -x
+gsutil -m rm $DESTINATION/** && \
 gsutil cp $LOCAL_REPO/artifacts.jar $LOCAL_REPO/content.jar \
     $SIGNED_DIR/index.html \
-    gs://cloud-tools-for-eclipse/$VERSION/ && \
+    $DESTINATION && \
 gsutil -m cp -R $LOCAL_REPO/features $LOCAL_REPO/plugins \
-    gs://cloud-tools-for-eclipse/$VERSION/
+    $DESTINATION
 set +x
 
 ###############################################################################

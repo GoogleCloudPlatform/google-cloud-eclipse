@@ -37,7 +37,7 @@ import org.eclipse.wst.sse.ui.internal.reconcile.validator.IncrementalHelper;
 import org.eclipse.wst.sse.ui.internal.reconcile.validator.IncrementalReporter;
 import org.eclipse.wst.validation.internal.core.ValidationException;
 import org.eclipse.wst.validation.internal.provisional.core.IMessage;
-import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -51,61 +51,51 @@ public class XmlSourceValidatorTest {
 
   private final IncrementalReporter reporter = new IncrementalReporter(null);
 
-  @ClassRule public static TestProjectCreator dynamicWebProject =
+  @Rule public TestProjectCreator dynamicWebProject =
       new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
 
-  @ClassRule public static TestProjectCreator appEngineStandardProject =
+  @Rule public TestProjectCreator appEngineStandardProject =
       new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7,
-          WebFacetUtils.WEB_25, AppEngineStandardFacet.FACET_VERSION);
+          WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
 
   @Test
   public void testValidate_appEngineStandardFacet() throws CoreException, ValidationException {
     IProject project = appEngineStandardProject.getProject();
     IFile file = project.getFile("testdata.xml");
-    try {
-      file.create(ValidationTestUtils.stringToInputStream(
-          APPLICATION_XML), 0, null);
+    file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), 0, null);
 
-      IDocument document = ValidationTestUtils.getDocument(file);
+    IDocument document = ValidationTestUtils.getDocument(file);
 
-      // Adds the URI of the file to be validated to the IncrementalHelper.
-      IncrementalHelper helper = new IncrementalHelper(document, project);
-      IPath path = file.getFullPath();
-      helper.setURI(path.toString());
+    // Adds the URI of the file to be validated to the IncrementalHelper.
+    IncrementalHelper helper = new IncrementalHelper(document, project);
+    IPath path = file.getFullPath();
+    helper.setURI(path.toString());
 
-      XmlSourceValidator validator = new XmlSourceValidator();
-      validator.setHelper(new AppEngineWebXmlValidator());
-      validator.connect(document);
-      validator.validate(helper, reporter);
-      assertEquals(1, reporter.getMessages().size());
-    } finally {
-      file.delete(true, null);
-    }
+    XmlSourceValidator validator = new XmlSourceValidator();
+    validator.setHelper(new AppEngineWebXmlValidator());
+    validator.connect(document);
+    validator.validate(helper, reporter);
+    assertEquals(1, reporter.getMessages().size());
   }
 
   @Test
   public void testValidate_dynamicWebProject() throws CoreException, ValidationException {
     IProject project = dynamicWebProject.getProject();
     IFile file = project.getFile("testdata.xml");
-    try {
-      file.create(ValidationTestUtils.stringToInputStream(
-          APPLICATION_XML), 0, null);
+    file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), 0, null);
 
-      IDocument document = ValidationTestUtils.getDocument(file);
+    IDocument document = ValidationTestUtils.getDocument(file);
 
-      // Adds the URI of the file to be validated to the IncrementalHelper.
-      IncrementalHelper helper = new IncrementalHelper(document, project);
-      IPath path = file.getFullPath();
-      helper.setURI(path.toString());
+    // Adds the URI of the file to be validated to the IncrementalHelper.
+    IncrementalHelper helper = new IncrementalHelper(document, project);
+    IPath path = file.getFullPath();
+    helper.setURI(path.toString());
 
-      XmlSourceValidator validator = new XmlSourceValidator();
-      validator.setHelper(new AppEngineWebXmlValidator());
-      validator.connect(document);
-      validator.validate(helper, reporter);
-      assertEquals(0, reporter.getMessages().size());
-    } finally {
-      file.delete(true, null);
-    }
+    XmlSourceValidator validator = new XmlSourceValidator();
+    validator.setHelper(new AppEngineWebXmlValidator());
+    validator.connect(document);
+    validator.validate(helper, reporter);
+    assertTrue(reporter.getMessages().isEmpty());
   }
 
   @Test
@@ -132,14 +122,9 @@ public class XmlSourceValidatorTest {
   public void getDocumentEncodingTest() throws CoreException {
     IProject project = dynamicWebProject.getProject();
     IFile file = project.getFile("testdata.xml");
-    try {
-      file.create(ValidationTestUtils.stringToInputStream(
-        APPLICATION_XML), IFile.FORCE, null);
-      IDocument document = ValidationTestUtils.getDocument(file);
-      assertEquals("UTF-8", XmlSourceValidator.getDocumentEncoding(document));
-    } finally {
-      file.delete(true, null);
-    }
+    file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), IFile.FORCE, null);
+    IDocument document = ValidationTestUtils.getDocument(file);
+    assertEquals("UTF-8", XmlSourceValidator.getDocumentEncoding(document));
   }
 
   @Test
@@ -160,42 +145,32 @@ public class XmlSourceValidatorTest {
   public void testGetFile() throws CoreException {
     IProject project = dynamicWebProject.getProject();
     IFile file = project.getFile("testdata.xml");
-    try {
-      file.create(ValidationTestUtils.stringToInputStream(
-          APPLICATION_XML), 0, null);
+    file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), 0, null);
 
-      assertTrue(file.exists());
+    assertTrue(file.exists());
 
-      IPath path = file.getFullPath();
-      IFile testFile = XmlSourceValidator.getFile(path.toString());
+    IPath path = file.getFullPath();
+    IFile testFile = XmlSourceValidator.getFile(path.toString());
 
-      assertNotNull(testFile);
-      assertEquals(file, testFile);
-    } finally {
-      file.delete(true, null);
-    }
+    assertNotNull(testFile);
+    assertEquals(file, testFile);
   }
 
   @Test
   public void testGetProject() throws CoreException {
     IProject project = dynamicWebProject.getProject();
     IFile file = project.getFile("testdata.xml");
-    try {
-      file.create(ValidationTestUtils.stringToInputStream(
-          APPLICATION_XML), 0, null);
+    file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), 0, null);
 
-      IDocument document = ValidationTestUtils.getDocument(file);
+    IDocument document = ValidationTestUtils.getDocument(file);
 
-      IncrementalHelper helper = new IncrementalHelper(document, project);
-      IPath path = file.getFullPath();
-      helper.setURI(path.toString());
+    IncrementalHelper helper = new IncrementalHelper(document, project);
+    IPath path = file.getFullPath();
+    helper.setURI(path.toString());
 
-      IProject testProject = XmlSourceValidator.getProject(helper);
-      assertNotNull(testProject);
-      assertEquals(project, testProject);
-    } finally {
-      file.delete(true, null);
-    }
+    IProject testProject = XmlSourceValidator.getProject(helper);
+    assertNotNull(testProject);
+    assertEquals(project, testProject);
   }
 
 }

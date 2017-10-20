@@ -7,7 +7,6 @@
   xmlns:appengine="http://appengine.google.com/ns/1.0"
   xmlns="http://appengine.google.com/ns/1.0">
 
-
   <xsl:template match="/">
   <xsl:text>
 </xsl:text>

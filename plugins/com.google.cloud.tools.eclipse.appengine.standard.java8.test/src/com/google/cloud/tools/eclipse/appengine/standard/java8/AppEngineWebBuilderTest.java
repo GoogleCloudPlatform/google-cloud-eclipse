@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.standard.java8;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -32,14 +33,16 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject.Action;
+import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.junit.Rule;
 import org.junit.Test;
 
 public class AppEngineWebBuilderTest {
 
   @Rule
-  public TestProjectCreator testProject = new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
+  public TestProjectCreator testProject = new TestProjectCreator();
 
   /** Project without App Engine Standard facet should never have builder. */
   @Test
@@ -47,55 +50,96 @@ public class AppEngineWebBuilderTest {
     assertProjectMissingBuilder();
   }
 
-  /** Project adding App Engine Standard facet should have builder. */
+  /** Project adding App Engine Standard facet should have our builder. */
   @Test
   public void testAddedBuilder() throws CoreException {
-    Action installAction =
-        new Action(Action.Type.INSTALL, AppEngineStandardFacet.FACET_VERSION, null);
-    testProject.getFacetedProject().modify(Collections.singleton(installAction), null);
+    testProject.withFacetVersions(AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8,
+        JavaFacet.VERSION_1_8, WebFacetUtils.WEB_25).getFacetedProject();
 
     assertProjectHasBuilder();
   }
 
-  /** Project adding App Engine Standard facet should have builder. */
+  /** Project removing App Engine Standard facet should not have our builder. */
   @Test
-  public void testRemovedBuilder() throws CoreException {
-    Action installAction =
-        new Action(Action.Type.INSTALL, AppEngineStandardFacet.FACET_VERSION, null);
-    testProject.getFacetedProject().modify(Collections.singleton(installAction), null);
+  public void testBuilderRemoved() throws CoreException {
+    testProject.withFacetVersions(AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8,
+        JavaFacet.VERSION_1_8, WebFacetUtils.WEB_25).getFacetedProject();
     assertProjectHasBuilder();
 
     Action uninstallAction =
-        new Action(Action.Type.UNINSTALL, AppEngineStandardFacet.FACET_VERSION, null);
+        new Action(Action.Type.UNINSTALL,
+            AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8, null);
     testProject.getFacetedProject().modify(Collections.singleton(uninstallAction), null);
     assertProjectMissingBuilder();
   }
 
-  /** Project adding App Engine Standard facet should have builder. */
+  /**
+   * Adding <runtime>java8</runtime> to appengine-web.xml should upgrade the Java and Dynamic Web
+   * Project facets to 1.8 and 3.1 respectively.
+   */
   @Test
-  public void testAddingJava8Runtime() throws CoreException {
-    Action installAction =
-        new Action(Action.Type.INSTALL, AppEngineStandardFacet.FACET_VERSION, null);
-    testProject.getFacetedProject().modify(Collections.singleton(installAction), null);
+  public void testAddJava8Runtime() throws CoreException {
+    testProject
+        .withFacetVersions(AppEngineStandardFacet.JRE7, JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25)
+        .getFacetedProject();
     assertProjectHasBuilder();
 
     IFile appEngineWebDescriptor = WebProjectUtil.findInWebInf(testProject.getProject(),
         new Path("appengine-web.xml"));
-    assertTrue("missing appengine-web.xml",
+    assertTrue("should have appengine-web.xml",
         appEngineWebDescriptor != null && appEngineWebDescriptor.exists());
-
-    assertTrue(testProject.getFacetedProject().hasProjectFacet(JavaFacet.VERSION_1_7));
-    assertTrue(testProject.getFacetedProject().hasProjectFacet(WebFacetUtils.WEB_25));
 
     AppEngineDescriptorTransform.addJava8Runtime(appEngineWebDescriptor);
     ProjectUtils.waitForProjects(testProject.getProject());
-    assertTrue(testProject.getFacetedProject().hasProjectFacet(JavaFacet.VERSION_1_8));
-    assertTrue(testProject.getFacetedProject().hasProjectFacet(WebFacetUtils.WEB_25));
+
+    // adding <runtime>java8</runtime> should change java to 1.8 and dwp to 3.1
+    assertFacetVersions(testProject.getFacetedProject(),
+        AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8, JavaFacet.VERSION_1_8,
+        WebFacetUtils.WEB_31);
+  }
+
+  /**
+   * Removing <runtime>java8</runtime> from appengine-web.xml should always downgrade the Java and
+   * Dynamic Web Project facets to 1.7 and 2.5 respectively.
+   */
+  @Test
+  public void testRemovingJava8Runtime() throws CoreException {
+    testProject.withFacetVersions(AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8,
+        JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31).getFacetedProject();
+    assertProjectHasBuilder();
+
+    IFile appEngineWebDescriptor =
+        WebProjectUtil.findInWebInf(testProject.getProject(), new Path("appengine-web.xml"));
+    assertTrue("should have appengine-web.xml",
+        appEngineWebDescriptor != null && appEngineWebDescriptor.exists());
 
     AppEngineDescriptorTransform.removeJava8Runtime(appEngineWebDescriptor);
     ProjectUtils.waitForProjects(testProject.getProject());
-    assertTrue(testProject.getFacetedProject().hasProjectFacet(JavaFacet.VERSION_1_7));
-    assertTrue(testProject.getFacetedProject().hasProjectFacet(WebFacetUtils.WEB_25));
+    assertFacetVersions(testProject.getFacetedProject(), AppEngineStandardFacet.JRE7,
+        JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
+  }
+
+  /**
+   * Removing <runtime>java8</runtime> from appengine-web.xml should always downgrade the Java and
+   * Dynamic Web Project facets to 1.7 and 2.5 respectively.
+   */
+  @Test
+  public void testRemovingJava8Runtime_webFacet() throws CoreException {
+    testProject.withFacetVersions(AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8,
+        JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31).getFacetedProject();
+    assertProjectHasBuilder();
+
+    IFile appEngineWebDescriptor =
+        WebProjectUtil.findInWebInf(testProject.getProject(), new Path("appengine-web.xml"));
+    assertTrue("should have appengine-web.xml",
+        appEngineWebDescriptor != null && appEngineWebDescriptor.exists());
+
+    AppEngineDescriptorTransform.removeJava8Runtime(appEngineWebDescriptor);
+    ProjectUtils.waitForProjects(testProject.getProject());
+    // removing <runtime>java8</runtime> should change java to 1.7
+    // removing <runtime>java8</runtime> should change jst.web to 2.5
+    assertFacetVersions(testProject.getFacetedProject(), AppEngineStandardFacet.JRE7,
+        JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
   }
 
   private void assertProjectMissingBuilder() throws CoreException {
@@ -116,4 +160,11 @@ public class AppEngineWebBuilderTest {
     }
     fail("missing AppEngineWebBuilder");
   }
+
+  private void assertFacetVersions(IFacetedProject project, IProjectFacetVersion... versions) {
+    for (IProjectFacetVersion version : versions) {
+      assertEquals(version, project.getProjectFacetVersion(version.getProjectFacet()));
+    }
+  }
+
 }

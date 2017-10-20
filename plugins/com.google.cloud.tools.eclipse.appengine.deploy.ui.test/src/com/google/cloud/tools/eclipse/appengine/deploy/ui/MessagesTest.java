@@ -29,8 +29,8 @@ public class MessagesTest {
   @Test
   public void testSpecifyVersionTooltip() {
     Assert.assertEquals(
-        "If checked, stops the previously running version when "
-        + "deploying a new version that receives all traffic.",
+        "If Checked, Stops the Previously Running Version when "
+        + "Deploying a New Version that Receives All Traffic",
         Messages.getString("tooltip.stop.previous.version"));
   }
 

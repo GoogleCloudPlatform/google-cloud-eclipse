@@ -16,13 +16,19 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.osgi.service.prefs.BackingStoreException;
 
+/**
+ * Common deploy parameters (e.g., account email, GCP project ID, whether to stop previous versions,
+ * etc.) required to deploy an Eclipse project to App Engine. The parameters are saved to a
+ * project-scoped preferences store.
+ *
+ * Incidentally, these parameters are all that the standard deploy needs.
+ */
 public class DeployPreferences {
 
   public static final String PREFERENCE_STORE_QUALIFIER =
@@ -59,8 +65,7 @@ public class DeployPreferences {
     this(new ProjectScope(project).getNode(PREFERENCE_STORE_QUALIFIER));
   }
 
-  @VisibleForTesting
-  DeployPreferences(IEclipsePreferences preferenceStore) {
+  protected DeployPreferences(IEclipsePreferences preferenceStore) {
     this.preferenceStore = preferenceStore;
 
     accountEmail = preferenceStore.get(PREF_ACCOUNT_EMAIL, DEFAULT_ACCOUNT_EMAIL);

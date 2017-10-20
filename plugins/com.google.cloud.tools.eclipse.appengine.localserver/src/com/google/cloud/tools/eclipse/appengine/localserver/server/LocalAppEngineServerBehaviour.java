@@ -22,13 +22,14 @@ import com.google.cloud.tools.appengine.api.devserver.DefaultRunConfiguration;
 import com.google.cloud.tools.appengine.api.devserver.DefaultStopConfiguration;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDevServer1;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDevServer2;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
 import com.google.cloud.tools.appengine.cloudsdk.serialization.CloudSdkVersion;
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
-import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
+import com.google.cloud.tools.eclipse.sdk.MessageConsoleWriterOutputLineListener;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -199,6 +200,21 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     setModulePublishState(module, state);
   }
 
+  @Override
+  protected void publishFinish(IProgressMonitor monitor) throws CoreException {
+    boolean allPublished = true;
+    IServer server = getServer();
+    IModule[] modules = server.getModules();
+    for (IModule module : modules) {
+      if (server.getModulePublishState(new IModule[] {module}) != IServer.PUBLISH_STATE_NONE) {
+        allPublished = false;
+      }
+    }
+    if (allPublished) {
+      setServerPublishState(IServer.PUBLISH_STATE_NONE);
+    }
+  }
+
   private static IStatus newErrorStatus(String message) {
     return new Status(IStatus.ERROR, Activator.PLUGIN_ID, message);
   }
@@ -220,13 +236,39 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     workingCopy.setMappedResources(projects.toArray(new IResource[projects.size()]));
   }
 
+  @VisibleForTesting
+  void checkPorts(DefaultRunConfiguration devServerRunConfiguration, PortChecker portInUse)
+      throws CoreException {
+    InetAddress serverHost = InetAddress.getLoopbackAddress();
+    if (devServerRunConfiguration.getHost() != null) {
+      serverHost = LocalAppEngineServerLaunchConfigurationDelegate
+          .resolveAddress(devServerRunConfiguration.getHost());
+    }
+    serverPort = checkPort(serverHost,
+        ifNull(devServerRunConfiguration.getPort(), DEFAULT_SERVER_PORT), portInUse);
+
+    if (LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2) {
+      InetAddress adminHost = InetAddress.getLoopbackAddress();
+      if (devServerRunConfiguration.getAdminHost() != null) {
+        adminHost = LocalAppEngineServerLaunchConfigurationDelegate
+            .resolveAddress(devServerRunConfiguration.getAdminHost());
+      }
+      adminPort = checkPort(adminHost,
+          ifNull(devServerRunConfiguration.getAdminPort(), DEFAULT_ADMIN_PORT), portInUse);
+    }
+
+    // API port seems to be bound on localhost in practice
+    checkPort(InetAddress.getLoopbackAddress(),
+        ifNull(devServerRunConfiguration.getApiPort(), DEFAULT_API_PORT), portInUse);
+  }
+
   /**
    * Check whether the provided port is in use. Returns the port if not, or throws an exception if
    * the port is in use.
    * 
    * @param addr a machine address or {@code null} for all addresses
    * @param portInUse returns true if the (host,port) is in use
-   * @return the port value ⊂ [0, 65535]
+   * @return the value of the {@code port} parameter
    * @throws CoreException if the port is in use
    */
   @VisibleForTesting
@@ -283,12 +325,12 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   /**
    * Starts the development server.
    *
-   * @param console the stream (Eclipse console) to send development server process output to
+   * @param mode the launch mode (see ILaunchManager.*_MODE constants)
    */
-  void startDevServer(DefaultRunConfiguration devServerRunConfiguration,
-      Path javaHomePath, MessageConsoleStream console)
+  void startDevServer(String mode, DefaultRunConfiguration devServerRunConfiguration,
+      Path javaHomePath, MessageConsoleStream outputStream, MessageConsoleStream errorStream)
       throws CoreException {
-    
+
     PortChecker portInUse = new PortChecker() {
       @Override
       public boolean isInUse(InetAddress addr, int port) {
@@ -297,30 +339,13 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
       }
     };
 
-    InetAddress serverHost = InetAddress.getLoopbackAddress();
-    if (devServerRunConfiguration.getHost() != null) {
-      serverHost = LocalAppEngineServerLaunchConfigurationDelegate
-          .resolveAddress(devServerRunConfiguration.getHost());
-    }
-    serverPort = checkPort(serverHost,
-        ifNull(devServerRunConfiguration.getPort(), DEFAULT_SERVER_PORT), portInUse);
-
-    InetAddress adminHost = InetAddress.getLoopbackAddress();
-    if (devServerRunConfiguration.getAdminHost() != null) {
-      adminHost = LocalAppEngineServerLaunchConfigurationDelegate
-          .resolveAddress(devServerRunConfiguration.getAdminHost());
-    }
-    adminPort = checkPort(adminHost,
-        ifNull(devServerRunConfiguration.getAdminPort(), DEFAULT_ADMIN_PORT), portInUse);
-
-    // API port seems on localhost in practice
-    checkPort(InetAddress.getLoopbackAddress(),
-        ifNull(devServerRunConfiguration.getApiPort(), DEFAULT_API_PORT), portInUse);
+    checkPorts(devServerRunConfiguration, portInUse);
 
     setServerState(IServer.STATE_STARTING);
+    setMode(mode);
 
     // Create dev app server instance
-    initializeDevServer(console, javaHomePath);
+    initializeDevServer(outputStream, errorStream, javaHomePath);
 
     // Run server
     try {
@@ -335,22 +360,26 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     return value != null ? value : defaultValue;
   }
 
-  private void initializeDevServer(MessageConsoleStream console, Path javaHomePath) {
-    MessageConsoleWriterOutputLineListener outputListener =
-        new MessageConsoleWriterOutputLineListener(console);
+  private void initializeDevServer(MessageConsoleStream stdout, MessageConsoleStream stderr,
+      Path javaHomePath) {
+    MessageConsoleWriterOutputLineListener stdoutListener =
+        new MessageConsoleWriterOutputLineListener(stdout);
+    MessageConsoleWriterOutputLineListener stderrListener =
+        new MessageConsoleWriterOutputLineListener(stderr);
 
     // dev_appserver output goes to stderr
     cloudSdk = new CloudSdk.Builder()
         .javaHome(javaHomePath)
-        .addStdOutLineListener(outputListener)
-        .addStdErrLineListener(outputListener)
+        .addStdOutLineListener(stdoutListener).addStdErrLineListener(stderrListener)
         .addStdErrLineListener(serverOutputListener)
         .startListener(localAppEngineStartListener)
         .exitListener(localAppEngineExitListener)
         .async(true)
         .build();
 
-    devServer = new CloudSdkAppEngineDevServer1(cloudSdk);
+    devServer = LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2
+        ? new CloudSdkAppEngineDevServer2(cloudSdk)
+        : new CloudSdkAppEngineDevServer1(cloudSdk);
     moduleToUrlMap.clear();
   }
   

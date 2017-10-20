@@ -38,6 +38,7 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IModuleType;
 import org.eclipse.wst.server.core.IServer;
+import org.eclipse.wst.server.core.internal.Server;
 import org.eclipse.wst.server.core.internal.facets.FacetUtil;
 import org.eclipse.wst.server.core.model.IURLProvider;
 import org.eclipse.wst.server.core.model.ServerDelegate;
@@ -74,6 +75,17 @@ public class LocalAppEngineServerDelegate extends ServerDelegate implements IURL
     return serverDelegate;
   }
 
+  @Override
+  public void setDefaults(IProgressMonitor monitor) {
+    super.setDefaults(monitor);
+
+    // Configure the server to auto-publish immediately on change, and to auto-publish
+    // any changes, not just on builds.
+    setAttribute(Server.PROP_AUTO_PUBLISH_SETTING, Server.AUTO_PUBLISH_RESOURCE);
+    setAttribute(Server.PROP_AUTO_PUBLISH_TIME, 0);
+  }
+
+
   /**
    * Returns OK status if the projects associated with modules to be added support the App Engine
    * runtime, otherwise returns an ERROR status.
@@ -94,6 +106,9 @@ public class LocalAppEngineServerDelegate extends ServerDelegate implements IURL
   IStatus checkProjectFacets(IModule[] toBeAdded) {
     if (toBeAdded != null) {
       for (IModule module : toBeAdded) {
+        if (!module.exists()) {
+          return StatusUtil.error(this, Messages.getString("deleted.project", module.getName())); //$NON-NLS-1$
+        }
         if (module.getProject() != null) {
           IStatus supportedFacets = FacetUtil.verifyFacets(module.getProject(), getServer());
           if (supportedFacets != null && !supportedFacets.isOK()) {
@@ -119,23 +134,33 @@ public class LocalAppEngineServerDelegate extends ServerDelegate implements IURL
     // verify that we do not have conflicting modules by service id
     Map<String, IModule> currentServiceIds = new HashMap<>();
     for (IModule module : current) {
-      String moduleServiceId = getServiceId(module);
-      if (currentServiceIds.containsKey(moduleServiceId)) {
-        // should never happen: we have a conflict within the already-defined modules
-        return StatusUtil.error(this, Messages.getString("SERVICE_CONFLICTS", //$NON-NLS-1$
-            module.getName(), currentServiceIds.get(moduleServiceId).getName(), moduleServiceId));
+      // ignore deleted modules / closed projects
+      if (module.exists()) {
+        String moduleServiceId = getServiceId(module);
+        if (currentServiceIds.containsKey(moduleServiceId)) {
+          // should never happen: we have a conflict within the already-defined modules
+          return StatusUtil.error(this, Messages.getString("SERVICE_CONFLICTS", //$NON-NLS-1$
+              module.getName(), currentServiceIds.get(moduleServiceId).getName(), moduleServiceId));
+        }
+        currentServiceIds.put(moduleServiceId, module);
       }
-      currentServiceIds.put(moduleServiceId, module);
     }
     if (toBeRemoved != null) {
       for (IModule module : toBeRemoved) {
-        String moduleServiceId = getServiceId(module);
-        // could verify that: serviceIds.containsKey(moduleServiceId)
-        currentServiceIds.remove(moduleServiceId);
+        // always ok to remove deleted modules / closed projects
+        if (module.exists()) {
+          String moduleServiceId = getServiceId(module);
+          // could verify that: serviceIds.containsKey(moduleServiceId)
+          currentServiceIds.remove(moduleServiceId);
+        }
       }
     }
     if (toBeAdded != null) {
       for (IModule module : toBeAdded) {
+        if (!module.exists()) {
+          return StatusUtil.error(this, Messages.getString("deleted.project", //$NON-NLS-1$
+              module.getName()));
+        }
         if (currentServiceIds.containsValue(module)) {
           // skip modules that are already present
           continue;

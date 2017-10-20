@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.bugreport.ui;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.appengine.cloudsdk.serialization.CloudSdkVersion;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.regex.Matcher;
@@ -35,18 +36,29 @@ public class BugReportCommandHandlerTest {
     assertEquals("github.com", url.getHost());
     assertEquals("/GoogleCloudPlatform/google-cloud-eclipse/issues/new", url.getPath());
 
+    //@formatter:off
+    // check that values are properly filled in
     Pattern pattern = Pattern.compile("body="
-        + "-\\+Cloud\\+Tools\\+for\\+Eclipse\\+Version%3A\\+(.*)%0A"
-        + "-\\+OS%3A\\+(.*)%0A"
-        + "-\\+Java\\+Version%3A\\+(.*)%0A%0A");
+        + "%28please\\+ensure\\+you\\+are\\+running\\+the\\+latest\\+version\\+of\\+CT4E\\+with\\+_Help\\+%3E\\+Check\\+for\\+Updates_%29%0A"
+        + "-\\+Cloud\\+Tools\\+for\\+Eclipse\\+version%3A\\+(?<toolVersion>.*)%0A"
+        + "-\\+Google\\+Cloud\\+SDK\\+version%3A\\+(?<gcloudVersion>.*)%0A"
+        + "-\\+OS%3A\\+(?<os>.*)%0A"
+        + "-\\+Java\\+version%3A\\+(?<javaVersion>.*)%0A%0A"
+        + "\\*\\*What\\+did\\+you\\+do%3F\\*\\*%0A%0A" 
+        + "\\*\\*What\\+did\\+you\\+expect\\+to\\+see%3F\\*\\*%0A%0A"
+        + "\\*\\*What\\+did\\+you\\+see\\+instead%3F\\*\\*%0A%0A" 
+        + "%28screenshots\\+are\\+helpful%29");
+    //@formatter:on
     Matcher matcher = pattern.matcher(url.getQuery());
     assertTrue(matcher.matches());
-    String toolVersion = matcher.group(1);
-    String os = matcher.group(2);
-    String javaVersion = matcher.group(3);
+    String toolVersion = matcher.group("toolVersion");
+    String gcloudVersion = matcher.group("gcloudVersion");
+    String os = matcher.group("os");
+    String javaVersion = matcher.group("javaVersion");
 
     assertTrue(Pattern.compile("^\\d+\\.\\d+\\.\\d+").matcher(toolVersion).find());
     assertTrue(javaVersion.startsWith("1.7.") || javaVersion.startsWith("1.8."));
     assertTrue(os.startsWith("Linux") || os.startsWith("Mac") || os.startsWith("Windows"));
+    new CloudSdkVersion(gcloudVersion); // throws IllegalArgumentException if invalid
   }
 }

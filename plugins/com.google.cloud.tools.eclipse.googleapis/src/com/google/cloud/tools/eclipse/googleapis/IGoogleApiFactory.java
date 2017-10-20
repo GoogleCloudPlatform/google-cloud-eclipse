@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.googleapis;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.services.appengine.v1.Appengine.Apps;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
+import com.google.api.services.servicemanagement.ServiceManagement;
 import com.google.api.services.storage.Storage;
 
 /**
@@ -32,16 +33,20 @@ public interface IGoogleApiFactory {
   /**
    * @return a Google Cloud Storage API client
    */
-  Storage newStorageApi(Credential credential) throws GoogleApiException;  
-  
+  Storage newStorageApi(Credential credential);
+
   /**
    * @return an Appengine Apps API client
    */
-  Apps newAppsApi(Credential credential) throws GoogleApiException;
+  Apps newAppsApi(Credential credential);
 
   /**
    * @return a CloudResourceManager/Projects API client
    */
-  Projects newProjectsApi(Credential credential) throws GoogleApiException;
+  Projects newProjectsApi(Credential credential);
 
+  /**
+   * @return a ServiceManagement API client
+   */
+  ServiceManagement newServiceManagementApi(Credential credential);
 }

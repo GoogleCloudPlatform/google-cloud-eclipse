@@ -16,28 +16,39 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.flex;
 
+/**
+ * Deploy parameters required to deploy an Eclipse project to App Engine flexible. The class adds
+ * one more parameter, an {@code app.yaml} path, to the common deploy parameters defined in {@link
+ * DeployPrefereces}.
+ */
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
 import com.google.common.base.Strings;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.osgi.service.prefs.BackingStoreException;
 
 public class FlexDeployPreferences extends DeployPreferences {
 
-  static final String PREF_APP_YAML_PATH = "app.yaml.path";
+  protected static final String PREF_APP_YAML_PATH = "app.yaml.path";
 
-  public static final String DEFAULT_APP_YAML_PATH = "src/main/appengine/app.yaml";
+  private static final String DEFAULT_APP_YAML_PATH = "src/main/appengine/app.yaml";
 
   private String appYamlPath;
 
   public FlexDeployPreferences(IProject project) {
-    super(project);
+    this(new ProjectScope(project).getNode(PREFERENCE_STORE_QUALIFIER));
+  }
+
+  protected FlexDeployPreferences(IEclipsePreferences preferenceStore) {
+    super(preferenceStore);
     appYamlPath = preferenceStore.get(PREF_APP_YAML_PATH, DEFAULT_APP_YAML_PATH);
   }
 
   @Override
   public void resetToDefaults() {
-    appYamlPath = DEFAULT_APP_YAML_PATH;
     super.resetToDefaults();
+    appYamlPath = DEFAULT_APP_YAML_PATH;
   }
 
   @Override

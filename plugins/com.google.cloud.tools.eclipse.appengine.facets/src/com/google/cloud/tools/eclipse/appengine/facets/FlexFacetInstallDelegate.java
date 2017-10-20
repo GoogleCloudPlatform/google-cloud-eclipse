@@ -17,8 +17,8 @@
 package com.google.cloud.tools.eclipse.appengine.facets;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexDeployPreferences;
+import com.google.cloud.tools.eclipse.util.Templates;
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
-import com.google.cloud.tools.eclipse.util.templates.appengine.AppEngineTemplateUtility;
 import java.io.ByteArrayInputStream;
 import java.util.Collections;
 import org.eclipse.core.resources.IContainer;
@@ -30,6 +30,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
+/**
+ * Creates {@code src/main/appengine/app.yaml} if not present. Applies to both the WAR facet and
+ * the JAR facet.
+ */
 public class FlexFacetInstallDelegate extends AppEngineFacetInstallDelegate {
   @Override
   public void execute(IProject project,
@@ -58,8 +62,8 @@ public class FlexFacetInstallDelegate extends AppEngineFacetInstallDelegate {
 
     appYaml.create(new ByteArrayInputStream(new byte[0]), true, subMonitor.newChild(10));
     String configFileLocation = appYaml.getLocation().toString();
-    AppEngineTemplateUtility.createFileContent(
-        configFileLocation, AppEngineTemplateUtility.APP_YAML_TEMPLATE,
+    Templates.createFileContent(
+        configFileLocation, Templates.APP_YAML_TEMPLATE,
         Collections.<String, String>emptyMap());
     subMonitor.worked(55);
 

@@ -25,14 +25,13 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * Tests for {@link EclipsePreferenceStore}.
  */
-@RunWith(JUnit4.class)
+@RunWith(MockitoJUnitRunner.class)
 public class EclipsePreferenceStoreTest {
   @Mock
   private IEclipsePreferences eclipsePrefs;
@@ -40,9 +39,7 @@ public class EclipsePreferenceStoreTest {
   private EclipsePreferenceStore prefs;
 
   @Before
-  public void setup() {
-    MockitoAnnotations.initMocks(this);
-
+  public void setUp() {
     prefs = new EclipsePreferenceStore(eclipsePrefs);
   }
 

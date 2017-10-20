@@ -7,5 +7,5 @@ Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: Google Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Fragment-Host: com.google.cloud.tools.eclipse.welcome
-Import-Package: com.google.cloud.tools.eclipse.test.util,
- org.junit;version="4.12.0"
+Require-Bundle: com.google.cloud.tools.eclipse.test.dependencies
+Import-Package: com.google.cloud.tools.eclipse.test.util

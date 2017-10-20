@@ -22,7 +22,6 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.Proxy.Type;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.logging.Logger;
 import org.eclipse.core.net.proxy.IProxyData;
 import org.eclipse.core.net.proxy.IProxyService;
@@ -34,19 +33,19 @@ public class ProxyFactory {
   private static final Logger logger = Logger.getLogger(ProxyFactory.class.getName());
 
   private IProxyService proxyService;
-  
+
   // needs to be public for Mockito
   @VisibleForTesting
-  public Proxy createProxy(String url) throws URISyntaxException {
-    Preconditions.checkNotNull(url, "url is null");
-    Preconditions.checkArgument(!url.startsWith("http://"), "http is not a supported schema");
-    
+  public Proxy createProxy(URI uri) {
+    Preconditions.checkNotNull(uri, "uri is null");
+    Preconditions.checkArgument(!"http".equals(uri.getScheme()), "http is not a supported schema");
+
     IProxyService proxyServiceCopy = proxyService;
     if (proxyServiceCopy == null) {
       return Proxy.NO_PROXY;
     }
 
-    IProxyData[] proxyDataForUri = proxyServiceCopy.select(new URI(url));
+    IProxyData[] proxyDataForUri = proxyServiceCopy.select(uri);
     for (final IProxyData iProxyData : proxyDataForUri) {
       switch (iProxyData.getType()) {
         case IProxyData.HTTPS_PROXY_TYPE:

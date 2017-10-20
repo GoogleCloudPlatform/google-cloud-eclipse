@@ -16,14 +16,13 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.standard;
 
-import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectWizard;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 public class AppEngineStandardProjectWizardTest {
 
-  private AppEngineProjectWizard wizard;
+  private AppEngineStandardProjectWizard wizard;
 
   @Before
   public void setUp() {

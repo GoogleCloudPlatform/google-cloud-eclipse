@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.dataflow.core.internal.properties;
 
 import com.google.cloud.tools.eclipse.dataflow.core.DataflowCorePlugin;
 import com.google.cloud.tools.eclipse.dataflow.core.natures.DataflowJavaProjectNature;
-
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -81,12 +80,10 @@ public class DataflowPropertyTester extends PropertyTester {
 
   private boolean isProjectDataflowProject(IProject project) {
     try {
-      if (project != null && DataflowJavaProjectNature.hasDataflowNature(project)) {
-        return true;
-      }
+      return DataflowJavaProjectNature.hasDataflowNature(project);
     } catch (CoreException e) {
       DataflowCorePlugin.logError(e, "Exception while testing for Dataflow Nature");
+      return false;
     }
-    return false;
   }
 }

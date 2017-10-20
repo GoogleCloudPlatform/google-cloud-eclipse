@@ -30,19 +30,20 @@ import org.junit.Test;
 
 public class MavenCoordinatesHelperTest {
 
-  private MavenCoordinates mavenCoordinates;
+  private MavenCoordinates.Builder builder = new MavenCoordinates.Builder();
 
   @Before
   public void setUp() {
-    mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
-    mavenCoordinates.setRepository("testRepo");
-    mavenCoordinates.setType("war");
-    mavenCoordinates.setVersion(MavenCoordinates.LATEST_VERSION);
+    builder.setGroupId("groupId")
+        .setArtifactId("artifactId")
+        .setRepository("testRepo")
+        .setType("war")
+        .setVersion(MavenCoordinates.LATEST_VERSION);
   }
 
   @Test
   public void testCreateClasspathAttributesWithClassifier() {
-    mavenCoordinates.setClassifier("classifier");
+    MavenCoordinates mavenCoordinates = builder.setClassifier("classifier").build();
 
     List<IClasspathAttribute> classpathAttributes =
         MavenCoordinatesHelper.createClasspathAttributes(mavenCoordinates, "1.0.0");
@@ -62,6 +63,7 @@ public class MavenCoordinatesHelperTest {
 
   @Test
   public void testCreateClasspathAttributesWithoutClassifier() {
+    MavenCoordinates mavenCoordinates = builder.build();
     List<IClasspathAttribute> classpathAttributes =
         MavenCoordinatesHelper.createClasspathAttributes(mavenCoordinates, "1.0.0");
     for (IClasspathAttribute iClasspathAttribute : classpathAttributes) {

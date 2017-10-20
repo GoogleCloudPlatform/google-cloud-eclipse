@@ -16,11 +16,17 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets;
 
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.resources.IProject;
@@ -28,12 +34,15 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.jobs.ILock;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.componentcore.internal.builder.DependencyGraphImpl;
 import org.eclipse.wst.common.componentcore.internal.builder.IDependencyGraph;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.IFacetedProjectBase;
+import org.eclipse.wst.common.project.facet.core.IFacetedProjectWorkingCopy;
 import org.eclipse.wst.common.project.facet.core.IProjectFacet;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
@@ -47,16 +56,41 @@ public class AppEngineStandardFacet {
   private static final Logger logger = Logger.getLogger(AppEngineStandardFacet.class.getName());
 
   public static final String ID = "com.google.cloud.tools.eclipse.appengine.facets.standard";
-  public static final String VERSION = "1";
 
   public static final IProjectFacet FACET = ProjectFacetsManager.getProjectFacet(ID);
-  public static final IProjectFacetVersion FACET_VERSION = FACET.getVersion(VERSION);
+  // See AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8 too
+  public static final IProjectFacetVersion JRE7 = FACET.getVersion("JRE7");
 
   static final String DEFAULT_RUNTIME_ID =
       "com.google.cloud.tools.eclipse.appengine.standard.runtime";
   static final String DEFAULT_RUNTIME_NAME = "App Engine Standard";
-  public static final String DEFAULT_APPENGINE_SDK_VERSION = "1.9.49";
-  public static final String DEFAULT_GCLOUD_PLUGIN_VERSION = "2.0.9.133.v201611104";
+
+  /**
+   * Locks for managing simultaneous installation of App Engine Standard facets and runtimes. Use a
+   * CacheBuilder as it synchronizes simultaneous requests for the same project.
+   */
+  private final static LoadingCache<IProject, ILock> installationLocks =
+      CacheBuilder.newBuilder().weakValues().build(new CacheLoader<IProject, ILock>() {
+        @Override
+        public ILock load(IProject project) throws Exception {
+          return Job.getJobManager().newLock();
+        }
+      });
+
+  /**
+   * Obtain the project lock.
+   */
+  private static ILock acquireLock(IProject project) throws CoreException {
+    try {
+      ILock lock = installationLocks.get(project);
+      lock.acquire();
+      return lock;
+    } catch (ExecutionException ex) {
+      throw new CoreException(
+          StatusUtil.error(AppEngineStandardFacet.class, "Unable to acquire project lock", ex));
+    }
+  }
+
 
   /**
    * Returns true if project has the App Engine Standard facet and false otherwise.
@@ -88,7 +122,7 @@ public class AppEngineStandardFacet {
    * Check that the given Servlet API version string (expected to be from the
    * <tt>&lt;web-app version="xxx"&gt;</tt> attribute), is compatible with this project's App Engine
    * settings.
-   * 
+   *
    * @return {@code true} if supported or {@code false} otherwise
    * @throws NullPointerException if the project does not have an App Engine Standard facet
    */
@@ -164,29 +198,122 @@ public class AppEngineStandardFacet {
    * @param monitor the progress monitor
    * @throws CoreException if anything goes wrong during install
    */
-  public static void installAppEngineFacet(IFacetedProject facetedProject,
-      boolean installDependentFacets, IProgressMonitor monitor) throws CoreException {
-    SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
+  public static void installAppEngineFacet(final IFacetedProject facetedProject,
+      final boolean installDependentFacets, final IProgressMonitor monitor) throws CoreException {
+    ILock lock = acquireLock(facetedProject.getProject());
+    try {
+      SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
-    if (facetedProject.hasProjectFacet(FACET)) {
-      return;
+      if (facetedProject.hasProjectFacet(FACET)) {
+        // nothing to do, move along
+        return;
+      }
+
+      /*
+       * So the project does not have the App Engine Standard facet. We first try our AES JRE7 and
+       * JRE8 detectors: these detectors look for appengine-web.xml and either add or change the
+       * required facets to correspond to the AES runtime in the appengine-web.xml. The JRE7
+       * detector may downgrade the Java and Dynamic Web Project facets (if set).
+       * 
+       * If no appengine-web.xml is detected, then there should be no changes to the IFPWC, unless
+       * there are other detectors that make a contribution.
+       */
+      String projectName = facetedProject.getProject().getName();
+      logger.fine(projectName + ": current facets: " + facetedProject.getProjectFacets());
+      IFacetedProjectWorkingCopy workingCopy = facetedProject.createWorkingCopy();
+      workingCopy.detect(subMonitor.newChild(20));
+
+      logger.fine(projectName + ": detector changes: " + workingCopy.getProjectFacetActions());
+
+      // If there is a conflict, send the CoreException up
+      // If successful, workingCopy will mirror the IFacetedProject.
+      // The only known potential for conflict was downgrading DWP from 3.x -> 2.5 for
+      // AES JRE7 which we've side-stepped by allowing this version change.
+      workingCopy.commitChanges(subMonitor.newChild(20));
+
+      if (facetedProject.hasProjectFacet(FACET)) {
+        // success!
+        return;
+      }
+
+      // So we must have a project with no appengine-web.xml.
+      // Need to figure out: what AES version do we install?
+
+      /*
+       * https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155
+       * 
+       * Instead of calling "IFacetedProject.installProjectFacet()" multiple times, we install
+       * facets in a batch using "IFacetedProject.modify()" so that we hold the lock until we finish
+       * installing all the facets. This ensures that the first ConvertJob starts installing the
+       * JSDT facet only after the batch is complete, which in turn prevents the first ConvertJob
+       * from scheduling the second ConvertJob (triggered by installing the JSDT facet.)
+       * 
+       * we continue to update workingCopy to use FacetUtil.getHighestSatisfyingVersion() FIXME:
+       * investigate using IFacetProjectWorkingCopy instead
+       */
+      FacetUtil facetUtil = new FacetUtil(facetedProject);
+      IProjectFacetVersion standardFacet;
+      // See if the default AppEngine Standard facet is ok with the project's current settings
+      if (!FacetUtil.conflictsWith(workingCopy, FACET.getDefaultVersion())) {
+        standardFacet = FACET.getDefaultVersion();
+        logger.fine(projectName + ": installing default AES facet " + standardFacet);
+        facetUtil.addFacetToBatch(standardFacet, null);
+        workingCopy.addProjectFacet(standardFacet);
+      } else {
+        // first see if there's a AES version that works with our current constraints
+        standardFacet = FacetUtil.getHighestSatisfyingVersion(workingCopy, FACET);
+        if (standardFacet == null && installDependentFacets) {
+          // if we're not installing/updating dependent facets, see if there's something
+          // that works without Java and DWP
+          standardFacet = FacetUtil.getHighestSatisfyingVersion(workingCopy, FACET,
+              Arrays.asList(JavaFacet.FACET));
+        }
+        if (standardFacet == null) {
+          throw new CoreException(StatusUtil.error(AppEngineStandardFacet.class,
+              "No compatible AppEngine Standard facet found"));
+        }
+        logger.fine(projectName + ": installing AES facet " + standardFacet);
+        facetUtil.addFacetToBatch(standardFacet, /* config */ null);
+        workingCopy.addProjectFacet(standardFacet);
+      }
+
+      if (installDependentFacets) {
+        // check if we need to add/update Java facet
+        IProjectFacetVersion currentJavaFacet = workingCopy.getProjectFacetVersion(JavaFacet.FACET);
+        if (currentJavaFacet == null || standardFacet.conflictsWith(currentJavaFacet)) {
+          IProjectFacetVersion javaFacet =
+              FacetUtil.getHighestSatisfyingVersion(workingCopy, JavaFacet.FACET);
+          facetUtil.addJavaFacetToBatch(javaFacet);
+          if (currentJavaFacet == null) {
+            logger.fine(projectName + ": adding Java facet " + javaFacet);
+            workingCopy.addProjectFacet(javaFacet);
+          } else {
+            logger.fine(projectName + ": updating Java facet to " + javaFacet);
+            workingCopy.changeProjectFacetVersion(javaFacet);
+          }
+        }
+
+        // check if we need to add/update DWP facet
+        IProjectFacetVersion currentWebFacet =
+            workingCopy.getProjectFacetVersion(WebFacetUtils.WEB_FACET);
+        if (currentWebFacet == null || standardFacet.conflictsWith(currentWebFacet)) {
+          IProjectFacetVersion webFacet =
+              FacetUtil.getHighestSatisfyingVersion(workingCopy, WebFacetUtils.WEB_FACET);
+          facetUtil.addWebFacetToBatch(webFacet);
+          if (currentWebFacet == null) {
+            logger.fine(projectName + ": adding DWP facet " + webFacet);
+            workingCopy.addProjectFacet(webFacet);
+          } else {
+            logger.fine(projectName + ": updating DWP facet to " + webFacet);
+            workingCopy.changeProjectFacetVersion(webFacet);
+          }
+        }
+      }
+
+      facetUtil.install(subMonitor.newChild(90));
+    } finally {
+      lock.release();
     }
-    FacetUtil facetUtil = new FacetUtil(facetedProject);
-    facetUtil.addFacetToBatch(FACET_VERSION, null /* config */);
-
-    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155
-    // Instead of calling "IFacetedProject.installProjectFacet()" multiple times, we install facets
-    // in a batch using "IFacetedProject.modify()" so that we hold the lock until we finish
-    // installing all the facets. This ensures that the first ConvertJob starts installing the JSDT
-    // facet only after the batch is complete, which in turn prevents the first ConvertJob from
-    // scheduling the second ConvertJob (triggered by installing the JSDT facet.)
-
-    if (installDependentFacets) {
-      facetUtil.addJavaFacetToBatch(JavaFacet.VERSION_1_7);
-      facetUtil.addWebFacetToBatch(WebFacetUtils.WEB_25);
-    }
-
-    facetUtil.install(subMonitor.newChild(90));
   }
 
   /**
@@ -199,51 +326,80 @@ public class AppEngineStandardFacet {
    * @throws CoreException if the project contains one or more facets that are not supported by
    *     this runtime; if failed for any other reason
    */
-  public static void installAllAppEngineRuntimes(IFacetedProject project, IProgressMonitor monitor)
-      throws CoreException {
-    // If the project already has an App Engine runtime instance
-    // do not add any other App Engine runtime instances to the list of targeted runtimes
-    for (IRuntime existingTargetedRuntime : project.getTargetedRuntimes()) {
-      if (AppEngineStandardFacet.isAppEngineStandardRuntime(existingTargetedRuntime)) {
+  public static void installAllAppEngineRuntimes(IFacetedProjectBase project,
+      IProgressMonitor monitor) throws CoreException {
+    ILock lock = acquireLock(project.getProject());
+    try {
+      if (!project.getProject().isOpen()) {
+        // no sense trying to install into a deleted/closed project
         return;
       }
-    }
-
-    SubMonitor progress = SubMonitor.convert(monitor, 100);
-
-    // Workaround deadlock bug described in Eclipse bug (https://bugs.eclipse.org/511793).
-    // There are graph update jobs triggered by the completion of the CreateProjectOperation
-    // above (from resource notifications) and from other resource changes from modifying the
-    // project facets. So we force the dependency graph to defer updates.
-    try {
-      IDependencyGraph.INSTANCE.preUpdate();
-      try {
-        Job.getJobManager().join(DependencyGraphImpl.GRAPH_UPDATE_JOB_FAMILY,
-            progress.newChild(10));
-      } catch (OperationCanceledException | InterruptedException ex) {
-        logger.log(Level.WARNING, "Exception waiting for WTP Graph Update job", ex);
+      SubMonitor progress = SubMonitor.convert(monitor, 100);
+      // If the project already has an App Engine runtime instance
+      // do not add any other App Engine runtime instances to the list of targeted runtimes
+      for (IRuntime existingTargetedRuntime : project.getTargetedRuntimes()) {
+        if (AppEngineStandardFacet.isAppEngineStandardRuntime(existingTargetedRuntime)) {
+          return;
+        }
       }
 
-      org.eclipse.wst.server.core.IRuntime[] appEngineRuntimes = getAppEngineRuntimes();
-      if (appEngineRuntimes.length > 0) {
-        IRuntime appEngineFacetRuntime = null;
-        progress.setWorkRemaining(appEngineRuntimes.length);
-        for (org.eclipse.wst.server.core.IRuntime appEngineRuntime : appEngineRuntimes) {
-          appEngineFacetRuntime = org.eclipse.jst.server.core.FacetUtil.getRuntime(appEngineRuntime);
-          project.addTargetedRuntime(appEngineFacetRuntime, progress.newChild(1));
-        }
-        project.setPrimaryRuntime(appEngineFacetRuntime, monitor);
-      } else { // Create a new App Engine runtime
-        IRuntime appEngineFacetRuntime = createAppEngineFacetRuntime(progress.newChild(10));
-        if (appEngineFacetRuntime == null) {
-          throw new NullPointerException("Could not locate App Engine facet runtime");
+
+      // Workaround deadlock bug described in Eclipse bug (https://bugs.eclipse.org/511793).
+      // There are graph update jobs triggered by the completion of the CreateProjectOperation
+      // above (from resource notifications) and from other resource changes from modifying the
+      // project facets. So we force the dependency graph to defer updates.
+      try {
+        IDependencyGraph.INSTANCE.preUpdate();
+        try {
+          Job.getJobManager().join(DependencyGraphImpl.GRAPH_UPDATE_JOB_FAMILY,
+              progress.newChild(10));
+        } catch (OperationCanceledException | InterruptedException ex) {
+          logger.log(Level.WARNING, "Exception waiting for WTP Graph Update job", ex);
         }
 
-        project.addTargetedRuntime(appEngineFacetRuntime, progress.newChild(10));
-        project.setPrimaryRuntime(appEngineFacetRuntime, progress.newChild(10));
+        org.eclipse.wst.server.core.IRuntime[] appEngineRuntimes = getAppEngineRuntimes();
+        if (appEngineRuntimes.length > 0) {
+          IRuntime appEngineFacetRuntime = null;
+          progress.setWorkRemaining(appEngineRuntimes.length);
+          for (org.eclipse.wst.server.core.IRuntime appEngineRuntime : appEngineRuntimes) {
+            appEngineFacetRuntime =
+                org.eclipse.jst.server.core.FacetUtil.getRuntime(appEngineRuntime);
+            if (project instanceof IFacetedProject) {
+              ((IFacetedProject) project).addTargetedRuntime(appEngineFacetRuntime,
+                  progress.newChild(1));
+            } else {
+              ((IFacetedProjectWorkingCopy) project).addTargetedRuntime(appEngineFacetRuntime);
+            }
+          }
+          if (project instanceof IFacetedProject) {
+            ((IFacetedProject) project).setPrimaryRuntime(appEngineFacetRuntime,
+                progress.newChild(1));
+          } else {
+            ((IFacetedProjectWorkingCopy) project).setPrimaryRuntime(appEngineFacetRuntime);
+          }
+        } else { // Create a new App Engine runtime
+          IRuntime appEngineFacetRuntime = createAppEngineFacetRuntime(progress.newChild(10));
+          if (appEngineFacetRuntime == null) {
+            throw new NullPointerException("Could not locate App Engine facet runtime");
+          }
+
+          if (project instanceof IFacetedProject) {
+            ((IFacetedProject) project).addTargetedRuntime(appEngineFacetRuntime,
+                progress.newChild(10));
+            ((IFacetedProject) project).setPrimaryRuntime(appEngineFacetRuntime,
+                progress.newChild(10));
+          } else {
+            ((IFacetedProjectWorkingCopy) project).addTargetedRuntime(appEngineFacetRuntime);
+            ((IFacetedProjectWorkingCopy) project).setPrimaryRuntime(appEngineFacetRuntime);
+          }
+        }
+      } catch (CoreException ex) {
+        logger.log(Level.SEVERE, "Exception occurred when installing App Engine Runtime", ex);
+      } finally {
+        IDependencyGraph.INSTANCE.postUpdate();
       }
     } finally {
-      IDependencyGraph.INSTANCE.postUpdate();
+      lock.release();
     }
   }
 

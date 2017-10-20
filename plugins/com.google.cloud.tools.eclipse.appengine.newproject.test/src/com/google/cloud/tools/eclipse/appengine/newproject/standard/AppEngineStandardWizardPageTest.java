@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.standard;
 
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
@@ -30,36 +31,43 @@ public class AppEngineStandardWizardPageTest {
   public void testPageInitiallyIncomplete() {
     Assert.assertFalse(page.isPageComplete());
   }
-  
+
   @Test
   public void testGetNextPage() {
     Assert.assertNull(page.getNextPage());
   }
-  
+
   @Test
   public void testGetPreviousPage() {
     Assert.assertNull(page.getPreviousPage());
   }
-  
+
   @Test
   public void testTitle() {
     Assert.assertEquals("App Engine Standard Project", page.getTitle());
   }
-  
+
   @Test
   public void testDescription() {
     Assert.assertEquals(
         "Create a new Eclipse project for App Engine standard environment development.",
         page.getDescription());
   }
-  
+
+  @Test
+  public void testDefaultRuntime() {
+    Assert.assertEquals(AppEngineRuntime.STANDARD_JAVA_8,
+        AppEngineStandardWizardPage.DEFAULT_RUNTIME);
+    Assert.assertEquals(AppEngineStandardWizardPage.DEFAULT_RUNTIME.getId(), page.getRuntimeId());
+  }
+
   @Test
   public void testValidatePage() {
     Assert.assertFalse(page.validatePage());
     Assert.assertNull(page.getErrorMessage());
     Assert.assertEquals("Project name must be specified", page.getMessage());
   }
-  
+
   @Test
   public void testCreateControl() {
     Composite parent = new Composite(new Shell(), SWT.NONE);

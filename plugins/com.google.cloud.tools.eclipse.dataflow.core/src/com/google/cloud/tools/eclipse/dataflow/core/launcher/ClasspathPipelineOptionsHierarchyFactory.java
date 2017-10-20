@@ -21,10 +21,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.cloud.tools.eclipse.dataflow.core.DataflowCorePlugin;
 import com.google.cloud.tools.eclipse.dataflow.core.launcher.options.JavaProjectPipelineOptionsHierarchy;
 import com.google.cloud.tools.eclipse.dataflow.core.launcher.options.PipelineOptionsHierarchy;
+import com.google.cloud.tools.eclipse.dataflow.core.launcher.options.PipelineOptionsNamespaces;
 import com.google.cloud.tools.eclipse.dataflow.core.project.MajorVersion;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 /**
@@ -44,15 +47,19 @@ public class ClasspathPipelineOptionsHierarchyFactory implements PipelineOptions
   public PipelineOptionsHierarchy forProject(
       IProject project, MajorVersion version, IProgressMonitor monitor)
       throws PipelineOptionsRetrievalException {
-    IJavaElement javaProject = project.getAdapter(IJavaElement.class);
+    IJavaElement javaElement = project.getAdapter(IJavaElement.class);
     checkNotNull(
-        javaProject,
+        javaElement,
         "%s cannot be created for a non-java project: %s",
         JavaProjectPipelineOptionsHierarchy.class.getSimpleName(),
         project);
     try {
-      return new JavaProjectPipelineOptionsHierarchy(
-          javaProject.getJavaProject(), version, monitor);
+      IJavaProject javaProject = javaElement.getJavaProject();
+      IType rootType = javaProject.findType(PipelineOptionsNamespaces.rootType(version));
+      if (rootType == null || !rootType.exists()) {
+        return global(monitor);
+      }
+      return new JavaProjectPipelineOptionsHierarchy(javaProject, version, monitor);
     } catch (JavaModelException e) {
       DataflowCorePlugin.logError(e,
           "Error while constructing Pipeline Options Hierarchy for project %s", project.getName());

@@ -52,8 +52,8 @@ public class LibraryClasspathContainerInitializer extends ClasspathContainerInit
 
   @VisibleForTesting
   LibraryClasspathContainerInitializer(String containerPathPrefix,
-                                       LibraryClasspathContainerSerializer serializer,
-                                       ILibraryClasspathContainerResolverService resolverService) {
+      LibraryClasspathContainerSerializer serializer,
+      ILibraryClasspathContainerResolverService resolverService) {
     this.containerPathPrefix = containerPathPrefix;
     this.serializer = serializer;
     this.resolverService = resolverService;
@@ -84,9 +84,8 @@ public class LibraryClasspathContainerInitializer extends ClasspathContainerInit
         resolverService.resolveContainer(project, containerPath, new NullProgressMonitor());
       }
     } catch (IOException ex) {
-      throw new CoreException(StatusUtil.error(this,
-                                               "Failed to load persisted container descriptor",
-                                               ex));
+      throw new CoreException(
+          StatusUtil.error(this, "Failed to load persisted container descriptor", ex));
     }
   }
 
@@ -101,4 +100,11 @@ public class LibraryClasspathContainerInitializer extends ClasspathContainerInit
     }
     return true;
   }
+
+  @Override
+  public Object getComparisonID(IPath containerPath, IJavaProject project) {
+    // used to collapse duplicate classpath entries; we use the full path to identify libraries
+    return containerPath;
+  }
+
 }

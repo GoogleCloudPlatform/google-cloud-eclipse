@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
+import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedSet;
@@ -43,20 +44,18 @@ import org.eclipse.m2e.core.project.IMavenProjectRegistry;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * Tests for {@link DataflowArtifactRetriever}.
  */
-@RunWith(JUnit4.class)
+@RunWith(MockitoJUnitRunner.class)
 public class DataflowDependencyManagerTest {
-  @Mock
-  private DataflowArtifactRetriever artifactRetriever;
 
   private DataflowDependencyManager manager;
-
+  
+  @Mock private ArtifactRetriever artifactRetriever;
   @Mock private IMaven maven;
   @Mock private IMavenProjectRegistry projectRegistry;
   @Mock private IProject project;
@@ -67,7 +66,6 @@ public class DataflowDependencyManagerTest {
 
   @Before
   public void setup() throws Exception {
-    MockitoAnnotations.initMocks(this);
     manager = DataflowDependencyManager.create(artifactRetriever, maven, projectRegistry);
 
     when(projectRegistry.getProject(project)).thenReturn(mavenFacade);
@@ -77,9 +75,10 @@ public class DataflowDependencyManagerTest {
   }
 
   @Test
-  public void testGetDataflowDependencyNoTrackDependsUpToNextMajorVersion() throws Exception {
+  public void testGetDataflowDependencyNoTrackDependsUpToNextMajorVersion() {
     ArtifactVersion baseVersion = new DefaultArtifactVersion("1.2.3");
-    when(artifactRetriever.getLatestSdkVersion(MajorVersion.ONE.getVersionRange()))
+    when(artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
+        DataflowMavenCoordinates.ARTIFACT_ID, MajorVersion.ONE.getVersionRange()))
         .thenReturn(baseVersion);
 
     ArtifactVersion version =
@@ -89,9 +88,9 @@ public class DataflowDependencyManagerTest {
   }
 
   @Test
-  public void testGetDataflowDependencyNoTrackNoVersionInRangeDependsOnUnstableMajorVersionRange()
-      throws Exception {
-    when(artifactRetriever.getLatestSdkVersion(MajorVersion.QUALIFIED_TWO.getVersionRange()))
+  public void testGetDataflowDependencyNoTrackNoVersionInRangeDependsOnUnstableMajorVersionRange() {
+    when(artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
+        DataflowMavenCoordinates.ARTIFACT_ID, MajorVersion.QUALIFIED_TWO.getVersionRange()))
         .thenReturn(null);
 
     ArtifactVersion version =
@@ -101,9 +100,9 @@ public class DataflowDependencyManagerTest {
   }
 
   @Test
-  public void testGetDataflowDependencyNoTrackNoVersionInRangeDependsOnMajorVersionRange()
-      throws Exception {
-    when(artifactRetriever.getLatestSdkVersion(MajorVersion.TWO.getVersionRange()))
+  public void testGetDataflowDependencyNoTrackNoVersionInRangeDependsOnMajorVersionRange() {
+    when(artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
+        DataflowMavenCoordinates.ARTIFACT_ID, MajorVersion.TWO.getVersionRange()))
         .thenReturn(null);
 
     ArtifactVersion version =
@@ -118,7 +117,8 @@ public class DataflowDependencyManagerTest {
     when(model.getDependencies()).thenReturn(ImmutableList.of(pinnedDep));
     DefaultArtifactVersion latestVersion = new DefaultArtifactVersion("1.2.3");
     when(
-        artifactRetriever.getLatestSdkVersion(
+        artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
+            DataflowMavenCoordinates.ARTIFACT_ID, 
             VersionRange.createFromVersionSpec(pinnedDep.getVersion()))).thenReturn(latestVersion);
 
     assertEquals(MajorVersion.ONE, manager.getProjectMajorVersion(project));
@@ -127,10 +127,12 @@ public class DataflowDependencyManagerTest {
   @Test
   public void testGetLatestVersions() {
     DefaultArtifactVersion latestVersionOne = new DefaultArtifactVersion("1.2.3");
-    when(artifactRetriever.getLatestSdkVersion(MajorVersion.ONE.getVersionRange()))
+    when(artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
+        DataflowMavenCoordinates.ARTIFACT_ID, MajorVersion.ONE.getVersionRange()))
         .thenReturn(latestVersionOne);
     ArtifactVersion latestVersionTwo = new DefaultArtifactVersion("2.0.0");
-    when(artifactRetriever.getLatestSdkVersion(MajorVersion.TWO.getVersionRange()))
+    when(artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
+        DataflowMavenCoordinates.ARTIFACT_ID, MajorVersion.TWO.getVersionRange()))
         .thenReturn(latestVersionTwo);
 
     Map<ArtifactVersion, MajorVersion> expected =
@@ -146,9 +148,11 @@ public class DataflowDependencyManagerTest {
   @Test
   public void testGetLatestVersionUnstableNoReleasedStableVersion() {
     DefaultArtifactVersion latestVersion = new DefaultArtifactVersion("2.0.0-beta2");
-    when(artifactRetriever.getLatestSdkVersion(MajorVersion.QUALIFIED_TWO.getVersionRange()))
+    when(artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
+        DataflowMavenCoordinates.ARTIFACT_ID, MajorVersion.QUALIFIED_TWO.getVersionRange()))
         .thenReturn(latestVersion);
-    when(artifactRetriever.getLatestSdkVersion(MajorVersion.TWO.getVersionRange()))
+    when(artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
+        DataflowMavenCoordinates.ARTIFACT_ID, MajorVersion.TWO.getVersionRange()))
         .thenReturn(null);
 
     assertEquals(
@@ -160,10 +164,12 @@ public class DataflowDependencyManagerTest {
   @Test
   public void testGetLatestVersionUnstableWithStableVersionInMap() {
     DefaultArtifactVersion latestQualified = new DefaultArtifactVersion("2.0.0-beta2");
-    when(artifactRetriever.getLatestSdkVersion(MajorVersion.QUALIFIED_TWO.getVersionRange()))
+    when(artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
+        DataflowMavenCoordinates.ARTIFACT_ID, MajorVersion.QUALIFIED_TWO.getVersionRange()))
         .thenReturn(latestQualified);
     DefaultArtifactVersion latestMajor = new DefaultArtifactVersion("2.0.0");
-    when(artifactRetriever.getLatestSdkVersion(MajorVersion.TWO.getVersionRange()))
+    when(artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
+        DataflowMavenCoordinates.ARTIFACT_ID, MajorVersion.TWO.getVersionRange()))
         .thenReturn(latestMajor);
 
     assertEquals(
@@ -175,10 +181,12 @@ public class DataflowDependencyManagerTest {
   @Test
   public void testGetLatestVersionUnstableWithNoStableVersion() {
     DefaultArtifactVersion latestOne = new DefaultArtifactVersion("1.9.0");
-    when(artifactRetriever.getLatestSdkVersion(MajorVersion.ONE.getVersionRange()))
+    when(artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
+        DataflowMavenCoordinates.ARTIFACT_ID, MajorVersion.ONE.getVersionRange()))
         .thenReturn(latestOne);
     DefaultArtifactVersion latestQualifiedTwo = new DefaultArtifactVersion("2.0.0-beta2");
-    when(artifactRetriever.getLatestSdkVersion(MajorVersion.QUALIFIED_TWO.getVersionRange()))
+    when(artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
+        DataflowMavenCoordinates.ARTIFACT_ID, MajorVersion.QUALIFIED_TWO.getVersionRange()))
         .thenReturn(latestQualifiedTwo);
 
     Map<ArtifactVersion, MajorVersion> expected =
@@ -252,22 +260,22 @@ public class DataflowDependencyManagerTest {
     assertFalse(manager.hasPinnedDataflowDependency(project));
   }
 
-  private Dependency dataflowDependency() {
-    Dependency dep = new Dependency();
-    dep.setArtifactId("google-cloud-dataflow-java-sdk-all");
-    dep.setGroupId("com.google.cloud.dataflow");
-    return dep;
+  private static Dependency dataflowDependency() {
+    Dependency dependency = new Dependency();
+    dependency.setArtifactId("google-cloud-dataflow-java-sdk-all");
+    dependency.setGroupId("com.google.cloud.dataflow");
+    return dependency;
   }
 
-  private Dependency pinnedDataflowDependency() {
-    Dependency dep = dataflowDependency();
-    dep.setVersion("[1.0.0, 2.0.0)");
-    return dep;
+  private static Dependency pinnedDataflowDependency() {
+    Dependency dependency = dataflowDependency();
+    dependency.setVersion("[1.0.0, 2.0.0)");
+    return dependency;
   }
 
-  private Dependency trackedDataflowDependency() {
-    Dependency dep = dataflowDependency();
-    dep.setVersion(Artifact.LATEST_VERSION);
-    return dep;
+  private static Dependency trackedDataflowDependency() {
+    Dependency depedency = dataflowDependency();
+    depedency.setVersion(Artifact.LATEST_VERSION);
+    return depedency;
   }
 }

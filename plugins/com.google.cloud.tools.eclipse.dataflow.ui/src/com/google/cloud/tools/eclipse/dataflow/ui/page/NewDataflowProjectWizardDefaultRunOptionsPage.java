@@ -18,13 +18,10 @@ package com.google.cloud.tools.eclipse.dataflow.ui.page;
 
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.ProjectOrWorkspaceDataflowPreferences;
-import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowProjectCreator;
+import com.google.cloud.tools.eclipse.dataflow.ui.Messages;
 import com.google.cloud.tools.eclipse.dataflow.ui.preferences.RunOptionsDefaultsComponent;
-
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
@@ -32,17 +29,14 @@ import org.eclipse.swt.widgets.Composite;
  * An optional Page to input default run options for a Dataflow Project.
  */
 public class NewDataflowProjectWizardDefaultRunOptionsPage extends WizardPage {
-  private static final String PAGE_NAME = Messages.getString("RUN_OPTIONS");
-
-  private final DataflowProjectCreator creator;
+  private static final String PAGE_NAME = "dataflowDefaultRunOptionsPage"; //$NON-NLS-1$
 
   private RunOptionsDefaultsComponent runOptionsDefaultsComponent;
 
-  public NewDataflowProjectWizardDefaultRunOptionsPage(DataflowProjectCreator creator) {
+  public NewDataflowProjectWizardDefaultRunOptionsPage() {
     super(PAGE_NAME);
-    this.creator = creator;
-    setTitle(Messages.getString("SET_RUN_OPTIONS"));
-    setDescription(Messages.getString("DATAFLOW_PIPELINE_OPTIONS"));
+    setTitle(Messages.getString("set.run.options")); //$NON-NLS-1$
+    setDescription(Messages.getString("dataflow.pipeline.options")); //$NON-NLS-1$
     setPageComplete(true);
   }
 
@@ -53,19 +47,25 @@ public class NewDataflowProjectWizardDefaultRunOptionsPage extends WizardPage {
     int numColumns = 3;
     composite.setLayout(new GridLayout(numColumns, false));
     runOptionsDefaultsComponent = new RunOptionsDefaultsComponent(
-        composite, numColumns, new DialogPageMessageTarget(this), prefs, this);
+        composite, numColumns, new DialogPageMessageTarget(this), prefs, this,
+        true /* allowIncomplete */);
 
     setControl(runOptionsDefaultsComponent.getControl());
-    addListeners();
   }
 
-  private void addListeners() {
-    runOptionsDefaultsComponent.addProjectModifyListener(new ModifyListener() {
-      @Override
-      public void modifyText(ModifyEvent event) {
-        creator.setDefaultProject(runOptionsDefaultsComponent.getProject());
-      }
-    });
+  public String getAccountEmail() {
+    return runOptionsDefaultsComponent.getAccountEmail();
+  }
+
+  public String getProjectId() {
+    return runOptionsDefaultsComponent.getProjectId();
+  }
+
+  /**
+   * @return name of the GCS bucket to stage artifacts in
+   */
+  public String getStagingLocation() {
+    return runOptionsDefaultsComponent.getStagingLocation();
   }
 
 }

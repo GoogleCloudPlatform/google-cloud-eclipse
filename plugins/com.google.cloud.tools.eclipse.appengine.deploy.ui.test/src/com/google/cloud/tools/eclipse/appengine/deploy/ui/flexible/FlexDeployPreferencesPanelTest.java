@@ -18,17 +18,17 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.AppYamlValidator;
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexFacet;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexWarFacet;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
-import com.google.common.base.Predicate;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.resources.IProject;
@@ -49,16 +49,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class FlexDeployPreferencesPanelTest {
 
-  private static final String APP_YAML_FIELD_TOOLTIP =
-      "app.yaml path, either absolute or relative to the project.";
-
   @Mock private IGoogleLoginService loginService;
   @Mock private ProjectRepository projectRepository;
   @Mock private Runnable layoutHandler;
 
   @Rule public ShellTestResource shellResource = new ShellTestResource();
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacetVersions(
-      JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31, AppEngineFlexFacet.FACET_VERSION);
+      JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31, AppEngineFlexWarFacet.FACET_VERSION);
 
   private IProject project;
 
@@ -132,11 +129,8 @@ public class FlexDeployPreferencesPanelTest {
   }
 
   private static Text findAppYamlField(Composite panel) {
-    return (Text) CompositeUtil.findControl(panel, new Predicate<Control>() {
-      @Override
-      public boolean apply(Control control) {
-        return control instanceof Text && APP_YAML_FIELD_TOOLTIP.equals(control.getToolTipText());
-      }
-    });
+    Control control = CompositeUtil.findControlAfterLabel(panel, Text.class, "app.yaml:");
+    assertNotNull("Could not locate app.yaml field", control);
+    return (Text) control;
   }
 }

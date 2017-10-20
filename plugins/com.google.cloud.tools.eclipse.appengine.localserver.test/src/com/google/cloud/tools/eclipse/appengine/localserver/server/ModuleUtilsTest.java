@@ -56,7 +56,8 @@ public class ModuleUtilsTest {
     Mockito.when(module.getProject()).thenReturn(project);
     IFolder webapp = Mockito.mock(IFolder.class);
     Mockito.when(project.getFolder("src/main/webapp")).thenReturn(webapp);
-    Mockito.when(webapp.getFolder("WEB-INF/")).thenReturn(webinf);
+    Mockito.when(webapp.exists()).thenReturn(true);
+    Mockito.when(webapp.getFolder("WEB-INF")).thenReturn(webinf);
     Mockito.when(webinf.exists()).thenReturn(true);
     IPath ipath = Mockito.any();
     Mockito.when(webinf.getFile(ipath)).thenReturn(descriptorFile);

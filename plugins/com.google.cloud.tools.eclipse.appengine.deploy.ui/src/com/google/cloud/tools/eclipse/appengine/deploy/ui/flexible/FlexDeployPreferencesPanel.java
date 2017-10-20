@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible;
 
+import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexDeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.AppEngineDeployPreferencesPanel;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
@@ -23,14 +24,11 @@ import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.AppYamlValida
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.RelativeFileFieldSetter;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
-import org.eclipse.core.databinding.beans.PojoProperties;
-import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.jface.databinding.swt.ISWTObservableValue;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -41,13 +39,25 @@ public class FlexDeployPreferencesPanel extends AppEngineDeployPreferencesPanel 
   public FlexDeployPreferencesPanel(Composite parent, IProject project,
       IGoogleLoginService loginService, Runnable layoutChangedHandler, boolean requireValues,
       ProjectRepository projectRepository) {
-    super(parent, project, loginService, layoutChangedHandler, requireValues, projectRepository,
+    this(parent, project, loginService, layoutChangedHandler, requireValues, projectRepository,
         new FlexDeployPreferences(project));
+  }
+
+  protected FlexDeployPreferencesPanel(Composite parent, IProject project,
+      IGoogleLoginService loginService, Runnable layoutChangedHandler, boolean requireValues,
+      ProjectRepository projectRepository, DeployPreferences model) {
+    super(parent, project, loginService, layoutChangedHandler, requireValues, projectRepository,
+        model);
   }
 
   @Override
   protected void createCenterArea() {
-    createAppYamlSection();
+    Text appYamlField = createBrowseFileRow(
+        Messages.getString("deploy.preferences.dialog.label.app.yaml"),
+        Messages.getString("tooltip.app.yaml"),
+        getWorkingDirectory(), new String[] {"*.yaml"});
+    setupPossiblyUnvalidatedTextFieldDataBinding(appYamlField, "appYamlPath",
+        new AppYamlValidator(getWorkingDirectory(), appYamlField));
 
     super.createCenterArea();
 
@@ -58,38 +68,40 @@ public class FlexDeployPreferencesPanel extends AppEngineDeployPreferencesPanel 
         includeOptionalConfigurationFilesButton, "includeOptionalConfigurationFiles");
   }
 
-  private void createAppYamlSection() {
-    // Part 1. create UI widgets
+  /**
+   * Helper method to create a row of a {@link Label}, a {@link Text} for a file path input, and
+   * a "browse" {@link Button} to open a {@link FileDialog}.
+   *
+   * @param fileFieldBasePath a base path that file input fields will treat as a prefix. The path is
+   * for 1) relativizing absolute paths in file input fields; and 2) setting the default path for
+   * the file chooser dialog.
+   */
+  protected Text createBrowseFileRow(String labelText, String Tooltip,
+      IPath fileFieldBasePath, String[] fileDialogfilterExtensions) {
     Label label = new Label(this, SWT.LEAD);
-    label.setText(Messages.getString("deploy.preferences.dialog.label.app.yaml"));
-    label.setToolTipText(Messages.getString("tooltip.app.yaml"));
+    label.setText(labelText);
+    label.setToolTipText(Tooltip);
 
     Composite secondColumn = new Composite(this, SWT.NONE);
-    Text appYamlField = new Text(secondColumn, SWT.SINGLE | SWT.BORDER);
-    appYamlField.setToolTipText(Messages.getString("tooltip.app.yaml"));
+    Text fileField = new Text(secondColumn, SWT.SINGLE | SWT.BORDER);
+    fileField.setToolTipText(Tooltip);
 
     Button browse = new Button(secondColumn, SWT.PUSH);
     browse.setText(Messages.getString("deploy.preferences.dialog.browse"));
-    browse.addSelectionListener(new RelativeFileFieldSetter(appYamlField, project.getLocation()));
+    browse.addSelectionListener(
+        new RelativeFileFieldSetter(fileField, fileFieldBasePath, fileDialogfilterExtensions));
 
-    GridLayoutFactory.fillDefaults().numColumns(2).applyTo(secondColumn);
-    GridData fillGridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
-    secondColumn.setLayoutData(fillGridData);
-    appYamlField.setLayoutData(fillGridData);
-
-    // Part 2. set up data binding
-    ISWTObservableValue fieldValue = WidgetProperties.text(SWT.Modify).observe(appYamlField);
-    IObservableValue modelValue = PojoProperties.value("appYamlPath").observe(model);
-
-    bindingContext.bindValue(fieldValue, modelValue);
-    if (requireValues) {
-      bindingContext.addValidationStatusProvider(
-          new AppYamlValidator(project.getLocation(), fieldValue));
-    }
+    GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(secondColumn);
+    GridDataFactory.fillDefaults().applyTo(secondColumn);
+    return fileField;
   }
 
   @Override
   protected String getHelpContextId() {
     return "com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployAppEngineFlexProjectContext";
+  }
+
+  protected IPath getWorkingDirectory() {
+    return project.getLocation();
   }
 }

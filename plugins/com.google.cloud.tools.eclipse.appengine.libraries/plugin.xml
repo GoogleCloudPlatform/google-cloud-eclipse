@@ -3,22 +3,22 @@
 <plugin>
   <extension-point id="com.google.cloud.tools.eclipse.appengine.libraries" 
       name="App Engine Libraries" />
-  
-  <!-- todo the dependency tracking is getting ridiculous. Pull this from Maven Central,
-       whether statically or dynamically --> 
+
   <extension point="com.google.cloud.tools.eclipse.appengine.libraries"
-             id="com.google.cloud.tools.eclipse.appengine.libraries.defaultapis">
+             id="com.google.cloud.tools.eclipse.appengine.libraries.defaultapis">       
+             
     <library 
           id="appengine-api"
-          group="appengine"
+          group="appengine-api"
           name="App Engine API"
           tooltip="%appengine.api.tooltip"
           siteUri="https://cloud.google.com/appengine/docs/java/" >
-      <libraryFile javadocUri="https://cloud.google.com/appengine/docs/java/javadoc/">
+      <libraryFile javadocUri="https://cloud.google.com/appengine/docs/java/javadoc/"
+          export="false">
         <mavenCoordinates
               artifactId="appengine-api-1.0-sdk"
               groupId="com.google.appengine" 
-              version="1.9.51" />
+              version="1.9.57" />
         <exclusionFilter pattern="com/google/appengine/repackaged/**" />
         <exclusionFilter pattern="com/google/appengine/labs/repackaged/**" />
         <inclusionFilter pattern="com/google/apphosting/api/**" />
@@ -30,37 +30,32 @@
           group="appengine"
           name="Google Cloud Endpoints"
           tooltip="%endpoints.tooltip"
-          siteUri="https://cloud.google.com/appengine/docs/java/endpoints/" >
-      <libraryDependency id="appengine-api" />
-      <libraryFile
-            javadocUri="https://cloud.google.com/appengine/docs/java/endpoints/javadoc/">
+          dependencies="include"
+          siteUri="https://cloud.google.com/endpoints/docs/frameworks/java/about-cloud-endpoints-frameworks" >
+      <libraryFile export="true" 
+            javadocUri="https://cloud.google.com/endpoints/docs/frameworks/java/javadoc/">
         <mavenCoordinates
-              artifactId="appengine-endpoints"
-              groupId="com.google.appengine" 
-              version="1.9.51" />
+              artifactId="endpoints-framework"
+              groupId="com.google.endpoints" 
+              version="2.0.8"/>
         <exclusionFilter pattern="com/google/appengine/repackaged/**" />
       </libraryFile>
     </library>
+    
     <library
           id="objectify"
           group="appengine"
           name="Objectify"
           tooltip="%objectify.tooltip"
+          dependencies="include"
           siteUri="https://github.com/objectify/objectify/wiki" >
-      <libraryDependency id="appengine-api" />
       <libraryFile
-            javadocUri="http://static.javadoc.io/com.googlecode.objectify/objectify/5.1.14/">
+          export="true"
+          javadocUri="https://www.javadoc.io/doc/com.googlecode.objectify/objectify/5.1.21">
         <mavenCoordinates
               artifactId="objectify"
               groupId="com.googlecode.objectify"
-              version="5.1.17" />
-      </libraryFile>
-      <libraryFile
-            javadocUri="https://google.github.io/guava/releases/20.0/api/docs/">
-        <mavenCoordinates
-              artifactId="guava"
-              groupId="com.google.guava"
-              version="20.0" />
+              version="5.1.21" />
       </libraryFile>
     </library>
 
@@ -69,8 +64,7 @@
           name="Servlet API 2.5"
           group="servlet"
           siteUri="http://www.oracle.com/technetwork/java/javaee/servlet/index.html"
-          export="false"
-          recommendation="required">
+          export="false">
       <libraryFile
             javadocUri="https://docs.oracle.com/cd/E17802_01/products/products/servlet/2.5/docs/servlet-2_5-mr2/">
         <mavenCoordinates
@@ -85,8 +79,7 @@
           group="servlet"
           name="Java Server Pages API 2.1"
           siteUri="http://www.oracle.com/technetwork/java/javaee/jsp/index.html"
-          export="false"
-          recommendation="optional" >
+          export="false">
       <libraryFile
             javadocUri="http://docs.oracle.com/cd/E17802_01/products/products/jsp/2.1/docs/jsp-2_1-pfd2/">
         <mavenCoordinates
@@ -94,186 +87,8 @@
               artifactId="jsp-api"
               version="2.1" />
       </libraryFile>
-      <libraryFile javadocUri="https://tomcat.apache.org/taglibs/standard/apidocs/">
-        <mavenCoordinates
-              groupId="javax.servlet"
-              artifactId="jstl"
-              version="1.2" />
-      </libraryFile>
     </library>
-    
-    <library
-          id="googleapiclient"
-          group="clientapis"
-          name="%googleapiclient.name"
-          tooltip="%googleapiclient.tooltip"
-          siteUri="https://developers.google.com/api-client-library/java/" >
-      <libraryFile
-          javadocUri="https://google.github.io/google-api-java-client/releases/1.21.0/javadoc/index.html">
-        <mavenCoordinates
-            artifactId="google-api-client"
-            groupId="com.google.api-client"
-            version="1.22.0" />
-      </libraryFile>
-      <libraryFile
-          javadocUri="https://google.github.io/google-api-java-client/releases/1.21.0/javadoc/index.html">
-        <mavenCoordinates
-            artifactId="google-api-client-appengine"
-            groupId="com.google.api-client"
-            version="1.22.0" />
-      </libraryFile>
-      <libraryFile>
-        <mavenCoordinates
-            artifactId="google-http-client-appengine"
-            groupId="com.google.http-client"
-            version="1.22.0" />
-      </libraryFile>
-      <libraryFile
-          javadocUri="https://google.github.io/google-http-java-client/releases/1.21.0/javadoc/index.html">
-        <mavenCoordinates
-            artifactId="google-http-client"
-            groupId="com.google.http-client"
-            version="1.22.0" />
-      </libraryFile>
-      <libraryFile javadocUri=
-          "https://developers.google.com/api-client-library/java/google-oauth-java-client/reference/1.20.0/">
-        <mavenCoordinates
-            artifactId="google-oauth-client"
-            groupId="com.google.oauth-client"
-            version="1.22.0" />
-      </libraryFile>
-      <libraryFile javadocUri=
-          "https://developers.google.com/api-client-library/java/google-oauth-java-client/reference/1.20.0/">
-        <mavenCoordinates
-            artifactId="google-oauth-client-servlet"
-            groupId="com.google.oauth-client"
-            version="1.22.0" />
-      </libraryFile>
-      
-      <libraryFile>  <!-- todo javadoc if it's published -->
-        <mavenCoordinates
-              artifactId="google-oauth-client-appengine"
-              groupId="com.google.oauth-client"
-              version="1.22.0" />
-      </libraryFile>      
-      <libraryFile>  <!-- todo javadoc if it's published -->
-        <mavenCoordinates
-              artifactId="google-http-client-jackson2"
-              groupId="com.google.http-client"
-              version="1.22.0" />
-      </libraryFile>
-      <libraryFile>  <!-- todo javadoc if it's published -->
-        <mavenCoordinates
-              artifactId="google-http-client-jackson"
-              groupId="com.google.http-client"
-              version="1.22.0" />
-      </libraryFile>
-      <libraryFile javadocUri=
-          "http://www.atetric.com/atetric/javadoc/org.codehaus.jackson/jackson-mapper-asl/1.9.13/index.html?overview-summary.html">
-        <mavenCoordinates
-              artifactId="jackson-core-asl"
-              groupId="org.codehaus.jackson"
-              version="1.9.13" />
-      </libraryFile>
-      
-      <libraryFile javadocUri="https://fasterxml.github.io/jackson-core/javadoc/2.2.0/">
-        <mavenCoordinates
-              artifactId="jackson-core"
-              groupId="com.fasterxml.jackson.core"
-              version="2.9.0.pr2" />
-      </libraryFile>
-    </library>
-    
-    <library
-          id="googlecloudcore"
-          group="clientapis"
-          name="%googlecloudcore.name"
-          tooltip="%googlecloudcore.tooltip"
-          siteUri="https://googlecloudplatform.github.io/google-cloud-java/" >
-      <libraryDependency id="googleapiclient" />
-      <libraryFile
-            javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.10.0/apidocs/">
-        <mavenCoordinates
-              artifactId="google-cloud-core"
-              groupId="com.google.cloud"
-              version="1.0.0" />
-      </libraryFile>
-      <libraryFile>  <!-- todo javadoc if it's published -->
-        <mavenCoordinates
-              artifactId="google-auth-library-oauth2-http"
-              groupId="com.google.auth"
-              version="0.6.1" />
-      </libraryFile>
-      <libraryFile> <!-- todo javadoc if it's published -->
-        <mavenCoordinates
-              artifactId="google-auth-library-credentials"
-              groupId="com.google.auth"
-              version="0.6.1" />
-      </libraryFile>
-      <libraryFile javadocUri="http://www.joda.org/joda-time/apidocs/">
-        <mavenCoordinates
-              artifactId="joda-time"
-              groupId="joda-time"
-              version="2.9.2" />
-      </libraryFile>
-       <libraryFile javadocUri="https://stleary.github.io/JSON-java/">
-        <mavenCoordinates
-              artifactId="json"
-              groupId="org.json"
-              version="20151123" />
-      </libraryFile>
-      <libraryFile
-            javadocUri="https://developers.google.com/protocol-buffers/docs/reference/java/">
-        <mavenCoordinates
-              artifactId="protobuf-java"
-              groupId="com.google.protobuf"
-              version="3.0.0" />
-      </libraryFile>
-      <libraryFile
-            javadocUri="https://developers.google.com/protocol-buffers/docs/reference/java/">
-        <mavenCoordinates
-              artifactId="protobuf-java-util"
-              groupId="com.google.protobuf"
-              version="3.0.0" />
-      </libraryFile>
-      <libraryFile
-            javadocUri="https://google.github.io/guava/releases/19.0/api/docs/">
-        <mavenCoordinates
-              artifactId="guava"
-              groupId="com.google.guava"
-              version="19.0" />
-      </libraryFile>
-     <!-- todo javadoc -->
-     <libraryFile>
-        <mavenCoordinates
-              artifactId="gax"
-              groupId="com.google.api"
-              version="1.0.0" />
-      </libraryFile>
-    </library>
-    
-    <library
-          id="googlecloudstorage"
-          group="clientapis"
-          name="%googlecloudstorage.name"
-          tooltip="%googlecloudstorage.tooltip"
-          siteUri="https://cloud.google.com/storage/docs/reference/libraries#client-libraries-install-java" >
-      <libraryDependency id="googlecloudcore" />
-      <libraryFile
-            javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.10.0/apidocs/">
-        <mavenCoordinates
-              artifactId="google-cloud-storage"
-              groupId="com.google.cloud"
-              version="1.0.0" />
-      </libraryFile>
-      <libraryFile
-            javadocUri="https://developers.google.com/resources/api-libraries/documentation/storage/v1/java/latest/index.html">
-        <mavenCoordinates
-              artifactId="google-api-services-storage"
-              groupId="com.google.apis"
-              version="v1-rev102-1.22.0" />
-      </libraryFile>
-    </library>
+
   </extension>
 
   <extension point="org.eclipse.jdt.core.classpathContainerInitializer">

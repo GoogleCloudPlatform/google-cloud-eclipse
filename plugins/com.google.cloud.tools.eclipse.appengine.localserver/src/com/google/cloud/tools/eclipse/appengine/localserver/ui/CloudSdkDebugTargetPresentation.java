@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
-import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerLaunchConfigurationDelegate;
 import com.google.cloud.tools.eclipse.ui.util.images.SharedImages;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,7 +31,7 @@ import org.eclipse.ui.IEditorInput;
 
 /**
  * A Platform/Debug Presentation to provide an icon for our
- * {@link LocalAppEngineServerLaunchConfigurationDelegate.CloudSdkDebugTarget} instances.
+ * {@code LocalAppEngineServerLaunchConfigurationDelegate.CloudSdkDebugTarget} instances.
  */
 public class CloudSdkDebugTargetPresentation extends LabelProvider
     implements IDebugModelPresentation {

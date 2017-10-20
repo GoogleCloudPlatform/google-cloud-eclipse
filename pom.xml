@@ -36,6 +36,7 @@
 
     <module>plugins/com.google.cloud.tools.eclipse.appengine.compat</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.compat.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.compat.cte13</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy.ui</module>
@@ -52,8 +53,6 @@
     <module>plugins/com.google.cloud.tools.eclipse.appengine.newproject.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.standard.java8</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.standard.java8.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.newproject.maven</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.newproject.maven.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.validation</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.validation.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.ui</module>
@@ -119,11 +118,11 @@
     -->
     <tycho.toolchains>SYSTEM</tycho.toolchains>
 
-     <!-- OS-specific JVM flags, empty for the default case but redefined below -->
-     <os-jvm-flags/>
-     <org.eclipse.swtbot.search.timeout>30000</org.eclipse.swtbot.search.timeout>
+    <!-- OS-specific JVM flags, empty for the default case but redefined below -->
+    <os-jvm-flags/>
+    <org.eclipse.swtbot.search.timeout>30000</org.eclipse.swtbot.search.timeout>
 
-     <jgit.dirtyWorkingTree>warning</jgit.dirtyWorkingTree>
+    <jgit.dirtyWorkingTree>warning</jgit.dirtyWorkingTree>
   </properties>
 
   <!--
@@ -145,7 +144,7 @@
       <!-- bundle: com.google.cloud.tools.appengine -->
       <groupId>com.google.cloud.tools</groupId>
       <artifactId>appengine-plugins-core</artifactId>
-      <version>0.3.5</version>
+      <version>0.3.8</version>
     </dependency>
     <dependency>
       <!-- bundle: com.google.guava -->
@@ -189,7 +188,33 @@
       <artifactId>snakeyaml</artifactId>
       <version>1.17</version>
     </dependency>
+    <dependency>
+      <!-- bundle: org.glassfish.javax.json -->
+      <groupId>org.glassfish</groupId>
+      <artifactId>javax.json</artifactId>
+      <version>1.0.4</version>
+    </dependency>
   </dependencies>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.12</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>1.10.19</version>
+      </dependency>
+      <dependency>
+        <groupId>org.objenesis</groupId>
+        <artifactId>objenesis</artifactId>
+        <version>2.2</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <build>
     <plugins>
@@ -271,41 +296,6 @@
           </jgit.ignore>
         </configuration>
       </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-enforcer-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals><goal>enforce</goal></goals>
-            <configuration>
-              <rules>
-                <bannedDependencies>
-                  <excludes>
-                    <exclude>commons-collections:commons-collections:[3.2.1]</exclude>
-                  </excludes>
-                </bannedDependencies>
-                <bannedDependencies>
-                  <!--
-                    Ensure our bundles only use Guava 20.0.0.
-                    Tycho identifies p2-resolved bundles are of form:
-                    p2.eclipse-plugin:com.google.guava:jar:20.0.0:system
-                  -->
-                  <searchTransitive>false</searchTransitive>
-                  <excludes>
-                    <exclude>com.google.guava:guava</exclude>
-                    <exclude>*:com.google.guava</exclude>
-                  </excludes>
-                  <includes>
-                    <include>com.google.guava:guava:[20,21)</include>
-                    <include>*:com.google.guava:[20,21)</include>
-                  </includes>
-                </bannedDependencies>
-              </rules>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
 
     <pluginManagement>
@@ -352,7 +342,11 @@
           <configuration>
             <runOrder>hourly</runOrder>
             <forkedProcessTimeoutInSeconds>600</forkedProcessTimeoutInSeconds>
-            <argLine>${jacoco.agentArgLine} -Dorg.eclipse.swtbot.search.timeout=${org.eclipse.swtbot.search.timeout} -Xms40m -Xmx1G -XX:MaxPermSize=512m -Djava.awt.headless=true ${os-jvm-flags}</argLine>
+            <!--
+              - maven.artifact.threads=1 to workaround repository corruption seen in
+                https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2284
+            -->
+            <argLine>${jacoco.agentArgLine} -Dmaven.artifact.threads=1 -Dorg.eclipse.swtbot.search.timeout=${org.eclipse.swtbot.search.timeout} -Xms40m -Xmx1G -XX:MaxPermSize=512m -Djava.awt.headless=true ${os-jvm-flags}</argLine>
           </configuration>
         </plugin>
 
@@ -372,6 +366,17 @@
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
           <version>0.7.8</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>2.5.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.12.4</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -419,6 +424,45 @@
               </artifact>
             </target>
            </configuration>
+          </plugin>
+
+          <!--
+            Ensure we don't have buggy commons-collections nor Java-8 Guava.
+            Must be done here as Oxygen has moved to Guava 21.
+          -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <executions>
+              <execution>
+                <goals><goal>enforce</goal></goals>
+                <configuration>
+                  <rules>
+                    <bannedDependencies>
+                      <excludes>
+                        <exclude>commons-collections:commons-collections:[3.2.1]</exclude>
+                      </excludes>
+                    </bannedDependencies>
+                    <bannedDependencies>
+                      <!--
+                        Ensure our bundles only use Guava 20.0.0.
+                        Tycho identifies p2-resolved bundles are of form:
+                        p2.eclipse-plugin:com.google.guava:jar:20.0.0:system
+                      -->
+                      <searchTransitive>false</searchTransitive>
+                      <excludes>
+                        <exclude>com.google.guava:guava</exclude>
+                        <exclude>*:com.google.guava</exclude>
+                      </excludes>
+                      <includes>
+                        <include>com.google.guava:guava:[20,21)</include>
+                        <include>*:com.google.guava:[20,21)</include>
+                      </includes>
+                    </bannedDependencies>
+                  </rules>
+                </configuration>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>

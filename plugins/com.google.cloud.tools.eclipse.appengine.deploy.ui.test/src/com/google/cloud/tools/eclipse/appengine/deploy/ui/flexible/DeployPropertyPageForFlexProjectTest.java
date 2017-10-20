@@ -17,7 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPropertyPageTest;
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexFacet;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexWarFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
@@ -29,7 +29,7 @@ public class DeployPropertyPageForFlexProjectTest
 
   @Rule
   public TestProjectCreator flexProjectCreator = new TestProjectCreator().withFacetVersions(
-      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineFlexFacet.FACET_VERSION);
+      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineFlexWarFacet.FACET_VERSION);
 
   @Override
   protected IProject getProject() {

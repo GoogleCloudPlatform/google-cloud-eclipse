@@ -34,27 +34,29 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.server.core.IRuntime;
 
 /**
- * Supply Java standard classes, specifically servlet-api.jar and jsp-api.jar,
- * to non-Maven projects.
+ * Supply Java servlet container classes, specifically servlet-api.jar, jsp-api.jar, and
+ * appengine-api-1.0-sdk.jar to non-Maven projects.
  * <p>
  * The jars are resolved using {@link ILibraryRepositoryService}.
  */
 public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
 
   /**
-   * The default Servlet API supported by App Engine for Java.
+   * The default Servlet API supported by the App Engine Java 7 runtime.
    */
   private static final IProjectFacetVersion DEFAULT_DYNAMIC_WEB_VERSION = WebFacetUtils.WEB_25;
 
+  private static final IClasspathEntry[] NO_CLASSPATH_ENTRIES = {};
+
   private static final Logger logger = Logger.getLogger(ServletClasspathProvider.class.getName());
-  
+
   @Inject
   private ILibraryClasspathContainerResolverService resolverService;
 
   @Override
   public IClasspathEntry[] resolveClasspathContainer(IProject project, IRuntime runtime) {
     if (project != null && MavenUtils.hasMavenNature(project)) { // Maven handles its own classpath
-      return null;
+      return NO_CLASSPATH_ENTRIES;
     }
 
     // Runtime is expected to provide Servlet and JSP APIs
@@ -68,15 +70,10 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
     return doResolveClasspathContainer(webFacetVersion);
   }
 
-  // TODO this method is called often as the result of user initiated UI actions, e.g. when the user
-  // clicks through the project in the Project Explorer view to drill down into the libraries
-  // attached to the project. This method resolves the servlet and jsp jars each time (instead of
-  // persisting the resolved version the first time and use that later). So we must ensure that if
-  // the supported versions change in the future (e.g. a new GAE runtime starts
-  // supporting Servlet API 3.1), then resolved versions of these jars remain the same for a project
-  // as long as it is associated with the originally selected runtime (i.e. the one that supports
-  // Servlet 2.5)
-  // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/953
+  // This method is called often as the result of user initiated UI actions, e.g. when the user
+  // clicks through the project in the Project Explorer to drill down into the libraries
+  // attached to the project. This method resolves the servlet and jsp jars each time instead of
+  // persisting the resolved version the first time and using that later.
   @Override
   public IClasspathEntry[] resolveClasspathContainer(IRuntime runtime) {
     return doResolveClasspathContainer(DEFAULT_DYNAMIC_WEB_VERSION);
@@ -99,7 +96,10 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
       IClasspathEntry[] apiEntries =
           resolverService.resolveLibraryAttachSourcesSync(servletApiId);
       IClasspathEntry[] jspApiEntries = resolverService.resolveLibraryAttachSourcesSync(jspApiId);
-      return ObjectArrays.concat(apiEntries, jspApiEntries, IClasspathEntry.class);
+      IClasspathEntry[] appEngineSdkEntries = resolverService.resolveLibraryAttachSourcesSync("appengine-api");
+      IClasspathEntry[] result = ObjectArrays.concat(apiEntries, jspApiEntries, IClasspathEntry.class);
+      result = ObjectArrays.concat(result, appEngineSdkEntries, IClasspathEntry.class);
+      return result;
     } catch (CoreException ex) {
       logger.log(Level.WARNING, "Failed to initialize libraries", ex);
     }

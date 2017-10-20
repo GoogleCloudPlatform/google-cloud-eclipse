@@ -25,12 +25,12 @@ import org.junit.Test;
 public class BucketNameValidatorTest {
 
   private static final String LENGTH_63 = "123456789012345678901234567890123456789012345678901234567890123";
-  private static final String LENGTH_64_WITH_DOT = "12345678901234567890123456789012345678901234567890123456789012.4";
-  private static final String LENGTH_222 = "12345678901234567890123456789012345678901234567890."
-                                           + "12345678901234567890123456789012345678901234567890."
-                                           + "12345678901234567890123456789012345678901234567890."
-                                           + "12345678901234567890123456789012345678901234567890."
-                                           + "123456789012345678";
+  private static final String LENGTH_65_WITH_DOT_TLD =
+      "12345678901234567890123456789012345678901234567890123456789012.us";
+  private static final String LENGTH_222 = "a1234567890123456789012345678901234567890123456789."
+      + "b1234567890123456789012345678901234567890123456789."
+      + "c1234567890123456789012345678901234567890123456789."
+      + "d1234567890123456789012345678901234567890123456789.e12345678901234.us";
   
   private BucketNameValidator validator = new BucketNameValidator();
 
@@ -95,7 +95,7 @@ public class BucketNameValidatorTest {
 
   @Test
   public void testValidation_validNameWithDot() {
-    assertThat(validator.validate(LENGTH_64_WITH_DOT).getSeverity(), is(IStatus.OK));
+    assertThat(validator.validate(LENGTH_65_WITH_DOT_TLD).getSeverity(), is(IStatus.OK));
   }
 
   @Test
@@ -111,5 +111,10 @@ public class BucketNameValidatorTest {
   @Test
   public void testValidation_emptyComponent() {
     assertThat(validator.validate("foo..bar").getSeverity(), is(IStatus.ERROR));
+  }
+
+  @Test
+  public void testValidation_invalidDomainName() {
+    assertThat(validator.validate("foo-.bar").getSeverity(), is(IStatus.ERROR));
   }
 }

@@ -37,7 +37,7 @@ public class WebXmlValidatorTest {
 
   @Rule
   public TestProjectCreator projectCreator = new TestProjectCreator().withFacetVersions(
-      WebFacetUtils.WEB_25, JavaFacet.VERSION_1_7, AppEngineStandardFacet.FACET_VERSION);
+      WebFacetUtils.WEB_25, JavaFacet.VERSION_1_7, AppEngineStandardFacet.JRE7);
 
   private final WebXmlValidator validator = new WebXmlValidator();
 
