@@ -23,6 +23,7 @@ import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.DialogPage;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.junit.Before;
@@ -44,7 +45,7 @@ public class MavenCoordinatesUiTest {
   @Before
   public void setUp() {
     shell = shellResource.getShell();
-    ui = new MavenCoordinatesUi(shell);
+    ui = new MavenCoordinatesUi(shell, SWT.NONE);
   }
 
   @Test
