@@ -118,7 +118,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(mavenCoordinates.getRepository(), is("central"));
     assertThat(mavenCoordinates.getGroupId(), is("com.google.endpoints"));
     assertThat(mavenCoordinates.getArtifactId(), is("endpoints-framework"));
-    assertThat(mavenCoordinates.getVersion(), is("2.0.8"));
+    assertThat(mavenCoordinates.getVersion(), is("2.0.9"));
     assertThat(mavenCoordinates.getType(), is("jar"));
     assertNull(mavenCoordinates.getClassifier());
     assertThat(libraryFile.getJavadocUri(),
