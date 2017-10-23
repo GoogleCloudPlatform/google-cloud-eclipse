@@ -28,18 +28,18 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Listener;
 
-public class MavenCoordinatesWizardUi {
+public class MavenCoordinatesWizardUi extends Composite {
 
   private final Button asMavenProjectButton;
 
   private final MavenCoordinatesUi mavenCoordinatesUi;
-  private final Group coordinatesGroup;
 
-  public MavenCoordinatesWizardUi(Composite container) {
-    asMavenProjectButton = new Button(container, SWT.CHECK);
+  public MavenCoordinatesWizardUi(Composite container, int style) {
+    super(container, style);
+
+    asMavenProjectButton = new Button(this, SWT.CHECK);
     asMavenProjectButton.setText(Messages.getString("CREATE_AS_MAVEN_PROJECT")); //$NON-NLS-1$
     asMavenProjectButton.addSelectionListener(new SelectionAdapter() {
       @Override
@@ -48,14 +48,12 @@ public class MavenCoordinatesWizardUi {
       }
     });
 
-    coordinatesGroup = new Group(container, SWT.NONE);
-    coordinatesGroup.setText(Messages.getString("MAVEN_PROJECT_COORDINATES")); //$NON-NLS-1$
-
-    mavenCoordinatesUi = new MavenCoordinatesUi(coordinatesGroup);
+    mavenCoordinatesUi = new MavenCoordinatesUi(this, SWT.NONE);
+    mavenCoordinatesUi.setText(Messages.getString("MAVEN_PROJECT_COORDINATES")); //$NON-NLS-1$
 
     updateEnablement();
 
-    GridLayoutFactory.swtDefaults().numColumns(2).generateLayout(coordinatesGroup);
+    GridLayoutFactory.swtDefaults().generateLayout(this);
   }
 
   public boolean uiEnabled() {
@@ -87,7 +85,6 @@ public class MavenCoordinatesWizardUi {
 
   private void updateEnablement() {
     boolean checked = asMavenProjectButton.getSelection();
-    coordinatesGroup.setEnabled(checked);
     mavenCoordinatesUi.setEnabled(checked);
   }
 

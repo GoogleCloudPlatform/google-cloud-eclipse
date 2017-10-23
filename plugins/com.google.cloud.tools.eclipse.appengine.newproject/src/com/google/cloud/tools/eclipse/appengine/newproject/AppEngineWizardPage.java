@@ -79,7 +79,7 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
 
     createCustomFields(container);
 
-    mavenCoordinatesUi = new MavenCoordinatesWizardUi(container);
+    mavenCoordinatesUi = new MavenCoordinatesWizardUi(container, SWT.NONE);
     mavenCoordinatesUi.addChangeListener(new Listener() {
       @Override
       public void handleEvent(Event event) {

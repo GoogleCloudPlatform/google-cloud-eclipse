@@ -25,11 +25,12 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 
-public class MavenCoordinatesUi {
+public class MavenCoordinatesUi extends Group {
 
   private static final String DEFAULT_VERSION = "0.1.0-SNAPSHOT"; //$NON-NLS-1$
 
@@ -40,23 +41,30 @@ public class MavenCoordinatesUi {
   private final Label artifactIdLabel;
   private final Label versionLabel;
 
-  public MavenCoordinatesUi(Composite container) {
-    groupIdLabel = new Label(container, SWT.LEAD);
+  public MavenCoordinatesUi(Composite container, int style) {
+    super(container, style);
+
+    groupIdLabel = new Label(this, SWT.LEAD);
     groupIdLabel.setText(Messages.getString("GROUP_ID")); //$NON-NLS-1$
-    groupIdField = new Text(container, SWT.BORDER);
+    groupIdField = new Text(this, SWT.BORDER);
     groupIdField.setToolTipText(Messages.getString("GROUP_ID_TOOLTIP")); //$NON-NLS-1$
 
-    artifactIdLabel = new Label(container, SWT.LEAD);
+    artifactIdLabel = new Label(this, SWT.LEAD);
     artifactIdLabel.setText(Messages.getString("ARTIFACT_ID")); //$NON-NLS-1$
-    artifactIdField = new Text(container, SWT.BORDER);
+    artifactIdField = new Text(this, SWT.BORDER);
     artifactIdField.setToolTipText(Messages.getString("ARTIFACT_ID_TOOLTIP")); //$NON-NLS-1$
 
-    versionLabel = new Label(container, SWT.LEAD);
+    versionLabel = new Label(this, SWT.LEAD);
     versionLabel.setText(Messages.getString("ARTIFACT_VERSION")); //$NON-NLS-1$
-    versionField = new Text(container, SWT.BORDER);
+    versionField = new Text(this, SWT.BORDER);
     versionField.setText(DEFAULT_VERSION);
 
-    GridLayoutFactory.swtDefaults().numColumns(2).generateLayout(container);
+    GridLayoutFactory.swtDefaults().numColumns(2).generateLayout(this);
+  }
+
+  @Override
+  protected void checkSubclass () {
+    // Allow subclassing by not calling super().
   }
 
   public String getGroupId() {
@@ -81,7 +89,9 @@ public class MavenCoordinatesUi {
     groupIdField.addModifyListener(listener);
   }
 
+  @Override
   public void setEnabled(boolean enabled) {
+    super.setEnabled(enabled);
     groupIdLabel.setEnabled(enabled);
     groupIdField.setEnabled(enabled);
     artifactIdLabel.setEnabled(enabled);
