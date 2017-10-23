@@ -23,8 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Locale;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
@@ -166,28 +164,32 @@ public abstract class BasePluginXmlTest {
   @Test
   public final void testPropertiesDefinedInManifestMf() throws IOException {
     boolean localizedMessageExists = false;
-    String bundleLocalization = null;
 
     Attributes attributes = getManifestAttributes();
-    for (Entry<?, ?> entry : attributes.entrySet()) {
-      String key = entry.getKey().toString();
-      String value = entry.getValue().toString();
+    for (Object object : attributes.values()) {
+      String value = object.toString();
       assertPropertyDefined(value);
 
       if (value.startsWith("%")) {
         localizedMessageExists = true;
       }
-      if ("bundle-localization".equals(key.toLowerCase(Locale.US))) {
-        bundleLocalization = value;
-      }
     }
 
     if (localizedMessageExists) {
-      assertEquals("plugin", bundleLocalization);
+      assertEquals("plugin", attributes.getValue("Bundle-Localization"));
     }
   }
 
-  private Attributes getManifestAttributes() throws IOException {
+  @Test
+  public final void testBundleVendor() throws IOException {
+    String vendor = getManifestAttributes().getValue("Bundle-Vendor");
+    if (vendor.startsWith("%")) {
+      vendor = pluginProperties.get(vendor.substring(1));
+    }
+    assertEquals("Google Inc.", vendor);
+  }
+
+  private static Attributes getManifestAttributes() throws IOException {
     String bundlePath = EclipseProperties.getHostBundlePath();
     String manifestLocation = bundlePath + "/META-INF/MANIFEST.MF";
 
