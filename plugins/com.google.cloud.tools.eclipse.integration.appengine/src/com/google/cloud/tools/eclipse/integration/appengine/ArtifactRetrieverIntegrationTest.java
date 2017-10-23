@@ -68,7 +68,7 @@ public class ArtifactRetrieverIntegrationTest {
   }
   
   @Test
-  public void testGetBestArtifactVersion() {
+  public void testGetBestVersion() {
     ArtifactVersion version = ArtifactRetriever.DEFAULT.getBestVersion(
         "com.google.cloud", "google-cloud-dns");
     Assert.assertNotNull(version);
