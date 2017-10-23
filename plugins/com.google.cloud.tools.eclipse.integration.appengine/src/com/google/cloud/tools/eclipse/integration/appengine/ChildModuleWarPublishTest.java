@@ -38,6 +38,7 @@ import org.junit.Test;
 public abstract class ChildModuleWarPublishTest {
 
   private static final IProgressMonitor monitor = new NullProgressMonitor();
+  private static List<IProject> allProjects;
   private static IProject project;
 
   protected abstract List<String> getExpectedChildModuleNames();
@@ -46,9 +47,9 @@ public abstract class ChildModuleWarPublishTest {
       throws IOException, CoreException {
     ThreadDumpingWatchdog.report("ChildModuleWarPublishTest.setUp() from "
         + Thread.currentThread() + " at " + System.nanoTime(), null);
-    List<IProject> projects = ProjectUtils.importProjects(ChildModuleWarPublishTest.class,
+    allProjects = ProjectUtils.importProjects(ChildModuleWarPublishTest.class,
         testZip, false /* checkBuildErrors */, monitor);
-    for (IProject loaded : projects) {
+    for (IProject loaded : allProjects) {
       if (loaded.getName().equals(mainProject)) {
         project = loaded;
       }
@@ -58,8 +59,10 @@ public abstract class ChildModuleWarPublishTest {
 
   @AfterClass
   public static void tearDown() throws CoreException {
-    ProjectUtils.waitForProjects(project);
-    project.delete(true, null);
+    ProjectUtils.waitForProjects(allProjects);
+    for (IProject project : allProjects) {
+      project.delete(true, null);
+    }
   }
 
   @Test
