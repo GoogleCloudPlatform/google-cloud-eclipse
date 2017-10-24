@@ -119,8 +119,7 @@ public class LibraryFile implements Comparable<LibraryFile> {
    */
   void updateVersion() {
     if (!fixedVersion) {
-      // todo need method to get latest nonrelease version instead for alphas and betas
-      ArtifactVersion remoteVersion = ArtifactRetriever.DEFAULT.getLatestReleaseVersion(
+      ArtifactVersion remoteVersion = ArtifactRetriever.DEFAULT.getBestVersion(
           mavenCoordinates.getGroupId(), mavenCoordinates.getArtifactId());
       if (remoteVersion != null) {
         DefaultArtifactVersion localVersion = new DefaultArtifactVersion(mavenCoordinates.getVersion());

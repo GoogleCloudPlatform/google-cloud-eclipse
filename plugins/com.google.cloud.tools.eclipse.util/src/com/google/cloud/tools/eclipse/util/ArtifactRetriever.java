@@ -62,6 +62,7 @@ public class ArtifactRetriever {
 
   private final String repositoryUrl;
 
+  // see https://maven.apache.org/ref/3.5.0/maven-repository-metadata/repository-metadata.html
   @VisibleForTesting
   URL getMetadataUrl(String groupId, String artifactId) {
     String groupPath = groupId.replace('.', '/');
@@ -130,6 +131,19 @@ public class ArtifactRetriever {
   }
 
   /**
+   * Returns the most recent release version of the artifact in the repo if one exists.
+   * If there's no release version, then return the latest beta, alpha, or pre-release
+   * but not a snapshot version. Returns null if the artifact is not found.
+   */
+  public ArtifactVersion getBestVersion(String groupId, String artifactId) {
+    ArtifactVersion version = getLatestReleaseVersion(groupId, artifactId);
+    if (version == null) {
+      version = getLatestVersion(groupId, artifactId);
+    }
+    return version;
+  }
+
+  /**
    * Returns the latest published release artifact version, or null if there is no such version.
    */
   public ArtifactVersion getLatestReleaseVersion(String groupId, String artifactId) {
@@ -159,6 +173,24 @@ public class ArtifactRetriever {
           ex.getCause());
     }
     return null;
+  }
+
+  /**
+   * Returns the most recent version of the artifact in the repo,
+   * possibly a beta, alpha, or pre-release but not a snapshot version.
+   */
+  public ArtifactVersion getLatestVersion(String groupId, String artifactId) {
+    String coordinates = idToKey(groupId, artifactId);
+    try {
+      NavigableSet<ArtifactVersion> versions = availableVersions.get(coordinates);
+      return versions.last();
+    } catch (ExecutionException ex) {
+      logger.log(
+          Level.WARNING,
+          "Could not retrieve version for artifact " + coordinates,
+          ex.getCause());
+      return null;
+    }
   }
 
   private static boolean isReleased(ArtifactVersion version) {
@@ -215,4 +247,5 @@ public class ArtifactRetriever {
     
     return retrievers.getUnchecked(url);
   }
+
 }

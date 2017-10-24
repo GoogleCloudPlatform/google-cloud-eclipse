@@ -21,68 +21,50 @@ import com.google.cloud.tools.eclipse.util.MavenCoordinatesValidator;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.dialogs.DialogPage;
-import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 
-public class MavenCoordinatesUi {
+public class MavenCoordinatesUi extends Group {
 
   private static final String DEFAULT_VERSION = "0.1.0-SNAPSHOT"; //$NON-NLS-1$
 
-  private Button asMavenProjectButton;
-  private Group coordinatesGroup;
-  private Text groupIdField;
-  private Text artifactIdField;
-  private Text versionField;
-  private Label groupIdLabel;
-  private Label artifactIdLabel;
-  private Label versionLabel;
+  private final Text groupIdField;
+  private final Text artifactIdField;
+  private final Text versionField;
+  private final Label groupIdLabel;
+  private final Label artifactIdLabel;
+  private final Label versionLabel;
 
-  public MavenCoordinatesUi(Composite container) {
-    asMavenProjectButton = new Button(container, SWT.CHECK);
-    asMavenProjectButton.setText(Messages.getString("CREATE_AS_MAVEN_PROJECT")); //$NON-NLS-1$
-    asMavenProjectButton.addSelectionListener(new SelectionAdapter() {
-      @Override
-      public void widgetSelected(SelectionEvent event) {
-        updateEnablement();
-      }
-    });
+  public MavenCoordinatesUi(Composite container, int style) {
+    super(container, style);
 
-    coordinatesGroup = new Group(container, SWT.NONE);
-    coordinatesGroup.setText(Messages.getString("MAVEN_PROJECT_COORDINATES")); //$NON-NLS-1$
-
-    groupIdLabel = new Label(coordinatesGroup, SWT.LEAD);
+    groupIdLabel = new Label(this, SWT.LEAD);
     groupIdLabel.setText(Messages.getString("GROUP_ID")); //$NON-NLS-1$
-    groupIdField = new Text(coordinatesGroup, SWT.BORDER);
+    groupIdField = new Text(this, SWT.BORDER);
     groupIdField.setToolTipText(Messages.getString("GROUP_ID_TOOLTIP")); //$NON-NLS-1$
 
-    artifactIdLabel = new Label(coordinatesGroup, SWT.LEAD);
+    artifactIdLabel = new Label(this, SWT.LEAD);
     artifactIdLabel.setText(Messages.getString("ARTIFACT_ID")); //$NON-NLS-1$
-    artifactIdField = new Text(coordinatesGroup, SWT.BORDER);
+    artifactIdField = new Text(this, SWT.BORDER);
     artifactIdField.setToolTipText(Messages.getString("ARTIFACT_ID_TOOLTIP")); //$NON-NLS-1$
 
-    versionLabel = new Label(coordinatesGroup, SWT.LEAD);
+    versionLabel = new Label(this, SWT.LEAD);
     versionLabel.setText(Messages.getString("ARTIFACT_VERSION")); //$NON-NLS-1$
-    versionField = new Text(coordinatesGroup, SWT.BORDER);
+    versionField = new Text(this, SWT.BORDER);
     versionField.setText(DEFAULT_VERSION);
 
-    updateEnablement();
-
-    GridLayoutFactory.swtDefaults().numColumns(2).generateLayout(coordinatesGroup);
+    GridLayoutFactory.swtDefaults().numColumns(2).generateLayout(this);
   }
 
-  public boolean uiEnabled() {
-    return asMavenProjectButton.getSelection();
+  @Override
+  protected void checkSubclass () {
+    // Allow subclassing by not calling super().
   }
 
   public String getGroupId() {
@@ -101,35 +83,28 @@ public class MavenCoordinatesUi {
     groupIdField.addListener(SWT.Modify, listener);
     artifactIdField.addListener(SWT.Modify, listener);
     versionField.addListener(SWT.Modify, listener);
-    if (asMavenProjectButton != null) {
-      asMavenProjectButton.addListener(SWT.Selection, listener);
-    }
   }
 
   public void addGroupIdModifyListener(ModifyListener listener) {
     groupIdField.addModifyListener(listener);
   }
 
-  private void updateEnablement() {
-    boolean checked = asMavenProjectButton.getSelection();
-    coordinatesGroup.setEnabled(checked);
-    groupIdLabel.setEnabled(checked);
-    groupIdField.setEnabled(checked);
-    artifactIdLabel.setEnabled(checked);
-    artifactIdField.setEnabled(checked);
-    versionLabel.setEnabled(checked);
-    versionField.setEnabled(checked);
+  @Override
+  public void setEnabled(boolean enabled) {
+    super.setEnabled(enabled);
+    groupIdLabel.setEnabled(enabled);
+    groupIdField.setEnabled(enabled);
+    artifactIdLabel.setEnabled(enabled);
+    artifactIdField.setEnabled(enabled);
+    versionLabel.setEnabled(enabled);
+    versionField.setEnabled(enabled);
   }
 
   /**
-   * @return {@link IStatus#OK} if there was no validation problem or the UI is disabled; otherwise
-   *     a status describing a validation problem (with a non-OK status)
+   * @return {@link IStatus#OK} if there was no validation problem; otherwise a status describing a
+   *     validation problem (with a non-OK status)
    */
   public IStatus validateMavenSettings() {
-    if (!uiEnabled()) {
-      return Status.OK_STATUS;
-    }
-
     if (getGroupId().isEmpty()) {
       return StatusUtil.info(this, Messages.getString("PROVIDE_GROUP_ID")); //$NON-NLS-1$
     } else if (getArtifactId().isEmpty()) {
@@ -147,29 +122,5 @@ public class MavenCoordinatesUi {
           Messages.getString("ILLEGAL_VERSION", getVersion())); //$NON-NLS-1$
     }
     return Status.OK_STATUS;
-  }
-
-  /**
-   * Convenience method to set a validation message on {@link DialogPage} from the result of calling
-   * {@link #validateMavenSettings()}.
-   *
-   * @return {@code true} if no validation message was set; {@code false} otherwise
-   *
-   * @see #validateMavenSettings()
-   */
-  public boolean setValidationMessage(DialogPage page) {
-    IStatus status = validateMavenSettings();
-    if (status.isOK()) {
-      return true;
-    }
-
-    if (IStatus.ERROR == status.getSeverity()) {
-      page.setErrorMessage(status.getMessage());
-    } else if (IStatus.WARNING == status.getSeverity()) {
-      page.setMessage(status.getMessage(), IMessageProvider.WARNING);
-    } else if (IStatus.INFO == status.getSeverity()) {
-      page.setMessage(status.getMessage(), IMessageProvider.INFORMATION);
-    }
-    return false;
   }
 }

@@ -19,7 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.ui.LibrarySelectorGroup;
-import com.google.cloud.tools.eclipse.appengine.newproject.maven.MavenCoordinatesUi;
+import com.google.cloud.tools.eclipse.appengine.newproject.maven.MavenCoordinatesWizardUi;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 import com.google.cloud.tools.eclipse.util.JavaPackageValidator;
 import com.google.cloud.tools.eclipse.util.MavenCoordinatesValidator;
@@ -52,7 +52,7 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
   private LibrarySelectorGroup appEngineLibrariesSelectorGroup;
   private Text javaPackageField;
   private Text serviceNameField;
-  private MavenCoordinatesUi mavenCoordinatesUi;
+  private MavenCoordinatesWizardUi mavenCoordinatesUi;
   private final boolean showLibrariesSelectorGroup;
 
   /** True if we should auto-generate the javaPackageField from the provided groupId */
@@ -79,7 +79,7 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
 
     createCustomFields(container);
 
-    mavenCoordinatesUi = new MavenCoordinatesUi(container);
+    mavenCoordinatesUi = new MavenCoordinatesWizardUi(container, SWT.NONE);
     mavenCoordinatesUi.addChangeListener(new Listener() {
       @Override
       public void handleEvent(Event event) {
