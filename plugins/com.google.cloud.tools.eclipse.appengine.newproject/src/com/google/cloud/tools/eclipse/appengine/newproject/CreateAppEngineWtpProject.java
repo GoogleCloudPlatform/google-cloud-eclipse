@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
@@ -137,14 +138,15 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
     fixTestSourceDirectorySettings(newProject, subMonitor.newChild(5));
   }
 
-  protected void addAdditionalDependencies(IProject newProject, IProgressMonitor monitor)
+  private void addAdditionalDependencies(IProject newProject, IProgressMonitor monitor)
       throws CoreException {
-    SubMonitor progress = SubMonitor.convert(monitor, 10);
+    SubMonitor progress = SubMonitor.convert(monitor, 12);
     if (config.getUseMaven()) {
-      enableMavenNature(newProject, progress.newChild(4));
-      BuildPath.addMavenLibraries(newProject, config.getAppEngineLibraries(), progress.newChild(5));
+      enableMavenNature(newProject, progress.newChild(5));
+      BuildPath.addMavenLibraries(newProject, config.getAppEngineLibraries(), progress.newChild(7));
     } else {
       addJunit4ToClasspath(newProject, progress.newChild(2));
+      addJstl12ToClasspath(newProject, progress.newChild(2));
       IJavaProject javaProject = JavaCore.create(newProject);
       
       List<Library> libraries = config.getAppEngineLibraries();
@@ -217,6 +219,24 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
         new IClasspathAttribute[] {nonDependencyAttribute},
         false);
     ClasspathUtil.addClasspathEntry(newProject, junit4Container, monitor);
+  }
+
+  private void addJstl12ToClasspath(IProject newProject, IProgressMonitor monitor)
+      throws CoreException {
+    SubMonitor subMonitor = SubMonitor.convert(monitor, 15);
+
+    // locate WEB-INF/lib
+    IFolder webInfFolder = WebProjectUtil.getWebInfDirectory(newProject);
+    IFolder libFolder = webInfFolder.getFolder("lib"); //$NON-NLS-1$
+    if (!libFolder.exists()) {
+      libFolder.create(true, true, subMonitor.newChild(5));
+    }
+
+    MavenCoordinates jstl = new MavenCoordinates.Builder()
+        .setGroupId("jstl") //$NON-NLS-1$
+        .setArtifactId("jstl") //$NON-NLS-1$
+        .setVersion("1.2").build(); //$NON-NLS-1$
+    installArtifact(jstl, libFolder, subMonitor.newChild(10));
   }
 
   /**
