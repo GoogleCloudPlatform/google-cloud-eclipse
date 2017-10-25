@@ -30,7 +30,6 @@ import com.google.common.collect.ImmutableList;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -56,8 +55,6 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
  * Utility to create a new App Engine Flexible Eclipse project.
  */
 public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
-  private static final Logger logger =
-      Logger.getLogger(CreateAppEngineFlexWtpProject.class.getName());
 
   private static final List<MavenCoordinates> SERVLET_DEPENDENCIES;
   private static final List<MavenCoordinates> PROJECT_DEPENDENCIES;
