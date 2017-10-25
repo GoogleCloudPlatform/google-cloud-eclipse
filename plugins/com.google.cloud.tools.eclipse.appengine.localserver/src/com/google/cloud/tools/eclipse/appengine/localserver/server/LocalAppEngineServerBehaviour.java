@@ -46,7 +46,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -400,9 +399,9 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
 
   @VisibleForTesting
   static boolean appEngineApiSdkJarExists(Path directory) {
-    for (String file : directory.toFile().list()) {
-      String lowercase = file.toLowerCase(Locale.US);
-      if (lowercase.startsWith("appengine-api-1.0-sdk") && lowercase.endsWith(".jar")) {
+    Pattern pattern = Pattern.compile("^appengine-api-1.0-sdk-.+\\.jar$", Pattern.CASE_INSENSITIVE);
+    for (String filename : directory.toFile().list()) {
+      if (pattern.matcher(filename).matches()) {
         return true;
       }
     }
