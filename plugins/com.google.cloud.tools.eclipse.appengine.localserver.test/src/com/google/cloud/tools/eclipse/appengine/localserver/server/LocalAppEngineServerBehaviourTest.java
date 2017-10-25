@@ -270,7 +270,7 @@ public class LocalAppEngineServerBehaviourTest {
   @Test
   public void testPutAppEngineApiSdkJarIntoApps() throws IOException, CoreException {
     Artifact appEngineApi = mock(Artifact.class);
-    when(appEngineApi.getFile()).thenReturn(tempFolder.newFile("fake.jar"));
+    when(appEngineApi.getFile()).thenReturn(tempFolder.newFile("appengine-api-1.0-sdk-9.8.7.jar"));
 
     ILibraryRepositoryService repositoryService = mock(ILibraryRepositoryService.class);
     when(repositoryService.resolveArtifact(any(LibraryFile.class), any(IProgressMonitor.class)))
@@ -280,12 +280,35 @@ public class LocalAppEngineServerBehaviourTest {
     File appDirectory2 = tempFolder.newFolder("app2");
     Path libDirectory1 = appDirectory1.toPath().resolve("WEB-INF/lib");
     Path libDirectory2 = appDirectory1.toPath().resolve("WEB-INF/lib");
-    assertTrue(libDirectory2 .toFile().mkdirs());
+    assertTrue(libDirectory2.toFile().mkdirs());
 
     List<File> appDirectories = Arrays.asList(appDirectory1, appDirectory2);
     LocalAppEngineServerBehaviour.putAppEngineApiSdkJarIntoApps(appDirectories, repositoryService);
 
-    assertTrue(Files.exists(libDirectory1.resolve("fake.jar")));
-    assertTrue(Files.exists(libDirectory2.resolve("fake.jar")));
+    assertTrue(Files.exists(libDirectory1.resolve("appengine-api-1.0-sdk-9.8.7.jar")));
+    assertTrue(Files.exists(libDirectory2.resolve("appengine-api-1.0-sdk-9.8.7.jar")));
+  }
+
+  @Test
+  public void testPutAppEngineApiSdkJarIntoApps_noCopyIfAlreadyExists()
+      throws IOException, CoreException {
+    Artifact appEngineApi = mock(Artifact.class);
+    when(appEngineApi.getFile()).thenReturn(tempFolder.newFile("fake.jar"));
+
+    ILibraryRepositoryService repositoryService = mock(ILibraryRepositoryService.class);
+    when(repositoryService.resolveArtifact(any(LibraryFile.class), any(IProgressMonitor.class)))
+        .thenReturn(appEngineApi);
+
+    File appDirectory = tempFolder.newFolder("app1");
+    Path libDirectory = appDirectory.toPath().resolve("WEB-INF/lib");
+    Path appEngineApiSdkJar = libDirectory.resolve("appengine-api-1.0-sdk-1.23.45.jar"); 
+    assertTrue(libDirectory.toFile().mkdirs());
+    assertTrue(appEngineApiSdkJar.toFile().createNewFile());
+
+    LocalAppEngineServerBehaviour.putAppEngineApiSdkJarIntoApps(
+        Arrays.asList(appDirectory), repositoryService);
+
+    assertFalse(Files.exists(libDirectory.resolve("appengine-api-1.0-sdk-9.8.7.jar")));
+    assertTrue(Files.exists(libDirectory.resolve("appengine-api-1.0-sdk-1.23.45.jar")));
   }
 }
