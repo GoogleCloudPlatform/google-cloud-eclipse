@@ -20,6 +20,7 @@ import com.google.common.base.Preconditions;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
+import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacet;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
@@ -61,6 +62,7 @@ public class AppEngineFlexWarFacet {
     FacetUtil facetUtil = new FacetUtil(facetedProject);
     if (installDependentFacets) {
       facetUtil.addJavaFacetToBatch(JavaFacet.VERSION_1_8);
+      facetUtil.addWebFacetToBatch(WebFacetUtils.WEB_31);
     }
 
     facetUtil.addFacetToBatch(FACET_VERSION, null /* config */);

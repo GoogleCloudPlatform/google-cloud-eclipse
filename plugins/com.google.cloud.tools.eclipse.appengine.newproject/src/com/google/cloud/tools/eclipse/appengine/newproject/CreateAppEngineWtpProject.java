@@ -62,6 +62,8 @@ import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.ide.undo.CreateProjectOperation;
 import org.eclipse.wst.common.componentcore.internal.builder.DependencyGraphImpl;
 import org.eclipse.wst.common.componentcore.internal.builder.IDependencyGraph;
+import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 /**
 * Utility to make a new Eclipse App Engine project in the workspace.
@@ -79,7 +81,7 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
   @VisibleForTesting
   Job deployAssemblyEntryRemoveJob;
 
-  public abstract void addAppEngineFacet(IProject newProject, IProgressMonitor monitor)
+  public abstract void addAppEngineFacet(IFacetedProject newProject, IProgressMonitor monitor)
       throws CoreException;
 
   /**
@@ -132,14 +134,17 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
       throw new InvocationTargetException(ex);
     }
 
-    addAppEngineFacet(newProject, subMonitor.newChild(6));
-    addAdditionalDependencies(newProject, subMonitor.newChild(10));
+    IFacetedProject facetedProject = ProjectFacetsManager.create(
+        newProject, true /* convertIfNecessary */, subMonitor.newChild(5));
+    addAppEngineFacet(facetedProject, subMonitor.newChild(6));
+
+    addAdditionalDependencies(newProject, config, subMonitor.newChild(20));
 
     fixTestSourceDirectorySettings(newProject, subMonitor.newChild(5));
   }
 
-  private void addAdditionalDependencies(IProject newProject, IProgressMonitor monitor)
-      throws CoreException {
+  protected void addAdditionalDependencies(IProject newProject, AppEngineProjectConfig config,
+      IProgressMonitor monitor) throws CoreException {
     SubMonitor progress = SubMonitor.convert(monitor, 12);
     if (config.getUseMaven()) {
       enableMavenNature(newProject, progress.newChild(5));

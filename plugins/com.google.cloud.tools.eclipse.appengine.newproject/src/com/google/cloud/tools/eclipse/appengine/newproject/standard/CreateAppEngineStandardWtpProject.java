@@ -29,7 +29,6 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
-import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 /**
  * Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.
@@ -42,14 +41,13 @@ public class CreateAppEngineStandardWtpProject extends CreateAppEngineWtpProject
   }
 
   @Override
-  public void addAppEngineFacet(IProject newProject, IProgressMonitor monitor) throws CoreException {
+  public void addAppEngineFacet(IFacetedProject newProject, IProgressMonitor monitor)
+      throws CoreException {
     SubMonitor subMonitor = SubMonitor.convert(monitor,
         Messages.getString("add.appengine.standard.facet"), 100); 
  
-    IFacetedProject facetedProject = ProjectFacetsManager.create(
-        newProject, true /* convertIfNecessary */, subMonitor.newChild(50));
     AppEngineStandardFacet.installAppEngineFacet(
-        facetedProject, true /* installDependentFacets */, subMonitor.newChild(50));
+        newProject, true /* installDependentFacets */, subMonitor.newChild(100));
   }
 
   @Override
