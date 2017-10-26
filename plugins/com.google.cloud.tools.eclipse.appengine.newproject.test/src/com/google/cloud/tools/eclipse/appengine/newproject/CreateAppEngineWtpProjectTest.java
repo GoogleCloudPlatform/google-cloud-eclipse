@@ -259,7 +259,7 @@ public abstract class CreateAppEngineWtpProjectTest {
   }
 
   @Test
-  public void testJstl12JarIfnonMavenProject() throws InvocationTargetException, CoreException {
+  public void testJstl12JarIfNonMavenProject() throws InvocationTargetException, CoreException {
     CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
     creator.execute(monitor);
 
