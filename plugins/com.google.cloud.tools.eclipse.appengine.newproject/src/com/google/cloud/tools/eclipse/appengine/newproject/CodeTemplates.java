@@ -76,9 +76,10 @@ public class CodeTemplates {
    */
   private static IFile materialize(IProject project, AppEngineProjectConfig config,
       boolean isStandardProject, IProgressMonitor monitor) throws CoreException {
-    SubMonitor subMonitor = SubMonitor.convert(monitor, "Generating code", 40);
+    SubMonitor subMonitor = SubMonitor.convert(monitor, "Generating code", 45);
 
-    IFile hello = createJavaSourceFiles(project, config, isStandardProject, subMonitor.newChild(15));
+    IFile hello =
+        createJavaSourceFiles(project, config, isStandardProject, subMonitor.newChild(15));
 
     createAppEngineWebXmlOrAppYaml(project, config, isStandardProject, subMonitor.newChild(5));
 
@@ -88,6 +89,8 @@ public class CodeTemplates {
 
     if (config.getUseMaven()) {
       createPomXml(project, config, isStandardProject, subMonitor.newChild(5));
+    } else {
+      subMonitor.worked(5);
     }
 
     return hello;
