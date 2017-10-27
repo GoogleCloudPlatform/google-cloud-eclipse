@@ -134,21 +134,18 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
     // The virtual component model is very flexible, but we assume that
     // the WEB-INF/appengine-web.xml isn't a virtual file remapped elsewhere
     IFolder webInfDir = WebProjectUtil.getWebInfDirectory(project);
-
     if (webInfDir == null) {
       webInfDir =
           project.getFolder(WebProjectUtil.DEFAULT_WEB_PATH).getFolder(WebProjectUtil.WEB_INF);
-      ResourceUtils.createFolders(webInfDir, progress.newChild(3));
     }
-
     progress.worked(1);
 
     IFile appEngineWebXml = webInfDir.getFile(APPENGINE_WEB_XML);
-
     if (appEngineWebXml.exists()) {
       return;
     }
 
+    ResourceUtils.createFolders(webInfDir, progress.newChild(1));
     appEngineWebXml.create(new ByteArrayInputStream(new byte[0]), true, progress.newChild(2));
     String configFileLocation = appEngineWebXml.getLocation().toString();
     Templates.createFileContent(

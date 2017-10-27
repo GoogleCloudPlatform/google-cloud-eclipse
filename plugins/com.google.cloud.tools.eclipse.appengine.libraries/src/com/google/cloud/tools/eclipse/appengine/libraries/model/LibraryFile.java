@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
+import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.net.URI;
@@ -23,24 +24,31 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+
 /**
  * A jar file that is downloaded from the location defined by {@link MavenCoordinates}. It can have
  * associated filters to control visibility of classes and packages contained in the jar file.
  */
-public class LibraryFile {
+public class LibraryFile implements Comparable<LibraryFile> {
 
   private List<Filter> filters = Collections.emptyList();
   private MavenCoordinates mavenCoordinates;
   private URI javadocUri;
   private URI sourceUri;
   private boolean export = true;
+  
+  /** Version has been checked against Maven Central **/
+  // todo could mark this transient and on deserialization set depending on whether
+  // version is still LATEST_VERSION or not
+  private boolean fixedVersion = false;
 
   public LibraryFile(MavenCoordinates mavenCoordinates) {
     Preconditions.checkNotNull(mavenCoordinates, "mavenCoordinates is null");
     this.mavenCoordinates = mavenCoordinates;
   }
 
-  // todo Danger! This exposes mutable internal state
   public MavenCoordinates getMavenCoordinates() {
     return mavenCoordinates;
   }
@@ -79,4 +87,49 @@ public class LibraryFile {
   void setExport(boolean export) {
     this.export = export;
   }
+  
+  @Override
+  public String toString() {
+    return mavenCoordinates.toStringCoordinates();
+  }
+
+  @Override
+  public int compareTo(LibraryFile other) {
+    return this.mavenCoordinates.toStringCoordinates()
+        .compareTo(other.mavenCoordinates.toStringCoordinates());
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (other == null || !(other instanceof LibraryFile)) {
+      return false;
+    }
+    return this.mavenCoordinates.toStringCoordinates()
+        .equals((((LibraryFile) other).mavenCoordinates.toStringCoordinates()));
+  }
+  
+  @Override
+  public int hashCode() {
+    return this.mavenCoordinates.toStringCoordinates().hashCode();
+  }
+
+  /**
+   * Check Maven Central to find the latest release version of this artifact.
+   * This check is made at most once. Subsequent checks are no-ops.
+   */
+  void updateVersion() {
+    if (!fixedVersion) {
+      ArtifactVersion remoteVersion = ArtifactRetriever.DEFAULT.getBestVersion(
+          mavenCoordinates.getGroupId(), mavenCoordinates.getArtifactId());
+      if (remoteVersion != null) {
+        DefaultArtifactVersion localVersion = new DefaultArtifactVersion(mavenCoordinates.getVersion());
+        if (remoteVersion.compareTo(localVersion) > 0) {
+          String updatedVersion = remoteVersion.toString(); 
+          mavenCoordinates = mavenCoordinates.toBuilder().setVersion(updatedVersion).build();
+        }
+      }
+      fixedVersion = true;
+    }
+  }
+
 }

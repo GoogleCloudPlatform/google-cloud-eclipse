@@ -92,6 +92,7 @@ public class ProjectSelector extends Composite implements ISelectionProvider {
     tableColumnLayout.setColumnData(idColumn.getColumn(), new ColumnWeightData(1, 200));
   }
 
+  @Override
   public IStructuredSelection getSelection() {
     // getStructuredSelection() is not available in Mars
     return (IStructuredSelection) viewer.getSelection();
@@ -169,11 +170,12 @@ public class ProjectSelector extends Composite implements ISelectionProvider {
     viewer.setSelection(selection);
   }
 
-
+  @Override
   public void addSelectionChangedListener(ISelectionChangedListener listener) {
     viewer.addPostSelectionChangedListener(listener);
   }
 
+  @Override
   public void removeSelectionChangedListener(ISelectionChangedListener listener) {
     viewer.removePostSelectionChangedListener(listener);
   }

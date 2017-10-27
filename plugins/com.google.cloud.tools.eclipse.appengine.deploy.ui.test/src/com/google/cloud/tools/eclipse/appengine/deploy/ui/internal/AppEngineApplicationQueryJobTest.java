@@ -33,6 +33,7 @@ import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.AppEngine;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Display;
@@ -186,12 +187,10 @@ public class AppEngineApplicationQueryJobTest {
     when(projectRepository2.getAppEngineApplication(staleCredential, "staleProjectId"))
         .thenThrow(new ProjectRepositoryException("testException"));
 
-    Predicate<Job> notLatest = mock(Predicate.class);
+    // This second job is stale, i.e., it was fired, but user has selected another credential.
+    Predicate<Job> notLatest = Predicates.alwaysFalse();
     Job staleJob = new AppEngineApplicationQueryJob(staleProject, staleCredential,
         projectRepository2, projectSelector, EXPECTED_LINK, notLatest);
-
-    // This second job is stale, i.e., it was fired, but user has selected another credential.
-    when(notLatest.apply(staleJob)).thenReturn(false);
 
     queryJob.schedule();
     queryJob.join();

@@ -58,13 +58,23 @@ public class LibrarySelectorGroup implements ISelectionProvider {
   private final ListenerList/* <ISelectedChangeListener> */ listeners = new ListenerList/* <> */();
 
   public LibrarySelectorGroup(Composite parentContainer, String groupName) {
-    Collection<Library> availableLibraries = CloudLibraries.getLibraries(groupName);
+    this(parentContainer, groupName, true);
+  }
+  
+  /**
+   * @param restrictedEnvironment whether project is targeted to an environment 
+   *     that cannot handle GRPC such as the white-listed App Engine Standard Java 7 JRE,
+   *     android, etc.
+   */
+  LibrarySelectorGroup(Composite parentContainer, String groupName, boolean restrictedEnvironment) {
     Preconditions.checkNotNull(parentContainer, "parentContainer is null");
-    Preconditions.checkNotNull(availableLibraries, "availableLibraries is null");
-
+    
+    Collection<Library> availableLibraries = CloudLibraries.getLibraries(groupName);
     this.availableLibraries = new LinkedHashMap<>();
     for (Library library : availableLibraries) {
-      this.availableLibraries.put(library.getId(), library);
+      if (!restrictedEnvironment || "http".equals(library.getTransport())) {
+        this.availableLibraries.put(library.getId(), library);
+      }
     }
     createContents(parentContainer);
   }
@@ -98,8 +108,11 @@ public class LibrarySelectorGroup implements ISelectionProvider {
   private Collection<Library> getLibraryDependencies() {
     Collection<Library> dependencies = new HashSet<>();
     for (Library library : explicitSelectedLibraries) {
-      for (String depId : library.getLibraryDependencies()) {
-        dependencies.add(availableLibraries.get(depId));
+      for (String dependencyId : library.getLibraryDependencies()) {
+        Library dependency = CloudLibraries.getLibrary(dependencyId);
+        if (dependency != null) {
+          dependencies.add(dependency);
+        }
       }
     }
     return dependencies;
@@ -173,8 +186,7 @@ public class LibrarySelectorGroup implements ISelectionProvider {
   }
 
   private void fireSelectionListeners() {
-    SelectionChangedEvent event =
-        new SelectionChangedEvent(this, getSelection());
+    SelectionChangedEvent event = new SelectionChangedEvent(this, getSelection());
     for (Object listener : listeners.getListeners()) {
       ((ISelectionChangedListener) listener).selectionChanged(event);
     }

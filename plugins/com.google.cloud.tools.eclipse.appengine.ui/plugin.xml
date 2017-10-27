@@ -61,6 +61,14 @@
                     value="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineFlex">
               </parameter>
            </command>
+           <command
+                 commandId="org.eclipse.ui.newWizard"
+                 style="push">
+              <parameter
+                    name="newWizardId"
+                    value="com.google.cloud.tools.eclipse.dataflow.ui.wizard.NewDataflowProjectWizard">
+              </parameter>
+           </command>
         </menu>
         <separator
               name="launch"
@@ -96,6 +104,11 @@
         </command>
         <command
               commandId="com.google.cloud.tools.eclipse.appengine.flex.deploy"
+              style="push">
+        </command>
+        <command
+              commandId="com.google.cloud.tools.eclipse.appengine.flex.deploy.existing.war.jar"
+              label="%deployFlexExistingWarJarMenuLabel"
               style="push">
         </command>
         <separator

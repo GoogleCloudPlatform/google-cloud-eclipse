@@ -16,17 +16,19 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -40,11 +42,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
-import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
-import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 
 public class PomTest {
   
@@ -75,25 +72,44 @@ public class PomTest {
   public void testAddDependencies() 
       throws CoreException, ParserConfigurationException, IOException, SAXException {
     
-    MavenCoordinates coordinates0 = new MavenCoordinates("com.example.group0", "artifact0");
-    coordinates0.setVersion("1.2.3");
+    MavenCoordinates.Builder builder = new MavenCoordinates.Builder()
+        .setGroupId("com.example.group0")
+        .setArtifactId("artifact0")
+        .setVersion("1.2.3"); 
+
+    MavenCoordinates coordinates0 = builder.build();
     LibraryFile file0 = new LibraryFile(coordinates0);
     List<LibraryFile> list0 = new ArrayList<>();
     list0.add(file0);
     
+    MavenCoordinates coordinates1 = new MavenCoordinates.Builder()
+        .setGroupId("com.example.group1")
+        .setArtifactId("artifact1")
+        .build();
     List<LibraryFile> list1 = new ArrayList<>();
-    LibraryFile file1 = new LibraryFile(new MavenCoordinates("com.example.group1", "artifact1"));
+    LibraryFile file1 = new LibraryFile(coordinates1);
     list1.add(file1);
     
+    MavenCoordinates coordinates2 = new MavenCoordinates.Builder()
+        .setGroupId("com.example.group2")
+        .setArtifactId("artifact2")
+        .build();
+    MavenCoordinates coordinates3 = new MavenCoordinates.Builder()
+        .setGroupId("com.example.group3")
+        .setArtifactId("artifact3")
+        .build();
     List<LibraryFile> list2 = new ArrayList<>();
-    LibraryFile file2 = new LibraryFile(new MavenCoordinates("com.example.group2", "artifact2"));
-    LibraryFile file3 = new LibraryFile(new MavenCoordinates("com.example.group3", "artifact3"));
+    LibraryFile file2 = new LibraryFile(coordinates2);
+    LibraryFile file3 = new LibraryFile(coordinates3);
     list2.add(file2);
     list2.add(file3);
     
-    Library library0 = new Library("id0", list0);
-    Library library1 = new Library("id1", list1);
-    Library library2 = new Library("id2", list2);
+    Library library0 = new Library("id0");
+    library0.setLibraryFiles(list0);
+    Library library1 = new Library("id1");
+    library1.setLibraryFiles(list1);
+    Library library2 = new Library("id2");
+    library2.setLibraryFiles(list2);
     List<Library> libraries = new ArrayList<>();
     libraries.add(library0);
     libraries.add(library1);
@@ -134,18 +150,30 @@ public class PomTest {
   @Test
   public void testAddDependencies_withDuplicates() 
       throws CoreException, ParserConfigurationException, IOException, SAXException {
-        
+
+    MavenCoordinates coordinates1 = new MavenCoordinates.Builder()
+        .setGroupId("com.example.group1")
+        .setArtifactId("artifact1")
+        .build();
+    MavenCoordinates coordinates2 = new MavenCoordinates.Builder()
+        .setGroupId("com.example.group2")
+        .setArtifactId("artifact2")
+        .build();
+
     List<LibraryFile> list1 = new ArrayList<>();
-    LibraryFile file1 = new LibraryFile(new MavenCoordinates("com.example.group1", "artifact1"));
+    LibraryFile file1 = new LibraryFile(coordinates1);
     list1.add(file1);
     
     List<LibraryFile> list2 = new ArrayList<>();
-    LibraryFile file2 = new LibraryFile(new MavenCoordinates("com.example.group2", "artifact2"));
+    LibraryFile file2 = new LibraryFile(coordinates2);
     list2.add(file1);
     list2.add(file2);
     
-    Library library1 = new Library("id1", list1);
-    Library library2 = new Library("id2", list2);
+    Library library1 = new Library("id1");
+    library1.setLibraryFiles(list1);
+    Library library2 = new Library("id2");
+    library2.setLibraryFiles(list2);
+
     List<Library> libraries = new ArrayList<>();
     libraries.add(library1);
     libraries.add(library2);
@@ -171,6 +199,44 @@ public class PomTest {
     Assert.assertEquals("com.example.group2", groupId1.getTextContent());
     Element artifactId1 = getOnlyChild(child1, "artifactId");
     Assert.assertEquals("artifact2", artifactId1.getTextContent());
+  }
+  
+  @Test
+  public void testAddDependencies_areDirect() 
+      throws CoreException, ParserConfigurationException, IOException, SAXException {
+    
+    // objectify depends on guava
+    MavenCoordinates coordinates =
+        new MavenCoordinates.Builder()
+            .setGroupId("com.googlecode.objectify")
+            .setArtifactId("objectify")
+            .setVersion("5.1.10").build(); // to be upgraded
+    
+    List<LibraryFile> files = new ArrayList<>();
+    LibraryFile file = new LibraryFile(coordinates);
+    files.add(file);
+    
+    Library library = new Library("objectify");
+    library.setLibraryFiles(files);
+    
+    List<Library> libraries = new ArrayList<>();
+    libraries.add(library);
+    
+    pom.addDependencies(libraries);
+    
+    InputStream contents = pomFile.getContents();
+    Document actual = parse(contents);
+    
+    NodeList dependencies = actual.getElementsByTagName("dependencies");
+    Assert.assertEquals(1, dependencies.getLength());    
+    
+    Element dependency = getOnlyChild(((Element) dependencies.item(0)), "dependency");
+    Element groupId = getOnlyChild(dependency, "groupId");
+    Assert.assertEquals("com.googlecode.objectify", groupId.getTextContent());
+    Element artifactId = getOnlyChild(dependency, "artifactId");
+    Assert.assertEquals("objectify", artifactId.getTextContent());
+    Element version = getOnlyChild(dependency, "version");
+    Assert.assertNotEquals("5.1.10", version.getTextContent());
   }
 
   private static Document parse(InputStream in)

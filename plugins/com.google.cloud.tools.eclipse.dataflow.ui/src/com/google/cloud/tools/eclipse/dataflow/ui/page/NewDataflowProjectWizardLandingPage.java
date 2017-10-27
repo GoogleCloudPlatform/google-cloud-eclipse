@@ -16,13 +16,18 @@
 
 package com.google.cloud.tools.eclipse.dataflow.ui.page;
 
-import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowDependencyManager;
+import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowMavenCoordinates;
+import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowProjectArchetype;
 import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowProjectCreator;
-import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowProjectCreator.Template;
 import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowProjectValidationStatus;
 import com.google.cloud.tools.eclipse.dataflow.core.project.MajorVersion;
+import com.google.cloud.tools.eclipse.dataflow.ui.Messages;
 import com.google.cloud.tools.eclipse.dataflow.ui.util.ButtonFactory;
+import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
 import com.google.common.base.Strings;
+import java.io.File;
+import java.net.URI;
+import java.util.Collection;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -45,19 +50,14 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-
-import java.io.File;
-import java.net.URI;
-import java.util.Map;
 
 /**
  * The landing page for the New Cloud Dataflow Project wizard.
  */
 public class NewDataflowProjectWizardLandingPage extends WizardPage  {
-  private static final String EXAMPLE_GROUP_ID = "com.company.product";
 
-  private DataflowDependencyManager dependencyManager;
   private final DataflowProjectCreator targetCreator;
 
   private Text groupIdInput;
@@ -73,21 +73,20 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
   private Combo projectNameTemplate;
 
   public NewDataflowProjectWizardLandingPage(DataflowProjectCreator targetCreator) {
-    super("newDataflowProjectWizardLandingPage");
-    this.dependencyManager = DataflowDependencyManager.create();
+    super("newDataflowProjectWizardLandingPage"); //$NON-NLS-1$
     this.targetCreator = targetCreator;
-    setTitle(Messages.getString("CREATE_DATAFLOW_PROJECT"));
-    setDescription(Messages.getString("WIZARD_DESCRIPTION"));
+    setTitle(Messages.getString("create.dataflow.project")); //$NON-NLS-1$
+    setDescription(Messages.getString("wizard.description")); //$NON-NLS-1$
     setImageDescriptor(getDataflowIcon());
     setPageComplete(false);
   }
 
   private static ImageDescriptor getDataflowIcon() {
-    String imageFilePath = "icons/Dataflow_64.png";
+    String imageFilePath = "icons/Dataflow_64.png"; //$NON-NLS-1$
     return AbstractUIPlugin.imageDescriptorFromPlugin(
-        "com.google.cloud.tools.eclipse.dataflow.ui", imageFilePath);
+        "com.google.cloud.tools.eclipse.dataflow.ui", imageFilePath); //$NON-NLS-1$
   }
-  
+
   private static void addLabel(Composite formComposite, String labelText) {
     Label label = new Label(formComposite, SWT.NULL);
     label.setText(labelText);
@@ -101,7 +100,8 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     return widget;
   }
 
-  private static Button addCheckbox(Composite formComposite, String labelText, boolean initialValue) {
+  private static Button addCheckbox(Composite formComposite, String labelText,
+      boolean initialValue) {
     Button checkbox = new Button(formComposite, SWT.CHECK);
     checkbox.setText(labelText);
     checkbox.setLayoutData(gridSpan(SWT.NULL, 3));
@@ -130,50 +130,54 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     Composite formComposite = new Composite(parent, SWT.NULL);
     formComposite.setLayout(new GridLayout(3, false));
     setControl(formComposite);
+    setHelp(formComposite);
+    
+    groupIdInput = addLabeledText(formComposite, Messages.getString("group.id")); //$NON-NLS-1$
+    groupIdInput.setMessage(Messages.getString("example.group.id"));//$NON-NLS-1$
+    groupIdInput.setToolTipText(Messages.getString("GROUP_ID_TOOLTIP")); //$NON-NLS-1$
+    artifactIdInput = addLabeledText(formComposite, Messages.getString("artifact.id")); //$NON-NLS-1$
+    artifactIdInput.setToolTipText(Messages.getString("ARTIFACT_ID_TOOLTIP")); //$NON-NLS-1$
 
-    groupIdInput = addLabeledText(formComposite, "&Group ID:");
-    groupIdInput.setMessage(EXAMPLE_GROUP_ID);
-    groupIdInput.setToolTipText(Messages.getString("GROUP_ID_TOOLTIP"));
-    artifactIdInput = addLabeledText(formComposite, "&Artifact ID:");
-    artifactIdInput.setToolTipText(Messages.getString("ARTIFACT_ID_TOOLTIP"));
-
-    templateDropdown = addCombo(formComposite, "Project &Template:", true);
-    for (Template template : Template.values()) {
+    templateDropdown = addCombo(formComposite,
+        Messages.getString("project.template"), true); //$NON-NLS-1$
+    for (DataflowProjectArchetype template : DataflowProjectArchetype.values()) {
       templateDropdown.add(template.getLabel());
     }
-    templateVersionDropdown = addCombo(formComposite, "Project Dataflow &Version", false);
+    templateVersionDropdown = addCombo(formComposite,
+        Messages.getString("dataflow.version"), false); //$NON-NLS-1$
 
     templateDropdown.select(0);
     updateAvailableVersions();
 
-    packageInput = addLabeledText(formComposite, "&Package:");
-    packageInput.setToolTipText(Messages.getString("UNSET_PACKAGE_TOOLTIP"));
-    packageInput.setMessage(EXAMPLE_GROUP_ID);
+    packageInput = addLabeledText(formComposite, Messages.getString("package")); //$NON-NLS-1$
+    packageInput.setToolTipText(Messages.getString("package.tooltip")); //$NON-NLS-1$
+    packageInput.setMessage(Messages.getString("example.group.id"));//$NON-NLS-1$
 
     // Add a labeled text and button for the default location.
     Group locationGroup = new Group(formComposite, SWT.NULL);
     locationGroup.setLayoutData(gridSpan(GridData.FILL_HORIZONTAL, 3));
     locationGroup.setLayout(new GridLayout(3, false));
 
-    useDefaultLocation = addCheckbox(locationGroup, "Use default &Workspace location", true);
+    useDefaultLocation = addCheckbox(locationGroup,
+        Messages.getString("use.default.workspace.location"), true); //$NON-NLS-1$
 
-    addLabel(locationGroup, "&Location:");
+    addLabel(locationGroup, Messages.getString("location")); //$NON-NLS-1$
 
     String defaultLocation = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
     locationInput = new Text(locationGroup, SWT.SINGLE | SWT.BORDER);
     locationInput.setText(defaultLocation);
     locationInput.setEnabled(false);
     locationInput.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-    locationInput.setToolTipText(Messages.getString("LOCATION_TOOLTIP"));
+    locationInput.setToolTipText(Messages.getString("location.tooltip")); //$NON-NLS-1$
 
-    locationBrowse = ButtonFactory.newPushButton(locationGroup, "&Browse");
+    locationBrowse = ButtonFactory.newPushButton(locationGroup, Messages.getString("browse")); //$NON-NLS-1$
     locationBrowse.setEnabled(false);
 
-    projectNameTemplate = addCombo(formComposite, "Name &template:", false);
+    projectNameTemplate = addCombo(formComposite, Messages.getString("name.template"), false); //$NON-NLS-1$
     projectNameTemplate.setToolTipText(
-        "Optional Eclipse project name template such as [groupId]-[artifactId].");
-    projectNameTemplate.add("[artifactId]");
-    projectNameTemplate.add("[groupId]-[artifactId]");
+        Messages.getString("name.template.tooltip")); //$NON-NLS-1$
+    projectNameTemplate.add("[artifactId]"); //$NON-NLS-1$
+    projectNameTemplate.add("[groupId]-[artifactId]"); //$NON-NLS-1$
     projectNameTemplate.setLayoutData(gridSpan(GridData.FILL_HORIZONTAL, 1));
 
     // Register all the listeners
@@ -182,21 +186,33 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     formComposite.layout();
     parent.layout();
   }
+  
+
+  private void setHelp(Composite container) {
+    PlatformUI.getWorkbench().getHelpSystem().setHelp(container,
+        "com.google.cloud.tools.eclipse.dataflow.ui.NewDataflowProjectContext"); //$NON-NLS-1$
+  }
 
   private void validateAndSetError() {
-    if (targetCreator.isValid()) {
-      setErrorMessage(null);
-      setPageComplete(true);
-      return;
-    } else {
-      for (DataflowProjectValidationStatus status : targetCreator.validate()) {
-        if (!status.isValid()) {
-          setErrorMessage(status.getMessage());
-          break;
-        }
+    Collection<DataflowProjectValidationStatus> validations = targetCreator.validate();
+    for (DataflowProjectValidationStatus status : validations) {
+      if (status.isError()) {
+        setErrorMessage(status.getMessage());
+        setPageComplete(false);
+        return;
       }
     }
-    setPageComplete(false);
+    for (DataflowProjectValidationStatus status : validations) {
+      if (status.isMissing()) {
+        setErrorMessage(null);
+        setMessage(status.getMessage());
+        setPageComplete(false);
+        return;
+      }
+    }
+    setMessage(null);
+    setErrorMessage(null);
+    setPageComplete(true);
   }
 
   private void addListeners(String defaultProjectLocation) {
@@ -265,42 +281,37 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     return new SelectionAdapter() {
       @Override
       public void widgetSelected(SelectionEvent event) {
-        targetCreator.setTemplate(Template.values()[templateDropdown.getSelectionIndex()]);
+        targetCreator.setTemplate(DataflowProjectArchetype.values()[templateDropdown.getSelectionIndex()]);
         updateAvailableVersions();
       }
     };
   }
 
   /**
-   * Update the dropdown of available versions to versions that are available for the currently
-   * selected Template. If the available versions for the currently selected template does not
-   * include the currently selected version, select the latest stable version; if none is available,
-   * select the latest version.
+   * Update the dropdown of available template (archetype) versions to versions that are available
+   * for the currently selected template. If the available versions for the currently selected
+   * template do not include the currently selected version, select the latest stable version.
    */
   private void updateAvailableVersions() {
     String selected = templateVersionDropdown.getText();
     templateVersionDropdown.removeAll();
 
-    Template template = Template.values()[templateDropdown.getSelectionIndex()];
-    Map<ArtifactVersion, MajorVersion> availableVersions =
-        dependencyManager.getLatestVersions(template.getSdkVersions());
+    DataflowProjectArchetype template = DataflowProjectArchetype.values()[templateDropdown.getSelectionIndex()];
+    for (MajorVersion majorVersion : template.getSdkVersions().descendingSet()) {
+      ArtifactVersion latestArtifact = ArtifactRetriever.DEFAULT.getLatestReleaseVersion(
+          DataflowMavenCoordinates.GROUP_ID, template.getArtifactId(),
+          majorVersion.getVersionRange());
 
-    // If there is a previously selected version that is available, select it. Otherwise, if there
-    // is a stable version available, select the most recent. Otherwise, select the latest version.
-    int latestStableVersionIndex = availableVersions.size() - 1;
-    boolean selectedVersionExists = false;
-    for (Map.Entry<ArtifactVersion, MajorVersion> version : availableVersions.entrySet()) {
-      templateVersionDropdown.add(version.getKey().toString());
-      int index = templateVersionDropdown.getItemCount() - 1;
-      if (version.getKey().toString().equals(selected)) {
-        templateVersionDropdown.select(index);
-        selectedVersionExists = true;
-      } else if (version.getValue().hasStableApi()) {
-        latestStableVersionIndex = index;
+      if (latestArtifact != null) {
+        templateVersionDropdown.add(latestArtifact.toString());
+        if (latestArtifact.toString().equals(selected)) {
+          templateVersionDropdown.select(templateVersionDropdown.getItemCount() - 1);
+        }
       }
     }
-    if (!selectedVersionExists) {
-      templateVersionDropdown.select(latestStableVersionIndex);
+
+    if (templateVersionDropdown.getSelectionIndex() == -1) {
+      templateVersionDropdown.select(0);
     }
     updateArchetypeVersion();
   }
@@ -330,7 +341,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
 
   private SelectionListener showDefaultOrCustomValueListener(final String defaultValue) {
     return new SelectionAdapter() {
-      private String customValue = "";
+      private String customValue = ""; //$NON-NLS-1$
 
       @Override
       public void widgetSelected(SelectionEvent event) {
@@ -411,7 +422,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
       @Override
       public void widgetSelected(SelectionEvent event) {
         DirectoryDialog dialog = new DirectoryDialog(shell);
-        dialog.setMessage(Messages.getString("SELECT_PROJECT_LOCATION"));
+        dialog.setMessage(Messages.getString("select.project.location")); //$NON-NLS-1$
         String result = dialog.open();
         if (!Strings.isNullOrEmpty(result)) {
           locationInput.setText(result);

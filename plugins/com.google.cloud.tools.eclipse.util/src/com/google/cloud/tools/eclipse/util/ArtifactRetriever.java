@@ -18,22 +18,18 @@ package com.google.cloud.tools.eclipse.util;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.ImmutableSortedSet.Builder;
-import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
-import org.apache.maven.artifact.versioning.VersionRange;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Locale;
 import java.util.NavigableSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -44,22 +40,29 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.apache.maven.artifact.versioning.VersionRange;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 /**
  * {@link ArtifactRetriever} provides access to Maven artifacts using low-level URL and XPath APIs
- * rather than using the M2E plugin to work around shortcomings in the ability of M2E to query
- * Maven for available versions. Additionally, M2E APIs are internal and unstable, and thus may
- * change between versions.
+ * rather than using the M2E plugin in order to work around shortcomings in the ability of M2E to
+ * query Maven for available versions. Additionally, M2E APIs are internal and unstable, and thus
+ * may change between versions.
  *
  * <p>The artifact retriever reads Maven Central metadata XML files to retrieve available and latest
  * versions.
  */
 public class ArtifactRetriever {
-  
+
   private static final Logger logger = Logger.getLogger(ArtifactRetriever.class.getName());
-  
+
   private final String repositoryUrl;
-  
+
+  // see https://maven.apache.org/ref/3.5.0/maven-repository-metadata/repository-metadata.html
   @VisibleForTesting
   URL getMetadataUrl(String groupId, String artifactId) {
     String groupPath = groupId.replace('.', '/');
@@ -71,33 +74,6 @@ public class ArtifactRetriever {
           "Could not construct metadata URL for artifact " + artifactId, ex);
     }
   }
-  
-  private final LoadingCache<String, Document> metadataCache =
-      CacheBuilder.newBuilder()
-          .refreshAfterWrite(4, TimeUnit.HOURS)
-          .build(
-              new CacheLoader<String, Document>() {
-
-                @Override
-                public Document load(String coordinates) throws Exception {
-                  return getMetadataDocument(coordinates);
-                }
-              });
-
-  private final LoadingCache<String, ArtifactVersion> latestVersion =
-      CacheBuilder.newBuilder()
-          .refreshAfterWrite(4, TimeUnit.HOURS)
-          .build(
-              new CacheLoader<String, ArtifactVersion>() {
-
-                @Override
-                public ArtifactVersion load(String coordinates) throws Exception {
-                  Document document = metadataCache.get(coordinates);
-                  XPath xpath = XPathFactory.newInstance().newXPath();
-                  String result = xpath.evaluate("/metadata/versioning/latest", document);
-                  return new DefaultArtifactVersion(result);
-                }
-              });
 
   private final LoadingCache<String, NavigableSet<ArtifactVersion>> availableVersions =
       CacheBuilder.newBuilder()
@@ -107,7 +83,7 @@ public class ArtifactRetriever {
 
                 @Override
                 public NavigableSet<ArtifactVersion> load(String coordinates) throws Exception {
-                  Document document = metadataCache.get(coordinates);
+                  Document document = getMetadataDocument(coordinates);
                   XPath xpath = XPathFactory.newInstance().newXPath();
                   NodeList versionNodes = (NodeList) xpath.evaluate(
                       "/metadata/versioning/versions/version",
@@ -122,85 +98,112 @@ public class ArtifactRetriever {
                 }
               });
 
+  private static final LoadingCache<String, ArtifactRetriever> retrievers =
+      CacheBuilder.newBuilder()
+          .build(
+              new CacheLoader<String, ArtifactRetriever>() {
+
+                @Override
+                public ArtifactRetriever load(String url) {
+                  return new ArtifactRetriever(url);
+                }
+              });
+
   /**
-   * @param repositoryUrl the base URL of the maven mirror such as 
-   *     "https://repo1.maven.org/maven2/"
-   * @throws URISyntaxException if the argument is not a valid URL
+   * A retriever attached to Maven Central https://repo1.maven.org/maven2/
    */
-  public ArtifactRetriever(String repositoryUrl) throws URISyntaxException {
-    Preconditions.checkNotNull(repositoryUrl);
-    // check for URL syntax
-    new URI(repositoryUrl);
-    if (!repositoryUrl.endsWith("/")) {
-      repositoryUrl = repositoryUrl + "/";
-    }
-    
+  public static final ArtifactRetriever DEFAULT = central();
+
+  /**
+   * Avoid some exception catching during initialization of
+   * the known valid Maven Central URL.
+   **/
+  private static ArtifactRetriever central() {
+    return retrievers.getUnchecked("https://repo1.maven.org/maven2/");
+  }
+
+  /**
+   * @param repositoryUrl the base URL of the maven mirror such as
+   *     "https://repo1.maven.org/maven2/"
+   */
+  private ArtifactRetriever(String repositoryUrl) {
     this.repositoryUrl = repositoryUrl;
   }
 
   /**
-   * Retrieve from https://repo1.maven.org/maven2/
+   * Returns the most recent release version of the artifact in the repo if one exists.
+   * If there's no release version, then return the latest beta, alpha, or pre-release
+   * but not a snapshot version. Returns null if the artifact is not found.
    */
-  public ArtifactRetriever() {
-    this.repositoryUrl = "https://repo1.maven.org/maven2/";
+  public ArtifactVersion getBestVersion(String groupId, String artifactId) {
+    ArtifactVersion version = getLatestReleaseVersion(groupId, artifactId);
+    if (version == null) {
+      version = getLatestVersion(groupId, artifactId);
+    }
+    return version;
   }
 
   /**
-   * Returns the latest published artifact version, or null if there is no such version.
+   * Returns the latest published release artifact version, or null if there is no such version.
    */
-  public ArtifactVersion getLatestArtifactVersion(String groupId, String artifactId) {
-    return getLatestIncrementalVersion(idToKey(groupId, artifactId), null);
+  public ArtifactVersion getLatestReleaseVersion(String groupId, String artifactId) {
+    return getLatestReleaseVersion(groupId, artifactId, null);
   }
 
   /**
-   * Returns the latest published artifact version in the version range, or null if there is no such
-   * version.
+   * Returns the latest published release artifact version in the version range,
+   * or null if there is no such version.
    */
-  public ArtifactVersion getLatestArtifactVersion(
+  public ArtifactVersion getLatestReleaseVersion(
       String groupId, String artifactId, VersionRange range) {
-    return getLatestIncrementalVersion(idToKey(groupId, artifactId), range);
-  }
-
-  /**
-   * Returns the latest version of the specified artifact in the version range, or null if there is
-   * no such version.
-   * 
-   * @param coordinates Maven coordinates in the form groupId:artifactId
-   */
-  private ArtifactVersion getLatestIncrementalVersion(String coordinates, VersionRange range) {
+    String coordinates = idToKey(groupId, artifactId);
     try {
-      ArtifactVersion latest = latestVersion.get(coordinates);
-      if (range == null || range.containsVersion(latest)) {
-        return latest;
+      NavigableSet<ArtifactVersion> versions = availableVersions.get(coordinates);
+      for (ArtifactVersion version : versions.descendingSet()) {
+        if (isReleased(version)) {
+          if (range == null || range.containsVersion(version)) {
+            return version;
+          }
+        }
       }
     } catch (ExecutionException ex) {
       logger.log(
           Level.WARNING,
-          "Could not retrieve latest version for artifact " + coordinates,
+          "Could not retrieve version for artifact " + coordinates,
           ex.getCause());
     }
+    return null;
+  }
 
+  /**
+   * Returns the most recent version of the artifact in the repo,
+   * possibly a beta, alpha, or pre-release but not a snapshot version.
+   */
+  public ArtifactVersion getLatestVersion(String groupId, String artifactId) {
+    String coordinates = idToKey(groupId, artifactId);
     try {
-      NavigableSet<ArtifactVersion> allVersions = availableVersions.get(coordinates);
-      ArtifactVersion latest = getLatestInRange(range, allVersions);
-      return latest;
+      NavigableSet<ArtifactVersion> versions = availableVersions.get(coordinates);
+      return versions.last();
     } catch (ExecutionException ex) {
       logger.log(
           Level.WARNING,
-          "Could not retrieve available versions for artifact " + coordinates,
+          "Could not retrieve version for artifact " + coordinates,
           ex.getCause());
       return null;
     }
   }
 
-  private static ArtifactVersion getLatestInRange(
-      VersionRange versionRange, NavigableSet<ArtifactVersion> allVersions) {
-    for (ArtifactVersion version : allVersions.descendingSet()) {
-      if (versionRange.containsVersion(version)) {
-        return version;
-      }
+  private static boolean isReleased(ArtifactVersion version) {
+    String qualifier = version.getQualifier();
+    if (version.getMajorVersion() <= 0) {
+      return false;
+    } else if (Strings.isNullOrEmpty(qualifier)) {
+      return true; 
+    } else if ("final".equalsIgnoreCase(qualifier.toLowerCase(Locale.US))) {
+      return true; 
     }
-    return null;
+    
+    return false;
   }
 
   private Document getMetadataDocument(String coordinates) throws IOException {
@@ -226,4 +229,23 @@ public class ArtifactRetriever {
   static String[] keyToId(String coordinates) {
     return coordinates.split(":");
   }
+
+  /**
+   * Returns a possibly cached instance of a retriever connected to a particular repo.
+   *
+   * @param url the URL of the repository to retrieve from
+   * @throws URISyntaxException if the argument is not a valid URL
+   */
+  public static ArtifactRetriever getInstance(String url) throws URISyntaxException {
+    Preconditions.checkNotNull(url);
+    // check for URL syntax
+    new URI(url);
+
+    if (!url.endsWith("/")) {
+      url = url + "/";
+    }
+    
+    return retrievers.getUnchecked(url);
+  }
+
 }

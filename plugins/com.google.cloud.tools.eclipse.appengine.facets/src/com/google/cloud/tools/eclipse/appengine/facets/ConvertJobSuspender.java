@@ -28,7 +28,7 @@ import org.eclipse.core.runtime.jobs.Job;
 
 /**
  * Prevents scheduling all future {@link org.eclipse.wst.jsdt.web.core.internal.project.ConvertJob}s
- * once {@link #suspendConvertJobs} is called, until {@link #resume} is called. Jobs already
+ * once {@link #suspendFutureConvertJobs} is called, until {@link #resume} is called. Jobs already
  * scheduled are not affected and will run to completion.
  *
  * The class is for https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155. The

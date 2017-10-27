@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.dataflow.core.project;
 
+import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.HashBasedTable;
@@ -44,28 +45,28 @@ import org.eclipse.m2e.core.project.IMavenProjectRegistry;
  * Dataflow Examples.
  */
 public class DataflowDependencyManager {
-  private final DataflowArtifactRetriever artifactRetriever;
 
+  private final ArtifactRetriever artifactRetriever;
   private final IMaven maven;
   private final IMavenProjectRegistry mavenProjectRegistry;
 
   public static DataflowDependencyManager create() {
     return create(
-        DataflowArtifactRetriever.defaultInstance(),
+        ArtifactRetriever.DEFAULT,
         MavenPlugin.getMaven(),
         MavenPlugin.getMavenProjectRegistry());
   }
 
   @VisibleForTesting
   static DataflowDependencyManager create(
-      DataflowArtifactRetriever artifactRetriever,
+      ArtifactRetriever artifactRetriever,
       IMaven maven,
       IMavenProjectRegistry mavenProjectRegistry) {
     return new DataflowDependencyManager(artifactRetriever, maven, mavenProjectRegistry);
   }
 
   private DataflowDependencyManager(
-      DataflowArtifactRetriever artifactRetriever,
+      ArtifactRetriever artifactRetriever,
       IMaven maven,
       IMavenProjectRegistry mavenProjectRegistry) {
     this.artifactRetriever = artifactRetriever;
@@ -78,7 +79,10 @@ public class DataflowDependencyManager {
    * The version is [Current Version, Next Major Version).
    */
   public ArtifactVersion getLatestDataflowDependencyInRange(VersionRange currentVersionRange) {
-    return artifactRetriever.getLatestSdkVersion(currentVersionRange);
+    return artifactRetriever.getLatestReleaseVersion(
+        DataflowMavenCoordinates.GROUP_ID,
+        DataflowMavenCoordinates.ARTIFACT_ID,
+        currentVersionRange);
   }
 
   private static boolean isDataflowDependency(Dependency dependency) {
@@ -122,25 +126,23 @@ public class DataflowDependencyManager {
   }
 
   public VersionRange getDataflowVersionRange(IProject project) {
-    Dependency dfDependency =
-        getDataflowDependencyFromModel(getModelFromProject(project));
-    if (dfDependency != null) {
-      String version = dfDependency.getVersion();
-      if (Strings.isNullOrEmpty(version)) {
-        return allVersions();
-      } else {
-        try {
-          return VersionRange.createFromVersionSpec(version);
-        } catch (InvalidVersionSpecificationException e) {
-          throw new IllegalStateException(
-              String.format(
-                  "Could not create version range from existing version %s", version),
-              e);
+    Model model = getModelFromProject(project);
+    if (model != null) {
+      Dependency dependency = getDataflowDependencyFromModel(model);
+      if (dependency != null) {
+        String version = dependency.getVersion();
+        if (!Strings.isNullOrEmpty(version)) {
+          try {
+            return VersionRange.createFromVersionSpec(version);
+          } catch (InvalidVersionSpecificationException ex) {
+            String message =
+                String.format("Could not create version range from existing version %s", version);
+            throw new IllegalStateException(message, ex);
+          }
         }
       }
-    } else {
-      return allVersions();
     }
+    return allVersions();
   }
 
   private VersionRange allVersions() {

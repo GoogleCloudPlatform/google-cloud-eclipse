@@ -16,13 +16,17 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.ui;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
+import com.google.cloud.tools.eclipse.util.MavenUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.ui.wizards.IClasspathContainerPage;
@@ -32,11 +36,7 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-
-import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
-import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
-import com.google.cloud.tools.eclipse.util.MavenUtils;
+import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
 public abstract class CloudLibrariesPage extends WizardPage implements IClasspathContainerPage,
     IClasspathContainerPageExtension, IClasspathContainerPageExtension2 {
@@ -59,7 +59,14 @@ public abstract class CloudLibrariesPage extends WizardPage implements IClasspat
     Composite composite = new Composite(parent, SWT.BORDER);
     composite.setLayout(new GridLayout(2, true));
     
-    librariesSelector = new LibrarySelectorGroup(composite, group);
+    boolean java7AppEngineStandardProject = false;
+    IProjectFacetVersion facetVersion =
+        AppEngineStandardFacet.getProjectFacetVersion(project.getProject());
+    if (facetVersion != null && facetVersion.getVersionString().equals("JRE7")) {
+      java7AppEngineStandardProject = true;
+    }
+    
+    librariesSelector = new LibrarySelectorGroup(composite, group, java7AppEngineStandardProject);
     
     setControl(composite);
   }
@@ -79,6 +86,7 @@ public abstract class CloudLibrariesPage extends WizardPage implements IClasspat
 
   @Override
   public void setSelection(IClasspathEntry containerEntry) {
+    // todo can we use the containerEntry to tick the checkboxes in the library selector group?
   }
 
   @Override
@@ -92,18 +100,22 @@ public abstract class CloudLibrariesPage extends WizardPage implements IClasspat
     if (libraries == null || libraries.isEmpty()) {
       return null;
     }
-  
+
+    SubMonitor monitor = SubMonitor.convert(null, 10);
     try {
       if (MavenUtils.hasMavenNature(project.getProject())) {
-        BuildPath.addMavenLibraries(project.getProject(), libraries, new NullProgressMonitor());
+        BuildPath.addMavenLibraries(project.getProject(), libraries, monitor.newChild(10));
         return new IClasspathEntry[0];
       } else {
-        IClasspathEntry[] added =
-            BuildPath.listAdditionalLibraries(project, libraries, new NullProgressMonitor());
-        return added;
+        Library masterLibrary = BuildPath.collectLibraryFiles(project, libraries, monitor.newChild(7));
+        IClasspathEntry masterEntry = BuildPath.listNativeLibrary(project, masterLibrary, monitor.newChild(3));
+        if (masterEntry != null) {
+          return new IClasspathEntry[] {masterEntry};
+        } else {
+          return new IClasspathEntry[0];
+        }
       }
     } catch (CoreException ex) {
-      logger.log(Level.WARNING, "Error adding libraries to project", ex);
       return new IClasspathEntry[0];
     }
   }

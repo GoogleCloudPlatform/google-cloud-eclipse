@@ -21,8 +21,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyMapOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
@@ -36,6 +39,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
@@ -43,6 +48,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.wst.server.core.IServer;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -62,6 +68,19 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
 
   @Before
   public void setUp() throws CoreException {
+    when(launchConfiguration.getAttribute(anyString(), anyString()))
+        .thenAnswer(AdditionalAnswers.returnsSecondArg());
+    when(launchConfiguration.getAttribute(anyString(), anyInt()))
+        .thenAnswer(AdditionalAnswers.returnsSecondArg());
+    when(launchConfiguration.getAttribute(anyString(), anyBoolean()))
+        .thenAnswer(AdditionalAnswers.returnsSecondArg());
+    when(server.getAttribute(anyString(), anyString()))
+        .thenAnswer(AdditionalAnswers.returnsSecondArg());
+    when(server.getAttribute(anyString(), anyInt()))
+        .thenAnswer(AdditionalAnswers.returnsSecondArg());
+    when(server.getAttribute(anyString(), anyBoolean()))
+        .thenAnswer(AdditionalAnswers.returnsSecondArg());
+
     when(server.loadAdapter(any(Class.class), any(IProgressMonitor.class)))
         .thenReturn(serverBehavior);
   }
@@ -224,7 +243,9 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
   }
 
   @Test
-  public void testGenerateRunConfiguration_withAdminPort() throws CoreException {
+  public void testGenerateRunConfiguration_withAdminPortWhenDevAppserver2() throws CoreException {
+    Assume.assumeTrue(LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2);
+
     when(launchConfiguration.getAttribute(anyString(), anyString()))
         .thenAnswer(AdditionalAnswers.returnsSecondArg());
     when(launchConfiguration
@@ -237,20 +258,14 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
     assertNull(config.getAdminPort());
     verify(launchConfiguration, never())
         .getAttribute(eq(LocalAppEngineServerBehaviour.ADMIN_PORT_ATTRIBUTE_NAME), anyInt());
-    verify(server, never()).getAttribute(anyString(), anyInt());
+    verify(server, never())
+        .getAttribute(eq(LocalAppEngineServerBehaviour.ADMIN_PORT_ATTRIBUTE_NAME), anyInt());
   }
 
   @Test
-  public void testGenerateRunConfiguration_withAdminPortFailover()
+  public void testGenerateRunConfiguration_withAdminPortFailoverWhenDevAppserver2()
       throws CoreException, IOException {
-    when(launchConfiguration.getAttribute(anyString(), anyString()))
-        .thenAnswer(AdditionalAnswers.returnsSecondArg());
-    when(launchConfiguration.getAttribute(anyString(), anyInt()))
-        .thenAnswer(AdditionalAnswers.returnsSecondArg());
-    when(server.getAttribute(anyString(), anyString()))
-        .thenAnswer(AdditionalAnswers.returnsSecondArg());
-    when(server.getAttribute(anyString(), anyInt()))
-        .thenAnswer(AdditionalAnswers.returnsSecondArg());
+    Assume.assumeTrue(LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2);
 
     // dev_appserver waits on localhost by default
     try (ServerSocket socket = new ServerSocket(8080, 100, InetAddress.getLoopbackAddress())) {
@@ -264,7 +279,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
   @Test
   public void testGenerateRunConfiguration_withVMArgs() throws CoreException {
     // DebugPlugin.parseArguments() only supports double-quotes on Windows
-    when(launchConfiguration.getAttribute(anyString(), anyString())).thenReturn("");
     when(launchConfiguration.getAttribute(eq(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS),
         anyString())).thenReturn("a b \"c d\"");
 
@@ -280,7 +294,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
   @Test
   public void testGenerateRunConfiguration_withProgramArgs() throws CoreException {
     // DebugPlugin.parseArguments() only supports double-quotes on Windows
-    when(launchConfiguration.getAttribute(anyString(), anyString())).thenReturn("");
     when(launchConfiguration
         .getAttribute(eq(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS), anyString()))
             .thenReturn("e f \"g h\"");
@@ -294,10 +307,46 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
         .getAttribute(eq(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS), anyString());
   }
 
+  @Test
+  public void testGenerateRunConfiguration_withEnvironment() throws CoreException {
+    Map<String, String> definedMap = new HashMap<>();
+    definedMap.put("foo", "bar");
+    definedMap.put("baz", "${env_var:PATH}");
+    when(launchConfiguration.getAttribute(eq(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES),
+        anyMapOf(String.class, String.class)))
+        .thenReturn(definedMap);
+
+    DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
+        .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
+
+    Map<String, String> parsedEnvironment = config.getEnvironment();
+    assertNotNull(parsedEnvironment);
+    assertEquals("bar", parsedEnvironment.get("foo"));
+    assertEquals(System.getenv("PATH"), parsedEnvironment.get("baz"));
+    verify(launchConfiguration).getAttribute(eq(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES),
+        anyMapOf(String.class, String.class));
+    verify(launchConfiguration, atLeastOnce())
+        .getAttribute(eq(ILaunchManager.ATTR_APPEND_ENVIRONMENT_VARIABLES),
+        anyBoolean());
+  }
+
+  @Test
+  public void testGenerateRunConfiguration_replaceEnvironmentFails() throws CoreException {
+    when(launchConfiguration.getAttribute(eq(ILaunchManager.ATTR_APPEND_ENVIRONMENT_VARIABLES),
+        anyBoolean())).thenReturn(false);
+
+    try {
+      new LocalAppEngineServerLaunchConfigurationDelegate()
+          .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
+      fail("should have thrown CoreException");
+    } catch (CoreException ex) {
+      /* expected */
+    }
+  }
+
 
   @Test
   public void testGenerateRunConfiguration_restart_run() throws CoreException {
-    when(launchConfiguration.getAttribute(anyString(), anyString())).thenReturn("");
     DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
         .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
     assertTrue(config.getAutomaticRestart());
@@ -305,7 +354,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
 
   @Test
   public void testGenerateRunConfiguration_restart_debug() throws CoreException {
-    when(launchConfiguration.getAttribute(anyString(), anyString())).thenReturn("");
     DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
         .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.DEBUG_MODE);
     assertFalse(config.getAutomaticRestart());
@@ -318,8 +366,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
     ILaunch[] launches = new ILaunch[] {launch};
     when(launch.getLaunchConfiguration()).thenReturn(null);
 
-    new LocalAppEngineServerLaunchConfigurationDelegate()
-        .checkConflictingLaunches(null, ILaunchManager.RUN_MODE,
-            mock(DefaultRunConfiguration.class), launches);
+    new LocalAppEngineServerLaunchConfigurationDelegate().checkConflictingLaunches(null,
+        ILaunchManager.RUN_MODE, mock(DefaultRunConfiguration.class), launches);
   }
 }

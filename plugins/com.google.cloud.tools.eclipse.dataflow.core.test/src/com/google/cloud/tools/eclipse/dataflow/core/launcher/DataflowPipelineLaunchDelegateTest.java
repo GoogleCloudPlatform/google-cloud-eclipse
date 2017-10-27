@@ -78,7 +78,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class DataflowPipelineLaunchDelegateTest {
   private DataflowPipelineLaunchDelegate dataflowDelegate;
-  private NullProgressMonitor monitor = new NullProgressMonitor();
+  private final NullProgressMonitor monitor = new NullProgressMonitor();
 
   @Mock
   private DataflowDependencyManager dependencyManager;

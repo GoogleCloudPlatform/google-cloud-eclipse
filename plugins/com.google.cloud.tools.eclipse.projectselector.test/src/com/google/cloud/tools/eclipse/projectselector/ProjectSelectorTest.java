@@ -44,8 +44,7 @@ public class ProjectSelectorTest {
 
   @Test
   public void testCreatedColumns() {
-    ProjectSelector projectSelector =
-        new ProjectSelector(shellResource.getShell());
+    ProjectSelector projectSelector = new ProjectSelector(shellResource.getShell());
 
     TableColumn[] columns = projectSelector.getViewer().getTable().getColumns();
     assertThat(columns.length, is(2));
@@ -54,9 +53,8 @@ public class ProjectSelectorTest {
   }
 
   @Test
-  public void testProjectsAreSortedAlphabetically() throws Exception {
-    ProjectSelector projectSelector =
-        new ProjectSelector(shellResource.getShell());
+  public void testProjectsAreSortedAlphabetically() {
+    ProjectSelector projectSelector = new ProjectSelector(shellResource.getShell());
     projectSelector.setProjects(getUnsortedProjectList());
 
     assertThat(getVisibleProjectAtIndex(projectSelector, 0).getName(), is("a"));

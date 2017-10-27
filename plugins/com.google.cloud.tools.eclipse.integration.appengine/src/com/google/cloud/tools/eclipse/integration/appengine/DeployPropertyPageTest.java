@@ -22,14 +22,12 @@ import static org.junit.Assert.assertTrue;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
-
+import java.util.concurrent.TimeUnit;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Rule;
 import org.junit.Test;
-
-import java.util.concurrent.TimeUnit;
 
 public class DeployPropertyPageTest extends BaseProjectTest {
   @Rule
@@ -38,7 +36,8 @@ public class DeployPropertyPageTest extends BaseProjectTest {
   @Test
   public void testPropertyPageTitle_standardProject() throws CoreException {
     String projectName = "foo";
-    project = SwtBotAppEngineActions.createNativeWebAppProject(bot, projectName, null, null);
+    project = SwtBotAppEngineActions.createNativeWebAppProject(bot, projectName,
+        null /* location */, null/* javaPackage */, null/* runtime */);
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     assertNotNull("Native App Engine projects should be faceted", facetedProject);
     assertTrue(AppEngineStandardFacet.hasFacet(facetedProject));

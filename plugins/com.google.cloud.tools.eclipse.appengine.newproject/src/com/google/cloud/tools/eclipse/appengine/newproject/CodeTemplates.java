@@ -16,8 +16,10 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.util.Templates;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import java.util.Collections;
 import java.util.HashMap;
@@ -73,6 +75,11 @@ public class CodeTemplates {
    */
   private static IFile materialize(IProject project, AppEngineProjectConfig config,
       boolean isStandardProject, IProgressMonitor monitor) throws CoreException {
+    
+    // todo this method is getting overly long and complex.
+    // break up into smaller methods and consider whether we can/should use a single map for 
+    // all templates.
+    
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
     subMonitor.setTaskName("Generating code");
     boolean force = true;
@@ -95,6 +102,12 @@ public class CodeTemplates {
     } else {
       templateValues.put("package", ""); //$NON-NLS-1$ //$NON-NLS-2$
     }
+    if (isStandardProject
+        && Objects.equal(AppEngineRuntime.STANDARD_JAVA_7.getId(), config.getRuntimeId())) {
+      templateValues.put("servletVersion", "2.5"); //$NON-NLS-1$ //$NON-NLS-2$
+    } else {
+      templateValues.put("servletVersion", "3.1"); //$NON-NLS-1$ //$NON-NLS-2$
+    }    
 
     IFolder packageFolder = createFoldersForPackage(java, packageName, subMonitor.newChild(5));
     IFile hello = createChildFile("HelloAppEngine.java", //$NON-NLS-1$
@@ -140,12 +153,13 @@ public class CodeTemplates {
             ? ""  //$NON-NLS-1$
             : config.getPackageName() + "."; //$NON-NLS-1$
     packageMap.put("package", packageValue);  //$NON-NLS-1$
-    if (isStandardProject) {
-      packageMap.put("version", "2.5"); //$NON-NLS-1$ //$NON-NLS-2$
+    if (isStandardProject
+        && Objects.equal(AppEngineRuntime.STANDARD_JAVA_7.getId(), config.getRuntimeId())) {
+      packageMap.put("servletVersion", "2.5"); //$NON-NLS-1$ //$NON-NLS-2$
       packageMap.put("namespace", "http://java.sun.com/xml/ns/javaee"); //$NON-NLS-1$ //$NON-NLS-2$
       packageMap.put("schemaUrl", "http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"); //$NON-NLS-1$ //$NON-NLS-2$
     } else {
-      packageMap.put("version", "3.1"); //$NON-NLS-1$ //$NON-NLS-2$
+      packageMap.put("servletVersion", "3.1"); //$NON-NLS-1$ //$NON-NLS-2$
       packageMap.put("namespace", "http://xmlns.jcp.org/xml/ns/javaee"); //$NON-NLS-1$ //$NON-NLS-2$
       packageMap.put("schemaUrl", "http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"); //$NON-NLS-1$ //$NON-NLS-2$
     }
@@ -163,6 +177,13 @@ public class CodeTemplates {
       mavenCoordinates.put("projectArtifactId", config.getMavenArtifactId()); //$NON-NLS-1$
       mavenCoordinates.put("projectVersion", config.getMavenVersion()); //$NON-NLS-1$
       if (isStandardProject) {
+        if (Objects.equal(AppEngineRuntime.STANDARD_JAVA_7.getId(), config.getRuntimeId())) {
+          mavenCoordinates.put("servletVersion", "2.5"); //$NON-NLS-1$ //$NON-NLS-2$
+          mavenCoordinates.put("compilerVersion", "1.7"); //$NON-NLS-1$ //$NON-NLS-2$
+        } else {
+          mavenCoordinates.put("servletVersion", "3.1"); //$NON-NLS-1$ //$NON-NLS-2$
+          mavenCoordinates.put("compilerVersion", "1.8"); //$NON-NLS-1$ //$NON-NLS-2$
+        }
         createChildFile("pom.xml", Templates.POM_XML_STANDARD_TEMPLATE, //$NON-NLS-1$
             project, mavenCoordinates, subMonitor.newChild(5));
       } else {

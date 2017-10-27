@@ -16,11 +16,10 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.persistence;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IJavaProject;
-
-import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
 
 /**
  * Implementers of this interface provide a location of a file that can be used to save and load
@@ -29,17 +28,17 @@ import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContai
 public interface LibraryContainerStateLocationProvider {
 
   /**
-   * Based on the parameters <code>javaProject</code> and <code>containerPath</code> will return
-   * an {@link IPath} to a file that can be used to save and load
-   * {@link LibraryClasspathContainer} instances.
+   * Based on the parameters <code>javaProject</code> and <code>containerPath</code> will return an
+   * {@link IPath} to a file that can be used to save and load {@link LibraryClasspathContainer}
+   * instances.
    *
    * @param javaProject the project the {@link LibraryClasspathContainer} belongs to
-   * @param containerPath the container path of the {@link LibraryClasspathContainer}
+   * @param id the file name/ID for the {@link LibraryClasspathContainer} state file
    * @param create if true the file and parent folders will be created if needed; if false the
    *        location returned may not refer to an existing file.
    *
    * @throws CoreException if an error happens while creating the necessary folders or file
    */
-  IPath getContainerStateFile(IJavaProject javaProject, IPath containerPath, boolean create)
+  IPath getContainerStateFile(IJavaProject javaProject, String id, boolean create)
       throws CoreException;
 }

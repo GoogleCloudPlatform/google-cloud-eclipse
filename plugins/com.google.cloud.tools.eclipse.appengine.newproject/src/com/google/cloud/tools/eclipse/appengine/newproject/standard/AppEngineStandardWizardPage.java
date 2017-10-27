@@ -36,7 +36,7 @@ import org.eclipse.ui.PlatformUI;
 public class AppEngineStandardWizardPage extends AppEngineWizardPage {
   /** The default AppEngine runtime for new projects. */
   @VisibleForTesting
-  static final AppEngineRuntime DEFAULT_RUNTIME = AppEngineRuntime.STANDARD_JAVA_7;
+  static final AppEngineRuntime DEFAULT_RUNTIME = AppEngineRuntime.STANDARD_JAVA_8;
 
   private ComboViewer runtimeField;
 
@@ -51,7 +51,6 @@ public class AppEngineStandardWizardPage extends AppEngineWizardPage {
     PlatformUI.getWorkbench().getHelpSystem().setHelp(container,
         "com.google.cloud.tools.eclipse.appengine.newproject.NewStandardProjectContext"); //$NON-NLS-1$
   }
-
 
   @Override
   protected void createRuntimeField(Composite composite) {

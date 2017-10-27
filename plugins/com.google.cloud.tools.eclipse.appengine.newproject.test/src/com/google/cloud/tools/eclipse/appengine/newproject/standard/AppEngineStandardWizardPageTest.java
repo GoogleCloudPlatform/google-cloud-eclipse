@@ -31,32 +31,32 @@ public class AppEngineStandardWizardPageTest {
   public void testPageInitiallyIncomplete() {
     Assert.assertFalse(page.isPageComplete());
   }
-  
+
   @Test
   public void testGetNextPage() {
     Assert.assertNull(page.getNextPage());
   }
-  
+
   @Test
   public void testGetPreviousPage() {
     Assert.assertNull(page.getPreviousPage());
   }
-  
+
   @Test
   public void testTitle() {
     Assert.assertEquals("App Engine Standard Project", page.getTitle());
   }
-  
+
   @Test
   public void testDescription() {
     Assert.assertEquals(
         "Create a new Eclipse project for App Engine standard environment development.",
         page.getDescription());
   }
-  
+
   @Test
   public void testDefaultRuntime() {
-    Assert.assertEquals(AppEngineRuntime.STANDARD_JAVA_7,
+    Assert.assertEquals(AppEngineRuntime.STANDARD_JAVA_8,
         AppEngineStandardWizardPage.DEFAULT_RUNTIME);
     Assert.assertEquals(AppEngineStandardWizardPage.DEFAULT_RUNTIME.getId(), page.getRuntimeId());
   }
@@ -67,7 +67,7 @@ public class AppEngineStandardWizardPageTest {
     Assert.assertNull(page.getErrorMessage());
     Assert.assertEquals("Project name must be specified", page.getMessage());
   }
-  
+
   @Test
   public void testCreateControl() {
     Composite parent = new Composite(new Shell(), SWT.NONE);

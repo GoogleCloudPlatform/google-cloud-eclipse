@@ -27,14 +27,7 @@ public class MessagesTest {
         "New App Engine Standard Project", 
         Messages.getString("new.app.engine.standard.project"));
   }
-  
-  @Test
-  public void testPackageEndsWithPeriod() {
-    Assert.assertEquals(
-        "com.google. ends with a period.", 
-        Messages.getString("package.ends.with.period", "com.google."));
-  }
-  
+
   @Test
   public void testWizardDescription() {
     Assert.assertEquals(

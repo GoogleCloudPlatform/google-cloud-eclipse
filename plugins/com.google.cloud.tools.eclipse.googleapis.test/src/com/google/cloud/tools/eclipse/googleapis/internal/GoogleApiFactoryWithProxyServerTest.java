@@ -49,7 +49,7 @@ public class GoogleApiFactoryWithProxyServerTest {
   @Mock private JsonFactory jsonFactory;
   @Mock private IProxyService proxyService;
   @Mock private Credential credential;
-  @Mock private LoadingCache<GoogleApiUrl, HttpTransport> transportCache;
+  @Mock private LoadingCache<GoogleApi, HttpTransport> transportCache;
   @Captor private ArgumentCaptor<IProxyChangeListener> proxyListenerCaptor =
       ArgumentCaptor.forClass(IProxyChangeListener.class);
 
@@ -58,7 +58,7 @@ public class GoogleApiFactoryWithProxyServerTest {
   @Before
   public void setUp() {
     googleApiFactory = new GoogleApiFactory();
-    when(transportCache.getUnchecked(any(GoogleApiUrl.class)))
+    when(transportCache.getUnchecked(any(GoogleApi.class)))
         .thenReturn(mock(HttpTransport.class));
     googleApiFactory.setTransportCache(transportCache);
   }

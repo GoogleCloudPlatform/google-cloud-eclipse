@@ -45,7 +45,7 @@ import org.xml.sax.SAXException;
 public class AppEngineStandardFacetChangeListener implements IFacetedProjectListener {
   private static final Logger logger = Logger.getLogger(AppEngineStandardFacetChangeListener.class.getName());
 
-  static final IProjectFacetVersion APP_ENGINE_STANDARD_JRE8 =
+  public static final IProjectFacetVersion APP_ENGINE_STANDARD_JRE8 =
       AppEngineStandardFacet.FACET.getVersion("JRE8");
 
   @Override

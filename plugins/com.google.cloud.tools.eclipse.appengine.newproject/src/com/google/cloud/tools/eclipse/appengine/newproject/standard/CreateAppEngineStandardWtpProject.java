@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.newproject.standard;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfig;
 import com.google.cloud.tools.eclipse.appengine.newproject.CodeTemplates;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
@@ -34,10 +35,10 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
  * Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.
  */
 public class CreateAppEngineStandardWtpProject extends CreateAppEngineWtpProject {
-  
+
   public CreateAppEngineStandardWtpProject(AppEngineProjectConfig config,
-      IAdaptable uiInfoAdapter) {
-    super(config, uiInfoAdapter);
+      IAdaptable uiInfoAdapter, ILibraryRepositoryService repositoryService) {
+    super(config, uiInfoAdapter, repositoryService);
   }
 
   @Override
@@ -61,5 +62,4 @@ public class CreateAppEngineStandardWtpProject extends CreateAppEngineWtpProject
       IProgressMonitor monitor) throws CoreException {
     return CodeTemplates.materializeAppEngineStandardFiles(newProject, config, monitor);
   }
-
 }

@@ -19,7 +19,11 @@ package com.google.cloud.tools.eclipse.test.util.project;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.eclipse.test.util.ArrayAssertions;
+import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
+import com.google.cloud.tools.eclipse.test.util.ZipUtil;
 import com.google.cloud.tools.eclipse.test.util.reflection.ReflectionUtil;
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Stopwatch;
 import java.io.File;
@@ -49,13 +53,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.wst.common.project.facet.core.util.internal.ZipUtil;
 import org.eclipse.wst.validation.internal.operations.ValidationBuilder;
 import org.eclipse.wst.validation.internal.operations.ValidatorManager;
 import org.osgi.framework.Bundle;
@@ -107,7 +111,8 @@ public class ProjectUtils {
     IWorkspaceRoot root = getWorkspace().getRoot();
     // extract projects into our workspace using WTP internal utility class
     // assumes projects are contained in subdirectories within the zip
-    ZipUtil.unzip(zippedFile, root.getLocation().toFile(), progress.newChild(10));
+    IStatus status = ZipUtil.unzip(zippedFile, root.getLocation().toFile(), progress.newChild(10));
+    assertTrue("failed to extract: " + status, status.isOK());
 
     List<IPath> projectFiles = new ArrayList<>();
     try (ZipFile zip = new ZipFile(zippedFile)) {
@@ -124,7 +129,9 @@ public class ProjectUtils {
     // import the projects
     progress.setWorkRemaining(10 * projectFiles.size() + 10);
     List<IProject> projects = new ArrayList<>(projectFiles.size());
+    System.out.printf("Importing %d projects:\n", projectFiles.size());
     for (IPath projectFile : projectFiles) {
+      System.out.println("    " + projectFile);
       IProjectDescription descriptor =
           root.getWorkspace().loadProjectDescription(projectFile);
       IProject project = root.getProject(descriptor.getName());
@@ -320,14 +327,75 @@ public class ProjectUtils {
     Collections.addAll(jobs, jobManager.find("org.eclipse.wst.server.ui.family"));
     Collections.addAll(jobs, jobManager.find(ValidationBuilder.FAMILY_VALIDATION_JOB));
     for (IProject project : projects) {
-      Collections.addAll(jobs, jobManager.find(
-          project.getName() + ValidatorManager.VALIDATOR_JOB_FAMILY));
+      Collections.addAll(jobs,
+          jobManager.find(project.getName() + ValidatorManager.VALIDATOR_JOB_FAMILY));
+    }
+    // some jobs are not part of a family
+    for (Job job : jobManager.find(null)) {
+      switch (job.getClass().getName()) {
+        case "org.eclipse.wst.jsdt.web.core.internal.project.ConvertJob":
+        case "org.eclipse.m2e.core.ui.internal.wizards.ImportMavenProjectsJob":
+        case "org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob":
+          jobs.add(job);
+          break;
+      }
     }
     return jobs;
   }
 
   private static IWorkspace getWorkspace() {
     return ResourcesPlugin.getWorkspace();
+  }
+
+
+  /**
+   * Wait until the project has finished building and markers have been registered.
+   * 
+   * @throws AssertionError if markers are still present
+   */
+  public static IMarker[] waitUntilNoMarkersFound(IResource resource, String markerType,
+      boolean includeSubtypes, int depth) throws CoreException {
+    Stopwatch elapsed = Stopwatch.createStarted();
+    IMarker[] markers;
+    do {
+      ProjectUtils.waitForProjects(resource.getProject());
+      markers = resource.findMarkers(markerType, includeSubtypes, depth);
+      if (markers.length > 0) {
+        System.err.printf("[WARNING][TESTS] %s: %d markers found of type %s\n", elapsed,
+            markers.length, markerType);
+        ThreadDumpingWatchdog.report("Expected no markers of type " + markerType, elapsed);
+      }
+    } while (elapsed.elapsed(TimeUnit.SECONDS) < 300 && markers.length > 0);
+
+    ArrayAssertions.assertIsEmpty(markers, new Function<IMarker, String>() {
+      @Override
+      public String apply(IMarker marker) {
+        return ProjectUtils.formatProblem(marker);
+      }
+    });
+    return markers;
+  }
+
+  /**
+   * Wait until the project has finished building and markers have disappeared.
+   * 
+   * @throws AssertionError if there are no markers by the timeout
+   */
+  public static IMarker[] waitUntilMarkersFound(IResource resource, String markerType,
+      boolean includeSubtypes, int depth) throws CoreException {
+    Stopwatch elapsed = Stopwatch.createStarted();
+    IMarker[] markers;
+    do {
+      ProjectUtils.waitForProjects(resource.getProject());
+      markers = resource.findMarkers(markerType, includeSubtypes, depth);
+      if (markers.length == 0) {
+        System.err.printf("[WARNING][TESTS] %s: no markers found of type %s\n", elapsed,
+            markerType);
+        ThreadDumpingWatchdog.report("Expected to find markers of type " + markerType, elapsed);
+      }
+    } while (elapsed.elapsed(TimeUnit.SECONDS) < 300 && markers.length == 0);
+    assertTrue("No markers found", markers.length > 0);
+    return markers;
   }
 
   private ProjectUtils() {}

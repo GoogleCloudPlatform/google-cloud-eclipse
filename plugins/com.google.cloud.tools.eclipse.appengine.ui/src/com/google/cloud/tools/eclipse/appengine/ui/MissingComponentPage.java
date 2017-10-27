@@ -22,7 +22,6 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 
 /**
@@ -50,13 +49,8 @@ public class MissingComponentPage extends WizardPage {
   @Override
   public void createControl(Composite parent) {
     Composite container = new Composite(parent, SWT.NONE);
-    GridLayoutFactory.swtDefaults().numColumns(1).applyTo(container);
-
-    GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
-    gridData.widthHint = parent.getSize().x;
 
     StyledText styledText = new StyledText(container, SWT.MULTI | SWT.READ_ONLY | SWT.WRAP);
-    styledText.setLayoutData(gridData);
     styledText.setText(message);
     styledText.setBackground(container.getBackground());
     styledText.setCaret(null /* hide caret */);
@@ -74,6 +68,7 @@ public class MissingComponentPage extends WizardPage {
     setControl(container);
     setPageComplete(false);
     Dialog.applyDialogFont(container);
+    GridLayoutFactory.swtDefaults().generateLayout(container);
   }
 
 }

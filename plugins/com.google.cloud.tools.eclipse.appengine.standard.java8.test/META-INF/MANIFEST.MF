@@ -4,10 +4,11 @@ Bundle-Name: Google Cloud Tools for App Engine Standard Java 8 Tests
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.standard.java8.test
 Fragment-Host: com.google.cloud.tools.eclipse.appengine.standard.java8
 Bundle-Version: 0.1.0.qualifier
-Bundle-Vendor: Google, Inc.
+Bundle-Vendor: Google Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.google.cloud.tools.appengine;version="0.3.6",
+Import-Package: com.google.cloud.tools.appengine;version="0.3.8",
  com.google.cloud.tools.eclipse.appengine.facets.convert,
+ com.google.cloud.tools.eclipse.test.util,
  com.google.cloud.tools.eclipse.test.util.project,
  com.google.cloud.tools.eclipse.util.io,
  org.eclipse.core.runtime;version="3.5.0",

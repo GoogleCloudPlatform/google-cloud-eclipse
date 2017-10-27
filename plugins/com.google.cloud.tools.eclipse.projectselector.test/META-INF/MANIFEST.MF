@@ -9,4 +9,6 @@ Bundle-Version: 0.1.0.qualifier
 Fragment-Host: com.google.cloud.tools.eclipse.projectselector
 Require-Bundle: com.google.cloud.tools.eclipse.test.dependencies
 Import-Package: com.google.api.client.googleapis.testing.json;version="[1.22.0,1.23.0)",
- com.google.cloud.tools.eclipse.test.util.ui
+ com.google.cloud.tools.eclipse.test.util.ui,
+ org.eclipse.swtbot.swt.finder,
+ org.eclipse.swtbot.swt.finder.waits

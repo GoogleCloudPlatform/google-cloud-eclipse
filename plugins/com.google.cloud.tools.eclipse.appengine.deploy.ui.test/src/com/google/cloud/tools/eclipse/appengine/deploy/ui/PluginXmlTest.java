@@ -20,7 +20,7 @@ import static org.hamcrest.CoreMatchers.either;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexFacet;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexWarFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.BasePluginXmlTest;
 import org.junit.Assert;
@@ -38,9 +38,9 @@ public class PluginXmlTest extends BasePluginXmlTest {
     NodeList enabledWhen = getDocument().getElementsByTagName("enabledWhen");
     Assert.assertEquals(4, enabledWhen.getLength());
     NodeList tests = getDocument().getElementsByTagName("test");
-    Assert.assertEquals(4, tests.getLength());
+    Assert.assertEquals(6, tests.getLength());
     NodeList adapts = getDocument().getElementsByTagName("adapt");
-    Assert.assertEquals(4, adapts.getLength());
+    Assert.assertEquals(5, adapts.getLength());
 
     for (int i = 0; i < enabledWhen.getLength(); i++) {
       Element element = (Element) enabledWhen.item(i);
@@ -51,7 +51,7 @@ public class PluginXmlTest extends BasePluginXmlTest {
     Element standardAdapt = (Element) adapts.item(0);
     verifyAdapt(standardAdapt, AppEngineStandardFacet.ID);
     Element flexAdapt = (Element) adapts.item(1);
-    verifyAdapt(flexAdapt, AppEngineFlexFacet.ID);
+    verifyAdapt(flexAdapt, AppEngineFlexWarFacet.ID);
   }
 
   private void verifyAdapt(Element adapt, String attributeValue) {

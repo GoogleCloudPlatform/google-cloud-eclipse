@@ -77,8 +77,8 @@ public class CodeTemplatesTest {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     config.setRuntimeId(AppEngineRuntime.STANDARD_JAVA_8.getId());
     IFile mostImportant = CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
-    validateNonConfigFiles(mostImportant, "http://java.sun.com/xml/ns/javaee",
-        "http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd", "2.5");
+    validateNonConfigFiles(mostImportant, "http://xmlns.jcp.org/xml/ns/javaee",
+        "http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd", "3.1");
     validateAppEngineWebXml(AppEngineRuntime.STANDARD_JAVA_8);
   }
 
@@ -144,8 +144,10 @@ public class CodeTemplatesTest {
         root.getAttribute("xsi:schemaLocation"));
     Assert.assertEquals(servletVersion, root.getAttribute("version"));
     Element servletClass = (Element) root.getElementsByTagName("servlet-class").item(0);
-    Assert.assertEquals("HelloAppEngine", servletClass.getTextContent());
-
+    if (servletClass != null) { // servlet 2.5
+      Assert.assertEquals("HelloAppEngine", servletClass.getTextContent());
+    }
+    
     IFile htmlFile = webapp.getFile("index.html");
     Element html = buildDocument(htmlFile).getDocumentElement();
     Assert.assertEquals("html", html.getNodeName());
@@ -240,6 +242,7 @@ public class CodeTemplatesTest {
   public void testCreateChildFile() throws CoreException, IOException {
     Map<String, String> values = new HashMap<>();
     values.put("package", "com.google.foo.bar");
+    values.put("servletVersion", "2.5");
 
     IFile child = CodeTemplates.createChildFile("HelloAppEngine.java",
         Templates.HELLO_APPENGINE_TEMPLATE, parent, values, monitor);

@@ -36,6 +36,7 @@
 
     <module>plugins/com.google.cloud.tools.eclipse.appengine.compat</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.compat.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.compat.cte13</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy.ui</module>
@@ -143,7 +144,7 @@
       <!-- bundle: com.google.cloud.tools.appengine -->
       <groupId>com.google.cloud.tools</groupId>
       <artifactId>appengine-plugins-core</artifactId>
-      <version>0.3.6</version>
+      <version>0.3.8</version>
     </dependency>
     <dependency>
       <!-- bundle: com.google.guava -->
@@ -186,6 +187,12 @@
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>
       <version>1.17</version>
+    </dependency>
+    <dependency>
+      <!-- bundle: org.glassfish.javax.json -->
+      <groupId>org.glassfish</groupId>
+      <artifactId>javax.json</artifactId>
+      <version>1.0.4</version>
     </dependency>
   </dependencies>
 
@@ -335,7 +342,11 @@
           <configuration>
             <runOrder>hourly</runOrder>
             <forkedProcessTimeoutInSeconds>600</forkedProcessTimeoutInSeconds>
-            <argLine>${jacoco.agentArgLine} -Dorg.eclipse.swtbot.search.timeout=${org.eclipse.swtbot.search.timeout} -Xms40m -Xmx1G -XX:MaxPermSize=512m -Djava.awt.headless=true ${os-jvm-flags}</argLine>
+            <!--
+              - maven.artifact.threads=1 to workaround repository corruption seen in
+                https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2284
+            -->
+            <argLine>${jacoco.agentArgLine} -Dmaven.artifact.threads=1 -Dorg.eclipse.swtbot.search.timeout=${org.eclipse.swtbot.search.timeout} -Xms40m -Xmx1G -XX:MaxPermSize=512m -Djava.awt.headless=true ${os-jvm-flags}</argLine>
           </configuration>
         </plugin>
 

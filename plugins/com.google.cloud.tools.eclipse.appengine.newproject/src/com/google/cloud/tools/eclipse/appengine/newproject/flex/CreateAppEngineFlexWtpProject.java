@@ -16,9 +16,8 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.flex;
 
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexFacet;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexWarFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.FacetUtil;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfig;
@@ -26,15 +25,10 @@ import com.google.cloud.tools.eclipse.appengine.newproject.CodeTemplates;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
 import com.google.cloud.tools.eclipse.util.ClasspathUtil;
+import com.google.common.collect.ImmutableList;
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -60,23 +54,26 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
  * Utility to create a new App Engine Flexible Eclipse project.
  */
 public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
-  private static final Logger logger =
-      Logger.getLogger(CreateAppEngineFlexWtpProject.class.getName());
 
-  private static final List<MavenCoordinates> PROJECT_DEPENDENCIES;
+  private static final List<MavenCoordinates> SERVLET_DEPENDENCIES;
 
   static {
-    MavenCoordinates servletApi = new MavenCoordinates("javax.servlet", "javax.servlet-api"); //$NON-NLS-1$ //$NON-NLS-2$
-    servletApi.setVersion("3.1.0"); //$NON-NLS-1$
-    PROJECT_DEPENDENCIES = Collections.singletonList(servletApi);
+    // servlet-api and jsp-api are marked as not being included
+    MavenCoordinates servletApi = new MavenCoordinates.Builder()
+        .setGroupId("javax.servlet") //$NON-NLS-1$
+        .setArtifactId("javax.servlet-api") //$NON-NLS-1$
+        .setVersion("3.1.0") //$NON-NLS-1$
+        .build();
+    MavenCoordinates jsp = new MavenCoordinates.Builder().setGroupId("javax.servlet.jsp") //$NON-NLS-1$
+        .setArtifactId("javax.servlet.jsp-api") //$NON-NLS-1$
+        .setVersion("2.3.1") //$NON-NLS-1$
+        .build();
+    SERVLET_DEPENDENCIES = ImmutableList.of(servletApi, jsp);
   }
-
-  private ILibraryRepositoryService repositoryService;
 
   CreateAppEngineFlexWtpProject(AppEngineProjectConfig config, IAdaptable uiInfoAdapter,
       ILibraryRepositoryService repositoryService) {
-    super(config, uiInfoAdapter);
-    this.repositoryService = repositoryService;
+    super(config, uiInfoAdapter, repositoryService);
   }
 
   @Override
@@ -114,9 +111,9 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
     facetUtil.addJavaFacetToBatch(JavaFacet.VERSION_1_8);
     facetUtil.addWebFacetToBatch(WebFacetUtils.WEB_31);
 
-    IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
+    IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexWarFacet.ID);
     IProjectFacetVersion appEngineFacetVersion =
-        appEngineFacet.getVersion(AppEngineFlexFacet.VERSION);
+        appEngineFacet.getVersion(AppEngineFlexWarFacet.VERSION);
     facetUtil.addFacetToBatch(appEngineFacetVersion, null /* config */);
     facetUtil.install(subMonitor.newChild(50));
   }
@@ -132,30 +129,15 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
     }
 
     // Download the dependencies from maven
-    int ticks = 50 / PROJECT_DEPENDENCIES.size();
-    for (MavenCoordinates dependency : PROJECT_DEPENDENCIES) {
-      LibraryFile libraryFile = new LibraryFile(dependency);
-      File artifactFile = null;
-      try {
-        Artifact artifact = repositoryService.resolveArtifact(
-            libraryFile, subMonitor.newChild(ticks));
-        artifactFile = artifact.getFile();
-        IFile destFile = libFolder.getFile(artifactFile.getName());
-        destFile.create(Files.newInputStream(artifactFile.toPath()), true, subMonitor.newChild(30));
-      } catch (CoreException ex) {
-        logger.log(Level.WARNING, "Error downloading " + //$NON-NLS-1$
-            libraryFile.getMavenCoordinates().toString() + " from maven", ex); //$NON-NLS-1$
-      } catch (IOException ex) {
-        logger.log(Level.WARNING, "Error copying over " + artifactFile.toString() + " to " + //$NON-NLS-1$ //$NON-NLS-2$
-            libFolder.getFullPath().toPortableString(), ex);
-      }
+    subMonitor.setWorkRemaining(SERVLET_DEPENDENCIES.size() + 10);
+    for (MavenCoordinates dependency : SERVLET_DEPENDENCIES) {
+      installArtifact(dependency, libFolder, subMonitor.newChild(1));
     }
 
-    addDependenciesToClasspath(project, libFolder.getLocation().toString(),
-        subMonitor.newChild(10));
+    addDependenciesToClasspath(project, libFolder, subMonitor.newChild(10));
   }
 
-  private void addDependenciesToClasspath(IProject project, String libraryPath,
+  private void addDependenciesToClasspath(IProject project, IFolder folder,
       IProgressMonitor monitor)  throws CoreException {
     List<IClasspathEntry> newEntries = new ArrayList<>();
 
@@ -163,7 +145,7 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
         new IClasspathAttribute[] {UpdateClasspathAttributeUtil.createNonDependencyAttribute()};
 
     // Add all the jars under lib folder to the classpath
-    File libFolder = new File(libraryPath);
+    File libFolder = folder.getLocation().toFile();
     for (File file : libFolder.listFiles()) {
       IPath path = Path.fromOSString(file.toPath().toString());
       newEntries.add(JavaCore.newLibraryEntry(path, null, null, new IAccessRule[0],
