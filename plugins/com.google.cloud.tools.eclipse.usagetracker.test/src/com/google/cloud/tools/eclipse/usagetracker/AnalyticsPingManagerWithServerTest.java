@@ -18,8 +18,6 @@ package com.google.cloud.tools.eclipse.usagetracker;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.test.util.http.TestHttpServer;
@@ -28,7 +26,6 @@ import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.ui.PlatformUI;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -47,12 +44,11 @@ public class AnalyticsPingManagerWithServerTest {
 
   @Before
   public void setUp() {
-    when(preferences.getBoolean(eq(AnalyticsPreferences.ANALYTICS_OPT_IN), anyBoolean()))
-        .thenReturn(true);  // Simulate user has opted in.
+    when(preferences.getBoolean("ANALYTICS_OPT_IN", false)).thenReturn(true);
+    when(preferences.get("ANALYTICS_CLIENT_ID", null)).thenReturn("unique-client-id");
 
-    pingManager = new AnalyticsPingManager(
-        server.getAddress(), "unique-client-id", preferences,
-        PlatformUI.getWorkbench().getDisplay(), new ConcurrentLinkedQueue<PingEvent>());
+    pingManager = new AnalyticsPingManager(server.getAddress(), preferences,
+        new ConcurrentLinkedQueue<PingEvent>());
   }
 
   @Test

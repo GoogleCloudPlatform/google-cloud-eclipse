@@ -73,10 +73,8 @@ public class AnalyticsPingManager {
   private static AnalyticsPingManager instance;
 
   private final String endpointUrl;
-  private final String clientId;
   // Preference store (should be configuration scoped) from which we get UUID, opt-in status, etc.
   private final IEclipsePreferences preferences;
-  private final Display display;
 
   private final ConcurrentLinkedQueue<PingEvent> pingEventQueue;
   @VisibleForTesting
@@ -86,9 +84,7 @@ public class AnalyticsPingManager {
       try {
         while (!pingEventQueue.isEmpty() && !monitor.isCanceled()) {
           PingEvent event = pingEventQueue.poll();
-          if (shouldShowOptInDialog()) {
-            openOptInDialog(event.shell);
-          }
+          showOptInDialogIfNeeded(event.shell);
           sendPingHelper(event);
         }
       } catch (InterruptedException ex) {  // Fall-through to die.
@@ -98,26 +94,20 @@ public class AnalyticsPingManager {
   };
 
   @VisibleForTesting
-  AnalyticsPingManager(String endpointUrl, String clientId, IEclipsePreferences preferences,
-      Display display, ConcurrentLinkedQueue<PingEvent> concurrentLinkedQueue) {
+  AnalyticsPingManager(String endpointUrl, IEclipsePreferences preferences,
+      ConcurrentLinkedQueue<PingEvent> concurrentLinkedQueue) {
     this.endpointUrl = endpointUrl;
-    this.clientId = clientId;
     this.preferences = Preconditions.checkNotNull(preferences);
-    this.display = display;
-    this.pingEventQueue = concurrentLinkedQueue;
+    pingEventQueue = concurrentLinkedQueue;
   }
 
   public static synchronized AnalyticsPingManager getInstance() {
     if (instance == null) {
-      IEclipsePreferences preferences = AnalyticsPreferences.getPreferenceNode();
-      String clientId = getAnonymizedClientId(preferences);
-      Display display = PlatformUI.getWorkbench().getDisplay();
-
       String endpointUrl = null;
       if (!Platform.inDevelopmentMode() && isTrackingIdDefined()) {
         endpointUrl = ANALYTICS_COLLECTION_URL;  // Enable only in production env.
       }
-      instance = new AnalyticsPingManager(endpointUrl, clientId, preferences, display,
+      instance = new AnalyticsPingManager(endpointUrl, AnalyticsPreferences.getPreferenceNode(),
           new ConcurrentLinkedQueue<PingEvent>());
     }
     return instance;
@@ -129,7 +119,7 @@ public class AnalyticsPingManager {
   }
 
   @VisibleForTesting
-  static String getAnonymizedClientId(IEclipsePreferences preferences) {
+  static synchronized String getAnonymizedClientId(IEclipsePreferences preferences) {
     String clientId = preferences.get(AnalyticsPreferences.ANALYTICS_CLIENT_ID, null);
     if (clientId == null) {
       clientId = UUID.randomUUID().toString();
@@ -205,6 +195,7 @@ public class AnalyticsPingManager {
   private void sendPingHelper(PingEvent pingEvent) {
     if (userHasOptedIn()) {
       try {
+        String clientId = getAnonymizedClientId(preferences);
         Map<String, String> parametersMap = buildParametersMap(clientId, pingEvent);
         HttpUtil.sendPost(endpointUrl, parametersMap);
       } catch (IOException ex) {
@@ -248,23 +239,27 @@ public class AnalyticsPingManager {
   /**
    * @param parentShell if null, tries to show the dialog at the workbench level.
    */
-  private void openOptInDialog(final Shell parentShell) throws InterruptedException {
-    final OptInDialog[] dialogHolder = new OptInDialog[1];
-    display.syncExec(new Runnable() {
-      @Override
-      public void run() {
-        dialogHolder[0] = new OptInDialog(findShell(parentShell));
-        dialogHolder[0].open();
-      }
-    });
-    registerOptInStatus(dialogHolder[0].isOptInYes());
+  private void showOptInDialogIfNeeded(final Shell parentShell) throws InterruptedException {
+    if (shouldShowOptInDialog()) {
+      Display display = PlatformUI.getWorkbench().getDisplay();
+
+      final OptInDialog[] dialogHolder = new OptInDialog[1];
+      display.syncExec(new Runnable() {
+        @Override
+        public void run() {
+          dialogHolder[0] = new OptInDialog(findShell(parentShell));
+          dialogHolder[0].open();
+        }
+      });
+      registerOptInStatus(dialogHolder[0].isOptInYes());
+    }
   }
 
   /**
    * May return null. (However, dialogs can have null as a parent shell.)
    */
-  private Shell findShell(Shell parentShell) {
-    Preconditions.checkNotNull(display);
+  private static Shell findShell(Shell parentShell) {
+    Preconditions.checkNotNull(Display.getCurrent());
     if (parentShell != null && !parentShell.isDisposed()) {
       return parentShell;
     }
@@ -277,7 +272,7 @@ public class AnalyticsPingManager {
     } catch (IllegalStateException ise) {  // getWorkbench() might throw this.
       // Fall through.
     }
-    return display.getActiveShell();
+    return Display.getCurrent().getActiveShell();
   }
 
   private static void flushPreferences(IEclipsePreferences preferences) {
