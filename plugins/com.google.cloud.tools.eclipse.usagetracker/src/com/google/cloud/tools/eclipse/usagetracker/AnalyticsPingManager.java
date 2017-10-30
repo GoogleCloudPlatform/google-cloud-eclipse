@@ -195,8 +195,7 @@ public class AnalyticsPingManager {
   private void sendPingHelper(PingEvent pingEvent) {
     if (userHasOptedIn()) {
       try {
-        String clientId = getAnonymizedClientId(preferences);
-        Map<String, String> parametersMap = buildParametersMap(clientId, pingEvent);
+        Map<String, String> parametersMap = buildParametersMap(pingEvent);
         HttpUtil.sendPost(endpointUrl, parametersMap);
       } catch (IOException ex) {
         // Don't try to recover or retry.
@@ -206,9 +205,9 @@ public class AnalyticsPingManager {
   }
 
   @VisibleForTesting
-  static Map<String, String> buildParametersMap(String clientId, PingEvent pingEvent) {
+  Map<String, String> buildParametersMap(PingEvent pingEvent) {
     Map<String, String> parametersMap = new HashMap<>(STANDARD_PARAMETERS);
-    parametersMap.put("cid", clientId);
+    parametersMap.put("cid", getAnonymizedClientId(preferences));
     parametersMap.put("cd19", CloudToolsInfo.METRICS_NAME);  // cd19: "event type"
     parametersMap.put("cd20", pingEvent.eventName);
 

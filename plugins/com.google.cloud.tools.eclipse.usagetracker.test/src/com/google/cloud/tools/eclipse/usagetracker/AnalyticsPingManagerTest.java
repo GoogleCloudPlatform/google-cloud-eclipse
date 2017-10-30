@@ -60,28 +60,28 @@ public class AnalyticsPingManagerTest {
   @Test
   public void testEventTypeEventNameConvention() {
     PingEvent event = new PingEvent("some.event-name", null, null, null);
-    Map<String, String> parameters = AnalyticsPingManager.buildParametersMap("clientId", event);
+    Map<String, String> parameters = pingManager.buildParametersMap(event);
     assertEquals("/virtual/gcloud-eclipse-tools/some.event-name", parameters.get("dp"));
   }
 
   @Test
   public void testVirtualHostSet() {
     PingEvent event = new PingEvent("some.event-name", null, null, null);
-    Map<String, String> parameters = AnalyticsPingManager.buildParametersMap("clientId", event);
+    Map<String, String> parameters = pingManager.buildParametersMap(event);
     assertTrue(parameters.get("dh").startsWith("virtual."));
   }
 
   @Test
   public void testMetadataConvention() {
     PingEvent event = new PingEvent("some.event-name", "times-happened", "1234", null);
-    Map<String, String> parameters = AnalyticsPingManager.buildParametersMap("clientId", event);
+    Map<String, String> parameters = pingManager.buildParametersMap(event);
     assertEquals("times-happened=1234", parameters.get("dt"));
   }
 
   @Test
   public void testClientId() {
     PingEvent event = new PingEvent("some.event-name", null, null, null);
-    Map<String, String> parameters = AnalyticsPingManager.buildParametersMap("clientId", event);
+    Map<String, String> parameters = pingManager.buildParametersMap(event);
     assertEquals("clientId", parameters.get("cid"));
   }
 
