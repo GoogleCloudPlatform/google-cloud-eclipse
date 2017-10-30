@@ -17,28 +17,46 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.appengine.api.devserver.DefaultRunConfiguration;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
+import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour.PortChecker;
+import java.io.File;
+import java.io.IOException;
 import java.net.InetAddress;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
+import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.junit.Assume;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LocalAppEngineServerBehaviourTest {
+  @Rule
+  public TemporaryFolder tempFolder = new TemporaryFolder();
+
   @Mock
   private PortChecker alwaysTrue;
   @Mock
@@ -227,5 +245,70 @@ public class LocalAppEngineServerBehaviourTest {
     serverBehavior.checkPorts(runConfig, portProber);
     assertEquals(-1, serverBehavior.adminPort);
     verify(portProber, never()).isInUse(any(InetAddress.class), eq(8000));
+  }
+
+  @Test
+  public void testAppEngineApiSdkJarExists_noJar() {
+    Path emptyFolder = tempFolder.getRoot().toPath();
+    assertFalse(LocalAppEngineServerBehaviour.appEngineApiSdkJarExists(emptyFolder));
+  }
+
+  @Test
+  public void testAppEngineApiSdkJarExists_jarExists() throws IOException {
+    tempFolder.newFile("appengine-api-1.0-sdk-99.99.99.jar");
+    Path rootFolder = tempFolder.getRoot().toPath();
+    assertTrue(LocalAppEngineServerBehaviour.appEngineApiSdkJarExists(rootFolder));
+  }
+
+  @Test
+  public void testAppEngineApiSdkJarExists_caseInsensitive() throws IOException {
+    tempFolder.newFile("AppEngine-ApI-1.0-sDK-99.99.99.JaR");
+    Path rootFolder = tempFolder.getRoot().toPath();
+    assertTrue(LocalAppEngineServerBehaviour.appEngineApiSdkJarExists(rootFolder));
+  }
+
+  @Test
+  public void testPutAppEngineApiSdkJarIntoApps() throws IOException, CoreException {
+    Artifact appEngineApi = mock(Artifact.class);
+    when(appEngineApi.getFile()).thenReturn(tempFolder.newFile("appengine-api-1.0-sdk-9.8.7.jar"));
+
+    ILibraryRepositoryService repositoryService = mock(ILibraryRepositoryService.class);
+    when(repositoryService.resolveArtifact(any(LibraryFile.class), any(IProgressMonitor.class)))
+        .thenReturn(appEngineApi);
+
+    File appDirectory1 = tempFolder.newFolder("app1");
+    File appDirectory2 = tempFolder.newFolder("app2");
+    Path libDirectory1 = appDirectory1.toPath().resolve("WEB-INF/lib");
+    Path libDirectory2 = appDirectory1.toPath().resolve("WEB-INF/lib");
+    assertTrue(libDirectory2.toFile().mkdirs());
+
+    List<File> appDirectories = Arrays.asList(appDirectory1, appDirectory2);
+    LocalAppEngineServerBehaviour.putAppEngineApiSdkJarIntoApps(appDirectories, repositoryService);
+
+    assertTrue(Files.exists(libDirectory1.resolve("appengine-api-1.0-sdk-9.8.7.jar")));
+    assertTrue(Files.exists(libDirectory2.resolve("appengine-api-1.0-sdk-9.8.7.jar")));
+  }
+
+  @Test
+  public void testPutAppEngineApiSdkJarIntoApps_noCopyIfAlreadyExists()
+      throws IOException, CoreException {
+    Artifact appEngineApi = mock(Artifact.class);
+    when(appEngineApi.getFile()).thenReturn(tempFolder.newFile("fake.jar"));
+
+    ILibraryRepositoryService repositoryService = mock(ILibraryRepositoryService.class);
+    when(repositoryService.resolveArtifact(any(LibraryFile.class), any(IProgressMonitor.class)))
+        .thenReturn(appEngineApi);
+
+    File appDirectory = tempFolder.newFolder("app1");
+    Path libDirectory = appDirectory.toPath().resolve("WEB-INF/lib");
+    Path appEngineApiSdkJar = libDirectory.resolve("appengine-api-1.0-sdk-1.23.45.jar"); 
+    assertTrue(libDirectory.toFile().mkdirs());
+    assertTrue(appEngineApiSdkJar.toFile().createNewFile());
+
+    LocalAppEngineServerBehaviour.putAppEngineApiSdkJarIntoApps(
+        Arrays.asList(appDirectory), repositoryService);
+
+    assertFalse(Files.exists(libDirectory.resolve("appengine-api-1.0-sdk-9.8.7.jar")));
+    assertTrue(Files.exists(libDirectory.resolve("appengine-api-1.0-sdk-1.23.45.jar")));
   }
 }

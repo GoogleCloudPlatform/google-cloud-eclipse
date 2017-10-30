@@ -5,13 +5,13 @@
    <extension point="org.eclipse.jdt.ui.classpathContainerPage">
      <classpathContainerPage
        id="com.google.cloud.tools.eclipse.appengine.libraries"
-       name="App Engine Libraries"
+       name="%appEngineLibrariesTitle"
        class="com.google.cloud.tools.eclipse.appengine.libraries.ui.AppEngineLibrariesPage">
     </classpathContainerPage>
 
     <classpathContainerPage
        id="com.google.cloud.tools.eclipse.appengine.libraries"
-       name="Google API Libraries"
+       name="%googleCloudClientLibrariesTitle"
        class="com.google.cloud.tools.eclipse.appengine.libraries.ui.ApiClientLibrariesPage">
     </classpathContainerPage>
     

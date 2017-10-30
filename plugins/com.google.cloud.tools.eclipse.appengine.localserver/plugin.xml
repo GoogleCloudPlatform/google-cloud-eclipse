@@ -33,7 +33,7 @@
    <extension
          point="org.eclipse.wst.server.core.serverTypes">
       <serverType
-            behaviourClass="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour"
+            behaviourClass="com.google.cloud.tools.eclipse.util.service.ServiceContextFactory:com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour"
             class="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerDelegate"
             description="%runtimeTypeDescription"
             id="com.google.cloud.tools.eclipse.appengine.standard.server"

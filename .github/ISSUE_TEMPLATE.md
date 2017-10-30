@@ -2,6 +2,7 @@
 
 - Cloud Tools for Eclipse version:
 - Google Cloud SDK version: _(run `gcloud version`)_
+- Eclipse version: _(e.g, 4.5.2.v20160212-1500 or Neon.3)_
 - OS:
 - Java version:
 

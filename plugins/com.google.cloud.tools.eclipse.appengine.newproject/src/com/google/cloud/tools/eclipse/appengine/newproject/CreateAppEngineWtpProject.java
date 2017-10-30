@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
@@ -61,6 +62,8 @@ import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.ide.undo.CreateProjectOperation;
 import org.eclipse.wst.common.componentcore.internal.builder.DependencyGraphImpl;
 import org.eclipse.wst.common.componentcore.internal.builder.IDependencyGraph;
+import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 /**
 * Utility to make a new Eclipse App Engine project in the workspace.
@@ -78,7 +81,7 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
   @VisibleForTesting
   Job deployAssemblyEntryRemoveJob;
 
-  public abstract void addAppEngineFacet(IProject newProject, IProgressMonitor monitor)
+  public abstract void addAppEngineFacet(IFacetedProject newProject, IProgressMonitor monitor)
       throws CoreException;
 
   /**
@@ -131,20 +134,24 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
       throw new InvocationTargetException(ex);
     }
 
-    addAppEngineFacet(newProject, subMonitor.newChild(6));
-    addAdditionalDependencies(newProject, subMonitor.newChild(10));
+    IFacetedProject facetedProject = ProjectFacetsManager.create(
+        newProject, true /* convertIfNecessary */, subMonitor.newChild(5));
+    addAppEngineFacet(facetedProject, subMonitor.newChild(6));
+
+    addAdditionalDependencies(newProject, config, subMonitor.newChild(20));
 
     fixTestSourceDirectorySettings(newProject, subMonitor.newChild(5));
   }
 
-  protected void addAdditionalDependencies(IProject newProject, IProgressMonitor monitor)
-      throws CoreException {
-    SubMonitor progress = SubMonitor.convert(monitor, 10);
+  protected void addAdditionalDependencies(IProject newProject, AppEngineProjectConfig config,
+      IProgressMonitor monitor) throws CoreException {
+    SubMonitor progress = SubMonitor.convert(monitor, 12);
     if (config.getUseMaven()) {
-      enableMavenNature(newProject, progress.newChild(4));
-      BuildPath.addMavenLibraries(newProject, config.getAppEngineLibraries(), progress.newChild(5));
+      enableMavenNature(newProject, progress.newChild(5));
+      BuildPath.addMavenLibraries(newProject, config.getAppEngineLibraries(), progress.newChild(7));
     } else {
       addJunit4ToClasspath(newProject, progress.newChild(2));
+      addJstl12ToClasspath(newProject, progress.newChild(2));
       IJavaProject javaProject = JavaCore.create(newProject);
       
       List<Library> libraries = config.getAppEngineLibraries();
@@ -217,6 +224,24 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
         new IClasspathAttribute[] {nonDependencyAttribute},
         false);
     ClasspathUtil.addClasspathEntry(newProject, junit4Container, monitor);
+  }
+
+  private void addJstl12ToClasspath(IProject newProject, IProgressMonitor monitor)
+      throws CoreException {
+    SubMonitor subMonitor = SubMonitor.convert(monitor, 15);
+
+    // locate WEB-INF/lib
+    IFolder webInfFolder = WebProjectUtil.getWebInfDirectory(newProject);
+    IFolder libFolder = webInfFolder.getFolder("lib"); //$NON-NLS-1$
+    if (!libFolder.exists()) {
+      libFolder.create(true, true, subMonitor.newChild(5));
+    }
+
+    MavenCoordinates jstl = new MavenCoordinates.Builder()
+        .setGroupId("jstl") //$NON-NLS-1$
+        .setArtifactId("jstl") //$NON-NLS-1$
+        .setVersion("1.2").build(); //$NON-NLS-1$
+    installArtifact(jstl, libFolder, subMonitor.newChild(10));
   }
 
   /**

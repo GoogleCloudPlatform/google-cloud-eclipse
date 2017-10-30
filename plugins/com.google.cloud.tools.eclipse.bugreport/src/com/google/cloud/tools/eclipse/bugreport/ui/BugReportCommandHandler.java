@@ -26,7 +26,9 @@ import java.text.MessageFormat;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.program.Program;
+import org.osgi.framework.Bundle;
 
 public class BugReportCommandHandler extends AbstractHandler {
 
@@ -39,8 +41,9 @@ public class BugReportCommandHandler extends AbstractHandler {
       "(please ensure you are running the latest version of CT4E with _Help > Check for Updates_)\n"
       + "- Cloud Tools for Eclipse version: {0}\n"
       + "- Google Cloud SDK version: {1}\n"
-      + "- OS: {2} {3}\n"
-      + "- Java version: {4}\n"
+      + "- Eclipse version: {2}\n"
+      + "- OS: {3} {4}\n"
+      + "- Java version: {5}\n"
       + "\n"
       + "**What did you do?**\n"
       + "\n"
@@ -60,7 +63,8 @@ public class BugReportCommandHandler extends AbstractHandler {
   @VisibleForTesting
   static String formatReportUrl() {
     String body = MessageFormat.format(BODY_TEMPLATE, CloudToolsInfo.getToolsVersion(),
-        getCloudSdkVersion(), System.getProperty("os.name"), System.getProperty("os.version"),
+        getCloudSdkVersion(), getEclipseVersion(),
+        System.getProperty("os.name"), System.getProperty("os.version"),
         System.getProperty("java.version"));
 
     Escaper escaper = UrlEscapers.urlFormParameterEscaper();
@@ -73,6 +77,15 @@ public class BugReportCommandHandler extends AbstractHandler {
       return sdk.getVersion().toString();
     } catch (AppEngineException ex) {
       return ex.toString();
+    }
+  }
+
+  private static String getEclipseVersion() {
+    Bundle bundle = Platform.getBundle("org.eclipse.platform");
+    if (bundle != null) {
+      return bundle.getVersion().toString();
+    } else {
+      return "_(failed to get bundle \"org.eclipse.platform\")_";
     }
   }
 }
