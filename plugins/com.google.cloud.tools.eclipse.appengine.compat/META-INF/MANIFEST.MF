@@ -7,11 +7,26 @@ Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: Google Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
-Export-Package: com.google.cloud.tools.eclipse.appengine.compat
-Import-Package: com.google.cloud.tools.eclipse.util,
+Import-Package: com.google.cloud.tools.eclipse.appengine.facets,
+ com.google.cloud.tools.eclipse.appengine.facets.convert,
+ com.google.cloud.tools.eclipse.appengine.libraries,
+ com.google.cloud.tools.eclipse.appengine.libraries.model,
+ com.google.cloud.tools.eclipse.sdk.ui.preferences,
+ com.google.cloud.tools.eclipse.ui.util,
+ com.google.cloud.tools.eclipse.util,
+ com.google.cloud.tools.eclipse.util.status,
  com.google.common.annotations;version="[20.0.0,21.0.0)",
+ com.google.common.base;version="[20.0.0,21.0.0)",
  com.google.common.collect;version="[20.0.0,21.0.0)",
+ org.eclipse.core.commands,
  org.eclipse.core.resources,
  org.eclipse.core.runtime;version="3.5.0",
+ org.eclipse.core.runtime.jobs,
  org.eclipse.jdt.core,
+ org.eclipse.jface.dialogs,
+ org.eclipse.swt.widgets,
+ org.eclipse.ui;ui.workbench=split,
+ org.eclipse.ui.handlers,
  org.eclipse.wst.common.project.facet.core
+Require-Bundle: org.eclipse.core.expressions
+Export-Package: com.google.cloud.tools.eclipse.appengine.compat.cte13;x-friends:="com.google.cloud.tools.eclipse.integration.appengine"

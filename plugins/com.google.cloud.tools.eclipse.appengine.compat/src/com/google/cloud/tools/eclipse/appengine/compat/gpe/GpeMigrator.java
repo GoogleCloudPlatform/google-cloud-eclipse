@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.compat;
+package com.google.cloud.tools.eclipse.appengine.compat.gpe;
 
 import com.google.cloud.tools.eclipse.util.NatureUtils;
 import com.google.cloud.tools.eclipse.util.Xslt;

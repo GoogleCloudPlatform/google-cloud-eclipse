@@ -16,6 +16,8 @@
 
 package com.google.cloud.tools.eclipse.usagetracker;
 
+import com.google.common.base.Preconditions;
+import java.util.concurrent.Semaphore;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
@@ -23,6 +25,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -32,6 +35,9 @@ import org.eclipse.ui.PlatformUI;
  * A one-time dialog to suggest opt-in for sending client-side usage metrics.
  */
 public class OptInDialog extends Dialog {
+
+  private final Semaphore answeredSignal = new Semaphore(0);
+  private boolean optInYes;
 
   public OptInDialog(Shell parentShell) {
     super(parentShell);
@@ -104,13 +110,14 @@ public class OptInDialog extends Dialog {
   @Override
   protected void okPressed() {
     super.okPressed();
-    AnalyticsPingManager.getInstance().registerOptInStatus(true);
+    optInYes = true;
+    answeredSignal.release();
   }
 
   @Override
   protected void cancelPressed() {
     super.cancelPressed();
-    AnalyticsPingManager.getInstance().registerOptInStatus(false);
+    answeredSignal.release();
   }
 
   /**
@@ -119,6 +126,19 @@ public class OptInDialog extends Dialog {
   @Override
   protected void handleShellCloseEvent() {
     super.handleShellCloseEvent();
-    AnalyticsPingManager.getInstance().registerOptInStatus(false);
+    answeredSignal.release();
+  }
+
+  /**
+   * Blocks until the dialog closes and returns the opt-in answer. Must not be called from the UI
+   * thread, and should be called only once at most.
+   *
+   * @return {@code true} if answered yes; {@code false} if answered no or not answered by closing
+   *     the dialog.
+   */
+  boolean isOptInYes() throws InterruptedException {
+    Preconditions.checkState(Display.getCurrent() == null, "Cannot be called from the UI thread.");
+    answeredSignal.acquire();
+    return optInYes;
   }
 }

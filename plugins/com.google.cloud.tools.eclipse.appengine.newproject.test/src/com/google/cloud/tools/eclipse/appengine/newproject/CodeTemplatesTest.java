@@ -232,13 +232,6 @@ public class CodeTemplatesTest {
   }
 
   @Test
-  public void testCreateChildFolder() throws CoreException {
-    IFolder child = CodeTemplates.createChildFolder("testchild", parent, monitor);
-    Assert.assertTrue(child.exists());
-    Assert.assertEquals("testchild", child.getName());
-  }
-
-  @Test
   public void testCreateChildFile() throws CoreException, IOException {
     Map<String, String> values = new HashMap<>();
     values.put("package", "com.google.foo.bar");

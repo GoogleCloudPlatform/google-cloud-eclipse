@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.compat.cte13;
 
+import com.google.cloud.tools.eclipse.appengine.compat.Messages;
 import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
@@ -49,7 +50,7 @@ public class CloudToolsEclipseProjectUpdater {
    */
   public static boolean hasOldContainers(IProject project) {
     try {
-      if (!project.hasNature(JavaCore.NATURE_ID)) {
+      if (!project.isAccessible() || !project.hasNature(JavaCore.NATURE_ID)) {
         return false;
       }
       IJavaProject javaProject = JavaCore.create(project);

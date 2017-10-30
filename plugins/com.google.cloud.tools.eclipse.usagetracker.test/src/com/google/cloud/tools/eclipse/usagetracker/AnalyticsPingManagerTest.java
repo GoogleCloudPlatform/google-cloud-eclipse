@@ -32,7 +32,6 @@ import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager.PingEven
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.swt.widgets.Display;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,7 +43,6 @@ import org.mockito.verification.VerificationMode;
 public class AnalyticsPingManagerTest {
 
   @Mock private IEclipsePreferences preferences;
-  @Mock private Display display;
   @Mock private ConcurrentLinkedQueue<PingEvent> pingEventQueue;
 
   private AnalyticsPingManager pingManager;
@@ -53,65 +51,66 @@ public class AnalyticsPingManagerTest {
   public void setUp() {
     // Pretend ping event queue is always empty to prevent making actual HTTP requests.
     when(pingEventQueue.isEmpty()).thenReturn(true);
+    when(preferences.get("ANALYTICS_CLIENT_ID", null)).thenReturn("clientId");
 
     pingManager = new AnalyticsPingManager("https://non-null-url-to-enable-mananger",
-        "clientId", preferences, display, pingEventQueue);
+        preferences, pingEventQueue);
   }
 
   @Test
   public void testEventTypeEventNameConvention() {
     PingEvent event = new PingEvent("some.event-name", null, null, null);
-    Map<String, String> parameters = AnalyticsPingManager.buildParametersMap("clientId", event);
+    Map<String, String> parameters = pingManager.buildParametersMap(event);
     assertEquals("/virtual/gcloud-eclipse-tools/some.event-name", parameters.get("dp"));
   }
 
   @Test
   public void testVirtualHostSet() {
     PingEvent event = new PingEvent("some.event-name", null, null, null);
-    Map<String, String> parameters = AnalyticsPingManager.buildParametersMap("clientId", event);
+    Map<String, String> parameters = pingManager.buildParametersMap(event);
     assertTrue(parameters.get("dh").startsWith("virtual."));
   }
 
   @Test
   public void testMetadataConvention() {
     PingEvent event = new PingEvent("some.event-name", "times-happened", "1234", null);
-    Map<String, String> parameters = AnalyticsPingManager.buildParametersMap("clientId", event);
+    Map<String, String> parameters = pingManager.buildParametersMap(event);
     assertEquals("times-happened=1234", parameters.get("dt"));
   }
 
   @Test
   public void testClientId() {
     PingEvent event = new PingEvent("some.event-name", null, null, null);
-    Map<String, String> parameters = AnalyticsPingManager.buildParametersMap("clientId", event);
+    Map<String, String> parameters = pingManager.buildParametersMap(event);
     assertEquals("clientId", parameters.get("cid"));
   }
 
   @Test
-  public void testOptInDialogShown_optInNotRegisteredAndNotYetOptedIn() {
+  public void testShouldShowOptInDialog_optInNotRegisteredAndNotYetOptedIn() {
     mockOptIn(false);
     mockOptInRegistered(false);
-    verifyOptInDialogOpen(times(1));
+    assertTrue(pingManager.shouldShowOptInDialog());
   }
 
   @Test
-  public void testOptInDialogSkipped_optInNotRegisteredAndAlreadyOptedIn() {
+  public void testShouldShowOptInDialog_optInNotRegisteredAndAlreadyOptedIn() {
     mockOptIn(true);
     mockOptInRegistered(false);
-    verifyOptInDialogOpen(never());
+    assertFalse(pingManager.shouldShowOptInDialog());
   }
 
   @Test
-  public void testOptInDialogSkipped_optInRegisteredAndNotYetOptedIn() {
+  public void testShouldShowOptInDialog_optInRegisteredAndNotYetOptedIn() {
     mockOptIn(false);
     mockOptInRegistered(true);
-    verifyOptInDialogOpen(never());
+    assertFalse(pingManager.shouldShowOptInDialog());
   }
 
   @Test
-  public void testOptInDialogSkipped_optInRegisteredAndAlreadyOptedIn() {
+  public void testShouldShowOptInDialog_optInRegisteredAndAlreadyOptedIn() {
     mockOptIn(true);
     mockOptInRegistered(true);
-    verifyOptInDialogOpen(never());
+    assertFalse(pingManager.shouldShowOptInDialog());
   }
 
   private void mockOptIn(boolean optIn) {
@@ -123,11 +122,6 @@ public class AnalyticsPingManagerTest {
     when(preferences.getBoolean(eq(AnalyticsPreferences.ANALYTICS_OPT_IN_REGISTERED),
                                 anyBoolean()))
         .thenReturn(registered);
-  }
-
-  private void verifyOptInDialogOpen(VerificationMode verificationMode) {
-    pingManager.showOptInDialogIfNeeded(null);
-    verify(display, verificationMode).syncExec(any(Runnable.class));
   }
 
   @Test

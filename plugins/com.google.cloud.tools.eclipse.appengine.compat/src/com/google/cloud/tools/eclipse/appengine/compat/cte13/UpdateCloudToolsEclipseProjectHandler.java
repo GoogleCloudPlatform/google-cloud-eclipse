@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.compat.cte13;
 
+import com.google.cloud.tools.eclipse.appengine.compat.Messages;
 import com.google.cloud.tools.eclipse.ui.util.ProjectFromSelectionHelper;
 import java.text.MessageFormat;
 import org.eclipse.core.commands.AbstractHandler;

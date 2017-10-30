@@ -18,9 +18,13 @@ package com.google.cloud.tools.eclipse.appengine.facets;
 
 import static org.mockito.Mockito.when;
 
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.util.Arrays;
 import java.util.Collections;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IConstraint;
@@ -29,6 +33,7 @@ import org.eclipse.wst.common.project.facet.core.IProjectFacet;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -36,6 +41,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AppEngineFlexJarFacetTest {
+
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacetVersions();
+  @Rule public TestProjectCreator javaProjectCreator = new TestProjectCreator().withFacetVersions(
+      JavaFacet.VERSION_1_7);
+
   @Mock private IFacetedProject facetedProject;
 
   @Test
@@ -97,5 +107,42 @@ public class AppEngineFlexJarFacetTest {
     IConstraint constraint = AppEngineFlexJarFacet.FACET_VERSION.getConstraint();
     IStatus result = constraint.check(Arrays.asList(WebFacetUtils.WEB_31));
     Assert.assertFalse(result.isOK());
+  }
+
+  @Test
+  public void testInstallAppEngineFacet_installDependentFacets() throws CoreException {
+    IProject project = projectCreator.getProject();
+
+    IFacetedProject facetedProject = ProjectFacetsManager.create(project);
+    AppEngineFlexJarFacet.installAppEngineFacet(facetedProject,
+        true /* installDependentFacets */, new NullProgressMonitor());
+    Assert.assertTrue(AppEngineFlexJarFacet.hasFacet(facetedProject));
+    Assert.assertTrue(facetedProject.hasProjectFacet(JavaFacet.VERSION_1_8));
+    Assert.assertTrue(project.getFile("src/main/appengine/app.yaml").exists());
+  }
+
+  @Test
+  public void testInstallAppEngineFacet_noDependentFacets() throws CoreException {
+    IProject project = projectCreator.getProject();
+
+    IFacetedProject facetedProject = ProjectFacetsManager.create(project);
+    try {
+      AppEngineFlexJarFacet.installAppEngineFacet(facetedProject,
+          false /* installDependentFacets */, new NullProgressMonitor());
+    } catch (CoreException e) {
+      Assert.assertNotNull(e.getMessage());
+    }
+  }
+
+  @Test
+  public void testInstallAppEngineFacet_onJavaProject() throws CoreException {
+    IProject project = javaProjectCreator.getProject();
+
+    IFacetedProject facetedProject = ProjectFacetsManager.create(project);
+    AppEngineFlexJarFacet.installAppEngineFacet(facetedProject,
+        false /* installDependentFacets */, new NullProgressMonitor());
+    Assert.assertTrue(AppEngineFlexJarFacet.hasFacet(facetedProject));
+    Assert.assertTrue(facetedProject.hasProjectFacet(JavaFacet.VERSION_1_7));
+    Assert.assertTrue(project.getFile("src/main/appengine/app.yaml").exists());
   }
 }

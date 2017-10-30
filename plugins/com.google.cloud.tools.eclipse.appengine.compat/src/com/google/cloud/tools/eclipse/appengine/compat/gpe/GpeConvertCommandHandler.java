@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.facets.ui;
+package com.google.cloud.tools.eclipse.appengine.compat.gpe;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.appengine.facets.convert.AppEngineStandardProjectConvertJob;
 import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPrompter;
 import com.google.cloud.tools.eclipse.ui.util.ProjectFromSelectionHelper;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
@@ -31,7 +30,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
-public class AppEngineStandardProjectConvertCommandHandler extends AbstractHandler {
+public class GpeConvertCommandHandler extends AbstractHandler {
 
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -54,8 +53,7 @@ public class AppEngineStandardProjectConvertCommandHandler extends AbstractHandl
         throw new IllegalStateException("Convert menu enabled for App Engine projects");
       }
 
-      AppEngineStandardProjectConvertJob job =
-          new AppEngineStandardProjectConvertJob(facetedProject);
+      GpeConvertJob job = new GpeConvertJob(facetedProject);
       job.setUser(true);
       job.schedule();
     } catch (CoreException ex) {
@@ -63,4 +61,5 @@ public class AppEngineStandardProjectConvertCommandHandler extends AbstractHandl
     }
     return null; // Must return null per method Javadoc.
   }
+
 }

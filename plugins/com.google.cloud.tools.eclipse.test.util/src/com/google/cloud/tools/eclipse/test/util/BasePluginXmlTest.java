@@ -16,11 +16,16 @@
 
 package com.google.cloud.tools.eclipse.test.util;
 
+import static org.junit.Assert.assertEquals;
+
 import com.google.common.collect.Sets;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Set;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.RegistryFactory;
@@ -156,4 +161,40 @@ public abstract class BasePluginXmlTest {
     }
   }
 
+  @Test
+  public final void testPropertiesDefinedInManifestMf() throws IOException {
+    boolean localizedMessageExists = false;
+
+    Attributes attributes = getManifestAttributes();
+    for (Object object : attributes.values()) {
+      String value = object.toString();
+      assertPropertyDefined(value);
+
+      if (value.startsWith("%")) {
+        localizedMessageExists = true;
+      }
+    }
+
+    if (localizedMessageExists) {
+      assertEquals("plugin", attributes.getValue("Bundle-Localization"));
+    }
+  }
+
+  @Test
+  public final void testBundleVendor() throws IOException {
+    String vendor = getManifestAttributes().getValue("Bundle-Vendor");
+    if (vendor.startsWith("%")) {
+      vendor = pluginProperties.get(vendor.substring(1));
+    }
+    assertEquals("Google Inc.", vendor);
+  }
+
+  private static Attributes getManifestAttributes() throws IOException {
+    String bundlePath = EclipseProperties.getHostBundlePath();
+    String manifestLocation = bundlePath + "/META-INF/MANIFEST.MF";
+
+    try (InputStream in = Files.newInputStream(Paths.get(manifestLocation))) {
+      return new Manifest(in).getMainAttributes();
+    }
+  }
 }

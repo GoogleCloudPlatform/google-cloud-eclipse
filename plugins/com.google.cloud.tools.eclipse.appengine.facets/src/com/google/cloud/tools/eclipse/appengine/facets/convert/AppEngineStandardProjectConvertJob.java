@@ -16,46 +16,52 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets.convert;
 
-import com.google.cloud.tools.eclipse.appengine.compat.GpeMigrator;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.Messages;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 
 public class AppEngineStandardProjectConvertJob extends Job {
 
-  private final IFacetedProject facetedProject;
+  protected final IFacetedProject facetedProject;
 
-  public AppEngineStandardProjectConvertJob(IFacetedProject facetedProject) {
-    super("App Engine Standard Project Conversion Job");
+  protected AppEngineStandardProjectConvertJob(String description, IFacetedProject facetedProject) {
+    super(description);
     this.facetedProject = facetedProject;
   }
 
+  public AppEngineStandardProjectConvertJob(IFacetedProject facetedProject) {
+    this("App Engine Standard Project Conversion Job", facetedProject);
+  }
+
   @Override
-  protected IStatus run(IProgressMonitor monitor) {
-    SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
+  protected final IStatus run(IProgressMonitor monitor) {
+    String projectName = facetedProject.getProject().getName();
+    MultiStatus status =
+        StatusUtil.multi(this, Messages.getString("project.conversion.error", projectName));
+    convert(status, monitor);
+    return monitor.isCanceled() ? Status.CANCEL_STATUS : status;
+  }
 
-    try {
-      // Updating project before installing App Engine facet to avoid
-      // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155.
-      GpeMigrator.removeObsoleteGpeRemnants(facetedProject, subMonitor.newChild(20));
-
-      if (!monitor.isCanceled()) {
-        AppEngineStandardFacet.installAppEngineFacet(facetedProject,
-            true /* install Java and Web facets too (safe even if already installed) */,
-            subMonitor.newChild(80));
+  /**
+   * Perform the conversion. Any errors should be accumulated in {@code status}.
+   */
+  protected void convert(MultiStatus status, IProgressMonitor monitor) {
+    if (!monitor.isCanceled()) {
+      try {
+        /* Install Java and Web facets too (safe even if already installed) */
+        boolean installDependentFacets = true;
+        AppEngineStandardFacet.installAppEngineFacet(facetedProject, installDependentFacets,
+            monitor);
+      } catch (CoreException ex) {
+        status.add(StatusUtil.error(this, "Unable to install App Engine Standard facet", ex));
       }
-
-      return monitor.isCanceled() ? Status.CANCEL_STATUS : Status.OK_STATUS;
-    } catch (CoreException ex) {
-      String project = facetedProject.getProject().getName();
-      return StatusUtil.error(this, Messages.getString("project.conversion.error", project), ex);
     }
   }
 }

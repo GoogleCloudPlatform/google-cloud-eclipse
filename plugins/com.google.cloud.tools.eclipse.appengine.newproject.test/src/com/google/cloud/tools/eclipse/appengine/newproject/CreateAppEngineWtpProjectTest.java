@@ -21,13 +21,24 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
+import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -47,10 +58,21 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
+@RunWith(MockitoJUnitRunner.class)
 public abstract class CreateAppEngineWtpProjectTest {
 
   @Rule public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
+
+  @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
+
+  @Mock protected ILibraryRepositoryService repositoryService;
 
   protected final IProgressMonitor monitor = new NullProgressMonitor();
   protected final AppEngineProjectConfig config = new AppEngineProjectConfig();
@@ -58,12 +80,13 @@ public abstract class CreateAppEngineWtpProjectTest {
 
   protected abstract CreateAppEngineWtpProject newCreateAppEngineWtpProject();
 
-  // Let subclasses throw arbitrary exceptions during "setUp()"
   @Before
-  public void setUp() throws Exception {
+  public void setUp() throws CoreException {
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
     project = workspace.getRoot().getProject("testproject" + Math.random());
     config.setProject(project);
+
+    mockRepositoryService();
   }
 
   @After
@@ -73,6 +96,32 @@ public abstract class CreateAppEngineWtpProjectTest {
       ProjectUtils.waitForProjects(project);
       project.delete(true, monitor);
     }
+  }
+
+  private void mockRepositoryService() throws CoreException {
+    final LoadingCache<String, Artifact> fakeArtifactStore = CacheBuilder.newBuilder().build(
+        new CacheLoader<String, Artifact>() {
+          @Override
+          public Artifact load(String artifactKey) throws Exception {
+            Artifact artifact = mock(Artifact.class);
+            File jar = tempFolder.newFile("fake-" + artifactKey + ".jar");
+            when(artifact.getFile()).thenReturn(jar);
+            return artifact;
+          }
+        });
+
+    Answer<Artifact> answerFakeArtifact = new Answer<Artifact>() {
+      @Override
+      public Artifact answer(InvocationOnMock invocation) throws Throwable {
+        LibraryFile libraryFile = invocation.getArgumentAt(0, LibraryFile.class);
+        MavenCoordinates coordinates = libraryFile.getMavenCoordinates();
+        String artifactKey = coordinates.getGroupId() + "-" + coordinates.getArtifactId()
+            + "-" + coordinates.getVersion();
+        return fakeArtifactStore.get(artifactKey);
+      }
+    };
+    when(repositoryService.resolveArtifact(any(LibraryFile.class), any(IProgressMonitor.class)))
+        .thenAnswer(answerFakeArtifact);
   }
 
   @Test
@@ -207,5 +256,22 @@ public abstract class CreateAppEngineWtpProjectTest {
       }
     }
     return false;
+  }
+
+  @Test
+  public void testJstl12JarIfNonMavenProject() throws InvocationTargetException, CoreException {
+    CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
+    creator.execute(monitor);
+
+    assertTrue(project.getFile("src/main/webapp/WEB-INF/lib/fake-jstl-jstl-1.2.jar").exists());
+  }
+
+  @Test
+  public void testNoJstl12JarIfMavenProject() throws InvocationTargetException, CoreException {
+    config.setUseMaven("my.group.id", "my-other-artifact-id", "12.34.56");
+    CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
+    creator.execute(monitor);
+
+    assertFalse(project.getFile("src/main/webapp/WEB-INF/lib/fake-jstl-jstl-1.2.jar").exists());
   }
 }

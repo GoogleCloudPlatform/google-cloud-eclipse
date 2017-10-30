@@ -155,8 +155,9 @@ public class CloudLibrariesInPluginXmlTest {
         guavaLibraryFile = file;
       }
     }
-    
+    assertNotNull("objectify not found", objectifyLibraryFile);
     assertTrue("Objectify not exported", objectifyLibraryFile.isExport());
+    assertNotNull("guava not found", guavaLibraryFile);
 
     MavenCoordinates objectifyMavenCoordinates = objectifyLibraryFile.getMavenCoordinates();
     assertThat(objectifyMavenCoordinates.getRepository(), is("central"));
