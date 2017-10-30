@@ -196,7 +196,6 @@ public class CodeTemplates {
     properties.put("projectArtifactId", config.getMavenArtifactId()); //$NON-NLS-1$
     properties.put("projectVersion", config.getMavenVersion()); //$NON-NLS-1$
 
-    String template;
     if (isStandardProject) {
       if (Objects.equal(AppEngineRuntime.STANDARD_JAVA_7.getId(), config.getRuntimeId())) {
         properties.put("servletVersion", "2.5"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -205,12 +204,12 @@ public class CodeTemplates {
         properties.put("servletVersion", "3.1"); //$NON-NLS-1$ //$NON-NLS-2$
         properties.put("compilerVersion", "1.8"); //$NON-NLS-1$ //$NON-NLS-2$
       }
-      template = Templates.POM_XML_STANDARD_TEMPLATE;
+      createChildFile("pom.xml", Templates.POM_XML_STANDARD_TEMPLATE, //$NON-NLS-1$
+          project, properties, monitor);
     } else {
-      template = Templates.POM_XML_FLEX_TEMPLATE;
+      createChildFile("pom.xml", Templates.POM_XML_FLEX_TEMPLATE, //$NON-NLS-1$
+          project, properties, monitor);
     }
-
-    createChildFile("pom.xml", template, project, properties, monitor); //$NON-NLS-1$
   }
 
   @VisibleForTesting
