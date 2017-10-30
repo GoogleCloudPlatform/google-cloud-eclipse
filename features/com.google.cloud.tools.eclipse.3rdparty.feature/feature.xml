@@ -95,5 +95,8 @@
          version="1.0.4"
          unpack="false"/>
 
+  <requires>
+    <import plugin="org.dadacoalition.yedit"/>
+  </requires>
 
 </feature>
