@@ -57,5 +57,5 @@ location "http://download.eclipse.org/tools/orbit/downloads/drops/R2017051619251
 }
 
 location "http://dadacoalition.org/yedit/" {
-  org.dadacoalition.yedit
+  org.dadacoalition.yedit.feature.feature.group
 }

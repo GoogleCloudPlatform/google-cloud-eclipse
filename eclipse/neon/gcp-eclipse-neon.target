@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde?>
 <!-- generated with https://github.com/mbarbero/fr.obeo.releng.targetplatform -->
-<target name="GCP for Eclipse Neon" sequenceNumber="1493435411">
+<target name="GCP for Eclipse Neon" sequenceNumber="1509391548">
   <locations>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
       <unit id="org.eclipse.license.feature.group" version="1.0.1.v20140414-1359"/>
@@ -45,7 +45,7 @@
       <repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20160520211859/repository/"/>
     </location>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
-      <unit id="org.dadacoalition.yedit" version="1.0.20.201509041456-RELEASE"/>
+      <unit id="org.dadacoalition.yedit.feature.feature.group" version="1.0.20.201509041456-RELEASE"/>
       <repository location="http://dadacoalition.org/yedit/"/>
     </location>
   </locations>
