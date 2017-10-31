@@ -24,10 +24,6 @@
          name="YEdit"
          optional="true"/>
 
-   <requires>
-      <import plugin="org.dadacoalition.yedit"/>
-   </requires>
-
    <plugin
          id="com.google.cloud.tools.appengine"
          download-size="0"
