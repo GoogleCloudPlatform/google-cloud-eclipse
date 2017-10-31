@@ -30,7 +30,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -77,9 +76,6 @@ public class BuildPath {
     }
   }
 
-  /**
-   * Returns the entries added to the classpath.
-   */
   public static void addNativeLibrary(IJavaProject javaProject,
       List<Library> libraries, IProgressMonitor monitor) throws CoreException {
     
@@ -152,7 +148,7 @@ public class BuildPath {
     }
     
     Library masterLibrary = new Library(CloudLibraries.MASTER_CONTAINER_ID);
-    masterLibrary.setName("Google APIs"); //$NON-NLS-1$
+    masterLibrary.setName(Messages.getString("google.api.libraries")); //$NON-NLS-1$
     masterLibrary.setLibraryDependencies(dependentIds);
     subMonitor.worked(1);
     
@@ -162,7 +158,6 @@ public class BuildPath {
     masterLibrary.setLibraryFiles(resolved);
     
     masterLibrary.setResolved();
-    
     subMonitor.worked(1);
 
     return masterLibrary;
@@ -178,17 +173,6 @@ public class BuildPath {
         Messages.getString("computing.entries"), //$NON-NLS-1$
         11);
     
-    if (CloudLibraries.MASTER_CONTAINER_ID.equals(library.getId())) {
-      try {
-        LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer();
-        serializer.saveLibraryIds(javaProject, library.getLibraryDependencies());
-      } catch (IOException ex) {
-        throw new CoreException(
-            StatusUtil.error(BuildPath.class, "Error saving master library list", ex)); //$NON-NLS-1$
-      }
-    }
-    subMonitor.worked(10);
-
     IClasspathEntry libraryContainer = makeClasspathEntry(library);
     subMonitor.worked(1);
 

@@ -106,8 +106,8 @@ public class CloudToolsEclipseProjectUpdater {
 
       // remove "appengine-api" as appengine-api-1.0-sdk now included in the servlet container
       libraryIds.remove("appengine-api"); //$NON-NLS-1$
-      // remove "googlecloudcore" and "googleapiclient" as they were utility definitions, now from
-      // dependencies
+      // remove "googlecloudcore" and "googleapiclient" as they were utility definitions, now
+      // pulled from library dependencies
       libraryIds.remove("googlecloudcore"); //$NON-NLS-1$
       libraryIds.remove("googleapiclient"); //$NON-NLS-1$
 

@@ -19,105 +19,145 @@ package com.google.cloud.tools.eclipse.appengine.libraries.ui;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
-import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
+import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import com.google.common.base.Preconditions;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.ui.wizards.IClasspathContainerPage;
 import org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension;
-import org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension2;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
 public abstract class CloudLibrariesPage extends WizardPage implements IClasspathContainerPage,
-    IClasspathContainerPageExtension, IClasspathContainerPageExtension2 {
+    IClasspathContainerPageExtension {
 
   private static final Logger logger = Logger.getLogger(CloudLibrariesPage.class.getName());
-  private LibrarySelectorGroup librariesSelector;
-  private IJavaProject project;
-  private final String group;
+  private final LibraryClasspathContainerSerializer serializer =
+      new LibraryClasspathContainerSerializer();
+  private Map<String, String> groups; // id -> title
+  private List<String> initialLibraryIds = Collections.emptyList();
 
-  protected CloudLibrariesPage(String group) {
-    super(group + "-page"); //$NON-NLS-1$
-    setTitle(Messages.getString(group + "-title"));  //$NON-NLS-1$
-    setDescription(Messages.getString(group + "-description"));  //$NON-NLS-1$
-    setImageDescriptor(AppEngineImages.appEngine(64));
-    this.group = group;
+  private List<LibrarySelectorGroup> librariesSelectors;
+  private IJavaProject project;
+  private boolean isMavenProject;
+  private IClasspathEntry newEntry;
+
+
+  protected CloudLibrariesPage(String pageId) {
+    super(pageId); // $NON-NLS-1$
+  }
+
+  /** Set the visible library groups. Map is set of (id, title) pairs. */
+  protected void setGroups(Map<String, String> groups) {
+    this.groups = groups;
+  }
+
+  @Override
+  public void initialize(IJavaProject project, IClasspathEntry[] currentEntries) {
+    this.project = project;
+    isMavenProject = MavenUtils.hasMavenNature(project.getProject());
   }
 
   @Override
   public void createControl(Composite parent) {
-    Composite composite = new Composite(parent, SWT.BORDER);
-    composite.setLayout(new GridLayout(2, true));
-    
+    Preconditions.checkNotNull(groups, "Groups must be set");
+    Composite composite = new Group(parent, SWT.NONE);
+
     boolean java7AppEngineStandardProject = false;
     IProjectFacetVersion facetVersion =
         AppEngineStandardFacet.getProjectFacetVersion(project.getProject());
     if (facetVersion != null && facetVersion.getVersionString().equals("JRE7")) {
       java7AppEngineStandardProject = true;
     }
-    
-    librariesSelector = new LibrarySelectorGroup(composite, group, java7AppEngineStandardProject);
-    
+
+    // FIXME: what should happen with libraries that aren't visible in any of the groups?
+    librariesSelectors = new ArrayList<>();
+    for (Entry<String, String> group : groups.entrySet()) {
+      LibrarySelectorGroup librariesSelector =
+          new LibrarySelectorGroup(composite, group.getKey(), group.getValue(),
+              java7AppEngineStandardProject);
+      // setSelection() ignores any libraries not part of its group
+      librariesSelector.setSelection(new StructuredSelection(initialLibraryIds));
+      librariesSelectors.add(librariesSelector);
+    }
+    composite.setLayout(new RowLayout(SWT.HORIZONTAL));
     setControl(composite);
   }
 
   @Override
   public boolean finish() {
-    return true;
+    final List<Library> libraries = new ArrayList<>();
+    final List<String> libraryIds = new ArrayList<>();
+    for (LibrarySelectorGroup librariesSelector : librariesSelectors) {
+      libraries.addAll(librariesSelector.getSelectedLibraries());
+    }
+    for (Library library : libraries) {
+      libraryIds.add(library.getId());
+    }
+    try {
+      getContainer().run(false, true, new IRunnableWithProgress() {
+        @Override
+        public void run(IProgressMonitor monitor)
+            throws InvocationTargetException, InterruptedException {
+          try {
+            if (isMavenProject) {
+              BuildPath.addMavenLibraries(project.getProject(), libraries, monitor);
+            } else {
+              SubMonitor progress = SubMonitor.convert(monitor, 10);
+              Library masterLibrary =
+                  BuildPath.collectLibraryFiles(project, libraries, progress.newChild(5));
+              newEntry = BuildPath.listNativeLibrary(project, masterLibrary, progress.newChild(5));
+              serializer.saveLibraryIds(project, libraryIds /* , newEntry.getPath() */);
+            }
+          } catch (CoreException | IOException ex) {
+            StatusUtil.setErrorStatus(this, "Error updating container definition", ex);
+            throw new InvocationTargetException(ex);
+          }
+        }
+      });
+      return true;
+    } catch (InvocationTargetException ex) {
+      // ignored: exceptions are already reported above
+    } catch (InterruptedException ex) {
+      Thread.interrupted();
+    }
+    return false;
   }
 
   @Override
   public IClasspathEntry getSelection() {
-    // Since this class implements IClasspathContainerPageExtension2,
-    // Eclipse calls getNewContainers instead.
-    logger.log(Level.WARNING, "Unexpected call to getSelection()");
-    return null;
+    return newEntry;
   }
 
   @Override
   public void setSelection(IClasspathEntry containerEntry) {
-    // todo can we use the containerEntry to tick the checkboxes in the library selector group?
-  }
-
-  @Override
-  public void initialize(IJavaProject project, IClasspathEntry[] currentEntries) {
-    this.project = project;
-  }
-
-  @Override
-  public IClasspathEntry[] getNewContainers() {
-    List<Library> libraries = new ArrayList<>(librariesSelector.getSelectedLibraries());
-    if (libraries == null || libraries.isEmpty()) {
-      return null;
-    }
-
-    SubMonitor monitor = SubMonitor.convert(null, 10);
-    try {
-      if (MavenUtils.hasMavenNature(project.getProject())) {
-        BuildPath.addMavenLibraries(project.getProject(), libraries, monitor.newChild(10));
-        return new IClasspathEntry[0];
-      } else {
-        Library masterLibrary = BuildPath.collectLibraryFiles(project, libraries, monitor.newChild(7));
-        IClasspathEntry masterEntry = BuildPath.listNativeLibrary(project, masterLibrary, monitor.newChild(3));
-        if (masterEntry != null) {
-          return new IClasspathEntry[] {masterEntry};
-        } else {
-          return new IClasspathEntry[0];
-        }
+    if (containerEntry != null) {
+      try {
+        initialLibraryIds = serializer.loadLibraryIds(project, containerEntry.getPath());
+      } catch (CoreException | IOException ex) {
+        logger.log(Level.WARNING,
+            "Error loading selected library IDs for " + project.getElementName(), ex);
       }
-    } catch (CoreException ex) {
-      return new IClasspathEntry[0];
     }
   }
-
 }

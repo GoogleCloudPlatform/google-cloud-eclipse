@@ -58,7 +58,7 @@ public class LibrarySelectorGroup implements ISelectionProvider {
   private final ListenerList/* <ISelectedChangeListener> */ listeners = new ListenerList/* <> */();
 
   public LibrarySelectorGroup(Composite parentContainer, String groupName) {
-    this(parentContainer, groupName, true);
+    this(parentContainer, groupName, Messages.getString("appengine.libraries.group"), true);
   }
   
   /**
@@ -66,8 +66,11 @@ public class LibrarySelectorGroup implements ISelectionProvider {
    *     that cannot handle GRPC such as the white-listed App Engine Standard Java 7 JRE,
    *     android, etc.
    */
-  LibrarySelectorGroup(Composite parentContainer, String groupName, boolean restrictedEnvironment) {
+  LibrarySelectorGroup(Composite parentContainer, String groupName, String groupLabel,
+      boolean restrictedEnvironment) {
     Preconditions.checkNotNull(parentContainer, "parentContainer is null");
+    Preconditions.checkNotNull(groupName, "groupName is null");
+    Preconditions.checkNotNull(groupLabel, "groupLabel is null");
     
     Collection<Library> availableLibraries = CloudLibraries.getLibraries(groupName);
     this.availableLibraries = new LinkedHashMap<>();
@@ -76,12 +79,12 @@ public class LibrarySelectorGroup implements ISelectionProvider {
         this.availableLibraries.put(library.getId(), library);
       }
     }
-    createContents(parentContainer);
+    createContents(parentContainer, groupLabel);
   }
 
-  private void createContents(Composite parentContainer) {
+  private void createContents(Composite parentContainer, String groupLabel) {
     Group apiGroup = new Group(parentContainer, SWT.NONE);
-    apiGroup.setText(Messages.getString("appengine.libraries.group")); //$NON-NLS-1$
+    apiGroup.setText(groupLabel); // $NON-NLS-1$
 
     for (Library library : availableLibraries.values()) {
       Button libraryButton = new Button(apiGroup, SWT.CHECK);
@@ -93,7 +96,7 @@ public class LibrarySelectorGroup implements ISelectionProvider {
       libraryButton.addSelectionListener(new ManualSelectionTracker());
       libraryButtons.put(library, libraryButton);
     }
-    GridLayoutFactory.swtDefaults().generateLayout(apiGroup);
+    GridLayoutFactory.fillDefaults().generateLayout(apiGroup);
   }
 
   /**

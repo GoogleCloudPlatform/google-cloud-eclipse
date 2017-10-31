@@ -17,11 +17,21 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.ui;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
+import com.google.common.collect.Maps;
+import java.util.Map;
 
 public class ApiClientLibrariesPage extends CloudLibrariesPage {
 
   public ApiClientLibrariesPage() {
-    super(CloudLibraries.CLIENT_APIS_GROUP);
+    super("clientapis");
+    setTitle(Messages.getString("appengine.libraries.group")); //$NON-NLS-1$
+    setImageDescriptor(AppEngineImages.appEngine(64));
+
+    Map<String, String> groups = Maps.newLinkedHashMap();
+    groups.put(CloudLibraries.APP_ENGINE_GROUP, Messages.getString("appengine-title"));
+    groups.put(CloudLibraries.CLIENT_APIS_GROUP, Messages.getString("clientapis-title"));
+    setGroups(groups);
   }
 
 }
