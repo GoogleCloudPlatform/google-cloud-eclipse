@@ -20,7 +20,9 @@
 
    <includes
          id="org.dadacoalition.yedit.feature"
-         version="0.0.0"/>
+         version="0.0.0"
+         name="YEdit"
+         optional="true"/>
 
    <requires>
       <import plugin="org.dadacoalition.yedit"/>
