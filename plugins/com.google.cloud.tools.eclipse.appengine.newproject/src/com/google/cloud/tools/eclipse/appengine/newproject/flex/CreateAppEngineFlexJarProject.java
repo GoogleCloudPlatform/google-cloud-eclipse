@@ -20,7 +20,7 @@ import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexJarFacet;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfig;
 import com.google.cloud.tools.eclipse.appengine.newproject.CodeTemplates;
-import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
+import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineProject;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -30,7 +30,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 
-public class CreateAppEngineFlexJarProject extends CreateAppEngineWtpProject {
+public class CreateAppEngineFlexJarProject extends CreateAppEngineProject {
 
   CreateAppEngineFlexJarProject(AppEngineProjectConfig config, IAdaptable uiInfoAdapter,
       ILibraryRepositoryService repositoryService) {
@@ -55,7 +55,8 @@ public class CreateAppEngineFlexJarProject extends CreateAppEngineWtpProject {
   @Override
   public IFile createAndConfigureProjectContent(IProject newProject, AppEngineProjectConfig config,
       IProgressMonitor monitor) throws CoreException {
-    IFile mostImportantFile =  CodeTemplates.materializeFlexJar(newProject, config, monitor);
+    IFile mostImportantFile =
+        CodeTemplates.materializeAppEngineFlexJarFiles(newProject, config, monitor);
     return mostImportantFile;
   }
 }

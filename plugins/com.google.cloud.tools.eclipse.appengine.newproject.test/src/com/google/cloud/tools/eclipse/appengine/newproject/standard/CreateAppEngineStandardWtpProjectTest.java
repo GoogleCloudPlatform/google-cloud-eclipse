@@ -25,7 +25,7 @@ import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
-import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
+import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineProject;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProjectTest;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.lang.reflect.InvocationTargetException;
@@ -48,18 +48,18 @@ import org.junit.Test;
 public class CreateAppEngineStandardWtpProjectTest extends CreateAppEngineWtpProjectTest {
 
   @Override
-  protected CreateAppEngineWtpProject newCreateAppEngineWtpProject() {
+  protected CreateAppEngineProject newCreateAppEngineProject() {
     return new CreateAppEngineStandardWtpProject(config, mock(IAdaptable.class), repositoryService);
   }
 
   @Test
   public void testConstructor() {
-    newCreateAppEngineWtpProject();
+    newCreateAppEngineProject();
   }
 
   @Test
   public void testAppEngineRuntimeAdded() throws InvocationTargetException, CoreException {
-    CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
+    CreateAppEngineProject creator = newCreateAppEngineProject();
     creator.execute(monitor);
 
     ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
@@ -74,7 +74,7 @@ public class CreateAppEngineStandardWtpProjectTest extends CreateAppEngineWtpPro
     List<Library> libraries = new ArrayList<>();
     libraries.add(library);
     config.setAppEngineLibraries(libraries);
-    CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
+    CreateAppEngineProject creator = newCreateAppEngineProject();
     creator.execute(monitor);
 
     assertTrue(project.hasNature(JavaCore.NATURE_ID));

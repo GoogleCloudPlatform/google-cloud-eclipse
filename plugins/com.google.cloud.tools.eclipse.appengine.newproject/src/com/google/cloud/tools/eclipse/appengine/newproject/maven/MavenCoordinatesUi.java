@@ -30,7 +30,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 
-public class MavenCoordinatesUi extends Group {
+public class MavenCoordinatesUi extends Group implements MavenCoordinatesInput {
 
   private static final String DEFAULT_VERSION = "0.1.0-SNAPSHOT"; //$NON-NLS-1$
 
@@ -67,24 +67,29 @@ public class MavenCoordinatesUi extends Group {
     // Allow subclassing by not calling super().
   }
 
+  @Override
   public String getGroupId() {
     return groupIdField.getText().trim();
   }
 
+  @Override
   public String getArtifactId() {
     return artifactIdField.getText().trim();
   }
 
+  @Override
   public String getVersion() {
     return versionField.getText().trim();
   }
 
+  @Override
   public void addChangeListener(Listener listener) {
     groupIdField.addListener(SWT.Modify, listener);
     artifactIdField.addListener(SWT.Modify, listener);
     versionField.addListener(SWT.Modify, listener);
   }
 
+  @Override
   public void addGroupIdModifyListener(ModifyListener listener) {
     groupIdField.addModifyListener(listener);
   }
@@ -104,6 +109,7 @@ public class MavenCoordinatesUi extends Group {
    * @return {@link IStatus#OK} if there was no validation problem; otherwise a status describing a
    *     validation problem (with a non-OK status)
    */
+  @Override
   public IStatus validateMavenSettings() {
     if (getGroupId().isEmpty()) {
       return StatusUtil.info(this, Messages.getString("PROVIDE_GROUP_ID")); //$NON-NLS-1$
@@ -122,5 +128,10 @@ public class MavenCoordinatesUi extends Group {
           Messages.getString("ILLEGAL_VERSION", getVersion())); //$NON-NLS-1$
     }
     return Status.OK_STATUS;
+  }
+
+  @Override
+  public boolean uiEnabled() {
+    return true;
   }
 }

@@ -19,12 +19,10 @@ package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.verify;
 
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import org.eclipse.jface.dialogs.DialogPage;
-import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Shell;
@@ -89,72 +87,6 @@ public class MavenCoordinatesWizardUiTest {
   public void testValidateMavenSettings_okWhenDisabled() {
     assertFalse(ui.uiEnabled());
     assertTrue(ui.validateMavenSettings().isOK());
-  }
-
-  @Test
-  public void testSetValidationMessage_okWhenDisabled() {
-    assertFalse(ui.uiEnabled());
-    assertTrue(ui.setValidationMessage(dialogPage));
-  }
-
-  @Test
-  public void testSetValidationMessage_emptyGroupId() {
-    enableUi();
-
-    assertFalse(ui.setValidationMessage(dialogPage));
-    verify(dialogPage).setMessage("Provide Maven Group ID.", IMessageProvider.INFORMATION);
-  }
-
-  @Test
-  public void testSetValidationMessage_emptyArtifactId() {
-    enableUi();
-    getGroupIdField().setText("com.example");
-
-    assertFalse(ui.setValidationMessage(dialogPage));
-    verify(dialogPage).setMessage("Provide Maven Artifact ID.", IMessageProvider.INFORMATION);
-  }
-
-  @Test
-  public void testSetValidationMessage_emptyVersion() {
-    enableUi();
-    getGroupIdField().setText("com.example");
-    getArtifactIdField().setText("some-artifact-id");
-    getVersionField().setText("");
-
-    assertFalse(ui.setValidationMessage(dialogPage));
-    verify(dialogPage).setMessage("Provide Maven artifact version.", IMessageProvider.INFORMATION);
-  }
-
-  @Test
-  public void testSetValidationMessage_illegalGroupId() {
-    enableUi();
-
-    getArtifactIdField().setText("some-artifact-id");
-
-    getGroupIdField().setText("<:#= Illegal ID =#:>");
-    assertFalse(ui.setValidationMessage(dialogPage));
-    verify(dialogPage).setErrorMessage("Illegal Maven Group ID: <:#= Illegal ID =#:>");
-  }
-
-  @Test
-  public void testSetValidationMessage_illegalArtifactId() {
-    enableUi();
-    getGroupIdField().setText("com.example");
-
-    getArtifactIdField().setText("<:#= Illegal ID =#:>");
-    assertFalse(ui.setValidationMessage(dialogPage));
-    verify(dialogPage).setErrorMessage("Illegal Maven Artifact ID: <:#= Illegal ID =#:>");
-  }
-
-  @Test
-  public void testValidateMavenSettings_noValidationIfUiDisabled() {
-    getGroupIdField().setText("<:#= Illegal ID =#:>");
-    assertTrue(ui.setValidationMessage(dialogPage));
-  }
-
-  private void enableUi() {
-    Button asMavenProject = CompositeUtil.findControl(shell, Button.class);
-    new SWTBotCheckBox(asMavenProject).click();
   }
 
   private Text getGroupIdField() {

@@ -40,19 +40,19 @@ import org.eclipse.ui.ide.undo.WorkspaceUndoUtil;
 
 public abstract class AppEngineProjectWizard extends Wizard implements INewWizard {
 
-  protected AppEngineWizardPage page = null;
-  protected final AppEngineProjectConfig config = new AppEngineProjectConfig();
+  private AppEngineWizardPage page = null;
+  private final AppEngineProjectConfig config = new AppEngineProjectConfig();
   private IWorkbench workbench;
 
   public AppEngineProjectWizard() {
     setNeedsProgressMonitor(true);
   }
 
-  public abstract AppEngineWizardPage createWizardPage();
+  protected abstract AppEngineWizardPage createWizardPage();
 
-  public abstract IStatus validateDependencies();
+  protected abstract IStatus validateDependencies();
 
-  public abstract CreateAppEngineWtpProject getAppEngineProjectCreationOperation(
+  protected abstract CreateAppEngineProject getAppEngineProjectCreationOperation(
       AppEngineProjectConfig config, IAdaptable uiInfoAdapter);
 
   @Override
@@ -89,8 +89,7 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
 
     // todo set up
     IAdaptable uiInfoAdapter = WorkspaceUndoUtil.getUIInfoAdapter(getShell());
-    CreateAppEngineWtpProject runnable =
-        getAppEngineProjectCreationOperation(config, uiInfoAdapter);
+    CreateAppEngineProject runnable = getAppEngineProjectCreationOperation(config, uiInfoAdapter);
 
     try {
       boolean fork = true;
@@ -114,6 +113,7 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
     config.setServiceName(page.getServiceName());
     config.setPackageName(page.getPackageName());
     config.setRuntimeId(page.getRuntimeId());
+    config.setTemplate(page.getTemplate());
     config.setProject(page.getProjectHandle());
     if (!page.useDefaults()) {
       config.setEclipseProjectLocationUri(page.getLocationURI());

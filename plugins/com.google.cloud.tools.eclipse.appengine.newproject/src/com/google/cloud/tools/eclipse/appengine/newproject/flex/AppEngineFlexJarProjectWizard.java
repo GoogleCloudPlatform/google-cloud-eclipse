@@ -19,7 +19,8 @@ package com.google.cloud.tools.eclipse.appengine.newproject.flex;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfig;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectWizard;
-import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
+import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineWizardPage;
+import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineProject;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
@@ -28,33 +29,33 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
-public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
+public class AppEngineFlexJarProjectWizard extends AppEngineProjectWizard {
   @Inject
   private ILibraryRepositoryService repositoryService;
 
-  public AppEngineFlexProjectWizard() {
-    setWindowTitle(Messages.getString("new.app.engine.flex.project"));
+  AppEngineFlexJarProjectWizard() {
+    setWindowTitle(Messages.getString("new.app.engine.flex.jar.project"));
   }
 
   @Override
-  public AppEngineFlexWizardPage createWizardPage() {
+  protected AppEngineWizardPage createWizardPage() {
     AnalyticsPingManager.getInstance().sendPing(
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_FLEX, getShell());
 
-    return new AppEngineFlexWizardPage();
+    return new AppEngineFlexJarWizardPage();
   }
 
   @Override
-  public IStatus validateDependencies() {
+  protected IStatus validateDependencies() {
     return Status.OK_STATUS;
   }
 
   @Override
-  public CreateAppEngineWtpProject getAppEngineProjectCreationOperation(
+  protected CreateAppEngineProject getAppEngineProjectCreationOperation(
       AppEngineProjectConfig config, IAdaptable uiInfoAdapter) {
-    return new CreateAppEngineFlexWtpProject(config, uiInfoAdapter, repositoryService);
+    return new CreateAppEngineFlexJarProject(config, uiInfoAdapter, repositoryService);
   }
 
   @Override

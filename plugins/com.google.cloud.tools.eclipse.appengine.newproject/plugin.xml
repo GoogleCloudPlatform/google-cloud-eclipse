@@ -16,81 +16,89 @@
          <keywordReference id="com.google.cloud.tools.eclipse.appengine.ui.GCPKeyword"/>
          <keywordReference id="com.google.cloud.tools.eclipse.appengine.ui.GAEKeyword"/>
          <keywordReference id="com.google.cloud.tools.eclipse.appengine.ui.GoogleKeyword"/>
-         <keywordReference
-             id="com.google.cloud.tools.eclipse.appengine.ui.AppEngineKeyword"/>
-         <keywordReference
-             id="com.google.cloud.tools.eclipse.appengine.ui.AppSpaceEngineKeyword"/>
+         <keywordReference id="com.google.cloud.tools.eclipse.appengine.ui.AppEngineKeyword"/>
+         <keywordReference id="com.google.cloud.tools.eclipse.appengine.ui.AppSpaceEngineKeyword"/>
     </wizard>
     <category
         id="com.google.cloud.tools.eclipse.wizards"
         name="%gcp.category" />
   </extension>
-  <extension
-        point="org.eclipse.ui.perspectiveExtensions">
-     <perspectiveExtension
-           targetID="org.eclipse.jdt.ui.JavaPerspective">
-        <newWizardShortcut
-              id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard">
-        </newWizardShortcut>
+  <extension point="org.eclipse.ui.perspectiveExtensions">
+     <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
+        <newWizardShortcut id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard"/>
      </perspectiveExtension>
-     <perspectiveExtension
-           targetID="org.eclipse.jst.j2ee.J2EEPerspective">
-        <newWizardShortcut
-              id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard">
-        </newWizardShortcut>
+     <perspectiveExtension targetID="org.eclipse.jst.j2ee.J2EEPerspective">
+        <newWizardShortcut id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard"/>
      </perspectiveExtension>
-     <perspectiveExtension
-           targetID="org.eclipse.wst.web.ui.webDevPerspective">
-        <newWizardShortcut
-              id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard">
-        </newWizardShortcut>
+     <perspectiveExtension targetID="org.eclipse.wst.web.ui.webDevPerspective">
+        <newWizardShortcut id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard"/>
      </perspectiveExtension>
   </extension>
   <!-- end App Engine standard -->
 
-  <!-- begin App Engine flex -->
+  <!-- begin App Engine flex WAR -->
   <extension point="org.eclipse.ui.newWizards">
      <wizard
             id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineFlex"
-            name="%flex.wizard.name"
-            class="com.google.cloud.tools.eclipse.util.service.ServiceContextFactory:com.google.cloud.tools.eclipse.appengine.newproject.flex.AppEngineFlexProjectWizard"
+            name="%flex.war.wizard.name"
+            class="com.google.cloud.tools.eclipse.util.service.ServiceContextFactory:com.google.cloud.tools.eclipse.appengine.newproject.flex.AppEngineFlexWarProjectWizard"
             icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gae-16x16.png"
             project="true"
             category="com.google.cloud.tools.eclipse.wizards">
-         <description>%flex.wizard.description</description>
+         <description>%flex.war.wizard.description</description>
          <selection class="org.eclipse.core.resources.IResource"/>
          <keywordReference id="com.google.cloud.tools.eclipse.appengine.ui.FlexKeyword"/>
          <keywordReference id="com.google.cloud.tools.eclipse.appengine.ui.GCPKeyword"/>
          <keywordReference id="com.google.cloud.tools.eclipse.appengine.ui.GAEKeyword"/>
          <keywordReference id="com.google.cloud.tools.eclipse.appengine.ui.GoogleKeyword"/>
-         <keywordReference
-             id="com.google.cloud.tools.eclipse.appengine.ui.AppEngineKeyword"/>
-         <keywordReference
-             id="com.google.cloud.tools.eclipse.appengine.ui.AppSpaceEngineKeyword"/>
+         <keywordReference id="com.google.cloud.tools.eclipse.appengine.ui.AppEngineKeyword"/>
+         <keywordReference id="com.google.cloud.tools.eclipse.appengine.ui.AppSpaceEngineKeyword"/>
     </wizard>
   </extension>
-  <extension
-        point="org.eclipse.ui.perspectiveExtensions">
-     <perspectiveExtension
-           targetID="org.eclipse.jdt.ui.JavaPerspective">
-        <newWizardShortcut
-              id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineFlex">
-        </newWizardShortcut>
+  <extension point="org.eclipse.ui.perspectiveExtensions">
+     <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
+        <newWizardShortcut id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineFlex"/>
      </perspectiveExtension>
-     <perspectiveExtension
-           targetID="org.eclipse.jst.j2ee.J2EEPerspective">
-        <newWizardShortcut
-              id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineFlex">
-        </newWizardShortcut>
+     <perspectiveExtension targetID="org.eclipse.jst.j2ee.J2EEPerspective">
+        <newWizardShortcut id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineFlex"/>
      </perspectiveExtension>
-     <perspectiveExtension
-           targetID="org.eclipse.wst.web.ui.webDevPerspective">
-        <newWizardShortcut
-              id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineFlex">
-        </newWizardShortcut>
+     <perspectiveExtension targetID="org.eclipse.wst.web.ui.webDevPerspective">
+        <newWizardShortcut id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineFlex"/>
      </perspectiveExtension>
   </extension>
-  <!-- end App Engine flex -->
+  <!-- end App Engine flex WAR -->
+
+  <!-- begin App Engine flex JAR -->
+  <extension point="org.eclipse.ui.newWizards">
+     <wizard
+            id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineFlexJar"
+            name="%flex.jar.wizard.name"
+            class="com.google.cloud.tools.eclipse.util.service.ServiceContextFactory:com.google.cloud.tools.eclipse.appengine.newproject.flex.AppEngineFlexJarProjectWizard"
+            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gae-16x16.png"
+            project="true"
+            category="com.google.cloud.tools.eclipse.wizards">
+         <description>%flex.jar.wizard.description</description>
+         <selection class="org.eclipse.core.resources.IResource"/>
+         <keywordReference id="com.google.cloud.tools.eclipse.appengine.ui.FlexKeyword"/>
+         <keywordReference id="com.google.cloud.tools.eclipse.appengine.ui.GCPKeyword"/>
+         <keywordReference id="com.google.cloud.tools.eclipse.appengine.ui.GAEKeyword"/>
+         <keywordReference id="com.google.cloud.tools.eclipse.appengine.ui.GoogleKeyword"/>
+         <keywordReference id="com.google.cloud.tools.eclipse.appengine.ui.AppEngineKeyword"/>
+         <keywordReference id="com.google.cloud.tools.eclipse.appengine.ui.AppSpaceEngineKeyword"/>
+    </wizard>
+  </extension>
+  <extension point="org.eclipse.ui.perspectiveExtensions">
+     <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
+        <newWizardShortcut id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineFlexJar"/>
+     </perspectiveExtension>
+     <perspectiveExtension targetID="org.eclipse.jst.j2ee.J2EEPerspective">
+        <newWizardShortcut id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineFlexJar"/>
+     </perspectiveExtension>
+     <perspectiveExtension targetID="org.eclipse.wst.web.ui.webDevPerspective">
+        <newWizardShortcut id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineFlexJar"/>
+     </perspectiveExtension>
+  </extension>
+  <!-- end App Engine flex JAR -->
 
   <extension
         point="org.eclipse.help.contexts">

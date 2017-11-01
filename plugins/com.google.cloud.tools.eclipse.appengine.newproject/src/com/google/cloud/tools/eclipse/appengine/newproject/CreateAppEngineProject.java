@@ -68,9 +68,9 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 /**
 * Utility to make a new Eclipse App Engine project in the workspace.
 */
-public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation {
+public abstract class CreateAppEngineProject extends WorkspaceModifyOperation {
 
-  private static final Logger logger = Logger.getLogger(CreateAppEngineWtpProject.class.getName());
+  private static final Logger logger = Logger.getLogger(CreateAppEngineProject.class.getName());
 
   protected final ILibraryRepositoryService repositoryService;
 
@@ -104,7 +104,7 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
     return mostImportant;
   }
 
-  protected CreateAppEngineWtpProject(AppEngineProjectConfig config,
+  protected CreateAppEngineProject(AppEngineProjectConfig config,
       IAdaptable uiInfoAdapter, ILibraryRepositoryService repositoryService) {
     if (config == null) {
       throw new NullPointerException("Null App Engine configuration"); //$NON-NLS-1$

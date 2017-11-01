@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import static org.junit.Assert.assertFalse;
 
+import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfig.Template;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.util.Templates;
@@ -132,7 +133,7 @@ public class CodeTemplatesTest {
     config.setUseMaven("my.project.group.id", "my-project-artifact-id", "98.76.54");
     config.setServiceName("database-service");
 
-    IFile mostImportant = CodeTemplates.materializeFlexJar(project, config, monitor);
+    IFile mostImportant = CodeTemplates.materializeAppEngineFlexJarFiles(project, config, monitor);
 
     validateFlexJarNonConfigFiles(mostImportant);
     validateAppYaml();
@@ -145,8 +146,9 @@ public class CodeTemplatesTest {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     config.setUseMaven("my.project.group.id", "my-project-artifact-id", "98.76.54");
     config.setServiceName("database-service");
+    config.setTemplate(Template.SPRING_BOOT);
 
-    IFile mostImportant = CodeTemplates.materializeFlexSpringBoot(project, config, monitor);
+    IFile mostImportant = CodeTemplates.materializeAppEngineFlexJarFiles(project, config, monitor);
 
     validateFlexSpringBootNonConfigFiles(mostImportant);
     validateAppYaml();
@@ -160,7 +162,7 @@ public class CodeTemplatesTest {
     config.setUseMaven("my.project.group.id", "my-project-artifact-id", "98.76.54");
     config.setPackageName("com.example");
 
-    IFile mostImportant = CodeTemplates.materializeFlexJar(project, config, monitor);
+    IFile mostImportant = CodeTemplates.materializeAppEngineFlexJarFiles(project, config, monitor);
     validateMainClassInPomXml("com.example", mostImportant);
   }
 
@@ -170,7 +172,7 @@ public class CodeTemplatesTest {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     config.setUseMaven("my.project.group.id", "my-project-artifact-id", "98.76.54");
 
-    IFile mostImportant = CodeTemplates.materializeFlexJar(project, config, monitor);
+    IFile mostImportant = CodeTemplates.materializeAppEngineFlexJarFiles(project, config, monitor);
     validateMainClassInPomXml(null /* expectedPackage */, mostImportant);
   }
 

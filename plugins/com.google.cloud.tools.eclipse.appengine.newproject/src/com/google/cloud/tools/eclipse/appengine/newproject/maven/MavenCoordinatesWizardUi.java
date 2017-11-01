@@ -19,8 +19,6 @@ package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.dialogs.DialogPage;
-import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyListener;
@@ -30,7 +28,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Listener;
 
-public class MavenCoordinatesWizardUi extends Composite {
+public class MavenCoordinatesWizardUi extends Composite implements MavenCoordinatesInput {
 
   private final Button asMavenProjectButton;
 
@@ -56,29 +54,33 @@ public class MavenCoordinatesWizardUi extends Composite {
     GridLayoutFactory.swtDefaults().generateLayout(this);
   }
 
+  @Override
   public boolean uiEnabled() {
     return asMavenProjectButton.getSelection();
   }
 
+  @Override
   public String getGroupId() {
     return mavenCoordinatesUi.getGroupId();
   }
 
+  @Override
   public String getArtifactId() {
     return mavenCoordinatesUi.getArtifactId();
   }
 
+  @Override
   public String getVersion() {
     return mavenCoordinatesUi.getVersion();
   }
 
+  @Override
   public void addChangeListener(Listener listener) {
     mavenCoordinatesUi.addChangeListener(listener);
-    if (asMavenProjectButton != null) {
-      asMavenProjectButton.addListener(SWT.Selection, listener);
-    }
+    asMavenProjectButton.addListener(SWT.Selection, listener);
   }
 
+  @Override
   public void addGroupIdModifyListener(ModifyListener listener) {
     mavenCoordinatesUi.addGroupIdModifyListener(listener);
   }
@@ -98,29 +100,5 @@ public class MavenCoordinatesWizardUi extends Composite {
     } else {
       return mavenCoordinatesUi.validateMavenSettings();
     }
-  }
-
-  /**
-   * Convenience method to set a validation message on {@link DialogPage} from the result of calling
-   * {@link #validateMavenSettings()}.
-   *
-   * @return {@code true} if no validation message was set; {@code false} otherwise
-   *
-   * @see #validateMavenSettings()
-   */
-  public boolean setValidationMessage(DialogPage page) {
-    IStatus status = validateMavenSettings();
-    if (status.isOK()) {
-      return true;
-    }
-
-    if (IStatus.ERROR == status.getSeverity()) {
-      page.setErrorMessage(status.getMessage());
-    } else if (IStatus.WARNING == status.getSeverity()) {
-      page.setMessage(status.getMessage(), IMessageProvider.WARNING);
-    } else if (IStatus.INFO == status.getSeverity()) {
-      page.setMessage(status.getMessage(), IMessageProvider.INFORMATION);
-    }
-    return false;
   }
 }

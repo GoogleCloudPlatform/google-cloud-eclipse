@@ -14,37 +14,27 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.newproject.standard;
+package com.google.cloud.tools.eclipse.appengine.newproject.flex;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfig;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectWizard;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineWizardPage;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineProject;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
-import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
-import com.google.cloud.tools.eclipse.util.status.StatusUtil;
-import java.lang.reflect.InvocationTargetException;
 import javax.inject.Inject;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 
-public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
-
-  @Inject
-  private ILibraryClasspathContainerResolverService resolverService;
-
+public class AppEngineFlexWarProjectWizard extends AppEngineProjectWizard {
   @Inject
   private ILibraryRepositoryService repositoryService;
 
-  AppEngineStandardProjectWizard() {
-    setWindowTitle(Messages.getString("new.app.engine.standard.project"));
+  AppEngineFlexWarProjectWizard() {
+    setWindowTitle(Messages.getString("new.app.engine.flex.war.project"));
   }
 
   @Override
@@ -52,36 +42,20 @@ public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
     AnalyticsPingManager.getInstance().sendPing(
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_STANDARD, getShell());
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_FLEX, getShell());
 
-    return new AppEngineStandardWizardPage();
+    return new AppEngineFlexWarWizardPage();
   }
 
   @Override
   protected IStatus validateDependencies() {
-    try {
-      boolean fork = true;
-      boolean cancelable = true;
-      DependencyValidator dependencyValidator = new DependencyValidator();
-      getContainer().run(fork, cancelable, dependencyValidator);
-      if (dependencyValidator.result.isOK()) {
-        return Status.OK_STATUS;
-      } else {
-        return StatusUtil.setErrorStatus(this, Messages.getString("project.creation.failed"),
-            dependencyValidator.result);
-      }
-    } catch (InvocationTargetException ex) {
-      return StatusUtil.setErrorStatus(this, Messages.getString("project.creation.failed"),
-          ex.getCause());
-    } catch (InterruptedException ex) {
-      return Status.CANCEL_STATUS;
-    }
+    return Status.OK_STATUS;
   }
 
   @Override
   protected CreateAppEngineProject getAppEngineProjectCreationOperation(
       AppEngineProjectConfig config, IAdaptable uiInfoAdapter) {
-    return new CreateAppEngineStandardWtpProject(config, uiInfoAdapter, repositoryService);
+    return new CreateAppEngineFlexWtpProject(config, uiInfoAdapter, repositoryService);
   }
 
   @Override
@@ -91,21 +65,8 @@ public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
       AnalyticsPingManager.getInstance().sendPing(
           AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_COMPLETE,
           AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
-          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_STANDARD);
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_FLEX);
     }
     return accepted;
   }
-
-
-  private class DependencyValidator implements IRunnableWithProgress {
-
-    private IStatus result;
-
-    @Override
-    public void run(IProgressMonitor monitor)
-        throws InvocationTargetException, InterruptedException {
-      result = resolverService.checkRuntimeAvailability(AppEngineRuntime.STANDARD_JAVA_7, monitor);
-    }
-  }
-
 }

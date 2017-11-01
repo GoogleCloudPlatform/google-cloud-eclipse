@@ -20,7 +20,7 @@ import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfig;
 import com.google.cloud.tools.eclipse.appengine.newproject.CodeTemplates;
-import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
+import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineProject;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -33,7 +33,7 @@ import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 /**
  * Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.
  */
-public class CreateAppEngineStandardWtpProject extends CreateAppEngineWtpProject {
+public class CreateAppEngineStandardWtpProject extends CreateAppEngineProject {
 
   public CreateAppEngineStandardWtpProject(AppEngineProjectConfig config,
       IAdaptable uiInfoAdapter, ILibraryRepositoryService repositoryService) {

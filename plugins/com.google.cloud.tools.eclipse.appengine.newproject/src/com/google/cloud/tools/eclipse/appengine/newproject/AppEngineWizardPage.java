@@ -19,7 +19,8 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.ui.LibrarySelectorGroup;
-import com.google.cloud.tools.eclipse.appengine.newproject.maven.MavenCoordinatesWizardUi;
+import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfig.Template;
+import com.google.cloud.tools.eclipse.appengine.newproject.maven.MavenCoordinatesInput;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 import com.google.cloud.tools.eclipse.util.JavaPackageValidator;
 import com.google.cloud.tools.eclipse.util.MavenCoordinatesValidator;
@@ -31,6 +32,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.DialogPage;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -52,7 +55,7 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
   private LibrarySelectorGroup appEngineLibrariesSelectorGroup;
   private Text javaPackageField;
   private Text serviceNameField;
-  private MavenCoordinatesWizardUi mavenCoordinatesUi;
+  private MavenCoordinatesInput mavenCoordinatesUi;
   private final boolean showLibrariesSelectorGroup;
 
   /** True if we should auto-generate the javaPackageField from the provided groupId */
@@ -68,7 +71,9 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     this.showLibrariesSelectorGroup = showLibrariesSelectorGroup;
   }
 
-  public abstract void setHelp(Composite container);
+  protected abstract void setHelp(Composite container);
+
+  protected abstract MavenCoordinatesInput createMavenCoordinatesInput(Composite container);
 
   @Override
   public void createControl(Composite parent) {
@@ -77,9 +82,10 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     Composite container = (Composite) getControl();
     setHelp(container);
 
-    createCustomFields(container);
+    Composite customFieldsArea = new Composite(container, SWT.NONE);
+    createCustomFields(customFieldsArea);
 
-    mavenCoordinatesUi = new MavenCoordinatesWizardUi(container, SWT.NONE);
+    mavenCoordinatesUi = createMavenCoordinatesInput(container);
     mavenCoordinatesUi.addChangeListener(new Listener() {
       @Override
       public void handleEvent(Event event) {
@@ -100,17 +106,18 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     setErrorMessage(null);
     setMessage(Messages.getString("enter.project.name"));
 
+    GridLayoutFactory.swtDefaults().numColumns(2).generateLayout(customFieldsArea);
     GridLayoutFactory.swtDefaults().generateLayout(container);
     Dialog.applyDialogFont(container);
   }
 
-  private void createCustomFields(Composite container) {
-    Composite composite = new Composite(container, SWT.NONE);
-    createRuntimeField(composite);
-    createPackageField(composite);
-    createServiceField(composite);
-
-    GridLayoutFactory.swtDefaults().numColumns(2).generateLayout(composite);
+  /**
+   * Creates a custom-field section. Composite is laid out with 2 columns.
+   */
+  protected void createCustomFields(Composite container) {
+    createRuntimeField(container);
+    createPackageField(container);
+    createServiceField(container);
   }
 
   protected void revalidate() {
@@ -124,8 +131,12 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     // default: do nothing; used by subclasses
   }
 
-  public String getRuntimeId() {
+  protected String getRuntimeId() {
     return null;
+  }
+
+  protected AppEngineProjectConfig.Template getTemplate() {
+    return Template.DEFAULT;
   }
 
   // Java package name; Composite is laid out with 2 columns.
@@ -203,7 +214,32 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
       return false;
     }
 
-    return mavenCoordinatesUi.setValidationMessage(this);
+    return setMavenValidationMessage();
+  }
+
+  /**
+   * Convenience method to set a validation message on {@link DialogPage} from the result of calling
+   * {@link MavenCoordinatesInput#validateMavenSettings()}.
+   *
+   * @return {@code true} if no validation message was set; {@code false} otherwise
+   *
+   * @see MavenCoordinatesInput#validateMavenSettings()
+   */
+  @VisibleForTesting
+  boolean setMavenValidationMessage() {
+    IStatus status = mavenCoordinatesUi.validateMavenSettings();
+    if (status.isOK()) {
+      return true;
+    }
+
+    if (IStatus.ERROR == status.getSeverity()) {
+      setErrorMessage(status.getMessage());
+    } else if (IStatus.WARNING == status.getSeverity()) {
+      setMessage(status.getMessage(), IMessageProvider.WARNING);
+    } else if (IStatus.INFO == status.getSeverity()) {
+      setMessage(status.getMessage(), IMessageProvider.INFORMATION);
+    }
+    return false;
   }
 
   public String getPackageName() {

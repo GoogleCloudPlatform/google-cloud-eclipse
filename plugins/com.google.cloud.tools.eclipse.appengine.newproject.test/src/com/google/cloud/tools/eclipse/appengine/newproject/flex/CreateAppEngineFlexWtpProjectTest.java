@@ -19,7 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.newproject.flex;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
-import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
+import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineProject;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProjectTest;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -39,13 +39,13 @@ import org.junit.Test;
 public class CreateAppEngineFlexWtpProjectTest extends CreateAppEngineWtpProjectTest {
 
   @Override
-  protected CreateAppEngineWtpProject newCreateAppEngineWtpProject() {
+  protected CreateAppEngineProject newCreateAppEngineProject() {
     return new CreateAppEngineFlexWtpProject(config, mock(IAdaptable.class), repositoryService);
   }
 
   @Test
   public void testServletApi31Added() throws InvocationTargetException, CoreException {
-    CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
+    CreateAppEngineProject creator = newCreateAppEngineProject();
     creator.execute(monitor);
 
     assertTrue(project.getFile("lib/fake-javax.servlet-javax.servlet-api-3.1.0.jar").exists());
@@ -53,7 +53,7 @@ public class CreateAppEngineFlexWtpProjectTest extends CreateAppEngineWtpProject
 
   @Test
   public void testJspApi231Added() throws InvocationTargetException, CoreException {
-    CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
+    CreateAppEngineProject creator = newCreateAppEngineProject();
     creator.execute(monitor);
 
     assertTrue(project.getFile("lib/fake-javax.servlet.jsp-javax.servlet.jsp-api-2.3.1.jar")
@@ -63,7 +63,7 @@ public class CreateAppEngineFlexWtpProjectTest extends CreateAppEngineWtpProject
   @Test
   public void testNonDependencyAttributeOnJarsInLib()
       throws InvocationTargetException, CoreException {
-    CreateAppEngineWtpProject creator =
+    CreateAppEngineProject creator =
         new CreateAppEngineFlexWtpProject(config, mock(IAdaptable.class), repositoryService);
     creator.execute(monitor);
 
@@ -94,7 +94,7 @@ public class CreateAppEngineFlexWtpProjectTest extends CreateAppEngineWtpProject
 
   @Test
   public void testDynamicWebModuleFacet31Added() throws InvocationTargetException, CoreException {
-    CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
+    CreateAppEngineProject creator = newCreateAppEngineProject();
     creator.execute(monitor);
 
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);

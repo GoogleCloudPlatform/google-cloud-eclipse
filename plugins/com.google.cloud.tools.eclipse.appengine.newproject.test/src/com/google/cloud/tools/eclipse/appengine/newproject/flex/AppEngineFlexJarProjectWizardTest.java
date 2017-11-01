@@ -19,13 +19,13 @@ package com.google.cloud.tools.eclipse.appengine.newproject.flex;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class AppEngineFlexProjectWizardTest {
+public class AppEngineFlexJarProjectWizardTest {
 
-  private AppEngineFlexProjectWizard wizard = new AppEngineFlexProjectWizard();
+  private AppEngineFlexJarProjectWizard wizard = new AppEngineFlexJarProjectWizard();
 
   @Test
   public void testWindowTitle() {
-    Assert.assertEquals("New App Engine Flexible Project", wizard.getWindowTitle());
+    Assert.assertEquals("New App Engine Flexible JAR Project", wizard.getWindowTitle());
   }
 
   @Test

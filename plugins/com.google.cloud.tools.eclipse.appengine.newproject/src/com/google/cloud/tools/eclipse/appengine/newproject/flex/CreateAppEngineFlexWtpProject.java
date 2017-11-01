@@ -21,7 +21,7 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfig;
 import com.google.cloud.tools.eclipse.appengine.newproject.CodeTemplates;
-import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
+import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineProject;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
 import com.google.cloud.tools.eclipse.util.ClasspathUtil;
 import com.google.common.collect.ImmutableList;
@@ -47,7 +47,7 @@ import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 /**
  * Utility to create a new App Engine Flexible Eclipse project.
  */
-public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
+public class CreateAppEngineFlexWtpProject extends CreateAppEngineProject {
 
   private static final List<MavenCoordinates> SERVLET_DEPENDENCIES;
 

@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.newproject.standard;
 
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineWizardPage;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
+import com.google.cloud.tools.eclipse.appengine.newproject.maven.MavenCoordinatesWizardUi;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -40,14 +41,14 @@ public class AppEngineStandardWizardPage extends AppEngineWizardPage {
 
   private ComboViewer runtimeField;
 
-  public AppEngineStandardWizardPage() {
+  AppEngineStandardWizardPage() {
     super(true);
     setTitle(Messages.getString("app.engine.standard.project")); //$NON-NLS-1$
     setDescription(Messages.getString("create.app.engine.standard.project")); //$NON-NLS-1$
   }
 
   @Override
-  public void setHelp(Composite container) {
+  protected void setHelp(Composite container) {
     PlatformUI.getWorkbench().getHelpSystem().setHelp(container,
         "com.google.cloud.tools.eclipse.appengine.newproject.NewStandardProjectContext"); //$NON-NLS-1$
   }
@@ -75,7 +76,7 @@ public class AppEngineStandardWizardPage extends AppEngineWizardPage {
   }
 
   @Override
-  public String getRuntimeId() {
+  protected String getRuntimeId() {
     AppEngineRuntime selected = DEFAULT_RUNTIME;
     if (runtimeField != null && !runtimeField.getSelection().isEmpty()) {
       Preconditions.checkState(runtimeField.getSelection() instanceof IStructuredSelection,
@@ -84,5 +85,10 @@ public class AppEngineStandardWizardPage extends AppEngineWizardPage {
       selected = (AppEngineRuntime) selection.getFirstElement();
     }
     return selected.getId();
+  }
+
+  @Override
+  protected MavenCoordinatesWizardUi createMavenCoordinatesInput(Composite container) {
+    return new MavenCoordinatesWizardUi(container, SWT.NONE);
   }
 }

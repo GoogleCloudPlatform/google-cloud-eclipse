@@ -18,21 +18,27 @@ package com.google.cloud.tools.eclipse.appengine.newproject.flex;
 
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineWizardPage;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
+import com.google.cloud.tools.eclipse.appengine.newproject.maven.MavenCoordinatesWizardUi;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.PlatformUI;
 
-public class AppEngineFlexWizardPage extends AppEngineWizardPage {
+public class AppEngineFlexWarWizardPage extends AppEngineWizardPage {
 
-  public AppEngineFlexWizardPage() {
+  AppEngineFlexWarWizardPage() {
     super(false);
     setTitle(Messages.getString("app.engine.flex.project")); //$NON-NLS-1$
     setDescription(Messages.getString("create.app.engine.flex.project")); //$NON-NLS-1$
   }
 
   @Override
-  public void setHelp(Composite container) {
+  protected void setHelp(Composite container) {
     PlatformUI.getWorkbench().getHelpSystem().setHelp(container,
         "com.google.cloud.tools.eclipse.appengine.newproject.NewFlexProjectContext"); //$NON-NLS-1$
   }
 
+  @Override
+  protected MavenCoordinatesWizardUi createMavenCoordinatesInput(Composite container) {
+    return new MavenCoordinatesWizardUi(container, SWT.NONE);
+  }
 }
