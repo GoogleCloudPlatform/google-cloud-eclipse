@@ -21,6 +21,8 @@ import com.google.cloud.tools.eclipse.dataflow.ui.DataflowUiPlugin;
 import com.google.cloud.tools.eclipse.dataflow.ui.Messages;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.NewDataflowProjectWizardDefaultRunOptionsPage;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.NewDataflowProjectWizardLandingPage;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import java.lang.reflect.InvocationTargetException;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -38,6 +40,9 @@ public class NewDataflowProjectWizard extends Wizard implements INewWizard {
 
   @Override
   public boolean performFinish() {
+    AnalyticsPingManager.getInstance().sendPing(
+        AnalyticsEvents.DATAFLOW_NEW_PROJECT_WIZARD_COMPLETE, null, null);
+
     creator.setDefaultAccountEmail(defaultRunOptionsPage.getAccountEmail());
     creator.setDefaultProject(defaultRunOptionsPage.getProjectId());
     creator.setDefaultStagingLocation(defaultRunOptionsPage.getStagingLocation());
@@ -64,6 +69,9 @@ public class NewDataflowProjectWizard extends Wizard implements INewWizard {
 
   @Override
   public void addPages() {
+    AnalyticsPingManager.getInstance().sendPing(
+        AnalyticsEvents.DATAFLOW_NEW_PROJECT_WIZARD, null, null);
+
     landingPage = new NewDataflowProjectWizardLandingPage(creator);
     addPage(landingPage);
 

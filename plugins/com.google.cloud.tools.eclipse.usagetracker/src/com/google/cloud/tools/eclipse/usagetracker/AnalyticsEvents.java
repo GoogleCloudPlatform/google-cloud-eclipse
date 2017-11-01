@@ -23,6 +23,10 @@ public class AnalyticsEvents {
   public static final String LOGIN_SUCCESS = "user.login.success";
   public static final String LOGIN_CANCELED = "user.login.canceled";
 
+  public static final String DATAFLOW_NEW_PROJECT_WIZARD = "dataflow.new.project.wizard";
+  public static final String DATAFLOW_NEW_PROJECT_WIZARD_COMPLETE =
+      "dataflow.new.project.wizard.complete";
+
   public static final String APP_ENGINE_DEPLOY = "appengine.deploy";
   public static final String APP_ENGINE_DEPLOY_SUCCESS = "appengine.deploy.success";
   public static final String APP_ENGINE_LOCAL_SERVER = "appengine.local.server";
