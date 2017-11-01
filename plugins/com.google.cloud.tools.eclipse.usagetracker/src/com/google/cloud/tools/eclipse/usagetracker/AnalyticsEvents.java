@@ -23,6 +23,7 @@ public class AnalyticsEvents {
   public static final String LOGIN_SUCCESS = "user.login.success";
   public static final String LOGIN_CANCELED = "user.login.canceled";
 
+  public static final String DATAFLOW_RUN = "dataflow.run";
   public static final String DATAFLOW_NEW_PROJECT_WIZARD = "dataflow.new.project.wizard";
   public static final String DATAFLOW_NEW_PROJECT_WIZARD_COMPLETE =
       "dataflow.new.project.wizard.complete";

@@ -27,6 +27,8 @@ import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowDependencyMa
 import com.google.cloud.tools.eclipse.dataflow.core.project.MajorVersion;
 import com.google.cloud.tools.eclipse.login.CredentialHelper;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
@@ -98,8 +100,8 @@ public class DataflowPipelineLaunchDelegate extends ForwardingLaunchConfiguratio
       DataflowDependencyManager dependencyManager,
       IWorkspaceRoot workspaceRoot,
       IGoogleLoginService loginService) {
-    this.delegate = javaLaunchDelegate;
-    this.optionsRetrieverFactory = optionsHierarchyFactory;
+    delegate = javaLaunchDelegate;
+    optionsRetrieverFactory = optionsHierarchyFactory;
     this.dependencyManager = dependencyManager;
     this.workspaceRoot = workspaceRoot;
     this.loginService = loginService;
@@ -148,6 +150,9 @@ public class DataflowPipelineLaunchDelegate extends ForwardingLaunchConfiguratio
 
     String accountEmail = effectiveArguments.get("accountEmail");
     setLoginCredential(workingCopy, accountEmail);
+
+    AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.DATAFLOW_RUN,
+        pipelineConfig.getRunner().getRunnerName(), null);
 
     delegate.launch(workingCopy, mode, launch, progress.newChild(1));
   }
