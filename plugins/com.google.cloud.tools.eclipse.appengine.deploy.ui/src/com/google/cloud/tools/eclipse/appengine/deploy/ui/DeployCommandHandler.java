@@ -138,17 +138,17 @@ public abstract class DeployCommandHandler extends AbstractHandler {
     return severity != IMarker.SEVERITY_ERROR;
   }
 
-  protected void onDeployJobCreation() {
-    // Allow subclasses to perform actions before launching the deploy job.
+  protected void onDeployStart() {
+    // Allow subclasses to perform actions before starting deploy.
   }
 
-  protected void onSuccessfulDeploy() {
-    // Allow subclasses to perform actions after successful termination of the deploy job.
+  protected void onDeploySuccess() {
+    // Allow subclasses to perform actions after successful deploy.
   }
 
   private void launchDeployJob(IProject project, Credential credential)
       throws IOException, CoreException {
-    onDeployJobCreation();
+    onDeployStart();
 
     IPath workDirectory = createWorkDirectory();
     DeployPreferences deployPreferences = getDeployPreferences(project);
@@ -176,7 +176,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
       @Override
       public void done(IJobChangeEvent event) {
         if (event.getResult().isOK()) {
-          onSuccessfulDeploy();
+          onDeploySuccess();
         }
         launchCleanupJob();
       }

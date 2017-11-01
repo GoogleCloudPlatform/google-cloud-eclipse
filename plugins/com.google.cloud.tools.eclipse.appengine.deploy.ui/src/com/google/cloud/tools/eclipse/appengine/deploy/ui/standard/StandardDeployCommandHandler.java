@@ -72,13 +72,13 @@ public class StandardDeployCommandHandler extends DeployCommandHandler {
   }
 
   @Override
-  protected void onDeployJobCreation() {
+  protected void onDeployStart() {
     AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_DEPLOY,
         AnalyticsEvents.APP_ENGINE_DEPLOY_STANDARD, null);
   }
 
   @Override
-  protected void onSuccessfulDeploy() {
+  protected void onDeploySuccess() {
     AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_DEPLOY_SUCCESS,
         AnalyticsEvents.APP_ENGINE_DEPLOY_STANDARD, null);
   }
