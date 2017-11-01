@@ -26,8 +26,6 @@ import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
 import com.google.cloud.tools.eclipse.ui.util.ProjectFromSelectionHelper;
 import com.google.cloud.tools.eclipse.ui.util.ServiceUtils;
-import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
-import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.text.DateFormat;
@@ -140,10 +138,17 @@ public abstract class DeployCommandHandler extends AbstractHandler {
     return severity != IMarker.SEVERITY_ERROR;
   }
 
+  protected void onDeployJobCreation() {
+    // Allow subclasses to perform actions before launching the deploy job.
+  }
+
+  protected void onSuccessfulDeploy() {
+    // Allow subclasses to perform actions after successful termination of the deploy job.
+  }
+
   private void launchDeployJob(IProject project, Credential credential)
       throws IOException, CoreException {
-    AnalyticsPingManager.getInstance().sendPing(
-        AnalyticsEvents.APP_ENGINE_DEPLOY, AnalyticsEvents.APP_ENGINE_DEPLOY_STANDARD, null);
+    onDeployJobCreation();
 
     IPath workDirectory = createWorkDirectory();
     DeployPreferences deployPreferences = getDeployPreferences(project);
@@ -171,8 +176,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
       @Override
       public void done(IJobChangeEvent event) {
         if (event.getResult().isOK()) {
-          AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_DEPLOY_SUCCESS,
-              AnalyticsEvents.APP_ENGINE_DEPLOY_STANDARD, null);
+          onSuccessfulDeploy();
         }
         launchCleanupJob();
       }

@@ -34,8 +34,10 @@ public class AnalyticsEvents {
   public static final String APP_ENGINE_LOCAL_SERVER_MODE = "mode";
   public static final String APP_ENGINE_NEW_PROJECT_WIZARD_TYPE = "type";
   public static final String APP_ENGINE_DEPLOY_STANDARD = "standard";
+  public static final String APP_ENGINE_DEPLOY_FLEXIBLE = "flex";
 
   // Metadata values
+  // This actually means "standard"; the value "native" is for a legacy reason.
   public static final String APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_STANDARD = "native";
   public static final String APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_FLEX = "flex";
 }
