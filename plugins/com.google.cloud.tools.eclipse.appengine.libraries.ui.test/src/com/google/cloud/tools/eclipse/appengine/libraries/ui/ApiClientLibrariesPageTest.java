@@ -16,6 +16,9 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.ui;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -33,10 +36,10 @@ public class ApiClientLibrariesPageTest {
         page.getDescription());
     Assert.assertNotNull(page.getImage());
   }
-  
+
   @Test
-  public void testFinish() {
-    Assert.assertTrue(page.finish());
+  public void testSetSelection_null() {
+    page.setSelection(null);
   }
   
   @Test
@@ -44,4 +47,13 @@ public class ApiClientLibrariesPageTest {
     Assert.assertNull(page.getSelection());
   }
 
+  @Test
+  public void testSelectionRoundTrip() {
+    List<Library> selectedLibraries = Arrays.asList(new Library("foo"));
+    page.setSelectedLibraries(selectedLibraries);
+
+    List<Library> returnedLibraries = page.getSelectedLibraries();
+    Assert.assertEquals(1, returnedLibraries.size());
+    Assert.assertEquals("foo", returnedLibraries.get(0).getId());
+  }
 }

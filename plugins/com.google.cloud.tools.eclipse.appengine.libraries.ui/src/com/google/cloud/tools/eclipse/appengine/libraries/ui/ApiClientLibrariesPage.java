@@ -25,7 +25,8 @@ public class ApiClientLibrariesPage extends CloudLibrariesPage {
 
   public ApiClientLibrariesPage() {
     super("clientapis");
-    setTitle(Messages.getString("appengine.libraries.group")); //$NON-NLS-1$
+    setTitle(Messages.getString("clientapis-title")); //$NON-NLS-1$
+    setDescription(Messages.getString("clientapis-description")); //$NON-NLS-1$
     setImageDescriptor(AppEngineImages.appEngine(64));
 
     Map<String, String> groups = Maps.newLinkedHashMap();

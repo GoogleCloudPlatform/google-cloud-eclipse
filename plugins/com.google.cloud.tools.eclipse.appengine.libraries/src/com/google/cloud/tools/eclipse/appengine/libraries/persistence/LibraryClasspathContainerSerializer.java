@@ -118,7 +118,8 @@ public class LibraryClasspathContainerSerializer {
     }
   }
 
-  public void saveLibraryIds(IJavaProject javaProject, List<String> libraryIds)
+  // todo containerPath argument is not used
+  public void saveLibraryIds(IJavaProject javaProject, IPath containerPath, List<String> libraryIds)
       throws CoreException, IOException {
     File stateFile = getContainerStateFile(javaProject, CONTAINER_LIBRARY_LIST_FILE_ID, true);
     if (stateFile == null) {

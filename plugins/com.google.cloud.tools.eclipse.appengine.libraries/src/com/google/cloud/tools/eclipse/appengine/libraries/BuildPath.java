@@ -33,6 +33,7 @@ import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SubMonitor;
@@ -81,30 +82,16 @@ public class BuildPath {
     
     SubMonitor subMonitor = SubMonitor.convert(monitor,
         Messages.getString("adding.app.engine.libraries"), //$NON-NLS-1$
-        18);
+        25);
     
     Library masterLibrary = collectLibraryFiles(javaProject, libraries, subMonitor.newChild(8));
-    subMonitor.worked(1);
     IClasspathEntry masterEntry = computeEntry(javaProject, masterLibrary, subMonitor.newChild(8));
-    subMonitor.worked(1);
-
-    List<String> libraryIds = new ArrayList<>();
-    for (Library library : libraries) {
-      libraryIds.add(library.getId());
-    }
-    try {
-      LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer();
-      // We could create the LibraryClasspathContainer and serialize out the classpath information,
-      // but our LibraryClasspathContainerInitializer requires source paths to be resolved too,
-      // or it tosses the serialized classpath information
-      serializer.saveLibraryIds(javaProject, libraryIds);
-    } catch (IOException ex) {
-      throw new CoreException(
-          StatusUtil.error(BuildPath.class, "Error saving master library list", ex));
-    }
+    IPath containerPath = null; // not used, and masterEntry may be null
+    saveLibraryList(javaProject, containerPath, libraries, subMonitor.newChild(1));
 
     if (masterEntry != null) {
-      ClasspathUtil.addClasspathEntry(javaProject.getProject(), masterEntry, subMonitor);
+      ClasspathUtil.addClasspathEntry(javaProject.getProject(), masterEntry,
+          subMonitor.newChild(8));
     }
     runContainerResolverJob(javaProject);
   }
@@ -221,6 +208,47 @@ public class BuildPath {
       }
     });
     job.schedule();
+  }
+
+  /**
+   * Load the list of library dependencies saved for this project.
+   */
+  public static List<Library> loadLibraryList(IJavaProject project, IPath containerPath,
+      IProgressMonitor monitor) throws CoreException {
+    LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer();
+    List<String> savedLibraryIds;
+    try {
+      savedLibraryIds = serializer.loadLibraryIds(project, containerPath);
+    } catch (IOException ex) {
+      throw new CoreException(
+          StatusUtil.error(BuildPath.class, "Error retrieving project library list", ex));
+    }
+    List<Library> selectedLibraries = new ArrayList<>();
+    for (String libraryId : savedLibraryIds) {
+      Library library = CloudLibraries.getLibrary(libraryId);
+      if (library != null) {
+        selectedLibraries.add(library);
+      }
+    }
+    return selectedLibraries;
+  }
+
+  /**
+   * Save the list of library dependencies for this project.
+   */
+  public static void saveLibraryList(IJavaProject project, IPath containerPath,
+      List<Library> libraries, IProgressMonitor monitor) throws CoreException {
+    LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer();
+    List<String> libraryIds = new ArrayList<>();
+    for (Library library : libraries) {
+      libraryIds.add(library.getId());
+    }
+    try {
+    serializer.saveLibraryIds(project, containerPath, libraryIds);
+    } catch (IOException ex) {
+      throw new CoreException(
+          StatusUtil.error(BuildPath.class, "Error saving project library list", ex));
+    }
   }
 
 }

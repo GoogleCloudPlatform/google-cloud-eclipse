@@ -22,9 +22,8 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,13 +32,12 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.ui.wizards.IClasspathContainerPage;
 import org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -54,14 +52,17 @@ public abstract class CloudLibrariesPage extends WizardPage implements IClasspat
   private static final Logger logger = Logger.getLogger(CloudLibrariesPage.class.getName());
   private final LibraryClasspathContainerSerializer serializer =
       new LibraryClasspathContainerSerializer();
-  private Map<String, String> groups; // id -> title
-  private List<String> initialLibraryIds = Collections.emptyList();
 
-  private List<LibrarySelectorGroup> librariesSelectors;
+  /** The library groups to be displayed; pairs of (id, title). */
+  private Map<String, String> groups;
+  /** Selected libraries that are not shown but should be preserved. */
+  private List<Library> hiddenLibraries = Collections.emptyList();
+
+  private final List<LibrarySelectorGroup> librariesSelectors = new ArrayList<>();
   private IJavaProject project;
   private boolean isMavenProject;
+  private IClasspathEntry oldEntry;
   private IClasspathEntry newEntry;
-
 
   protected CloudLibrariesPage(String pageId) {
     super(pageId); // $NON-NLS-1$
@@ -83,81 +84,93 @@ public abstract class CloudLibrariesPage extends WizardPage implements IClasspat
     Preconditions.checkNotNull(groups, "Groups must be set");
     Composite composite = new Group(parent, SWT.NONE);
 
-    boolean java7AppEngineStandardProject = false;
     IProjectFacetVersion facetVersion =
         AppEngineStandardFacet.getProjectFacetVersion(project.getProject());
-    if (facetVersion != null && facetVersion.getVersionString().equals("JRE7")) {
-      java7AppEngineStandardProject = true;
-    }
+    boolean java7AppEngineStandardProject = AppEngineStandardFacet.JRE7.equals(facetVersion);
 
-    // FIXME: what should happen with libraries that aren't visible in any of the groups?
-    librariesSelectors = new ArrayList<>();
+    // create the library selector groups
     for (Entry<String, String> group : groups.entrySet()) {
       LibrarySelectorGroup librariesSelector =
           new LibrarySelectorGroup(composite, group.getKey(), group.getValue(),
               java7AppEngineStandardProject);
-      // setSelection() ignores any libraries not part of its group
-      librariesSelector.setSelection(new StructuredSelection(initialLibraryIds));
       librariesSelectors.add(librariesSelector);
     }
+    // set the initial selection; hiddenLibraries will hold all selected libraries
+    setSelectedLibraries(hiddenLibraries);
     composite.setLayout(new RowLayout(SWT.HORIZONTAL));
     setControl(composite);
   }
 
   @Override
   public boolean finish() {
-    final List<Library> libraries = new ArrayList<>();
-    final List<String> libraryIds = new ArrayList<>();
-    for (LibrarySelectorGroup librariesSelector : librariesSelectors) {
-      libraries.addAll(librariesSelector.getSelectedLibraries());
+    final List<Library> libraries = getSelectedLibraries();
+    try {
+      if (isMavenProject) {
+        BuildPath.addMavenLibraries(project.getProject(), libraries, new NullProgressMonitor());
+      } else {
+        /*
+         * FIXME: BuildPath.addNativeLibrary() is too heavy-weight here. ClasspathContainerWizard,
+         * our wizard, is responsible for installing the classpath entry returned by getSelection(),
+         * which will perform the library resolution. We just need to save the selected libraries 
+         * so that they are resolved later.
+         */
+        Library masterLibrary =
+            BuildPath.collectLibraryFiles(project, libraries, new NullProgressMonitor());
+        newEntry = BuildPath.listNativeLibrary(project, masterLibrary, new NullProgressMonitor());
+        IPath containerPath = newEntry != null ? newEntry.getPath() : oldEntry.getPath();
+        BuildPath.saveLibraryList(project, containerPath, libraries,
+            new NullProgressMonitor());
+      }
+      return true;
+    } catch (CoreException ex) {
+      StatusUtil.setErrorStatus(this, "Error updating container definition", ex);
+      return false;
     }
-    for (Library library : libraries) {
-      libraryIds.add(library.getId());
+  }
+
+  /**
+   * Return the list of selected libraries.
+   */
+  @VisibleForTesting
+  List<Library> getSelectedLibraries() {
+    List<Library> selectedLibraries = new ArrayList<>(hiddenLibraries);
+    for (LibrarySelectorGroup librariesSelector : librariesSelectors) {
+      selectedLibraries.addAll(librariesSelector.getSelectedLibraries());
+    }
+    return selectedLibraries;
+  }
+
+  @VisibleForTesting
+  void setSelectedLibraries(List<Library> selectedLibraries) {
+    hiddenLibraries = new ArrayList<>(selectedLibraries);
+    if (librariesSelectors != null) {
+      for (LibrarySelectorGroup librarySelector : librariesSelectors) {
+        librarySelector.setSelection(new StructuredSelection(hiddenLibraries));
+        hiddenLibraries.removeAll(librarySelector.getSelectedLibraries());
+      }
+    }
+  }
+
+  @Override
+  public void setSelection(IClasspathEntry containerEntry) {
+    // null means new entry, so nothing to read in; might be usful to read in
+    // current dependencies for maven projects
+    oldEntry = containerEntry;
+    if (containerEntry == null || isMavenProject) {
+      return;
     }
     try {
-      getContainer().run(false, true, new IRunnableWithProgress() {
-        @Override
-        public void run(IProgressMonitor monitor)
-            throws InvocationTargetException, InterruptedException {
-          try {
-            if (isMavenProject) {
-              BuildPath.addMavenLibraries(project.getProject(), libraries, monitor);
-            } else {
-              SubMonitor progress = SubMonitor.convert(monitor, 10);
-              Library masterLibrary =
-                  BuildPath.collectLibraryFiles(project, libraries, progress.newChild(5));
-              newEntry = BuildPath.listNativeLibrary(project, masterLibrary, progress.newChild(5));
-              serializer.saveLibraryIds(project, libraryIds /* , newEntry.getPath() */);
-            }
-          } catch (CoreException | IOException ex) {
-            StatusUtil.setErrorStatus(this, "Error updating container definition", ex);
-            throw new InvocationTargetException(ex);
-          }
-        }
-      });
-      return true;
-    } catch (InvocationTargetException ex) {
-      // ignored: exceptions are already reported above
-    } catch (InterruptedException ex) {
-      Thread.interrupted();
+      List<Library> savedLibraries =
+          BuildPath.loadLibraryList(project, containerEntry.getPath(), new NullProgressMonitor());
+      setSelectedLibraries(savedLibraries);
+    } catch (CoreException ex) {
+      logger.log(Level.WARNING,
+          "Error loading selected library IDs for " + project.getElementName(), ex);
     }
-    return false;
   }
 
   @Override
   public IClasspathEntry getSelection() {
     return newEntry;
-  }
-
-  @Override
-  public void setSelection(IClasspathEntry containerEntry) {
-    if (containerEntry != null) {
-      try {
-        initialLibraryIds = serializer.loadLibraryIds(project, containerEntry.getPath());
-      } catch (CoreException | IOException ex) {
-        logger.log(Level.WARNING,
-            "Error loading selected library IDs for " + project.getElementName(), ex);
-      }
-    }
   }
 }

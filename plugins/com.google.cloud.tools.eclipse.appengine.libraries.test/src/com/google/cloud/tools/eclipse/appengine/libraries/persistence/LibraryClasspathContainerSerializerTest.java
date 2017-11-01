@@ -219,7 +219,7 @@ public class LibraryClasspathContainerSerializerTest {
         anyBoolean())).thenReturn(stateFilePath);
     LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer(
         stateLocationProvider, binaryBaseLocationProvider, sourceBaseLocationProvider);
-    serializer.saveLibraryIds(javaProject, Arrays.asList("a", "b"));
+    serializer.saveLibraryIds(javaProject, new Path(CONTAINER_PATH), Arrays.asList("a", "b"));
     assertTrue(stateFilePath.toFile().exists());
     List<String> libraryIds = serializer.loadLibraryIds(javaProject, new Path(CONTAINER_PATH));
     assertThat(libraryIds, Matchers.contains("a", "b"));
