@@ -25,7 +25,6 @@ import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
-import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import java.nio.file.Path;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -36,6 +35,10 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.swt.widgets.Shell;
 
 public class StandardDeployCommandHandler extends DeployCommandHandler {
+
+  public StandardDeployCommandHandler() {
+    super(AnalyticsEvents.APP_ENGINE_DEPLOY_STANDARD);
+  }
 
   @Override
   protected DeployPreferencesDialog newDeployPreferencesDialog(Shell shell, IProject project,
@@ -69,17 +72,5 @@ public class StandardDeployCommandHandler extends DeployCommandHandler {
   @Override
   protected DeployPreferences getDeployPreferences(IProject project) {
     return new DeployPreferences(project);
-  }
-
-  @Override
-  protected void onDeployStart() {
-    AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_DEPLOY,
-        AnalyticsEvents.APP_ENGINE_DEPLOY_STANDARD, null);
-  }
-
-  @Override
-  protected void onDeploySuccess() {
-    AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_DEPLOY_SUCCESS,
-        AnalyticsEvents.APP_ENGINE_DEPLOY_STANDARD, null);
   }
 }

@@ -26,6 +26,8 @@ import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
 import com.google.cloud.tools.eclipse.ui.util.ProjectFromSelectionHelper;
 import com.google.cloud.tools.eclipse.ui.util.ServiceUtils;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.text.DateFormat;
@@ -68,6 +70,12 @@ import org.osgi.framework.FrameworkUtil;
  * the staging and deploy operations provided by the App Engine Plugins Core Library.
  */
 public abstract class DeployCommandHandler extends AbstractHandler {
+
+  private final String analyticsDeployEventMetadataKey;
+
+  public DeployCommandHandler(String analyticsDeployEventMetadataKey) {
+    this.analyticsDeployEventMetadataKey = analyticsDeployEventMetadataKey;
+  }
 
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -138,17 +146,10 @@ public abstract class DeployCommandHandler extends AbstractHandler {
     return severity != IMarker.SEVERITY_ERROR;
   }
 
-  protected void onDeployStart() {
-    // Allow subclasses to perform actions before starting deploy.
-  }
-
-  protected void onDeploySuccess() {
-    // Allow subclasses to perform actions after successful deploy.
-  }
-
   private void launchDeployJob(IProject project, Credential credential)
       throws IOException, CoreException {
-    onDeployStart();
+    AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_DEPLOY,
+        analyticsDeployEventMetadataKey, null);
 
     IPath workDirectory = createWorkDirectory();
     DeployPreferences deployPreferences = getDeployPreferences(project);
@@ -176,7 +177,8 @@ public abstract class DeployCommandHandler extends AbstractHandler {
       @Override
       public void done(IJobChangeEvent event) {
         if (event.getResult().isOK()) {
-          onDeploySuccess();
+          AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_DEPLOY_SUCCESS,
+              analyticsDeployEventMetadataKey, null);
         }
         launchCleanupJob();
       }

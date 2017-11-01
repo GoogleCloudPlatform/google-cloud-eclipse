@@ -29,7 +29,6 @@ import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexWarFacet;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
-import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Preconditions;
@@ -42,6 +41,10 @@ import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 public class FlexDeployCommandHandler extends DeployCommandHandler {
+
+  public FlexDeployCommandHandler() {
+    super(AnalyticsEvents.APP_ENGINE_DEPLOY_FLEXIBLE);
+  }
 
   @Override
   protected DeployPreferencesDialog newDeployPreferencesDialog(Shell shell, IProject project,
@@ -88,17 +91,5 @@ public class FlexDeployCommandHandler extends DeployCommandHandler {
   @Override
   protected DeployPreferences getDeployPreferences(IProject project) {
     return new FlexDeployPreferences(project);
-  }
-
-  @Override
-  protected void onDeployStart() {
-    AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_DEPLOY,
-        AnalyticsEvents.APP_ENGINE_DEPLOY_FLEXIBLE, null);
-  }
-
-  @Override
-  protected void onDeploySuccess() {
-    AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_DEPLOY_SUCCESS,
-        AnalyticsEvents.APP_ENGINE_DEPLOY_FLEXIBLE, null);
   }
 }
