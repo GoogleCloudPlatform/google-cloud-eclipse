@@ -16,34 +16,55 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.ui;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import java.util.Arrays;
 import java.util.List;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jst.common.project.facet.core.JavaFacet;
+import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matchers;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
 
 public class ApiClientLibrariesPageTest {
-
   private final ApiClientLibrariesPage page = new ApiClientLibrariesPage();
+
+  @Rule
+  public ShellTestResource shellTestResource = new ShellTestResource();
+
+  @Rule
+  public TestProjectCreator plainJavaProjectCreator =
+      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7);
 
   @Test
   public void testConstructor() {
     Assert.assertEquals("Google Client APIs for Java", page.getTitle());
     Assert.assertNull(page.getMessage());
     Assert.assertNull(page.getErrorMessage());
-    Assert.assertEquals(
-        "Additional jars used by Google Client APIs for Java",
+    Assert.assertEquals("Additional jars for applications using Google Client APIs for Java",
         page.getDescription());
     Assert.assertNotNull(page.getImage());
   }
 
   @Test
   public void testSetSelection_null() {
+    // creates a new container
     page.setSelection(null);
   }
-  
+
   @Test
   public void testGetSelection() {
+    // a new page with no library selections shouldn't bother creating a new container
     Assert.assertNull(page.getSelection());
   }
 
@@ -55,5 +76,44 @@ public class ApiClientLibrariesPageTest {
     List<Library> returnedLibraries = page.getSelectedLibraries();
     Assert.assertEquals(1, returnedLibraries.size());
     Assert.assertEquals("foo", returnedLibraries.get(0).getId());
+  }
+
+  @Test
+  public void testAppEngineLibraries_foundOnAppEngineProject() {
+    IJavaProject javaProject = plainJavaProjectCreator.withFacetVersions(WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7)
+        .getJavaProject();
+    page.initialize(javaProject, null);
+    page.createControl(shellTestResource.getShell());
+    assertThat(page.getVisibleLibraries(), Matchers.hasItem(new LibraryMatcher("objectify")));
+  }
+
+  @Test
+  public void testAppEngineLibraries_missingOnPlainJavaProject() {
+    IJavaProject javaProject = plainJavaProjectCreator.getJavaProject();
+    page.initialize(javaProject, null);
+    page.createControl(shellTestResource.getShell());
+    Library objectify = CloudLibraries.getLibrary("objectify");
+    assertNotNull(objectify);
+    // objectify shouldn't be found on a non-App Engine project
+    assertThat(page.getVisibleLibraries(),
+        Matchers.everyItem(Matchers.not(new LibraryMatcher("objectify"))));
+  }
+
+  static class LibraryMatcher extends BaseMatcher<Library> {
+    private String libraryId;
+
+    LibraryMatcher(String libraryId) {
+      this.libraryId = libraryId;
+    }
+
+    @Override
+    public void describeTo(Description description) {
+      description.appendText("Looking for " + libraryId);
+    }
+
+    @Override
+    public boolean matches(Object item) {
+      return item instanceof Library && libraryId.equals(((Library) item).getId());
+    }
   }
 }

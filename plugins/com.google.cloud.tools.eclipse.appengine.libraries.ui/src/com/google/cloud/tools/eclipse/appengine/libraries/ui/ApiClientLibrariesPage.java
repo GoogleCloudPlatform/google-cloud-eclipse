@@ -16,23 +16,34 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.ui;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 import com.google.common.collect.Maps;
 import java.util.Map;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
 
 public class ApiClientLibrariesPage extends CloudLibrariesPage {
 
   public ApiClientLibrariesPage() {
     super("clientapis");
     setTitle(Messages.getString("clientapis-title")); //$NON-NLS-1$
-    setDescription(Messages.getString("clientapis-description")); //$NON-NLS-1$
+    setDescription(Messages.getString("apiclientlibrariespage-description")); //$NON-NLS-1$
     setImageDescriptor(AppEngineImages.appEngine(64));
+  }
+
+  @Override
+  public void initialize(IJavaProject project, IClasspathEntry[] currentEntries) {
+    super.initialize(project, currentEntries);
 
     Map<String, String> groups = Maps.newLinkedHashMap();
-    groups.put(CloudLibraries.APP_ENGINE_GROUP, Messages.getString("appengine-title"));
+    if (AppEngineStandardFacet.getProjectFacetVersion(project.getProject()) != null) {
+      groups.put(CloudLibraries.APP_ENGINE_GROUP, Messages.getString("appengine-title"));
+    }
     groups.put(CloudLibraries.CLIENT_APIS_GROUP, Messages.getString("clientapis-title"));
     setGroups(groups);
   }
+
 
 }

@@ -128,6 +128,15 @@ public abstract class CloudLibrariesPage extends WizardPage implements IClasspat
     }
   }
 
+  @VisibleForTesting
+  List<Library> getVisibleLibraries() {
+    List<Library> visible = new ArrayList<>();
+    for (LibrarySelectorGroup librariesSelector : librariesSelectors) {
+      visible.addAll(librariesSelector.getLibraries());
+    }
+    return visible;
+  }
+
   /**
    * Return the list of selected libraries.
    */

@@ -35,15 +35,8 @@ public class MessagesTest {
 
   @Test
   public void testClientApisDescription() {
-    Assert.assertEquals("Additional jars used by Google Client APIs for Java",
-        Messages.getString("clientapis-description"));
-  }
-
-  @Test
-  public void testDescription() {
-    Assert.assertEquals(
-        "Additional jars commonly used in App Engine standard environment applications",
-        Messages.getString("appengine-description"));
+    Assert.assertEquals("Additional jars for applications using Google Client APIs for Java",
+        Messages.getString("apiclientlibrariespage-description"));
   }
 
   @Test
