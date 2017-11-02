@@ -48,11 +48,11 @@ import org.eclipse.ui.menus.IMenuService;
  *          &lt;command
  *                style=&quot;pulldown&quot;
  *                commandId=&quot;com.google.cloud.tools.eclipse.ui.util.showPopup&quot;
- *                id=&quot;com.google.cloud.tools.eclipse.appengine.actions&quot;
+ *                id=&quot;com.google.cloud.tools.eclipse.ui.actions&quot;
  *                icon=&quot;xxx.png&quot; /&gt;
  *       &lt;/toolbar&gt;
  *    &lt;/menuContribution&gt;
- *    &lt;menuContribution locationURI=&quot;menu:com.google.cloud.tools.eclipse.appengine.actions&quot;&gt;
+ *    &lt;menuContribution locationURI=&quot;menu:com.google.cloud.tools.eclipse.ui.actions&quot;&gt;
  *       &lt;command commandId=&quot;...&quot;/&gt;
  *    &lt;/menuContribution&gt;
  * &lt;/extension&gt;
