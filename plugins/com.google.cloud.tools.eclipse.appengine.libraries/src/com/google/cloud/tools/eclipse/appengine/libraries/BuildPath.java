@@ -20,6 +20,8 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.cloud.tools.eclipse.util.ClasspathUtil;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.io.IOException;
@@ -57,7 +59,9 @@ public class BuildPath {
   
   public static void addMavenLibraries(IProject project, List<Library> libraries,
       IProgressMonitor monitor) throws CoreException {
-    
+    AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.API_ADDED_CLOUD_LIBRARY,
+        AnalyticsEvents.API_MAVEN_PROJECT, null);
+
     if (libraries.isEmpty()) {
       return;
     }
@@ -81,6 +85,9 @@ public class BuildPath {
    */
   public static void addNativeLibrary(IJavaProject javaProject,
       List<Library> libraries, IProgressMonitor monitor) throws CoreException {
+    AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.API_ADDED_CLOUD_LIBRARY,
+        AnalyticsEvents.API_NATIVE_PROJECT, null);
+
     SubMonitor subMonitor = SubMonitor.convert(monitor,
         Messages.getString("adding.app.engine.libraries"), //$NON-NLS-1$
         18);
@@ -202,6 +209,9 @@ public class BuildPath {
    */
   public static IClasspathEntry listNativeLibrary(IJavaProject javaProject, Library library,
       IProgressMonitor monitor) throws CoreException {
+    AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.API_ADDED_CLOUD_LIBRARY,
+        AnalyticsEvents.API_NATIVE_PROJECT, null);
+
     IClasspathEntry libraryEntry = computeEntry(javaProject, library, monitor);
     runContainerResolverJob(javaProject);
     return libraryEntry;
