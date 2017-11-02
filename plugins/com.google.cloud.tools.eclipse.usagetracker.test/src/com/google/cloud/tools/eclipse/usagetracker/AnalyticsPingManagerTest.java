@@ -234,7 +234,7 @@ public class AnalyticsPingManagerTest {
   @Test
   public void testSendPingArguments_nullEventName() {
     try {
-      pingManager.sendPing(null, "metadataKey", "metadataValue");
+      pingManager.sendPing(null);
       fail();
    } catch (IllegalArgumentException e) {
       assertEquals("eventName null or empty", e.getMessage());
@@ -244,7 +244,7 @@ public class AnalyticsPingManagerTest {
   @Test
   public void testSendPingArguments_emptyEventName() {
     try {
-      pingManager.sendPing("", "metadataKey", "metadataValue");
+      pingManager.sendPing("");
       fail();
    } catch (IllegalArgumentException e) {
       assertEquals("eventName null or empty", e.getMessage());
@@ -252,8 +252,28 @@ public class AnalyticsPingManagerTest {
   }
 
   @Test
-  public void testSendPingArguments_validArgumentsDoNotThrowException() {
+  public void testSendPingArguments_validMetadataKeyValue() {
     pingManager.sendPing("eventName", "metadataKey", "metadataValue");
+  }
+
+  @Test
+  public void testSendPingArguments_nullMetadataKey() {
+    try {
+      pingManager.sendPing("eventName", null, "metadataValue");
+      fail();
+    } catch (IllegalArgumentException e) {
+      assertEquals("metadataKey null or empty", e.getMessage());
+    }
+  }
+
+  @Test
+  public void testSendPingArguments_emptyMetadataKey() {
+    try {
+      pingManager.sendPing("eventName", "", "metadataValue");
+      fail();
+    } catch (IllegalArgumentException e) {
+      assertEquals("metadataKey null or empty", e.getMessage());
+    }
   }
 
   @Test
@@ -273,26 +293,6 @@ public class AnalyticsPingManagerTest {
       fail();
     } catch (IllegalArgumentException e) {
       assertEquals("metadataValue null or empty", e.getMessage());
-    }
-  }
-
-  @Test
-  public void testSendPingArguments_nullMetadataKeyWithNonNullValue() {
-    try {
-      pingManager.sendPing("eventName", null, "metadataValue");
-      fail();
-    } catch (IllegalArgumentException e) {
-      assertEquals("metadataKey null or empty", e.getMessage());
-    }
-  }
-
-  @Test
-  public void testSendPingArguments_emptyMetadataKeyWithNonNullValue() {
-    try {
-      pingManager.sendPing("eventName", "", "metadataValue");
-      fail();
-    } catch (IllegalArgumentException e) {
-      assertEquals("metadataKey null or empty", e.getMessage());
     }
   }
 
