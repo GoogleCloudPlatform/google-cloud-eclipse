@@ -65,6 +65,7 @@ public class AnalyticsPingManagerTest {
   public void testPingEventConstructor_nullEventName() {
     try {
       new PingEvent(null, EMPTY_MAP, null);
+      fail();
     } catch (IllegalArgumentException e) {
       assertEquals("eventName null or empty", e.getMessage());
     }
@@ -74,6 +75,7 @@ public class AnalyticsPingManagerTest {
   public void testPingEventConstructor_emtpyEventName() {
     try {
       new PingEvent("", EMPTY_MAP, null);
+      fail();
     } catch (IllegalArgumentException e) {
       assertEquals("eventName null or empty", e.getMessage());
     }
@@ -83,6 +85,7 @@ public class AnalyticsPingManagerTest {
   public void testPingEventConstructor_nullMetadata() {
     try {
       new PingEvent("some.event-name", null, null);
+      fail();
     } catch (NullPointerException e) {
       assertEquals("metadata is null", e.getMessage());
     }
@@ -257,6 +260,7 @@ public class AnalyticsPingManagerTest {
   public void testSendPingArguments_nullMetadataValue() {
     try {
       pingManager.sendPing("eventName", "metadataKey", null);
+      fail();
     } catch (IllegalArgumentException e) {
       assertEquals("metadataValue null or empty", e.getMessage());
     }
@@ -266,6 +270,7 @@ public class AnalyticsPingManagerTest {
   public void testSendPingArguments_emptyMetadataValue() {
     try {
       pingManager.sendPing("eventName", "metadataKey", "");
+      fail();
     } catch (IllegalArgumentException e) {
       assertEquals("metadataValue null or empty", e.getMessage());
     }
