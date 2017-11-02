@@ -152,7 +152,7 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
     setLoginCredential(workingCopy, accountEmail);
 
     AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.DATAFLOW_RUN,
-        pipelineConfig.getRunner().getRunnerName());
+        AnalyticsEvents.DATAFLOW_RUN_RUNNER, pipelineConfig.getRunner().getRunnerName());
 
     delegate.launch(workingCopy, mode, launch, progress.newChild(1));
   }

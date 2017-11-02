@@ -40,6 +40,7 @@ public class AnalyticsEvents {
   public static final String APP_ENGINE_NEW_PROJECT_WIZARD_TYPE = "type";
   public static final String APP_ENGINE_DEPLOY_STANDARD = "standard";
   public static final String APP_ENGINE_DEPLOY_FLEXIBLE = "flex";
+  public static final String DATAFLOW_RUN_RUNNER = "runner";
 
   // Metadata values
   // This actually means "standard"; the value "native" is for a legacy reason.
