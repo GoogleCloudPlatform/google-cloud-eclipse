@@ -58,7 +58,7 @@ public class LibrarySelectorGroup implements ISelectionProvider {
   private final ListenerList/* <ISelectedChangeListener> */ listeners = new ListenerList/* <> */();
 
   public LibrarySelectorGroup(Composite parentContainer, String groupName) {
-    this(parentContainer, groupName, Messages.getString("appengine.libraries.group"), true);
+    this(parentContainer, groupName, Messages.getString("appengine.libraries.group"), true); //$NON-NLS-1$
   }
   
   /**
@@ -68,14 +68,14 @@ public class LibrarySelectorGroup implements ISelectionProvider {
    */
   LibrarySelectorGroup(Composite parentContainer, String groupName, String groupLabel,
       boolean restrictedEnvironment) {
-    Preconditions.checkNotNull(parentContainer, "parentContainer is null");
-    Preconditions.checkNotNull(groupName, "groupName is null");
-    Preconditions.checkNotNull(groupLabel, "groupLabel is null");
+    Preconditions.checkNotNull(parentContainer, "parentContainer is null"); //$NON-NLS-1$
+    Preconditions.checkNotNull(groupName, "groupName is null"); //$NON-NLS-1$
+    Preconditions.checkNotNull(groupLabel, "groupLabel is null"); //$NON-NLS-1$
     
     Collection<Library> availableLibraries = CloudLibraries.getLibraries(groupName);
     this.availableLibraries = new LinkedHashMap<>();
     for (Library library : availableLibraries) {
-      if (!restrictedEnvironment || "http".equals(library.getTransport())) {
+      if (!restrictedEnvironment || "http".equals(library.getTransport())) { //$NON-NLS-1$
         this.availableLibraries.put(library.getId(), library);
       }
     }
@@ -84,7 +84,7 @@ public class LibrarySelectorGroup implements ISelectionProvider {
 
   private void createContents(Composite parentContainer, String groupLabel) {
     Group apiGroup = new Group(parentContainer, SWT.NONE);
-    apiGroup.setText(groupLabel); // $NON-NLS-1$
+    apiGroup.setText(groupLabel);
 
     for (Library library : availableLibraries.values()) {
       Button libraryButton = new Button(apiGroup, SWT.CHECK);
@@ -103,7 +103,7 @@ public class LibrarySelectorGroup implements ISelectionProvider {
    * Return the available libraries.
    */
   @VisibleForTesting
-  Collection<? extends Library> getLibraries() {
+  Collection<? extends Library> getAvailableLibraries() {
     return availableLibraries.values();
   }
 

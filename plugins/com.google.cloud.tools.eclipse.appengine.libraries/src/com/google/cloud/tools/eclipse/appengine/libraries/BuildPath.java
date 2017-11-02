@@ -66,7 +66,7 @@ public class BuildPath {
     // see m2e-core/org.eclipse.m2e.core.ui/src/org/eclipse/m2e/core/ui/internal/actions/AddDependencyAction.java
     // m2e-core/org.eclipse.m2e.core.ui/src/org/eclipse/m2e/core/ui/internal/editing/AddDependencyOperation.java
 
-    IFile pomFile = project.getFile("pom.xml");
+    IFile pomFile = project.getFile("pom.xml"); //$NON-NLS-1$
 
     try {
       Pom pom = Pom.parse(pomFile);
@@ -131,7 +131,7 @@ public class BuildPath {
         }
       }
     } catch (IOException | CoreException ex) {
-      logger.log(Level.WARNING, "Error loading previous libraries", ex);
+      logger.log(Level.WARNING, "Error loading previous libraries", ex); //$NON-NLS-1$
     }
     
     Library masterLibrary = new Library(CloudLibraries.MASTER_CONTAINER_ID);
@@ -221,7 +221,7 @@ public class BuildPath {
       savedLibraryIds = serializer.loadLibraryIds(project, containerPath);
     } catch (IOException ex) {
       throw new CoreException(
-          StatusUtil.error(BuildPath.class, "Error retrieving project library list", ex));
+          StatusUtil.error(BuildPath.class, "Error retrieving project library list", ex)); //$NON-NLS-1$
     }
     List<Library> selectedLibraries = new ArrayList<>();
     for (String libraryId : savedLibraryIds) {
@@ -244,10 +244,10 @@ public class BuildPath {
       libraryIds.add(library.getId());
     }
     try {
-    serializer.saveLibraryIds(project, containerPath, libraryIds);
+      serializer.saveLibraryIds(project, containerPath, libraryIds);
     } catch (IOException ex) {
       throw new CoreException(
-          StatusUtil.error(BuildPath.class, "Error saving project library list", ex));
+          StatusUtil.error(BuildPath.class, "Error saving project library list", ex)); //$NON-NLS-1$
     }
   }
 

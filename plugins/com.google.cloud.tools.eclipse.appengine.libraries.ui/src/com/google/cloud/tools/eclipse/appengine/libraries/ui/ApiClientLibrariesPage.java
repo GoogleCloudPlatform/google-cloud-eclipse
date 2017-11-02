@@ -42,7 +42,7 @@ public class ApiClientLibrariesPage extends CloudLibrariesPage {
       groups.put(CloudLibraries.APP_ENGINE_GROUP, Messages.getString("appengine-title"));
     }
     groups.put(CloudLibraries.CLIENT_APIS_GROUP, Messages.getString("clientapis-title"));
-    setGroups(groups);
+    setLibraryGroups(groups);
   }
 
 

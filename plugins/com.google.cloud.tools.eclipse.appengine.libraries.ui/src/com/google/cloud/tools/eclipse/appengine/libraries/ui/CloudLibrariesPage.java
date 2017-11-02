@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.appengine.libraries.ui;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
-import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -48,15 +47,16 @@ import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
 public abstract class CloudLibrariesPage extends WizardPage implements IClasspathContainerPage,
     IClasspathContainerPageExtension {
-
   private static final Logger logger = Logger.getLogger(CloudLibrariesPage.class.getName());
-  private final LibraryClasspathContainerSerializer serializer =
-      new LibraryClasspathContainerSerializer();
 
-  /** The library groups to be displayed; pairs of (id, title). */
-  private Map<String, String> groups;
-  /** Selected libraries that are not shown but should be preserved. */
-  private List<Library> hiddenLibraries = Collections.emptyList();
+  /**
+   * The library libraryGroups to be displayed; pairs of (id, title). For example, <em>"clientapis" &rarr;
+   * "Google Cloud APIs for Java"</em>.
+   */
+  private Map<String, String> libraryGroups;
+
+  /** Initially selected libraries. */
+  private List<Library> initialSelection = Collections.emptyList();
 
   private final List<LibrarySelectorGroup> librariesSelectors = new ArrayList<>();
   private IJavaProject project;
@@ -65,12 +65,12 @@ public abstract class CloudLibrariesPage extends WizardPage implements IClasspat
   private IClasspathEntry newEntry;
 
   protected CloudLibrariesPage(String pageId) {
-    super(pageId); // $NON-NLS-1$
+    super(pageId);
   }
 
-  /** Set the visible library groups. Map is set of (id, title) pairs. */
-  protected void setGroups(Map<String, String> groups) {
-    this.groups = groups;
+  /** Set the visible library libraryGroups. Map is set of (id, title) pairs. */
+  protected void setLibraryGroups(Map<String, String> groups) {
+    this.libraryGroups = groups;
   }
 
   @Override
@@ -81,22 +81,21 @@ public abstract class CloudLibrariesPage extends WizardPage implements IClasspat
 
   @Override
   public void createControl(Composite parent) {
-    Preconditions.checkNotNull(groups, "Groups must be set");
+    Preconditions.checkNotNull(libraryGroups, "Library groups must be set"); //$NON-NLS-1$
     Composite composite = new Group(parent, SWT.NONE);
 
     IProjectFacetVersion facetVersion =
         AppEngineStandardFacet.getProjectFacetVersion(project.getProject());
     boolean java7AppEngineStandardProject = AppEngineStandardFacet.JRE7.equals(facetVersion);
 
-    // create the library selector groups
-    for (Entry<String, String> group : groups.entrySet()) {
+    // create the library selector libraryGroups
+    for (Entry<String, String> group : libraryGroups.entrySet()) {
       LibrarySelectorGroup librariesSelector =
           new LibrarySelectorGroup(composite, group.getKey(), group.getValue(),
               java7AppEngineStandardProject);
       librariesSelectors.add(librariesSelector);
     }
-    // set the initial selection; hiddenLibraries will hold all selected libraries
-    setSelectedLibraries(hiddenLibraries);
+    setSelectedLibraries(initialSelection);
     composite.setLayout(new RowLayout(SWT.HORIZONTAL));
     setControl(composite);
   }
@@ -123,7 +122,7 @@ public abstract class CloudLibrariesPage extends WizardPage implements IClasspat
       }
       return true;
     } catch (CoreException ex) {
-      StatusUtil.setErrorStatus(this, "Error updating container definition", ex);
+      StatusUtil.setErrorStatus(this, "Error updating container definition", ex); //$NON-NLS-1$
       return false;
     }
   }
@@ -132,7 +131,7 @@ public abstract class CloudLibrariesPage extends WizardPage implements IClasspat
   List<Library> getVisibleLibraries() {
     List<Library> visible = new ArrayList<>();
     for (LibrarySelectorGroup librariesSelector : librariesSelectors) {
-      visible.addAll(librariesSelector.getLibraries());
+      visible.addAll(librariesSelector.getAvailableLibraries());
     }
     return visible;
   }
@@ -142,7 +141,7 @@ public abstract class CloudLibrariesPage extends WizardPage implements IClasspat
    */
   @VisibleForTesting
   List<Library> getSelectedLibraries() {
-    List<Library> selectedLibraries = new ArrayList<>(hiddenLibraries);
+    List<Library> selectedLibraries = new ArrayList<>(initialSelection);
     for (LibrarySelectorGroup librariesSelector : librariesSelectors) {
       selectedLibraries.addAll(librariesSelector.getSelectedLibraries());
     }
@@ -151,11 +150,17 @@ public abstract class CloudLibrariesPage extends WizardPage implements IClasspat
 
   @VisibleForTesting
   void setSelectedLibraries(List<Library> selectedLibraries) {
-    hiddenLibraries = new ArrayList<>(selectedLibraries);
+    initialSelection = new ArrayList<>(selectedLibraries);
+    List<Library> remaining = new ArrayList<>(selectedLibraries);
     if (librariesSelectors != null) {
       for (LibrarySelectorGroup librarySelector : librariesSelectors) {
-        librarySelector.setSelection(new StructuredSelection(hiddenLibraries));
-        hiddenLibraries.removeAll(librarySelector.getSelectedLibraries());
+        librarySelector.setSelection(new StructuredSelection(initialSelection));
+        remaining.removeAll(librarySelector.getSelectedLibraries());
+      }
+      if (!remaining.isEmpty()) {
+        logger.log(Level.WARNING,
+            "Discarding libraries that aren't availble from library container definition: " //$NON-NLS-1$
+                + remaining);
       }
     }
   }
@@ -174,7 +179,7 @@ public abstract class CloudLibrariesPage extends WizardPage implements IClasspat
       setSelectedLibraries(savedLibraries);
     } catch (CoreException ex) {
       logger.log(Level.WARNING,
-          "Error loading selected library IDs for " + project.getElementName(), ex);
+          "Error loading selected library IDs for " + project.getElementName(), ex); //$NON-NLS-1$
     }
   }
 
