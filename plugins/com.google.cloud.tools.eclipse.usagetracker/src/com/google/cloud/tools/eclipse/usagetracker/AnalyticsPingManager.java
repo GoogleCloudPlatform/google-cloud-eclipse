@@ -76,13 +76,6 @@ public class AnalyticsPingManager {
         }
       });
 
-  private static final Escaper METADATA_ESCAPER =
-      new CharEscaperBuilder()
-          .addEscape(',', "\\,")
-          .addEscape('=', "\\=")
-          .addEscape('\\', "\\\\")
-          .toEscaper();
-
   private static AnalyticsPingManager instance;
 
   private final String endpointUrl;
@@ -241,6 +234,11 @@ public class AnalyticsPingManager {
     }
   }
 
+  private static final Escaper METADATA_ESCAPER = new CharEscaperBuilder()
+      .addEscape(',', "\\,")
+      .addEscape('=', "\\=")
+      .addEscape('\\', "\\\\").toEscaper();
+
   @VisibleForTesting
   Map<String, String> buildParametersMap(PingEvent pingEvent) {
     Map<String, String> parametersMap = new HashMap<>(STANDARD_PARAMETERS);
@@ -260,11 +258,9 @@ public class AnalyticsPingManager {
         String value = METADATA_ESCAPER.escape(entry.getValue());
         escapedPairs.add(key + "=" + value);
       }
-
       // Event metadata are passed as a (virtual) page title.
       parametersMap.put("dt", Joiner.on(',').join(escapedPairs));
     }
-
     return parametersMap;
   }
 
