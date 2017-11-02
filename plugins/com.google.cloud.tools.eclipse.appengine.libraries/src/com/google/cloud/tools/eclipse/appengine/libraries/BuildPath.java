@@ -59,13 +59,13 @@ public class BuildPath {
   
   public static void addMavenLibraries(IProject project, List<Library> libraries,
       IProgressMonitor monitor) throws CoreException {
-    AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.API_ADDED_CLOUD_LIBRARY,
-        AnalyticsEvents.API_MAVEN_PROJECT, null);
-
     if (libraries.isEmpty()) {
       return;
     }
     
+    AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.API_ADDED_CLOUD_LIBRARY,
+        AnalyticsEvents.API_MAVEN_PROJECT, null);
+
     // see m2e-core/org.eclipse.m2e.core.ui/src/org/eclipse/m2e/core/ui/internal/actions/AddDependencyAction.java
     // m2e-core/org.eclipse.m2e.core.ui/src/org/eclipse/m2e/core/ui/internal/editing/AddDependencyOperation.java
 
@@ -85,6 +85,10 @@ public class BuildPath {
    */
   public static void addNativeLibrary(IJavaProject javaProject,
       List<Library> libraries, IProgressMonitor monitor) throws CoreException {
+    if (libraries.isEmpty()) {
+      return;
+    }
+
     AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.API_ADDED_CLOUD_LIBRARY,
         AnalyticsEvents.API_NATIVE_PROJECT, null);
 
