@@ -53,7 +53,7 @@ public class AnalyticsPingManagerWithServerTest {
 
   @Test
   public void testSendPing_noMetadata() throws InterruptedException {
-    pingManager.sendPing("some.event-name", null, null, null);
+    pingManager.sendPing("some.event-name");
     pingManager.eventFlushJob.join();
 
     Map<String, String[]> parameters = server.getRequestParameters();
@@ -63,7 +63,7 @@ public class AnalyticsPingManagerWithServerTest {
 
   @Test
   public void testSendPing_withMetadata() throws InterruptedException {
-    pingManager.sendPing("another.event-name", "times-happened", "1234", null);
+    pingManager.sendPing("another.event-name", "times-happened", "1234");
     pingManager.eventFlushJob.join();
 
     Map<String, String[]> parameters = server.getRequestParameters();

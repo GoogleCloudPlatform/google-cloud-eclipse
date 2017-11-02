@@ -48,10 +48,10 @@ public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
 
   @Override
   public AppEngineStandardWizardPage createWizardPage() {
-    AnalyticsPingManager.getInstance().sendPing(
+    AnalyticsPingManager.getInstance().sendPingOnShell(getShell(),
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_STANDARD, getShell());
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_STANDARD);
 
     return new AppEngineStandardWizardPage();
   }

@@ -149,7 +149,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
   private void launchDeployJob(IProject project, Credential credential)
       throws IOException, CoreException {
     AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_DEPLOY,
-        analyticsDeployEventMetadataKey, null);
+        analyticsDeployEventMetadataKey);
 
     IPath workDirectory = createWorkDirectory();
     DeployPreferences deployPreferences = getDeployPreferences(project);
@@ -178,7 +178,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
       public void done(IJobChangeEvent event) {
         if (event.getResult().isOK()) {
           AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_DEPLOY_SUCCESS,
-              analyticsDeployEventMetadataKey, null);
+              analyticsDeployEventMetadataKey);
         }
         launchCleanupJob();
       }
