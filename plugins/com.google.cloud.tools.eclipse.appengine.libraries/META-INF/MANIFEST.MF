@@ -18,6 +18,7 @@ Export-Package: com.google.cloud.tools.eclipse.appengine.libraries,
  com.google.cloud.tools.eclipse.appengine.libraries.repository
 Import-Package: com.google.cloud.tools.appengine.cloudsdk;version="0.3.8",
  com.google.cloud.tools.eclipse.appengine.ui,
+ com.google.cloud.tools.eclipse.usagetracker,
  com.google.cloud.tools.eclipse.util,
  com.google.cloud.tools.eclipse.util.io,
  com.google.cloud.tools.eclipse.util.service,

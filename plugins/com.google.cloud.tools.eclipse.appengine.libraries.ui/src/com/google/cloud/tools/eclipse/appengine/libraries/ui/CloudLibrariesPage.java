@@ -20,6 +20,8 @@ import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +38,7 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
 public abstract class CloudLibrariesPage extends WizardPage implements IClasspathContainerPage,
@@ -102,18 +105,26 @@ public abstract class CloudLibrariesPage extends WizardPage implements IClasspat
     }
 
     SubMonitor monitor = SubMonitor.convert(null, 10);
+    // The dialog is active now, but going to be dismissed almost immediately.
+    Shell parentShell = getShell().getParent().getShell();
     try {
       if (MavenUtils.hasMavenNature(project.getProject())) {
+        AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.API_ADDED_CLOUD_LIBRARY,
+            AnalyticsEvents.API_MAVEN_PROJECT, null, parentShell);
+
         BuildPath.addMavenLibraries(project.getProject(), libraries, monitor.newChild(10));
         return new IClasspathEntry[0];
       } else {
-        Library masterLibrary = BuildPath.collectLibraryFiles(project, libraries, monitor.newChild(7));
-        IClasspathEntry masterEntry = BuildPath.listNativeLibrary(project, masterLibrary, monitor.newChild(3));
-        if (masterEntry != null) {
-          return new IClasspathEntry[] {masterEntry};
-        } else {
-          return new IClasspathEntry[0];
-        }
+        AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.API_ADDED_CLOUD_LIBRARY,
+            AnalyticsEvents.API_NATIVE_PROJECT, null, parentShell);
+
+        Library masterLibrary =
+            BuildPath.collectLibraryFiles(project, libraries, monitor.newChild(7));
+        IClasspathEntry masterEntry =
+            BuildPath.listNativeLibrary(project, masterLibrary, monitor.newChild(3));
+        return masterEntry != null
+            ? new IClasspathEntry[] {masterEntry}
+            : new IClasspathEntry[0];
       }
     } catch (CoreException ex) {
       return new IClasspathEntry[0];

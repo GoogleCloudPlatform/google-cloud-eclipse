@@ -22,6 +22,8 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.cloud.tools.eclipse.util.ClasspathUtil;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.File;
@@ -147,9 +149,15 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
       IProgressMonitor monitor) throws CoreException {
     SubMonitor progress = SubMonitor.convert(monitor, 12);
     if (config.getUseMaven()) {
+      AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.API_ADDED_CLOUD_LIBRARY,
+          AnalyticsEvents.API_MAVEN_PROJECT, null);
+
       enableMavenNature(newProject, progress.newChild(5));
       BuildPath.addMavenLibraries(newProject, config.getAppEngineLibraries(), progress.newChild(7));
     } else {
+      AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.API_ADDED_CLOUD_LIBRARY,
+          AnalyticsEvents.API_NATIVE_PROJECT, null);
+
       addJunit4ToClasspath(newProject, progress.newChild(2));
       addJstl12ToClasspath(newProject, progress.newChild(2));
       IJavaProject javaProject = JavaCore.create(newProject);

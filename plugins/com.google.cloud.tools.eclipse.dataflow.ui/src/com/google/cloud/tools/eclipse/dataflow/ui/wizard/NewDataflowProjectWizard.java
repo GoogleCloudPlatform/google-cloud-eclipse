@@ -40,9 +40,6 @@ public class NewDataflowProjectWizard extends Wizard implements INewWizard {
 
   @Override
   public boolean performFinish() {
-    AnalyticsPingManager.getInstance().sendPing(
-        AnalyticsEvents.DATAFLOW_NEW_PROJECT_WIZARD_COMPLETE, null, null);
-
     creator.setDefaultAccountEmail(defaultRunOptionsPage.getAccountEmail());
     creator.setDefaultProject(defaultRunOptionsPage.getProjectId());
     creator.setDefaultStagingLocation(defaultRunOptionsPage.getStagingLocation());
@@ -64,13 +61,16 @@ public class NewDataflowProjectWizard extends Wizard implements INewWizard {
           "Error encountered when trying to create project"); //$NON-NLS-1$
       return false;
     }
+
+    AnalyticsPingManager.getInstance().sendPing(
+        AnalyticsEvents.DATAFLOW_NEW_PROJECT_WIZARD_COMPLETE, null, null);
     return true;
   }
 
   @Override
   public void addPages() {
     AnalyticsPingManager.getInstance().sendPing(
-        AnalyticsEvents.DATAFLOW_NEW_PROJECT_WIZARD, null, null);
+        AnalyticsEvents.DATAFLOW_NEW_PROJECT_WIZARD, null, null, getShell());
 
     landingPage = new NewDataflowProjectWizardLandingPage(creator);
     addPage(landingPage);

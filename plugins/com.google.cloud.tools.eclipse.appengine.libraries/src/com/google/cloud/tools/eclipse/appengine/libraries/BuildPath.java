@@ -30,7 +30,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -82,7 +81,6 @@ public class BuildPath {
    */
   public static void addNativeLibrary(IJavaProject javaProject,
       List<Library> libraries, IProgressMonitor monitor) throws CoreException {
-    
     SubMonitor subMonitor = SubMonitor.convert(monitor,
         Messages.getString("adding.app.engine.libraries"), //$NON-NLS-1$
         18);
