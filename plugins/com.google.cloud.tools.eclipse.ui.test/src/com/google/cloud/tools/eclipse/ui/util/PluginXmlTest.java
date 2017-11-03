@@ -27,17 +27,32 @@ public class PluginXmlTest extends BasePluginXmlTest {
   @Test
   public void testExtensionPoint() {
     NodeList extensions = getDocument().getElementsByTagName("extension");
-    assertEquals(1, extensions.getLength());
-    Element extension = (Element) extensions.item(0);
-    assertEquals("org.eclipse.ui.commands", extension.getAttribute("point"));
+    assertEquals(2, extensions.getLength());
 
-    NodeList commandDefinitions = extension.getElementsByTagName("command");
+    // first element is the showPopup command
+    Element extension = (Element) extensions.item(0);
+    assertEquals("org.eclipse.ui.commands", extension.getAttribute("point")); //$NON-NLS-1$ //$NON-NLS-2$
+    NodeList commandDefinitions = extension.getElementsByTagName("command"); //$NON-NLS-1$
     assertEquals(1, commandDefinitions.getLength());
     Element configExtension = (Element) commandDefinitions.item(0);
     assertEquals(OpenDropDownMenuHandler.class.getName(),
-        configExtension.getAttribute("defaultHandler"));
-    assertEquals("com.google.cloud.tools.eclipse.ui.util.showPopup",
-        configExtension.getAttribute("id"));
+        configExtension.getAttribute("defaultHandler")); //$NON-NLS-1$
+    assertEquals("com.google.cloud.tools.eclipse.ui.util.showPopup", //$NON-NLS-1$
+        configExtension.getAttribute("id")); //$NON-NLS-1$
+
+    // second element is the GCP TOolbar definition
+    extension = (Element) extensions.item(1);
+    assertEquals("org.eclipse.ui.menus", extension.getAttribute("point")); //$NON-NLS-1$ //$NON-NLS-2$
+    NodeList menuContributions = extension.getElementsByTagName("menuContribution"); //$NON-NLS-1$
+    assertEquals(2, menuContributions.getLength());
+    Element menuContribution = (Element) menuContributions.item(0);
+    // first element is the toolbar definition
+    assertEquals("toolbar:org.eclipse.ui.main.toolbar?after=additions", //$NON-NLS-1$
+        menuContribution.getAttribute("locationURI")); //$NON-NLS-1$
+    // second contribution is our actual menu definition
+    menuContribution = (Element) menuContributions.item(1);
+    assertEquals("menu:com.google.cloud.tools.eclipse.ui.actions", //$NON-NLS-1$
+        menuContribution.getAttribute("locationURI")); //$NON-NLS-1$
   }
 
 }
