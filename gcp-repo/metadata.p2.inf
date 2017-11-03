@@ -15,6 +15,12 @@ requires.1.name=com.google.cloud.tools.eclipse.category.definition
 requires.1.range=[1.0.0,1.0.0]
 requires.1.greedy=true
 
+requires.2.namespace=org.eclipse.equinox.p2.iu
+requires.2.name=org.dadacoalition.yedit.category.definition
+requires.2.range=[1.0.0,1.0.0]
+requires.2.greedy=true
+
+
 # Define the 'Google Cloud Tools for Eclipse' category IU
 # Note that the IU version is shown in the UI, not the .definition version.
 units.1.id=com.google.cloud.tools.eclipse.category
@@ -43,7 +49,7 @@ units.1.provides.1.name=com.google.cloud.tools.eclipse.category.definition
 units.1.provides.1.version=1.0.0
 
 # Define the YEdit category IU
-units.2.id=com.google.cloud.tools.eclipse.category
+units.2.id=org.dadacoalition.yedit.category
 units.2.version=$version$
 units.2.properties.1.name=org.eclipse.equinox.p2.type.category
 units.2.properties.1.value=true
@@ -62,6 +68,6 @@ units.2.requires.1.namespace=org.eclipse.equinox.p2.iu
 units.2.requires.1.name=org.dadacoalition.yedit.feature.feature.group
 units.2.requires.1.greedy=true
 units.2.provides.1.namespace=org.eclipse.equinox.p2.iu
-units.2.provides.1.name=com.google.cloud.tools.eclipse.category.definition
+units.2.provides.1.name=org.dadacoalition.yedit.category.definition
 units.2.provides.1.version=1.0.0
 
