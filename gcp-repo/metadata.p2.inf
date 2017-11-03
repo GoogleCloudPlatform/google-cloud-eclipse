@@ -42,7 +42,7 @@ units.1.provides.1.namespace=org.eclipse.equinox.p2.iu
 units.1.provides.1.name=com.google.cloud.tools.eclipse.category.definition
 units.1.provides.1.version=1.0.0
 
-# Define the YEdit' category IU
+# Define the YEdit category IU
 units.2.id=com.google.cloud.tools.eclipse.category
 units.2.version=$version$
 units.2.properties.1.name=org.eclipse.equinox.p2.type.category
