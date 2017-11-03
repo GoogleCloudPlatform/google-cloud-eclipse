@@ -22,7 +22,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 public class SharedImages {
 
   public static final ImageDescriptor CLOUDSDK_IMAGE_DESCRIPTOR =
-      AbstractUIPlugin.imageDescriptorFromPlugin("com.google.cloud.tools.eclipse.ui.util",
+      AbstractUIPlugin.imageDescriptorFromPlugin("com.google.cloud.tools.eclipse.ui",
           "icons/obj16/cloudsdk.png");
 
   public static final ImageDescriptor REFRESH_IMAGE_DESCRIPTOR =
