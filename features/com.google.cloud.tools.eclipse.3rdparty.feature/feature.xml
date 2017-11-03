@@ -94,32 +94,4 @@
          version="1.0.4"
          unpack="false"/>
 
-   <plugin
-         id="com.google.oauth-client"
-         download-size="0"
-         install-size="0"
-         version="1.23.0"
-         unpack="false"/>
-
-   <plugin
-         id="com.google.oauth-client-jetty"
-         download-size="0"
-         install-size="0"
-         version="1.23.0"
-         unpack="false"/>
-
-   <plugin
-         id="com.google.oauth-client-java6"
-         download-size="0"
-         install-size="0"
-         version="1.23.0"
-         unpack="false"/>
-
-   <plugin
-         id="com.google.cloud.tools.login.plugins-login-common"
-         download-size="0"
-         install-size="0"
-         version="0.1.0"
-         unpack="false"/>
-
 </feature>
