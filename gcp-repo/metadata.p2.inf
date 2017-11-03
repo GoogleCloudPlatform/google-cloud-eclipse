@@ -41,3 +41,27 @@ units.1.requires.1.greedy=true
 units.1.provides.1.namespace=org.eclipse.equinox.p2.iu
 units.1.provides.1.name=com.google.cloud.tools.eclipse.category.definition
 units.1.provides.1.version=1.0.0
+
+# Define the YEdit' category IU
+units.2.id=com.google.cloud.tools.eclipse.category
+units.2.version=$version$
+units.2.properties.1.name=org.eclipse.equinox.p2.type.category
+units.2.properties.1.value=true
+units.2.properties.2.name=org.eclipse.equinox.p2.name
+units.2.properties.2.value=YEdit
+units.2.properties.3.name=org.eclipse.equinox.p2.provider
+units.2.properties.3.value=Google Inc.
+units.2.properties.4.name=org.eclipse.equinox.p2.contact
+units.2.properties.4.value=https://github.com/oyse/yedit
+units.2.properties.5.name=org.eclipse.equinox.p2.doc.url
+units.2.properties.5.value=https://github.com/oyse/yedit/wiki
+units.2.licenses.0 =\
+YEdit is made available under the Eclipse Public License
+units.2.licenses.0.location=https://www.eclipse.org/legal/epl-v10.html
+units.2.requires.1.namespace=org.eclipse.equinox.p2.iu
+units.2.requires.1.name=org.dadacoalition.yedit.feature
+units.2.requires.1.greedy=true
+units.2.provides.1.namespace=org.eclipse.equinox.p2.iu
+units.2.provides.1.name=com.google.cloud.tools.eclipse.category.definition
+units.2.provides.1.version=1.0.0
+

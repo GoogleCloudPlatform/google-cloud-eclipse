@@ -19,13 +19,6 @@
       %license.text
    </license>
 
-   <includes
-         id="org.dadacoalition.yedit.feature"
-         version="0.0.0"
-         name="YEdit"
-         optional="true"
-         search-location="both"/>
-
    <requires>
       <import feature="org.eclipse.jdt" version="3.11.2.v20160212-1500" match="greaterOrEqual"/>
       <import feature="org.eclipse.m2e.wtp.feature" version="1.2.1.20150819-2220" match="greaterOrEqual"/>
