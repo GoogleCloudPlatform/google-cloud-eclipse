@@ -182,12 +182,12 @@ public class AnalyticsPingManager {
    * If the user has never seen the opt-in dialog or set the opt-in preference beforehand,
    * this method can potentially present an opt-in dialog at the top workbench level. If you
    * are calling this method inside another modal dialog, consider using {@link #sendPingOnShell(
-   * Shell, String, ImmutableMap)} and pass the {@Shell} of the currently open modal dialog.
+   * Shell, String, Map)} and pass the {@Shell} of the currently open modal dialog.
    * (Otherwise, the opt-in dialog won't be able to get input until the workbench can get input.)
    *
    * Safe to call from non-UI contexts.
    */
-  public void sendPing(String eventName, ImmutableMap<String, String> metadata) {
+  public void sendPing(String eventName, Map<String, String> metadata) {
     sendPingOnShell(null, eventName, metadata);
   }
 
@@ -207,8 +207,7 @@ public class AnalyticsPingManager {
     sendPingOnShell(parentShell, eventName, ImmutableMap.of(metadataKey, metadataValue));
   }
 
-  public void sendPingOnShell(Shell parentShell,
-      String eventName, ImmutableMap<String, String> metadata) {
+  public void sendPingOnShell(Shell parentShell, String eventName, Map<String, String> metadata) {
     Preconditions.checkArgument(!Strings.isNullOrEmpty(eventName), "eventName null or empty");
     Preconditions.checkNotNull(metadata);
 
@@ -216,7 +215,8 @@ public class AnalyticsPingManager {
       // Note: always enqueue if a user has not seen the opt-in dialog yet; enqueuing itself
       // doesn't mean that the event ping will be posted.
       if (userHasOptedIn() || !userHasRegisteredOptInStatus()) {
-        pingEventQueue.add(new PingEvent(eventName, metadata, parentShell));
+        ImmutableMap<String, String> metadataCopy = ImmutableMap.copyOf(metadata);
+        pingEventQueue.add(new PingEvent(eventName, metadataCopy, parentShell));
         eventFlushJob.schedule();
       }
     }

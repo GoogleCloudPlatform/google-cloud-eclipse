@@ -72,7 +72,7 @@ public class AnalyticsPingManagerTest {
   }
 
   @Test
-  public void testPingEventConstructor_emtpyEventName() {
+  public void testPingEventConstructor_emptyEventName() {
     try {
       new PingEvent("", EMPTY_MAP, null);
       fail();
