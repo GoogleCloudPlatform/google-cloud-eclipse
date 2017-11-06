@@ -233,6 +233,36 @@
             typeIds="com.google.cloud.tools.eclipse.appengine.standard.server">
       </fragment>
    </extension>
+   
+   <!-- GCP Toolbar -->
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+	        locationURI="menu:com.google.cloud.tools.eclipse.ui.actions?after=launch">
+        <command
+              commandId="com.google.cloud.tools.eclipse.appengine.localserver.launch"
+              icon="platform:/plugin/org.eclipse.debug.ui/icons/full/etool16/run_exc.png"
+              label="%launch.gae.run"
+              style="push">
+           <parameter
+                 name="launchMode"
+                 value="run">
+           </parameter>
+        </command>
+        <command
+              commandId="com.google.cloud.tools.eclipse.appengine.localserver.launch"
+              icon="platform:/plugin/org.eclipse.debug.ui/icons/full/etool16/debug_exc.png"
+              label="%launch.gae.debug"
+              style="push">
+           <parameter
+                 name="launchMode"
+                 value="debug">
+           </parameter>
+        </command>
+      </menuContribution>
+   </extension>
+   
    <extension
          point="org.eclipse.ui.commands">
       <command

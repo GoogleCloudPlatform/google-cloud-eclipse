@@ -18,6 +18,12 @@
       %license.text
    </license>
 
+   <includes
+         id="org.dadacoalition.yedit.feature"
+         version="0.0.0"
+         name="YEdit"
+         optional="true"/>
+
    <plugin
          id="com.google.cloud.tools.appengine"
          download-size="0"
@@ -44,8 +50,8 @@
          download-size="0"
          install-size="0"
          version="1.9.13"
-         unpack="false"/>    
-         
+         unpack="false"/>
+
    <plugin
          id="com.fasterxml.jackson.core.jackson-core"
          download-size="0"
@@ -78,15 +84,14 @@
          id="org.yaml.snakeyaml"
          download-size="0"
          install-size="0"
-         version="1.17"
+         version="1.17.0"
          unpack="false"/>
-         
+
    <plugin
          id="org.glassfish.javax.json"
          download-size="0"
          install-size="0"
          version="1.0.4"
          unpack="false"/>
-
 
 </feature>

@@ -23,6 +23,11 @@ public class AnalyticsEvents {
   public static final String LOGIN_SUCCESS = "user.login.success";
   public static final String LOGIN_CANCELED = "user.login.canceled";
 
+  public static final String DATAFLOW_RUN = "dataflow.run";
+  public static final String DATAFLOW_NEW_PROJECT_WIZARD = "dataflow.new.project.wizard";
+  public static final String DATAFLOW_NEW_PROJECT_WIZARD_COMPLETE =
+      "dataflow.new.project.wizard.complete";
+
   public static final String APP_ENGINE_DEPLOY = "appengine.deploy";
   public static final String APP_ENGINE_DEPLOY_SUCCESS = "appengine.deploy.success";
   public static final String APP_ENGINE_LOCAL_SERVER = "appengine.local.server";
@@ -34,8 +39,11 @@ public class AnalyticsEvents {
   public static final String APP_ENGINE_LOCAL_SERVER_MODE = "mode";
   public static final String APP_ENGINE_NEW_PROJECT_WIZARD_TYPE = "type";
   public static final String APP_ENGINE_DEPLOY_STANDARD = "standard";
+  public static final String APP_ENGINE_DEPLOY_FLEXIBLE = "flex";
+  public static final String DATAFLOW_RUN_RUNNER = "runner";
 
   // Metadata values
+  // This actually means "standard"; the value "native" is for a legacy reason.
   public static final String APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_STANDARD = "native";
   public static final String APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_FLEX = "flex";
 }

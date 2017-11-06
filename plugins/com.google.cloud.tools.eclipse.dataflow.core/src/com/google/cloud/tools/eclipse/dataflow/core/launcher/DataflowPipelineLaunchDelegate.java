@@ -27,6 +27,8 @@ import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowDependencyMa
 import com.google.cloud.tools.eclipse.dataflow.core.project.MajorVersion;
 import com.google.cloud.tools.eclipse.login.CredentialHelper;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
@@ -62,7 +64,7 @@ import org.osgi.framework.FrameworkUtil;
  *
  * <p>The JavaLaunchDelegate is responsible for most of the launching.
  */
-public class DataflowPipelineLaunchDelegate extends ForwardingLaunchConfigurationDelegate {
+public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDelegate2 {
   private static final String ARGUMENT_FORMAT_STR = "--%s=%s";
 
   @VisibleForTesting
@@ -98,8 +100,8 @@ public class DataflowPipelineLaunchDelegate extends ForwardingLaunchConfiguratio
       DataflowDependencyManager dependencyManager,
       IWorkspaceRoot workspaceRoot,
       IGoogleLoginService loginService) {
-    this.delegate = javaLaunchDelegate;
-    this.optionsRetrieverFactory = optionsHierarchyFactory;
+    delegate = javaLaunchDelegate;
+    optionsRetrieverFactory = optionsHierarchyFactory;
     this.dependencyManager = dependencyManager;
     this.workspaceRoot = workspaceRoot;
     this.loginService = loginService;
@@ -148,6 +150,9 @@ public class DataflowPipelineLaunchDelegate extends ForwardingLaunchConfiguratio
 
     String accountEmail = effectiveArguments.get("accountEmail");
     setLoginCredential(workingCopy, accountEmail);
+
+    AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.DATAFLOW_RUN,
+        AnalyticsEvents.DATAFLOW_RUN_RUNNER, pipelineConfig.getRunner().getRunnerName());
 
     delegate.launch(workingCopy, mode, launch, progress.newChild(1));
   }
@@ -247,7 +252,25 @@ public class DataflowPipelineLaunchDelegate extends ForwardingLaunchConfiguratio
   }
 
   @Override
-  protected ILaunchConfigurationDelegate2 delegate() {
-    return delegate;
+  public ILaunch getLaunch(ILaunchConfiguration configuration, String mode) throws CoreException {
+    return delegate.getLaunch(configuration, mode);
+  }
+
+  @Override
+  public boolean buildForLaunch(ILaunchConfiguration configuration, String mode,
+      IProgressMonitor monitor) throws CoreException {
+    return delegate.buildForLaunch(configuration, mode, monitor);
+  }
+
+  @Override
+  public boolean finalLaunchCheck(ILaunchConfiguration configuration, String mode,
+      IProgressMonitor monitor) throws CoreException {
+    return delegate.finalLaunchCheck(configuration, mode, monitor);
+  }
+
+  @Override
+  public boolean preLaunchCheck(ILaunchConfiguration configuration, String mode,
+      IProgressMonitor monitor) throws CoreException {
+    return delegate.preLaunchCheck(configuration, mode, monitor);
   }
 }

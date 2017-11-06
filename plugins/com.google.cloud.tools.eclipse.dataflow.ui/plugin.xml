@@ -248,6 +248,20 @@
          </command>
        </menu>
      </menuContribution>
+
+     <!-- Contributions to the GCP Toolbar -->
+     <menuContribution
+           allPopups="false"
+           locationURI="menu:com.google.cloud.tools.eclipse.ui.actions.new?after=dataflow">
+       <command
+             commandId="org.eclipse.ui.newWizard"
+             style="push">
+          <parameter
+                name="newWizardId"
+                value="com.google.cloud.tools.eclipse.dataflow.ui.wizard.NewDataflowProjectWizard">
+          </parameter>
+       </command>
+     </menuContribution>
    </extension>
 
    <extension point="org.eclipse.ui.preferencePages">

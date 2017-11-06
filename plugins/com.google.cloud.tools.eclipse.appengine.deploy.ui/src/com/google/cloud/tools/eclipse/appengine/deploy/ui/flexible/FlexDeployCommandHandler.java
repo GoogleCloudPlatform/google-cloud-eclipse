@@ -28,6 +28,7 @@ import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexJarFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexWarFacet;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Preconditions;
@@ -40,6 +41,10 @@ import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 public class FlexDeployCommandHandler extends DeployCommandHandler {
+
+  public FlexDeployCommandHandler() {
+    super(AnalyticsEvents.APP_ENGINE_DEPLOY_FLEXIBLE);
+  }
 
   @Override
   protected DeployPreferencesDialog newDeployPreferencesDialog(Shell shell, IProject project,

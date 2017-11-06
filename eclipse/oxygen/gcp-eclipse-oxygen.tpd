@@ -6,7 +6,7 @@
  * 
  *    * Right-click in the editor and choose 'Create Target Definition File'
  *      to update the corresponding .target file.
- *    * Right-lick in the editor and choose 'Set as Target Platform'
+ *    * Right-click in the editor and choose 'Set as Target Platform'
  *      to update your IDE's target platform (regenerates the .target too)
  */
 target "GCP for Eclipse Oxygen" with source requirements
@@ -54,4 +54,8 @@ location "http://download.eclipse.org/tools/orbit/downloads/drops/R2017051619251
     org.hamcrest.library [1.3.0,1.3.1)
     ch.qos.logback.slf4j
     org.slf4j.log4j
+}
+
+location "http://dadacoalition.org/yedit/" {
+  org.dadacoalition.yedit.feature.feature.group
 }

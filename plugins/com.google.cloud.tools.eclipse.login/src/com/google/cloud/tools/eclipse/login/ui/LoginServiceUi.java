@@ -108,8 +108,8 @@ public class LoginServiceUi implements UiFacade {
       String authorizationCode = showProgressDialogAndWaitForCode(
           message, codeReceiver, redirectUrl);
       if (authorizationCode != null) {
-        AnalyticsPingManager.getInstance().sendPing(
-            AnalyticsEvents.LOGIN_SUCCESS, null, null, shellProvider.getShell());
+        AnalyticsPingManager.getInstance().sendPingOnShell(shellProvider.getShell(),
+            AnalyticsEvents.LOGIN_SUCCESS);
 
         return new VerificationCodeHolder(authorizationCode, redirectUrl);
       }
@@ -141,8 +141,8 @@ public class LoginServiceUi implements UiFacade {
           wait.release();  // Allow termination of the attached task.
           stopCodeWaitingJob(redirectUrl);
 
-          AnalyticsPingManager.getInstance().sendPing(
-              AnalyticsEvents.LOGIN_CANCELED, null, null, getParentShell());
+          AnalyticsPingManager.getInstance().sendPingOnShell(getParentShell(),
+              AnalyticsEvents.LOGIN_CANCELED);
         }
       };
 
@@ -153,8 +153,8 @@ public class LoginServiceUi implements UiFacade {
         @Override
         public void run(IProgressMonitor monitor)
             throws InvocationTargetException, InterruptedException {
-          AnalyticsPingManager.getInstance().sendPing(
-              AnalyticsEvents.LOGIN_START, null, null, dialog.getShell());
+          AnalyticsPingManager.getInstance().sendPingOnShell(dialog.getShell(),
+              AnalyticsEvents.LOGIN_START);
 
           monitor.beginTask(
               message != null ? message : Messages.getString("LOGIN_PROGRESS_DIALOG_MESSAGE"),

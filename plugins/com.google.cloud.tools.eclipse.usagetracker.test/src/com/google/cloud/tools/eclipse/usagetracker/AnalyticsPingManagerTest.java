@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.usagetracker;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
@@ -29,6 +30,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager.PingEvent;
+import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -41,6 +43,8 @@ import org.mockito.verification.VerificationMode;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AnalyticsPingManagerTest {
+
+  private static final ImmutableMap<String, String> EMPTY_MAP = ImmutableMap.of();
 
   @Mock private IEclipsePreferences preferences;
   @Mock private ConcurrentLinkedQueue<PingEvent> pingEventQueue;
@@ -58,29 +62,76 @@ public class AnalyticsPingManagerTest {
   }
 
   @Test
+  public void testPingEventConstructor_nullEventName() {
+    try {
+      new PingEvent(null, EMPTY_MAP, null);
+      fail();
+    } catch (IllegalArgumentException e) {
+      assertEquals("eventName null or empty", e.getMessage());
+    }
+  }
+
+  @Test
+  public void testPingEventConstructor_emptyEventName() {
+    try {
+      new PingEvent("", EMPTY_MAP, null);
+      fail();
+    } catch (IllegalArgumentException e) {
+      assertEquals("eventName null or empty", e.getMessage());
+    }
+  }
+
+  @Test
+  public void testPingEventConstructor_nullMetadata() {
+    try {
+      new PingEvent("some.event-name", null, null);
+      fail();
+    } catch (NullPointerException e) {
+      assertEquals("metadata is null", e.getMessage());
+    }
+  }
+
+  @Test
   public void testEventTypeEventNameConvention() {
-    PingEvent event = new PingEvent("some.event-name", null, null, null);
+    PingEvent event = new PingEvent("some.event-name", EMPTY_MAP, null);
     Map<String, String> parameters = pingManager.buildParametersMap(event);
     assertEquals("/virtual/gcloud-eclipse-tools/some.event-name", parameters.get("dp"));
   }
 
   @Test
   public void testVirtualHostSet() {
-    PingEvent event = new PingEvent("some.event-name", null, null, null);
+    PingEvent event = new PingEvent("some.event-name", EMPTY_MAP, null);
     Map<String, String> parameters = pingManager.buildParametersMap(event);
     assertTrue(parameters.get("dh").startsWith("virtual."));
   }
 
   @Test
   public void testMetadataConvention() {
-    PingEvent event = new PingEvent("some.event-name", "times-happened", "1234", null);
+    PingEvent event = new PingEvent("some.event-name",
+        ImmutableMap.of("times-happened", "1234"), null);
     Map<String, String> parameters = pingManager.buildParametersMap(event);
     assertEquals("times-happened=1234", parameters.get("dt"));
   }
 
   @Test
+  public void testMetadataConvention_multiplePairs() {
+    PingEvent event = new PingEvent("some.event-name",
+        ImmutableMap.of("times-happened", "1234", "mode", "debug"), null);
+    Map<String, String> parameters = pingManager.buildParametersMap(event);
+    assertEquals("times-happened=1234,mode=debug", parameters.get("dt"));
+  }
+
+  @Test
+  public void testMetadataConvention_escaping() {
+    PingEvent event = new PingEvent("some.event-name",
+        ImmutableMap.of("key , \\ = k", "value , \\ = v"), null);
+    Map<String, String> parameters = pingManager.buildParametersMap(event);
+    assertEquals("key \\, \\\\ \\= k=value \\, \\\\ \\= v", parameters.get("dt"));
+  }
+
+  @Test
   public void testClientId() {
-    PingEvent event = new PingEvent("some.event-name", null, null, null);
+    PingEvent event = new PingEvent("some.event-name", EMPTY_MAP, null);
     Map<String, String> parameters = pingManager.buildParametersMap(event);
     assertEquals("clientId", parameters.get("cid"));
   }
@@ -176,37 +227,77 @@ public class AnalyticsPingManagerTest {
   }
 
   @Test
-  public void testSendPingArguments_validArgumentsDoNotThrowException() {
-    pingManager.sendPing("eventName", "metadataKey", "metadataValue");
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void testSendPingArguments_nullEventName() {
-    pingManager.sendPing(null, "metadataKey", "metadataValue");
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void testSendPingArguments_emptyEventName() {
-    pingManager.sendPing("", "metadataKey", "metadataValue");
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void testSendPingArguments_nullMetadataKeyWithNonNullValue() {
-    pingManager.sendPing("eventName", null, "metadataValue");
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void testSendPingArguments_emptyMetadataKeyWithNonNullValue() {
-    pingManager.sendPing("eventName", "", "metadataValue");
+  public void testSendPingArguments_validEventName() {
+    pingManager.sendPing("eventName");
   }
 
   @Test
-  public void testSendPingArguments_nullMetadataValueDoNotThrowException() {
-    pingManager.sendPing("eventName", "metadataKey", null);
+  public void testSendPingArguments_nullEventName() {
+    try {
+      pingManager.sendPing(null);
+      fail();
+   } catch (IllegalArgumentException e) {
+      assertEquals("eventName null or empty", e.getMessage());
+    }
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
+  public void testSendPingArguments_emptyEventName() {
+    try {
+      pingManager.sendPing("");
+      fail();
+   } catch (IllegalArgumentException e) {
+      assertEquals("eventName null or empty", e.getMessage());
+    }
+  }
+
+  @Test
+  public void testSendPingArguments_validMetadataKeyValue() {
+    pingManager.sendPing("eventName", "metadataKey", "metadataValue");
+  }
+
+  @Test
+  public void testSendPingArguments_nullMetadataKey() {
+    try {
+      pingManager.sendPing("eventName", null, "metadataValue");
+      fail();
+    } catch (IllegalArgumentException e) {
+      assertEquals("metadataKey null or empty", e.getMessage());
+    }
+  }
+
+  @Test
+  public void testSendPingArguments_emptyMetadataKey() {
+    try {
+      pingManager.sendPing("eventName", "", "metadataValue");
+      fail();
+    } catch (IllegalArgumentException e) {
+      assertEquals("metadataKey null or empty", e.getMessage());
+    }
+  }
+
+  @Test
+  public void testSendPingArguments_nullMetadataValue() {
+    try {
+      pingManager.sendPing("eventName", "metadataKey", null);
+      fail();
+    } catch (IllegalArgumentException e) {
+      assertEquals("metadataValue null or empty", e.getMessage());
+    }
+  }
+
+  @Test
   public void testSendPingArguments_emptyMetadataValue() {
-    pingManager.sendPing("eventName", "metadataKey", "");
+    try {
+      pingManager.sendPing("eventName", "metadataKey", "");
+      fail();
+    } catch (IllegalArgumentException e) {
+      assertEquals("metadataValue null or empty", e.getMessage());
+    }
+  }
+
+  @Test
+  public void testSendPingArguments_validMetadataMap() {
+    pingManager.sendPing("eventName", EMPTY_MAP);
   }
 }

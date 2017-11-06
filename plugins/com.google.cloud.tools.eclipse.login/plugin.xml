@@ -48,7 +48,7 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="menu:com.google.cloud.tools.eclipse.appengine.actions?after=accounts">
+            locationURI="menu:com.google.cloud.tools.eclipse.ui.actions?after=accounts">
          <command
                commandId="com.google.cloud.tools.eclipse.login.commands.loginCommand"
                icon="icons/googleFavicon.png"

@@ -71,6 +71,12 @@ import org.osgi.framework.FrameworkUtil;
  */
 public abstract class DeployCommandHandler extends AbstractHandler {
 
+  private final String analyticsDeployEventMetadataKey;
+
+  public DeployCommandHandler(String analyticsDeployEventMetadataKey) {
+    this.analyticsDeployEventMetadataKey = analyticsDeployEventMetadataKey;
+  }
+
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
     try {
@@ -142,8 +148,8 @@ public abstract class DeployCommandHandler extends AbstractHandler {
 
   private void launchDeployJob(IProject project, Credential credential)
       throws IOException, CoreException {
-    AnalyticsPingManager.getInstance().sendPing(
-        AnalyticsEvents.APP_ENGINE_DEPLOY, AnalyticsEvents.APP_ENGINE_DEPLOY_STANDARD, null);
+    AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_DEPLOY,
+        analyticsDeployEventMetadataKey);
 
     IPath workDirectory = createWorkDirectory();
     DeployPreferences deployPreferences = getDeployPreferences(project);
@@ -172,7 +178,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
       public void done(IJobChangeEvent event) {
         if (event.getResult().isOK()) {
           AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_DEPLOY_SUCCESS,
-              AnalyticsEvents.APP_ENGINE_DEPLOY_STANDARD, null);
+              analyticsDeployEventMetadataKey);
         }
         launchCleanupJob();
       }

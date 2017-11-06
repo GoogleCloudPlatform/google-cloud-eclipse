@@ -164,7 +164,7 @@
          unpack="false"/>
 
    <plugin
-         id="com.google.cloud.tools.eclipse.ui.util"
+         id="com.google.cloud.tools.eclipse.ui"
          download-size="0"
          install-size="0"
          version="0.0.0"
