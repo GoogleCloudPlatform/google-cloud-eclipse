@@ -66,34 +66,29 @@ public class AccountSelectorTest {
     when(account3.getOAuth2Credential()).thenReturn(credential3);
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void testConstructor_nullLoginMessage() {
-    new AccountSelector(shell, loginService, null);
-  }
-
   @Test
   public void testComboSetup_noAccount() {
     when(loginService.getAccounts()).thenReturn(new HashSet<Account>());
 
-    AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
+    AccountSelector selector = new AccountSelector(shell, loginService);
     assertEquals(-1, selector.combo.getSelectionIndex());
     assertNull(selector.getSelectedCredential());
     assertTrue(selector.getSelectedEmail().isEmpty());
     assertEquals(1, selector.combo.getItemCount());
-    assertEquals("<select this to login>", selector.combo.getItem(0));
+    assertEquals("<Sign into another account...>", selector.combo.getItem(0));
   }
 
   @Test
   public void testComboSetup_oneAccount() {
     when(loginService.getAccounts()).thenReturn(Collections.singleton(account1));
 
-    AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
+    AccountSelector selector = new AccountSelector(shell, loginService);
     assertEquals(-1, selector.combo.getSelectionIndex());
     assertNull(selector.getSelectedCredential());
     assertTrue(selector.getSelectedEmail().isEmpty());
     assertEquals(2, selector.combo.getItemCount());
     assertEquals("some-email-1@example.com", selector.combo.getItem(0));
-    assertEquals("<select this to login>", selector.combo.getItem(1));
+    assertEquals("<Sign into another account...>", selector.combo.getItem(1));
   }
 
   @Test
@@ -101,7 +96,7 @@ public class AccountSelectorTest {
     when(loginService.getAccounts())
         .thenReturn(new HashSet<>(Arrays.asList(account1, account2, account3)));
 
-    AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
+    AccountSelector selector = new AccountSelector(shell, loginService);
     assertEquals(-1, selector.combo.getSelectionIndex());
     assertNull(selector.getSelectedCredential());
     assertTrue(selector.getSelectedEmail().isEmpty());
@@ -111,7 +106,7 @@ public class AccountSelectorTest {
     assertTrue(allEmails.contains("some-email-1@example.com"));
     assertTrue(allEmails.contains("some-email-2@example.com"));
     assertTrue(allEmails.contains("some-email-3@example.com"));
-    assertEquals("<select this to login>", selector.combo.getItem(3));
+    assertEquals("<Sign into another account...>", selector.combo.getItem(3));
   }
 
 
@@ -119,7 +114,7 @@ public class AccountSelectorTest {
   public void testIsEmailAvailable_noAccount() {
     when(loginService.getAccounts()).thenReturn(new HashSet<Account>());
 
-    AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
+    AccountSelector selector = new AccountSelector(shell, loginService);
     assertFalse(selector.isEmailAvailable(null));
     assertFalse(selector.isEmailAvailable(""));
   }
@@ -129,7 +124,7 @@ public class AccountSelectorTest {
     when(loginService.getAccounts())
         .thenReturn(new HashSet<>(Arrays.asList(account1, account2, account3)));
 
-    AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
+    AccountSelector selector = new AccountSelector(shell, loginService);
     assertFalse(selector.isEmailAvailable(null));
     assertFalse(selector.isEmailAvailable(""));
     assertTrue(selector.isEmailAvailable("some-email-1@example.com"));
@@ -141,7 +136,7 @@ public class AccountSelectorTest {
   public void testGetSelectedCredential() {
     when(loginService.getAccounts())
         .thenReturn(new HashSet<>(Arrays.asList(account1, account2, account3)));
-    AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
+    AccountSelector selector = new AccountSelector(shell, loginService);
 
     assertEquals(-1, selector.combo.getSelectionIndex());
     assertNull(selector.getSelectedCredential());
@@ -158,7 +153,7 @@ public class AccountSelectorTest {
   @Test
   public void testSelectAccount_nonExistingEmailClearsSelection() {
     when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
-    AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
+    AccountSelector selector = new AccountSelector(shell, loginService);
 
     selector.selectAccount("some-email-2@example.com");
     assertEquals("some-email-2@example.com", selector.getSelectedEmail());
@@ -172,7 +167,7 @@ public class AccountSelectorTest {
   public void testSelectAccount() {
     when(loginService.getAccounts())
         .thenReturn(new HashSet<>(Arrays.asList(account1, account2, account3)));
-    AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
+    AccountSelector selector = new AccountSelector(shell, loginService);
 
     assertEquals(-1, selector.combo.getSelectionIndex());
     assertTrue(selector.getSelectedEmail().isEmpty());
@@ -188,7 +183,7 @@ public class AccountSelectorTest {
   @Test
   public void testSelectAccount_nonExistingEmail() {
     when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
-    AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
+    AccountSelector selector = new AccountSelector(shell, loginService);
 
     assertEquals(-1, selector.combo.getSelectionIndex());
     assertTrue(selector.getSelectedEmail().isEmpty());
@@ -202,7 +197,7 @@ public class AccountSelectorTest {
   @Test
   public void testSelectAccount_nullOrEmptyEmail() {
     when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
-    AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
+    AccountSelector selector = new AccountSelector(shell, loginService);
 
     assertEquals(-1, selector.combo.getSelectionIndex());
     assertTrue(selector.getSelectedEmail().isEmpty());
@@ -222,10 +217,10 @@ public class AccountSelectorTest {
   public void testLogin_itemAddedAtTopAndSelected() {
     when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
     when(loginService.logIn(anyString())).thenReturn(account3);
-    AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
+    AccountSelector selector = new AccountSelector(shell, loginService);
     assertEquals(3, selector.combo.getItemCount());
 
-    assertEquals("<select this to login>", selector.combo.getItem(2));
+    assertEquals("<Sign into another account...>", selector.combo.getItem(2));
     simulateSelect(selector, 2);
 
     assertEquals(4, selector.combo.getItemCount());
@@ -233,7 +228,7 @@ public class AccountSelectorTest {
     assertEquals("some-email-3@example.com", selector.combo.getItem(0));
     assertEquals(0, selector.combo.getSelectionIndex());
     assertEquals(credential3, selector.getSelectedCredential());
-    assertEquals("<select this to login>", selector.combo.getItem(3));
+    assertEquals("<Sign into another account...>", selector.combo.getItem(3));
   }
 
   @Test
@@ -241,11 +236,11 @@ public class AccountSelectorTest {
     when(loginService.getAccounts())
         .thenReturn(new HashSet<>(Arrays.asList(account1, account2, account3)));
     when(loginService.logIn(anyString())).thenReturn(account1);
-    AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
+    AccountSelector selector = new AccountSelector(shell, loginService);
     assertEquals(4, selector.combo.getItemCount());
     assertEquals(-1, selector.combo.getSelectionIndex());
 
-    assertEquals("<select this to login>", selector.combo.getItem(3));
+    assertEquals("<Sign into another account...>", selector.combo.getItem(3));
     simulateSelect(selector, 3);
 
     assertEquals(4, selector.combo.getItemCount());
@@ -259,7 +254,7 @@ public class AccountSelectorTest {
   public void testFailedLogin_reselectLoginLinkItem() {
     when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
     when(loginService.logIn(anyString())).thenReturn(null);
-    AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
+    AccountSelector selector = new AccountSelector(shell, loginService);
     assertEquals(3, selector.combo.getItemCount());
 
     simulateSelect(selector, 1);
@@ -267,7 +262,7 @@ public class AccountSelectorTest {
     assertNotNull(selector.getSelectedCredential());
     assertFalse(selector.getSelectedEmail().isEmpty());
 
-    assertEquals("<select this to login>", selector.combo.getItem(2));
+    assertEquals("<Sign into another account...>", selector.combo.getItem(2));
     simulateSelect(selector, 2);
 
     assertEquals(3, selector.combo.getItemCount());
@@ -279,27 +274,27 @@ public class AccountSelectorTest {
 
   @Test
   public void testIsSignedIn_notSignedIn() {
-    AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
+    AccountSelector selector = new AccountSelector(shell, loginService);
     assertFalse(selector.isSignedIn());
   }
 
   @Test
   public void testIsSignedIn_signedIn() {
     when(loginService.getAccounts()).thenReturn(Collections.singleton(account1));
-    AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
+    AccountSelector selector = new AccountSelector(shell, loginService);
     assertTrue(selector.isSignedIn());
   }
 
   @Test
   public void testGetAccountCount() {
-    AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
+    AccountSelector selector = new AccountSelector(shell, loginService);
     assertEquals(0, selector.getAccountCount());
   }
 
   @Test
   public void testGetAccountCount_oneAccount() {
     when(loginService.getAccounts()).thenReturn(Collections.singleton(account1));
-    AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
+    AccountSelector selector = new AccountSelector(shell, loginService);
     assertEquals(1, selector.getAccountCount());
   }
 
@@ -307,7 +302,7 @@ public class AccountSelectorTest {
   public void testGetAccountCount_threeAccounts() {
     when(loginService.getAccounts()).thenReturn(
         new HashSet<>(Arrays.asList(account1, account2, account3)));
-    AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
+    AccountSelector selector = new AccountSelector(shell, loginService);
     assertEquals(3, selector.getAccountCount());
   }
 
@@ -315,7 +310,7 @@ public class AccountSelectorTest {
   public void testInitialItemOrder() {
     when(loginService.getAccounts())
         .thenReturn(new HashSet<>(Arrays.asList(account3, account2, account1)));
-    AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
+    AccountSelector selector = new AccountSelector(shell, loginService);
     assertEquals(4, selector.combo.getItemCount());
     assertEquals(account1.getEmail(), selector.combo.getItem(0));
     assertEquals(account2.getEmail(), selector.combo.getItem(1));
@@ -324,14 +319,14 @@ public class AccountSelectorTest {
 
   @Test(expected = IllegalStateException.class)
   public void testGetFirstEmail_noAccount() {
-    AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
+    AccountSelector selector = new AccountSelector(shell, loginService);
     selector.getFirstEmail();
   }
 
   @Test
   public void testGetFirstEmail_oneAccount() {
     when(loginService.getAccounts()).thenReturn(Collections.singleton(account2));
-    AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
+    AccountSelector selector = new AccountSelector(shell, loginService);
     assertEquals(account2.getEmail(), selector.getFirstEmail());
   }
 
@@ -339,7 +334,7 @@ public class AccountSelectorTest {
   public void testGetFirstEmail_threeAccounts() {
     when(loginService.getAccounts())
        .thenReturn(new HashSet<>(Arrays.asList(account3, account2, account1)));
-    AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
+    AccountSelector selector = new AccountSelector(shell, loginService);
     assertEquals(account1.getEmail(), selector.getFirstEmail());  // Accounts are sorted.
   }
 

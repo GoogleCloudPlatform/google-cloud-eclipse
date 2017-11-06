@@ -47,8 +47,7 @@ public class GcpEmulationTab extends AbstractLaunchConfigurationTab {
     new Label(composite, SWT.LEAD).setText("Account:");
     IGoogleLoginService loginService =
         PlatformUI.getWorkbench().getService(IGoogleLoginService.class);
-    accountSelector = new AccountSelector(composite, loginService,
-        "<Sign into another account...>");
+    accountSelector = new AccountSelector(composite, loginService);
 
     new Label(composite, SWT.LEAD).setText("Service key:");
     serviceKeyInput = new Text(composite, SWT.BORDER);

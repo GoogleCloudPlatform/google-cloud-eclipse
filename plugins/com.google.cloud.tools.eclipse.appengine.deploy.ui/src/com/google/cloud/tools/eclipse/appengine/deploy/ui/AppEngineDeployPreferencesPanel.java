@@ -352,8 +352,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     accountLabel.setText(Messages.getString("deploy.preferences.dialog.label.selectAccount"));
     accountLabel.setToolTipText(Messages.getString("tooltip.account"));
 
-    accountSelector = new AccountSelector(this, loginService,
-        Messages.getString("deploy.preferences.dialog.accountSelector.login"));
+    accountSelector = new AccountSelector(this, loginService);
     accountSelector.setToolTipText(Messages.getString("tooltip.account"));
     GridData accountSelectorGridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
     accountSelector.setLayoutData(accountSelectorGridData);

@@ -132,14 +132,13 @@ public class RunOptionsDefaultsComponent {
     this.target = target;
     this.page = page;
     this.messageTarget = messageTarget;
-    this.displayExecutor = DisplayExecutor.create(target.getDisplay());
+    displayExecutor = DisplayExecutor.create(target.getDisplay());
     this.apiFactory = apiFactory;
     this.allowIncomplete = allowIncomplete;
 
     Label accountLabel = new Label(target, SWT.NULL);
     accountLabel.setText(Messages.getString("account")); //$NON-NLS-1$
-    accountSelector =
-        new AccountSelector(target, loginService, Messages.getString("sign.into.another.account")); //$NON-NLS-1$
+    accountSelector = new AccountSelector(target, loginService);
 
     Label projectInputLabel = new Label(target, SWT.NULL);
     projectInputLabel.setText(Messages.getString("cloud.platform.project.id")); //$NON-NLS-1$
