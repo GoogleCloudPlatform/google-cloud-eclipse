@@ -41,6 +41,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.e4.core.di.annotations.Creatable;
@@ -130,11 +131,7 @@ public class LibraryClasspathContainerSerializer {
       out.write(gson.toJson(libraryIds.toArray()));
     }
     // delete the container state cache file since the library list has changed
-    File stateFile = getContainerStateFile(javaProject, CloudLibraries.MASTER_CONTAINER_ID, false);
-    if (stateFile != null) {
-      stateFile.delete();
-    }
-
+    stateLocationProvider.removeContainerStateFile(javaProject, CloudLibraries.MASTER_CONTAINER_ID);
   }
 
   public List<String> loadLibraryIds(IJavaProject javaProject)
@@ -170,6 +167,7 @@ public class LibraryClasspathContainerSerializer {
     return null;
   }
 
+
   private static class DefaultStateLocationProvider
       implements LibraryContainerStateLocationProvider {
 
@@ -180,6 +178,15 @@ public class LibraryClasspathContainerSerializer {
     @Override
     public IPath getContainerStateFile(IJavaProject javaProject, String id,
         boolean create) throws CoreException {
+      IFile containerFile = getFile(javaProject, id, create);
+      if (!containerFile.exists() && create) {
+        containerFile.create(new ByteArrayInputStream(new byte[0]), true, null);
+      }
+      return containerFile.getLocation();
+    }
+
+    private IFile getFile(IJavaProject javaProject, String id, boolean create)
+        throws CoreException {
       IFolder settingsFolder = javaProject.getProject().getFolder(".settings"); //$NON-NLS-1$
       IFolder folder =
           settingsFolder.getFolder(FrameworkUtil.getBundle(getClass()).getSymbolicName());
@@ -187,10 +194,15 @@ public class LibraryClasspathContainerSerializer {
         folder.create(true, true, null);
       }
       IFile containerFile = folder.getFile(id + ".container"); //$NON-NLS-1$
-      if (!containerFile.exists() && create) {
-        containerFile.create(new ByteArrayInputStream(new byte[0]), true, null);
+      return containerFile;
+    }
+
+    @Override
+    public void removeContainerStateFile(IJavaProject javaProject, String id) throws CoreException {
+      IFile stateFile = getFile(javaProject, id, false);
+      if (stateFile != null && stateFile.exists()) {
+        stateFile.delete(true, new NullProgressMonitor());
       }
-      return containerFile.getLocation();
     }
   }
 

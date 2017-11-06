@@ -25,6 +25,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
@@ -54,7 +55,9 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LibraryClasspathContainerSerializerTest {
@@ -75,7 +78,7 @@ public class LibraryClasspathContainerSerializerTest {
   private LibraryClasspathContainer container;
 
   @Before
-  public void setUp() throws IOException {
+  public void setUp() throws IOException, CoreException {
     serializedContainer = loadFile("testdata/serializedContainer.json");
     
     List<IClasspathEntry> classpathEntries = Arrays.asList(
@@ -84,6 +87,20 @@ public class LibraryClasspathContainerSerializerTest {
             new IAccessRule[] {newAccessRule("/com/example/accessible", true /* accessible */),
                 newAccessRule("/com/example/nonaccessible", false /* accessible */)},
             true));
+
+    doAnswer(new Answer<Void>() {
+      @Override
+      public Void answer(InvocationOnMock invocation) throws Throwable {
+        IJavaProject project = invocation.getArgumentAt(0, IJavaProject.class);
+        String fileId = invocation.getArgumentAt(1, String.class);
+        IPath path = stateLocationProvider.getContainerStateFile(project, fileId, false);
+        if (path != null && path.toFile() != null) {
+          path.toFile().delete();
+        }
+        return null;
+      }
+    }).when(stateLocationProvider).removeContainerStateFile(any(IJavaProject.class), anyString());
+
     when(binaryBaseLocationProvider.getBaseLocation()).thenReturn(new Path("/test"));
     when(sourceBaseLocationProvider.getBaseLocation()).thenReturn(new Path("/test"));
     MavenCoordinates coordinates = new MavenCoordinates.Builder()
