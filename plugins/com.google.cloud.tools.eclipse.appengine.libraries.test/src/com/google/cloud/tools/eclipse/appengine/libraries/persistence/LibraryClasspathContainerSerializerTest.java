@@ -17,12 +17,14 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.persistence;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
@@ -183,7 +185,7 @@ public class LibraryClasspathContainerSerializerTest {
         StandardOpenOption.TRUNCATE_EXISTING);
     LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer(
         stateLocationProvider, binaryBaseLocationProvider, sourceBaseLocationProvider);
-    List<String> libraryIds = serializer.loadLibraryIds(javaProject, new Path(CONTAINER_PATH));
+    List<String> libraryIds = serializer.loadLibraryIds(javaProject);
     assertThat(libraryIds, Matchers.contains("a", "b"));
   }
 
@@ -197,7 +199,7 @@ public class LibraryClasspathContainerSerializerTest {
         StandardOpenOption.TRUNCATE_EXISTING);
     LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer(
         stateLocationProvider, binaryBaseLocationProvider, sourceBaseLocationProvider);
-    List<String> libraryIds = serializer.loadLibraryIds(javaProject, new Path(CONTAINER_PATH));
+    List<String> libraryIds = serializer.loadLibraryIds(javaProject);
     assertTrue(libraryIds.isEmpty());
   }
 
@@ -208,20 +210,25 @@ public class LibraryClasspathContainerSerializerTest {
         anyBoolean())).thenReturn(stateFilePath);
     LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer(
         stateLocationProvider, binaryBaseLocationProvider, sourceBaseLocationProvider);
-    List<String> libraryIds = serializer.loadLibraryIds(javaProject, new Path(CONTAINER_PATH));
+    List<String> libraryIds = serializer.loadLibraryIds(javaProject);
     assertTrue(libraryIds.isEmpty());
   }
 
   @Test
   public void testLibraryIdsRoundtrip() throws IOException, CoreException {
+    Path librariesFilePath = new Path(stateFolder.newFile().getAbsolutePath());
     Path stateFilePath = new Path(stateFolder.newFile().getAbsolutePath());
-    when(stateLocationProvider.getContainerStateFile(any(IJavaProject.class), anyString(),
-        anyBoolean())).thenReturn(stateFilePath);
+    when(stateLocationProvider.getContainerStateFile(any(IJavaProject.class),
+        eq("_libraries"), anyBoolean())).thenReturn(librariesFilePath);
+    when(stateLocationProvider.getContainerStateFile(any(IJavaProject.class),
+        eq("master-container"), anyBoolean())).thenReturn(stateFilePath);
     LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer(
         stateLocationProvider, binaryBaseLocationProvider, sourceBaseLocationProvider);
-    serializer.saveLibraryIds(javaProject, new Path(CONTAINER_PATH), Arrays.asList("a", "b"));
-    assertTrue(stateFilePath.toFile().exists());
-    List<String> libraryIds = serializer.loadLibraryIds(javaProject, new Path(CONTAINER_PATH));
+    serializer.saveLibraryIds(javaProject, Arrays.asList("a", "b"));
+    assertTrue(librariesFilePath.toFile().exists());
+    assertFalse("saving library list should toss container state cache",
+        stateFilePath.toFile().exists());
+    List<String> libraryIds = serializer.loadLibraryIds(javaProject);
     assertThat(libraryIds, Matchers.contains("a", "b"));
   }
 

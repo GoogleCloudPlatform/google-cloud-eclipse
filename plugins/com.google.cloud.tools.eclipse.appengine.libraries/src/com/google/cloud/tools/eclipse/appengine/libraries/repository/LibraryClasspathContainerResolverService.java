@@ -121,7 +121,7 @@ public class LibraryClasspathContainerResolverService
       String libraryId = containerPath.segment(1);
       Library library = null;
       if (CloudLibraries.MASTER_CONTAINER_ID.equals(libraryId)) {
-        List<String> referencedIds = serializer.loadLibraryIds(javaProject, containerPath);
+        List<String> referencedIds = serializer.loadLibraryIds(javaProject);
         List<Library> referencedLibraries = new ArrayList<>();
         for (String referencedId : referencedIds) {
           Library referencedLibrary = CloudLibraries.getLibrary(referencedId);

@@ -149,10 +149,11 @@ public class BuildPath {
   }
 
   /**
-   * @return an {@link IClasspathEntry} created from {@code library} if {@code javaProject} does not
-   *     already have the entry; otherwise, {@code null}
+   * Returns the entry of {@code library} to be added to the classpath of {@code javaProject}, if
+   * the project does not already have it. (Note that this does not add it to the classpath.)
+   * Returns {@code null} otherwise.
    */
-  private static IClasspathEntry computeEntry(IJavaProject javaProject, Library library,
+  public static IClasspathEntry computeEntry(IJavaProject javaProject, Library library,
       IProgressMonitor monitor) throws CoreException {
     SubMonitor subMonitor = SubMonitor.convert(monitor, Messages.getString("computing.entries"), 1); //$NON-NLS-1$
     
@@ -164,18 +165,6 @@ public class BuildPath {
     return alreadyExists ? null : libraryContainer;
   }
   
-  /**
-   * Returns the entry of {@code library} to be added to the classpath of {@code javaProject}, if
-   * the project does not already have it. (Note that this does not add it to the classpath.)
-   * Returns {@code null} otherwise.
-   */
-  public static IClasspathEntry listNativeLibrary(IJavaProject javaProject, Library library,
-      IProgressMonitor monitor) throws CoreException {
-    IClasspathEntry libraryEntry = computeEntry(javaProject, library, monitor);
-    runContainerResolverJob(javaProject);
-    return libraryEntry;
-  }
-
   private static IClasspathEntry makeClasspathEntry(Library library) throws CoreException {
     IClasspathAttribute[] classpathAttributes = new IClasspathAttribute[1];
     if (library.isExport()) {
@@ -189,7 +178,7 @@ public class BuildPath {
         classpathAttributes, false);
   }
 
-  private static void runContainerResolverJob(IJavaProject javaProject) {
+  public static void runContainerResolverJob(IJavaProject javaProject) {
     IEclipseContext context = EclipseContextFactory.getServiceContext(
         FrameworkUtil.getBundle(BuildPath.class).getBundleContext());
     final IEclipseContext childContext =

@@ -7,7 +7,7 @@
     <classpathContainerPage
        id="com.google.cloud.tools.eclipse.appengine.libraries"
        name="%googleCloudClientLibrariesTitle"
-       class="com.google.cloud.tools.eclipse.appengine.libraries.ui.ApiClientLibrariesPage">
+       class="com.google.cloud.tools.eclipse.appengine.libraries.ui.CloudLibrariesPage">
     </classpathContainerPage>
     
  </extension>

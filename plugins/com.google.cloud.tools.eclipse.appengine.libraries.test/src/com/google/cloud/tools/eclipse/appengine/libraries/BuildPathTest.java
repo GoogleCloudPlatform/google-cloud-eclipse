@@ -24,7 +24,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
@@ -65,15 +64,6 @@ public class BuildPathTest {
     Assert.assertEquals(initialClasspathSize + 1, project.getRawClasspath().length);
   }
   
-  @Test
-  public void testListNativeLibrary() throws CoreException {
-    Library library = new Library("libraryId");
-    IClasspathEntry result =
-        BuildPath.listNativeLibrary(project, library, new NullProgressMonitor());
-    Assert.assertNotNull(result);
-    Assert.assertEquals(initialClasspathSize, project.getRawClasspath().length);
-  }
-
   @Test
   public void testAddLibraries() throws CoreException {
     Library library = new Library("libraryId");

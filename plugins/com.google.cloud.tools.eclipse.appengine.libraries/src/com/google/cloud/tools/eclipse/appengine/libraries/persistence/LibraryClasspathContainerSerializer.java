@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.persistence;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
@@ -118,20 +119,24 @@ public class LibraryClasspathContainerSerializer {
     }
   }
 
-  // todo containerPath argument is not used
   public void saveLibraryIds(IJavaProject javaProject, List<String> libraryIds)
       throws CoreException, IOException {
-    File stateFile = getContainerStateFile(javaProject, CONTAINER_LIBRARY_LIST_FILE_ID, true);
-    if (stateFile == null) {
+    File librariesFile = getContainerStateFile(javaProject, CONTAINER_LIBRARY_LIST_FILE_ID, true);
+    if (librariesFile == null) {
       logger.warning("Master libraries file cannot be created, save failed"); //$NON-NLS-1$
       return;
     }
-    try (Writer out = Files.newBufferedWriter(stateFile.toPath(), StandardCharsets.UTF_8)) {
+    try (Writer out = Files.newBufferedWriter(librariesFile.toPath(), StandardCharsets.UTF_8)) {
       out.write(gson.toJson(libraryIds.toArray()));
     }
+    // delete the container state cache file since the library list has changed
+    File stateFile = getContainerStateFile(javaProject, CloudLibraries.MASTER_CONTAINER_ID, false);
+    if (stateFile != null) {
+      stateFile.delete();
+    }
+
   }
 
-  // todo containerPath argument is not used
   public List<String> loadLibraryIds(IJavaProject javaProject)
       throws IOException, CoreException {
     File stateFile = getContainerStateFile(javaProject, CONTAINER_LIBRARY_LIST_FILE_ID, false);
@@ -154,7 +159,6 @@ public class LibraryClasspathContainerSerializer {
       return Collections.emptyList();
     }
   }
-
 
   private File getContainerStateFile(IJavaProject javaProject, String fileId, boolean create)
       throws CoreException {

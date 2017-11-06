@@ -34,7 +34,6 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -128,10 +127,12 @@ public class CloudLibrariesPage extends WizardPage
          */
         Library masterLibrary =
             BuildPath.collectLibraryFiles(project, libraries, new NullProgressMonitor());
-        newEntry = BuildPath.listNativeLibrary(project, masterLibrary, new NullProgressMonitor());
-        IPath containerPath = newEntry != null ? newEntry.getPath() : oldEntry.getPath();
-        BuildPath.saveLibraryList(project, containerPath, libraries,
-            new NullProgressMonitor());
+        newEntry = BuildPath.computeEntry(project, masterLibrary, new NullProgressMonitor());
+        BuildPath.saveLibraryList(project, libraries, new NullProgressMonitor());
+        if (newEntry == null) {
+          // container-editing only refreshes the content if new
+          BuildPath.runContainerResolverJob(project);
+        }
       }
       return true;
     } catch (CoreException ex) {
@@ -165,7 +166,7 @@ public class CloudLibrariesPage extends WizardPage
   void setSelectedLibraries(List<Library> selectedLibraries) {
     initialSelection = new ArrayList<>(selectedLibraries);
     List<Library> remaining = new ArrayList<>(selectedLibraries);
-    if (librariesSelectors != null) {
+    if (!librariesSelectors.isEmpty()) {
       for (LibrarySelectorGroup librarySelector : librariesSelectors) {
         librarySelector.setSelection(new StructuredSelection(initialSelection));
         remaining.removeAll(librarySelector.getSelectedLibraries());
@@ -188,7 +189,7 @@ public class CloudLibrariesPage extends WizardPage
     }
     try {
       List<Library> savedLibraries =
-          BuildPath.loadLibraryList(project, containerEntry.getPath(), new NullProgressMonitor());
+          BuildPath.loadLibraryList(project, new NullProgressMonitor());
       setSelectedLibraries(savedLibraries);
     } catch (CoreException ex) {
       logger.log(Level.WARNING,
