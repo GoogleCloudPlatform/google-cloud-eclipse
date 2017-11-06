@@ -41,97 +41,91 @@
                 <artifactItem>
                   <groupId>com.google.api-client</groupId>
                   <artifactId>google-api-client</artifactId>
-                  <version>1.22.0</version>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>com.google.apis</groupId>
-                  <artifactId>google-api-services-appengine</artifactId>
-                  <version>v1-rev26-1.22.0</version>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>com.google.apis</groupId>
-                  <artifactId>google-api-services-cloudresourcemanager</artifactId>
-                  <version>v1-rev444-1.22.0</version>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>com.google.apis</groupId>
-                  <artifactId>google-api-services-servicemanagement</artifactId>
-                  <version>v1-rev358-1.22.0</version>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>com.google.apis</groupId>
-                  <artifactId>google-api-services-storage</artifactId>
-                  <version>v1-rev109-1.22.0</version>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>com.google.apis</groupId>
-                  <artifactId>google-api-services-compute</artifactId>
-                  <version>v1-rev152-1.22.0</version>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>com.google.apis</groupId>
-                  <artifactId>google-api-services-dataflow</artifactId>
-                  <version>v1b3-rev209-1.22.0</version>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>com.google.apis</groupId>
-                  <artifactId>google-api-services-bigquery</artifactId>
-                  <version>v2-rev353-1.22.0</version>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>com.google.apis</groupId>
-                  <artifactId>google-api-services-pubsub</artifactId>
-                  <version>v1beta2-rev364-1.22.0</version>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>com.google.apis</groupId>
-                  <artifactId>google-api-services-datastore</artifactId>
-                  <version>v1beta3-rev35-1.22.0</version> <!-- or v1-rev27-1.22.0? -->
-                </artifactItem>
-                <artifactItem>
-                  <groupId>com.google.apis</groupId>
-                  <artifactId>google-api-services-oauth2</artifactId>
-                  <version>v2-rev127-1.22.0</version>
+                  <version>1.23.0</version>
                 </artifactItem>
 
                 <artifactItem>
                   <groupId>com.google.apis</groupId>
+                  <artifactId>google-api-services-appengine</artifactId>
+                  <version>v1-rev35-1.23.0</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.google.apis</groupId>
+                  <artifactId>google-api-services-cloudresourcemanager</artifactId>
+                  <version>v1-rev455-1.23.0</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.google.apis</groupId>
+                  <artifactId>google-api-services-servicemanagement</artifactId>
+                  <version>v1-rev368-1.23.0</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.google.apis</groupId>
+                  <artifactId>google-api-services-storage</artifactId>
+                  <version>v1-rev115-1.23.0</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.google.apis</groupId>
+                  <artifactId>google-api-services-compute</artifactId>
+                  <version>v1-rev160-1.23.0</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.google.apis</groupId>
+                  <artifactId>google-api-services-dataflow</artifactId>
+                  <version>v1b3-rev219-1.23.0</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.google.apis</groupId>
+                  <artifactId>google-api-services-bigquery</artifactId>
+                  <version>v2-rev362-1.23.0</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.google.apis</groupId>
+                  <artifactId>google-api-services-pubsub</artifactId>
+                  <version>v1-rev363-1.23.0</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.google.apis</groupId>
+                  <artifactId>google-api-services-datastore</artifactId>
+                  <version>v1-rev34-1.23.0</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.google.apis</groupId>
                   <artifactId>google-api-services-oauth2</artifactId>
-                  <version>v2-rev127-1.22.0</version>
+                  <version>v2-rev131-1.23.0</version>
                 </artifactItem>
 
                 <artifactItem>
                   <groupId>com.google.http-client</groupId>
                   <artifactId>google-http-client</artifactId>
-                  <version>1.22.0</version>
+                  <version>1.23.0</version>
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.google.http-client</groupId>
                   <artifactId>google-http-client-jackson</artifactId>
-                  <version>1.22.0</version>
+                  <version>1.23.0</version>
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.google.http-client</groupId>
                   <artifactId>google-http-client-jackson2</artifactId>
-                  <version>1.22.0</version>
+                  <version>1.23.0</version>
                 </artifactItem>
 
                 <artifactItem>
                   <groupId>com.google.oauth-client</groupId>
                   <artifactId>google-oauth-client</artifactId>
-                  <version>1.22.0</version>
+                  <version>1.23.0</version>
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.google.oauth-client</groupId>
                   <artifactId>google-oauth-client-jetty</artifactId>
-                  <version>1.22.0</version>
+                  <version>1.23.0</version>
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.google.oauth-client</groupId>
                   <artifactId>google-oauth-client-java6</artifactId>
-                  <version>1.22.0</version>
+                  <version>1.23.0</version>
                 </artifactItem>
-
                 <artifactItem>
                   <groupId>com.google.cloud.tools.login</groupId>
                   <artifactId>plugins-login-common</artifactId>
