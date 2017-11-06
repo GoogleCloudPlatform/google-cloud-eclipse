@@ -56,7 +56,7 @@ public class LibraryClasspathContainerSerializer {
   private static final Logger logger =
       Logger.getLogger(LibraryClasspathContainerSerializer.class.getName());
 
-  private static final String CONTAINER_LIBRARY_LIST_FILE_ID = "_libraries";
+  private static final String CONTAINER_LIBRARY_LIST_FILE_ID = "_libraries"; //$NON-NLS-1$
 
   private final LibraryContainerStateLocationProvider stateLocationProvider;
   private final ArtifactBaseLocationProvider binaryArtifactBaseLocationProvider;
@@ -84,7 +84,7 @@ public class LibraryClasspathContainerSerializer {
       throws IOException, CoreException {
     File stateFile = getContainerStateFile(javaProject, container.getPath().lastSegment(), true);
     if (stateFile == null) {
-      logger.warning("Container state file cannot be created, save failed");
+      logger.warning("Container state file cannot be created, save failed"); //$NON-NLS-1$
       return;
     }
     try (Writer out = Files.newBufferedWriter(stateFile.toPath(), StandardCharsets.UTF_8)) {
@@ -119,11 +119,11 @@ public class LibraryClasspathContainerSerializer {
   }
 
   // todo containerPath argument is not used
-  public void saveLibraryIds(IJavaProject javaProject, IPath containerPath, List<String> libraryIds)
+  public void saveLibraryIds(IJavaProject javaProject, List<String> libraryIds)
       throws CoreException, IOException {
     File stateFile = getContainerStateFile(javaProject, CONTAINER_LIBRARY_LIST_FILE_ID, true);
     if (stateFile == null) {
-      logger.warning("Master libraries file cannot be created, save failed");
+      logger.warning("Master libraries file cannot be created, save failed"); //$NON-NLS-1$
       return;
     }
     try (Writer out = Files.newBufferedWriter(stateFile.toPath(), StandardCharsets.UTF_8)) {
@@ -132,11 +132,11 @@ public class LibraryClasspathContainerSerializer {
   }
 
   // todo containerPath argument is not used
-  public List<String> loadLibraryIds(IJavaProject javaProject, IPath containerPath)
+  public List<String> loadLibraryIds(IJavaProject javaProject)
       throws IOException, CoreException {
     File stateFile = getContainerStateFile(javaProject, CONTAINER_LIBRARY_LIST_FILE_ID, false);
     if (stateFile == null) {
-      logger.warning("Library-id state file not found: " + stateFile);
+      logger.info("Library-id state file not found for: " + javaProject.getElementName()); //$NON-NLS-1$
       return Collections.emptyList();
     }
     try (Reader reader = Files.newBufferedReader(stateFile.toPath(), StandardCharsets.UTF_8)) {
@@ -150,7 +150,7 @@ public class LibraryClasspathContainerSerializer {
       }
       return libraryIds;
     } catch (JsonSyntaxException ex) {
-      logger.log(Level.WARNING, "Invalid content in library-id state file: " + stateFile, ex);
+      logger.log(Level.WARNING, "Invalid content in library-id state file: " + stateFile, ex); //$NON-NLS-1$
       return Collections.emptyList();
     }
   }
@@ -176,13 +176,13 @@ public class LibraryClasspathContainerSerializer {
     @Override
     public IPath getContainerStateFile(IJavaProject javaProject, String id,
         boolean create) throws CoreException {
-      IFolder settingsFolder = javaProject.getProject().getFolder(".settings");
+      IFolder settingsFolder = javaProject.getProject().getFolder(".settings"); //$NON-NLS-1$
       IFolder folder =
           settingsFolder.getFolder(FrameworkUtil.getBundle(getClass()).getSymbolicName());
       if (!folder.exists() && create) {
         folder.create(true, true, null);
       }
-      IFile containerFile = folder.getFile(id + ".container");
+      IFile containerFile = folder.getFile(id + ".container"); //$NON-NLS-1$
       if (!containerFile.exists() && create) {
         containerFile.create(new ByteArrayInputStream(new byte[0]), true, null);
       }
@@ -206,7 +206,7 @@ public class LibraryClasspathContainerSerializer {
       implements ArtifactBaseLocationProvider {
 
     private static final String APPENGINE_LIBRARIES_BUNDLE_NAME =
-        "com.google.cloud.tools.eclipse.appengine.libraries";
+        "com.google.cloud.tools.eclipse.appengine.libraries"; //$NON-NLS-1$
 
     /**
      * @see com.google.cloud.tools.eclipse.appengine.libraries.persistence.ArtifactBaseLocationProvider#getBaseLocation()
@@ -215,7 +215,7 @@ public class LibraryClasspathContainerSerializer {
     public IPath getBaseLocation() {
       Bundle librariesBundle = Platform.getBundle(APPENGINE_LIBRARIES_BUNDLE_NAME);
       Preconditions.checkState(librariesBundle != null,
-          "Bundle Cloud Tools For Eclipse App Engine Libraries Management not found");
+          "Bundle Cloud Tools For Eclipse App Engine Libraries Management not found"); //$NON-NLS-1$
       return Platform.getStateLocation(librariesBundle);
     }
   }

@@ -18,11 +18,14 @@ package com.google.cloud.tools.eclipse.appengine.libraries.ui;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.ui.util.images.SharedImages;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -45,17 +48,22 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
-public abstract class CloudLibrariesPage extends WizardPage implements IClasspathContainerPage,
-    IClasspathContainerPageExtension {
+/**
+ * Provides for selecting from a suite of useful libraries for GCP projects. Supports editing the
+ * list of libraries for native Cloud Tools for Eclipse projects. Supported only selecting new
+ * libraries for Maven-based projects.
+ */
+public class CloudLibrariesPage extends WizardPage
+    implements IClasspathContainerPage, IClasspathContainerPageExtension {
   private static final Logger logger = Logger.getLogger(CloudLibrariesPage.class.getName());
 
   /**
-   * The library libraryGroups to be displayed; pairs of (id, title). For example, <em>"clientapis" &rarr;
+   * The library groups to be displayed; pairs of (id, title). For example, <em>"clientapis" &rarr;
    * "Google Cloud APIs for Java"</em>.
    */
   private Map<String, String> libraryGroups;
 
-  /** Initially selected libraries. */
+  /** The initially selected libraries. */
   private List<Library> initialSelection = Collections.emptyList();
 
   private final List<LibrarySelectorGroup> librariesSelectors = new ArrayList<>();
@@ -64,19 +72,24 @@ public abstract class CloudLibrariesPage extends WizardPage implements IClasspat
   private IClasspathEntry oldEntry;
   private IClasspathEntry newEntry;
 
-  protected CloudLibrariesPage(String pageId) {
-    super(pageId);
-  }
-
-  /** Set the visible library libraryGroups. Map is set of (id, title) pairs. */
-  protected void setLibraryGroups(Map<String, String> groups) {
-    this.libraryGroups = groups;
+  public CloudLibrariesPage() {
+    super(CloudLibraries.CLIENT_APIS_GROUP);
+    setTitle(Messages.getString("clientapis-title")); //$NON-NLS-1$
+    setDescription(Messages.getString("apiclientlibrariespage-description")); //$NON-NLS-1$
+    setImageDescriptor(SharedImages.GCP_WIZARD_IMAGE_DESCRIPTOR);
   }
 
   @Override
   public void initialize(IJavaProject project, IClasspathEntry[] currentEntries) {
     this.project = project;
     isMavenProject = MavenUtils.hasMavenNature(project.getProject());
+
+    Map<String, String> groups = Maps.newLinkedHashMap();
+    if (AppEngineStandardFacet.getProjectFacetVersion(project.getProject()) != null) {
+      groups.put(CloudLibraries.APP_ENGINE_GROUP, Messages.getString("appengine-title"));
+    }
+    groups.put(CloudLibraries.CLIENT_APIS_GROUP, Messages.getString("clientapis-title"));
+    this.libraryGroups = groups;
   }
 
   @Override

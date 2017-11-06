@@ -36,8 +36,8 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 
-public class ApiClientLibrariesPageTest {
-  private final ApiClientLibrariesPage page = new ApiClientLibrariesPage();
+public class CloudLibrariesPageTest {
+  private final CloudLibrariesPage page = new CloudLibrariesPage();
 
   @Rule
   public ShellTestResource shellTestResource = new ShellTestResource();
@@ -99,10 +99,10 @@ public class ApiClientLibrariesPageTest {
         Matchers.everyItem(Matchers.not(new LibraryMatcher("objectify"))));
   }
 
-  static class LibraryMatcher extends BaseMatcher<Library> {
+  private static class LibraryMatcher extends BaseMatcher<Library> {
     private String libraryId;
 
-    LibraryMatcher(String libraryId) {
+    private LibraryMatcher(String libraryId) {
       this.libraryId = libraryId;
     }
 
