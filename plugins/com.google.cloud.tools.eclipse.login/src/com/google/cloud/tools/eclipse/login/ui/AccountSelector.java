@@ -49,10 +49,10 @@ public class AccountSelector extends Composite {
     super(parent, SWT.NONE);
     this.loginService = loginService;
     this.loginMessage = loginMessage;
-    GridLayoutFactory.fillDefaults().generateLayout(this);
 
     combo = new Combo(this, SWT.READ_ONLY);
     GridDataFactory.fillDefaults().grab(true, false).applyTo(combo);
+    GridLayoutFactory.fillDefaults().applyTo(this);
 
     List<Account> sortedAccounts = new ArrayList<>(loginService.getAccounts());
     Collections.sort(sortedAccounts, new Comparator<Account>() {

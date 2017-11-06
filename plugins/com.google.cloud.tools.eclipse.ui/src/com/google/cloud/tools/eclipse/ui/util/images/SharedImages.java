@@ -25,6 +25,10 @@ public class SharedImages {
       AbstractUIPlugin.imageDescriptorFromPlugin("com.google.cloud.tools.eclipse.ui",
           "icons/obj16/cloudsdk.png");
 
+  public static final ImageDescriptor GCP_IMAGE_DESCRIPTOR =
+      AbstractUIPlugin.imageDescriptorFromPlugin("com.google.cloud.tools.eclipse.ui",
+          "icons/obj16/gcp.png");
+
   public static final ImageDescriptor REFRESH_IMAGE_DESCRIPTOR =
       AbstractUIPlugin.imageDescriptorFromPlugin("org.eclipse.debug.ui",
                                                  "icons/full/obj16/refresh_tab.png");
