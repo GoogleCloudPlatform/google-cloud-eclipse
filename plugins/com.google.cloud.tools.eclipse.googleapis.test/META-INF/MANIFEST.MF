@@ -8,5 +8,5 @@ Bundle-Vendor: Google Inc.
 Bundle-Version: 0.1.0.qualifier
 Fragment-Host: com.google.cloud.tools.eclipse.googleapis
 Require-Bundle: com.google.cloud.tools.eclipse.test.dependencies
-Import-Package: com.google.api.services.storage;version="1.22.0",
+Import-Package: com.google.api.services.storage;version="[1.23.0,1.24.0)",
  com.google.cloud.tools.eclipse.test.util.http
