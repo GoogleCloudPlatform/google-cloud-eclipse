@@ -135,6 +135,7 @@ public class CloudLibrariesPageTest {
     Assert.assertEquals(1, returnedLibraries.size());
     assertThat(returnedLibraries, Matchers.hasItem(new LibraryMatcher("objectify")));
 
+    // select GCS
     page.librariesSelectors.get(1).setSelection(new StructuredSelection("googlecloudstorage"));
 
     // check the library group widgets
@@ -146,6 +147,18 @@ public class CloudLibrariesPageTest {
     returnedLibraries = page.getSelectedLibraries();
     Assert.assertEquals(2, returnedLibraries.size());
     assertThat(returnedLibraries, Matchers.hasItem(new LibraryMatcher("objectify")));
+    assertThat(returnedLibraries, Matchers.hasItem(new LibraryMatcher("googlecloudstorage")));
+
+    // unselect objectify
+    page.librariesSelectors.get(0).setSelection(StructuredSelection.EMPTY);
+
+    // check the library group widgets
+    assertThat(page.librariesSelectors.get(0).getSelectedLibraries(), Matchers.empty());
+    assertThat(page.librariesSelectors.get(1).getSelectedLibraries(),
+        Matchers.hasItem(new LibraryMatcher("googlecloudstorage")));
+
+    returnedLibraries = page.getSelectedLibraries();
+    Assert.assertEquals(1, returnedLibraries.size());
     assertThat(returnedLibraries, Matchers.hasItem(new LibraryMatcher("googlecloudstorage")));
   }
 
