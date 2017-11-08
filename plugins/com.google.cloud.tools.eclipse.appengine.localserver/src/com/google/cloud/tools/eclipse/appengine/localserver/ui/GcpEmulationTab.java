@@ -21,7 +21,8 @@ import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDisposer;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -54,7 +55,13 @@ public class GcpEmulationTab extends AbstractLaunchConfigurationTab {
 
   private Image gcpIcon;
 
-  private String savedGcpProjectId;
+  private boolean initializing;
+  // We set up intermediary models between a run configuration and UI components for certain values,
+  // because, e.g., the account selector cannot load an email if it is not logged in. In such a
+  // case, although nothing is selected in the account selector, we should not clear the email saved
+  // in the run configuration.
+  private String accountEmailModel;
+  private String gcpProjectIdModel;
 
   public GcpEmulationTab() {
     this(PlatformUI.getWorkbench().getService(IGoogleLoginService.class),
@@ -78,6 +85,16 @@ public class GcpEmulationTab extends AbstractLaunchConfigurationTab {
       @Override
       public void run() {
         updateProjectSelector();
+
+        if (!initializing) {
+          boolean emptySelection = accountSelector.getSelectedEmail().isEmpty();
+          boolean savedEmailAvailable = accountSelector.isEmailAvailable(accountEmailModel);
+          if (!emptySelection || savedEmailAvailable) {
+            accountEmailModel = accountSelector.getSelectedEmail();
+            gcpProjectIdModel = "";
+            updateLaunchConfigurationDialog();
+          }
+        }
       }
     });
 
@@ -90,6 +107,19 @@ public class GcpEmulationTab extends AbstractLaunchConfigurationTab {
         SWT.BORDER | SWT.SEARCH | SWT.ICON_SEARCH | SWT.ICON_CANCEL);
 
     projectSelector = new ProjectSelector(projectSelectorComposite);
+    projectSelector.addSelectionChangedListener(new ISelectionChangedListener() {
+      @Override
+      public void selectionChanged(SelectionChangedEvent event) {
+        if (!initializing) {
+          boolean emptySelection = projectSelector.getSelectProjectId().isEmpty();
+          boolean savedIdAvailable = projectSelector.isProjectIdAvailable(gcpProjectIdModel);
+          if (!emptySelection || savedIdAvailable) {
+            gcpProjectIdModel = projectSelector.getSelectProjectId();
+            updateLaunchConfigurationDialog();
+          }
+        }
+      }
+    });
 
     filterField.setMessage("Filter projects by name or ID");
     filterField.addModifyListener(new ModifyListener() {
@@ -134,18 +164,15 @@ public class GcpEmulationTab extends AbstractLaunchConfigurationTab {
 
   @Override
   public void initializeFrom(ILaunchConfiguration configuration) {
-    String accountEmail = getAttribute(configuration, ATTRIBUTE_ACCOUNT_EMAIL, "");
-    savedGcpProjectId = getAttribute(configuration, ATTRIBUTE_GCP_PROJECT, "");
     String serviceKey = getAttribute(configuration, ATTRIBUTE_SERVICE_KEY, "");
+    accountEmailModel = getAttribute(configuration, ATTRIBUTE_ACCOUNT_EMAIL, "");
+    gcpProjectIdModel = getAttribute(configuration, ATTRIBUTE_GCP_PROJECT, "");
 
-    System.out.println("initializeForm: " + configuration.getName());
-    System.out.println("    config: email=" + accountEmail + ", key=" + serviceKey);
-    System.out.println("    UI: email=" + accountSelector.getSelectedEmail() + ", key=" + serviceKeyInput.getText());
-
-    accountSelector.selectAccount(accountEmail);
+    initializing = true;
     serviceKeyInput.setText(serviceKey);
-
-    updateProjectSelector();
+    accountSelector.selectAccount(accountEmailModel);
+    projectSelector.selectProjectId(gcpProjectIdModel);
+    initializing = false;
   }
 
   private void updateProjectSelector() {
@@ -156,68 +183,17 @@ public class GcpEmulationTab extends AbstractLaunchConfigurationTab {
       try {
         List<GcpProject> gcpProjects = projectRepository.getProjects(credential);
         projectSelector.setProjects(gcpProjects);
-
-        if (!savedGcpProjectId.isEmpty()) {
-          GcpProject gcpProject = projectRepository.getProject(credential, savedGcpProjectId);
-          projectSelector.setSelection(new StructuredSelection(gcpProject));
-        }
       } catch (ProjectRepositoryException e) {
         logger.log(Level.WARNING, "Could not retrieve GCP project information from server.", e);
       }
     }
-    updateLaunchConfigurationDialog();
-
-    projectSelector.isProjectIdAvailable(savedGcpProjectId);
-    System.out.println("Can select [" + savedGcpProjectId + "].");
   }
 
   @Override
   public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-    String savedAccountEmail = getAttribute(configuration, ATTRIBUTE_ACCOUNT_EMAIL, "");
-    String savedServiceKey = getAttribute(configuration, ATTRIBUTE_SERVICE_KEY, "");
-
-    System.out.println("performApply: " + configuration.getName());
-    System.out.println("    config: email=" + savedAccountEmail + ", key=" + savedServiceKey);
-    System.out.println("    UI: email=" + accountSelector.getSelectedEmail() + ", key=" + serviceKeyInput.getText());
-
-    // We want to call "setAttribute()" only when really needed; otherwise, Eclipse asks users to
-    // confirm if they want to save non-existential "changes".
-    if (!savedServiceKey.equals(serviceKeyInput.getText())) {
-      configuration.setAttribute(ATTRIBUTE_SERVICE_KEY, serviceKeyInput.getText());
-    }
-
-    String selectedEmail = accountSelector.getSelectedEmail();
-    if (selectedEmail.isEmpty()) {
-      if (!savedAccountEmail.isEmpty()) {
-        // Some email was saved, and now no email is selected: this means either 1) the user
-        // explicitly unselected it to clear the saved email; or 2) the email couldn't be selected
-        // simply because it was not logged in. Don't clear the saved email in the last case.
-        if (accountSelector.isEmailAvailable(savedAccountEmail)) {
-          configuration.setAttribute(ATTRIBUTE_ACCOUNT_EMAIL, "");
-        }
-      }
-    } else if (!savedAccountEmail.equals(selectedEmail)) {
-      configuration.setAttribute(ATTRIBUTE_ACCOUNT_EMAIL, selectedEmail);
-    }
-
-    GcpProject gcpProject = (GcpProject) projectSelector.getSelection().getFirstElement();
-    if (gcpProject == null) {
-      if (!savedGcpProjectId.isEmpty()) {
-        // Some project ID was saved, and now no project is selected: this means either 1) the user
-        // explicitly unselected it to clear the saved project; 2) the user selected another
-        // account (or cleared the current one); or 3) the project couldn't be selected simply
-        // because the project selector did not have a credential to list projects (i.e., the
-        // required account was not logged in). Don't clear the saved project in the last case.
-        String updatedAccountEmail = getAttribute(configuration, ATTRIBUTE_ACCOUNT_EMAIL, "");
-        boolean emailChanged = savedAccountEmail.equals(updatedAccountEmail);
-
-        if (emailChanged || projectSelector.isProjectIdAvailable(savedGcpProjectId)) {
-          configuration.setAttribute(ATTRIBUTE_GCP_PROJECT, "");
-        }
-      }
-    } else if (!savedGcpProjectId.equals(gcpProject.getId())) {
-      configuration.setAttribute(ATTRIBUTE_GCP_PROJECT, gcpProject.getId());
-    }
+    configuration.setAttribute(ATTRIBUTE_SERVICE_KEY, serviceKeyInput.getText());
+    configuration.setAttribute(ATTRIBUTE_ACCOUNT_EMAIL, accountEmailModel);
+    configuration.setAttribute(ATTRIBUTE_GCP_PROJECT, gcpProjectIdModel);
   }
 
   @Override
