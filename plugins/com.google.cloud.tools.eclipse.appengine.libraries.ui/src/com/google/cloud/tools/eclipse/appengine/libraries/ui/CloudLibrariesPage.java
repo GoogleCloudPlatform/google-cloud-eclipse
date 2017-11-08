@@ -190,10 +190,11 @@ public class CloudLibrariesPage extends WizardPage
 
   @Override
   public void setSelection(IClasspathEntry containerEntry) {
-    // null means new entry, so nothing to read in; might be usful to read in
-    // current dependencies for maven projects
+    // Although null means "new entry", we only support a single entry
+    // and since we use a fixed container path, we treat null as edit-current-entry
+    // FIXME: might be useful to read in current dependencies for maven projects
     oldEntry = containerEntry;
-    if (containerEntry == null || isMavenProject) {
+    if (project == null || isMavenProject) {
       return;
     }
     try {
