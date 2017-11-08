@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.persistence;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
+import com.google.cloud.tools.eclipse.appengine.libraries.Messages;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
@@ -59,7 +60,7 @@ class SerializableLibraryClasspathContainer {
     }
     
     Library masterLibrary = new Library(CloudLibraries.MASTER_CONTAINER_ID);
-    masterLibrary.setName("Google APIs"); //$NON-NLS-1$
+    masterLibrary.setName(Messages.getString("google.cloud.platform.libraries")); //$NON-NLS-1$
     if (libraryFiles == null) { // we deserialized an old version
       libraryFiles = new ArrayList<>();
     }

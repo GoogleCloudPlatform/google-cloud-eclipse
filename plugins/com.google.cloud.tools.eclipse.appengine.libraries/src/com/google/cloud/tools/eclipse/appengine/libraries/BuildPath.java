@@ -133,7 +133,7 @@ public class BuildPath {
     }
     
     Library masterLibrary = new Library(CloudLibraries.MASTER_CONTAINER_ID);
-    masterLibrary.setName(Messages.getString("google.api.libraries")); //$NON-NLS-1$
+    masterLibrary.setName(Messages.getString("google.cloud.platform.libraries")); //$NON-NLS-1$
     masterLibrary.setLibraryDependencies(dependentIds);
     subMonitor.worked(1);
     
