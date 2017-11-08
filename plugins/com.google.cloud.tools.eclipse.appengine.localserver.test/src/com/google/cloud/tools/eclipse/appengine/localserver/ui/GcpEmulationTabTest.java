@@ -123,14 +123,14 @@ public class GcpEmulationTabTest {
     assertEquals(2, accountSelector.getAccountCount());
     assertEquals("", accountSelector.getSelectedEmail());
   }
-  
+
   @Test
   public void testProjectSelectorLoaded() {
     accountSelector.selectAccount("email-1@example.com");
     assertEquals(projectsOfEmail1, projectSelector.getProjects());
     assertEquals("", projectSelector.getSelectProjectId());
   }
-  
+
   @Test
   public void testProjectSelectorLoaded_switchingAccounts() {
     accountSelector.selectAccount("email-1@example.com");
@@ -138,7 +138,7 @@ public class GcpEmulationTabTest {
     assertEquals(projectsOfEmail2, projectSelector.getProjects());
     assertEquals("", projectSelector.getSelectProjectId());
   }
-  
+
   @Test
   public void testInitializeFrom_accountSelected() throws CoreException {
     mockLaunchConfig("email-1@example.com", "", "");
