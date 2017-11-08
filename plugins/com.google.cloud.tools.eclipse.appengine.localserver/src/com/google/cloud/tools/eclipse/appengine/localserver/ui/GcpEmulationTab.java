@@ -55,7 +55,7 @@ public class GcpEmulationTab extends AbstractLaunchConfigurationTab {
 
   private Image gcpIcon;
 
-  private boolean initializing;
+  private boolean initializingUiValues;
   // We set up intermediary models between a run configuration and UI components for certain values,
   // because, e.g., the account selector cannot load an email if it is not logged in. In such a
   // case, although nothing is selected in the account selector, we should not clear the email saved
@@ -86,7 +86,7 @@ public class GcpEmulationTab extends AbstractLaunchConfigurationTab {
       public void run() {
         updateProjectSelector();
 
-        if (!initializing) {
+        if (!initializingUiValues) {
           boolean emptySelection = accountSelector.getSelectedEmail().isEmpty();
           boolean savedEmailAvailable = accountSelector.isEmailAvailable(accountEmailModel);
           if (!emptySelection || savedEmailAvailable) {
@@ -110,7 +110,7 @@ public class GcpEmulationTab extends AbstractLaunchConfigurationTab {
     projectSelector.addSelectionChangedListener(new ISelectionChangedListener() {
       @Override
       public void selectionChanged(SelectionChangedEvent event) {
-        if (!initializing) {
+        if (!initializingUiValues) {
           boolean emptySelection = projectSelector.getSelectProjectId().isEmpty();
           boolean savedIdAvailable = projectSelector.isProjectIdAvailable(gcpProjectIdModel);
           if (!emptySelection || savedIdAvailable) {
@@ -168,11 +168,11 @@ public class GcpEmulationTab extends AbstractLaunchConfigurationTab {
     accountEmailModel = getAttribute(configuration, ATTRIBUTE_ACCOUNT_EMAIL, "");
     gcpProjectIdModel = getAttribute(configuration, ATTRIBUTE_GCP_PROJECT, "");
 
-    initializing = true;
+    initializingUiValues = true;
     serviceKeyInput.setText(serviceKey);
     accountSelector.selectAccount(accountEmailModel);
     projectSelector.selectProjectId(gcpProjectIdModel);
-    initializing = false;
+    initializingUiValues = false;
   }
 
   private void updateProjectSelector() {
