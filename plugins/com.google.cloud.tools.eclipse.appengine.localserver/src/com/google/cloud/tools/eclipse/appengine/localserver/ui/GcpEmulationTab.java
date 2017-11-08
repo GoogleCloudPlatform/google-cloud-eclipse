@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
@@ -54,13 +55,13 @@ public class GcpEmulationTab extends AbstractLaunchConfigurationTab {
   private static final Logger logger = Logger.getLogger(GcpEmulationTab.class.getName());
 
   private static final String ATTRIBUTE_ACCOUNT_EMAIL =
-      "com.google.cloud.tools.eclipse.gcpEmulation.accountEmail";
+      "com.google.cloud.tools.eclipse.gcpEmulation.accountEmail"; //$NON-NLS-1$
 
   private static final String ATTRIBUTE_GCP_PROJECT =
-      "com.google.cloud.tools.eclipse.gcpEmulation.gcpProject";
+      "com.google.cloud.tools.eclipse.gcpEmulation.gcpProject"; //$NON-NLS-1$
 
   private static final String ATTRIBUTE_SERVICE_KEY =
-      "com.google.cloud.tools.eclipse.gcpEmulation.serviceKey";
+      "com.google.cloud.tools.eclipse.gcpEmulation.serviceKey"; //$NON-NLS-1$
 
   private final IGoogleLoginService loginService;
   private final ProjectRepository projectRepository;
@@ -96,7 +97,7 @@ public class GcpEmulationTab extends AbstractLaunchConfigurationTab {
     Composite composite = new Composite(parent, SWT.NONE);
 
     // Account row
-    new Label(composite, SWT.LEAD).setText("Account:");
+    new Label(composite, SWT.LEAD).setText(Messages.getString("label.account")); //$NON-NLS-1$
     accountSelector = new AccountSelector(composite, loginService);
     accountSelector.addSelectionListener(new Runnable() {
       @Override
@@ -108,7 +109,7 @@ public class GcpEmulationTab extends AbstractLaunchConfigurationTab {
           boolean savedEmailAvailable = accountSelector.isEmailAvailable(accountEmailModel);
           if (!emptySelection || savedEmailAvailable) {
             accountEmailModel = accountSelector.getSelectedEmail();
-            gcpProjectIdModel = "";
+            gcpProjectIdModel = ""; //$NON-NLS-1$
             updateLaunchConfigurationDialog();
           }
         }
@@ -117,7 +118,7 @@ public class GcpEmulationTab extends AbstractLaunchConfigurationTab {
 
     // Project row
     Label projectLabel = new Label(composite, SWT.LEAD);
-    projectLabel.setText("Project:");
+    projectLabel.setText(Messages.getString("label.project")); //$NON-NLS-1$
 
     Composite projectSelectorComposite = new Composite(composite, SWT.NONE);
     final Text filterField = new Text(projectSelectorComposite,
@@ -138,7 +139,7 @@ public class GcpEmulationTab extends AbstractLaunchConfigurationTab {
       }
     });
 
-    filterField.setMessage("Filter projects by name or ID");
+    filterField.setMessage(Messages.getString("project.filter.hint")); //$NON-NLS-1$
     filterField.addModifyListener(new ModifyListener() {
       @Override
       public void modifyText(ModifyEvent event) {
@@ -147,7 +148,7 @@ public class GcpEmulationTab extends AbstractLaunchConfigurationTab {
     });
 
     // Service key row
-    new Label(composite, SWT.LEAD).setText("Service key:");
+    new Label(composite, SWT.LEAD).setText(Messages.getString("label.service.key")); //$NON-NLS-1$
     serviceKeyInput = new Text(composite, SWT.BORDER);
     serviceKeyInput.addModifyListener(new ModifyListener() {
       @Override
@@ -156,7 +157,7 @@ public class GcpEmulationTab extends AbstractLaunchConfigurationTab {
       }
     });
     Button browse = new Button(composite, SWT.NONE);
-    browse.setText("Browse...");
+    browse.setText(Messages.getString("button.browse")); //$NON-NLS-1$
 
     GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.TOP).applyTo(projectLabel);
     GridDataFactory.fillDefaults().span(2, 1).applyTo(accountSelector);
@@ -181,9 +182,9 @@ public class GcpEmulationTab extends AbstractLaunchConfigurationTab {
 
   @Override
   public void initializeFrom(ILaunchConfiguration configuration) {
-    accountEmailModel = getAttribute(configuration, ATTRIBUTE_ACCOUNT_EMAIL, "");
-    gcpProjectIdModel = getAttribute(configuration, ATTRIBUTE_GCP_PROJECT, "");
-    String serviceKey = getAttribute(configuration, ATTRIBUTE_SERVICE_KEY, "");
+    accountEmailModel = getAttribute(configuration, ATTRIBUTE_ACCOUNT_EMAIL, ""); //$NON-NLS-1$
+    gcpProjectIdModel = getAttribute(configuration, ATTRIBUTE_GCP_PROJECT, ""); //$NON-NLS-1$
+    String serviceKey = getAttribute(configuration, ATTRIBUTE_SERVICE_KEY, ""); //$NON-NLS-1$
 
     initializingUiValues = true;
     accountSelector.selectAccount(accountEmailModel);
@@ -201,7 +202,7 @@ public class GcpEmulationTab extends AbstractLaunchConfigurationTab {
         List<GcpProject> gcpProjects = projectRepository.getProjects(credential);
         projectSelector.setProjects(gcpProjects);
       } catch (ProjectRepositoryException e) {
-        logger.log(Level.WARNING, "Could not retrieve GCP project information from server.", e);
+        logger.log(Level.WARNING, "Could not retrieve GCP project information from server.", e); //$NON-NLS-1$
       }
     }
   }
@@ -215,7 +216,7 @@ public class GcpEmulationTab extends AbstractLaunchConfigurationTab {
 
   @Override
   public String getName() {
-    return "GCP";
+    return Messages.getString("gcp.emulation.tab.name"); //$NON-NLS-1$
   }
 
   @Override
@@ -229,7 +230,7 @@ public class GcpEmulationTab extends AbstractLaunchConfigurationTab {
     try {
       return configuration.getAttribute(attribute, defaultValue);
     } catch (CoreException e) {
-      logger.log(Level.WARNING, "Can't get value from launch configuration.", e);
+      logger.log(Level.WARNING, "Can't get value from launch configuration.", e); //$NON-NLS-1$
       return defaultValue;
     }
   }
