@@ -65,7 +65,8 @@ public class CloudLibrariesPage extends WizardPage
   /** The initially selected libraries. */
   private List<Library> initialSelection = Collections.emptyList();
 
-  private final List<LibrarySelectorGroup> librariesSelectors = new ArrayList<>();
+  @VisibleForTesting
+  final List<LibrarySelectorGroup> librariesSelectors = new ArrayList<>();
   private IJavaProject project;
   private boolean isMavenProject;
   private IClasspathEntry oldEntry;
@@ -88,6 +89,14 @@ public class CloudLibrariesPage extends WizardPage
       groups.put(CloudLibraries.APP_ENGINE_GROUP, Messages.getString("appengine-title"));
     }
     groups.put(CloudLibraries.CLIENT_APIS_GROUP, Messages.getString("clientapis-title"));
+    setLibraryGroups(groups);
+  }
+
+  /**
+   * Set the different library groups to be shown; must be called before controls are created.
+   */
+  @VisibleForTesting
+  void setLibraryGroups(Map<String, String> groups) {
     this.libraryGroups = groups;
   }
 
@@ -155,7 +164,7 @@ public class CloudLibrariesPage extends WizardPage
    */
   @VisibleForTesting
   List<Library> getSelectedLibraries() {
-    List<Library> selectedLibraries = new ArrayList<>(initialSelection);
+    List<Library> selectedLibraries = new ArrayList<>();
     for (LibrarySelectorGroup librariesSelector : librariesSelectors) {
       selectedLibraries.addAll(librariesSelector.getSelectedLibraries());
     }

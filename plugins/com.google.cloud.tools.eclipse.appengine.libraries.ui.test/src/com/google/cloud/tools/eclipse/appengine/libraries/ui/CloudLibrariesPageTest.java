@@ -16,17 +16,23 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.ui;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
+import com.google.common.collect.Maps;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.hamcrest.BaseMatcher;
@@ -48,10 +54,10 @@ public class CloudLibrariesPageTest {
 
   @Test
   public void testConstructor() {
-    Assert.assertEquals("Google Client APIs for Java", page.getTitle());
+    Assert.assertEquals("Google Cloud Platform Libraries", page.getTitle());
     Assert.assertNull(page.getMessage());
     Assert.assertNull(page.getErrorMessage());
-    Assert.assertEquals("Additional jars for applications using Google Client APIs for Java",
+    Assert.assertEquals("Additional jars for applications using Google Cloud Platform",
         page.getDescription());
     Assert.assertNotNull(page.getImage());
   }
@@ -70,18 +76,22 @@ public class CloudLibrariesPageTest {
 
   @Test
   public void testSelectionRoundTrip() {
-    List<Library> selectedLibraries = Arrays.asList(new Library("foo"));
+    IJavaProject javaProject = plainJavaProjectCreator.getJavaProject();
+    List<Library> selectedLibraries =
+        Arrays.asList(CloudLibraries.getLibrary("googlecloudstorage"));
+    page.initialize(javaProject, null);
     page.setSelectedLibraries(selectedLibraries);
+    page.createControl(shellTestResource.getShell());
 
     List<Library> returnedLibraries = page.getSelectedLibraries();
     Assert.assertEquals(1, returnedLibraries.size());
-    Assert.assertEquals("foo", returnedLibraries.get(0).getId());
+    Assert.assertEquals("googlecloudstorage", returnedLibraries.get(0).getId());
   }
 
   @Test
   public void testAppEngineLibraries_foundOnAppEngineProject() {
-    IJavaProject javaProject = plainJavaProjectCreator.withFacetVersions(WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7)
-        .getJavaProject();
+    IJavaProject javaProject = plainJavaProjectCreator
+        .withFacetVersions(WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7).getJavaProject();
     page.initialize(javaProject, null);
     page.createControl(shellTestResource.getShell());
     assertThat(page.getVisibleLibraries(), Matchers.hasItem(new LibraryMatcher("objectify")));
@@ -97,6 +107,46 @@ public class CloudLibrariesPageTest {
     // objectify shouldn't be found on a non-App Engine project
     assertThat(page.getVisibleLibraries(),
         Matchers.everyItem(Matchers.not(new LibraryMatcher("objectify"))));
+  }
+
+  @Test
+  public void testSelectionMaintained() {
+    // explicitly configure App Engine and GCP libraries
+    IJavaProject javaProject = plainJavaProjectCreator.getJavaProject();
+    LinkedHashMap<String, String> groups = Maps.newLinkedHashMap();
+    groups.put(CloudLibraries.APP_ENGINE_GROUP, CloudLibraries.APP_ENGINE_GROUP);
+    groups.put(CloudLibraries.CLIENT_APIS_GROUP, CloudLibraries.CLIENT_APIS_GROUP);
+
+    // select objectify
+    page.setSelectedLibraries(Collections.singletonList(CloudLibraries.getLibrary("objectify"))); //$NON-NLS-1$
+    page.initialize(javaProject, null);
+    page.setLibraryGroups(groups);
+    page.createControl(shellTestResource.getShell());
+    assertTrue(page.librariesSelectors != null && !page.librariesSelectors.isEmpty());
+    assertEquals(2, page.librariesSelectors.size());
+
+    // check the library group widgets
+    assertThat(page.librariesSelectors.get(0).getSelectedLibraries(),
+        Matchers.hasItem(new LibraryMatcher("objectify")));
+    assertThat(page.librariesSelectors.get(1).getSelectedLibraries(), Matchers.empty());
+
+    // check the page's selected libraries
+    List<Library> returnedLibraries = page.getSelectedLibraries();
+    Assert.assertEquals(1, returnedLibraries.size());
+    assertThat(returnedLibraries, Matchers.hasItem(new LibraryMatcher("objectify")));
+
+    page.librariesSelectors.get(1).setSelection(new StructuredSelection("googlecloudstorage"));
+
+    // check the library group widgets
+    assertThat(page.librariesSelectors.get(0).getSelectedLibraries(),
+        Matchers.hasItem(new LibraryMatcher("objectify")));
+    assertThat(page.librariesSelectors.get(1).getSelectedLibraries(),
+        Matchers.hasItem(new LibraryMatcher("googlecloudstorage")));
+
+    returnedLibraries = page.getSelectedLibraries();
+    Assert.assertEquals(2, returnedLibraries.size());
+    assertThat(returnedLibraries, Matchers.hasItem(new LibraryMatcher("objectify")));
+    assertThat(returnedLibraries, Matchers.hasItem(new LibraryMatcher("googlecloudstorage")));
   }
 
   private static class LibraryMatcher extends BaseMatcher<Library> {

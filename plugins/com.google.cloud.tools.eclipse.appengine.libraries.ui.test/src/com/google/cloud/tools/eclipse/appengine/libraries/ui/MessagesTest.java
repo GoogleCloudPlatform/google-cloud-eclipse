@@ -29,13 +29,13 @@ public class MessagesTest {
 
   @Test
   public void testClientApisTitle() {
-    Assert.assertEquals("Google Client APIs for Java",
+    Assert.assertEquals("Google Cloud Platform Libraries",
         Messages.getString("clientapis-title"));
   }
 
   @Test
   public void testClientApisDescription() {
-    Assert.assertEquals("Additional jars for applications using Google Client APIs for Java",
+    Assert.assertEquals("Additional jars for applications using Google Cloud Platform",
         Messages.getString("apiclientlibrariespage-description"));
   }
 
