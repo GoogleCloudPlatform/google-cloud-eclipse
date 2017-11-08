@@ -1,3 +1,19 @@
+/*
+ * Copyright 2017 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
 import com.google.api.client.auth.oauth2.Credential;
@@ -38,13 +54,13 @@ public class GcpEmulationTab extends AbstractLaunchConfigurationTab {
   private static final Logger logger = Logger.getLogger(GcpEmulationTab.class.getName());
 
   private static final String ATTRIBUTE_ACCOUNT_EMAIL =
-      "com.google.cloud.tools.eclipse.gcp.emulation.accountEmail";
+      "com.google.cloud.tools.eclipse.gcpEmulation.accountEmail";
 
   private static final String ATTRIBUTE_GCP_PROJECT =
-      "com.google.cloud.tools.eclipse.gcp.emulation.gcpProject";
+      "com.google.cloud.tools.eclipse.gcpEmulation.gcpProject";
 
   private static final String ATTRIBUTE_SERVICE_KEY =
-      "com.google.cloud.tools.eclipse.gcp.emulation.serviceKey";
+      "com.google.cloud.tools.eclipse.gcpEmulation.serviceKey";
 
   private final IGoogleLoginService loginService;
   private final ProjectRepository projectRepository;
@@ -55,13 +71,14 @@ public class GcpEmulationTab extends AbstractLaunchConfigurationTab {
 
   private Image gcpIcon;
 
-  private boolean initializingUiValues;
   // We set up intermediary models between a run configuration and UI components for certain values,
   // because, e.g., the account selector cannot load an email if it is not logged in. In such a
   // case, although nothing is selected in the account selector, we should not clear the email saved
   // in the run configuration.
   private String accountEmailModel;
   private String gcpProjectIdModel;
+  // To prevent updating above models when programmatically setting up UI components.
+  private boolean initializingUiValues;
 
   public GcpEmulationTab() {
     this(PlatformUI.getWorkbench().getService(IGoogleLoginService.class),
@@ -164,14 +181,14 @@ public class GcpEmulationTab extends AbstractLaunchConfigurationTab {
 
   @Override
   public void initializeFrom(ILaunchConfiguration configuration) {
-    String serviceKey = getAttribute(configuration, ATTRIBUTE_SERVICE_KEY, "");
     accountEmailModel = getAttribute(configuration, ATTRIBUTE_ACCOUNT_EMAIL, "");
     gcpProjectIdModel = getAttribute(configuration, ATTRIBUTE_GCP_PROJECT, "");
+    String serviceKey = getAttribute(configuration, ATTRIBUTE_SERVICE_KEY, "");
 
     initializingUiValues = true;
-    serviceKeyInput.setText(serviceKey);
     accountSelector.selectAccount(accountEmailModel);
     projectSelector.selectProjectId(gcpProjectIdModel);
+    serviceKeyInput.setText(serviceKey);
     initializingUiValues = false;
   }
 
@@ -191,9 +208,9 @@ public class GcpEmulationTab extends AbstractLaunchConfigurationTab {
 
   @Override
   public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-    configuration.setAttribute(ATTRIBUTE_SERVICE_KEY, serviceKeyInput.getText());
     configuration.setAttribute(ATTRIBUTE_ACCOUNT_EMAIL, accountEmailModel);
     configuration.setAttribute(ATTRIBUTE_GCP_PROJECT, gcpProjectIdModel);
+    configuration.setAttribute(ATTRIBUTE_SERVICE_KEY, serviceKeyInput.getText());
   }
 
   @Override
