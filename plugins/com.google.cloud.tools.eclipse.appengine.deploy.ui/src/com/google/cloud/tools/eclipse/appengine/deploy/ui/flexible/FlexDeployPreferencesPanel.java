@@ -91,8 +91,9 @@ public class FlexDeployPreferencesPanel extends AppEngineDeployPreferencesPanel 
     browse.addSelectionListener(
         new RelativeFileFieldSetter(fileField, fileFieldBasePath, fileDialogfilterExtensions));
 
-    GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(secondColumn);
     GridDataFactory.fillDefaults().applyTo(secondColumn);
+    GridDataFactory.swtDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(fileField);
+    GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(secondColumn);
     return fileField;
   }
 
