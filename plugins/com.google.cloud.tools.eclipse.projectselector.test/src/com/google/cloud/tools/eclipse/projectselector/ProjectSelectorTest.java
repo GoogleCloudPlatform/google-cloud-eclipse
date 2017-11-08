@@ -129,6 +129,30 @@ public class ProjectSelectorTest {
     assertEquals("", projectSelector.getSelectProjectId());
   }
 
+  @Test
+  public void testIsProjectIdAvailable() {
+    projectSelector.setProjects(getUnsortedProjectList());
+    assertTrue(projectSelector.isProjectIdAvailable("d"));
+  }
+
+  @Test
+  public void testIsProjectIdAvailable_notAvailable() {
+    projectSelector.setProjects(getUnsortedProjectList());
+    assertFalse(projectSelector.isProjectIdAvailable("non-existing-project-id"));
+  }
+
+  @Test
+  public void testIsProjectIdAvailable_null() {
+    projectSelector.setProjects(getUnsortedProjectList());
+    assertFalse(projectSelector.isProjectIdAvailable(null));
+  }
+
+  @Test
+  public void testIsProjectIdAvailable_emptyString() {
+    projectSelector.setProjects(getUnsortedProjectList());
+    assertFalse(projectSelector.isProjectIdAvailable(""));
+  }
+
   private List<GcpProject> getUnsortedProjectList() {
     return Arrays.asList(new GcpProject("b", "b"),
                          new GcpProject("a", "a"),
