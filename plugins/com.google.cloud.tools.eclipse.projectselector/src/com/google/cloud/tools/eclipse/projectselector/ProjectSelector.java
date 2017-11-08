@@ -98,6 +98,16 @@ public class ProjectSelector extends Composite implements ISelectionProvider {
     return (IStructuredSelection) viewer.getSelection();
   }
 
+  public boolean isProjectIdAvailable(String projectId) {
+    for (Object o : input) {
+      GcpProject gcpProject = (GcpProject) o;
+      if (gcpProject.getId().equals(projectId)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   public int getProjectCount() {
     return input.size();
   }
