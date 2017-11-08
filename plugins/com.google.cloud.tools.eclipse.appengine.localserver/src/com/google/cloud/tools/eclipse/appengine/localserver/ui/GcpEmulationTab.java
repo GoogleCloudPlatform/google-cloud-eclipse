@@ -223,7 +223,8 @@ public class GcpEmulationTab extends AbstractLaunchConfigurationTab {
     return gcpIcon;
   }
 
-  private static final String getAttribute(ILaunchConfiguration configuration,
+  @VisibleForTesting
+  static final String getAttribute(ILaunchConfiguration configuration,
       String attribute, String defaultValue) {
     try {
       return configuration.getAttribute(attribute, defaultValue);

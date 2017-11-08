@@ -18,6 +18,9 @@ package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.auth.oauth2.Credential;
@@ -34,13 +37,14 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.AdditionalAnswers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -57,7 +61,7 @@ public class GcpEmulationTabTest {
   @Mock private Credential credential1;
   @Mock private Credential credential2;
 
-  @Mock private ILaunchConfiguration launchConfig;
+  @Mock private ILaunchConfigurationWorkingCopy launchConfig;
 
   private final List<GcpProject> projectsOfEmail1 = Arrays.asList(
       new GcpProject("project-A in email-1", "email-1-project-A"),
@@ -90,33 +94,49 @@ public class GcpEmulationTabTest {
 
     accountSelector = CompositeUtil.findControl(shell, AccountSelector.class);
     projectSelector = CompositeUtil.findControl(shell, ProjectSelector.class);
-    assertNotNull(accountSelector);
-    assertNotNull(projectSelector);
   }
 
   @Test
-  public void testServiceKey() {
+  public void testUiComponents() {
+    assertNotNull(accountSelector);
+    assertNotNull(projectSelector);
     assertNotNull(CompositeUtil.findControlAfterLabel(shell, Text.class, "Service key:"));
+  }
+
+  @Test
+  public void testGetAttribute() throws CoreException {
+    when(launchConfig.getAttribute(eq("attribute-key"), anyString())).thenReturn("expected value");
+    String value = GcpEmulationTab.getAttribute(launchConfig, "attribute-key", "defualt");
+    assertEquals("expected value", value);
+  }
+
+  @Test
+  public void testGetAttribute_defaultValue() throws CoreException {
+    when(launchConfig.getAttribute(anyString(), anyString()))
+        .then(AdditionalAnswers.returnsLastArg());
+    String value = GcpEmulationTab.getAttribute(launchConfig, "non-existing-key", "default");
+    assertEquals("default", value);
   }
 
   @Test
   public void testAccountSelectorLoaded() {
     assertEquals(2, accountSelector.getAccountCount());
+    assertEquals("", accountSelector.getSelectedEmail());
   }
   
   @Test
   public void testProjectSelectorLoaded() {
     accountSelector.selectAccount("email-1@example.com");
-    List<GcpProject> projects = projectSelector.getProjects();
-    assertEquals(projectsOfEmail1, projects);
+    assertEquals(projectsOfEmail1, projectSelector.getProjects());
+    assertEquals("", projectSelector.getSelectProjectId());
   }
   
   @Test
   public void testProjectSelectorLoaded_switchingAccounts() {
     accountSelector.selectAccount("email-1@example.com");
     accountSelector.selectAccount("email-2@example.com");
-    List<GcpProject> projects = projectSelector.getProjects();
-    assertEquals(projectsOfEmail2, projects);
+    assertEquals(projectsOfEmail2, projectSelector.getProjects());
+    assertEquals("", projectSelector.getSelectProjectId());
   }
   
   @Test
@@ -142,7 +162,7 @@ public class GcpEmulationTabTest {
   }
 
   @Test
-  public void testInitializeFrom_loadServiceKey() throws CoreException {
+  public void testInitializeFrom_serviceKeyEntered() throws CoreException {
     Text serviceKey = CompositeUtil.findControlAfterLabel(shell, Text.class, "Service key:");
 
     mockLaunchConfig("", "", "/usr/home/keystore/my-key.json");
@@ -158,5 +178,25 @@ public class GcpEmulationTabTest {
         .thenReturn(gcpProjectId);
     when(launchConfig.getAttribute("com.google.cloud.tools.eclipse.gcpEmulation.serviceKey", ""))
         .thenReturn(serviceKey);
+  }
+
+  @Test
+  public void testPerformApply() throws CoreException {
+    mockLaunchConfig("email-1@example.com", "email-1-project-A", "/usr/home/key.json");
+    tab.initializeFrom(launchConfig);
+
+    accountSelector.selectAccount("email-2@example.com");
+    projectSelector.selectProjectId("email-2-project-C");
+    Text serviceKeyText = CompositeUtil.findControlAfterLabel(shell, Text.class, "Service key:");
+    serviceKeyText.setText("/tmp/keys/another.json");
+
+    tab.performApply(launchConfig);
+
+    verify(launchConfig).setAttribute("com.google.cloud.tools.eclipse.gcpEmulation.accountEmail",
+        "email-2@example.com");
+    verify(launchConfig).setAttribute("com.google.cloud.tools.eclipse.gcpEmulation.gcpProject",
+        "email-2-project-C");
+    verify(launchConfig).setAttribute("com.google.cloud.tools.eclipse.gcpEmulation.serviceKey",
+        "/tmp/keys/another.json");
   }
 }
