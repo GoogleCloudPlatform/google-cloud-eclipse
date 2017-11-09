@@ -50,9 +50,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 
-public class GcpEmulationTab extends AbstractLaunchConfigurationTab {
+public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
 
-  private static final Logger logger = Logger.getLogger(GcpEmulationTab.class.getName());
+  private static final Logger logger = Logger.getLogger(GcpLocalRunTab.class.getName());
 
   private static final String ATTRIBUTE_ACCOUNT_EMAIL =
       "com.google.cloud.tools.eclipse.gcpEmulation.accountEmail"; //$NON-NLS-1$
@@ -81,13 +81,13 @@ public class GcpEmulationTab extends AbstractLaunchConfigurationTab {
   // To prevent updating above models when programmatically setting up UI components.
   private boolean initializingUiValues;
 
-  public GcpEmulationTab() {
+  public GcpLocalRunTab() {
     this(PlatformUI.getWorkbench().getService(IGoogleLoginService.class),
         new ProjectRepository(PlatformUI.getWorkbench().getService(IGoogleApiFactory.class)));
   }
 
   @VisibleForTesting
-  GcpEmulationTab(IGoogleLoginService loginService, ProjectRepository projectRepository) {
+  GcpLocalRunTab(IGoogleLoginService loginService, ProjectRepository projectRepository) {
     this.loginService = loginService;
     this.projectRepository = projectRepository;
   }

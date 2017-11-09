@@ -49,7 +49,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GcpEmulationTabTest {
+public class GcpLocalRunTabTest {
 
   @Rule public ShellTestResource shellResource = new ShellTestResource();
 
@@ -71,7 +71,7 @@ public class GcpEmulationTabTest {
       new GcpProject("project-C in email-2", "email-2-project-C"),
       new GcpProject("project-D in email-2", "email-2-project-D"));
 
-  private GcpEmulationTab tab;
+  private GcpLocalRunTab tab;
   private Shell shell;
   private AccountSelector accountSelector;
   private ProjectSelector projectSelector;
@@ -89,15 +89,11 @@ public class GcpEmulationTabTest {
     when(projectRepository.getProjects(credential1)).thenReturn(projectsOfEmail1);
     when(projectRepository.getProjects(credential2)).thenReturn(projectsOfEmail2);
 
-    tab = new GcpEmulationTab(loginService, projectRepository);
+    tab = new GcpLocalRunTab(loginService, projectRepository);
     tab.createControl(shell);
 
     accountSelector = CompositeUtil.findControl(shell, AccountSelector.class);
     projectSelector = CompositeUtil.findControl(shell, ProjectSelector.class);
-  }
-
-  @Test
-  public void testUiComponents() {
     assertNotNull(accountSelector);
     assertNotNull(projectSelector);
     assertNotNull(CompositeUtil.findControlAfterLabel(shell, Text.class, "Service key:"));
@@ -106,7 +102,7 @@ public class GcpEmulationTabTest {
   @Test
   public void testGetAttribute() throws CoreException {
     when(launchConfig.getAttribute(eq("attribute-key"), anyString())).thenReturn("expected value");
-    String value = GcpEmulationTab.getAttribute(launchConfig, "attribute-key", "defualt");
+    String value = GcpLocalRunTab.getAttribute(launchConfig, "attribute-key", "defualt");
     assertEquals("expected value", value);
   }
 
@@ -114,7 +110,7 @@ public class GcpEmulationTabTest {
   public void testGetAttribute_defaultValue() throws CoreException {
     when(launchConfig.getAttribute(anyString(), anyString()))
         .then(AdditionalAnswers.returnsLastArg());
-    String value = GcpEmulationTab.getAttribute(launchConfig, "non-existing-key", "default");
+    String value = GcpLocalRunTab.getAttribute(launchConfig, "non-existing-key", "default");
     assertEquals("default", value);
   }
 
