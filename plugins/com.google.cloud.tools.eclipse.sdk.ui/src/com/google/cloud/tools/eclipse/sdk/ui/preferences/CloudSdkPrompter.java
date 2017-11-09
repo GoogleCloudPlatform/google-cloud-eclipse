@@ -1,11 +1,11 @@
 /*
- * Copyright 2016 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,7 +38,8 @@ public class CloudSdkPrompter {
 
   /**
    * Return the Cloud SDK. If it cannot be found, prompt the user to specify its location. Like
-   * {@linkplain CloudSdk.Builder#build()} the caller is responsible for validating the SDK location
+   * {@linkplain com.google.cloud.tools.appengine.cloudsdk.CloudSdk.Builder#build()} 
+   * the caller is responsible for validating the SDK location
    * (if desired).
    * <p>
    * <b>Must be called from the SWT UI Thread.</b>
@@ -53,7 +54,8 @@ public class CloudSdkPrompter {
 
   /**
    * Return the Cloud SDK. If it cannot be found, prompt the user to specify its location. Like
-   * {@linkplain CloudSdk.Builder#build()} the caller is responsible for validating the SDK location
+   * {@linkplain com.google.cloud.tools.appengine.cloudsdk.CloudSdk.Builder#build()} 
+   * the caller is responsible for validating the SDK location
    * (if desired).
    * 
    * <p>
@@ -83,8 +85,8 @@ public class CloudSdkPrompter {
 
   /**
    * Return the Cloud SDK location. If it cannot be found, prompt the user to specify its location.
-   * Like {@linkplain CloudSdk.Builder#build()} the caller is responsible for validating the SDK
-   * location (if desired).
+   * Like {@linkplain com.google.cloud.tools.appengine.cloudsdk.CloudSdk.Builder#build()} 
+   * the caller is responsible for validating the SDK location (if desired).
    * <p>
    * <b>Must be called from the SWT UI Thread.</b>
    * </p>
@@ -98,8 +100,8 @@ public class CloudSdkPrompter {
 
   /**
    * Return the Cloud SDK location. If it cannot be found, prompt the user to specify its location.
-   * Like {@linkplain CloudSdk.Builder#build()} the caller is responsible for validating the SDK
-   * location (if desired).
+   * Like {@linkplain com.google.cloud.tools.appengine.cloudsdk.CloudSdk.Builder#build()} the caller
+   * is responsible for validating the SDK location (if desired).
    * <p>
    * <b>Must be called from the SWT UI Thread.</b>
    * </p>
@@ -126,8 +128,8 @@ public class CloudSdkPrompter {
    * @return true if the user appears to have configured the SDK, or false if the SDK is unavailable
    */
   static boolean promptForSdk(IShellProvider shellProvider) {
-    if (!MessageDialog.openQuestion(null, SdkUiMessages.CloudSdkPrompter_0,
-        SdkUiMessages.CloudSdkPrompter_1)) {
+    if (!MessageDialog.openQuestion(null, SdkUiMessages.getString("CloudSdkPrompter_0"),
+        SdkUiMessages.getString("CloudSdkPrompter_1"))) {
       return false;
     }
     Shell shell = shellProvider == null ? null : shellProvider.getShell();

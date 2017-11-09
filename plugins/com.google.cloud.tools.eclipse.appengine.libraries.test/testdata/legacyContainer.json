@@ -1,0 +1,26 @@
+  {
+  "description": "Test container description",
+  "path": "container/path",
+  "entries": [
+    {
+      "accessRules": [
+        {
+          "ruleKind": "ACCESSIBLE",
+          "pattern": "/com/example/accessible"
+        },
+        {
+          "ruleKind": "FORBIDDEN",
+          "pattern": "/com/example/nonaccessible"
+        }
+      ],
+      "sourceAttachmentPath": "SRC/path/to/src",
+      "path": "path/to/jar",
+      "attributes": [
+        {
+          "name": "attrName",
+          "value": "attrValue"
+        }
+      ]
+    }
+  ]
+}

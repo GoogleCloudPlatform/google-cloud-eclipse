@@ -1,11 +1,11 @@
 /*
- * Copyright 2016 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,13 +16,13 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets;
 
-import org.eclipse.core.resources.IProject;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jst.j2ee.refactor.listeners.J2EEElementChangedListener;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.events.IFacetedProjectEvent;
 import org.eclipse.wst.common.project.facet.core.events.IFacetedProjectListener;
@@ -35,6 +35,46 @@ import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
  */
 public class AppEngineStandardRuntimeChangeListener implements IFacetedProjectListener {
 
+  /** A Job to install out App Engine facet given that we've added a runtime. */
+  private static class InstallAppEngineFacetJob extends Job {
+    private final IFacetedProject facetedProject;
+    private final IRuntime newRuntime;
+
+    private InstallAppEngineFacetJob(IFacetedProject facetedProject,
+        IRuntime newRuntime) {
+      super(Messages.getString("appengine.add.facet.to.project",
+          facetedProject.getProject().getName())); // $NON-NLS$
+      this.facetedProject = facetedProject;
+      this.newRuntime = newRuntime;
+    }
+
+    /**
+     * Mark this job as a component update job. Useful for our tests to ensure project configuration
+     * is complete.
+     */
+    @Override
+    public boolean belongsTo(Object family) {
+      return J2EEElementChangedListener.PROJECT_COMPONENT_UPDATE_JOB_FAMILY.equals(family);
+    }
+
+    @Override
+    protected IStatus run(IProgressMonitor monitor) {
+      try {
+        AppEngineStandardFacet.installAppEngineFacet(facetedProject,
+            false /* installDependentFacets */, monitor);
+        return Status.OK_STATUS;
+      } catch (CoreException ex1) {
+        // Remove App Engine as primary runtime
+        try {
+          facetedProject.removeTargetedRuntime(newRuntime, monitor);
+          return ex1.getStatus();  // Displays missing constraints that prevented facet installation
+        } catch (CoreException ex2) {
+          return StatusUtil.merge(ex1.getStatus(), ex2.getStatus());
+        }
+      }
+    }
+  }
+
   @Override
   public void handleEvent(IFacetedProjectEvent event) {
     // PRIMARY_RUNTIME_CHANGED occurs in scenarios such as selecting runtimes on the
@@ -43,60 +83,19 @@ public class AppEngineStandardRuntimeChangeListener implements IFacetedProjectLi
     if (event.getType() != IFacetedProjectEvent.Type.PRIMARY_RUNTIME_CHANGED) {
       return;
     }
-    
-    IPrimaryRuntimeChangedEvent runtimeChangeEvent = (IPrimaryRuntimeChangedEvent)event;
-    final IRuntime newRuntime = runtimeChangeEvent.getNewPrimaryRuntime();
-    if (newRuntime == null) {
+
+    IPrimaryRuntimeChangedEvent runtimeChangeEvent = (IPrimaryRuntimeChangedEvent) event;
+    IRuntime newRuntime = runtimeChangeEvent.getNewPrimaryRuntime();
+    if (newRuntime == null || !AppEngineStandardFacet.isAppEngineStandardRuntime(newRuntime)) {
       return;
     }
 
-    if (!AppEngineStandardFacet.isAppEngineStandardRuntime(newRuntime)) {
-      return;
+    // Check if the App Engine facet has been installed in the project, and add the facet if not.
+    IFacetedProject facetedProject = runtimeChangeEvent.getProject();
+    if (!AppEngineStandardFacet.hasFacet(facetedProject)) {
+      Job addFacetJob = new InstallAppEngineFacetJob(facetedProject, newRuntime);
+      addFacetJob.schedule();
     }
-
-    // Check if the App Engine facet has been installed in the project
-    final IFacetedProject facetedProject = runtimeChangeEvent.getProject();
-    if (AppEngineStandardFacet.hasAppEngineFacet(facetedProject)) {
-      return;
-    }
-
-    // Add the App Engine facet
-    IProject project = facetedProject.getProject();
-    Job addFacetJob = new Job("Add App Engine facet to " + project.getName()) {
-
-      @Override
-      protected IStatus run(IProgressMonitor monitor) {
-
-        IStatus installStatus = Status.OK_STATUS;
-
-        try {
-          AppEngineStandardFacet.installAppEngineFacet(facetedProject, false /* installDependentFacets */, monitor);
-          return installStatus;
-        } catch (CoreException ex1) {
-          // Displays missing constraints that prevented facet installation
-          installStatus = ex1.getStatus();
-
-          // Remove App Engine as primary runtime
-          try {
-            facetedProject.removeTargetedRuntime(newRuntime, monitor);
-            return installStatus;
-          } catch (CoreException ex2) {
-            MultiStatus multiStatus;
-            if (installStatus instanceof MultiStatus) {
-              multiStatus = (MultiStatus) installStatus;
-            } else {
-              multiStatus = new MultiStatus(installStatus.getPlugin(), installStatus.getCode(),
-                  installStatus.getMessage(), installStatus.getException());
-            }
-            multiStatus.merge(ex2.getStatus());
-            return multiStatus;
-          }
-        }
-
-      }
-
-    };
-    addFacetJob.schedule();
   }
 
 }

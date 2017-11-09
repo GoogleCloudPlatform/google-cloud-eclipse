@@ -4,26 +4,36 @@
    <extension
          point="org.eclipse.wst.server.core.runtimeTypes">
       <runtimeType
-            class="com.google.cloud.tools.eclipse.appengine.localserver.server.AppToolsRuntime"
-            description="%runtimeTypeDescription"
             id="com.google.cloud.tools.eclipse.appengine.standard.runtime"
-            name="%apptoolsRuntimeTypeName"
             vendor="%runtimeTypeVendor"
-            version="1">
+            name="%apptoolsRuntimeTypeName"
+            description="%runtimeTypeDescription"
+            version="1"
+            class="com.google.cloud.tools.eclipse.appengine.localserver.server.AppToolsRuntime"
+            supportsManualCreation="false"
+            facetRuntimeComponent="com.google.cloud.tools.eclipse.appengine.standard.runtime"
+            facetRuntimeVersion="1">
+         <!-- J2EE Web Modules -->
          <moduleType
                types="jst.web"
                versions="2.5">
          </moduleType>
+         <!-- Static Web Projects -->
          <moduleType
-               types="java"
-               versions="1.7">
+               types="wst.web"
+               versions="*">
+         </moduleType>
+         <!-- Simple Web Projects -->
+         <moduleType
+               types="web.static"
+               versions="*">
          </moduleType>
       </runtimeType>
    </extension>
    <extension
          point="org.eclipse.wst.server.core.serverTypes">
       <serverType
-            behaviourClass="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour"
+            behaviourClass="com.google.cloud.tools.eclipse.util.service.ServiceContextFactory:com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour"
             class="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerDelegate"
             description="%runtimeTypeDescription"
             id="com.google.cloud.tools.eclipse.appengine.standard.server"
@@ -34,13 +44,22 @@
             runtime="true"
             runtimeTypeId="com.google.cloud.tools.eclipse.appengine.standard.runtime"
             startBeforePublish="false"
-            supportsRemoteHosts="false">
+            supportsRemoteHosts="true"
+            synchronousStart="true">
       </serverType>
    </extension>
+
+   <extension point="org.eclipse.wst.server.ui.serverCreationWizardPageExtension">
+      <serverCreationWizardPageExtension
+            class="com.google.cloud.tools.eclipse.appengine.localserver.ui.ServerPortExtension"
+            id="com.google.cloud.tools.eclipse.appengine.standard.server.wizardExtension">
+      </serverCreationWizardPageExtension>
+   </extension>
+
    <extension
          point="org.eclipse.jst.server.core.runtimeClasspathProviders">
       <runtimeClasspathProvider
-            class="com.google.cloud.tools.eclipse.appengine.localserver.ServletClasspathProvider"
+            class="com.google.cloud.tools.eclipse.util.service.ServiceContextFactory:com.google.cloud.tools.eclipse.appengine.localserver.ServletClasspathProvider"
             id="com.google.cloud.tools.eclipse.appengine.standard.runtimeClasspathProvider"
             runtimeTypeIds="com.google.cloud.tools.eclipse.appengine.standard.runtime">
       </runtimeClasspathProvider>
@@ -59,7 +78,7 @@
                id="com.google.cloud.tools.eclipse.appengine.standard.runtime"
                version="1"></runtime-component>
          <facet
-               id="com.google.cloud.tools.eclipse.appengine.facet"
+               id="com.google.cloud.tools.eclipse.appengine.facets.standard"
                version="1">
          </facet>
          <facet
@@ -96,7 +115,7 @@
    <extension
          point="org.eclipse.wst.server.ui.serverImages">
       <image
-            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gcp-16x16.png"
+            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gae-16x16.png"
             id="com.google.cloud.tools.eclipse.appengine.standard.serverImage"
             typeIds="com.google.cloud.tools.eclipse.appengine.standard.runtime, com.google.cloud.tools.eclipse.appengine.standard.server">
       </image>
@@ -109,20 +128,24 @@
             typeIds="com.google.cloud.tools.eclipse.appengine.standard.server">
       </publishTask>
    </extension>
+   
+   
    <extension
          point="org.eclipse.debug.core.launchConfigurationTypes">
       <launchConfigurationType
-            delegate="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerLaunchConfigurationDelegate"
             id="com.google.cloud.tools.eclipse.appengine.AppToolsLaunchConfigurationType"
+            name="%apptoolsServerTypeName"
+            delegate="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerLaunchConfigurationDelegate"
             modes="run, debug"
-            name="%apptoolsServerTypeName">
+            sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
+            sourcePathComputerId="org.eclipse.jst.server.generic.core.sourcePathComputer">
       </launchConfigurationType>
    </extension>
    <extension
          point="org.eclipse.debug.ui.launchConfigurationTypeImages">
       <launchConfigurationTypeImage
             configTypeID="com.google.cloud.tools.eclipse.appengine.AppToolsLaunchConfigurationType"
-            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gcp-16x16.png"
+            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gae-16x16.png"
             id="com.google.cloud.tools.eclipse.appengine.launchConfigurationTypeImages">
       </launchConfigurationTypeImage>
    </extension>
@@ -145,11 +168,24 @@
       </consolePageParticipant>
    </extension>
    <extension
-         id="com.google.cloud.tools.eclipse.appenginedefaultFacet"
+         id="urlLinker"
+         point="org.eclipse.ui.console.consolePatternMatchListeners">
+    <!-- pretty liberal URL pattern matcher -->
+    <consolePatternMatchListener
+      class="com.google.cloud.tools.eclipse.ui.util.console.PatternToHyperlinkConverter"
+      id="com.google.cloud.tools.eclipse.appengine.deploy.consolePatternMatchListener"
+      regex="https?://([\w-]+\.?)+(:\w+)?(/[^\s]*)?">
+      <enablement>
+        <instanceof value="com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsole"/>
+      </enablement>
+    </consolePatternMatchListener>
+   </extension>
+   <extension
+         id="com.google.cloud.tools.eclipse.appengineDefaultFacet"
          point="org.eclipse.wst.common.project.facet.core.defaultFacets">
       <default-facets>
          <facet
-               id="com.google.cloud.tools.eclipse.appengine.facet"
+               id="com.google.cloud.tools.eclipse.appengine.facets.standard"
                version="1">
          </facet>
          <runtime-component
@@ -178,7 +214,7 @@
             category="com.google.cloud.tools.eclipse.preferences.main"
             class="com.google.cloud.tools.eclipse.preferences.areas.AreaBasedPreferencePage"
             id="com.google.cloud.tools.eclipse.preferences.appengine.localserver"
-            name="Launching">
+            name="%launch.prefpage.name">
       </page>
    </extension>
    <extension
@@ -188,5 +224,151 @@
                title="App Engine"
                class="com.google.cloud.tools.eclipse.appengine.localserver.ui.LaunchBehaviorsArea"
                preferences="instance://com.google.cloud.tools.eclipse.appengine.localserver"/>
+   </extension>
+   <extension
+         point="org.eclipse.wst.server.ui.wizardFragments">
+      <fragment
+            class="com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineServerWizardFragment"
+            id="com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineServerWizardFragment"
+            typeIds="com.google.cloud.tools.eclipse.appengine.standard.server">
+      </fragment>
+   </extension>
+   
+   <!-- GCP Toolbar -->
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+	        locationURI="menu:com.google.cloud.tools.eclipse.ui.actions?after=launch">
+        <command
+              commandId="com.google.cloud.tools.eclipse.appengine.localserver.launch"
+              icon="platform:/plugin/org.eclipse.debug.ui/icons/full/etool16/run_exc.png"
+              label="%launch.gae.run"
+              style="push">
+           <parameter
+                 name="launchMode"
+                 value="run">
+           </parameter>
+        </command>
+        <command
+              commandId="com.google.cloud.tools.eclipse.appengine.localserver.launch"
+              icon="platform:/plugin/org.eclipse.debug.ui/icons/full/etool16/debug_exc.png"
+              label="%launch.gae.debug"
+              style="push">
+           <parameter
+                 name="launchMode"
+                 value="debug">
+           </parameter>
+        </command>
+      </menuContribution>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            description="%launch.command.description"
+            id="com.google.cloud.tools.eclipse.appengine.localserver.launch"
+            name="%launch.command.name">
+         <commandParameter
+               id="launchMode"
+               name="%launch.command.mode.name"
+               optional="true"
+               values="com.google.cloud.tools.eclipse.appengine.localserver.ui.LaunchModes">
+         </commandParameter>
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="com.google.cloud.tools.eclipse.appengine.localserver.launching.LaunchAppEngineStandardHandler"
+            commandId="com.google.cloud.tools.eclipse.appengine.localserver.launch">
+         <enabledWhen>
+            <or>
+               <iterate
+                     ifEmpty="false">
+                  <adapt
+                        type="org.eclipse.core.resources.IResource">
+                     <test
+                           property="org.eclipse.wst.common.project.facet.core.projectFacet"
+                           value="com.google.cloud.tools.eclipse.appengine.facets.standard">
+                     </test>
+                  </adapt>
+              </iterate>
+              <and>
+                 <with
+                       variable="activePart">
+                    <instanceof
+                          value="org.eclipse.ui.IEditorPart">
+                    </instanceof>
+                  </with>
+                  <with
+                        variable="activeEditorInput">
+                     <adapt
+                           type="org.eclipse.core.resources.IFile">
+                        <test
+                              property="org.eclipse.wst.common.project.facet.core.projectFacet"
+                              value="com.google.cloud.tools.eclipse.appengine.facets.standard">
+                        </test>
+                     </adapt>
+                  </with>
+               </and>
+           </or>
+         </enabledWhen>
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchShortcuts">
+      <shortcut
+            id="com.google.cloud.tools.eclipse.appengine.localserver.launch.appengine.standard"
+            label="%launch.shortcut.label"
+            description="%launch.shortcut.description"
+            path="com.google.cloud.tools.eclipse/appEngineStandard"
+            class="com.google.cloud.tools.eclipse.appengine.localserver.launching.LocalAppEngineStandardLaunchShortcut"
+            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gae-16x16.png"
+            modes="run,debug">
+         <contextualLaunch>
+            <enablement>
+               <iterate>
+                  <adapt type="org.eclipse.core.resources.IResource">
+                     <test
+                           property="org.eclipse.wst.common.project.facet.core.projectFacet"
+                           value="com.google.cloud.tools.eclipse.appengine.facets.standard" />
+                  </adapt>
+               </iterate>
+            </enablement>
+         </contextualLaunch>
+         <description
+               description="%launch.shortcut.run.description"
+               mode="run" />
+         <description
+               description="%launch.shortcut.debug.description"
+               mode="debug" />
+         <configurationType
+               id="com.google.cloud.tools.eclipse.appengine.AppToolsLaunchConfigurationType"/>
+      </shortcut>
+      
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.debugModelPresentations">
+      <debugModelPresentation
+            class="com.google.cloud.tools.eclipse.appengine.localserver.ui.CloudSdkDebugTargetPresentation"
+            id="com.google.cloud.tools.eclipse.appengine.localserver.cloudSdkDebugTarget">
+      </debugModelPresentation>
+   </extension>
+   <extension
+         point="org.eclipse.debug.core.statusHandlers">
+      <statusHandler
+            class="com.google.cloud.tools.eclipse.appengine.localserver.ui.StaleResourcesStatusHandler"
+            code="255"
+            id="com.google.cloud.tools.eclipse.appengine.localserver.statusHandlers.staleResources"
+            plugin="com.google.cloud.tools.eclipse.appengine.localserver">
+      </statusHandler>
+   </extension>
+   <extension
+         point="org.eclipse.wst.server.core.internalStartup">
+      <startup
+            class="com.google.cloud.tools.eclipse.appengine.localserver.server.RegisterAppEngineStandardRuntimeStartup"
+            id="com.google.cloud.tools.eclipse.appengine.localserver.startup">
+      </startup>
    </extension>
 </plugin>

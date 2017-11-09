@@ -1,11 +1,11 @@
 /*
- * Copyright 2016 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,50 +16,75 @@
 
 package com.google.cloud.tools.eclipse.integration.appengine;
 
-import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineDeployInfo;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotTestingUtilities;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotTimeoutManager;
+import com.google.cloud.tools.eclipse.swtbot.SwtBotTreeUtilities;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotWorkbenchActions;
-
-import org.eclipse.core.resources.IFile;
+import java.io.File;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
-
-import java.io.IOException;
-import java.io.InputStream;
+import org.eclipse.swtbot.swt.finder.widgets.TimeoutException;
+import org.eclipse.wst.common.project.facet.core.FacetedProjectFramework;
+import org.junit.Assert;
 
 /**
- * Useful App Engine-related actions for Google Cloud Tools for Eclipse
+ * Useful App Engine-related actions for Google Cloud Tools for Eclipse.
  */
 public class SwtBotAppEngineActions {
 
   /**
    * Create a native App Engine project using the
    * {@code com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard} new wizard.
-   * 
+   *
    * @param bot the bot
    * @param projectName the name of the project
    * @param location can be {@code null}
    * @param javaPackage can be {@code null} or empty
-   * @param projectId can be {@code null}
    * @return the project
    */
   public static IProject createNativeWebAppProject(SWTWorkbenchBot bot, String projectName,
-      String location, String javaPackage, String projectId) {
+      String location, String javaPackage, AppEngineRuntime runtime) {
+    return createWebAppProject(bot, projectName, location, javaPackage, runtime,
+        null /* extraBotActions */);
+  }
+
+  /**
+   * Create a new project with the Maven-based Google App Engine Standard Java Project wizard
+   */
+  public static IProject createMavenWebAppProject(final SWTWorkbenchBot bot, String projectName,
+      String location, String javaPackage, AppEngineRuntime runtime, final String mavenGroupId,
+      final String mavenArtifactId) {
+    return createWebAppProject(bot, projectName, location, javaPackage, runtime, new Runnable() {
+      @Override
+      public void run() {
+        bot.checkBox("Create as Maven project").click();
+        bot.textWithLabel("Group ID:").setText(mavenGroupId);
+        bot.textWithLabel("Artifact ID:").setText(mavenArtifactId);
+      }
+    });
+  }
+
+  public static IProject createWebAppProject(SWTWorkbenchBot bot, String projectName,
+      String location, String javaPackage, AppEngineRuntime runtime, Runnable extraBotActions) {
     bot.menu("File").menu("New").menu("Project...").click();
 
     SWTBotShell shell = bot.shell("New Project");
     shell.activate();
 
+    SwtBotTreeUtilities.waitUntilTreeHasItems(bot, bot.tree());
     bot.tree().expandNode("Google Cloud Platform")
         .select("Google App Engine Standard Java Project");
     bot.button("Next >").click();
+
+    if (extraBotActions != null) {
+      extraBotActions.run();
+    }
 
     bot.textWithLabel("Project name:").setText(projectName);
     if (location == null) {
@@ -71,63 +96,116 @@ public class SwtBotAppEngineActions {
     if (javaPackage != null) {
       bot.textWithLabel("Java package:").setText(javaPackage);
     }
-    if (projectId != null) {
-      bot.textWithLabel("App Engine Project ID: (optional)").setText(projectId);
+    if (runtime != null) {
+      if (runtime == AppEngineRuntime.STANDARD_JAVA_7) {
+        bot.comboBoxWithLabel("Java version:").setSelection("Java 7, Servlet 2.5");
+      } else if (runtime == AppEngineRuntime.STANDARD_JAVA_8) {
+        bot.comboBoxWithLabel("Java version:").setSelection("Java 8, Servlet 3.1");
+      } else {
+        Assert.fail("Runtime not handled: " + runtime);
+      }
     }
-    SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("Finish"));
-    SwtBotWorkbenchActions.waitForIdle(bot);
-    return waitUntilProjectExists(bot, getWorkspaceRoot().getProject(projectName));
+
+    // can take a loooong time to resolve jars (e.g. servlet-api.jar) from Maven Central
+    int libraryResolutionTimeout = 300 * 1000/* ms */;
+    SwtBotTimeoutManager.setTimeout(libraryResolutionTimeout);
+    try {
+      SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
+    } catch (TimeoutException ex) {
+      System.err.println("FATAL: timed out while waiting for the wizard to close. Forcibly killing "
+          + "all shells: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1925");
+      System.err.println("FATAL: You will see tons of related errors: \"Widget is disposed\", "
+          + "\"Failed to execute runnable\", \"IllegalStateException\", etc.");
+      SwtBotWorkbenchActions.killAllShells(bot);
+      throw ex;
+    }
+    SwtBotTimeoutManager.resetTimeout();
+    IProject project = waitUntilFacetedProjectExists(bot, getWorkspaceRoot().getProject(projectName));
+    SwtBotWorkbenchActions.waitForProjects(bot, project);
+    return project;
   }
 
-  /** Create a new project with the Maven-based Google App Engine Standard Java Project wizard */
-  public static IProject createMavenWebAppProject(SWTWorkbenchBot bot, String location,
-      String groupId, String artifactId, String javaPackage, String projectId,
-      String archetypeDescription) {
-    bot.menu("File").menu("New").menu("Project...").click();
+  /**
+   * Use the the Eclipse general import project wizard to import an existing project from a
+   * location.
+   */
+  public static IProject importNativeProject(SWTWorkbenchBot bot, String projectName,
+      File extractedLocation) {
+    bot.menu("File").menu("Import...").click();
 
-    SWTBotShell shell = bot.shell("New Project");
+    SWTBotShell shell = bot.shell("Import");
     shell.activate();
 
-    bot.tree().expandNode("Google Cloud Platform")
-        .select("Maven-based Google App Engine Standard Java Project");
+    SwtBotTreeUtilities.waitUntilTreeHasItems(bot, bot.tree());
+    bot.tree().expandNode("General").select("Existing Projects into Workspace");
     bot.button("Next >").click();
 
-    if (location == null) {
-      bot.checkBox("Create project in workspace").select();
-    } else {
-      bot.checkBox("Create project in workspace").deselect();
-      bot.textWithLabel("Location:").setText(location);
-    }
-    bot.textWithLabel("Group Id:").setText(groupId);
-    bot.textWithLabel("Artifact Id:").setText(artifactId);
-    if (javaPackage != null) {
-      bot.textWithLabel("Java package:").setText(javaPackage);
-    }
-    if (projectId != null) {
-      bot.textWithLabel("App Engine Project ID: (optional)").setText(projectId);
-    }
-    bot.button("Next >").click();
-    // select an archetype; use the default
-    if (archetypeDescription != null) {
-      bot.list().select(archetypeDescription);
-    }
+    // current comboBox is associated with a radio button
+    // with "Select root directory:"
+    bot.comboBox().setText(extractedLocation.getAbsolutePath());
+    bot.button("Refresh").click();
 
-    int mavenCompletionTimeout = 45000/* ms */; // can take a loooong time to fetch archetypes
-    SwtBotTimeoutManager.setTimeout(mavenCompletionTimeout);
-    SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("Finish"));
+    // can take a loooong time to resolve jars (e.g. servlet-api.jar) from Maven Central
+    int libraryResolutionTimeout = 300 * 1000/* ms */;
+    SwtBotTimeoutManager.setTimeout(libraryResolutionTimeout);
+    try {
+      SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
+    } catch (TimeoutException ex) {
+      System.err.println("FATAL: timed out while waiting for the wizard to close. Forcibly killing "
+          + "all shells: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1925");
+      System.err.println("FATAL: You will see tons of related errors: \"Widget is disposed\", "
+          + "\"Failed to execute runnable\", \"IllegalStateException\", etc.");
+      SwtBotWorkbenchActions.killAllShells(bot);
+      throw ex;
+    }
     SwtBotTimeoutManager.resetTimeout();
-    SwtBotWorkbenchActions.waitForIdle(bot);
-    return waitUntilProjectExists(bot, getWorkspaceRoot().getProject(artifactId));
+    IProject project =
+        waitUntilFacetedProjectExists(bot, getWorkspaceRoot().getProject(projectName));
+    SwtBotWorkbenchActions.waitForProjects(bot, project);
+    return project;
   }
-
 
 
   /**
-   * Spin until the given project actually exists.
-   * 
+   * Import a Maven project from a zip file
+   */
+  public static IProject importMavenProject(SWTWorkbenchBot bot, String projectName,
+      File extractedLocation) {
+
+    bot.menu("File").menu("Import...").click();
+
+    SWTBotShell shell = bot.shell("Import");
+    shell.activate();
+
+    SwtBotTreeUtilities.waitUntilTreeHasItems(bot, bot.tree());
+    bot.tree().expandNode("Maven").select("Existing Maven Projects");
+    bot.button("Next >").click();
+
+    bot.comboBoxWithLabel("Root Directory:").setText(extractedLocation.getAbsolutePath());
+    bot.button("Refresh").click();
+
+    try {
+      SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
+    } catch (TimeoutException ex) {
+      System.err.println("FATAL: timed out while waiting for the wizard to close. Forcibly killing "
+          + "all shells: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1925");
+      System.err.println("FATAL: You will see tons of related errors: \"Widget is disposed\", "
+          + "\"Failed to execute runnable\", \"IllegalStateException\", etc.");
+      SwtBotWorkbenchActions.killAllShells(bot);
+      throw ex;
+    }
+    SwtBotTimeoutManager.resetTimeout();
+    IProject project = waitUntilFacetedProjectExists(bot, getWorkspaceRoot().getProject(projectName));
+    SwtBotWorkbenchActions.waitForProjects(bot, project);
+    return project;
+  }
+
+  /**
+   * Spin until the given project actually exists and is facetd.
+   *
    * @return the project
    */
-  private static IProject waitUntilProjectExists(SWTBot bot, final IProject project) {
+  private static IProject waitUntilFacetedProjectExists(SWTBot bot, final IProject project) {
     bot.waitUntil(new DefaultCondition() {
       @Override
       public String getFailureMessage() {
@@ -136,7 +214,7 @@ public class SwtBotAppEngineActions {
 
       @Override
       public boolean test() throws Exception {
-        return project.exists();
+        return project.exists() && FacetedProjectFramework.isFacetedProject(project);
       }
     });
     return project;
@@ -147,21 +225,4 @@ public class SwtBotAppEngineActions {
   }
 
   private SwtBotAppEngineActions() {}
-
-  /**
-   * Extracts the project ID from the given file.
-   * 
-   * @return the project ID or {@code null} if none found
-   */
-  public static String getAppEngineProjectId(IFile appEngineXml) throws IOException, CoreException {
-    try (InputStream contents = appEngineXml.getContents()) {
-      AppEngineDeployInfo info = new AppEngineDeployInfo();
-      info.parse(contents);
-      String projectId = info.getProjectId();
-      if (projectId == null || projectId.trim().isEmpty()) {
-        return null;
-      }
-      return projectId;
-    }
-  }
 }

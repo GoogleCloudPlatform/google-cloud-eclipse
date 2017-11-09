@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<site>
-   <feature id="com.google.cloud.tools.eclipse.suite.e45.feature" version="0.1.0.qualifier">
-      <category name="GCP"/>
-   </feature>
-   <category-def name="GCP" label="Cloud Tools for Eclipse"/>
-</site>

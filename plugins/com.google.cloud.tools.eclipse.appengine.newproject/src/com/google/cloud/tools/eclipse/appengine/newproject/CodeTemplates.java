@@ -1,11 +1,11 @@
 /*
- * Copyright 2016 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,11 +16,15 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
-import java.io.ByteArrayInputStream;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
+import com.google.cloud.tools.eclipse.util.Templates;
+import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Objects;
+import com.google.common.base.Strings;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -31,108 +35,208 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
 
-import com.google.cloud.tools.eclipse.util.templates.appengine.AppEngineTemplateUtility;
-import com.google.common.annotations.VisibleForTesting;
-
 public class CodeTemplates {
 
   /**
-   * Load the named template into the supplied Eclipse project.
-   *  
+   * Creates files for a sample App Engine Standard project in the supplied Eclipse project.
+   *
    * @param project the Eclipse project to be filled with templated code
    * @param config replacement values
    * @param monitor progress monitor
-   * @param name directory from which to load template
+   * @return the most important file created that should be opened in an editor
    */
-  public static void materialize(IProject project, AppEngineStandardProjectConfig config,
+  public static IFile materializeAppEngineStandardFiles(IProject project,
+      AppEngineProjectConfig config, IProgressMonitor monitor) throws CoreException {
+    return materialize(project, config, true /* isStandardProject */, monitor);
+  }
+
+  /**
+   * Creates files for a sample App Engine Flexible project in the supplied Eclipse project.
+   *
+   * @param project the Eclipse project to be filled with templated code
+   * @param config replacement values
+   * @param monitor progress monitor
+   * @return the most important file created that should be opened in an editor
+   */
+  public static IFile materializeAppEngineFlexFiles(IProject project, AppEngineProjectConfig config,
       IProgressMonitor monitor) throws CoreException {
-    SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
-    subMonitor.setTaskName("Generating code");
-    boolean force = true;
-    boolean local = true;
-    IFolder src = project.getFolder("src");
-    if (!src.exists()) {
-      src.create(force, local, subMonitor);
+    return materialize(project, config, false /* isStandardProject */, monitor);
+  }
+
+  /**
+   * Creates files for a sample App Engine project in the supplied Eclipse project.
+   *
+   * @param project the Eclipse project to be filled with templated code
+   * @param config replacement values
+   * @param isStandardProject true if project should be configured to have the App Engine Standard
+   *   configuration files and false if project should have the App Engine Flexible configuration
+   *   files.
+   * @param monitor progress monitor
+   * @return the most important file created that should be opened in an editor
+   */
+  private static IFile materialize(IProject project, AppEngineProjectConfig config,
+      boolean isStandardProject, IProgressMonitor monitor) throws CoreException {
+    SubMonitor subMonitor = SubMonitor.convert(monitor, "Generating code", 45);
+
+    IFile hello =
+        createJavaSourceFiles(project, config, isStandardProject, subMonitor.newChild(15));
+
+    createAppEngineWebXmlOrAppYaml(project, config, isStandardProject, subMonitor.newChild(5));
+
+    createWebXml(project, config, isStandardProject, subMonitor.newChild(5));
+
+    createWebContents(project, subMonitor.newChild(15));
+
+    if (config.getUseMaven()) {
+      createPomXml(project, config, isStandardProject, subMonitor.newChild(5));
+    } else {
+      subMonitor.worked(5);
     }
-    IFolder main = createChildFolder("main", src, subMonitor);
-    IFolder java = createChildFolder("java", main, subMonitor);
-    IFolder test = createChildFolder("test", src, subMonitor);
-    IFolder testJava = createChildFolder("java", test, subMonitor);
+
+    return hello;
+  }
+
+  private static IFile createJavaSourceFiles(IProject project, AppEngineProjectConfig config,
+      boolean isStandardProject, IProgressMonitor monitor) throws CoreException {
+    SubMonitor subMonitor = SubMonitor.convert(monitor, 15);
 
     String packageName = config.getPackageName();
+    String packagePath = packageName.replace('.', '/');
+    IFolder mainPackageFolder = project.getFolder("src/main/java/" + packagePath); //$NON-NLS-1$
+    IFolder testPackageFolder = project.getFolder("src/test/java/" + packagePath); //$NON-NLS-1$
 
-    Map<String, String> templateValues = new HashMap<>();
-    if (packageName != null && !packageName.isEmpty()) {
-      templateValues.put("package", packageName);
-    } else {
-      templateValues.put("package", "");
-    }
-    
-    IFolder packageFolder = createFoldersForPackage(java, packageName, subMonitor);
-    createChildFile("HelloAppEngine.java", AppEngineTemplateUtility.HELLO_APPENGINE_TEMPLATE, packageFolder, subMonitor, templateValues);
-    
-    // now set up the test directory
-    IFolder testPackageFolder = createFoldersForPackage(testJava, packageName, subMonitor);
-    createChildFile("HelloAppEngineTest.java", AppEngineTemplateUtility.HELLO_APPENGINE_TEST_TEMPLATE, testPackageFolder, subMonitor, templateValues);
-    createChildFile("MockHttpServletResponse.java", AppEngineTemplateUtility.MOCK_HTTPSERVLETRESPONSE_TEMPLATE, testPackageFolder, subMonitor, templateValues);
-    
-    IFolder webapp = createChildFolder("webapp", main, subMonitor);
-    IFolder webinf = createChildFolder("WEB-INF", webapp, subMonitor);
-    
     Map<String, String> properties = new HashMap<>();
-    createChildFile("appengine-web.xml", AppEngineTemplateUtility.APPENGINE_WEB_XML_TEMPLATE, webinf, subMonitor, properties);
-    
-    Map<String, String> packageMap = new HashMap<>();
-    String packageValue = config.getPackageName().isEmpty() ? "" : config.getPackageName() + ".";
-    packageMap.put("package", packageValue);
-    createChildFile("web.xml", AppEngineTemplateUtility.WEB_XML_TEMPLATE, webinf, subMonitor, packageMap);
-    
-    createChildFile("index.html", AppEngineTemplateUtility.INDEX_HTML_TEMPLATE, webapp, subMonitor, Collections.<String, String> emptyMap());
-  }
-
-  private static IFolder createFoldersForPackage(IFolder parentFolder,
-                                                 String packageName,
-                                                 SubMonitor subMonitor) throws CoreException {
-    IFolder folder = parentFolder;
-    if (packageName != null && !packageName.isEmpty()) {
-      String[] packages = packageName.split("\\.");
-      for (int i = 0; i < packages.length; i++) {
-        folder = createChildFolder(packages[i], folder, subMonitor);
-      }
+    properties.put("package", Strings.nullToEmpty(packageName)); //$NON-NLS-1$
+    if (isStandardProject
+        && Objects.equal(AppEngineRuntime.STANDARD_JAVA_7.getId(), config.getRuntimeId())) {
+      properties.put("servletVersion", "2.5"); //$NON-NLS-1$ //$NON-NLS-2$
+    } else {
+      properties.put("servletVersion", "3.1"); //$NON-NLS-1$ //$NON-NLS-2$
     }
-    return folder;
+
+    IFile hello = createChildFile("HelloAppEngine.java", //$NON-NLS-1$
+        Templates.HELLO_APPENGINE_TEMPLATE,
+        mainPackageFolder, properties, subMonitor.newChild(5));
+
+    createChildFile("HelloAppEngineTest.java", //$NON-NLS-1$
+        Templates.HELLO_APPENGINE_TEST_TEMPLATE, testPackageFolder,
+        properties, subMonitor.newChild(5));
+    createChildFile("MockHttpServletResponse.java", //$NON-NLS-1$
+        Templates.MOCK_HTTPSERVLETRESPONSE_TEMPLATE,
+        testPackageFolder, properties, subMonitor.newChild(5));
+
+    return hello;
   }
 
-  @VisibleForTesting
-  static IFolder createChildFolder(String name, IFolder parent, SubMonitor monitor) 
+  private static void createAppEngineWebXmlOrAppYaml(IProject project,
+      AppEngineProjectConfig config, boolean isStandardProject, IProgressMonitor monitor)
       throws CoreException {
-    monitor.subTask("Creating folder " + name);
-    monitor.newChild(10);
-
-    boolean force = true;
-    boolean local = true;
-    IFolder child = parent.getFolder(name);
-    if (!child.exists()) {
-      child.create(force, local, monitor);
+    Map<String, String> properties = new HashMap<>();
+    String service = config.getServiceName();
+    if (!Strings.isNullOrEmpty(service)) {
+      properties.put("service", service);  //$NON-NLS-1$
     }
-    return child;
+    String runtime = config.getRuntimeId();
+    if (!Strings.isNullOrEmpty(runtime)) {
+      properties.put("runtime", runtime); //$NON-NLS-1$
+    }
+
+    if (isStandardProject) {
+      IFolder webInf = project.getFolder("src/main/webapp/WEB-INF"); //$NON-NLS-1$
+      createChildFile("appengine-web.xml", //$NON-NLS-1$
+          Templates.APPENGINE_WEB_XML_TEMPLATE,
+          webInf, properties, monitor);
+    } else {
+      IFolder appengine = project.getFolder("src/main/appengine"); //$NON-NLS-1$
+      createChildFile("app.yaml", Templates.APP_YAML_TEMPLATE, //$NON-NLS-1$
+          appengine, properties, monitor);
+    }
   }
-  
+
+  private static void createWebXml(IProject project, AppEngineProjectConfig config,
+      boolean isStandardProject, IProgressMonitor monitor) throws CoreException {
+    Map<String, String> properties = new HashMap<>();
+
+    String packageValue = config.getPackageName().isEmpty()
+        ? ""  //$NON-NLS-1$
+        : config.getPackageName() + "."; //$NON-NLS-1$
+    properties.put("package", packageValue);  //$NON-NLS-1$
+
+    if (isStandardProject
+        && Objects.equal(AppEngineRuntime.STANDARD_JAVA_7.getId(), config.getRuntimeId())) {
+      properties.put("servletVersion", "2.5"); //$NON-NLS-1$ //$NON-NLS-2$
+      properties.put("namespace", "http://java.sun.com/xml/ns/javaee"); //$NON-NLS-1$ //$NON-NLS-2$
+      properties.put("schemaUrl", "http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"); //$NON-NLS-1$ //$NON-NLS-2$
+    } else {
+      properties.put("servletVersion", "3.1"); //$NON-NLS-1$ //$NON-NLS-2$
+      properties.put("namespace", "http://xmlns.jcp.org/xml/ns/javaee"); //$NON-NLS-1$ //$NON-NLS-2$
+      properties.put("schemaUrl", "http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"); //$NON-NLS-1$ //$NON-NLS-2$
+    }
+
+    IFolder webInf = project.getFolder("src/main/webapp/WEB-INF"); //$NON-NLS-1$
+    createChildFile("web.xml", Templates.WEB_XML_TEMPLATE, webInf, //$NON-NLS-1$
+        properties, monitor);
+  }
+
+  private static void createWebContents(IProject project, IProgressMonitor monitor)
+      throws CoreException {
+    SubMonitor subMonitor = SubMonitor.convert(monitor, 10);
+
+    IFolder webapp = project.getFolder("src/main/webapp"); //$NON-NLS-1$
+    createChildFile("index.html", Templates.INDEX_HTML_TEMPLATE, webapp, //$NON-NLS-1$
+        Collections.<String, String>emptyMap(), subMonitor.newChild(5));
+
+    copyChildFile("favicon.ico", webapp, subMonitor.newChild(5)); //$NON-NLS-1$
+  }
+
+  private static void createPomXml(IProject project, AppEngineProjectConfig config,
+      boolean isStandardProject, IProgressMonitor monitor) throws CoreException {
+    Map<String, String> properties = new HashMap<>();
+    properties.put("projectGroupId", config.getMavenGroupId()); //$NON-NLS-1$
+    properties.put("projectArtifactId", config.getMavenArtifactId()); //$NON-NLS-1$
+    properties.put("projectVersion", config.getMavenVersion()); //$NON-NLS-1$
+
+    if (isStandardProject) {
+      if (Objects.equal(AppEngineRuntime.STANDARD_JAVA_7.getId(), config.getRuntimeId())) {
+        properties.put("servletVersion", "2.5"); //$NON-NLS-1$ //$NON-NLS-2$
+        properties.put("compilerVersion", "1.7"); //$NON-NLS-1$ //$NON-NLS-2$
+      } else {
+        properties.put("servletVersion", "3.1"); //$NON-NLS-1$ //$NON-NLS-2$
+        properties.put("compilerVersion", "1.8"); //$NON-NLS-1$ //$NON-NLS-2$
+      }
+      createChildFile("pom.xml", Templates.POM_XML_STANDARD_TEMPLATE, //$NON-NLS-1$
+          project, properties, monitor);
+    } else {
+      createChildFile("pom.xml", Templates.POM_XML_FLEX_TEMPLATE, //$NON-NLS-1$
+          project, properties, monitor);
+    }
+  }
+
   @VisibleForTesting
-  static IFile createChildFile(String name, String template, IContainer parent, SubMonitor monitor,
-      Map<String, String> values) throws CoreException {
-
+  static IFile createChildFile(String name, String template, IContainer parent,
+      Map<String, String> values, IProgressMonitor monitor) throws CoreException {
     monitor.subTask("Creating file " + name);
-    monitor.newChild(20);
 
+    ResourceUtils.createFolders(parent, monitor);
     IFile child = parent.getFile(new Path(name));
     if (!child.exists()) {
-      child.create(new ByteArrayInputStream(new byte[0]), true /* force */, monitor);
-      AppEngineTemplateUtility.createFileContent(
-          child.getLocation().toString(), template, values);
+      Templates.createFileContent(child.getLocation().toString(), template, values);
       child.refreshLocal(IResource.DEPTH_ZERO, monitor);
     }
     return child;
+  }
+
+  @VisibleForTesting
+  static void copyChildFile(String name, IContainer parent, IProgressMonitor monitor)
+      throws CoreException {
+    monitor.subTask("Copying file " + name);
+
+    ResourceUtils.createFolders(parent, monitor);
+    IFile child = parent.getFile(new Path(name));
+    if (!child.exists()) {
+      Templates.copyFileContent(child.getLocation().toString(), name);
+      child.refreshLocal(IResource.DEPTH_ZERO, monitor);
+    }
   }
 
 }

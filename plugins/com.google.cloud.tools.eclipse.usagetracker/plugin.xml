@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+  <extension point="org.eclipse.core.runtime.preferences">
+    <initializer class="com.google.cloud.tools.eclipse.usagetracker.PreferenceInitializer"/>
+  </extension>
+  <extension point="com.google.cloud.tools.eclipse.preferences.areas">
+    <area host="com.google.cloud.tools.eclipse.preferences.main"
+          title="%analytics.optin.area.title"
+          class="com.google.cloud.tools.eclipse.usagetracker.AnalyticsOptInArea"
+          preferences="configuration://com.google.cloud.tools.eclipse.usagetracker">
+    </area>
+  </extension>
+</plugin>

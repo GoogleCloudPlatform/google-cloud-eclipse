@@ -1,11 +1,11 @@
 /*
- * Copyright 2016 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import org.eclipse.swtbot.swt.finder.finders.UIThreadRunnable;
 import org.eclipse.swtbot.swt.finder.results.Result;
 import org.eclipse.swtbot.swt.finder.results.VoidResult;
 import org.eclipse.swtbot.swt.finder.results.WidgetResult;
+import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
@@ -340,10 +341,41 @@ public class SwtBotTreeUtilities {
   }
 
   /**
-   * Wait until the tree item contains the given text
+   * Wait until the given tree has not items.
+   * 
+   * @throws TimeoutException if no items appear within the default timeout
+   */
+  public static void waitUntilTreeHasNoItems(SWTWorkbenchBot bot, final SWTBotTree tree) {
+    bot.waitUntil(new DefaultCondition() {
+      @Override
+      public String getFailureMessage() {
+        return "Tree items never disappeared";
+      }
+
+      @Override
+      public boolean test() throws Exception {
+        return !tree.hasItems();
+      }
+    });
+  }
+
+
+  /**
+   * Wait until the tree item contains the given text with the
+   * timeout {@link SWTBotPreferences#TIMEOUT}.
    */
   public static void waitUntilTreeContainsText(SWTWorkbenchBot bot, final SWTBotTreeItem treeItem,
       final String text) {
+    waitUntilTreeContainsText(bot, treeItem, text, SWTBotPreferences.TIMEOUT);
+  }
+
+  /**
+   * Wait until the tree item contains the given text with the timeout specified.
+   */
+  public static void waitUntilTreeContainsText(SWTWorkbenchBot bot,
+                                               final SWTBotTreeItem treeItem,
+                                               final String text,
+                                               long timeout) {
     bot.waitUntil(new DefaultCondition() {
       @Override
       public boolean test() throws Exception {
@@ -354,6 +386,6 @@ public class SwtBotTreeUtilities {
       public String getFailureMessage() {
         return "Text never appeared";
       }
-    });
+    }, timeout);
   }
 }

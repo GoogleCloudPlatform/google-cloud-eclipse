@@ -1,11 +1,11 @@
 /*
- * Copyright 2016 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,7 +24,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.IPersistentPreferenceStore;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
@@ -50,14 +49,14 @@ import java.util.logging.Logger;
 /**
  * A host preference page that hosts multiple <em>preference areas</em>. These
  * {@link PreferenceArea} are like embedded preference pages, like more complex JFace
- * {@linkplain FieldEditor}s.
+ * {@link org.eclipse.jface.preference.FieldEditor}.
  */
 public class AreaBasedPreferencePage extends PreferencePage
     implements IWorkbenchPreferencePage, IExecutableExtension {
   /**
    * Responsible for ordering preference areas by their rank.
    */
-  public static class AreaOrdering implements Comparator<PreferenceArea> {
+  private static class AreaOrdering implements Comparator<PreferenceArea> {
     @Override
     public int compare(PreferenceArea o1, PreferenceArea o2) {
       return o1.getRank() - o2.getRank();
@@ -142,8 +141,8 @@ public class AreaBasedPreferencePage extends PreferencePage
   /**
    * 0-argument constructor required by the Eclipse Extension Registry. Not intended for normal use.
    * 
-   * @see AreaBasedPreferencePage(String)
-   * @noreference use {@link AreaBasedPreferencePage(String)} instead
+   * @see #AreaBasedPreferencePage(String)
+   * @noreference use {@link #AreaBasedPreferencePage(String)} instead
    */
   public AreaBasedPreferencePage() {}
 
@@ -209,6 +208,7 @@ public class AreaBasedPreferencePage extends PreferencePage
     // apply extra space around areas
     GridLayoutFactory.swtDefaults().spacing(5, 10).generateLayout(container);
     parent.layout(true, true);
+    
     return container;
   }
 
@@ -290,7 +290,7 @@ public class AreaBasedPreferencePage extends PreferencePage
     return RegistryFactory.getRegistry();
   }
 
-  protected void update() {
+  private void update() {
     IStatus severest = Status.OK_STATUS;
     for (PreferenceArea area : areas) {
       IStatus status = area.getStatus();

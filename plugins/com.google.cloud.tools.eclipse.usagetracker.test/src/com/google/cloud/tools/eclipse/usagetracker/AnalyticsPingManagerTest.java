@@ -1,152 +1,167 @@
+/*
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.google.cloud.tools.eclipse.usagetracker;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.tools.eclipse.preferences.AnalyticsPreferences;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager.PingEvent;
-
+import com.google.common.collect.ImmutableMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.swt.widgets.Display;
-import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.verification.VerificationMode;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 @RunWith(MockitoJUnitRunner.class)
 public class AnalyticsPingManagerTest {
 
-  private static final String UUID = "bee5d838-c3f8-4940-a944-b56973597e74";
-
-  private static final String EVENT_TYPE = "some-event-type";
-  private static final String EVENT_NAME = "some-event-name";
-
-  private static final String VIRTUAL_DOCUMENT_PAGE =
-      "/virtual/some-application/" + EVENT_TYPE + "/" + EVENT_NAME;
-
-  private static final String METADATA_KEY = "some-custom-key";
-  private static final String METADATA_VALUE = "some-custom-value";
-
-  private static final Map<String, String> RANDOM_PARAMETERS = Collections.unmodifiableMap(
-      new HashMap<String, String>() {
-        {
-          put("v", "1");
-          put("tid", "UA-12345678-1");
-          put("ni", "0");
-          put("t", "pageview");
-          put("cd21", "1");
-          put("cd16", "0");
-          put("cd17", "0");
-          put("cid", UUID);
-          put("cd19", EVENT_TYPE);
-          put("cd20", EVENT_NAME);
-          put("dp", VIRTUAL_DOCUMENT_PAGE);
-          put("dt", METADATA_KEY + "=" + METADATA_VALUE);
-        }
-      });
-
-  private static final Map<String, String> ENCODED_PARAMETERS = Collections.unmodifiableMap(
-      new HashMap<String, String>() {
-        {
-          put("dt", "some-custom-key%3Dsome-custom-value");
-          put("cd16", "0");
-          put("cd17", "0");
-          put("v", "1");
-          put("t", "pageview");
-          put("cd21", "1");
-          put("cd20", "some-event-name");
-          put("ni", "0");
-          put("tid", "UA-12345678-1");
-          put("dp", "%2Fvirtual%2Fsome-application%2Fsome-event-type%2Fsome-event-name");
-          put("cid", "bee5d838-c3f8-4940-a944-b56973597e74");
-          put("cd19", "some-event-type");
-        }
-      });
+  private static final ImmutableMap<String, String> EMPTY_MAP = ImmutableMap.of();
 
   @Mock private IEclipsePreferences preferences;
-  @Mock private Display display;
   @Mock private ConcurrentLinkedQueue<PingEvent> pingEventQueue;
 
+  private AnalyticsPingManager pingManager;
+
+  @Before
+  public void setUp() {
+    // Pretend ping event queue is always empty to prevent making actual HTTP requests.
+    when(pingEventQueue.isEmpty()).thenReturn(true);
+    when(preferences.get("ANALYTICS_CLIENT_ID", null)).thenReturn("clientId");
+
+    pingManager = new AnalyticsPingManager("https://non-null-url-to-enable-mananger",
+        preferences, pingEventQueue);
+  }
+
   @Test
-  public void testGetParametersString() {
-    String urlEncodedParameters = AnalyticsPingManager.getParametersString(RANDOM_PARAMETERS);
-
-    String[] keyValuePairs = urlEncodedParameters.split("&");
-    Assert.assertEquals(keyValuePairs.length, RANDOM_PARAMETERS.size());
-
-    for (String pair : keyValuePairs) {
-      String[] keyValue = pair.split("=");
-      Assert.assertEquals(2, keyValue.length);
-      Assert.assertEquals(keyValue[1], ENCODED_PARAMETERS.get(keyValue[0]));
+  public void testPingEventConstructor_nullEventName() {
+    try {
+      new PingEvent(null, EMPTY_MAP, null);
+      fail();
+    } catch (IllegalArgumentException e) {
+      assertEquals("eventName null or empty", e.getMessage());
     }
   }
 
   @Test
-  public void testGetParametersString_percentEscaping() {
-    Map<String, String> noEscape = new HashMap<>();
-    noEscape.put("k", ".*-_abcXYZ");
-    Assert.assertEquals("k=.*-_abcXYZ", AnalyticsPingManager.getParametersString(noEscape));
+  public void testPingEventConstructor_emptyEventName() {
+    try {
+      new PingEvent("", EMPTY_MAP, null);
+      fail();
+    } catch (IllegalArgumentException e) {
+      assertEquals("eventName null or empty", e.getMessage());
+    }
+  }
 
-    Map<String, String> escape = new HashMap<>();
-    escape.put("k", " ü한글+=,`~!@#$%^&()?<>{}][|:;/\\'\"");
-    Assert.assertEquals("k=+%C3%BC%ED%95%9C%EA%B8%80%2B%3D%2C%60%7E%21%40%23"
-        + "%24%25%5E%26%28%29%3F%3C%3E%7B%7D%5D%5B%7C%3A%3B%2F%5C%27%22",
-        AnalyticsPingManager.getParametersString(escape));
+  @Test
+  public void testPingEventConstructor_nullMetadata() {
+    try {
+      new PingEvent("some.event-name", null, null);
+      fail();
+    } catch (NullPointerException e) {
+      assertEquals("metadata is null", e.getMessage());
+    }
   }
 
   @Test
   public void testEventTypeEventNameConvention() {
-    PingEvent event = new PingEvent("some.event-name", null, null, null);
-    Map<String, String> parameters = AnalyticsPingManager.buildParametersMap("clientId", event);
-    Assert.assertEquals("/virtual/gcloud-eclipse-tools/some.event-name",
-        parameters.get("dp"));
+    PingEvent event = new PingEvent("some.event-name", EMPTY_MAP, null);
+    Map<String, String> parameters = pingManager.buildParametersMap(event);
+    assertEquals("/virtual/gcloud-eclipse-tools/some.event-name", parameters.get("dp"));
+  }
+
+  @Test
+  public void testVirtualHostSet() {
+    PingEvent event = new PingEvent("some.event-name", EMPTY_MAP, null);
+    Map<String, String> parameters = pingManager.buildParametersMap(event);
+    assertTrue(parameters.get("dh").startsWith("virtual."));
   }
 
   @Test
   public void testMetadataConvention() {
-    PingEvent event = new PingEvent("some.event-name", "times-happened", "1234", null);
-    Map<String, String> parameters = AnalyticsPingManager.buildParametersMap("clientId", event);
-    Assert.assertEquals("times-happened=1234", parameters.get("dt"));
+    PingEvent event = new PingEvent("some.event-name",
+        ImmutableMap.of("times-happened", "1234"), null);
+    Map<String, String> parameters = pingManager.buildParametersMap(event);
+    assertEquals("times-happened=1234", parameters.get("dt"));
   }
 
   @Test
-  public void testOptInDialogShown_optInNotRegisteredAndNotYetOptedIn() {
+  public void testMetadataConvention_multiplePairs() {
+    PingEvent event = new PingEvent("some.event-name",
+        ImmutableMap.of("times-happened", "1234", "mode", "debug"), null);
+    Map<String, String> parameters = pingManager.buildParametersMap(event);
+    assertEquals("times-happened=1234,mode=debug", parameters.get("dt"));
+  }
+
+  @Test
+  public void testMetadataConvention_escaping() {
+    PingEvent event = new PingEvent("some.event-name",
+        ImmutableMap.of("key , \\ = k", "value , \\ = v"), null);
+    Map<String, String> parameters = pingManager.buildParametersMap(event);
+    assertEquals("key \\, \\\\ \\= k=value \\, \\\\ \\= v", parameters.get("dt"));
+  }
+
+  @Test
+  public void testClientId() {
+    PingEvent event = new PingEvent("some.event-name", EMPTY_MAP, null);
+    Map<String, String> parameters = pingManager.buildParametersMap(event);
+    assertEquals("clientId", parameters.get("cid"));
+  }
+
+  @Test
+  public void testShouldShowOptInDialog_optInNotRegisteredAndNotYetOptedIn() {
     mockOptIn(false);
     mockOptInRegistered(false);
-    verifyOptInDialogOpen(times(1));
+    assertTrue(pingManager.shouldShowOptInDialog());
   }
 
   @Test
-  public void testOptInDialogSkipped_optInNotRegisteredAndAlreadyOptedIn() {
+  public void testShouldShowOptInDialog_optInNotRegisteredAndAlreadyOptedIn() {
     mockOptIn(true);
     mockOptInRegistered(false);
-    verifyOptInDialogOpen(never());
+    assertFalse(pingManager.shouldShowOptInDialog());
   }
 
   @Test
-  public void testOptInDialogSkipped_optInRegisteredAndNotYetOptedIn() {
+  public void testShouldShowOptInDialog_optInRegisteredAndNotYetOptedIn() {
     mockOptIn(false);
     mockOptInRegistered(true);
-    verifyOptInDialogOpen(never());
+    assertFalse(pingManager.shouldShowOptInDialog());
   }
 
   @Test
-  public void testOptInDialogSkipped_optInRegisteredAndAlreadyOptedIn() {
+  public void testShouldShowOptInDialog_optInRegisteredAndAlreadyOptedIn() {
     mockOptIn(true);
     mockOptInRegistered(true);
-    verifyOptInDialogOpen(never());
+    assertFalse(pingManager.shouldShowOptInDialog());
   }
 
   private void mockOptIn(boolean optIn) {
@@ -158,14 +173,6 @@ public class AnalyticsPingManagerTest {
     when(preferences.getBoolean(eq(AnalyticsPreferences.ANALYTICS_OPT_IN_REGISTERED),
                                 anyBoolean()))
         .thenReturn(registered);
-  }
-
-  private void verifyOptInDialogOpen(VerificationMode verificationMode) {
-    AnalyticsPingManager pingManager =
-        new AnalyticsPingManager(preferences, display, pingEventQueue, true);
-    pingManager.unitTestMode = true;
-    pingManager.showOptInDialogIfNeeded(null);
-    verify(display, verificationMode).syncExec(any(Runnable.class));
   }
 
   @Test
@@ -197,11 +204,100 @@ public class AnalyticsPingManagerTest {
   }
 
   private void verifyPingQueued(VerificationMode verificationMode) {
-    when(pingEventQueue.isEmpty()).thenReturn(true);
-    AnalyticsPingManager pingManager =
-        new AnalyticsPingManager(preferences, display, pingEventQueue, true);
-    pingManager.unitTestMode = true;
     pingManager.sendPing("eventName", "metadataKey", "metadataValue");
     verify(pingEventQueue, verificationMode).add(any(PingEvent.class));
+  }
+
+  @Test
+  public void testGetAnonymizedClientId_generateNewId() {
+    when(preferences.get(eq(AnalyticsPreferences.ANALYTICS_CLIENT_ID), anyString()))
+        .thenReturn(null);  // Simulate that client ID has never been generated.
+    String clientId = AnalyticsPingManager.getAnonymizedClientId(preferences);
+    assertFalse(clientId.isEmpty());
+    verify(preferences).put(AnalyticsPreferences.ANALYTICS_CLIENT_ID, clientId);
+  }
+
+  @Test
+  public void testGetAnonymizedClientId_useSavedId() {
+    when(preferences.get(eq(AnalyticsPreferences.ANALYTICS_CLIENT_ID), anyString()))
+        .thenReturn("some-unique-client-id");
+    String clientId = AnalyticsPingManager.getAnonymizedClientId(preferences);
+    assertEquals("some-unique-client-id", clientId);
+    verify(preferences, never()).put(AnalyticsPreferences.ANALYTICS_CLIENT_ID, clientId);
+  }
+
+  @Test
+  public void testSendPingArguments_validEventName() {
+    pingManager.sendPing("eventName");
+  }
+
+  @Test
+  public void testSendPingArguments_nullEventName() {
+    try {
+      pingManager.sendPing(null);
+      fail();
+   } catch (IllegalArgumentException e) {
+      assertEquals("eventName null or empty", e.getMessage());
+    }
+  }
+
+  @Test
+  public void testSendPingArguments_emptyEventName() {
+    try {
+      pingManager.sendPing("");
+      fail();
+   } catch (IllegalArgumentException e) {
+      assertEquals("eventName null or empty", e.getMessage());
+    }
+  }
+
+  @Test
+  public void testSendPingArguments_validMetadataKeyValue() {
+    pingManager.sendPing("eventName", "metadataKey", "metadataValue");
+  }
+
+  @Test
+  public void testSendPingArguments_nullMetadataKey() {
+    try {
+      pingManager.sendPing("eventName", null, "metadataValue");
+      fail();
+    } catch (IllegalArgumentException e) {
+      assertEquals("metadataKey null or empty", e.getMessage());
+    }
+  }
+
+  @Test
+  public void testSendPingArguments_emptyMetadataKey() {
+    try {
+      pingManager.sendPing("eventName", "", "metadataValue");
+      fail();
+    } catch (IllegalArgumentException e) {
+      assertEquals("metadataKey null or empty", e.getMessage());
+    }
+  }
+
+  @Test
+  public void testSendPingArguments_nullMetadataValue() {
+    try {
+      pingManager.sendPing("eventName", "metadataKey", null);
+      fail();
+    } catch (IllegalArgumentException e) {
+      assertEquals("metadataValue null or empty", e.getMessage());
+    }
+  }
+
+  @Test
+  public void testSendPingArguments_emptyMetadataValue() {
+    try {
+      pingManager.sendPing("eventName", "metadataKey", "");
+      fail();
+    } catch (IllegalArgumentException e) {
+      assertEquals("metadataValue null or empty", e.getMessage());
+    }
+  }
+
+  @Test
+  public void testSendPingArguments_validMetadataMap() {
+    pingManager.sendPing("eventName", EMPTY_MAP);
   }
 }

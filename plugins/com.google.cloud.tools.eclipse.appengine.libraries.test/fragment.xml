@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<fragment>
+    <extension
+        point="org.eclipse.jdt.core.classpathContainerInitializer">
+     <classpathContainerInitializer
+           class="com.google.cloud.tools.eclipse.appengine.libraries.TestAppEngineLibraryContainerInitializer"
+           id="test.appengine.libraries" />
+  </extension>
+</fragment>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<introContent>
+  <extensionContent path="overview/@" style="css/intro.css">
+    <group style-id="content-group">
+      <link id="cloud-tools-for-eclipse-link"
+            label="Google Cloud Tools for Eclipse"
+            style-id="content-link"
+            url="https://cloud.google.com/eclipse/docs/">
+        <text>Learn more about Google Cloud Tools for Eclipse.</text>
+      </link>
+    </group>
+  </extensionContent>
+
+  <extensionContent path="tutorials/@" style="css/intro.css">
+    <group style-id="content-group">
+      <link id="cloud-tools-for-eclipse-tutorial-link"
+            label="Google Cloud Tools for Eclipse Tutorial"
+            style-id="content-link"
+            url="https://cloud.google.com/eclipse/docs/quickstart">
+        <text>Read the Google Cloud Tools for Eclipse tutorial to learn how to build App Engine applications with Eclipse.</text>
+      </link>
+    </group>
+  </extensionContent>
+
+  <extensionContent path="whatsnew/@" style="css/intro.css">
+    <group style-id="content-group">
+      <link id="cloud-tools-for-eclipse-whatsnew-link"
+            label="Google Cloud Tools for Eclipse Release Notes"
+            style-id="content-link"
+            url="https://cloud.google.com/eclipse/docs/release-notes">
+        <text>Announcements about new and updated features, bug fixes, known issues, and deprecated functionality.</text>
+      </link>
+    </group>
+  </extensionContent>
+
+  <extensionContent path="migrate/@" style="css/intro.css">
+    <group style-id="content-group">
+      <link id="cloud-tools-for-eclipse-migration-link"
+            label="Migration from the Google Plugin for Eclipse (GPE)"
+            style-id="content-link"
+            url="https://cloud.google.com/eclipse/docs/converting">
+        <text>Learn how to migrate to Google Cloud Tools for Eclipse from the Google Plugin for Eclipse.</text>
+      </link>
+    </group>
+  </extensionContent>
+</introContent>

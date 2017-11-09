@@ -1,11 +1,11 @@
 /*
- * Copyright 2016 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -61,8 +61,8 @@ public class MultipleConnectionsTest {
 	public void testDefaultSettings() throws CoreException {
 		connector = new SocketListenMultiConnector();
 		Map<String, Connector.Argument> defaults = connector.getDefaultArguments();
-		assertTrue(defaults.containsKey("acceptCount"));
-		assertEquals(1, ((Connector.IntegerArgument) defaults.get("acceptCount")).intValue());
+		assertTrue(defaults.containsKey("connectionLimit"));
+		assertEquals(1, ((Connector.IntegerArgument) defaults.get("connectionLimit")).intValue());
 	}
 
 	/**
@@ -76,7 +76,6 @@ public class MultipleConnectionsTest {
 		connector = new SocketListenMultiConnector();
 		Map<String, String> arguments = new HashMap<>();
 		arguments.put("port", Integer.toString(port));
-		arguments.put("acceptCount", "1");
 		connector.connect(arguments, new NullProgressMonitor(), launch);
 		Thread.sleep(200);
 
@@ -94,7 +93,7 @@ public class MultipleConnectionsTest {
 		connector = new SocketListenMultiConnector();
 		Map<String, String> arguments = new HashMap<>();
 		arguments.put("port", Integer.toString(port));
-		arguments.put("acceptCount", "1");
+		arguments.put("connectionLimit", "1");
 		connector.connect(arguments, new NullProgressMonitor(), launch);
 		Thread.sleep(200);
 
@@ -113,7 +112,7 @@ public class MultipleConnectionsTest {
 		connector = new SocketListenMultiConnector();
 		Map<String, String> arguments = new HashMap<>();
 		arguments.put("port", Integer.toString(port));
-		arguments.put("acceptCount", "2");
+		arguments.put("connectionLimit", "2");
 		connector.connect(arguments, new NullProgressMonitor(), launch);
 		Thread.sleep(200);
 
@@ -132,7 +131,7 @@ public class MultipleConnectionsTest {
 		connector = new SocketListenMultiConnector();
 		Map<String, String> arguments = new HashMap<>();
 		arguments.put("port", Integer.toString(port));
-		arguments.put("acceptCount", "0");
+		arguments.put("connectionLimit", "0");
 		connector.connect(arguments, new NullProgressMonitor(), launch);
 		Thread.sleep(200);
 

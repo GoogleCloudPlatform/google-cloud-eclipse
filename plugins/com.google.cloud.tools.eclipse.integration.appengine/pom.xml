@@ -13,21 +13,32 @@
   <packaging>eclipse-test-plugin</packaging>
 
   <build>
-    <sourceDirectory>src</sourceDirectory>
     <plugins>
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-surefire-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>standalone</id>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <!-- must be run from a fresh workspace to ensure no server runtimes are available -->
+              <testClass>com.google.cloud.tools.eclipse.integration.appengine.ImportNativeAppEngineStandardProjectTest</testClass>
+            </configuration>
+          </execution>
+          <execution>
+            <id>default-test</id>
+            <goals>
+              <goal>test</goal>
+            </goals>
+          </execution>
+        </executions>
         <configuration>
           <useUIHarness>true</useUIHarness>
           <useUIThread>false</useUIThread>
-          <product>org.eclipse.sdk.ide</product>
-          <dependencies>
-            <dependency>
-              <type>p2-installable-unit</type>
-              <artifactId>org.eclipse.sdk.feature.group</artifactId>
-            </dependency>
-          </dependencies>
+          <product>org.eclipse.platform.ide</product>
         </configuration>
       </plugin>
       <plugin>
@@ -42,28 +53,23 @@
                 <versionRange>0.0.0</versionRange>
               </requirement>
               <requirement>
-                <type>eclipse-feature</type>
-                <id>org.eclipse.m2e.feature</id>
+                <type>eclipse-plugin</type>
+                <id>ch.qos.logback.slf4j</id>
+                <versionRange>0.0.0</versionRange>
+              </requirement>
+              <requirement>
+                <type>eclipse-plugin</type>
+                <id>org.slf4j.log4j</id>
+                <versionRange>0.0.0</versionRange>
+              </requirement>
+              <requirement>
+                <type>eclipse-plugin</type>
+                <id>com.google.cloud.tools.eclipse.test.logback</id>
                 <versionRange>0.0.0</versionRange>
               </requirement>
               <requirement>
                 <type>eclipse-feature</type>
-                <id>org.eclipse.jst.web_sdk.feature</id>
-                <versionRange>0.0.0</versionRange>
-              </requirement>
-              <requirement>
-                <type>eclipse-feature</type>
-                <id>org.eclipse.jst.common.fproj.enablement.jdt.sdk</id>
-                <versionRange>0.0.0</versionRange>
-              </requirement>
-              <requirement>
-                <type>eclipse-feature</type>
-                <id>org.eclipse.wst.common.fproj.sdk</id>
-                <versionRange>0.0.0</versionRange>
-              </requirement>
-              <requirement>
-                <type>eclipse-feature</type>
-                <id>org.eclipse.wst.server_adapters.sdk.feature</id>
+                <id>org.eclipse.rcp</id>
                 <versionRange>0.0.0</versionRange>
               </requirement>
             </extraRequirements>
@@ -73,4 +79,3 @@
     </plugins>
   </build>
 </project>
-

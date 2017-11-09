@@ -3,3 +3,5 @@ bin/
 proxy_bin/
 target/
 generated-sources/
+.metadata/
+**/.*.swp

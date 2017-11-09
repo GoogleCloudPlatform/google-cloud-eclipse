@@ -3,6 +3,7 @@
 </#if>import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Collection;
 import java.util.Locale;
 
 import javax.servlet.ServletOutputStream;
@@ -11,17 +12,17 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * This class is created only for the purpose of demonstrating unit testing of the
- * {@link HelloAppEngine} class. Only those methods have meaningful implementation
- * which are used in the unit test.
+ * This mock class is created to enable basic unit testing of the
+ * {@link HelloAppEngine} class. Only methods used in the unit test
+ * have a non-trivial implementation.
  * 
  * Feel free to change this class or replace it using other ways for testing
  * {@link HttpServlet}s, e.g. Spring MVC Test or Mockito to suit your needs.
- *
  */
 public class MockHttpServletResponse implements HttpServletResponse {
 
   private String contentType;
+  private String encoding;
   private StringWriter writerContent = new StringWriter();
   private PrintWriter writer = new PrintWriter(writerContent);
 
@@ -57,7 +58,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
   @Override
   public String getCharacterEncoding() {
-    return null;
+    return encoding;
   }
 
   @Override
@@ -88,7 +89,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
   }
 
   @Override
-  public void setCharacterEncoding(String arg0) {
+  public void setCharacterEncoding(String encoding) {
+    this.encoding = encoding;
   }
 
   @Override
@@ -171,5 +173,24 @@ public class MockHttpServletResponse implements HttpServletResponse {
   @Override
   public void setStatus(int arg0, String arg1) {
   }
+  
+  // Servlet API 3.0 and 3.1 methods
+  public void setContentLengthLong(long length) {  
+  }
 
+  public int getStatus() {
+    return 0;
+  }
+  
+  public String getHeader(String name) {
+    return null;
+  }
+
+  public Collection<String> getHeaders(String name) {
+    return null;
+  }
+  
+  public Collection<String> getHeaderNames() {
+    return null;
+  }
 }

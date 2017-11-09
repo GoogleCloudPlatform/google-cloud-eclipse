@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?pde version="3.5"?>
+<!--
+  This product exists to (1) bring in any required features, and
+  (2) add any additional metadata for the CT4E repository.
+
+  The product version should have a .qualifier *except* for releases.
+  This version is used for creating our CT4E category (see the accompanying
+  .p2.inf).  p2 generates unique qualifiers for categories, so it would be
+  best for our non-release builds to have unique versions too.
+-->
+<product uid="com.google.cloud.tools.eclipse.dist" version="1.4.1.qualifier" useFeatures="true" includeLaunchers="false">
+
+   <configIni use="default">
+   </configIni>
+
+   <launcherArgs>
+   </launcherArgs>
+
+   <features>
+      <feature id="com.google.cloud.tools.eclipse.suite.e45.feature" installMode="root"/>
+      <feature id="com.google.cloud.tools.eclipse.3rdparty.feature" installMode="root"/>
+   </features>
+
+   <configurations>
+   </configurations>
+
+</product>

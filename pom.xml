@@ -9,51 +9,94 @@
   <version>0.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
+  <name>Google Cloud Platform plugin for Eclipse</name>
+  <description>
+    An Eclipse plugin for building, debugging, and deploying Google
+    Cloud Platform applications.
+  </description>
+  <url>https://github.com/GoogleCloudPlatform/google-cloud-eclipse</url>
+
+  <organization>
+    <name>Google Inc.</name>
+    <url>https://www.google.com</url>
+  </organization>
+
+  <licenses>
+    <license>
+      <name>The Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+
   <modules>
     <module>gcp-repo</module>
     <module>features/com.google.cloud.tools.eclipse.suite.e45.feature</module>
     <module>features/com.google.cloud.tools.eclipse.3rdparty.feature</module>
     <module>features/com.google.licenses.apache_v2</module>
+
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.compat</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.compat.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy.ui</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy.ui.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.facets</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.facets.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.libraries</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.libraries.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.libraries.ui</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.libraries.ui.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.localserver</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.localserver.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.login</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.login.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.newproject</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.newproject.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.newproject.maven</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.newproject.maven.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.whitelist</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.whitelist.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.standard.java8</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.standard.java8.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.validation</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.validation.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.ui</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.ui.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.bugreport</module>
+    <module>plugins/com.google.cloud.tools.eclipse.bugreport.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.googleapis</module>
+    <module>plugins/com.google.cloud.tools.eclipse.googleapis.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.login</module>
+    <module>plugins/com.google.cloud.tools.eclipse.login.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.preferences</module>
     <module>plugins/com.google.cloud.tools.eclipse.preferences.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.projectselector</module>
+    <module>plugins/com.google.cloud.tools.eclipse.projectselector.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.sdk</module>
     <module>plugins/com.google.cloud.tools.eclipse.sdk.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.sdk.ui</module>
     <module>plugins/com.google.cloud.tools.eclipse.sdk.ui.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.test.dependencies</module>
+    <module>plugins/com.google.cloud.tools.eclipse.test.util</module>
+    <module>plugins/com.google.cloud.tools.eclipse.test.logback</module>
     <module>plugins/com.google.cloud.tools.eclipse.usagetracker</module>
     <module>plugins/com.google.cloud.tools.eclipse.usagetracker.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.ui.util</module>
-    <module>plugins/com.google.cloud.tools.eclipse.ui.util.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.ui</module>
+    <module>plugins/com.google.cloud.tools.eclipse.ui.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.util</module>
     <module>plugins/com.google.cloud.tools.eclipse.util.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.integration.appengine</module>
     <module>plugins/com.google.cloud.tools.eclipse.swtbot</module>
+    <module>plugins/com.google.cloud.tools.eclipse.welcome</module>
+    <module>plugins/com.google.cloud.tools.eclipse.welcome.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.aeri</module>
+    <module>plugins/com.google.cloud.tools.eclipse.aeri.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.dataflow.core</module>
+    <module>plugins/com.google.cloud.tools.eclipse.dataflow.core.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.dataflow.ui</module>
+    <module>plugins/com.google.cloud.tools.eclipse.dataflow.ui.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.integration.appengine</module>
 
     <module>third_party/com.google.cloud.tools.eclipse.jdt.launching</module>
+    <module>third_party/com.google.cloud.tools.eclipse.jst.server.core</module>
   </modules>
 
   <properties>
-    <tycho.version>0.24.0</tycho.version>
-    <tycho-extras.version>0.24.0</tycho-extras.version>
+    <tycho.version>1.0.0</tycho.version>
+    <tycho-extras.version>1.0.0</tycho-extras.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <eclipse.target>mars</eclipse.target>
 
@@ -61,15 +104,24 @@
     <tycho.showEclipseLog>true</tycho.showEclipseLog>
 
     <!--
-      `SYSTEM` means use the default JDK (necc for Travis).
-      `BREE` means find a configured JDK using Maven Toolchains matching
+      A round-about way for the jacoco-maven-plugin to provide its
+      JaCoCo agent arguments required as we specify an Tycho Surefire
+      <argLine/>.
+    -->
+    <jacoco.agentArgLine/>
+
+    <!--
+      `SYSTEM` means build using the default JDK.
+      `BREE` means find an appropriate JDK using Maven Toolchains matching
       the Bundle-RequiredExecutionEnvironment. See `README.md` for details.
     -->
-    <tycho.toolchains>BREE</tycho.toolchains>
+    <tycho.toolchains>SYSTEM</tycho.toolchains>
 
-     <!-- OS-specific JVM flags, empty for the default case but redefined below -->
-     <os-jvm-flags/>
-     <org.eclipse.swtbot.search.timeout>10000</org.eclipse.swtbot.search.timeout>
+    <!-- OS-specific JVM flags, empty for the default case but redefined below -->
+    <os-jvm-flags/>
+    <org.eclipse.swtbot.search.timeout>30000</org.eclipse.swtbot.search.timeout>
+
+    <jgit.dirtyWorkingTree>warning</jgit.dirtyWorkingTree>
   </properties>
 
   <!--
@@ -85,25 +137,31 @@
       <!-- bundle: com.google.gson -->
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
-      <version>2.6.2</version>
+      <version>2.7</version>
     </dependency>
     <dependency>
-      <!-- bundle: com.google.cloud.tools.app.lib -->
+      <!-- bundle: com.google.cloud.tools.appengine -->
       <groupId>com.google.cloud.tools</groupId>
       <artifactId>appengine-plugins-core</artifactId>
-      <version>0.1.8</version>
+      <version>0.3.8</version>
     </dependency>
     <dependency>
       <!-- bundle: com.google.guava -->
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>17.0</version>
+      <version>20.0</version>
     </dependency>
     <dependency>
       <!-- bundle: jackson-core-asl -->
       <groupId>org.codehaus.jackson</groupId>
       <artifactId>jackson-core-asl</artifactId>
       <version>1.9.13</version>
+    </dependency>
+    <dependency>
+      <!-- bundle: com.fasterxml.jackson.core.jackson-core -->
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>2.8.6</version>
     </dependency>
     <dependency>
       <!-- bundle: org.mortbay.jetty.server -->
@@ -117,7 +175,45 @@
       <artifactId>jetty-util</artifactId>
       <version>6.1.26</version>
     </dependency>
+    <dependency>
+      <!-- bundle: org.freemarker.freemarker -->
+      <groupId>org.freemarker</groupId>
+      <artifactId>freemarker</artifactId>
+      <version>2.3.25-incubating</version>
+    </dependency>
+    <dependency>
+      <!-- bundle: org.yaml.snakeyaml -->
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>1.17</version>
+    </dependency>
+    <dependency>
+      <!-- bundle: org.glassfish.javax.json -->
+      <groupId>org.glassfish</groupId>
+      <artifactId>javax.json</artifactId>
+      <version>1.0.4</version>
+    </dependency>
   </dependencies>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.12</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>1.10.19</version>
+      </dependency>
+      <dependency>
+        <groupId>org.objenesis</groupId>
+        <artifactId>objenesis</artifactId>
+        <version>2.2</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <build>
     <plugins>
@@ -136,7 +232,7 @@
             avoid access restriction on class due to restriction on
             required library
           -->
-          <compilerArgument>-warn:+discouraged,forbidden</compilerArgument>
+          <compilerArgument>-warn:+discouraged,+forbidden,-unavoidableGenericProblems,-warningToken</compilerArgument>
         </configuration>
       </plugin>
 
@@ -182,22 +278,22 @@
       </plugin>
 
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-enforcer-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals><goal>enforce</goal></goals>
-            <configuration>
-              <rules>
-                <bannedDependencies>
-                  <excludes>
-                    <exclude>commons-collections:commons-collections:[3.2.1]</exclude>
-                  </excludes>
-                </bannedDependencies>
-              </rules>
-            </configuration>
-          </execution>
-        </executions>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-packaging-plugin</artifactId>
+        <dependencies>
+          <dependency>
+            <groupId>org.eclipse.tycho.extras</groupId>
+            <artifactId>tycho-buildtimestamp-jgit</artifactId>
+            <version>${tycho-extras.version}</version>
+          </dependency>
+        </dependencies>
+        <configuration>
+          <timestampProvider>jgit</timestampProvider>
+          <jgit.dirtyWorkingTree>${jgit.dirtyWorkingTree}</jgit.dirtyWorkingTree>
+          <jgit.ignore>
+            pom.xml
+          </jgit.ignore>
+        </configuration>
       </plugin>
     </plugins>
 
@@ -228,17 +324,58 @@
 
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-packaging-plugin</artifactId>
+          <version>${tycho.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-p2-plugin</artifactId>
+          <version>${tycho.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-surefire-plugin</artifactId>
           <version>${tycho.version}</version>
           <configuration>
-            <argLine>-Dorg.eclipse.swtbot.search.timeout=${org.eclipse.swtbot.search.timeout} -Xms40m -Xmx1G -XX:MaxPermSize=512m -Djava.awt.headless=true ${os-jvm-flags}</argLine>
+            <runOrder>hourly</runOrder>
+            <forkedProcessTimeoutInSeconds>600</forkedProcessTimeoutInSeconds>
+            <!--
+              - maven.artifact.threads=1 to workaround repository corruption seen in
+                https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2284
+            -->
+            <argLine>${jacoco.agentArgLine} -Dmaven.artifact.threads=1 -Dorg.eclipse.swtbot.search.timeout=${org.eclipse.swtbot.search.timeout} -Xms40m -Xmx1G -XX:MaxPermSize=512m -Djava.awt.headless=true ${os-jvm-flags}</argLine>
           </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-toolchains-plugin</artifactId>
+          <version>1.1</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-enforcer-plugin</artifactId>
           <version>1.4.1</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>0.7.8</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>2.5.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.12.4</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -287,6 +424,45 @@
             </target>
            </configuration>
           </plugin>
+
+          <!--
+            Ensure we don't have buggy commons-collections nor Java-8 Guava.
+            Must be done here as Oxygen has moved to Guava 21.
+          -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <executions>
+              <execution>
+                <goals><goal>enforce</goal></goals>
+                <configuration>
+                  <rules>
+                    <bannedDependencies>
+                      <excludes>
+                        <exclude>commons-collections:commons-collections:[3.2.1]</exclude>
+                      </excludes>
+                    </bannedDependencies>
+                    <bannedDependencies>
+                      <!--
+                        Ensure our bundles only use Guava 20.0.0.
+                        Tycho identifies p2-resolved bundles are of form:
+                        p2.eclipse-plugin:com.google.guava:jar:20.0.0:system
+                      -->
+                      <searchTransitive>false</searchTransitive>
+                      <excludes>
+                        <exclude>com.google.guava:guava</exclude>
+                        <exclude>*:com.google.guava</exclude>
+                      </excludes>
+                      <includes>
+                        <include>com.google.guava:guava:[20,21)</include>
+                        <include>*:com.google.guava:[20,21)</include>
+                      </includes>
+                    </bannedDependencies>
+                  </rules>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
         </plugins>
       </build>
     </profile>
@@ -326,6 +502,40 @@
     </profile>
 
     <profile>
+      <id>build-eclipse-oxygen</id>
+      <activation>
+        <property>
+          <name>eclipse.target</name> <value>oxygen</value>
+        </property>
+      </activation>
+      <properties>
+         <jettyMinVersion>9.3</jettyMinVersion>
+         <jettyMaxVersion>9.5</jettyMaxVersion>
+      </properties>
+      <!-- build against a known target platform -->
+      <modules>
+        <module>eclipse/oxygen</module>
+      </modules>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>target-platform-configuration</artifactId>
+            <configuration>
+            <target>
+              <artifact>
+                <groupId>com.google.cloud.tools.eclipse</groupId>
+                <artifactId>gcp-eclipse-oxygen</artifactId>
+                <version>4.7.0-SNAPSHOT</version>
+              </artifact>
+            </target>
+           </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
       <!--
         create a copy of the build target platform, suitable for setting
         as an Eclipse Target Platform
@@ -336,19 +546,114 @@
       </modules>
     </profile>
 
+    <!--
+      The following profiles work to prevent Java 8'isms (or Java 9!)
+      using Maven and Tycho's support for toolchains.
+    -->
+    <profile>
+       <!-- 
+          We can only use tycho-compiler-plugin's `useJDK=BREE`
+          mode when we're building with our minimum supported Java
+          runtime environment (currently JavaSE-1.7).  `BREE` mode
+          builds each bundle against a JDK that matches its
+          Bundle-RequiredExecutionEnvironment, but results in
+          compile-time resolving errors on Eclipse 4.6/Neon
+          and later which require Java 8.
+      -->
+      <id>building-with-minimum-java-runtime-</id>
+      <activation>
+        <property><name>toolchain.java.runtime</name><value>JavaSE-1.7</value></property>
+      </activation>
+      <properties>
+         <tycho.toolchains>BREE</tycho.toolchains>
+      </properties>
+    </profile>
+    <profile>
+      <!--
+          We use tycho-surefire-plugin's default `useJDK=SYSTEM`
+          mode to run tests using the configured Maven toolchain.  So
+          specifying toolchain.java.runtime=JavaSE-1.7 will lead to test
+          failures should we attempt to load bundles with BREE=JavaSE-1.8
+          or that contains Java 8 code.  Same applies with Java 9.
+      -->
+      <id>testing-with-java-runtime</id>
+      <activation>
+        <property><name>toolchain.java.runtime</name></property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-toolchains-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>validate</phase>
+                <goals>
+                  <goal>toolchain</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <toolchains>
+                <jdk>
+                  <id>${toolchain.java.runtime}</id>
+                </jdk>
+              </toolchains>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
 
     <profile>
       <id>travis</id>
       <properties>
-        <!-- We configure Travis to use jdk7 -->
-        <tycho.toolchains>SYSTEM</tycho.toolchains>
         <!-- Ensure we don't resolve previous versions of our artifacts -->
         <tycho.localArtifacts>ignore</tycho.localArtifacts>
+        <jgit.dirtyWorkingTree>error</jgit.dirtyWorkingTree>
       </properties>
       <modules>
         <module>eclipse/ide-target-platform</module>
         <module>build/verify-feature-completeness</module>
       </modules>
+    </profile>
+
+    <profile>
+      <id>jacoco</id>
+      <!--
+        This rigamarole is required to obtain the JaCoCo agent argline
+        from the jacoco-maven-plugin.  By default, `prepare-agent`
+        attempts to populate `tycho.testArgLine`, but that property
+        is ignored since we explicitly configure our own `<argLine/>`.
+        If we reference `${jacocoArgLine}` in our `<argLine/>` without
+        previously declaring it in a `<properties/>`, then Maven
+        raises an error.  But `prepare-agent` is unable to override
+        a declared property.
+      -->
+      <properties>
+        <jacoco.agentArgLine>${jacocoArgLine}</jacoco.agentArgLine>
+      </properties>
+      <modules>
+        <module>build/jacoco</module>
+      </modules>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+                <configuration>
+                  <propertyName>jacocoArgLine</propertyName>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 

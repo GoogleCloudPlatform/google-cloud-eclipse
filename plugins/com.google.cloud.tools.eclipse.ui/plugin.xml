@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            categoryId="org.eclipse.ui.category.window"
+            defaultHandler="com.google.cloud.tools.eclipse.ui.util.OpenDropDownMenuHandler"
+            id="com.google.cloud.tools.eclipse.ui.util.showPopup"
+            name="Show associated drop-down menu">
+      </command>
+   </extension>
+
+   <extension
+         point="org.eclipse.ui.menus">
+     <menuContribution
+           allPopups="false"
+           locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+        <toolbar
+              id="com.google.cloud.tools.eclipse.appengine.toolbar">
+           <command
+                 commandId="com.google.cloud.tools.eclipse.ui.util.showPopup"
+                 icon="icons/obj16/gcp.png"
+                 id="com.google.cloud.tools.eclipse.ui.actions"
+                 style="pulldown"
+                 label="%googleCloudPlatformName"
+                 tooltip="%googleCloudPlatformName">
+           </command>
+        </toolbar>
+     </menuContribution>
+     
+     <menuContribution
+           allPopups="false"
+           locationURI="menu:com.google.cloud.tools.eclipse.ui.actions">
+        <menu
+              id="com.google.cloud.tools.eclipse.ui.actions.new"
+              label="%createNewProject">
+           <separator
+                 name="appengine.standard"
+                 visible="false">
+           </separator>
+           <separator
+                 name="appengine.flexible"
+                 visible="false">
+           </separator>
+           <separator
+                 name="dataflow"
+                 visible="false">
+           </separator>
+           <separator
+                 name="additions">
+           </separator>
+        </menu>
+        <separator
+              name="launch"
+              visible="true">
+        </separator>
+        <separator
+              name="deploy"
+              visible="true">
+        </separator>
+        <separator
+              name="additions"
+              visible="true">
+        </separator>
+        <separator
+              name="accounts"
+              visible="true">
+        </separator>
+        <separator
+              name="feedback"
+              visible="true">
+        </separator>
+     </menuContribution>
+     
+   </extension>
+
+</plugin>

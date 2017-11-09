@@ -1,11 +1,11 @@
 /*
- * Copyright 2011 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,6 +37,16 @@ public class SwtBotTestingUtilities {
   /** Click the button, wait for the window change. */
   public static void clickButtonAndWaitForWindowChange(SWTBot bot, final SWTBotButton button) {
     performAndWaitForWindowChange(bot, new Runnable() {
+      @Override
+      public void run() {
+        button.click();
+      }
+    });
+  }
+
+  /** Click the button, wait for the window close. */
+  public static void clickButtonAndWaitForWindowClose(SWTBot bot, final SWTBotButton button) {
+    performAndWaitForWindowClose(bot, new Runnable() {
       @Override
       public void run() {
         button.click();
@@ -77,6 +87,16 @@ public class SwtBotTestingUtilities {
   }
 
   /**
+   * Simple wrapper to block for actions that close a window.
+   */
+  public static void performAndWaitForWindowClose(SWTBot bot, Runnable runnable) {
+    SWTBotShell shell = bot.activeShell();
+    runnable.run();
+    waitUntilShellIsClosed(bot, shell);
+  }
+
+
+  /**
    * Injects a key or character via down and up events. Only one of {@code keyCode} or
    * {@code character} must be provided. Use
    * 
@@ -107,6 +127,23 @@ public class SwtBotTestingUtilities {
       @Override
       public boolean test() throws Exception {
         return !shell.isActive();
+      }
+    });
+  }
+
+  /**
+   * Blocks the caller until the given shell is closed.
+   */
+  public static void waitUntilShellIsClosed(SWTBot bot, final SWTBotShell shell) {
+    bot.waitUntil(new DefaultCondition() {
+      @Override
+      public String getFailureMessage() {
+        return "Shell " + shell.getText() + " did not close"; //$NON-NLS-1$
+      }
+
+      @Override
+      public boolean test() throws Exception {
+        return !shell.isOpen();
       }
     });
   }

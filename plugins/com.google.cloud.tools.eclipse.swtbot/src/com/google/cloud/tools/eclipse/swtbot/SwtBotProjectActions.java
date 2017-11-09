@@ -1,11 +1,11 @@
 /*
- * Copyright 2016 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,9 +17,6 @@
 package com.google.cloud.tools.eclipse.swtbot;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -68,7 +65,7 @@ public final class SwtBotProjectActions {
       public void run() {
         bot.activeShell();
         bot.textWithLabel("Name:").setText(className);
-        SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("Finish"));
+        SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
       }
     });
   }
@@ -92,12 +89,7 @@ public final class SwtBotProjectActions {
     bot.button("Next >").click();
 
     // open archetype dialog
-    SwtBotTestingUtilities.performAndWaitForWindowChange(bot, new Runnable() {
-      @Override
-      public void run() {
-        bot.button("Add Archetype...").click();
-      }
-    });
+    SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("Add Archetype..."));
 
     bot.comboBox(0).setText(archetypeGroupId);
     bot.comboBox(1).setText(archetypeArtifactId);
@@ -105,13 +97,8 @@ public final class SwtBotProjectActions {
     bot.comboBox(3).setText(archetypeUrl);
 
     // close archetype dialog
-    SwtBotTestingUtilities.performAndWaitForWindowChange(bot, new Runnable() {
-      @Override
-      public void run() {
-        // After OK, it will take a minute to download
-        bot.button("OK").click();
-      }
-    });
+    // After OK, it will take a minute to download
+    SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("OK"));
 
     // move to last wizard
     bot.button("Next >").click();
@@ -121,7 +108,7 @@ public final class SwtBotProjectActions {
     bot.comboBoxWithLabel("Artifact Id:").setText(artifactId);
     bot.comboBoxWithLabel("Package:").setText(javaPackage);
 
-    SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("Finish"));
+    SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
     return getWorkspaceRoot().getProject("testartifact");
   }
 
@@ -146,7 +133,7 @@ public final class SwtBotProjectActions {
     // Select the "Delete project contents on disk (cannot be undone)"
     bot.checkBox(0).click();
 
-    SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("OK"));
+    SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("OK"));
   }
 
   /**
@@ -175,7 +162,7 @@ public final class SwtBotProjectActions {
    * Choose either the Package Explorer View or the Project Explorer view. Some perspectives have
    * the Package Explorer View open by default, whereas others use the Project Explorer View.
    * 
-   * @throws WidgetNoFoundException if an explorer is not found
+   * @throws WidgetNotFoundException if an explorer is not found
    */
   public static SWTBotView getExplorer(final SWTWorkbenchBot bot) {
     for (SWTBotView view : bot.views()) {
@@ -195,29 +182,6 @@ public final class SwtBotProjectActions {
     SWTBotView explorer = getExplorer(bot);
     Tree tree = bot.widget(widgetOfType(Tree.class), explorer.getWidget());
     return new SWTBotTree(tree);
-  }
-
-  /**
-   * Returns true if there are errors in the Problems view. Returns false otherwise.
-   */
-  public static List<String> getErrorsInProblemsView(SWTWorkbenchBot bot) {
-    // Open Problems View by Window -> show view -> Problems
-    bot.menu("Window").menu("Show View").menu("Problems").click();
-
-    SWTBotView view = bot.viewByPartName("Problems");
-    view.show();
-    SWTBotTree tree = view.bot().tree();
-
-    List<String> errors = new ArrayList<>();
-    
-    for (SWTBotTreeItem item : tree.getAllItems()) {
-      String text = item.getText();
-      if (text != null && text.startsWith("Errors")) {
-        errors.add(text);
-      }
-    }
-
-    return errors;
   }
 
   /**
@@ -253,7 +217,7 @@ public final class SwtBotProjectActions {
    *
    * @param projectName the name of the project to select
    * @return the selected tree item
-   * @throws WidgetNoFoundException if the 'Package Explorer' or 'Project Explorer' view cannot be
+   * @throws WidgetNotFoundException if the 'Package Explorer' or 'Project Explorer' view cannot be
    *         found or if the specified project cannot be found.
    */
   public static SWTBotTreeItem selectProject(final SWTWorkbenchBot bot, String projectName) {

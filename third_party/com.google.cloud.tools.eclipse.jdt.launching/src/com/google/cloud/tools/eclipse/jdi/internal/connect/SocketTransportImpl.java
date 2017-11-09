@@ -21,6 +21,7 @@ import java.io.IOException;
  * A fork of org.eclipse.jdi.internal.connect.SocketTransportImpl that uses our
  * SocketTransportService.
  */
+@SuppressWarnings("restriction")
 public class SocketTransportImpl implements Transport {
 	public static final String TRANSPORT_NAME = "dt_socket"; //$NON-NLS-1$
 	public static final int MIN_PORTNR = 0;

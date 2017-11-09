@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ClassPath: .
+Bundle-ManifestVersion: 2
+Bundle-Name: Tests for Cloud Tools for Eclipse Error Reporting
+Bundle-SymbolicName: com.google.cloud.tools.eclipse.aeri.test
+Bundle-Version: 0.1.0.qualifier
+Bundle-Vendor: Google Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Fragment-Host: com.google.cloud.tools.eclipse.aeri
+Require-Bundle: com.google.cloud.tools.eclipse.test.dependencies

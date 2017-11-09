@@ -1,5 +1,23 @@
+/*
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.google.cloud.tools.eclipse.usagetracker;
 
+import com.google.common.base.Preconditions;
+import java.util.concurrent.Semaphore;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
@@ -7,6 +25,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -16,6 +35,9 @@ import org.eclipse.ui.PlatformUI;
  * A one-time dialog to suggest opt-in for sending client-side usage metrics.
  */
 public class OptInDialog extends Dialog {
+
+  private final Semaphore answeredSignal = new Semaphore(0);
+  private boolean optInYes;
 
   public OptInDialog(Shell parentShell) {
     super(parentShell);
@@ -63,7 +85,7 @@ public class OptInDialog extends Dialog {
   @Override
   protected void configureShell(Shell shell) {
     super.configureShell(shell);
-    shell.setText(Messages.OPT_IN_DIALOG_TITLE);
+    shell.setText(Messages.getString("OPT_IN_DIALOG_TITLE"));
   }
 
   /**
@@ -71,8 +93,8 @@ public class OptInDialog extends Dialog {
    */
   @Override
   protected void createButtonsForButtonBar(Composite parent) {
-    createButton(parent, IDialogConstants.OK_ID, Messages.OPT_IN_BUTTON, false);
-    createButton(parent, IDialogConstants.CANCEL_ID, Messages.OPT_OUT_BUTTON, true);
+    createButton(parent, IDialogConstants.OK_ID, Messages.getString("OPT_IN_BUTTON"), false);
+    createButton(parent, IDialogConstants.CANCEL_ID, Messages.getString("OPT_OUT_BUTTON"), true);
   }
 
   @Override
@@ -80,7 +102,7 @@ public class OptInDialog extends Dialog {
     Composite container = (Composite) super.createDialogArea(parent);
 
     Label label = new Label(container, SWT.WRAP);
-    label.setText(Messages.OPT_IN_DIALOG_TEXT);
+    label.setText(Messages.getString("OPT_IN_DIALOG_TEXT"));
 
     return container;
   }
@@ -88,13 +110,14 @@ public class OptInDialog extends Dialog {
   @Override
   protected void okPressed() {
     super.okPressed();
-    AnalyticsPingManager.getInstance().registerOptInStatus(true);
+    optInYes = true;
+    answeredSignal.release();
   }
 
   @Override
   protected void cancelPressed() {
     super.cancelPressed();
-    AnalyticsPingManager.getInstance().registerOptInStatus(false);
+    answeredSignal.release();
   }
 
   /**
@@ -103,6 +126,19 @@ public class OptInDialog extends Dialog {
   @Override
   protected void handleShellCloseEvent() {
     super.handleShellCloseEvent();
-    AnalyticsPingManager.getInstance().registerOptInStatus(false);
+    answeredSignal.release();
+  }
+
+  /**
+   * Blocks until the dialog closes and returns the opt-in answer. Must not be called from the UI
+   * thread, and should be called only once at most.
+   *
+   * @return {@code true} if answered yes; {@code false} if answered no or not answered by closing
+   *     the dialog.
+   */
+  boolean isOptInYes() throws InterruptedException {
+    Preconditions.checkState(Display.getCurrent() == null, "Cannot be called from the UI thread.");
+    answeredSignal.acquire();
+    return optInYes;
   }
 }

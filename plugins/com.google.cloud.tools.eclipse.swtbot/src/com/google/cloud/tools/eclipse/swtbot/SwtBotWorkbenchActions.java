@@ -1,11 +1,11 @@
 /*
- * Copyright 2011 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,20 +16,25 @@
 
 package com.google.cloud.tools.eclipse.swtbot;
 
-import org.eclipse.core.runtime.jobs.Job;
+import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
+import java.util.List;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.ProgressBar;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
+import org.eclipse.swtbot.swt.finder.finders.UIThreadRunnable;
+import org.eclipse.swtbot.swt.finder.results.VoidResult;
 import org.eclipse.swtbot.swt.finder.waits.ICondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.hamcrest.Matcher;
-
-import java.util.List;
 
 /**
  * SWTBot utility methods that perform general workbench actions.
@@ -65,10 +70,14 @@ public final class SwtBotWorkbenchActions {
   /**
    * Wait until all background tasks are complete.
    */
-  public static void waitForIdle(SWTBot bot) {
-    while (!Job.getJobManager().isIdle()) {
-      bot.sleep(300);
-    }
+  public static void waitForProjects(final SWTBot bot, IProject... projects) {
+    Runnable delayTactic = new Runnable() {
+      @Override
+      public void run() {
+        bot.sleep(300);
+      }
+    };
+    ProjectUtils.waitForProjects(delayTactic, projects);
   }
 
   /**
@@ -158,5 +167,60 @@ public final class SwtBotWorkbenchActions {
     }
   }
 
+  /**
+   * Reimplementation of {@link SWTWorkbenchBot#resetWorkbench()} due to Eclipse bug 511729 on
+   * Oxygen.
+   */
+  public static void resetWorkbench(SWTWorkbenchBot bot) {
+    closeAllShells(bot);
+    bot.saveAllEditors();
+    bot.closeAllEditors();
+    bot.resetActivePerspective();
+    bot.defaultPerspective().activate();
+    bot.resetActivePerspective();
+  }
+
+  public static void closeAllShells(SWTWorkbenchBot bot) {
+    closeAllShells(bot, false /* forceKill */);
+  }
+
+  public static void killAllShells(SWTWorkbenchBot bot) {
+    closeAllShells(bot, true /* forceKill */);
+  }
+
+  /**
+   * Reimplementation of {@link SWTWorkbenchBot#closeAllShells()} that does not close the internal
+   * Eclipse Workbench limbo shell thus avoiding Eclipse bug 511729.
+   */
+  private static void closeAllShells(final SWTWorkbenchBot bot, final boolean forceKill) {
+    // avoid bot.closeAllShells() due to bug 511729
+    UIThreadRunnable.syncExec(bot.getDisplay(), new VoidResult() {
+      @Override
+      public void run() {
+        IWorkbenchWindow activeWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+        Shell[] shells = bot.getDisplay().getShells();
+        for (Shell shell : shells) {
+          if (!isEclipseShell(shell, activeWindow)) {
+            if (forceKill) {
+              shell.dispose();
+            } else {
+              shell.close();
+            }
+          }
+        }
+      }
+
+      private boolean isEclipseShell(Shell shell, IWorkbenchWindow activeWindow) {
+        if (activeWindow != null && shell == activeWindow.getShell()) {
+          return true;
+        }
+        // avoid tossing the limbo shell
+        return "PartRenderingEngine's limbo".equals(shell.getText());
+      }
+    });
+  }
+
+
   private SwtBotWorkbenchActions() {}
+
 }

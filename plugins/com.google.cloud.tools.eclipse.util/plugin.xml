@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+  <extension point="org.eclipse.core.expressions.propertyTesters">
+    <propertyTester
+          class="com.google.cloud.tools.eclipse.util.FacetExistsPropertyTester"
+          id="com.google.cloud.tools.eclipse.FacetExistsPropertyTester"
+          namespace="com.google.cloud.tools.eclipse.util"
+          properties="facetExists"
+          type="java.lang.Object">
+    </propertyTester>
+  </extension>
+
+</plugin>

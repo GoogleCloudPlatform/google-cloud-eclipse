@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ClassPath: .
+Bundle-ManifestVersion: 2
+Bundle-Name: %pluginName
+Bundle-SymbolicName: com.google.cloud.tools.eclipse.test.logback;singleton:=true
+Bundle-Version: 0.1.0.qualifier
+Fragment-Host: ch.qos.logback.classic
+Bundle-Vendor: %providerName
+Bundle-Localization: plugin
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
+Import-Package: org.slf4j.impl
+Eclipse-BundleShape: dir

@@ -7,7 +7,7 @@
       license-feature="com.google.licenses.apache_v2">
 
    <description>
-      A collection of the 3rd Party Dependencies.
+      A collection of the third party dependencies.
    </description>
 
    <copyright>
@@ -18,22 +18,42 @@
       %license.text
    </license>
 
+   <includes
+         id="org.dadacoalition.yedit.feature"
+         version="0.0.0"
+         name="YEdit"
+         optional="true"/>
+
    <plugin
-         id="org.hamcrest"
+         id="com.google.cloud.tools.appengine"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.hamcrest.core"
+         id="com.google.guava"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="20.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.hamcrest.library"
+         id="com.google.gson"
+         download-size="0"
+         install-size="0"
+         version="2.7.0"
+         unpack="false"/>
+
+   <plugin
+         id="jackson-core-asl"
+         download-size="0"
+         install-size="0"
+         version="1.9.13"
+         unpack="false"/>
+
+   <plugin
+         id="com.fasterxml.jackson.core.jackson-core"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -54,31 +74,24 @@
          unpack="false"/>
 
    <plugin
-         id="com.google.guava"
+         id="org.freemarker.freemarker"
          download-size="0"
          install-size="0"
-         version="17.0.0"
+         version="2.3.25.stable-incubating"
          unpack="false"/>
 
    <plugin
-         id="com.google.gson"
+         id="org.yaml.snakeyaml"
          download-size="0"
          install-size="0"
-         version="2.6.2"
+         version="1.17.0"
          unpack="false"/>
 
    <plugin
-         id="com.google.cloud.tools.appengine"
+         id="org.glassfish.javax.json"
          download-size="0"
          install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="jackson-core-asl"
-         download-size="0"
-         install-size="0"
-         version="1.9.13"
+         version="1.0.4"
          unpack="false"/>
 
 </feature>

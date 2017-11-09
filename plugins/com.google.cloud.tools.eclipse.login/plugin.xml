@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension point="org.eclipse.ui.startup">
+     <startup class="com.google.cloud.tools.eclipse.login.ui.MenuContributionInitializer"/>
+   </extension>
+
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            id="com.google.cloud.tools.eclipse.login.commands.category"
+            name="Google Login Category">
+      </category>
+      <command
+            categoryId="com.google.cloud.tools.eclipse.login.commands.category"
+            id="com.google.cloud.tools.eclipse.login.commands.loginCommand"
+            name="Google Login Command">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="com.google.cloud.tools.eclipse.login.ui.GoogleLoginCommandHandler"
+            commandId="com.google.cloud.tools.eclipse.login.commands.loginCommand">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="menu:file?after=additions">
+         <command
+               commandId="com.google.cloud.tools.eclipse.login.commands.loginCommand"
+               id="com.google.cloud.tools.eclipse.login.menus.loginCommand"
+               mnemonic="G">
+         </command>
+      </menuContribution>
+      <menuContribution
+            locationURI="toolbar:org.eclipse.ui.trim.status?after=additions">
+         <toolbar
+               id="com.google.cloud.tools.eclipse.login.toolbars.loginToolbar">
+            <command
+                  commandId="com.google.cloud.tools.eclipse.login.commands.loginCommand"
+                  icon="icons/googleFavicon.png"
+                  tooltip="%loginIconTooltip"
+                  id="com.google.cloud.tools.eclipse.login.toolbars.loginCommand">
+            </command>
+         </toolbar>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:com.google.cloud.tools.eclipse.ui.actions?after=accounts">
+         <command
+               commandId="com.google.cloud.tools.eclipse.login.commands.loginCommand"
+               icon="icons/googleFavicon.png"
+               tooltip="%loginIconTooltip"
+               id="com.google.cloud.tools.eclipse.login.toolbars.loginCommand">
+         </command>
+      </menuContribution>
+   </extension>
+
+</plugin>

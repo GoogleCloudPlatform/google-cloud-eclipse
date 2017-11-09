@@ -1,5 +1,5 @@
-/*******************************************************************************
- * Copyright 2016 Google Inc.
+/*
+ * Copyright 2017 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,170 +12,65 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *******************************************************************************/
+ */
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.standard;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.text.DateFormat;
-import java.text.MessageFormat;
-import java.util.Date;
-import java.util.Locale;
-
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-import org.eclipse.jface.window.Window;
-import org.eclipse.ui.console.MessageConsoleStream;
-import org.eclipse.ui.handlers.HandlerUtil;
-
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
-import com.google.cloud.tools.eclipse.appengine.deploy.CleanupOldDeploysJob;
-import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployJob;
-import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployJobConfig;
-import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployPreferences;
-import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployPreferencesConverter;
-import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployConsole;
+import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
+import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
+import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardStagingDelegate;
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployCommandHandler;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesDialog;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
-import com.google.cloud.tools.eclipse.appengine.login.IGoogleLoginService;
-import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
-import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
-import com.google.cloud.tools.eclipse.ui.util.ProjectFromSelectionHelper;
-import com.google.cloud.tools.eclipse.ui.util.ServiceUtils;
-import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
-import com.google.common.annotations.VisibleForTesting;
+import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
+import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import java.nio.file.Path;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.swt.widgets.Shell;
 
-/**
- * Command handler to deploy an App Engine web application project to App Engine Standard.
- * <p>
- * It copies the project's exploded WAR to a staging directory and then executes staging and deploy operations
- * provided by the App Engine Plugins Core Library.
- */
-public class StandardDeployCommandHandler extends AbstractHandler {
-
-  private static final String CONSOLE_NAME = "App Engine Deploy";
-
-  private ProjectFromSelectionHelper helper;
+public class StandardDeployCommandHandler extends DeployCommandHandler {
 
   public StandardDeployCommandHandler() {
-    this(new FacetedProjectHelper());
-  }
-
-  @VisibleForTesting
-  StandardDeployCommandHandler(FacetedProjectHelper facetedProjectHelper) {
-      this.helper = new ProjectFromSelectionHelper(facetedProjectHelper);
+    super(AnalyticsEvents.APP_ENGINE_DEPLOY_STANDARD);
   }
 
   @Override
-  public Object execute(ExecutionEvent event) throws ExecutionException {
+  protected DeployPreferencesDialog newDeployPreferencesDialog(Shell shell, IProject project,
+      IGoogleLoginService loginService, IGoogleApiFactory googleApiFactory) {
+    String title = Messages.getString("deploy.preferences.dialog.title.standard");
+    return new StandardDeployPreferencesDialog(
+        shell, title, project, loginService, googleApiFactory);
+  }
+
+  @Override
+  protected StagingDelegate getStagingDelegate(IProject project) {
+    // TODO: this may still not be a JDK (although it will be very likely):
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2195#issuecomment-318439239
+    Path javaHome = getProjectVm(project);
+    return new StandardStagingDelegate(project, javaHome);
+  }
+
+  private static Path getProjectVm(IProject project) {
     try {
-      IProject project = helper.getProject(event);
-      if (project != null) {
-        Credential credential = loginIfNeeded(event);
-        if (credential != null) {
-          if (new DeployPreferencesDialog(HandlerUtil.getActiveShell(event), project).open() == Window.OK) {
-            launchDeployJob(project, credential, event);
-          }
-        }
+      IJavaProject javaProject = JavaCore.create(project);
+      IVMInstall vmInstall = JavaRuntime.getVMInstall(javaProject);
+      if (vmInstall != null) {
+        return vmInstall.getInstallLocation().toPath();
       }
-      // return value must be null, reserved for future use
-      return null;
-    } catch (CoreException | IOException exception) {
-      throw new ExecutionException(Messages.getString("deploy.failed.error.message"), exception); //$NON-NLS-1$
+    } catch (CoreException ex) {
+      // Give up.
     }
+    return null;
   }
 
-  private void launchDeployJob(IProject project, Credential credential, ExecutionEvent event) 
-      throws IOException, ExecutionException {
-    IPath workDirectory = createWorkDirectory();
-
-    DefaultDeployConfiguration deployConfiguration = getDeployConfiguration(project, event);
-    DeployConsole messageConsole =
-        MessageConsoleUtilities.createConsole(getConsoleName(deployConfiguration.getProject()),
-                                              new DeployConsole.Factory());
-
-    final MessageConsoleStream outputStream = messageConsole.newMessageStream();
-    StandardDeployJobConfig config = getDeployJobConfig(project, credential, event,
-                                                        workDirectory, outputStream, deployConfiguration);
-
-    StandardDeployJob deploy = new StandardDeployJob.Builder().config(config).build();
-    messageConsole.setJob(deploy);
-    deploy.addJobChangeListener(new JobChangeAdapter() {
-
-      @Override
-      public void done(IJobChangeEvent event) {
-        super.done(event);
-        launchCleanupJob();
-      }
-    });
-    deploy.schedule();
-  }
-
-  private String getConsoleName(String project) {
-    Date now = new Date();
-    String nowString =
-        DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, Locale.getDefault()).format(now);
-    return MessageFormat.format("{0} - {1} ({2})", CONSOLE_NAME, project, nowString);
-  }
-
-  private StandardDeployJobConfig getDeployJobConfig(IProject project,
-                                                     Credential credential,
-                                                     ExecutionEvent event,
-                                                     IPath workDirectory,
-                                                     final MessageConsoleStream outputStream, 
-                                                     DefaultDeployConfiguration deployConfiguration) {
-    StandardDeployJobConfig config = new StandardDeployJobConfig();
-    config.setProject(project)
-      .setCredential(credential)
-      .setWorkDirectory(workDirectory)
-      .setStdoutLineListener(new MessageConsoleWriterOutputLineListener(outputStream))
-      .setStderrLineListener(new MessageConsoleWriterOutputLineListener(outputStream))
-      .setDeployConfiguration(deployConfiguration);
-    return config;
-  }
-
-  private DefaultDeployConfiguration getDeployConfiguration(IProject project,
-                                                            ExecutionEvent event) throws ExecutionException {
-    StandardDeployPreferences deployPreferences = new StandardDeployPreferences(project);
-    if (deployPreferences.getProjectId() == null || deployPreferences.getProjectId().isEmpty()) {
-      throw new ExecutionException(Messages.getString("error.projectId.missing"));
-    }
-    return new StandardDeployPreferencesConverter(deployPreferences).toDeployConfiguration();
-  }
-
-  private IPath createWorkDirectory() throws IOException {
-    String now = Long.toString(System.currentTimeMillis());
-    IPath workDirectory = getTempDir().append(now);
-    Files.createDirectories(workDirectory.toFile().toPath());
-    return workDirectory;
-  }
-
-  private Credential loginIfNeeded(ExecutionEvent event) {
-    IGoogleLoginService loginService = ServiceUtils.getService(event, IGoogleLoginService.class);
-    Credential credential = loginService.getCachedActiveCredential();
-    if (credential != null) {
-      return credential;
-    }
-
-    // GoogleLoginService takes care of displaying error messages; no need to check errors.
-    return loginService.getActiveCredential(Messages.getString("deploy.login.dialog.message"));
-  }
-
-  private void launchCleanupJob() {
-    new CleanupOldDeploysJob(getTempDir()).schedule();
-  }
-
-  private IPath getTempDir() {
-    return Platform.getStateLocation(Platform.getBundle("com.google.cloud.tools.eclipse.appengine.deploy"))
-        .append("tmp");
+  @Override
+  protected DeployPreferences getDeployPreferences(IProject project) {
+    return new DeployPreferences(project);
   }
 }

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension point="org.eclipse.jdt.ui.classpathContainerPage">
+     <classpathContainerPage
+       id="com.google.cloud.tools.eclipse.appengine.libraries"
+       name="%appEngineLibrariesTitle"
+       class="com.google.cloud.tools.eclipse.appengine.libraries.ui.AppEngineLibrariesPage">
+    </classpathContainerPage>
+
+    <classpathContainerPage
+       id="com.google.cloud.tools.eclipse.appengine.libraries"
+       name="%googleCloudClientLibrariesTitle"
+       class="com.google.cloud.tools.eclipse.appengine.libraries.ui.ApiClientLibrariesPage">
+    </classpathContainerPage>
+    
+ </extension>
+</plugin>

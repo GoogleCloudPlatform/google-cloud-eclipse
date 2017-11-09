@@ -1,3 +1,19 @@
+/*
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
@@ -5,47 +21,112 @@ import com.google.cloud.tools.appengine.api.devserver.AppEngineDevServer;
 import com.google.cloud.tools.appengine.api.devserver.DefaultRunConfiguration;
 import com.google.cloud.tools.appengine.api.devserver.DefaultStopConfiguration;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDevServer;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDevServer1;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDevServer2;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
+import com.google.cloud.tools.appengine.cloudsdk.serialization.CloudSdkVersion;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
+import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
-import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour.DevAppServerOutputListener;
-import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour.LocalAppEngineExitListener;
-import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour.LocalAppEngineStartListener;
-import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
-
+import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
+import com.google.cloud.tools.eclipse.sdk.MessageConsoleWriterOutputLineListener;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
+import java.io.File;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.inject.Inject;
+import org.apache.maven.artifact.Artifact;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
+import org.eclipse.wst.server.core.internal.IModulePublishHelper;
 import org.eclipse.wst.server.core.model.IModuleResource;
 import org.eclipse.wst.server.core.model.IModuleResourceDelta;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.eclipse.wst.server.core.util.SocketUtil;
 
 /**
- * A {@link ServerBehaviourDelegate} for App Engine Server executed via the Java App Management
- * Client Library.
+ * A {@link ServerBehaviourDelegate} for DevAppServer.
+ * <p>
+ * {@link IModulePublishHelper} is implemented for addons such as the GWT Plugin that wish to add
+ * content during local deploys.
  */
-public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
+public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
+    implements IModulePublishHelper {
+
+  @VisibleForTesting // and should be replaced by Java8 BiFunction
+  public interface PortChecker {
+    boolean isInUse(InetAddress addr, int port);
+  }
+
+  /** Parse the numeric string. Return {@code defaultValue} if non-numeric. */
+  private static int parseInt(String numeric, int defaultValue) {
+    try {
+      return Integer.parseInt(numeric);
+    } catch (NumberFormatException ex) {
+      return defaultValue;
+    }
+  }
+
+  public static final String SERVER_PORT_ATTRIBUTE_NAME = "appEngineDevServerPort"; //$NON-NLS-1$
+  public static final String ADMIN_HOST_ATTRIBUTE_NAME = "appEngineDevServerAdminHost"; //$NON-NLS-1$
+  public static final String ADMIN_PORT_ATTRIBUTE_NAME = "appEngineDevServerAdminPort"; //$NON-NLS-1$
+
+  // These are the default values used by Cloud SDK's dev_appserver
+  public static final int DEFAULT_SERVER_PORT = 8080;
+  public static final String DEFAULT_ADMIN_HOST = "localhost"; //$NON-NLS-1$
+  public static final int DEFAULT_ADMIN_PORT = 8000;
+  public static final int DEFAULT_API_PORT = 0; // allocated at random
+
   private static final Logger logger =
       Logger.getLogger(LocalAppEngineServerBehaviour.class.getName());
 
+  @Inject
+  private ILibraryRepositoryService repositoryService;
+
   private LocalAppEngineStartListener localAppEngineStartListener;
   private LocalAppEngineExitListener localAppEngineExitListener;
+
+  /** The {@link CloudSdk} instance currently in use; may be {@code null}. */
+  private CloudSdk cloudSdk;
   private AppEngineDevServer devServer;
   private Process devProcess;
 
+  @VisibleForTesting
+  int serverPort = -1;
+  @VisibleForTesting
+  int adminPort = -1;
+
   private DevAppServerOutputListener serverOutputListener;
+  
+  @VisibleForTesting
+  Map<String, String> moduleToUrlMap = new LinkedHashMap<>();
 
   public LocalAppEngineServerBehaviour () {
     localAppEngineStartListener = new LocalAppEngineStartListener();
@@ -63,16 +144,20 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
     // then try to shut it down nicely
     if (devServer != null && (!force || serverState != IServer.STATE_STOPPING)) {
       setServerState(IServer.STATE_STOPPING);
-      // TODO: when available configure the host and port specified in the server
       DefaultStopConfiguration stopConfig = new DefaultStopConfiguration();
+      if (isDevAppServer1()) {
+        stopConfig.setAdminPort(serverPort);        
+      } else {
+        stopConfig.setAdminPort(adminPort);
+      }
       try {
         devServer.stop(stopConfig);
       } catch (AppEngineException ex) {
-        logger.log(Level.WARNING, "Error terminating server: " + ex.getMessage(), ex);
+        logger.log(Level.WARNING, "Error terminating server: " + ex.getMessage(), ex); //$NON-NLS-1$
       }
     } else {
       // we've already given it a chance
-      logger.info("forced stop: destroying associated processes");
+      logger.info("forced stop: destroying associated processes"); //$NON-NLS-1$
       if (devProcess != null) {
         devProcess.destroy();
         devProcess = null;
@@ -80,6 +165,16 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
       devServer = null;
       setServerState(IServer.STATE_STOPPED);
     }
+  }
+
+
+  @Override
+  public IStatus canStop() {
+    int serverState = getServer().getServerState();
+    if (serverState == IServer.STATE_STARTED) {
+      return Status.OK_STATUS;
+    }
+    return StatusUtil.error(this, "Not started");
   }
 
   /**
@@ -96,16 +191,6 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
   @Override
   protected IModuleResource[] getResources(IModule[] module) {
     return super.getResources(module);
-  }
-
-  @Override
-  public IStatus canStop() {
-    int serverState = getServer().getServerState();
-    if ((serverState != IServer.STATE_STOPPING) && (serverState != IServer.STATE_STOPPED)) {
-      return Status.OK_STATUS;
-    } else {
-      return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Stop in progress");
-    }
   }
 
   /**
@@ -129,102 +214,241 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
     setModulePublishState(module, state);
   }
 
+  @Override
+  protected void publishFinish(IProgressMonitor monitor) throws CoreException {
+    boolean allPublished = true;
+    IServer server = getServer();
+    IModule[] modules = server.getModules();
+    for (IModule module : modules) {
+      if (server.getModulePublishState(new IModule[] {module}) != IServer.PUBLISH_STATE_NONE) {
+        allPublished = false;
+      }
+    }
+    if (allPublished) {
+      setServerPublishState(IServer.PUBLISH_STATE_NONE);
+    }
+  }
+
+  private static IStatus newErrorStatus(String message) {
+    return new Status(IStatus.ERROR, Activator.PLUGIN_ID, message);
+  }
+
+  @Override
+  public void setupLaunchConfiguration(ILaunchConfigurationWorkingCopy workingCopy,
+      IProgressMonitor monitor) throws CoreException {
+    super.setupLaunchConfiguration(workingCopy, monitor);
+
+    // it seems surprising that the Server class doesn't already do this
+    Collection<IProject> projects = new ArrayList<>();
+    for (IModule module : getServer().getModules()) {
+      IProject project = module.getProject();
+      if (project != null) {
+        projects.add(project);
+      }
+    }
+    workingCopy.setMappedResources(projects.toArray(new IResource[projects.size()]));
+  }
+
+  @VisibleForTesting
+  void checkPorts(DefaultRunConfiguration devServerRunConfiguration, PortChecker portInUse)
+      throws CoreException {
+    InetAddress serverHost = InetAddress.getLoopbackAddress();
+    if (devServerRunConfiguration.getHost() != null) {
+      serverHost = LocalAppEngineServerLaunchConfigurationDelegate
+          .resolveAddress(devServerRunConfiguration.getHost());
+    }
+    serverPort = checkPort(serverHost,
+        ifNull(devServerRunConfiguration.getPort(), DEFAULT_SERVER_PORT), portInUse);
+
+    if (LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2) {
+      InetAddress adminHost = InetAddress.getLoopbackAddress();
+      if (devServerRunConfiguration.getAdminHost() != null) {
+        adminHost = LocalAppEngineServerLaunchConfigurationDelegate
+            .resolveAddress(devServerRunConfiguration.getAdminHost());
+      }
+      adminPort = checkPort(adminHost,
+          ifNull(devServerRunConfiguration.getAdminPort(), DEFAULT_ADMIN_PORT), portInUse);
+    }
+
+    // API port seems to be bound on localhost in practice
+    checkPort(InetAddress.getLoopbackAddress(),
+        ifNull(devServerRunConfiguration.getApiPort(), DEFAULT_API_PORT), portInUse);
+  }
+
+  /**
+   * Check whether the provided port is in use. Returns the port if not, or throws an exception if
+   * the port is in use.
+   * 
+   * @param addr a machine address or {@code null} for all addresses
+   * @param portInUse returns true if the (host,port) is in use
+   * @return the value of the {@code port} parameter
+   * @throws CoreException if the port is in use
+   */
+  @VisibleForTesting
+  static int checkPort(InetAddress addr, int port, PortChecker portInUse)
+      throws CoreException {
+    Preconditions.checkNotNull(portInUse);
+    if (port < 0 || port > 65535) {
+      throw new CoreException(newErrorStatus(Messages.getString("PORT_OUT_OF_RANGE")));
+    }
+
+    if (port != 0 && portInUse.isInUse(addr, port)) {
+      throw new CoreException(
+          newErrorStatus(Messages.getString("PORT_IN_USE", String.valueOf(port))));
+    }
+    return port;
+  }
+
+  /**
+   * Returns service port of this server. Note that this method returns -1 if the user has never
+   * attempted to launch the server.
+   *
+   * @return user-specified port, unless the user let the server choose it (by setting the port
+   *     to 0 or an empty string in the UI initially). If the user let the server choose it,
+   *     returns the port of the module with the name "default", if the module exists; otherwise,
+   *     returns the port of an arbitrary module.
+   */
+  public int getServerPort() {
+    return serverPort;
+  }
+
+  /**
+   * Returns the admin port of this server. Note that this method returns -1 if the user has never
+   * attempted to launch the server.
+   */
+  public int getAdminPort() {
+    return adminPort;
+  }
+
+  /**
+   * @return a short pithy description of this server suitable for use in UI elements
+   */
+  public String getDescription() {
+    if (cloudSdk != null) {
+      try {
+        CloudSdkVersion version = cloudSdk.getVersion();
+        return Messages.getString("cloudsdk.server.description.version", version); //$NON-NLS-1$
+      } catch (AppEngineException ex) {
+        logger.log(Level.WARNING, "Unable to obtain CloudSdk version", ex); //$NON-NLS-1$
+      }
+    }
+    return Messages.getString("cloudsdk.server.description"); //$NON-NLS-1$
+  }
+
   /**
    * Starts the development server.
    *
-   * @param runnables the path to directories that contain configuration files like appengine-web.xml
-   * @param stream the stream to send development server process output to
+   * @param mode the launch mode (see ILaunchManager.*_MODE constants)
    */
-  void startDevServer(List<File> runnables, MessageConsoleStream stream) {
+  void startDevServer(String mode, DefaultRunConfiguration devServerRunConfiguration,
+      Path javaHomePath, MessageConsoleStream outputStream, MessageConsoleStream errorStream)
+      throws CoreException {
+
+    PortChecker portInUse = new PortChecker() {
+      @Override
+      public boolean isInUse(InetAddress addr, int port) {
+        Preconditions.checkNotNull(port);
+        return SocketUtil.isPortInUse(addr, port);
+      }
+    };
+
+    checkPorts(devServerRunConfiguration, portInUse);
+
     setServerState(IServer.STATE_STARTING);
+    setMode(mode);
+
+    // TODO(chanseok): remove once Bug 68205805 is fixed. This is a temporary workaround for
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2531.
+    putAppEngineApiSdkJarIntoApps(devServerRunConfiguration.getServices(), repositoryService);
 
     // Create dev app server instance
-    initializeDevServer(stream);
-
-    // Create run configuration
-    DefaultRunConfiguration devServerRunConfiguration = new DefaultRunConfiguration();
-    devServerRunConfiguration.setAppYamls(runnables);
-
-    // FIXME: workaround bug when running on a Java8 JVM
-    // https://github.com/GoogleCloudPlatform/gcloud-eclipse-tools/issues/181
-    devServerRunConfiguration.setJvmFlags(Arrays.asList("-Dappengine.user.timezone=UTC"));
+    initializeDevServer(outputStream, errorStream, javaHomePath);
 
     // Run server
     try {
       devServer.run(devServerRunConfiguration);
     } catch (AppEngineException ex) {
-      Activator.logError("Error starting server: " + ex.getMessage());
+      Activator.logError("Error starting server: " + ex.getMessage()); //$NON-NLS-1$
       stop(true);
     }
   }
 
-  /**
-   * Starts the development server in debug mode.
-   *
-   * @param runnables the path to directories that contain configuration files like appengine-web.xml
-   * @param stream the stream to send development server process output to
-   * @param debugPort the port to attach a debugger to if launch is in debug mode
-   */
-  void startDebugDevServer(List<File> runnables, MessageConsoleStream stream, int debugPort) {
-    setServerState(IServer.STATE_STARTING);
-
-    // Create dev app server instance
-    initializeDevServer(stream);
-
-    // Create run configuration
-    DefaultRunConfiguration devServerRunConfiguration = new DefaultRunConfiguration();
-    devServerRunConfiguration.setAppYamls(runnables);
-
-    // todo: make this a configurable option, but default to
-    // 1 instance to simplify debugging
-    devServerRunConfiguration.setMaxModuleInstances(1);
-
-    List<String> jvmFlags = new ArrayList<String>();
-    // FIXME: workaround bug when running on a Java8 JVM
-    // https://github.com/GoogleCloudPlatform/gcloud-eclipse-tools/issues/181
-    jvmFlags.add("-Dappengine.user.timezone=UTC");
-
-    if (debugPort <= 0 || debugPort > 65535) {
-      throw new IllegalArgumentException("Debug port is set to " + debugPort
-                                      + ", should be between 1-65535");
-    }
-    jvmFlags.add("-Xdebug");
-    jvmFlags.add("-Xrunjdwp:transport=dt_socket,server=n,suspend=y,quiet=y,address=" + debugPort);
-    devServerRunConfiguration.setJvmFlags(jvmFlags);
-
-    // Run server
+  @VisibleForTesting
+  static void putAppEngineApiSdkJarIntoApps(List<File> appDirectories,
+      ILibraryRepositoryService repositoryService) throws CoreException {
     try {
-      devServer.run(devServerRunConfiguration);
-    } catch (AppEngineException ex) {
-      Activator.logError("Error starting server: " + ex.getMessage());
-      stop(true);
+      Library library = CloudLibraries.getLibrary("appengine-api");
+      for (LibraryFile libraryFile : library.getAllDependencies()) {
+        Artifact artifact =
+            repositoryService.resolveArtifact(libraryFile, new NullProgressMonitor());
+        Path artifactPath = artifact.getFile().toPath();
+
+        for (File appDirectory : appDirectories) {
+          Path libDirectory = appDirectory.toPath().resolve("WEB-INF/lib");
+          libDirectory.toFile().mkdirs();
+          if (!appEngineApiSdkJarExists(libDirectory)) {
+            Files.copy(artifactPath, libDirectory.resolve(artifactPath.getFileName()));
+          }
+        }
+      }
+    } catch (IOException e) {
+      String message = Messages.getString("cannot.copy.appengine.api.sdk.jar");
+      throw new CoreException(StatusUtil.error(LocalAppEngineServerBehaviour.class, message, e));
     }
   }
 
-  private void initializeDevServer(MessageConsoleStream stream) {
-    MessageConsoleWriterOutputLineListener outputListener =
-        new MessageConsoleWriterOutputLineListener(stream);
+  @VisibleForTesting
+  static boolean appEngineApiSdkJarExists(Path directory) {
+    Pattern pattern = Pattern.compile("^appengine-api-1.0-sdk-.+\\.jar$", Pattern.CASE_INSENSITIVE);
+    for (String filename : directory.toFile().list()) {
+      if (pattern.matcher(filename).matches()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static int ifNull(Integer value, int defaultValue) {
+    return value != null ? value : defaultValue;
+  }
+
+  private void initializeDevServer(MessageConsoleStream stdout, MessageConsoleStream stderr,
+      Path javaHomePath) {
+    MessageConsoleWriterOutputLineListener stdoutListener =
+        new MessageConsoleWriterOutputLineListener(stdout);
+    MessageConsoleWriterOutputLineListener stderrListener =
+        new MessageConsoleWriterOutputLineListener(stderr);
 
     // dev_appserver output goes to stderr
-    CloudSdk cloudSdk = new CloudSdk.Builder()
-        .addStdOutLineListener(outputListener)
-        .addStdErrLineListener(outputListener)
+    cloudSdk = new CloudSdk.Builder()
+        .javaHome(javaHomePath)
+        .addStdOutLineListener(stdoutListener).addStdErrLineListener(stderrListener)
         .addStdErrLineListener(serverOutputListener)
         .startListener(localAppEngineStartListener)
         .exitListener(localAppEngineExitListener)
         .async(true)
         .build();
 
-    devServer = new CloudSdkAppEngineDevServer(cloudSdk);
+    devServer = LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2
+        ? new CloudSdkAppEngineDevServer2(cloudSdk)
+        : new CloudSdkAppEngineDevServer1(cloudSdk);
+    moduleToUrlMap.clear();
+  }
+  
+  /**
+   * @return true if and only if we're using devappserver1
+   */
+  private boolean isDevAppServer1() {
+    return devServer instanceof CloudSdkAppEngineDevServer1;
   }
 
   /**
    * A {@link ProcessExitListener} for the App Engine server.
    */
-  public class LocalAppEngineExitListener implements ProcessExitListener {
+  private class LocalAppEngineExitListener implements ProcessExitListener {
     @Override
     public void onExit(int exitCode) {
-      logger.log(Level.FINE, "Process exit: code=" + exitCode);
+      logger.log(Level.FINE, "Process exit: code=" + exitCode); //$NON-NLS-1$
       devServer = null;
       devProcess = null;
       setServerState(IServer.STATE_STOPPED);
@@ -234,32 +458,88 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
   /**
    * A {@link ProcessStartListener} for the App Engine server.
    */
-  public class LocalAppEngineStartListener implements ProcessStartListener {
+  private class LocalAppEngineStartListener implements ProcessStartListener {
     @Override
     public void onStart(Process process) {
-      logger.log(Level.FINE, "New Process: " + process);
+      logger.log(Level.FINE, "New Process: " + process); //$NON-NLS-1$
       devProcess = process;
     }
   }
 
   /**
-   * An output listener that monitors for well-known key dev_appserver output and affects server
+   * An output listener that monitors for well-known key dev_appserver output and effects server
    * state changes.
    */
   public class DevAppServerOutputListener implements ProcessOutputLineListener {
+    // DevAppServer2 outputs the following for module-started and admin line (on one line):
+    // <<HEADER>> Starting module "default" running at: http://localhost:8080
+    // <<HEADER>> Starting admin server at: http://localhost:8000
+    // where <<HEADER>> = INFO 2017-01-31 21:00:40,700 dispatcher.py:197]
+    
+    // devappserver2 patterns
+    private final Pattern moduleStartedPattern = Pattern.compile(
+        "INFO .*Starting module \"(?<service>[^\"]+)\" running at: (?<url>http://.+:(?<port>[0-9]+))$");
+    private final Pattern adminStartedPattern =
+        Pattern.compile("INFO .*Starting admin server at: (?<url>http://.+:(?<port>[0-9]+))$");
+
+    // devappserver1 patterns
+    private final Pattern moduleRunningPattern = Pattern.compile(
+        "INFO: Module instance (?<service>[\\w\\d\\-]+) is running at (?<url>http://.+:(?<port>[0-9]+)/)$");
+    private final Pattern adminRunningPattern =
+        Pattern.compile("INFO: The admin console is running at (?<url>http://.+:(?<port>[0-9]+))/_ah/admin$");
+      
+    private int serverPortCandidate = 0;
 
     @Override
     public void onOutputLine(String line) {
-      if (line.endsWith("Dev App Server is now running")) {
+      Matcher matcher;
+      if (line.endsWith("Dev App Server is now running")) { //$NON-NLS-1$
         // App Engine Standard (v1)
         setServerState(IServer.STATE_STARTED);
-      } else if (line.endsWith(".Server:main: Started")) {
+      } else if (line.endsWith(".Server:main: Started")) { //$NON-NLS-1$
         // App Engine Flexible (v2)
         setServerState(IServer.STATE_STARTED);
-      } else if (line.equals("Traceback (most recent call last):")) {
+      } else if (line.equals("Traceback (most recent call last):")) { //$NON-NLS-1$
         // An error occurred
         setServerState(IServer.STATE_STOPPED);
+      } else if (line.contains("Error: A fatal exception has occurred. Program will exit")) { //$NON-NLS-1$
+        // terminate the Python process
+        stop(false);
+      } else if ((matcher = moduleStartedPattern.matcher(line)).matches()
+          || (matcher = moduleRunningPattern.matcher(line)).matches()) {
+        String serviceId = matcher.group("service");
+        String url = matcher.group("url");
+        moduleToUrlMap.put(serviceId, url);
+        String portString = matcher.group("port");
+        int port = parseInt(portString, 0);
+        if (port > 0 && (serverPortCandidate == 0 || "default".equals(serviceId))) { // $NON-NLS-1$
+          serverPortCandidate = port;
+        }
+      } else if ((matcher = adminStartedPattern.matcher(line)).matches()
+          || (matcher = adminRunningPattern.matcher(line)).matches()) {
+        int port = parseInt(matcher.group("port"), 0);
+        if (port > 0 && adminPort <= 0) {
+          adminPort = port;
+        }
+        // Admin comes after other modules, so no more module URLs
+        if (serverPort <= 0) {
+          serverPort = serverPortCandidate;
+        }
       }
     }
+  }
+
+  @Override
+  public IPath getPublishDirectory(IModule[] module) {
+    if (module == null || module.length == 0) {
+      return null;
+    }
+    return getModuleDeployDirectory(module[0]);
+  }
+
+  /** Return the URL for the given service, or {@code null} if unknown. */
+  public String getServiceUrl(String serviceId) {
+    Preconditions.checkNotNull(serviceId);
+    return moduleToUrlMap.get(serviceId);
   }
 }
