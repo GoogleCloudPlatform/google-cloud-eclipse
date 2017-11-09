@@ -114,14 +114,6 @@ public class LoginServiceUi implements UiFacade {
     }
   }
 
-  private void stopLocalServerReceiver(LocalServerReceiver codeReceiver) {
-    try {
-      codeReceiver.stop();
-    } catch (IOException ex) {
-      logger.log(Level.WARNING, "Failed to stop the local web server for login.", ex); //$NON-NLS-1$
-    }
-  }
-
   private String showProgressDialogAndWaitForCode(final String message,
       final LocalServerReceiver codeReceiver) throws IOException {
     try {
@@ -164,6 +156,14 @@ public class LoginServiceUi implements UiFacade {
       throw (IOException) ex.getTargetException();
     } catch (InterruptedException ex) {  // Never thrown from the attached task.
       return null;
+    }
+  }
+
+  private void stopLocalServerReceiver(LocalServerReceiver codeReceiver) {
+    try {
+      codeReceiver.stop();
+    } catch (IOException ex) {
+      logger.log(Level.WARNING, "Failed to stop the local web server for login.", ex); //$NON-NLS-1$
     }
   }
 
