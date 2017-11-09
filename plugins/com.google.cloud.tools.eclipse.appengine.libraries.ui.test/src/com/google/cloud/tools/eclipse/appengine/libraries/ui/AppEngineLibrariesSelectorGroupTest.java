@@ -52,7 +52,7 @@ public class AppEngineLibrariesSelectorGroupTest {
   public void setUp() {
     shell = shellTestResource.getShell();
     shell.setLayout(new FillLayout());
-    librariesSelector = new LibrarySelectorGroup(shell, CloudLibraries.APP_ENGINE_GROUP);
+    librariesSelector = new LibrarySelectorGroup(shell, CloudLibraries.APP_ENGINE_GROUP, "xxx"); //$NON-NLS-1$
     shell.open();
     endpointsButton = getButton("appengine-endpoints");
     objectifyButton = getButton("objectify");

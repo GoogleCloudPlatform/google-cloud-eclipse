@@ -56,8 +56,6 @@ public class CloudLibrariesInPluginXmlTest {
   @Test
   public void testAppEngineApiLibraryConfig() throws URISyntaxException {
     Library appEngineLibrary = CloudLibraries.getLibrary(APP_ENGINE_API_LIBRARY_ID);
-    assertThat(appEngineLibrary.getContainerPath().toString(),
-               is(Library.CONTAINER_PATH_PREFIX + "/" + APP_ENGINE_API_LIBRARY_ID));
     assertThat(appEngineLibrary.getId(), is(APP_ENGINE_API_LIBRARY_ID));
     assertThat(appEngineLibrary.getName(), is("App Engine API"));
     assertThat(appEngineLibrary.getGroup(), is("appengine-api"));
@@ -98,8 +96,6 @@ public class CloudLibrariesInPluginXmlTest {
   @Test
   public void testEndpointsLibraryConfig() throws URISyntaxException {
     Library endpointsLibrary = CloudLibraries.getLibrary(CLOUD_ENDPOINTS_LIBRARY_ID);
-    assertThat(endpointsLibrary.getContainerPath().toString(),
-               is(Library.CONTAINER_PATH_PREFIX + "/" + CLOUD_ENDPOINTS_LIBRARY_ID));
     assertThat(endpointsLibrary.getId(), is(CLOUD_ENDPOINTS_LIBRARY_ID));
     assertThat(endpointsLibrary.getName(), is("Google Cloud Endpoints"));
     assertThat(endpointsLibrary.getGroup(), is("appengine"));
@@ -134,8 +130,6 @@ public class CloudLibrariesInPluginXmlTest {
   @Test
   public void testObjectifyLibraryConfig() throws URISyntaxException {
     Library objectifyLibrary = CloudLibraries.getLibrary(OBJECTIFY_LIBRARY_ID);
-    assertThat(objectifyLibrary.getContainerPath().toString(),
-               is(Library.CONTAINER_PATH_PREFIX + "/" + OBJECTIFY_LIBRARY_ID));
     assertThat(objectifyLibrary.getId(), is(OBJECTIFY_LIBRARY_ID));
     assertThat(objectifyLibrary.getName(), is("Objectify"));
     assertThat(objectifyLibrary.getGroup(), is("appengine"));
@@ -190,8 +184,6 @@ public class CloudLibrariesInPluginXmlTest {
   @Test
   public void testServletApiLibraryConfig() throws URISyntaxException {
     Library servletApiLibrary = CloudLibraries.getLibrary(SERVLET_API_LIBRARY_ID);
-    assertThat(servletApiLibrary.getContainerPath().toString(),
-               is(Library.CONTAINER_PATH_PREFIX + "/" + SERVLET_API_LIBRARY_ID));
     assertThat(servletApiLibrary.getId(), is(SERVLET_API_LIBRARY_ID));
     assertThat(servletApiLibrary.getName(), is("Servlet API 2.5"));
     assertThat(servletApiLibrary.getGroup(), is("servlet"));
@@ -223,8 +215,6 @@ public class CloudLibrariesInPluginXmlTest {
   @Test
   public void testJspApiLibraryConfig() throws URISyntaxException {
     Library jspApiLibrary = CloudLibraries.getLibrary(JSP_API_LIBRARY_ID);
-    assertThat(jspApiLibrary.getContainerPath().toString(),
-               is(Library.CONTAINER_PATH_PREFIX + "/" + JSP_API_LIBRARY_ID));
     assertThat(jspApiLibrary.getId(), is(JSP_API_LIBRARY_ID));
     assertThat(jspApiLibrary.getGroup(), is("servlet"));
     assertThat(jspApiLibrary.getName(), is("Java Server Pages API 2.1"));

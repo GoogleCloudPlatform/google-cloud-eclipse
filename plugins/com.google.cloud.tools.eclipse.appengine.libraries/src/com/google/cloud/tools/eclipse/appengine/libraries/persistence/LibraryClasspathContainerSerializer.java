@@ -17,9 +17,9 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.persistence;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Verify;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -120,18 +120,26 @@ public class LibraryClasspathContainerSerializer {
     }
   }
 
+  public void resetContainer(IJavaProject javaProject, IPath containerPath)
+      throws IOException, CoreException {
+    // delete the container state cache file since the library list has changed
+    stateLocationProvider.removeContainerStateFile(javaProject, containerPath.lastSegment());
+  }
+
+  /**
+   * Persist the set of library IDs for this project; callers will likely need to rebuild the
+   * container state cache file.
+   */
   public void saveLibraryIds(IJavaProject javaProject, List<String> libraryIds)
       throws CoreException, IOException {
     File librariesFile = getContainerStateFile(javaProject, CONTAINER_LIBRARY_LIST_FILE_ID, true);
     if (librariesFile == null) {
-      logger.warning("Master libraries file cannot be created, save failed"); //$NON-NLS-1$
+      logger.warning("Library-id state file cannot be created, save failed"); //$NON-NLS-1$
       return;
     }
     try (Writer out = Files.newBufferedWriter(librariesFile.toPath(), StandardCharsets.UTF_8)) {
       out.write(gson.toJson(libraryIds.toArray()));
     }
-    // delete the container state cache file since the library list has changed
-    stateLocationProvider.removeContainerStateFile(javaProject, CloudLibraries.MASTER_CONTAINER_ID);
   }
 
   public List<String> loadLibraryIds(IJavaProject javaProject)
@@ -200,7 +208,8 @@ public class LibraryClasspathContainerSerializer {
     @Override
     public void removeContainerStateFile(IJavaProject javaProject, String id) throws CoreException {
       IFile stateFile = getFile(javaProject, id, false);
-      if (stateFile != null && stateFile.exists()) {
+      Verify.verifyNotNull(stateFile);
+      if (stateFile.exists()) {
         stateFile.delete(true, new NullProgressMonitor());
       }
     }

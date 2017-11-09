@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.persistence;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -243,8 +242,6 @@ public class LibraryClasspathContainerSerializerTest {
         stateLocationProvider, binaryBaseLocationProvider, sourceBaseLocationProvider);
     serializer.saveLibraryIds(javaProject, Arrays.asList("a", "b"));
     assertTrue(librariesFilePath.toFile().exists());
-    assertFalse("saving library list should toss container state cache",
-        stateFilePath.toFile().exists());
     List<String> libraryIds = serializer.loadLibraryIds(javaProject);
     assertThat(libraryIds, Matchers.contains("a", "b"));
   }

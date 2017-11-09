@@ -49,6 +49,6 @@ public interface LibraryContainerStateLocationProvider {
    * @param id the file name/ID for the {@link LibraryClasspathContainer} state file
    * @throws CoreException if an error happens during removal
    */
-  void removeContainerStateFile(IJavaProject javaProject, String masterContainerId)
+  void removeContainerStateFile(IJavaProject javaProject, String id)
       throws CoreException;
 }

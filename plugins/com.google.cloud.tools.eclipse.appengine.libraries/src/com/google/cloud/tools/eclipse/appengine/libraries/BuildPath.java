@@ -33,8 +33,10 @@ import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
@@ -173,9 +175,11 @@ public class BuildPath {
     } else {
       classpathAttributes[0] = UpdateClasspathAttributeUtil.createNonDependencyAttribute();
     }
-
-    return JavaCore.newContainerEntry(library.getContainerPath(), new IAccessRule[0],
-        classpathAttributes, false);
+    // in practice, this method will only be called for the master library
+    IPath containerPath = new Path(LibraryClasspathContainer.CONTAINER_PATH_PREFIX)
+        .append(library.getId());
+    return JavaCore.newContainerEntry(containerPath, new IAccessRule[0], classpathAttributes,
+        false);
   }
 
   public static void runContainerResolverJob(IJavaProject javaProject) {
@@ -236,7 +240,11 @@ public class BuildPath {
     }
     try {
       serializer.saveLibraryIds(project, libraryIds);
-      progress.worked(10);
+      progress.worked(5);
+      // in practice, we only ever use the master-container
+      IPath containerPath = new Path(LibraryClasspathContainer.CONTAINER_PATH_PREFIX)
+          .append(CloudLibraries.MASTER_CONTAINER_ID);
+      serializer.resetContainer(project, containerPath);
     } catch (IOException ex) {
       throw new CoreException(
           StatusUtil.error(BuildPath.class, "Error saving project library list", ex)); //$NON-NLS-1$

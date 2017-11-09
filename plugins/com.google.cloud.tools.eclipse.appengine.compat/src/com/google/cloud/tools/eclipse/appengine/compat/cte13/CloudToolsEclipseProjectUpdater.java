@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.compat.cte13;
 
 import com.google.cloud.tools.eclipse.appengine.compat.Messages;
 import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
+import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
@@ -96,7 +97,8 @@ public class CloudToolsEclipseProjectUpdater {
 
       progress.subTask(Messages.getString("removing.old.library.container.definitions")); //$NON-NLS-1$
       for (String libraryId : libraryIds) {
-        IFile definition = project.getFolder(".settings").getFolder(Library.CONTAINER_PATH_PREFIX) //$NON-NLS-1$
+        IFile definition = project.getFolder(".settings") //$NON-NLS-1$
+            .getFolder(LibraryClasspathContainer.CONTAINER_PATH_PREFIX)
             .getFile(libraryId + ".container"); //$NON-NLS-1$
         if (definition.exists()) {
           definition.delete(true, null);
@@ -133,7 +135,8 @@ public class CloudToolsEclipseProjectUpdater {
   private static boolean isLibraryContainer(IClasspathEntry entry, IPath containerPath) {
     return entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER
         && containerPath.segmentCount() == 2
-        && Library.CONTAINER_PATH_PREFIX.equals(containerPath.segment(0));
+        && LibraryClasspathContainer.CONTAINER_PATH_PREFIX
+            .equals(containerPath.segment(0));
   }
 
 

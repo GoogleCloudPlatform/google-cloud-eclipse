@@ -27,6 +27,7 @@ public class SharedImages {
   public static final ImageDescriptor CLOUDSDK_IMAGE_DESCRIPTOR =
       AbstractUIPlugin.imageDescriptorFromPlugin("com.google.cloud.tools.eclipse.ui", //$NON-NLS-1$
           "icons/obj16/cloudsdk.png"); //$NON-NLS-1$
+
   public static final ImageDescriptor GCP_WIZARD_IMAGE_DESCRIPTOR = AbstractUIPlugin
       .imageDescriptorFromPlugin("com.google.cloud.tools.eclipse.ui", "icons/wizban/gcp.png"); //$NON-NLS-1$ //$NON-NLS-2$
 

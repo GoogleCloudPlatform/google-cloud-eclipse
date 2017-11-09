@@ -57,8 +57,8 @@ public class LibrarySelectorGroup implements ISelectionProvider {
   private final Map<Library, Button> libraryButtons = new LinkedHashMap<>();
   private final ListenerList/* <ISelectedChangeListener> */ listeners = new ListenerList/* <> */();
 
-  public LibrarySelectorGroup(Composite parentContainer, String groupName) {
-    this(parentContainer, groupName, Messages.getString("appengine.libraries.group"), true); //$NON-NLS-1$
+  public LibrarySelectorGroup(Composite parentContainer, String groupName, String groupLabel) {
+    this(parentContainer, groupName, groupLabel, true); // $NON-NLS-1$
   }
   
   /**
