@@ -46,11 +46,13 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
@@ -114,9 +116,9 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
         updateProjectSelector();
 
         if (!initializingUiValues) {
-          boolean emptySelection = accountSelector.getSelectedEmail().isEmpty();
+          boolean somethingSelected = !accountSelector.getSelectedEmail().isEmpty();
           boolean savedEmailAvailable = accountSelector.isEmailAvailable(accountEmailModel);
-          if (!emptySelection || savedEmailAvailable) {
+          if (somethingSelected || savedEmailAvailable) {
             accountEmailModel = accountSelector.getSelectedEmail();
             gcpProjectIdModel = ""; //$NON-NLS-1$
             updateLaunchConfigurationDialog();
@@ -138,9 +140,9 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
       @Override
       public void selectionChanged(SelectionChangedEvent event) {
         if (!initializingUiValues) {
-          boolean emptySelection = projectSelector.getSelectProjectId().isEmpty();
+          boolean somethingSelected = !projectSelector.getSelectProjectId().isEmpty();
           boolean savedIdAvailable = projectSelector.isProjectIdAvailable(gcpProjectIdModel);
-          if (!emptySelection || savedIdAvailable) {
+          if (somethingSelected || savedIdAvailable) {
             gcpProjectIdModel = projectSelector.getSelectProjectId();
             updateLaunchConfigurationDialog();
           }
@@ -185,18 +187,24 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
   }
 
   private void updateProjectSelector() {
-    Credential credential = accountSelector.getSelectedCredential();
+    final Credential credential = accountSelector.getSelectedCredential();
     if (credential == null) {
       projectSelector.setProjects(new ArrayList<GcpProject>());
-    } else {
-      try {
-        List<GcpProject> gcpProjects = projectRepository.getProjects(credential);
-        projectSelector.setProjects(gcpProjects);
-      } catch (ProjectRepositoryException e) {
-        logger.log(Level.WARNING,
-            "Could not retrieve GCP project information from server.", e); //$NON-NLS-1$
-      }
+      return;
     }
+
+    BusyIndicator.showWhile(Display.getCurrent(), new Runnable() {
+      @Override
+      public void run() {
+        try {
+          List<GcpProject> gcpProjects = projectRepository.getProjects(credential);
+          projectSelector.setProjects(gcpProjects);
+        } catch (ProjectRepositoryException e) {
+          logger.log(Level.WARNING,
+              "Could not retrieve GCP project information from server.", e); //$NON-NLS-1$
+        }
+      }
+    });
   }
 
   @Override
@@ -225,6 +233,7 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     String serviceKey = Strings.nullToEmpty(environmentMap.get(SERVICE_KEY_ENVIRONMENT_VARIABLE));
 
     initializingUiValues = true;
+    // Selecting an account loads projects into the project selector synchronously (via a listener).
     accountSelector.selectAccount(accountEmailModel);
     projectSelector.selectProjectId(gcpProjectIdModel);
     serviceKeyInput.setText(serviceKey);
@@ -250,7 +259,10 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
       configuration.setAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, environmentMap);
 
       if (environmentTab != null) {
-        // Needed to make the "Environment" tab to re-initialize its UI from the changes made here.
+        // Unfortunately, "EnvironmentTab" overrides "activated()" not to call "initializeFrom()".
+        // (Calling "initializeFrom()" when "activated()" is the default implementation of the base
+        // class retained for backward compatibility.) We needed to call it on behalf of
+        // "EnvironmentTab" to re-initialize its UI with the changes made here.
         environmentTab.initializeFrom(configuration);
       }
     }
@@ -279,7 +291,7 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
 
   @VisibleForTesting
   static Map<String, String> getEnvironmentMap(ILaunchConfiguration configuration) {
-    Map<String, String> emptyMap = new HashMap<>();
+    Map<String, String> emptyMap = new HashMap<>();  // should be mutable
     try {
       return configuration.getAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, emptyMap);
     } catch (CoreException e) {

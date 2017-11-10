@@ -117,7 +117,7 @@ public class GcpLocalRunTabTest {
   @Test
   public void testGetAttribute() throws CoreException {
     when(launchConfig.getAttribute(eq("attribute-key"), anyString())).thenReturn("expected value");
-    String value = GcpLocalRunTab.getAttribute(launchConfig, "attribute-key", "defualt");
+    String value = GcpLocalRunTab.getAttribute(launchConfig, "attribute-key", "default");
     assertEquals("expected value", value);
   }
 
