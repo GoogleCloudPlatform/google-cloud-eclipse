@@ -88,7 +88,7 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
   // To prevent updating above models when programmatically setting up UI components.
   private boolean initializingUiValues;
 
-  private boolean activated;
+  private boolean activated;  // to avoid https://github.com/GoogleCloudPlatform/google-cloud-eclipse/pull/2568#discussion_r150128582
 
   public GcpLocalRunTab(EnvironmentTab environmentTab) {
     this(environmentTab, PlatformUI.getWorkbench().getService(IGoogleLoginService.class),
@@ -250,7 +250,7 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
 
   @Override
   public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-    if (!activated) {
+    if (!activated) {  // to avoid https://github.com/GoogleCloudPlatform/google-cloud-eclipse/pull/2568#discussion_r150128582
       return;
     }
 
