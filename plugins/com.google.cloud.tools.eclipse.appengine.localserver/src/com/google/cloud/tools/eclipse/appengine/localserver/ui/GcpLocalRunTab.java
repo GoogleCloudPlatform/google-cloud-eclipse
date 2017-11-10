@@ -27,14 +27,19 @@ import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.ui.util.images.SharedImages;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
+import org.eclipse.debug.ui.EnvironmentTab;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDisposer;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -57,12 +62,12 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
   private static final String ATTRIBUTE_ACCOUNT_EMAIL =
       "com.google.cloud.tools.eclipse.gcpEmulation.accountEmail"; //$NON-NLS-1$
 
-  private static final String ATTRIBUTE_GCP_PROJECT =
-      "com.google.cloud.tools.eclipse.gcpEmulation.gcpProject"; //$NON-NLS-1$
+  private static final String PROJECT_ID_ENVIRONMENT_VARIABLE =
+      "GOOGLE_CLOUD_PROJECT"; //$NON-NLS-1$
+  private static final String SERVICE_KEY_ENVIRONMENT_VARIABLE =
+      "GOOGLE_APPLICATION_CREDENTIALS"; //$NON-NLS-1$
 
-  private static final String ATTRIBUTE_SERVICE_KEY =
-      "com.google.cloud.tools.eclipse.gcpEmulation.serviceKey"; //$NON-NLS-1$
-
+  private final EnvironmentTab environmentTab;
   private final IGoogleLoginService loginService;
   private final ProjectRepository projectRepository;
 
@@ -81,13 +86,17 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
   // To prevent updating above models when programmatically setting up UI components.
   private boolean initializingUiValues;
 
-  public GcpLocalRunTab() {
-    this(PlatformUI.getWorkbench().getService(IGoogleLoginService.class),
+  private boolean activated;
+
+  public GcpLocalRunTab(EnvironmentTab environmentTab) {
+    this(environmentTab, PlatformUI.getWorkbench().getService(IGoogleLoginService.class),
         new ProjectRepository(PlatformUI.getWorkbench().getService(IGoogleApiFactory.class)));
   }
 
   @VisibleForTesting
-  GcpLocalRunTab(IGoogleLoginService loginService, ProjectRepository projectRepository) {
+  GcpLocalRunTab(EnvironmentTab environmentTab,
+      IGoogleLoginService loginService, ProjectRepository projectRepository) {
+    this.environmentTab = environmentTab;
     this.loginService = loginService;
     this.projectRepository = projectRepository;
   }
@@ -175,24 +184,6 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     composite.addDisposeListener(new ImageDisposer(gcpIcon));
   }
 
-  @Override
-  public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
-    // No particular default values to set in a newly created configuration.
-  }
-
-  @Override
-  public void initializeFrom(ILaunchConfiguration configuration) {
-    accountEmailModel = getAttribute(configuration, ATTRIBUTE_ACCOUNT_EMAIL, ""); //$NON-NLS-1$
-    gcpProjectIdModel = getAttribute(configuration, ATTRIBUTE_GCP_PROJECT, ""); //$NON-NLS-1$
-    String serviceKey = getAttribute(configuration, ATTRIBUTE_SERVICE_KEY, ""); //$NON-NLS-1$
-
-    initializingUiValues = true;
-    accountSelector.selectAccount(accountEmailModel);
-    projectSelector.selectProjectId(gcpProjectIdModel);
-    serviceKeyInput.setText(serviceKey);
-    initializingUiValues = false;
-  }
-
   private void updateProjectSelector() {
     Credential credential = accountSelector.getSelectedCredential();
     if (credential == null) {
@@ -202,16 +193,67 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
         List<GcpProject> gcpProjects = projectRepository.getProjects(credential);
         projectSelector.setProjects(gcpProjects);
       } catch (ProjectRepositoryException e) {
-        logger.log(Level.WARNING, "Could not retrieve GCP project information from server.", e); //$NON-NLS-1$
+        logger.log(Level.WARNING,
+            "Could not retrieve GCP project information from server.", e); //$NON-NLS-1$
       }
     }
   }
 
   @Override
+  public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
+    // No particular default values to set in a newly created configuration.
+  }
+
+  @Override
+  public void activated(ILaunchConfigurationWorkingCopy workingCopy) {
+    activated = true;
+    super.activated(workingCopy);
+  }
+
+  @Override
+  public void deactivated(ILaunchConfigurationWorkingCopy workingCopy) {
+    super.deactivated(workingCopy);
+    activated = false;
+  }
+
+  @Override
+  public void initializeFrom(ILaunchConfiguration configuration) {
+    accountEmailModel = getAttribute(configuration, ATTRIBUTE_ACCOUNT_EMAIL, ""); //$NON-NLS-1$
+
+    Map<String, String> environmentMap = getEnvironmentMap(configuration);
+    gcpProjectIdModel = Strings.nullToEmpty(environmentMap.get(PROJECT_ID_ENVIRONMENT_VARIABLE));
+    String serviceKey = Strings.nullToEmpty(environmentMap.get(SERVICE_KEY_ENVIRONMENT_VARIABLE));
+
+    initializingUiValues = true;
+    accountSelector.selectAccount(accountEmailModel);
+    projectSelector.selectProjectId(gcpProjectIdModel);
+    serviceKeyInput.setText(serviceKey);
+    initializingUiValues = false;
+  }
+
+  @Override
   public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-    configuration.setAttribute(ATTRIBUTE_ACCOUNT_EMAIL, accountEmailModel);
-    configuration.setAttribute(ATTRIBUTE_GCP_PROJECT, gcpProjectIdModel);
-    configuration.setAttribute(ATTRIBUTE_SERVICE_KEY, serviceKeyInput.getText());
+    if (activated) {
+      configuration.setAttribute(ATTRIBUTE_ACCOUNT_EMAIL, accountEmailModel);
+
+      Map<String, String> environmentMap = getEnvironmentMap(configuration);
+      if (!gcpProjectIdModel.isEmpty()) {
+        environmentMap.put(PROJECT_ID_ENVIRONMENT_VARIABLE, gcpProjectIdModel);
+      } else {
+        environmentMap.remove(PROJECT_ID_ENVIRONMENT_VARIABLE);
+      }
+      if (!serviceKeyInput.getText().isEmpty()) {
+        environmentMap.put(SERVICE_KEY_ENVIRONMENT_VARIABLE, serviceKeyInput.getText());
+      } else {
+        environmentMap.remove(SERVICE_KEY_ENVIRONMENT_VARIABLE);
+      }
+      configuration.setAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, environmentMap);
+
+      if (environmentTab != null) {
+        // Needed to make the "Environment" tab to re-initialize its UI from the changes made here.
+        environmentTab.initializeFrom(configuration);
+      }
+    }
   }
 
   @Override
@@ -225,13 +267,24 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
   }
 
   @VisibleForTesting
-  static final String getAttribute(ILaunchConfiguration configuration,
+  static String getAttribute(ILaunchConfiguration configuration,
       String attribute, String defaultValue) {
     try {
       return configuration.getAttribute(attribute, defaultValue);
     } catch (CoreException e) {
       logger.log(Level.WARNING, "Can't get value from launch configuration.", e); //$NON-NLS-1$
       return defaultValue;
+    }
+  }
+
+  @VisibleForTesting
+  static Map<String, String> getEnvironmentMap(ILaunchConfiguration configuration) {
+    Map<String, String> emptyMap = new HashMap<>();
+    try {
+      return configuration.getAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, emptyMap);
+    } catch (CoreException e) {
+      logger.log(Level.WARNING, "Can't get value from launch configuration.", e); //$NON-NLS-1$
+      return emptyMap;
     }
   }
 }

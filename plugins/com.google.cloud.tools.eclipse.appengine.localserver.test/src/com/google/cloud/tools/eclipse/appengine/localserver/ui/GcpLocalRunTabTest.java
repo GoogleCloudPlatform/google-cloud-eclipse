@@ -18,8 +18,11 @@ package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,10 +37,15 @@ import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.cloud.tools.login.Account;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.ui.EnvironmentTab;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.junit.Before;
@@ -45,6 +53,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.AdditionalAnswers;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -55,6 +65,7 @@ public class GcpLocalRunTabTest {
 
   @Mock private IGoogleLoginService loginService;
   @Mock private ProjectRepository projectRepository;
+  @Mock private EnvironmentTab environmentTab;
 
   @Mock private Account account1;
   @Mock private Account account2;
@@ -62,6 +73,8 @@ public class GcpLocalRunTabTest {
   @Mock private Credential credential2;
 
   @Mock private ILaunchConfigurationWorkingCopy launchConfig;
+
+  @Captor private ArgumentCaptor<Map<String, String>> mapCaptor; 
 
   private final List<GcpProject> projectsOfEmail1 = Arrays.asList(
       new GcpProject("project-A in email-1", "email-1-project-A"),
@@ -75,6 +88,7 @@ public class GcpLocalRunTabTest {
   private Shell shell;
   private AccountSelector accountSelector;
   private ProjectSelector projectSelector;
+  private Text serviceKeyText;
 
   @Before
   public void setUp() throws ProjectRepositoryException {
@@ -89,14 +103,15 @@ public class GcpLocalRunTabTest {
     when(projectRepository.getProjects(credential1)).thenReturn(projectsOfEmail1);
     when(projectRepository.getProjects(credential2)).thenReturn(projectsOfEmail2);
 
-    tab = new GcpLocalRunTab(loginService, projectRepository);
+    tab = new GcpLocalRunTab(environmentTab, loginService, projectRepository);
     tab.createControl(shell);
 
     accountSelector = CompositeUtil.findControl(shell, AccountSelector.class);
     projectSelector = CompositeUtil.findControl(shell, ProjectSelector.class);
+    serviceKeyText = CompositeUtil.findControlAfterLabel(shell, Text.class, "Service key:");
     assertNotNull(accountSelector);
     assertNotNull(projectSelector);
-    assertNotNull(CompositeUtil.findControlAfterLabel(shell, Text.class, "Service key:"));
+    assertNotNull(serviceKeyText);
   }
 
   @Test
@@ -112,6 +127,19 @@ public class GcpLocalRunTabTest {
         .then(AdditionalAnswers.returnsLastArg());
     String value = GcpLocalRunTab.getAttribute(launchConfig, "non-existing-key", "default");
     assertEquals("default", value);
+  }
+
+  @Test
+  public void testGetEnvironmentMap_defaultMap() {
+    assertTrue(GcpLocalRunTab.getEnvironmentMap(launchConfig).isEmpty());
+  }
+
+  @Test
+  public void testGetEnvironmentMap() throws CoreException {
+    Map<String, String> map = new HashMap<>();
+    when(launchConfig.getAttribute(eq(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES), any(Map.class)))
+        .thenReturn(map);
+    assertEquals(map, GcpLocalRunTab.getEnvironmentMap(launchConfig));
   }
 
   @Test
@@ -159,40 +187,74 @@ public class GcpLocalRunTabTest {
 
   @Test
   public void testInitializeFrom_serviceKeyEntered() throws CoreException {
-    Text serviceKey = CompositeUtil.findControlAfterLabel(shell, Text.class, "Service key:");
-
     mockLaunchConfig("", "", "/usr/home/keystore/my-key.json");
     tab.initializeFrom(launchConfig);
-    assertEquals("/usr/home/keystore/my-key.json", serviceKey.getText());
+    assertEquals("/usr/home/keystore/my-key.json", serviceKeyText.getText());
+  }
+
+  @Test
+  public void testActivated_initializesUi() throws CoreException {
+    mockLaunchConfig("email-1@example.com", "email-1-project-A", "/usr/home/keystore/my-key.json");
+    tab.activated(launchConfig);
+    assertEquals("email-1@example.com", accountSelector.getSelectedEmail());
+    assertEquals("email-1-project-A", projectSelector.getSelectProjectId());
+    assertEquals("/usr/home/keystore/my-key.json", serviceKeyText.getText());
   }
 
   private void mockLaunchConfig(String accountEmail, String gcpProjectId, String serviceKey)
       throws CoreException {
     when(launchConfig.getAttribute("com.google.cloud.tools.eclipse.gcpEmulation.accountEmail", ""))
         .thenReturn(accountEmail);
-    when(launchConfig.getAttribute("com.google.cloud.tools.eclipse.gcpEmulation.gcpProject", ""))
-        .thenReturn(gcpProjectId);
-    when(launchConfig.getAttribute("com.google.cloud.tools.eclipse.gcpEmulation.serviceKey", ""))
-        .thenReturn(serviceKey);
+
+    Map<String, String> environmentMap = new HashMap<>();
+    environmentMap.put("GOOGLE_CLOUD_PROJECT", gcpProjectId);
+    environmentMap.put("GOOGLE_APPLICATION_CREDENTIALS", serviceKey);
+    when(launchConfig.getAttribute(eq(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES), any(Map.class)))
+        .thenReturn(environmentMap);
   }
 
   @Test
-  public void testPerformApply() throws CoreException {
+  public void testPerformApply_activated() throws CoreException {
+    mockLaunchConfig("email-1@example.com", "email-1-project-A", "/usr/home/key.json");
+    tab.activated(launchConfig);
+
+    accountSelector.selectAccount("email-2@example.com");
+    projectSelector.selectProjectId("email-2-project-C");
+    serviceKeyText.setText("/tmp/keys/another.json");
+
+    tab.deactivated(launchConfig);
+
+    verify(launchConfig).setAttribute("com.google.cloud.tools.eclipse.gcpEmulation.accountEmail",
+        "email-2@example.com");
+
+    verify(launchConfig).setAttribute(eq(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES),
+        mapCaptor.capture());
+    assertEquals("email-2-project-C", mapCaptor.getValue().get("GOOGLE_CLOUD_PROJECT"));
+    assertEquals("/tmp/keys/another.json",
+        mapCaptor.getValue().get("GOOGLE_APPLICATION_CREDENTIALS"));
+  }
+
+  @Test
+  public void testPerformApply_notActivated() throws CoreException {
     mockLaunchConfig("email-1@example.com", "email-1-project-A", "/usr/home/key.json");
     tab.initializeFrom(launchConfig);
 
     accountSelector.selectAccount("email-2@example.com");
     projectSelector.selectProjectId("email-2-project-C");
-    Text serviceKeyText = CompositeUtil.findControlAfterLabel(shell, Text.class, "Service key:");
     serviceKeyText.setText("/tmp/keys/another.json");
 
     tab.performApply(launchConfig);
 
-    verify(launchConfig).setAttribute("com.google.cloud.tools.eclipse.gcpEmulation.accountEmail",
-        "email-2@example.com");
-    verify(launchConfig).setAttribute("com.google.cloud.tools.eclipse.gcpEmulation.gcpProject",
-        "email-2-project-C");
-    verify(launchConfig).setAttribute("com.google.cloud.tools.eclipse.gcpEmulation.serviceKey",
-        "/tmp/keys/another.json");
+    verify(launchConfig, never()).setAttribute(
+        "com.google.cloud.tools.eclipse.gcpEmulation.accountEmail", "email-2@example.com");
+    verify(launchConfig, never()).setAttribute(eq(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES),
+        any(Map.class));
+  }
+
+  @Test
+  public void testPerformApply_updatesEnvironmentTab() {
+    tab.activated(launchConfig);
+    tab.deactivated(launchConfig);
+    verify(environmentTab).initializeFrom(any(ILaunchConfiguration.class));
   }
 }
