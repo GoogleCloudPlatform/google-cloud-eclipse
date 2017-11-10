@@ -222,6 +222,14 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
   public void deactivated(ILaunchConfigurationWorkingCopy workingCopy) {
     super.deactivated(workingCopy);
     activated = false;
+
+    if (environmentTab != null) {
+      // Unfortunately, "EnvironmentTab" overrides "activated()" not to call "initializeFrom()".
+      // (Calling "initializeFrom()" when "activated()" is the default implementation of the base
+      // class retained for backward compatibility.) We needed to call it on behalf of
+      // "EnvironmentTab" to re-initialize its UI with the changes made here.
+      environmentTab.initializeFrom(workingCopy);
+    }
   }
 
   @Override
@@ -242,30 +250,24 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
 
   @Override
   public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-    if (activated) {
-      configuration.setAttribute(ATTRIBUTE_ACCOUNT_EMAIL, accountEmailModel);
-
-      Map<String, String> environmentMap = getEnvironmentMap(configuration);
-      if (!gcpProjectIdModel.isEmpty()) {
-        environmentMap.put(PROJECT_ID_ENVIRONMENT_VARIABLE, gcpProjectIdModel);
-      } else {
-        environmentMap.remove(PROJECT_ID_ENVIRONMENT_VARIABLE);
-      }
-      if (!serviceKeyInput.getText().isEmpty()) {
-        environmentMap.put(SERVICE_KEY_ENVIRONMENT_VARIABLE, serviceKeyInput.getText());
-      } else {
-        environmentMap.remove(SERVICE_KEY_ENVIRONMENT_VARIABLE);
-      }
-      configuration.setAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, environmentMap);
-
-      if (environmentTab != null) {
-        // Unfortunately, "EnvironmentTab" overrides "activated()" not to call "initializeFrom()".
-        // (Calling "initializeFrom()" when "activated()" is the default implementation of the base
-        // class retained for backward compatibility.) We needed to call it on behalf of
-        // "EnvironmentTab" to re-initialize its UI with the changes made here.
-        environmentTab.initializeFrom(configuration);
-      }
+    if (!activated) {
+      return;
     }
+
+    configuration.setAttribute(ATTRIBUTE_ACCOUNT_EMAIL, accountEmailModel);
+
+    Map<String, String> environmentMap = getEnvironmentMap(configuration);
+    if (!gcpProjectIdModel.isEmpty()) {
+      environmentMap.put(PROJECT_ID_ENVIRONMENT_VARIABLE, gcpProjectIdModel);
+    } else {
+      environmentMap.remove(PROJECT_ID_ENVIRONMENT_VARIABLE);
+    }
+    if (!serviceKeyInput.getText().isEmpty()) {
+      environmentMap.put(SERVICE_KEY_ENVIRONMENT_VARIABLE, serviceKeyInput.getText());
+    } else {
+      environmentMap.remove(SERVICE_KEY_ENVIRONMENT_VARIABLE);
+    }
+    configuration.setAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, environmentMap);
   }
 
   @Override
