@@ -60,7 +60,8 @@ public class CloudLibrariesPage extends WizardPage
    * The library groups to be displayed; pairs of (id, title). For example, <em>"clientapis" &rarr;
    * "Google Cloud APIs for Java"</em>.
    */
-  private Map<String, String> libraryGroups;
+  @VisibleForTesting
+  Map<String, String> libraryGroups;
 
   /** The initially selected libraries. */
   private List<Library> initialSelection = Collections.emptyList();
@@ -69,7 +70,6 @@ public class CloudLibrariesPage extends WizardPage
   final List<LibrarySelectorGroup> librariesSelectors = new ArrayList<>();
   private IJavaProject project;
   private boolean isMavenProject;
-  private IClasspathEntry oldEntry;
   private IClasspathEntry newEntry;
 
   public CloudLibrariesPage() {
@@ -86,9 +86,9 @@ public class CloudLibrariesPage extends WizardPage
 
     Map<String, String> groups = Maps.newLinkedHashMap();
     if (AppEngineStandardFacet.getProjectFacetVersion(project.getProject()) != null) {
-      groups.put(CloudLibraries.APP_ENGINE_GROUP, Messages.getString("appengine-title"));
+      groups.put(CloudLibraries.APP_ENGINE_GROUP, Messages.getString("appengine-title")); //$NON-NLS-1$
     }
-    groups.put(CloudLibraries.CLIENT_APIS_GROUP, Messages.getString("clientapis-title"));
+    groups.put(CloudLibraries.CLIENT_APIS_GROUP, Messages.getString("clientapis-title")); //$NON-NLS-1$
     setLibraryGroups(groups);
   }
 
@@ -123,7 +123,7 @@ public class CloudLibrariesPage extends WizardPage
 
   @Override
   public boolean finish() {
-    final List<Library> libraries = getSelectedLibraries();
+    List<Library> libraries = getSelectedLibraries();
     try {
       if (isMavenProject) {
         BuildPath.addMavenLibraries(project.getProject(), libraries, new NullProgressMonitor());
@@ -150,15 +150,6 @@ public class CloudLibrariesPage extends WizardPage
     }
   }
 
-  @VisibleForTesting
-  List<Library> getVisibleLibraries() {
-    List<Library> visible = new ArrayList<>();
-    for (LibrarySelectorGroup librariesSelector : librariesSelectors) {
-      visible.addAll(librariesSelector.getAvailableLibraries());
-    }
-    return visible;
-  }
-
   /**
    * Return the list of selected libraries.
    */
@@ -174,32 +165,21 @@ public class CloudLibrariesPage extends WizardPage
   @VisibleForTesting
   void setSelectedLibraries(List<Library> selectedLibraries) {
     initialSelection = new ArrayList<>(selectedLibraries);
-    List<Library> remaining = new ArrayList<>(selectedLibraries);
     if (!librariesSelectors.isEmpty()) {
       for (LibrarySelectorGroup librarySelector : librariesSelectors) {
         librarySelector.setSelection(new StructuredSelection(initialSelection));
-        remaining.removeAll(librarySelector.getSelectedLibraries());
-      }
-      if (!remaining.isEmpty()) {
-        logger.log(Level.WARNING,
-            "Discarding libraries that aren't availble from library container definition: " //$NON-NLS-1$
-                + remaining);
       }
     }
   }
 
   @Override
   public void setSelection(IClasspathEntry containerEntry) {
-    // Although null means "new entry", we only support a single entry
-    // and since we use a fixed container path, we treat null as edit-current-entry
-    // FIXME: might be useful to read in current dependencies for maven projects
-    oldEntry = containerEntry;
-    if (project == null || isMavenProject) {
+    if (isMavenProject) {
+      // FIXME: read in current dependencies for maven projects
       return;
     }
     try {
-      List<Library> savedLibraries =
-          BuildPath.loadLibraryList(project, new NullProgressMonitor());
+      List<Library> savedLibraries = BuildPath.loadLibraryList(project, new NullProgressMonitor());
       setSelectedLibraries(savedLibraries);
     } catch (CoreException ex) {
       logger.log(Level.WARNING,

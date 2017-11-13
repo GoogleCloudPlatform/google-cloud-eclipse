@@ -245,6 +245,7 @@ public class BuildPath {
       IPath containerPath = new Path(LibraryClasspathContainer.CONTAINER_PATH_PREFIX)
           .append(CloudLibraries.MASTER_CONTAINER_ID);
       serializer.resetContainer(project, containerPath);
+      progress.worked(5);
     } catch (IOException ex) {
       throw new CoreException(
           StatusUtil.error(BuildPath.class, "Error saving project library list", ex)); //$NON-NLS-1$

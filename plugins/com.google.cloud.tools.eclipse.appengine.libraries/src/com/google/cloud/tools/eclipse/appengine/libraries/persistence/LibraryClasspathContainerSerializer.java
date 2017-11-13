@@ -121,7 +121,7 @@ public class LibraryClasspathContainerSerializer {
   }
 
   public void resetContainer(IJavaProject javaProject, IPath containerPath)
-      throws IOException, CoreException {
+      throws CoreException {
     // delete the container state cache file since the library list has changed
     stateLocationProvider.removeContainerStateFile(javaProject, containerPath.lastSegment());
   }
@@ -146,7 +146,6 @@ public class LibraryClasspathContainerSerializer {
       throws IOException, CoreException {
     File stateFile = getContainerStateFile(javaProject, CONTAINER_LIBRARY_LIST_FILE_ID, false);
     if (stateFile == null) {
-      logger.info("Library-id state file not found for: " + javaProject.getElementName()); //$NON-NLS-1$
       return Collections.emptyList();
     }
     try (Reader reader = Files.newBufferedReader(stateFile.toPath(), StandardCharsets.UTF_8)) {

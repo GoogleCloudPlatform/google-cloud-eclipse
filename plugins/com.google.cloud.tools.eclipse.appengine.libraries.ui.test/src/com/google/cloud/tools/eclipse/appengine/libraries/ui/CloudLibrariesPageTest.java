@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.ui;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -94,7 +93,7 @@ public class CloudLibrariesPageTest {
         .withFacetVersions(WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7).getJavaProject();
     page.initialize(javaProject, null);
     page.createControl(shellTestResource.getShell());
-    assertThat(page.getVisibleLibraries(), Matchers.hasItem(new LibraryMatcher("objectify")));
+    assertThat(page.libraryGroups, Matchers.hasKey(CloudLibraries.APP_ENGINE_GROUP));
   }
 
   @Test
@@ -102,11 +101,7 @@ public class CloudLibrariesPageTest {
     IJavaProject javaProject = plainJavaProjectCreator.getJavaProject();
     page.initialize(javaProject, null);
     page.createControl(shellTestResource.getShell());
-    Library objectify = CloudLibraries.getLibrary("objectify");
-    assertNotNull(objectify);
-    // objectify shouldn't be found on a non-App Engine project
-    assertThat(page.getVisibleLibraries(),
-        Matchers.everyItem(Matchers.not(new LibraryMatcher("objectify"))));
+    assertThat(page.libraryGroups, Matchers.not(Matchers.hasKey(CloudLibraries.APP_ENGINE_GROUP)));
   }
 
   @Test
