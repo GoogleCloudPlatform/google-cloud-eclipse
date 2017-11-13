@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.deploy.ui.internal;
+package com.google.cloud.tools.eclipse.ui.util.event;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyString;
@@ -59,7 +60,9 @@ public class RelativeFileFieldSetterTest {
     try {
       new RelativeFileFieldSetter(field, new Path("non/absolute/base/path"), filter, dialog);
       fail();
-    } catch (IllegalArgumentException ex) {}
+    } catch (IllegalArgumentException ex) {
+      assertEquals("basePath not absolute", ex.getMessage());
+    }
   }
 
   @Test

@@ -25,6 +25,7 @@ import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepositoryException;
 import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
+import com.google.cloud.tools.eclipse.ui.util.event.FileFieldSetter;
 import com.google.cloud.tools.eclipse.ui.util.images.SharedImages;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
@@ -169,6 +170,8 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     });
     Button browse = new Button(composite, SWT.NONE);
     browse.setText(Messages.getString("button.browse")); //$NON-NLS-1$
+    browse.addSelectionListener(new FileFieldSetter(serviceKeyInput
+        , new String[] {"*.json", "*"})); //$NON-NLS-1$ //$NON-NLS-2$
 
     GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.TOP).applyTo(projectLabel);
     GridDataFactory.fillDefaults().span(2, 1).applyTo(accountSelector);
