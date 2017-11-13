@@ -100,14 +100,6 @@ public class LibrarySelectorGroup implements ISelectionProvider {
   }
 
   /**
-   * Return the available libraries.
-   */
-  @VisibleForTesting
-  Collection<? extends Library> getAvailableLibraries() {
-    return availableLibraries.values();
-  }
-
-  /**
    * Returns the selected libraries and required dependencies.
    */
   public Collection<Library> getSelectedLibraries() {
