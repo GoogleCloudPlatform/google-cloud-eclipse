@@ -51,7 +51,7 @@ public class FileFieldSetter extends SelectionAdapter {
   public void widgetSelected(SelectionEvent event) {
     IPath inputPath = new Path(fileField.getText().trim());
 
-    IPath filterPath = preProcessInputPath(inputPath); 
+    IPath filterPath = preProcessInputPath(inputPath);
     while (!filterPath.isEmpty() && !filterPath.isRoot() && !filterPath.toFile().isDirectory()) {
       filterPath = filterPath.removeLastSegments(1);
     }
