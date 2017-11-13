@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.deploy.ui.internal;
+package com.google.cloud.tools.eclipse.ui.util.event;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Text;
@@ -34,12 +31,9 @@ import org.eclipse.swt.widgets.Text;
  * path is {@code /usr/local} and a user chose {@code /usr/local/lib/cups}, the text field will be
  * set to {@code lib/cups}.
  */
-public class RelativeFileFieldSetter extends SelectionAdapter {
+public class RelativeFileFieldSetter extends FileFieldSetter {
 
-  private final Text fileField;
   private final IPath basePath;
-  private final FileDialog dialog;
-  private final String[] filterExtensions;
 
   public RelativeFileFieldSetter(Text fileField, IPath basePath, String[] filterExtensions) {
     this(fileField, basePath, filterExtensions, new FileDialog(fileField.getShell(), SWT.SHEET));
@@ -48,29 +42,21 @@ public class RelativeFileFieldSetter extends SelectionAdapter {
   @VisibleForTesting
   RelativeFileFieldSetter(Text fileField, IPath basePath, String[] filterExtensions,
       FileDialog fileDialog) {
-    this.fileField = fileField;
+    super(fileField, filterExtensions, fileDialog);
     this.basePath = Preconditions.checkNotNull(basePath);
-    this.filterExtensions = filterExtensions;
-    Preconditions.checkArgument(basePath.isAbsolute());
-    dialog = fileDialog;
+    Preconditions.checkArgument(basePath.isAbsolute(), "basePath not absolute");
   }
 
   @Override
-  public void widgetSelected(SelectionEvent event) {
-    IPath filterPath = new Path(fileField.getText().trim());
-    if (!filterPath.isAbsolute()) {
-      filterPath = basePath.append(filterPath);
+  protected IPath preProcessInputPath(IPath inputPath) {
+    if (!inputPath.isAbsolute()) {
+      inputPath = basePath.append(inputPath);
     }
-    while (!filterPath.isRoot() && !filterPath.toFile().isDirectory()) {
-      filterPath = filterPath.removeLastSegments(1);
-    }
-    dialog.setFilterPath(filterPath.toString());
-    dialog.setFilterExtensions(filterExtensions);
+    return inputPath;
+  }
 
-    String result = dialog.open();
-    if (result != null) {
-      IPath maybeRelative = new Path(result).makeRelativeTo(basePath);
-      fileField.setText(maybeRelative.toString());
-    }
+  @Override
+  protected IPath postProcessResultPath(IPath resultPath) {
+    return resultPath.makeRelativeTo(basePath);
   }
 }
