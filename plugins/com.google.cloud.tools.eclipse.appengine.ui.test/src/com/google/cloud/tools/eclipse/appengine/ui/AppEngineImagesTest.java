@@ -22,11 +22,6 @@ import org.junit.Test;
 public class AppEngineImagesTest {
 
   @Test
-  public void testLoadGCP16() {
-    Assert.assertNotNull(AppEngineImages.googleCloudPlatform(16));
-  }
-  
-  @Test
   public void testLoadAppEngine64() {
     Assert.assertNotNull(AppEngineImages.appEngine(64));
   }
@@ -34,11 +29,6 @@ public class AppEngineImagesTest {
   @Test
   public void testLoadAppEngine16() {
     Assert.assertNotNull(AppEngineImages.appEngine(16));
-  }
-
-  @Test
-  public void testLoadNonExistentGCPSize() {
-    Assert.assertNull(AppEngineImages.googleCloudPlatform(45));
   }
 
   @Test

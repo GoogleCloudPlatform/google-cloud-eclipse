@@ -41,4 +41,14 @@ public interface LibraryContainerStateLocationProvider {
    */
   IPath getContainerStateFile(IJavaProject javaProject, String id, boolean create)
       throws CoreException;
+
+  /**
+   * Remove the state file if present.
+   * 
+   * @param javaProject the project the {@link LibraryClasspathContainer} belongs to
+   * @param id the file name/ID for the {@link LibraryClasspathContainer} state file
+   * @throws CoreException if an error happens during removal
+   */
+  void removeContainerStateFile(IJavaProject javaProject, String id)
+      throws CoreException;
 }

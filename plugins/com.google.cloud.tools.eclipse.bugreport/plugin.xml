@@ -23,7 +23,7 @@
   <extension point="org.eclipse.ui.menus">
     <menuContribution
         allPopups="false"
-        locationURI="menu:com.google.cloud.tools.eclipse.appengine.actions?after=feedback">
+        locationURI="menu:com.google.cloud.tools.eclipse.ui.actions?after=feedback">
       <command commandId="com.google.cloud.tools.eclipse.bugreport.bugReportCommand"/>
     </menuContribution>
   </extension>

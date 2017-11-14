@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.projectselector;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -32,6 +33,7 @@ import org.eclipse.core.databinding.property.value.IValueProperty;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.TableColumn;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,10 +44,15 @@ public class ProjectSelectorTest {
 
   @Rule public ShellTestResource shellResource = new ShellTestResource();
 
+  private ProjectSelector projectSelector;
+
+  @Before
+  public void setUp() {
+    projectSelector = new ProjectSelector(shellResource.getShell());
+  }
+
   @Test
   public void testCreatedColumns() {
-    ProjectSelector projectSelector = new ProjectSelector(shellResource.getShell());
-
     TableColumn[] columns = projectSelector.getViewer().getTable().getColumns();
     assertThat(columns.length, is(2));
     assertThat(columns[0].getText(), is("Name"));
@@ -54,16 +61,15 @@ public class ProjectSelectorTest {
 
   @Test
   public void testProjectsAreSortedAlphabetically() {
-    ProjectSelector projectSelector = new ProjectSelector(shellResource.getShell());
     projectSelector.setProjects(getUnsortedProjectList());
 
-    assertThat(getVisibleProjectAtIndex(projectSelector, 0).getName(), is("a"));
-    assertThat(getVisibleProjectAtIndex(projectSelector, 1).getName(), is("b"));
-    assertThat(getVisibleProjectAtIndex(projectSelector, 2).getName(), is("c"));
-    assertThat(getVisibleProjectAtIndex(projectSelector, 3).getName(), is("d"));
+    assertThat(getVisibleProjectAtIndex(0).getName(), is("a"));
+    assertThat(getVisibleProjectAtIndex(1).getName(), is("b"));
+    assertThat(getVisibleProjectAtIndex(2).getName(), is("c"));
+    assertThat(getVisibleProjectAtIndex(3).getName(), is("d"));
   }
 
-  private static GcpProject getVisibleProjectAtIndex(ProjectSelector projectSelector, int index) {
+  private GcpProject getVisibleProjectAtIndex(int index) {
     return (GcpProject) projectSelector.getViewer().getTable().getItem(index).getData();
   }
 
@@ -72,7 +78,6 @@ public class ProjectSelectorTest {
     List<GcpProject> projects = getUnsortedProjectList();
     GcpProject selectedProject = projects.get(3);
 
-    ProjectSelector projectSelector = new ProjectSelector(shellResource.getShell());
     projectSelector.setProjects(projects);
     projectSelector.getViewer().setSelection(new StructuredSelection(selectedProject));
     projectSelector.setProjects(projects.subList(2, projects.size()));
@@ -91,6 +96,62 @@ public class ProjectSelectorTest {
         ProjectSelector.matches(new String[] {"b"}, new Object(), new IValueProperty[] {property}));
   }
 
+  @Test
+  public void testGetSelectedProjectId_nothingSelected() {
+    projectSelector.setProjects(getUnsortedProjectList());
+    assertEquals("", projectSelector.getSelectProjectId());
+  }
+
+  @Test
+  public void testGetSelectedProjectId() {
+    projectSelector.setProjects(getUnsortedProjectList());
+    projectSelector.setSelection(new StructuredSelection(new GcpProject("d", "d")));
+    assertEquals("d", projectSelector.getSelectProjectId());
+  }
+
+  @Test
+  public void testSelectProjectId() {
+    projectSelector.setProjects(getUnsortedProjectList());
+    assertTrue(projectSelector.selectProjectId("b"));
+    assertEquals("b", projectSelector.getSelectProjectId());
+
+    assertTrue(projectSelector.selectProjectId("d"));
+    assertEquals("d", projectSelector.getSelectProjectId());
+  }
+
+  @Test
+  public void testSelectProjectId_deselect() {
+    projectSelector.setProjects(getUnsortedProjectList());
+    assertTrue(projectSelector.selectProjectId("b"));
+    assertEquals("b", projectSelector.getSelectProjectId());
+
+    assertFalse(projectSelector.selectProjectId("non-existing-id"));
+    assertEquals("", projectSelector.getSelectProjectId());
+  }
+
+  @Test
+  public void testIsProjectIdAvailable() {
+    projectSelector.setProjects(getUnsortedProjectList());
+    assertTrue(projectSelector.isProjectIdAvailable("d"));
+  }
+
+  @Test
+  public void testIsProjectIdAvailable_notAvailable() {
+    projectSelector.setProjects(getUnsortedProjectList());
+    assertFalse(projectSelector.isProjectIdAvailable("non-existing-project-id"));
+  }
+
+  @Test
+  public void testIsProjectIdAvailable_null() {
+    projectSelector.setProjects(getUnsortedProjectList());
+    assertFalse(projectSelector.isProjectIdAvailable(null));
+  }
+
+  @Test
+  public void testIsProjectIdAvailable_emptyString() {
+    projectSelector.setProjects(getUnsortedProjectList());
+    assertFalse(projectSelector.isProjectIdAvailable(""));
+  }
 
   private List<GcpProject> getUnsortedProjectList() {
     return Arrays.asList(new GcpProject("b", "b"),

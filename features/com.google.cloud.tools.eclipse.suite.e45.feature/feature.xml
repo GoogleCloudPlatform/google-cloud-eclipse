@@ -29,7 +29,6 @@
       <import feature="org.eclipse.wst.web_ui.feature" version="3.7.1.v201602111638" match="greaterOrEqual"/>
    </requires>
 
-   <!-- appengine-plugins-core -->
    <plugin
          id="com.google.cloud.tools.appengine"
          download-size="0"
@@ -164,7 +163,7 @@
          unpack="false"/>
 
    <plugin
-         id="com.google.cloud.tools.eclipse.ui.util"
+         id="com.google.cloud.tools.eclipse.ui"
          download-size="0"
          install-size="0"
          version="0.0.0"

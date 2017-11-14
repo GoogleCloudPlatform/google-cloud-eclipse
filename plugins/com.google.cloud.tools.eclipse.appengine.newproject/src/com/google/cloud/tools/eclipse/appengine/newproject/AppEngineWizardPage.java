@@ -92,13 +92,14 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     // todo we don't need this if; can do with subclasses
     if (showLibrariesSelectorGroup) {
       appEngineLibrariesSelectorGroup =
-          new LibrarySelectorGroup(container, CloudLibraries.APP_ENGINE_GROUP);
+          new LibrarySelectorGroup(container, CloudLibraries.APP_ENGINE_GROUP,
+              Messages.getString("app.engine.libraries.group")); //$NON-NLS-1$
     }
 
     revalidate();
     // Show enter project name on opening
     setErrorMessage(null);
-    setMessage(Messages.getString("enter.project.name"));
+    setMessage(Messages.getString("enter.project.name")); //$NON-NLS-1$
 
     GridLayoutFactory.swtDefaults().generateLayout(container);
     Dialog.applyDialogFont(container);
@@ -153,7 +154,7 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
   // App Engine service name
   private void createServiceField(Composite parent) {
     Label serviceNameLabel = new Label(parent, SWT.LEAD);
-    serviceNameLabel.setText(Messages.getString("app.engine.service"));
+    serviceNameLabel.setText(Messages.getString("app.engine.service")); //$NON-NLS-1$
     serviceNameField = new Text(parent, SWT.BORDER);
     serviceNameField.setMessage("default"); //$NON-NLS-1$
     serviceNameField.addModifyListener(new ModifyListener() {

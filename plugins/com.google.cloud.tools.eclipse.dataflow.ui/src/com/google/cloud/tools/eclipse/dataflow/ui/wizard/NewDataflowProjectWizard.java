@@ -40,6 +40,9 @@ public class NewDataflowProjectWizard extends Wizard implements INewWizard {
 
   @Override
   public boolean performFinish() {
+    AnalyticsPingManager.getInstance().sendPing(
+        AnalyticsEvents.DATAFLOW_NEW_PROJECT_WIZARD_COMPLETE);
+
     creator.setDefaultAccountEmail(defaultRunOptionsPage.getAccountEmail());
     creator.setDefaultProject(defaultRunOptionsPage.getProjectId());
     creator.setDefaultStagingLocation(defaultRunOptionsPage.getStagingLocation());
@@ -69,8 +72,7 @@ public class NewDataflowProjectWizard extends Wizard implements INewWizard {
 
   @Override
   public void addPages() {
-    AnalyticsPingManager.getInstance().sendPing(
-        AnalyticsEvents.DATAFLOW_NEW_PROJECT_WIZARD, null, null, getShell());
+    AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.DATAFLOW_NEW_PROJECT_WIZARD);
 
     landingPage = new NewDataflowProjectWizardLandingPage(creator);
     addPage(landingPage);

@@ -36,6 +36,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
@@ -96,6 +97,46 @@ public class ProjectSelector extends Composite implements ISelectionProvider {
   public IStructuredSelection getSelection() {
     // getStructuredSelection() is not available in Mars
     return (IStructuredSelection) viewer.getSelection();
+  }
+
+  /**
+   * Returns the GCP project ID of a selected project. Returns an empty string if nothing is
+   * selected. Never returns null.
+   */
+  public String getSelectProjectId() {
+    if (getSelection().isEmpty()) {
+      return "";
+    }
+    GcpProject project = (GcpProject) getSelection().getFirstElement();
+    return project.getId();
+  }
+
+  public boolean isProjectIdAvailable(String projectId) {
+    for (Object o : input) {
+      GcpProject gcpProject = (GcpProject) o;
+      if (gcpProject.getId().equals(projectId)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Selects a project if it exists. If there is no corresponding project, clears any selection.
+   *
+   * @param projectId GCP project ID; may be null or empty
+   * @return true if selected; false otherwise
+   */
+  public boolean selectProjectId(String projectId) {
+    for (GcpProject gcpProject : getProjects()) {
+      if (gcpProject.getId().equals(projectId)) {
+        setSelection(new StructuredSelection(gcpProject));
+        return true;
+      }
+    }
+
+    setSelection(StructuredSelection.EMPTY);
+    return false;
   }
 
   public int getProjectCount() {

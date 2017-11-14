@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.login.ui;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.login.Messages;
 import com.google.cloud.tools.login.Account;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -45,14 +46,12 @@ public class AccountSelector extends Composite {
   @VisibleForTesting Combo combo;
   @VisibleForTesting LogInOnSelect logInOnSelect = new LogInOnSelect();
 
-  public AccountSelector(Composite parent, IGoogleLoginService loginService, String loginMessage) {
+  public AccountSelector(Composite parent, IGoogleLoginService loginService) {
     super(parent, SWT.NONE);
     this.loginService = loginService;
-    this.loginMessage = loginMessage;
-    GridLayoutFactory.fillDefaults().generateLayout(this);
+    loginMessage = Messages.getString("ACCOUNT_SELECTOR_LOGIN");
 
     combo = new Combo(this, SWT.READ_ONLY);
-    GridDataFactory.fillDefaults().grab(true, false).applyTo(combo);
 
     List<Account> sortedAccounts = new ArrayList<>(loginService.getAccounts());
     Collections.sort(sortedAccounts, new Comparator<Account>() {
@@ -67,6 +66,9 @@ public class AccountSelector extends Composite {
     }
     combo.add(loginMessage);
     combo.addSelectionListener(logInOnSelect);
+
+    GridDataFactory.fillDefaults().grab(true, false).applyTo(combo);
+    GridLayoutFactory.fillDefaults().generateLayout(this);
   }
 
   /**
@@ -134,7 +136,7 @@ public class AccountSelector extends Composite {
   }
 
   public int getAccountCount() {
-    return combo.getItemCount() - 1;  // <Add a new account...> is always in the combo
+    return combo.getItemCount() - 1;  // <Sign into another account...> is always in the combo
   }
 
   private void fireSelectionListeners() {

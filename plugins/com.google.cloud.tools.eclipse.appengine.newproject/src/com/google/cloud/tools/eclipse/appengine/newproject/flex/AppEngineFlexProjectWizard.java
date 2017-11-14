@@ -38,10 +38,10 @@ public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
 
   @Override
   public AppEngineFlexWizardPage createWizardPage() {
-    AnalyticsPingManager.getInstance().sendPing(
+    AnalyticsPingManager.getInstance().sendPingOnShell(getShell(),
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_FLEX, getShell());
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_FLEX);
 
     return new AppEngineFlexWizardPage();
   }

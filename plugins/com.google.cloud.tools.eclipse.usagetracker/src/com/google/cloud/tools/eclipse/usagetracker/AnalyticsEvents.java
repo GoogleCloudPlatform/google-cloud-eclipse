@@ -42,11 +42,16 @@ public class AnalyticsEvents {
   public static final String APP_ENGINE_NEW_PROJECT_WIZARD_TYPE = "type";
   public static final String APP_ENGINE_DEPLOY_STANDARD = "standard";
   public static final String APP_ENGINE_DEPLOY_FLEXIBLE = "flex";
-  public static final String API_NATIVE_PROJECT = "native.project";
-  public static final String API_MAVEN_PROJECT = "maven.project";
+  public static final String DATAFLOW_RUN_RUNNER = "runner";
+
+  public static final String PROJECT_TYPE = "project.type";
+  public static final String LIBRARY_ID = "library.id";
 
   // Metadata values
   // This actually means "standard"; the value "native" is for a legacy reason.
   public static final String APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_STANDARD = "native";
   public static final String APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_FLEX = "flex";
+
+  public static final String NATIVE_PROJECT = "native.project";
+  public static final String MAVEN_PROJECT = "maven.project";
 }

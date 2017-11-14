@@ -38,7 +38,10 @@ import java.util.List;
  */
 public class ProjectRepository {
 
-  private static final int PROJECT_LIST_PAGESIZE = 300;
+  // API may return fewer than 700 results in one request, but 600 and change is the
+  // most we've seen in any one account to date.
+  private static final int PROJECT_LIST_PAGESIZE = 700;
+  
   private static final String PROJECT_DELETE_REQUESTED = "DELETE_REQUESTED";
 
   private final IGoogleApiFactory apiFactory;
@@ -56,9 +59,20 @@ public class ProjectRepository {
     // TODO cache results https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1374
     try {
       Projects projects = apiFactory.newProjectsApi(credential);
-      ListProjectsResponse execute =
-          projects.list().setPageSize(PROJECT_LIST_PAGESIZE).execute();
-      return convertToGcpProjects(execute.getProjects());
+      
+      String token = null;
+      List<Project> projectList = new ArrayList<>();
+      do {
+        Projects.List listRequest = projects.list().setPageSize(PROJECT_LIST_PAGESIZE);
+        if (token != null) {
+          listRequest = listRequest.setPageToken(token); 
+        }
+        ListProjectsResponse response = listRequest.execute();
+        projectList.addAll(response.getProjects());
+        token = response.getNextPageToken();
+      } while (token != null);
+      List<GcpProject> gcpProjects = convertToGcpProjects(projectList);
+      return gcpProjects;
     } catch (IOException ex) {
       throw new ProjectRepositoryException(ex);
     }

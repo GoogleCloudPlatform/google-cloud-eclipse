@@ -18,11 +18,17 @@ package com.google.cloud.tools.eclipse.usagetracker;
 
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.escape.CharEscaperBuilder;
+import com.google.common.escape.Escaper;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -158,35 +164,59 @@ public class AnalyticsPingManager {
     flushPreferences(preferences);
   }
 
+  public void sendPing(String eventName) {
+    sendPingOnShell(null, eventName);
+  }
+
+  public void sendPing(String eventName, String metadataKey) {
+    sendPingOnShell(null, eventName, metadataKey);
+  }
+
+  public void sendPing(String eventName, String metadataKey, String metadataValue) {
+    sendPingOnShell(null, eventName, metadataKey, metadataValue);
+  }
+
   /**
    * Sends a usage metric to Google Analytics.
    *
    * If the user has never seen the opt-in dialog or set the opt-in preference beforehand,
    * this method can potentially present an opt-in dialog at the top workbench level. If you
-   * are calling this method inside another modal dialog, consider using {@link #sendPing(
-   * String, String, String, Shell)} and pass the {@Shell} of the currently open modal dialog.
+   * are calling this method inside another modal dialog, consider using {@link #sendPingOnShell(
+   * Shell, String, Map)} and pass the {@Shell} of the currently open modal dialog.
    * (Otherwise, the opt-in dialog won't be able to get input until the workbench can get input.)
    *
    * Safe to call from non-UI contexts.
    */
-  public void sendPing(String eventName, String metadataKey, String metadataValue) {
-    sendPing(eventName, metadataKey, metadataValue, null);
+  public void sendPing(String eventName, Map<String, String> metadata) {
+    sendPingOnShell(null, eventName, metadata);
   }
 
-  public void sendPing(String eventName,
-      String metadataKey, String metadataValue, Shell parentShell) {
-    Preconditions.checkArgument(!Strings.isNullOrEmpty(eventName));
-    if (metadataValue != null) {
-      Preconditions.checkArgument(!metadataValue.isEmpty());
-      Preconditions.checkArgument(!Strings.isNullOrEmpty(metadataKey),
-          "key cannot be null or empty if value is given");
-    }
+  public void sendPingOnShell(Shell parentShell, String eventName) {
+    sendPingOnShell(parentShell, eventName, ImmutableMap.<String, String>of());
+  }
+
+  public void sendPingOnShell(Shell parentShell, String eventName, String metadataKey) {
+    sendPingOnShell(parentShell, eventName, metadataKey, "null");
+  }
+
+  public void sendPingOnShell(Shell parentShell,
+      String eventName, String metadataKey, String metadataValue) {
+    Preconditions.checkArgument(!Strings.isNullOrEmpty(metadataKey), "metadataKey null or empty");
+    Preconditions.checkArgument(!Strings.isNullOrEmpty(metadataValue),
+        "metadataValue null or empty");
+    sendPingOnShell(parentShell, eventName, ImmutableMap.of(metadataKey, metadataValue));
+  }
+
+  public void sendPingOnShell(Shell parentShell, String eventName, Map<String, String> metadata) {
+    Preconditions.checkArgument(!Strings.isNullOrEmpty(eventName), "eventName null or empty");
+    Preconditions.checkNotNull(metadata);
 
     if (endpointUrl != null) {
       // Note: always enqueue if a user has not seen the opt-in dialog yet; enqueuing itself
       // doesn't mean that the event ping will be posted.
       if (userHasOptedIn() || !userHasRegisteredOptInStatus()) {
-        pingEventQueue.add(new PingEvent(eventName, metadataKey, metadataValue, parentShell));
+        ImmutableMap<String, String> metadataCopy = ImmutableMap.copyOf(metadata);
+        pingEventQueue.add(new PingEvent(eventName, metadataCopy, parentShell));
         eventFlushJob.schedule();
       }
     }
@@ -204,6 +234,11 @@ public class AnalyticsPingManager {
     }
   }
 
+  private static final Escaper METADATA_ESCAPER = new CharEscaperBuilder()
+      .addEscape(',', "\\,")
+      .addEscape('=', "\\=")
+      .addEscape('\\', "\\\\").toEscaper();
+
   @VisibleForTesting
   Map<String, String> buildParametersMap(PingEvent pingEvent) {
     Map<String, String> parametersMap = new HashMap<>(STANDARD_PARAMETERS);
@@ -215,18 +250,17 @@ public class AnalyticsPingManager {
     parametersMap.put("dp", virtualPageUrl);
     parametersMap.put("dh", "virtual.eclipse");
 
-    if (pingEvent.metadataKey != null) {
-      // Event metadata are passed as a (virtual) page title.
-      String virtualPageTitle = pingEvent.metadataKey + "=";
-      if (pingEvent.metadataValue != null) {
-        virtualPageTitle += pingEvent.metadataValue;
-      } else {
-        virtualPageTitle += "null";
+    if (!pingEvent.metadata.isEmpty()) {
+      List<String> escapedPairs = new ArrayList<>();
+
+      for (Map.Entry<String, String> entry : pingEvent.metadata.entrySet()) {
+        String key = METADATA_ESCAPER.escape(entry.getKey());
+        String value = METADATA_ESCAPER.escape(entry.getValue());
+        escapedPairs.add(key + "=" + value);
       }
-
-      parametersMap.put("dt", virtualPageTitle);
+      // Event metadata are passed as a (virtual) page title.
+      parametersMap.put("dt", Joiner.on(',').join(escapedPairs));
     }
-
     return parametersMap;
   }
 
@@ -284,15 +318,15 @@ public class AnalyticsPingManager {
 
   @VisibleForTesting
   static class PingEvent {
-    private String eventName;
-    private String metadataKey;
-    private String metadataValue;
-    private Shell shell;
+    private final String eventName;
+    private final ImmutableMap<String, String> metadata;
+    private final Shell shell;
 
-    public PingEvent(String eventName, String metadataKey, String metadataValue, Shell shell) {
+    PingEvent(String eventName, ImmutableMap<String, String> metadata, Shell shell) {
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(eventName), "eventName null or empty");
+      Preconditions.checkNotNull(metadata, "metadata is null");
       this.eventName = eventName;
-      this.metadataKey = metadataKey;
-      this.metadataValue = metadataValue;
+      this.metadata = metadata;
       this.shell = shell;
     }
   }
