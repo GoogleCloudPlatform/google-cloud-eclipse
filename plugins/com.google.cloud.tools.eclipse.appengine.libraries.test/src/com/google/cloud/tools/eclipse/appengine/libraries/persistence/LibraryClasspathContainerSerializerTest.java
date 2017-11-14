@@ -23,6 +23,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
@@ -52,7 +54,9 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LibraryClasspathContainerSerializerTest {
@@ -73,7 +77,7 @@ public class LibraryClasspathContainerSerializerTest {
   private LibraryClasspathContainer container;
 
   @Before
-  public void setUp() throws IOException {
+  public void setUp() throws IOException, CoreException {
     serializedContainer = loadFile("testdata/serializedContainer.json");
     
     List<IClasspathEntry> classpathEntries = Arrays.asList(
@@ -82,6 +86,20 @@ public class LibraryClasspathContainerSerializerTest {
             new IAccessRule[] {newAccessRule("/com/example/accessible", true /* accessible */),
                 newAccessRule("/com/example/nonaccessible", false /* accessible */)},
             true));
+
+    doAnswer(new Answer<Void>() {
+      @Override
+      public Void answer(InvocationOnMock invocation) throws Throwable {
+        IJavaProject project = invocation.getArgumentAt(0, IJavaProject.class);
+        String fileId = invocation.getArgumentAt(1, String.class);
+        IPath path = stateLocationProvider.getContainerStateFile(project, fileId, false);
+        if (path != null && path.toFile() != null) {
+          path.toFile().delete();
+        }
+        return null;
+      }
+    }).when(stateLocationProvider).removeContainerStateFile(any(IJavaProject.class), anyString());
+
     when(binaryBaseLocationProvider.getBaseLocation()).thenReturn(new Path("/test"));
     when(sourceBaseLocationProvider.getBaseLocation()).thenReturn(new Path("/test"));
     MavenCoordinates coordinates = new MavenCoordinates.Builder()
@@ -183,7 +201,7 @@ public class LibraryClasspathContainerSerializerTest {
         StandardOpenOption.TRUNCATE_EXISTING);
     LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer(
         stateLocationProvider, binaryBaseLocationProvider, sourceBaseLocationProvider);
-    List<String> libraryIds = serializer.loadLibraryIds(javaProject, new Path(CONTAINER_PATH));
+    List<String> libraryIds = serializer.loadLibraryIds(javaProject);
     assertThat(libraryIds, Matchers.contains("a", "b"));
   }
 
@@ -197,7 +215,7 @@ public class LibraryClasspathContainerSerializerTest {
         StandardOpenOption.TRUNCATE_EXISTING);
     LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer(
         stateLocationProvider, binaryBaseLocationProvider, sourceBaseLocationProvider);
-    List<String> libraryIds = serializer.loadLibraryIds(javaProject, new Path(CONTAINER_PATH));
+    List<String> libraryIds = serializer.loadLibraryIds(javaProject);
     assertTrue(libraryIds.isEmpty());
   }
 
@@ -208,20 +226,23 @@ public class LibraryClasspathContainerSerializerTest {
         anyBoolean())).thenReturn(stateFilePath);
     LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer(
         stateLocationProvider, binaryBaseLocationProvider, sourceBaseLocationProvider);
-    List<String> libraryIds = serializer.loadLibraryIds(javaProject, new Path(CONTAINER_PATH));
+    List<String> libraryIds = serializer.loadLibraryIds(javaProject);
     assertTrue(libraryIds.isEmpty());
   }
 
   @Test
   public void testLibraryIdsRoundtrip() throws IOException, CoreException {
+    Path librariesFilePath = new Path(stateFolder.newFile().getAbsolutePath());
     Path stateFilePath = new Path(stateFolder.newFile().getAbsolutePath());
-    when(stateLocationProvider.getContainerStateFile(any(IJavaProject.class), anyString(),
-        anyBoolean())).thenReturn(stateFilePath);
+    when(stateLocationProvider.getContainerStateFile(any(IJavaProject.class),
+        eq("_libraries"), anyBoolean())).thenReturn(librariesFilePath);
+    when(stateLocationProvider.getContainerStateFile(any(IJavaProject.class),
+        eq("master-container"), anyBoolean())).thenReturn(stateFilePath);
     LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer(
         stateLocationProvider, binaryBaseLocationProvider, sourceBaseLocationProvider);
     serializer.saveLibraryIds(javaProject, Arrays.asList("a", "b"));
-    assertTrue(stateFilePath.toFile().exists());
-    List<String> libraryIds = serializer.loadLibraryIds(javaProject, new Path(CONTAINER_PATH));
+    assertTrue(librariesFilePath.toFile().exists());
+    List<String> libraryIds = serializer.loadLibraryIds(javaProject);
     assertThat(libraryIds, Matchers.contains("a", "b"));
   }
 

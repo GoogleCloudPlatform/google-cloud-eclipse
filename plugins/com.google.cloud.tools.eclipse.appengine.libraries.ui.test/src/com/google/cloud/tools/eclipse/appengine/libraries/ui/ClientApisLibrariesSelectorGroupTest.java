@@ -53,7 +53,8 @@ public class ClientApisLibrariesSelectorGroupTest {
   public void setUp() {
     shell = shellTestResource.getShell();
     shell.setLayout(new FillLayout());
-    librariesSelector = new LibrarySelectorGroup(shell, CloudLibraries.CLIENT_APIS_GROUP, false);
+    librariesSelector =
+        new LibrarySelectorGroup(shell, CloudLibraries.CLIENT_APIS_GROUP, "label", false);
     shell.open();
     cloudStorageButton = getButton("googlecloudstorage");
     cloudTranslateButton = getButton("cloudtranslation");

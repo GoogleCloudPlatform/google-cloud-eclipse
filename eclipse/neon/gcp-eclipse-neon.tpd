@@ -15,6 +15,10 @@ location "http://download.eclipse.org/cbi/updates/license" {
     org.eclipse.license.feature.group
 }
 
+location "http://docker-editor.openanalytics.eu/update" {
+	  eu.openanalytics.editor.docker.feature.group
+}
+
 location "http://download.eclipse.org/releases/neon" {
 	org.eclipse.sdk.feature.group
 	org.eclipse.jdt.feature.group

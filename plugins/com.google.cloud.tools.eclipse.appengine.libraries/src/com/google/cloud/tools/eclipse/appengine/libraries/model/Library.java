@@ -27,8 +27,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 
 /**
  * A library that can be added to App Engine projects, e.g. App Engine Endpoints library.
@@ -36,9 +34,6 @@ import org.eclipse.core.runtime.Path;
  */
 public final class Library {
 
-  public static final String CONTAINER_PATH_PREFIX =
-      "com.google.cloud.tools.eclipse.appengine.libraries";
-  
   private static final Logger logger = Logger.getLogger(Library.class.getName());
 
   private final String id;
@@ -63,10 +58,6 @@ public final class Library {
   
   public String getId() {
     return id;
-  }
-
-  public IPath getContainerPath() {
-    return new Path(CONTAINER_PATH_PREFIX + "/" + id);
   }
 
   public String getName() {

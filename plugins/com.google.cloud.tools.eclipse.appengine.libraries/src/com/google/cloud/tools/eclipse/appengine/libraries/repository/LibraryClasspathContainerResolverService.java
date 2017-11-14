@@ -80,7 +80,8 @@ public class LibraryClasspathContainerResolverService
           Messages.getString("TaskResolveLibraries"), //$NON-NLS-1$
           getTotalWork(rawClasspath));
       for (IClasspathEntry classpathEntry : rawClasspath) {
-        if (classpathEntry.getPath().segment(0).equals(Library.CONTAINER_PATH_PREFIX)) {
+        if (classpathEntry.getPath().segment(0)
+            .equals(LibraryClasspathContainer.CONTAINER_PATH_PREFIX)) {
           IStatus resolveContainerStatus =
               resolveContainer(javaProject, classpathEntry.getPath(), subMonitor.newChild(1));
           status.add(resolveContainerStatus);
@@ -113,7 +114,8 @@ public class LibraryClasspathContainerResolverService
   public IStatus resolveContainer(IJavaProject javaProject, IPath containerPath,
       IProgressMonitor monitor) {
     
-    Preconditions.checkArgument(containerPath.segment(0).equals(Library.CONTAINER_PATH_PREFIX));
+    Preconditions.checkArgument(containerPath.segment(0)
+        .equals(LibraryClasspathContainer.CONTAINER_PATH_PREFIX));
     
     SubMonitor subMonitor = SubMonitor.convert(monitor, 19);
     
@@ -121,7 +123,7 @@ public class LibraryClasspathContainerResolverService
       String libraryId = containerPath.segment(1);
       Library library = null;
       if (CloudLibraries.MASTER_CONTAINER_ID.equals(libraryId)) {
-        List<String> referencedIds = serializer.loadLibraryIds(javaProject, containerPath);
+        List<String> referencedIds = serializer.loadLibraryIds(javaProject);
         List<Library> referencedLibraries = new ArrayList<>();
         for (String referencedId : referencedIds) {
           Library referencedLibrary = CloudLibraries.getLibrary(referencedId);
@@ -280,7 +282,7 @@ public class LibraryClasspathContainerResolverService
   private static boolean isLibraryClasspathEntry(IPath path) {
     return path != null
         && path.segmentCount() == 2
-        && Library.CONTAINER_PATH_PREFIX.equals(path.segment(0));
+        && LibraryClasspathContainer.CONTAINER_PATH_PREFIX.equals(path.segment(0));
   }
 
   private static String getLibraryDescription(Library library) {

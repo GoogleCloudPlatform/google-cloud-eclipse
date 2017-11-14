@@ -52,6 +52,10 @@ location "http://download.eclipse.org/webtools/repository/mars/" {
     org.eclipse.wst.server_adapters.sdk.feature.feature.group
 }
 
+location "http://docker-editor.openanalytics.eu/update" {
+	  eu.openanalytics.editor.docker.feature.group
+}
+
 location "http://download.eclipse.org/tools/orbit/downloads/drops/R20160221192158/repository/" {
     org.hamcrest.core [1.3.0,1.3.1)
     org.hamcrest.integration [1.3.0,1.3.1)

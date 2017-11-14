@@ -30,6 +30,8 @@ public class LibraryClasspathContainer implements IClasspathContainer {
   private final String description;
   private final List<IClasspathEntry> classpathEntries;
   private final List<LibraryFile> libraryFiles;
+  public static final String CONTAINER_PATH_PREFIX =
+      "com.google.cloud.tools.eclipse.appengine.libraries"; //$NON-NLS-1$
 
   public LibraryClasspathContainer(IPath path, String description,
       List<IClasspathEntry> classpathEntries, List<LibraryFile> libraryFiles) {
