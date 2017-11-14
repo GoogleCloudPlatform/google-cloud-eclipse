@@ -17,10 +17,12 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.ui;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.appengine.libraries.AnalyticsLibraryPingHelper;
 import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.ui.util.images.SharedImages;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -126,8 +128,11 @@ public class CloudLibrariesPage extends WizardPage
     List<Library> libraries = getSelectedLibraries();
     try {
       if (isMavenProject) {
+        // No need for an Analytics ping here; addMavenLibraries will do it.
         BuildPath.addMavenLibraries(project.getProject(), libraries, new NullProgressMonitor());
       } else {
+        AnalyticsLibraryPingHelper.sendLibrarySelectionPing(
+            AnalyticsEvents.NATIVE_PROJECT, libraries);
         /*
          * FIXME: BuildPath.addNativeLibrary() is too heavy-weight here. ClasspathContainerWizard,
          * our wizard, is responsible for installing the classpath entry returned by getSelection(),
