@@ -64,6 +64,8 @@ public class CloudLibrariesPageTest {
   @Test
   public void testSetSelection_null() {
     // creates a new container
+    IJavaProject javaProject = plainJavaProjectCreator.getJavaProject();
+    page.initialize(javaProject, null);
     page.setSelection(null);
   }
 
