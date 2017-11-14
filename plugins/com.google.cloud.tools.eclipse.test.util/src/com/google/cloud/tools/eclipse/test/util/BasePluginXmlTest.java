@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.test.util;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import com.google.common.collect.Sets;
 import java.io.IOException;
@@ -26,6 +27,8 @@ import java.nio.file.Paths;
 import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.RegistryFactory;
@@ -187,6 +190,35 @@ public abstract class BasePluginXmlTest {
       vendor = pluginProperties.get(vendor.substring(1));
     }
     assertEquals("Google Inc.", vendor);
+  }
+
+  @Test
+  public final void testGuavaImportVersions() throws IOException {
+    String importPackageValue = getManifestAttributes().getValue("Import-Package");
+    checkVersionStringsInManifestMf(importPackageValue,
+        "com.google.common.", "version=\"[20.0.0,21.0.0)\"");
+
+    String bundleRequireValue = getManifestAttributes().getValue("Require-Bundle");
+    checkVersionStringsInManifestMf(bundleRequireValue,
+        "com.google.guava", "bundle-version=\"[20.0.0,21.0.0)\"");
+  }
+
+  private void checkVersionStringsInManifestMf(
+      String value, String prefixToCheck, String versionString) {
+    String regexPrefix = prefixToCheck.replaceAll(".", "\\\\.");
+    Pattern pattern = Pattern.compile(regexPrefix + "[^;,]+");
+
+    Matcher matcher = pattern.matcher(value);
+    while (matcher.find()) {
+      int nextCharOffset = matcher.end();
+      if (nextCharOffset == value.length()) {
+        fail("Import-Package version not defined");
+      }
+      String stringAfterMatch = value.substring(nextCharOffset);
+      if (!stringAfterMatch.startsWith(";version=" + versionString)) {
+        fail("Import-Package version incorrect");
+      }
+    }
   }
 
   private static Attributes getManifestAttributes() throws IOException {
