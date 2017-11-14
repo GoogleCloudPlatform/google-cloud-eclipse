@@ -52,7 +52,6 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
@@ -88,7 +87,13 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
   // To prevent updating above models when programmatically setting up UI components.
   private boolean initializingUiValues;
 
-  private boolean activated;  // to avoid https://github.com/GoogleCloudPlatform/google-cloud-eclipse/pull/2568#discussion_r150128582
+  /**
+   * True if this tab is the currently visible tab. See {@link
+   * #performApply(ILaunchConfigurationWorkingCopy)} for details.
+   *
+   * @see #performApply(ILaunchConfigurationWorkingCopy)
+   */
+  private boolean activated;
 
   public GcpLocalRunTab(EnvironmentTab environmentTab) {
     this(environmentTab, PlatformUI.getWorkbench().getService(IGoogleLoginService.class),
@@ -116,9 +121,12 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
         updateProjectSelector();
 
         if (!initializingUiValues) {
-          boolean somethingSelected = !accountSelector.getSelectedEmail().isEmpty();
+          boolean accountSelected = !accountSelector.getSelectedEmail().isEmpty();
           boolean savedEmailAvailable = accountSelector.isEmailAvailable(accountEmailModel);
-          if (somethingSelected || savedEmailAvailable) {
+          // 1. If some account is selected, always save it.
+          // 2. Otherwise (no account selected), clear the saved project only when it is certain
+          // that the user explicitly removed selection (i.e., not because of logout).
+          if (accountSelected || savedEmailAvailable) {
             accountEmailModel = accountSelector.getSelectedEmail();
             gcpProjectIdModel = ""; //$NON-NLS-1$
             updateLaunchConfigurationDialog();
@@ -140,9 +148,12 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
       @Override
       public void selectionChanged(SelectionChangedEvent event) {
         if (!initializingUiValues) {
-          boolean somethingSelected = !projectSelector.getSelectProjectId().isEmpty();
+          boolean projectSelected = !projectSelector.getSelectProjectId().isEmpty();
           boolean savedIdAvailable = projectSelector.isProjectIdAvailable(gcpProjectIdModel);
-          if (somethingSelected || savedIdAvailable) {
+          // 1. If some project is selected, always save it.
+          // 2. Otherwise (no project selected), clear the saved project only when it is certain
+          // that the user explicitly removed selection (i.e., not because of logout).
+          if (projectSelected || savedIdAvailable) {
             gcpProjectIdModel = projectSelector.getSelectProjectId();
             updateLaunchConfigurationDialog();
           }
@@ -193,7 +204,7 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
       return;
     }
 
-    BusyIndicator.showWhile(Display.getCurrent(), new Runnable() {
+    BusyIndicator.showWhile(projectSelector.getDisplay(), new Runnable() {
       @Override
       public void run() {
         try {
@@ -225,9 +236,9 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
 
     if (environmentTab != null) {
       // Unfortunately, "EnvironmentTab" overrides "activated()" not to call "initializeFrom()".
-      // (Calling "initializeFrom()" when "activated()" is the default implementation of the base
-      // class retained for backward compatibility.) We needed to call it on behalf of
-      // "EnvironmentTab" to re-initialize its UI with the changes made here.
+      // (Calling "initializeFrom()" when "activated()" is the default behavior of the base class
+      // retained for backward compatibility.) We need to call it on behalf of "EnvironmentTab"
+      // to re-initialize its UI with the changes made here.
       environmentTab.initializeFrom(workingCopy);
     }
   }
@@ -250,7 +261,11 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
 
   @Override
   public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-    if (!activated) {  // to avoid https://github.com/GoogleCloudPlatform/google-cloud-eclipse/pull/2568#discussion_r150128582
+    // Must avoid updating the environment map unless we're active as performApply() is also called
+    // whenever the user makes changes in other tabs, like the EnvironmentTab, and thus we could
+    // clobber changes made in the EnvironmentTab.
+    // (https://github.com/GoogleCloudPlatform/google-cloud-eclipse/pull/2568#discussion_r150128582)
+    if (!activated) {
       return;
     }
 
@@ -293,7 +308,8 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
 
   @VisibleForTesting
   static Map<String, String> getEnvironmentMap(ILaunchConfiguration configuration) {
-    Map<String, String> emptyMap = new HashMap<>();  // should be mutable
+    // Don't return an immutable map such as Collections.emptyMap().
+    Map<String, String> emptyMap = new HashMap<>();
     try {
       return configuration.getAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, emptyMap);
     } catch (CoreException e) {
