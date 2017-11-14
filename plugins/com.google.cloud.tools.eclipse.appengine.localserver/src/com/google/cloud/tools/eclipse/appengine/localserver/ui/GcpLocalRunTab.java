@@ -144,7 +144,7 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
           boolean accountSelected = !accountSelector.getSelectedEmail().isEmpty();
           boolean savedEmailAvailable = accountSelector.isEmailAvailable(accountEmailModel);
           // 1. If some account is selected, always save it.
-          // 2. Otherwise (no account selected), clear the saved project only when it is certain
+          // 2. Otherwise (no account selected), clear the saved email only when it is certain
           // that the user explicitly removed selection (i.e., not because of logout).
           if (accountSelected || savedEmailAvailable) {
             accountEmailModel = accountSelector.getSelectedEmail();
