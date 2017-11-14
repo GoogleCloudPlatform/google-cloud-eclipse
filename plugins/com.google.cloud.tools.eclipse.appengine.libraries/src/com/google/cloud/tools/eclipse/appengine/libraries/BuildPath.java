@@ -21,15 +21,12 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
-import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.cloud.tools.eclipse.util.ClasspathUtil;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Level;
@@ -66,7 +63,7 @@ public class BuildPath {
     if (libraries.isEmpty()) {
       return;
     }
-    sendAnalyticsPing(AnalyticsEvents.MAVEN_PROJECT, libraries);
+    AnalyticsLibraryPingHelper.sendLibrarySelectionPing(AnalyticsEvents.MAVEN_PROJECT, libraries);
 
     // see m2e-core/org.eclipse.m2e.core.ui/src/org/eclipse/m2e/core/ui/internal/actions/AddDependencyAction.java
     // m2e-core/org.eclipse.m2e.core.ui/src/org/eclipse/m2e/core/ui/internal/editing/AddDependencyOperation.java
@@ -87,7 +84,7 @@ public class BuildPath {
     if (libraries.isEmpty()) {
       return;
     }
-    sendAnalyticsPing(AnalyticsEvents.NATIVE_PROJECT, libraries);
+    AnalyticsLibraryPingHelper.sendLibrarySelectionPing(AnalyticsEvents.NATIVE_PROJECT, libraries);
 
     SubMonitor subMonitor = SubMonitor.convert(monitor,
         Messages.getString("adding.app.engine.libraries"), //$NON-NLS-1$
@@ -102,15 +99,6 @@ public class BuildPath {
           subMonitor.newChild(8));
     }
     runContainerResolverJob(javaProject);
-  }
-
-  private static void sendAnalyticsPing(String projectType, List<Library> librariesSelected) {
-    Map<String, String> metadata = new HashMap<>();
-    metadata.put(AnalyticsEvents.PROJECT_TYPE, projectType);
-    for (Library library : librariesSelected) {
-      metadata.put(AnalyticsEvents.LIBRARY_ID, library.getId());
-    }
-    AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.LIBRARY_ADDED, metadata);
   }
 
   /**
