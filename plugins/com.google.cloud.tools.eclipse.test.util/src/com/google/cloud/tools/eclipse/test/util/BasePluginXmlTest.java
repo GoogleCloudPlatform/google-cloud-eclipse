@@ -194,13 +194,13 @@ public abstract class BasePluginXmlTest {
 
   @Test
   public final void testGuavaImportVersions() throws IOException {
-    checkVersionStringsInManifestMf(
+    checkDependencyDirectives(
         "Import-Package", "com.google.common.", "version=\"[20.0.0,21.0.0)\"");
-    checkVersionStringsInManifestMf(
+    checkDependencyDirectives(
         "Require-Bundle", "com.google.guava", "bundle-version=\"[20.0.0,21.0.0)\"");
   }
 
-  private void checkVersionStringsInManifestMf(
+  private void checkDependencyDirectives(
       String attributeName, String prefixToCheck, String versionString) throws IOException {
     String value = getManifestAttributes().getValue(attributeName);
     if (value != null) {
@@ -211,11 +211,11 @@ public abstract class BasePluginXmlTest {
       while (matcher.find()) {
         int nextCharOffset = matcher.end();
         if (nextCharOffset == value.length()) {
-          fail(attributeName + " version not defined: " + matcher.group());
+          fail(attributeName + " directive not defined: " + matcher.group());
         }
         String stringAfterMatch = value.substring(nextCharOffset);
         if (!stringAfterMatch.startsWith(";" + versionString)) {
-          fail(attributeName + " version incorrect: " + matcher.group());
+          fail(attributeName + " directive incorrect: " + matcher.group());
         }
       }
     }
