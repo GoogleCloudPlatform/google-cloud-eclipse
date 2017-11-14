@@ -67,7 +67,7 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
   private static final String SERVICE_KEY_ENVIRONMENT_VARIABLE =
       "GOOGLE_APPLICATION_CREDENTIALS"; //$NON-NLS-1$
 
-  private final Image gcpIcon = SharedImages.GCP_IMAGE_DESCRIPTOR.createImage();
+  private Image gcpIcon;
 
   private final EnvironmentTab environmentTab;
   private final IGoogleLoginService loginService;
@@ -114,12 +114,18 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
 
   @Override
   public Image getImage() {
+    if (gcpIcon == null) {
+      gcpIcon = SharedImages.GCP_IMAGE_DESCRIPTOR.createImage();
+    }
     return gcpIcon;
   }
 
   @Override
   public void dispose() {
-    gcpIcon.dispose();
+    if (gcpIcon != null) {
+      gcpIcon.dispose();
+      gcpIcon = null;
+    }
   }
 
   @Override
