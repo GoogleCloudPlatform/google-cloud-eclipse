@@ -51,7 +51,7 @@ class LabelImageLoadJob extends Job {
   @Override
   protected IStatus run(IProgressMonitor monitor) {
     ImageDescriptor descriptor = ImageDescriptor.createFromURL(imageUrl);
-    image = descriptor.createImage();
+    image = descriptor.createImage(display);
     if (image == null) {  // extreme cases; return normally.
       return Status.OK_STATUS;
     }

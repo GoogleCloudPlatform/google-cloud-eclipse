@@ -18,17 +18,23 @@ package com.google.cloud.tools.eclipse.ui.util.images;
 
 import static org.junit.Assert.assertNotNull;
 
-import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
-import org.junit.Rule;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 import org.junit.Test;
 
 public class SharedImagesTest {
 
-  @Rule public ShellTestResource shell = new ShellTestResource();
-
   @Test
   public void testCreateRefreshIcon() {
-    assertNotNull(SharedImages.REFRESH_IMAGE_DESCRIPTOR.createImage(shell.getDisplay()));
+    Image image = null;
+    try {
+      image = SharedImages.REFRESH_IMAGE_DESCRIPTOR.createImage(Display.getCurrent());
+      assertNotNull(image);
+    } finally {
+      if (image != null) {
+        image.dispose();
+      }
+    }
   }
 
 }
