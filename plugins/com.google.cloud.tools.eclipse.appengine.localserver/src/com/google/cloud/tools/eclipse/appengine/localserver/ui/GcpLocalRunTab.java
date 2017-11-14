@@ -40,7 +40,6 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
 import org.eclipse.debug.ui.EnvironmentTab;
-import org.eclipse.jdt.internal.ui.viewsupport.ImageDisposer;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -68,6 +67,8 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
   private static final String SERVICE_KEY_ENVIRONMENT_VARIABLE =
       "GOOGLE_APPLICATION_CREDENTIALS"; //$NON-NLS-1$
 
+  private final Image gcpIcon = SharedImages.GCP_IMAGE_DESCRIPTOR.createImage();
+
   private final EnvironmentTab environmentTab;
   private final IGoogleLoginService loginService;
   private final ProjectRepository projectRepository;
@@ -75,8 +76,6 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
   private AccountSelector accountSelector;
   private ProjectSelector projectSelector;
   private Text serviceKeyInput;
-
-  private Image gcpIcon;
 
   // We set up intermediary models between a run configuration and UI components for certain values,
   // because, e.g., the account selector cannot load an email if it is not logged in. In such a
@@ -106,6 +105,21 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     this.environmentTab = environmentTab;
     this.loginService = loginService;
     this.projectRepository = projectRepository;
+  }
+
+  @Override
+  public String getName() {
+    return Messages.getString("gcp.emulation.tab.name"); //$NON-NLS-1$
+  }
+
+  @Override
+  public Image getImage() {
+    return gcpIcon;
+  }
+
+  @Override
+  public void dispose() {
+    gcpIcon.dispose();
   }
 
   @Override
@@ -192,9 +206,6 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     GridLayoutFactory.fillDefaults().spacing(0, 0).generateLayout(projectSelectorComposite);
 
     setControl(composite);
-
-    gcpIcon = SharedImages.GCP_IMAGE_DESCRIPTOR.createImage();
-    composite.addDisposeListener(new ImageDisposer(gcpIcon));
   }
 
   private void updateProjectSelector() {
@@ -283,16 +294,6 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
       environmentMap.remove(SERVICE_KEY_ENVIRONMENT_VARIABLE);
     }
     configuration.setAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, environmentMap);
-  }
-
-  @Override
-  public String getName() {
-    return Messages.getString("gcp.emulation.tab.name"); //$NON-NLS-1$
-  }
-
-  @Override
-  public Image getImage() {
-    return gcpIcon;
   }
 
   @VisibleForTesting
