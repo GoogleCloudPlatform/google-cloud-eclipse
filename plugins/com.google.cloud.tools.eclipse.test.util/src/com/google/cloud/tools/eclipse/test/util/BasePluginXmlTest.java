@@ -203,6 +203,10 @@ public abstract class BasePluginXmlTest {
   private void checkVersionStringsInManifestMf(
       String attributeName, String prefixToCheck, String versionString) throws IOException {
     String value = getManifestAttributes().getValue(attributeName);
+    if (value == null) {
+      return;
+    }
+
     String regexPrefix = prefixToCheck.replaceAll("\\.", "\\\\.");
     Pattern pattern = Pattern.compile(regexPrefix + "[^;,]*");
 
