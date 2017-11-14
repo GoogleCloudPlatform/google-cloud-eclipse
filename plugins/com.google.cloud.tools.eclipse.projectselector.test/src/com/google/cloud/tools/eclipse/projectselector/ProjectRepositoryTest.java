@@ -206,8 +206,8 @@ public class ProjectRepositoryTest {
   public void testHasAppengineApplication_GoogleJsonResponseException()
       throws IOException, ProjectRepositoryException {
     com.google.api.services.appengine.v1.Appengine.Apps.Get get = initializeGetRequest();
-    GoogleJsonResponseException exception =
-        GoogleJsonResponseExceptionFactoryTesting.newMock(new JacksonFactory(), 500, "Server Error");
+    GoogleJsonResponseException exception = GoogleJsonResponseExceptionFactoryTesting
+        .newMock(new JacksonFactory(), 500, "Server Error");
     when(get.execute()).thenThrow(exception);
 
     repository.getAppEngineApplication(mock(Credential.class), "projectId");
@@ -219,8 +219,8 @@ public class ProjectRepositoryTest {
     Assert.assertTrue(projects.isEmpty());
   }
 
-  private com.google.api.services.appengine.v1.Appengine.Apps.Get
-  initializeGetRequest() throws IOException {
+  private com.google.api.services.appengine.v1.Appengine.Apps.Get initializeGetRequest()
+      throws IOException {
     Apps apps = mock(Apps.class);
     when(apiFactory.newAppsApi(any(Credential.class))).thenReturn(apps);
 

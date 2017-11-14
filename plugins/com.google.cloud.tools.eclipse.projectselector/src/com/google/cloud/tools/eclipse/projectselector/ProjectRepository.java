@@ -38,7 +38,7 @@ import java.util.List;
  */
 public class ProjectRepository {
 
-  private static final int PROJECT_LIST_PAGESIZE = 300;
+  private static final int PROJECT_LIST_PAGESIZE = 700;
   private static final String PROJECT_DELETE_REQUESTED = "DELETE_REQUESTED";
 
   private final IGoogleApiFactory apiFactory;
