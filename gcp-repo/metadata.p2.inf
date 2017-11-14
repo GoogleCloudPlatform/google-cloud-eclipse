@@ -20,6 +20,10 @@ requires.2.name=org.dadacoalition.yedit.category.definition
 requires.2.range=[1.0.0,1.0.0]
 requires.2.greedy=true
 
+requires.3.namespace=org.eclipse.equinox.p2.iu
+requires.3.name=eu.openanalytics.editor.docker.category.definition
+requires.3.range=[1.0.0,1.0.0]
+requires.3.greedy=true
 
 # Define the 'Google Cloud Tools for Eclipse' category IU
 # Note that the IU version is shown in the UI, not the .definition version.
@@ -70,4 +74,27 @@ units.2.requires.1.greedy=true
 units.2.provides.1.namespace=org.eclipse.equinox.p2.iu
 units.2.provides.1.name=org.dadacoalition.yedit.category.definition
 units.2.provides.1.version=1.0.0
+
+# Define the Dockerfile Editor category IU
+units.3.id=eu.openanalytics.editor.docker.category
+units.3.version=$version$
+units.3.properties.1.name=org.eclipse.equinox.p2.type.category
+units.3.properties.1.value=true
+units.3.properties.2.name=org.eclipse.equinox.p2.name
+units.3.properties.2.value=Docker Editor
+units.3.properties.3.name=org.eclipse.equinox.p2.provider
+units.3.properties.3.value=OpenAnalytics
+units.3.properties.4.name=org.eclipse.equinox.p2.contact
+units.3.properties.4.value=https://github.com/openanalytics/docker-editor/
+units.3.properties.5.name=org.eclipse.equinox.p2.doc.url
+units.3.properties.5.value=https://github.com/openanalytics/docker-editor/wiki/Getting-Started-with-Dockerfile-Editor
+units.3.licenses.0=\
+Docker Editor is made available under the Eclipse Public License
+units.3.licenses.0.location=https://www.eclipse.org/legal/epl-v10.html
+units.3.requires.1.namespace=org.eclipse.equinox.p2.iu
+units.3.requires.1.name=eu.openanalytics.editor.docker.feature.group
+units.3.requires.1.greedy=true
+units.3.provides.1.namespace=org.eclipse.equinox.p2.iu
+units.3.provides.1.name=eu.openanalytics.editor.docker.category.definition
+units.3.provides.1.version=1.0.0
 

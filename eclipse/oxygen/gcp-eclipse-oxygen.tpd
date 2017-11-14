@@ -15,6 +15,10 @@ location "http://download.eclipse.org/cbi/updates/license" {
     org.eclipse.license.feature.group
 }
 
+location "http://docker-editor.openanalytics.eu/update" {
+	  eu.openanalytics.editor.docker.feature.group
+}
+
 // 201706281000 = Oxygen.0
 location "http://download.eclipse.org/releases/oxygen/201706281000/" {
 	org.eclipse.sdk.feature.group

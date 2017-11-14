@@ -53,12 +53,6 @@ public class LibraryTest {
   }
 
   @Test
-  public void testGetContainerPath() {
-    assertThat(library.getContainerPath().toString(),
-               is("com.google.cloud.tools.eclipse.appengine.libraries" + "/" + "a"));
-  }
-
-  @Test
   public void testSetNullName() {
     library.setName(null);
     assertNull(library.getName());

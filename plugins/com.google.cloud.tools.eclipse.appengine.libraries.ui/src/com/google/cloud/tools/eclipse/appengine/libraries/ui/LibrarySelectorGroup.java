@@ -57,8 +57,8 @@ public class LibrarySelectorGroup implements ISelectionProvider {
   private final Map<Library, Button> libraryButtons = new LinkedHashMap<>();
   private final ListenerList/* <ISelectedChangeListener> */ listeners = new ListenerList/* <> */();
 
-  public LibrarySelectorGroup(Composite parentContainer, String groupName) {
-    this(parentContainer, groupName, true);
+  public LibrarySelectorGroup(Composite parentContainer, String groupName, String groupLabel) {
+    this(parentContainer, groupName, groupLabel, true); // $NON-NLS-1$
   }
   
   /**
@@ -66,22 +66,25 @@ public class LibrarySelectorGroup implements ISelectionProvider {
    *     that cannot handle GRPC such as the white-listed App Engine Standard Java 7 JRE,
    *     android, etc.
    */
-  LibrarySelectorGroup(Composite parentContainer, String groupName, boolean restrictedEnvironment) {
-    Preconditions.checkNotNull(parentContainer, "parentContainer is null");
+  LibrarySelectorGroup(Composite parentContainer, String groupName, String groupLabel,
+      boolean restrictedEnvironment) {
+    Preconditions.checkNotNull(parentContainer, "parentContainer is null"); //$NON-NLS-1$
+    Preconditions.checkNotNull(groupName, "groupName is null"); //$NON-NLS-1$
+    Preconditions.checkNotNull(groupLabel, "groupLabel is null"); //$NON-NLS-1$
     
     Collection<Library> availableLibraries = CloudLibraries.getLibraries(groupName);
     this.availableLibraries = new LinkedHashMap<>();
     for (Library library : availableLibraries) {
-      if (!restrictedEnvironment || "http".equals(library.getTransport())) {
+      if (!restrictedEnvironment || "http".equals(library.getTransport())) { //$NON-NLS-1$
         this.availableLibraries.put(library.getId(), library);
       }
     }
-    createContents(parentContainer);
+    createContents(parentContainer, groupLabel);
   }
 
-  private void createContents(Composite parentContainer) {
+  private void createContents(Composite parentContainer, String groupLabel) {
     Group apiGroup = new Group(parentContainer, SWT.NONE);
-    apiGroup.setText(Messages.getString("appengine.libraries.group")); //$NON-NLS-1$
+    apiGroup.setText(groupLabel);
 
     for (Library library : availableLibraries.values()) {
       Button libraryButton = new Button(apiGroup, SWT.CHECK);
@@ -93,7 +96,7 @@ public class LibrarySelectorGroup implements ISelectionProvider {
       libraryButton.addSelectionListener(new ManualSelectionTracker());
       libraryButtons.put(library, libraryButton);
     }
-    GridLayoutFactory.swtDefaults().generateLayout(apiGroup);
+    GridLayoutFactory.fillDefaults().generateLayout(apiGroup);
   }
 
   /**
