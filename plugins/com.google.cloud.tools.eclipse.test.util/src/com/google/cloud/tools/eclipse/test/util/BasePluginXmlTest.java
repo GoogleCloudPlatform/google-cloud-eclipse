@@ -203,22 +203,20 @@ public abstract class BasePluginXmlTest {
   private void checkVersionStringsInManifestMf(
       String attributeName, String prefixToCheck, String versionString) throws IOException {
     String value = getManifestAttributes().getValue(attributeName);
-    if (value == null) {
-      return;
-    }
+    if (value != null) {
+      String regexPrefix = prefixToCheck.replaceAll("\\.", "\\\\.");
+      Pattern pattern = Pattern.compile(regexPrefix + "[^;,]*");
 
-    String regexPrefix = prefixToCheck.replaceAll("\\.", "\\\\.");
-    Pattern pattern = Pattern.compile(regexPrefix + "[^;,]*");
-
-    Matcher matcher = pattern.matcher(value);
-    while (matcher.find()) {
-      int nextCharOffset = matcher.end();
-      if (nextCharOffset == value.length()) {
-        fail("Import-Package/Require-Bundle version not defined: " + matcher.group());
-      }
-      String stringAfterMatch = value.substring(nextCharOffset);
-      if (!stringAfterMatch.startsWith(";" + versionString)) {
-        fail("Import-Package/Require-Bundle version incorrect: " + matcher.group());
+      Matcher matcher = pattern.matcher(value);
+      while (matcher.find()) {
+        int nextCharOffset = matcher.end();
+        if (nextCharOffset == value.length()) {
+          fail(attributeName + " version not defined: " + matcher.group());
+        }
+        String stringAfterMatch = value.substring(nextCharOffset);
+        if (!stringAfterMatch.startsWith(";" + versionString)) {
+          fail(attributeName + " version incorrect: " + matcher.group());
+        }
       }
     }
   }
