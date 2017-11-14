@@ -193,7 +193,7 @@ public class ProjectRepositoryTest {
   @Test
   public void testHasAppengineApplication_hasApplication()
       throws IOException, ProjectRepositoryException {
-    com.google.api.services.appengine.v1.Appengine.Apps.Get get = initializeGetRequest();
+    Apps.Get get = initializeGetRequest();
     Application application = new Application();
     application.setId("id");
     when(get.execute()).thenReturn(application);
@@ -205,7 +205,7 @@ public class ProjectRepositoryTest {
   @Test
   public void testHasAppengineApplication_noApplication()
       throws IOException, ProjectRepositoryException {
-    com.google.api.services.appengine.v1.Appengine.Apps.Get get = initializeGetRequest();
+    Apps.Get get = initializeGetRequest();
     GoogleJsonResponseException notFoundException =
         GoogleJsonResponseExceptionFactoryTesting.newMock(new JacksonFactory(), 404, "Not found");
     when(get.execute()).thenThrow(notFoundException);
@@ -217,7 +217,7 @@ public class ProjectRepositoryTest {
   @Test(expected = ProjectRepositoryException.class)
   public void testHasAppengineApplication_exception()
       throws IOException, ProjectRepositoryException {
-    com.google.api.services.appengine.v1.Appengine.Apps.Get get = initializeGetRequest();
+    Apps.Get get = initializeGetRequest();
     when(get.execute()).thenThrow(new IOException("test exception"));
 
     repository.getAppEngineApplication(mock(Credential.class), "projectId");
@@ -226,7 +226,7 @@ public class ProjectRepositoryTest {
   @Test(expected = ProjectRepositoryException.class)
   public void testHasAppengineApplication_GoogleJsonResponseException()
       throws IOException, ProjectRepositoryException {
-    com.google.api.services.appengine.v1.Appengine.Apps.Get get = initializeGetRequest();
+    Apps.Get get = initializeGetRequest();
     GoogleJsonResponseException exception = GoogleJsonResponseExceptionFactoryTesting
         .newMock(new JacksonFactory(), 500, "Server Error");
     when(get.execute()).thenThrow(exception);
