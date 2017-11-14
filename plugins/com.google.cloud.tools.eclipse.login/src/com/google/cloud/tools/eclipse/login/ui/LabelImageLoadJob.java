@@ -58,10 +58,8 @@ class LabelImageLoadJob extends Job {
     public void run() {
       if (!label.isDisposed()) {
         Image image = new Image(label.getDisplay(), imageData);
-        if (image != null) {
-          label.addDisposeListener(new ImageDisposer(image));
-          label.setImage(image);
-        }
+        label.addDisposeListener(new ImageDisposer(image));
+        label.setImage(image);
       }
     }
   }
