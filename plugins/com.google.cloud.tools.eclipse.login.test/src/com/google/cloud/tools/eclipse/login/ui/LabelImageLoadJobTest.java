@@ -60,7 +60,6 @@ public class LabelImageLoadJobTest {
         assertTrue("FIX BUG: DisposeListener didn't run?", image.isDisposed());
       }
     }
-    assertTrue("FIX BUG: DisposeListener didn't run?", loadJob.image.isDisposed());
 
     LabelImageLoader.cache.clear();
   }
@@ -88,7 +87,6 @@ public class LabelImageLoadJobTest {
     Image image = label.getImage();
     label.dispose();
     assertTrue(image.isDisposed());
-    assertTrue(loadJob.image.isDisposed());
   }
 
   @Test
@@ -99,13 +97,13 @@ public class LabelImageLoadJobTest {
 
     label.dispose();
     runAndWaitJob();
-    assertTrue(loadJob.image.isDisposed());
   }
 
   private void runAndWaitJob() throws InterruptedException {
     loadJob.schedule();
     while (!loadJob.join(100, null)) {  // spin and dispatch UI events
-      shellResource.getDisplay().readAndDispatch();
+      while (shellResource.getDisplay().readAndDispatch()) {
+      }  // spin
     }
   }
 }

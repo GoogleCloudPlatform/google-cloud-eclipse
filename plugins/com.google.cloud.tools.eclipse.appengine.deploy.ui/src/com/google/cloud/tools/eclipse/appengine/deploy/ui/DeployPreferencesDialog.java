@@ -178,7 +178,10 @@ public abstract class DeployPreferencesDialog extends TitleAreaDialog {
 
   @Override
   public boolean close() {
-    titleImage.dispose();
+    if (titleImage != null) {
+      titleImage.dispose();
+      titleImage = null;
+    }
     return super.close();
   }
 

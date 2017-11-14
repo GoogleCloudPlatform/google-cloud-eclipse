@@ -18,23 +18,28 @@ package com.google.cloud.tools.eclipse.ui.util.images;
 
 import static org.junit.Assert.assertNotNull;
 
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Display;
 import org.junit.Test;
 
 public class SharedImagesTest {
 
   @Test
+  public void testCreateCloudSdkImage() {
+    assertNotNull(SharedImages.CLOUDSDK_IMAGE_DESCRIPTOR.getImageData());
+  }
+
+  @Test
+  public void testCreateGcpImage() {
+    assertNotNull(SharedImages.GCP_IMAGE_DESCRIPTOR.getImageData());
+  }
+
+  @Test
+  public void testCreateGcpWizardImage() {
+    assertNotNull(SharedImages.GCP_WIZARD_IMAGE_DESCRIPTOR.getImageData());
+  }
+
+  @Test
   public void testCreateRefreshIcon() {
-    Image image = null;
-    try {
-      image = SharedImages.REFRESH_IMAGE_DESCRIPTOR.createImage(Display.getCurrent());
-      assertNotNull(image);
-    } finally {
-      if (image != null) {
-        image.dispose();
-      }
-    }
+    assertNotNull(SharedImages.REFRESH_IMAGE_DESCRIPTOR.getImageData());
   }
 
 }
