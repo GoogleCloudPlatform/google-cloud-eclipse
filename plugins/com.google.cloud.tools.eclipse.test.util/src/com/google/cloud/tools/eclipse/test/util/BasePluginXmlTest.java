@@ -194,29 +194,27 @@ public abstract class BasePluginXmlTest {
 
   @Test
   public final void testGuavaImportVersions() throws IOException {
-    String importPackageValue = getManifestAttributes().getValue("Import-Package");
-    checkVersionStringsInManifestMf(importPackageValue,
-        "com.google.common.", "version=\"[20.0.0,21.0.0)\"");
-
-    String bundleRequireValue = getManifestAttributes().getValue("Require-Bundle");
-    checkVersionStringsInManifestMf(bundleRequireValue,
-        "com.google.guava", "bundle-version=\"[20.0.0,21.0.0)\"");
+    checkVersionStringsInManifestMf(
+        "Import-Package", "com.google.common.", "version=\"[20.0.0,21.0.0)\"");
+    checkVersionStringsInManifestMf(
+        "Require-Bundle", "com.google.guava", "bundle-version=\"[20.0.0,21.0.0)\"");
   }
 
   private void checkVersionStringsInManifestMf(
-      String value, String prefixToCheck, String versionString) {
-    String regexPrefix = prefixToCheck.replaceAll(".", "\\\\.");
-    Pattern pattern = Pattern.compile(regexPrefix + "[^;,]+");
+      String attributeName, String prefixToCheck, String versionString) throws IOException {
+    String value = getManifestAttributes().getValue(attributeName);
+    String regexPrefix = prefixToCheck.replaceAll("\\.", "\\\\.");
+    Pattern pattern = Pattern.compile(regexPrefix + "[^;,]*");
 
     Matcher matcher = pattern.matcher(value);
     while (matcher.find()) {
       int nextCharOffset = matcher.end();
       if (nextCharOffset == value.length()) {
-        fail("Import-Package version not defined");
+        fail("Import-Package/Require-Bundle version not defined: " + matcher.group());
       }
       String stringAfterMatch = value.substring(nextCharOffset);
-      if (!stringAfterMatch.startsWith(";version=" + versionString)) {
-        fail("Import-Package version incorrect");
+      if (!stringAfterMatch.startsWith(";" + versionString)) {
+        fail("Import-Package/Require-Bundle version incorrect: " + matcher.group());
       }
     }
   }
