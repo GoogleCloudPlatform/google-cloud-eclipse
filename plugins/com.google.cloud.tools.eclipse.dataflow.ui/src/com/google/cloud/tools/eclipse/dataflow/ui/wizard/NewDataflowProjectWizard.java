@@ -64,9 +64,6 @@ public class NewDataflowProjectWizard extends Wizard implements INewWizard {
           "Error encountered when trying to create project"); //$NON-NLS-1$
       return false;
     }
-
-    AnalyticsPingManager.getInstance().sendPing(
-        AnalyticsEvents.DATAFLOW_NEW_PROJECT_WIZARD_COMPLETE, null, null);
     return true;
   }
 
