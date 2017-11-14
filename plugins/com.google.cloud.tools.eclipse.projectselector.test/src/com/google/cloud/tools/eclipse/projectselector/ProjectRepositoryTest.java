@@ -255,6 +255,7 @@ public class ProjectRepositoryTest {
     Projects.List list = mock(Projects.List.class);
     when(projects.list()).thenReturn(list);
     when(list.setPageSize(anyInt())).thenReturn(list);
+    when(list.setPageToken(anyString())).thenReturn(list);
     return list;
   }
 
