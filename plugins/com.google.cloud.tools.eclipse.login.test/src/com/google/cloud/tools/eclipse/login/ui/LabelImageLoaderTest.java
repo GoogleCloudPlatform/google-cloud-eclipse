@@ -38,8 +38,12 @@ import org.junit.Test;
 
 public class LabelImageLoaderTest {
 
-  static final byte[] someImageBytes = { 71, 73, 70, 56, 57, 97, 1, 0, 1, 0, 0, 0, 0, 33,
-      (byte) 249, 4, 1, 0, 0, 0, 0, 44, 0, 0, 0, 0, 1, 0, 1, 0, 0, 2 };
+  static final byte[] someImageBytes = {(byte) 137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72,
+      68, 82, 0, 0, 0, 1, 0, 0, 0, 1, 1, 3, 0, 0, 0, 37, (byte) 219, 86, (byte) 202, 0, 0, 0, 3, 80,
+      76, 84, 69, 0, 0, 0, (byte) 167, 122, 61, (byte) 218, 0, 0, 0, 1, 116, 82, 78, 83, 0, 64,
+      (byte) 230, (byte) 216, 102, 0, 0, 0, 10, 73, 68, 65, 84, 8, (byte) 215, 99, 96, 0, 0, 0, 2,
+      0, 1, (byte) 226, 33, (byte) 188, 51, 0, 0, 0, 0, 73, 69, 78, 68, (byte) 174, 66, 96,
+      (byte) 130};
   static final ImageData someImageData = new ImageData(
       1, 1, 1, new PaletteData(new RGB[] { new RGB(0, 0, 0) }));
 

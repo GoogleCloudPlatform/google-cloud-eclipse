@@ -30,12 +30,13 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
@@ -66,7 +67,7 @@ public class BuildPath {
     // see m2e-core/org.eclipse.m2e.core.ui/src/org/eclipse/m2e/core/ui/internal/actions/AddDependencyAction.java
     // m2e-core/org.eclipse.m2e.core.ui/src/org/eclipse/m2e/core/ui/internal/editing/AddDependencyOperation.java
 
-    IFile pomFile = project.getFile("pom.xml");
+    IFile pomFile = project.getFile("pom.xml"); //$NON-NLS-1$
 
     try {
       Pom pom = Pom.parse(pomFile);
@@ -77,38 +78,20 @@ public class BuildPath {
     }
   }
 
-  /**
-   * Returns the entries added to the classpath.
-   */
   public static void addNativeLibrary(IJavaProject javaProject,
       List<Library> libraries, IProgressMonitor monitor) throws CoreException {
     
     SubMonitor subMonitor = SubMonitor.convert(monitor,
         Messages.getString("adding.app.engine.libraries"), //$NON-NLS-1$
-        18);
+        25);
     
     Library masterLibrary = collectLibraryFiles(javaProject, libraries, subMonitor.newChild(8));
-    subMonitor.worked(1);
     IClasspathEntry masterEntry = computeEntry(javaProject, masterLibrary, subMonitor.newChild(8));
-    subMonitor.worked(1);
-
-    List<String> libraryIds = new ArrayList<>();
-    for (Library library : libraries) {
-      libraryIds.add(library.getId());
-    }
-    try {
-      LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer();
-      // We could create the LibraryClasspathContainer and serialize out the classpath information,
-      // but our LibraryClasspathContainerInitializer requires source paths to be resolved too,
-      // or it tosses the serialized classpath information
-      serializer.saveLibraryIds(javaProject, libraryIds);
-    } catch (IOException ex) {
-      throw new CoreException(
-          StatusUtil.error(BuildPath.class, "Error saving master library list", ex));
-    }
+    saveLibraryList(javaProject, libraries, subMonitor.newChild(1));
 
     if (masterEntry != null) {
-      ClasspathUtil.addClasspathEntry(javaProject.getProject(), masterEntry, subMonitor);
+      ClasspathUtil.addClasspathEntry(javaProject.getProject(), masterEntry,
+          subMonitor.newChild(8));
     }
     runContainerResolverJob(javaProject);
   }
@@ -136,7 +119,7 @@ public class BuildPath {
     // need to get old master library entries first if they exist
     try {
       LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer();
-      List<String> previouslyAddedLibraries = serializer.loadLibraryIds(javaProject, null);
+      List<String> previouslyAddedLibraries = serializer.loadLibraryIds(javaProject);
       for (String id : previouslyAddedLibraries) {
         Library library = CloudLibraries.getLibrary(id);
         // null happens mostly in tests but could also be null
@@ -148,11 +131,11 @@ public class BuildPath {
         }
       }
     } catch (IOException | CoreException ex) {
-      logger.log(Level.WARNING, "Error loading previous libraries", ex);
+      logger.log(Level.WARNING, "Error loading previous libraries", ex); //$NON-NLS-1$
     }
     
     Library masterLibrary = new Library(CloudLibraries.MASTER_CONTAINER_ID);
-    masterLibrary.setName("Google APIs"); //$NON-NLS-1$
+    masterLibrary.setName(Messages.getString("google.cloud.platform.libraries")); //$NON-NLS-1$
     masterLibrary.setLibraryDependencies(dependentIds);
     subMonitor.worked(1);
     
@@ -162,33 +145,20 @@ public class BuildPath {
     masterLibrary.setLibraryFiles(resolved);
     
     masterLibrary.setResolved();
-    
     subMonitor.worked(1);
 
     return masterLibrary;
   }
 
   /**
-   * @return an {@link IClasspathEntry} created from {@code library} if {@code javaProject} does not
-   *     already have the entry; otherwise, {@code null}
+   * Returns the entry of {@code library} to be added to the classpath of {@code javaProject}, if
+   * the project does not already have it. (Note that this does not add it to the classpath.)
+   * Returns {@code null} otherwise.
    */
-  private static IClasspathEntry computeEntry(IJavaProject javaProject, Library library,
+  public static IClasspathEntry computeEntry(IJavaProject javaProject, Library library,
       IProgressMonitor monitor) throws CoreException {
-    SubMonitor subMonitor = SubMonitor.convert(monitor,
-        Messages.getString("computing.entries"), //$NON-NLS-1$
-        11);
+    SubMonitor subMonitor = SubMonitor.convert(monitor, Messages.getString("computing.entries"), 1); //$NON-NLS-1$
     
-    if (CloudLibraries.MASTER_CONTAINER_ID.equals(library.getId())) {
-      try {
-        LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer();
-        serializer.saveLibraryIds(javaProject, library.getLibraryDependencies());
-      } catch (IOException ex) {
-        throw new CoreException(
-            StatusUtil.error(BuildPath.class, "Error saving master library list", ex)); //$NON-NLS-1$
-      }
-    }
-    subMonitor.worked(10);
-
     IClasspathEntry libraryContainer = makeClasspathEntry(library);
     subMonitor.worked(1);
 
@@ -197,18 +167,6 @@ public class BuildPath {
     return alreadyExists ? null : libraryContainer;
   }
   
-  /**
-   * Returns the entry of {@code library} to be added to the classpath of {@code javaProject}, if
-   * the project does not already have it. (Note that this does not add it to the classpath.)
-   * Returns {@code null} otherwise.
-   */
-  public static IClasspathEntry listNativeLibrary(IJavaProject javaProject, Library library,
-      IProgressMonitor monitor) throws CoreException {
-    IClasspathEntry libraryEntry = computeEntry(javaProject, library, monitor);
-    runContainerResolverJob(javaProject);
-    return libraryEntry;
-  }
-
   private static IClasspathEntry makeClasspathEntry(Library library) throws CoreException {
     IClasspathAttribute[] classpathAttributes = new IClasspathAttribute[1];
     if (library.isExport()) {
@@ -217,12 +175,14 @@ public class BuildPath {
     } else {
       classpathAttributes[0] = UpdateClasspathAttributeUtil.createNonDependencyAttribute();
     }
-
-    return JavaCore.newContainerEntry(library.getContainerPath(), new IAccessRule[0],
-        classpathAttributes, false);
+    // in practice, this method will only be called for the master library
+    IPath containerPath = new Path(LibraryClasspathContainer.CONTAINER_PATH_PREFIX)
+        .append(library.getId());
+    return JavaCore.newContainerEntry(containerPath, new IAccessRule[0], classpathAttributes,
+        false);
   }
 
-  private static void runContainerResolverJob(IJavaProject javaProject) {
+  public static void runContainerResolverJob(IJavaProject javaProject) {
     IEclipseContext context = EclipseContextFactory.getServiceContext(
         FrameworkUtil.getBundle(BuildPath.class).getBundleContext());
     final IEclipseContext childContext =
@@ -237,6 +197,59 @@ public class BuildPath {
       }
     });
     job.schedule();
+  }
+
+  /**
+   * Load the list of library dependencies saved for this project.
+   */
+  public static List<Library> loadLibraryList(IJavaProject project, IProgressMonitor monitor)
+      throws CoreException {
+    SubMonitor progress = SubMonitor.convert(monitor, 10);
+    LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer();
+    List<String> savedLibraryIds;
+    try {
+      savedLibraryIds = serializer.loadLibraryIds(project);
+      progress.worked(3);
+    } catch (IOException ex) {
+      throw new CoreException(
+          StatusUtil.error(BuildPath.class, "Error retrieving project library list", ex)); //$NON-NLS-1$
+    }
+    List<Library> selectedLibraries = new ArrayList<>();
+    progress.setWorkRemaining(savedLibraryIds.size());
+    for (String libraryId : savedLibraryIds) {
+      Library library = CloudLibraries.getLibrary(libraryId);
+      if (library != null) {
+        selectedLibraries.add(library);
+      }
+      progress.worked(1);
+    }
+    return selectedLibraries;
+  }
+
+  /**
+   * Save the list of library dependencies for this project.
+   */
+  public static void saveLibraryList(IJavaProject project, List<Library> libraries,
+      IProgressMonitor monitor) throws CoreException {
+    SubMonitor progress = SubMonitor.convert(monitor, libraries.size() + 10);
+    LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer();
+    List<String> libraryIds = new ArrayList<>();
+    for (Library library : libraries) {
+      libraryIds.add(library.getId());
+      progress.worked(1);
+    }
+    try {
+      serializer.saveLibraryIds(project, libraryIds);
+      progress.worked(5);
+      // in practice, we only ever use the master-container
+      IPath containerPath = new Path(LibraryClasspathContainer.CONTAINER_PATH_PREFIX)
+          .append(CloudLibraries.MASTER_CONTAINER_ID);
+      serializer.resetContainer(project, containerPath);
+      progress.worked(5);
+    } catch (IOException ex) {
+      throw new CoreException(
+          StatusUtil.error(BuildPath.class, "Error saving project library list", ex)); //$NON-NLS-1$
+    }
   }
 
 }

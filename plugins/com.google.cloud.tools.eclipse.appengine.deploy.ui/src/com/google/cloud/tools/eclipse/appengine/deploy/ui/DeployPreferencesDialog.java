@@ -49,9 +49,7 @@ import org.eclipse.swt.widgets.Shell;
 
 public abstract class DeployPreferencesDialog extends TitleAreaDialog {
 
-  // if the image is smaller (e.g. 32x32, it will break the layout of the TitleAreaDialog)
-  // seems like an Eclipse/JFace bug
-  private final Image titleImage = AppEngineImages.appEngine(64).createImage();
+  private Image titleImage;
 
   private AppEngineDeployPreferencesPanel content;
   private final String title;
@@ -74,6 +72,10 @@ public abstract class DeployPreferencesDialog extends TitleAreaDialog {
 
   @Override
   protected Control createContents(Composite parent) {
+    // if the image is smaller (e.g. 32x32, it will break the layout of the TitleAreaDialog)
+    // seems like an Eclipse/JFace bug
+    titleImage = AppEngineImages.appEngine(64).createImage();
+
     Control contents = super.createContents(parent);
 
     getShell().setText(title);
@@ -176,7 +178,10 @@ public abstract class DeployPreferencesDialog extends TitleAreaDialog {
 
   @Override
   public boolean close() {
-    titleImage.dispose();
+    if (titleImage != null) {
+      titleImage.dispose();
+      titleImage = null;
+    }
     return super.close();
   }
 

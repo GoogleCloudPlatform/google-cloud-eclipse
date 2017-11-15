@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -36,16 +35,15 @@ import org.eclipse.jdt.core.JavaCore;
  * {@link ClasspathContainerInitializer} implementation that resolves containers for App Engine
  * libraries.
  * <p>
- * The container path is expected to be in the form of
- * &lt;value of {@link Library#CONTAINER_PATH_PREFIX}&gt;/&lt;library ID&gt;
+ * The container path is expected to be in the form of &lt;value of
+ * {@link LibraryClasspathContainer#CONTAINER_PATH_PREFIX}&gt;/&lt;library ID&gt;
  */
 public class LibraryClasspathContainerInitializer extends ClasspathContainerInitializer {
-
   @Inject
   private LibraryClasspathContainerSerializer serializer;
   @Inject
   private ILibraryClasspathContainerResolverService resolverService;
-  private String containerPathPrefix = Library.CONTAINER_PATH_PREFIX;
+  private String containerPathPrefix = LibraryClasspathContainer.CONTAINER_PATH_PREFIX;
 
   public LibraryClasspathContainerInitializer() {
   }

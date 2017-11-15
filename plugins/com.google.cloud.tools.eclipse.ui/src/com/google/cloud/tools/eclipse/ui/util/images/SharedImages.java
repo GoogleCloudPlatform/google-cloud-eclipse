@@ -21,15 +21,16 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 public class SharedImages {
 
-  public static final ImageDescriptor CLOUDSDK_IMAGE_DESCRIPTOR =
-      AbstractUIPlugin.imageDescriptorFromPlugin("com.google.cloud.tools.eclipse.ui",
-          "icons/obj16/cloudsdk.png");
+  public static final ImageDescriptor CLOUDSDK_IMAGE_DESCRIPTOR = AbstractUIPlugin
+      .imageDescriptorFromPlugin("com.google.cloud.tools.eclipse.ui", "icons/obj16/cloudsdk.png");
 
-  public static final ImageDescriptor GCP_IMAGE_DESCRIPTOR =
-      AbstractUIPlugin.imageDescriptorFromPlugin("com.google.cloud.tools.eclipse.ui",
-          "icons/obj16/gcp.png");
+  public static final ImageDescriptor GCP_IMAGE_DESCRIPTOR = AbstractUIPlugin
+      .imageDescriptorFromPlugin("com.google.cloud.tools.eclipse.ui", "icons/obj16/gcp.png");
 
-  public static final ImageDescriptor REFRESH_IMAGE_DESCRIPTOR =
-      AbstractUIPlugin.imageDescriptorFromPlugin("org.eclipse.debug.ui",
-                                                 "icons/full/obj16/refresh_tab.png");
+  public static final ImageDescriptor GCP_WIZARD_IMAGE_DESCRIPTOR = AbstractUIPlugin
+      .imageDescriptorFromPlugin("com.google.cloud.tools.eclipse.ui", "icons/wizban/gcp.png");
+
+  /** Convenience accessor. */
+  public static final ImageDescriptor REFRESH_IMAGE_DESCRIPTOR = AbstractUIPlugin
+      .imageDescriptorFromPlugin("org.eclipse.debug.ui", "icons/full/obj16/refresh_tab.png");
 }

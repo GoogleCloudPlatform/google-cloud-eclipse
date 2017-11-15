@@ -18,106 +18,177 @@ package com.google.cloud.tools.eclipse.appengine.libraries.ui;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
-import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
+import com.google.cloud.tools.eclipse.ui.util.images.SharedImages;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.ui.wizards.IClasspathContainerPage;
 import org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension;
-import org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension2;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
-public abstract class CloudLibrariesPage extends WizardPage implements IClasspathContainerPage,
-    IClasspathContainerPageExtension, IClasspathContainerPageExtension2 {
-
+/**
+ * Provides for selecting from a suite of useful libraries for GCP projects. Supports editing the
+ * list of libraries for native Cloud Tools for Eclipse projects. Supported only selecting new
+ * libraries for Maven-based projects.
+ */
+public class CloudLibrariesPage extends WizardPage
+    implements IClasspathContainerPage, IClasspathContainerPageExtension {
   private static final Logger logger = Logger.getLogger(CloudLibrariesPage.class.getName());
-  private LibrarySelectorGroup librariesSelector;
+
+  /**
+   * The library groups to be displayed; pairs of (id, title). For example, <em>"clientapis" &rarr;
+   * "Google Cloud APIs for Java"</em>.
+   */
+  @VisibleForTesting
+  Map<String, String> libraryGroups;
+
+  /** The initially selected libraries. */
+  private List<Library> initialSelection = Collections.emptyList();
+
+  @VisibleForTesting
+  final List<LibrarySelectorGroup> librariesSelectors = new ArrayList<>();
   private IJavaProject project;
-  private final String group;
+  private boolean isMavenProject;
+  private IClasspathEntry newEntry;
 
-  protected CloudLibrariesPage(String group) {
-    super(group + "-page"); //$NON-NLS-1$
-    setTitle(Messages.getString(group + "-title"));  //$NON-NLS-1$
-    setDescription(Messages.getString(group + "-description"));  //$NON-NLS-1$
-    setImageDescriptor(AppEngineImages.appEngine(64));
-    this.group = group;
-  }
-
-  @Override
-  public void createControl(Composite parent) {
-    Composite composite = new Composite(parent, SWT.BORDER);
-    composite.setLayout(new GridLayout(2, true));
-    
-    boolean java7AppEngineStandardProject = false;
-    IProjectFacetVersion facetVersion =
-        AppEngineStandardFacet.getProjectFacetVersion(project.getProject());
-    if (facetVersion != null && facetVersion.getVersionString().equals("JRE7")) {
-      java7AppEngineStandardProject = true;
-    }
-    
-    librariesSelector = new LibrarySelectorGroup(composite, group, java7AppEngineStandardProject);
-    
-    setControl(composite);
-  }
-
-  @Override
-  public boolean finish() {
-    return true;
-  }
-
-  @Override
-  public IClasspathEntry getSelection() {
-    // Since this class implements IClasspathContainerPageExtension2,
-    // Eclipse calls getNewContainers instead.
-    logger.log(Level.WARNING, "Unexpected call to getSelection()");
-    return null;
-  }
-
-  @Override
-  public void setSelection(IClasspathEntry containerEntry) {
-    // todo can we use the containerEntry to tick the checkboxes in the library selector group?
+  public CloudLibrariesPage() {
+    super(CloudLibraries.CLIENT_APIS_GROUP);
+    setTitle(Messages.getString("clientapis-title")); //$NON-NLS-1$
+    setDescription(Messages.getString("apiclientlibrariespage-description")); //$NON-NLS-1$
+    setImageDescriptor(SharedImages.GCP_WIZARD_IMAGE_DESCRIPTOR);
   }
 
   @Override
   public void initialize(IJavaProject project, IClasspathEntry[] currentEntries) {
     this.project = project;
+    isMavenProject = MavenUtils.hasMavenNature(project.getProject());
+
+    Map<String, String> groups = Maps.newLinkedHashMap();
+    if (AppEngineStandardFacet.getProjectFacetVersion(project.getProject()) != null) {
+      groups.put(CloudLibraries.APP_ENGINE_GROUP, Messages.getString("appengine-title")); //$NON-NLS-1$
+    }
+    groups.put(CloudLibraries.CLIENT_APIS_GROUP, Messages.getString("clientapis-title")); //$NON-NLS-1$
+    setLibraryGroups(groups);
+  }
+
+  /**
+   * Set the different library groups to be shown; must be called before controls are created.
+   */
+  @VisibleForTesting
+  void setLibraryGroups(Map<String, String> groups) {
+    this.libraryGroups = groups;
   }
 
   @Override
-  public IClasspathEntry[] getNewContainers() {
-    List<Library> libraries = new ArrayList<>(librariesSelector.getSelectedLibraries());
-    if (libraries == null || libraries.isEmpty()) {
-      return null;
-    }
+  public void createControl(Composite parent) {
+    Preconditions.checkNotNull(libraryGroups, "Library groups must be set"); //$NON-NLS-1$
+    Composite composite = new Group(parent, SWT.NONE);
 
-    SubMonitor monitor = SubMonitor.convert(null, 10);
+    IProjectFacetVersion facetVersion =
+        AppEngineStandardFacet.getProjectFacetVersion(project.getProject());
+    boolean java7AppEngineStandardProject = AppEngineStandardFacet.JRE7.equals(facetVersion);
+
+    // create the library selector libraryGroups
+    for (Entry<String, String> group : libraryGroups.entrySet()) {
+      LibrarySelectorGroup librariesSelector =
+          new LibrarySelectorGroup(composite, group.getKey(), group.getValue(),
+              java7AppEngineStandardProject);
+      librariesSelectors.add(librariesSelector);
+    }
+    setSelectedLibraries(initialSelection);
+    composite.setLayout(new RowLayout(SWT.HORIZONTAL));
+    setControl(composite);
+  }
+
+  @Override
+  public boolean finish() {
+    List<Library> libraries = getSelectedLibraries();
     try {
-      if (MavenUtils.hasMavenNature(project.getProject())) {
-        BuildPath.addMavenLibraries(project.getProject(), libraries, monitor.newChild(10));
-        return new IClasspathEntry[0];
+      if (isMavenProject) {
+        BuildPath.addMavenLibraries(project.getProject(), libraries, new NullProgressMonitor());
       } else {
-        Library masterLibrary = BuildPath.collectLibraryFiles(project, libraries, monitor.newChild(7));
-        IClasspathEntry masterEntry = BuildPath.listNativeLibrary(project, masterLibrary, monitor.newChild(3));
-        if (masterEntry != null) {
-          return new IClasspathEntry[] {masterEntry};
-        } else {
-          return new IClasspathEntry[0];
+        /*
+         * FIXME: BuildPath.addNativeLibrary() is too heavy-weight here. ClasspathContainerWizard,
+         * our wizard, is responsible for installing the classpath entry returned by getSelection(),
+         * which will perform the library resolution. We just need to save the selected libraries 
+         * so that they are resolved later.
+         */
+        Library masterLibrary =
+            BuildPath.collectLibraryFiles(project, libraries, new NullProgressMonitor());
+        newEntry = BuildPath.computeEntry(project, masterLibrary, new NullProgressMonitor());
+        BuildPath.saveLibraryList(project, libraries, new NullProgressMonitor());
+        if (newEntry == null) {
+          // container-editing only refreshes the content if new
+          BuildPath.runContainerResolverJob(project);
         }
       }
+      return true;
     } catch (CoreException ex) {
-      return new IClasspathEntry[0];
+      StatusUtil.setErrorStatus(this, "Error updating container definition", ex); //$NON-NLS-1$
+      return false;
     }
   }
 
+  /**
+   * Return the list of selected libraries.
+   */
+  @VisibleForTesting
+  List<Library> getSelectedLibraries() {
+    List<Library> selectedLibraries = new ArrayList<>();
+    for (LibrarySelectorGroup librariesSelector : librariesSelectors) {
+      selectedLibraries.addAll(librariesSelector.getSelectedLibraries());
+    }
+    return selectedLibraries;
+  }
+
+  @VisibleForTesting
+  void setSelectedLibraries(List<Library> selectedLibraries) {
+    initialSelection = new ArrayList<>(selectedLibraries);
+    if (!librariesSelectors.isEmpty()) {
+      for (LibrarySelectorGroup librarySelector : librariesSelectors) {
+        librarySelector.setSelection(new StructuredSelection(initialSelection));
+      }
+    }
+  }
+
+  @Override
+  public void setSelection(IClasspathEntry containerEntry) {
+    if (isMavenProject) {
+      // FIXME: read in current dependencies for maven projects
+      return;
+    }
+    try {
+      List<Library> savedLibraries = BuildPath.loadLibraryList(project, new NullProgressMonitor());
+      setSelectedLibraries(savedLibraries);
+    } catch (CoreException ex) {
+      logger.log(Level.WARNING,
+          "Error loading selected library IDs for " + project.getElementName(), ex); //$NON-NLS-1$
+    }
+  }
+
+  @Override
+  public IClasspathEntry getSelection() {
+    return newEntry;
+  }
 }

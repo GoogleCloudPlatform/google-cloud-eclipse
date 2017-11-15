@@ -22,6 +22,7 @@
    <feature id="org.eclipse.epp.logging.aeri.feature.source" version="0.0.0"/>
    -->
    <feature id="org.dadacoalition.yedit.feature" version="0.0.0"/>   
+   <feature id="eu.openanalytics.editor.docker" version="0.0.0"/>   
    
    <bundle id="org.eclipse.jetty.http" version="0.0.0"/>
    <bundle id="org.eclipse.jetty.servlet" version="0.0.0"/>
