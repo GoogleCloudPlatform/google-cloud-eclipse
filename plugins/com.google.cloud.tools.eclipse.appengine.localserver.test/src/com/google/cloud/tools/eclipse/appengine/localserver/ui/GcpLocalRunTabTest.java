@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
@@ -48,6 +49,7 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.EnvironmentTab;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -114,6 +116,21 @@ public class GcpLocalRunTabTest {
     assertNotNull(serviceKeyText);
   }
 
+  @After
+  public void tearDown() {
+    tab.dispose();
+  }
+
+  @Test
+  public void testGetName() {
+    assertEquals("Cloud Platform", tab.getName());
+  }
+
+  @Test
+  public void testGetImage() {
+    assertNotNull(tab.getImage());
+  }
+
   @Test
   public void testGetAttribute() throws CoreException {
     when(launchConfig.getAttribute(eq("attribute-key"), anyString())).thenReturn("expected value");
@@ -137,7 +154,7 @@ public class GcpLocalRunTabTest {
   @Test
   public void testGetEnvironmentMap() throws CoreException {
     Map<String, String> map = new HashMap<>();
-    when(launchConfig.getAttribute(eq(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES), any(Map.class)))
+    when(launchConfig.getAttribute(eq(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES), anyMap()))
         .thenReturn(map);
     assertEquals(map, GcpLocalRunTab.getEnvironmentMap(launchConfig));
   }
