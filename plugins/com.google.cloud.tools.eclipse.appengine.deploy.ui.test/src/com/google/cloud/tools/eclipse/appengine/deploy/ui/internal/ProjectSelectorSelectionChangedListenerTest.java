@@ -57,8 +57,8 @@ public class ProjectSelectorSelectionChangedListenerTest {
       "This project does not have an App Engine application which is "
           + "required for deployment. <a href=\"" + EXPECTED_LINK + "\">Create an App Engine "
           + "application in the Cloud Console</a>.";
-  static final String EXPECTED_MESSAGE_WHEN_EXCEPTION =
-      "An error occurred while retrieving App Engine application:\ntestException";
+  private static final String EXPECTED_MESSAGE_WHEN_EXCEPTION =
+      "An error occurred while retrieving App Engine application in project projectId:\ntestException";
 
   @Mock private AccountSelector accountSelector;
   @Mock private ProjectSelector projectSelector;

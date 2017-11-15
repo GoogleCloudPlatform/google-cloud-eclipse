@@ -52,7 +52,8 @@ public class AppEngineApplicationQueryJobTest {
   private static final String EXPECTED_MESSAGE_WHEN_NO_APPLICATION =
       ProjectSelectorSelectionChangedListenerTest.EXPECTED_MESSAGE_WHEN_NO_APPLICATION;
   private static final String EXPECTED_MESSAGE_WHEN_EXCEPTION =
-      ProjectSelectorSelectionChangedListenerTest.EXPECTED_MESSAGE_WHEN_EXCEPTION;
+      "An error occurred while retrieving App Engine application in project projectId:"
+      + "\ntestException";
 
   private GcpProject project = new GcpProject("name", "projectId");
   @Mock private Credential credential;
