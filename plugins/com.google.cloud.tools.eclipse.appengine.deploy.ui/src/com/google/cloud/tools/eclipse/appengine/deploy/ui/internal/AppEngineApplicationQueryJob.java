@@ -72,8 +72,8 @@ public class AppEngineApplicationQueryJob extends Job {
         updateStatus(statusMessage, statusTooltip);
       }
     } catch (ProjectRepositoryException ex) {
-      String statusMessage = Messages.getString(
-          "projectselector.retrieveapplication.error.message", ex.getLocalizedMessage(), ex);
+      String statusMessage = Messages.getString("projectselector.retrieveapplication.error.message",
+          project.getId(), ex.getLocalizedMessage());
       updateStatus(statusMessage, null /* statusTooltip */);
     }
     return Status.OK_STATUS;
