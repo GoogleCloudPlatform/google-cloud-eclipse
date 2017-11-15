@@ -134,6 +134,14 @@ public class ProjectRepository {
     } catch (GoogleJsonResponseException ex) {
       if (ex.getStatusCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
         return AppEngine.NO_APPENGINE_APPLICATION;
+      } else if (ex.getStatusCode() == HttpStatusCodes.STATUS_CODE_FORBIDDEN) {
+        String message = ex.getLocalizedMessage();
+        // the message is a full json string with multiple lines, let's extract only the message
+        // from the detail object if exists
+        if (ex.getDetails() != null && ex.getDetails().getMessage() != null) {
+          message = ex.getDetails().getMessage();
+        }
+        throw new ApplicationPermissionsException(message, ex);
       } else {
         String message = ex.getLocalizedMessage();
         // the message is a full json string with multiple lines, let's extract only the message

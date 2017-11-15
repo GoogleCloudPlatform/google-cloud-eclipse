@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui.internal;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
+import com.google.cloud.tools.eclipse.projectselector.ApplicationPermissionsException;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepositoryException;
 import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
@@ -71,6 +72,11 @@ public class AppEngineApplicationQueryJob extends Job {
         String statusTooltip = createAppLink;
         updateStatus(statusMessage, statusTooltip);
       }
+    } catch (ApplicationPermissionsException ex) {
+      String statusMessage =
+          Messages.getString("projectselector.retrieveapplication.permissionerror.message",
+              project.getId());
+      updateStatus(statusMessage, null /* statusTooltip */);
     } catch (ProjectRepositoryException ex) {
       String statusMessage = Messages.getString("projectselector.retrieveapplication.error.message",
           project.getId(), ex.getLocalizedMessage());
