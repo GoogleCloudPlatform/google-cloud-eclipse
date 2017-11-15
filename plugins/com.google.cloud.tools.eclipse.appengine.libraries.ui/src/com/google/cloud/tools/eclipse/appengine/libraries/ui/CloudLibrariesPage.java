@@ -99,7 +99,7 @@ public class CloudLibrariesPage extends WizardPage
    */
   @VisibleForTesting
   void setLibraryGroups(Map<String, String> groups) {
-    this.libraryGroups = groups;
+    libraryGroups = groups;
   }
 
   @Override
@@ -131,8 +131,11 @@ public class CloudLibrariesPage extends WizardPage
         // No need for an Analytics ping here; addMavenLibraries will do it.
         BuildPath.addMavenLibraries(project.getProject(), libraries, new NullProgressMonitor());
       } else {
-        AnalyticsLibraryPingHelper.sendLibrarySelectionPing(
-            AnalyticsEvents.NATIVE_PROJECT, libraries);
+        if (!libraries.isEmpty()) {
+          AnalyticsLibraryPingHelper.sendLibrarySelectionPing(
+              AnalyticsEvents.NATIVE_PROJECT, libraries);
+        }
+
         /*
          * FIXME: BuildPath.addNativeLibrary() is too heavy-weight here. ClasspathContainerWizard,
          * our wizard, is responsible for installing the classpath entry returned by getSelection(),
