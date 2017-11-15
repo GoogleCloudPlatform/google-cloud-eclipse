@@ -29,6 +29,8 @@ import com.google.cloud.tools.eclipse.ui.util.event.FileFieldSetter;
 import com.google.cloud.tools.eclipse.ui.util.images.SharedImages;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -110,7 +112,7 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
 
   @Override
   public String getName() {
-    return Messages.getString("gcp.emulation.tab.name"); //$NON-NLS-1$
+    return Messages.getString("gcp.local.run.tab.name"); //$NON-NLS-1$
   }
 
   @Override
@@ -201,8 +203,8 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     });
     Button browse = new Button(composite, SWT.NONE);
     browse.setText(Messages.getString("button.browse")); //$NON-NLS-1$
-    browse.addSelectionListener(new FileFieldSetter(serviceKeyInput
-        , new String[] {"*.json", "*"})); //$NON-NLS-1$ //$NON-NLS-2$
+    browse.addSelectionListener(new FileFieldSetter(serviceKeyInput,
+        new String[] {"*.json", "*"})); //$NON-NLS-1$ //$NON-NLS-2$
 
     GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.TOP).applyTo(projectLabel);
     GridDataFactory.fillDefaults().span(2, 1).applyTo(accountSelector);
@@ -210,7 +212,7 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
 
     GridDataFactory.fillDefaults().span(2, 1).applyTo(projectSelectorComposite);
     GridDataFactory.fillDefaults().applyTo(filterField);
-    GridDataFactory.fillDefaults().grab(true, false).hint(SWT.DEFAULT, 200)
+    GridDataFactory.fillDefaults().grab(true, false).hint(300, 200)
         .applyTo(projectSelector);
     GridLayoutFactory.fillDefaults().spacing(0, 0).generateLayout(projectSelectorComposite);
 
@@ -253,14 +255,6 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
   public void deactivated(ILaunchConfigurationWorkingCopy workingCopy) {
     super.deactivated(workingCopy);
     activated = false;
-
-    if (environmentTab != null) {
-      // Unfortunately, "EnvironmentTab" overrides "activated()" not to call "initializeFrom()".
-      // (Calling "initializeFrom()" when "activated()" is the default behavior of the base class
-      // retained for backward compatibility.) We need to call it on behalf of "EnvironmentTab"
-      // to re-initialize its UI with the changes made here.
-      environmentTab.initializeFrom(workingCopy);
-    }
   }
 
   @Override
@@ -303,6 +297,39 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
       environmentMap.remove(SERVICE_KEY_ENVIRONMENT_VARIABLE);
     }
     configuration.setAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, environmentMap);
+
+    if (environmentTab != null) {
+      // Unfortunately, "EnvironmentTab" overrides "activated()" not to call "initializeFrom()".
+      // (Calling "initializeFrom()" when "activated()" is the default behavior of the base class
+      // retained for backward compatibility.) We need to call it on behalf of "EnvironmentTab"
+      // to re-initialize its UI with the changes made here.
+      environmentTab.initializeFrom(configuration);
+      // To make the dirty status correct, we also need to notify "EnvironmentTab" of the potential
+      // changes made here to the launch config working copy .
+      environmentTab.performApply(configuration);
+    }
+  }
+
+  @Override
+  public boolean isValid(ILaunchConfiguration configuration) {
+    setErrorMessage(null);
+
+    Map<String, String> environmentMap = getEnvironmentMap(configuration);
+    String serviceKey = environmentMap.get(SERVICE_KEY_ENVIRONMENT_VARIABLE);
+    if (!Strings.isNullOrEmpty(serviceKey)) {
+      java.nio.file.Path path = Paths.get(serviceKey);
+      if (!Files.exists(path)) {
+        setErrorMessage(serviceKey + Messages.getString("error.file.does.not.exist")); //$NON-NLS-1$
+        return false;
+      } else if (Files.isDirectory(path)) {
+        setErrorMessage(serviceKey + Messages.getString("error.is.a.directory")); //$NON-NLS-1$
+        return false;
+      } else if (!Files.isReadable(path)) {
+        setErrorMessage(serviceKey + Messages.getString("error.is.not.readable")); //$NON-NLS-1$
+        return false;
+      }
+    }
+    return true;
   }
 
   @VisibleForTesting
