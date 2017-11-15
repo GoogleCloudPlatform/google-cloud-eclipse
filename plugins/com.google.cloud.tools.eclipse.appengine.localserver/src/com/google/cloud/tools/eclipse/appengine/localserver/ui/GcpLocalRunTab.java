@@ -319,13 +319,13 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     if (!Strings.isNullOrEmpty(serviceKey)) {
       java.nio.file.Path path = Paths.get(serviceKey);
       if (!Files.exists(path)) {
-        setErrorMessage(serviceKey + Messages.getString("error.file.does.not.exist")); //$NON-NLS-1$
+        setErrorMessage(Messages.getString("error.file.does.not.exist", serviceKey)); //$NON-NLS-1$
         return false;
       } else if (Files.isDirectory(path)) {
-        setErrorMessage(serviceKey + Messages.getString("error.is.a.directory")); //$NON-NLS-1$
+        setErrorMessage(Messages.getString("error.is.a.directory", serviceKey)); //$NON-NLS-1$
         return false;
       } else if (!Files.isReadable(path)) {
-        setErrorMessage(serviceKey + Messages.getString("error.is.not.readable")); //$NON-NLS-1$
+        setErrorMessage(Messages.getString("error.is.not.readable", serviceKey)); //$NON-NLS-1$
         return false;
       }
     }
