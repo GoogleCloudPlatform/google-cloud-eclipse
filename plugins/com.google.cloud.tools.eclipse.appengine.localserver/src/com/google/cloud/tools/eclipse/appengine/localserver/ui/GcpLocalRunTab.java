@@ -70,6 +70,8 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
   private static final String SERVICE_KEY_ENVIRONMENT_VARIABLE =
       "GOOGLE_APPLICATION_CREDENTIALS"; //$NON-NLS-1$
 
+  private static final String[] serviceKeyFilterExtensions = new String[] {"*.json"}; //$NON-NLS-1$
+
   private Image gcpIcon;
 
   private final EnvironmentTab environmentTab;
@@ -203,8 +205,7 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     });
     Button browse = new Button(composite, SWT.NONE);
     browse.setText(Messages.getString("button.browse")); //$NON-NLS-1$
-    browse.addSelectionListener(new FileFieldSetter(serviceKeyInput,
-        new String[] {"*.json", "*"})); //$NON-NLS-1$ //$NON-NLS-2$
+    browse.addSelectionListener(new FileFieldSetter(serviceKeyInput, serviceKeyFilterExtensions));
 
     GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.TOP).applyTo(projectLabel);
     GridDataFactory.fillDefaults().span(2, 1).applyTo(accountSelector);
