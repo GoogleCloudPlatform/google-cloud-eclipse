@@ -154,4 +154,12 @@ public class StatusUtilTest {
     assertEquals(1, ((MultiStatus) result).getChildren().length);
     verifyStatus(((MultiStatus) result).getChildren()[0]);
   }
+
+  @Test
+  public void testFilter_okMultiStatus() {
+    IStatus multi = StatusUtil.multi(StatusUtil.class, "test multi msg"); //$NON-NLS-1$
+    assertThat(StatusUtil.filter(multi), is(Status.OK_STATUS));
+  }
+
+
 }
