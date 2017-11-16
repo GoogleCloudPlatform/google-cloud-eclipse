@@ -271,7 +271,9 @@ public class GcpLocalRunTabTest {
   }
 
   @Test
-  public void testPerformApply_updatesEnvironmentTab() {
+  public void testPerformApply_updatesEnvironmentTab() throws CoreException {
+    when(launchConfig.getAttribute(anyString(), anyString()))
+      .thenAnswer(AdditionalAnswers.returnsSecondArg());
     tab.activated(launchConfig);
     tab.deactivated(launchConfig);
     verify(environmentTab).initializeFrom(any(ILaunchConfiguration.class));
