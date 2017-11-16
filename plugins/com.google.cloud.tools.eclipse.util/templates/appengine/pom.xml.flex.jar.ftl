@@ -4,14 +4,13 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <packaging>war</packaging>
+  <packaging>jar</packaging>
   <version>${projectVersion}</version>
 
   <groupId>${projectGroupId}</groupId>
   <artifactId>${projectArtifactId}</artifactId>
 
   <properties>
-    <appengine.maven.plugin.version>1.3.1</appengine.maven.plugin.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
@@ -23,25 +22,6 @@
   </prerequisites>
 
   <dependencies>
-    <!-- Compile/runtime dependencies -->
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
-      <version>3.1.0</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet.jsp</groupId>
-      <artifactId>javax.servlet.jsp-api</artifactId>
-      <version>2.3.1</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>jstl</groupId>
-      <artifactId>jstl</artifactId>
-      <version>1.2</version>
-    </dependency>
-
     <!-- Test Dependencies -->
     <dependency>
       <groupId>junit</groupId>
@@ -52,13 +32,11 @@
   </dependencies>
 
   <build>
-    <!-- for hot reload of the web application-->
-    <outputDirectory>${r"${project.build.directory}/${project.build.finalName}/WEB-INF/classes"}</outputDirectory>
     <plugins>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
-        <version>2.3</version>
+        <version>2.4</version>
         <executions>
           <execution>
             <phase>compile</phase>
@@ -70,11 +48,26 @@
         </executions>
       </plugin>
 
+      <!--
+        For packaging a runnable fat JAR with all dependencies. You may want to
+        consider using other methods to package a fat JAR.
+      -->
       <plugin>
-        <groupId>com.google.cloud.tools</groupId>
-        <artifactId>appengine-maven-plugin</artifactId>
-        <version>${r"${appengine.maven.plugin.version}"}</version>
+        <groupId>com.jolira</groupId>
+        <artifactId>onejar-maven-plugin</artifactId>
+        <version>1.4.4</version>
+        <executions>
+          <execution>
+            <configuration>
+              <mainClass><#if package != "">${package}.</#if>HelloAppEngineMain</mainClass>
+            </configuration>
+            <goals>
+              <goal>one-jar</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
+
   </build>
 </project>

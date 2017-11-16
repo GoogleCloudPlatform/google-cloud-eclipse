@@ -16,7 +16,6 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.compiler.source>${compilerVersion}</maven.compiler.source>
     <maven.compiler.target>${compilerVersion}</maven.compiler.target>
-    <maven.compiler.showDeprecation>true</maven.compiler.showDeprecation>
   </properties>
 
   <prerequisites>

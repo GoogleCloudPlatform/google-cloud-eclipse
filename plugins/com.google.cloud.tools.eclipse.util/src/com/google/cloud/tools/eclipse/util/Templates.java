@@ -37,14 +37,30 @@ import org.eclipse.core.runtime.CoreException;
 
 public class Templates {
   public static final String APPENGINE_WEB_XML_TEMPLATE = "appengine-web.xml.ftl";
-  public static final String HELLO_APPENGINE_TEMPLATE = "HelloAppEngine.java.ftl";
+  public static final String APP_YAML_TEMPLATE = "app.yaml.ftl";
+
   public static final String INDEX_HTML_TEMPLATE = "index.html.ftl";
   public static final String WEB_XML_TEMPLATE = "web.xml.ftl";
+
+  public static final String HELLO_APPENGINE_TEMPLATE = "HelloAppEngine.java.ftl";
   public static final String HELLO_APPENGINE_TEST_TEMPLATE = "HelloAppEngineTest.java.ftl";
   public static final String MOCK_HTTPSERVLETRESPONSE_TEMPLATE = "MockHttpServletResponse.java.ftl";
-  public static final String APP_YAML_TEMPLATE = "app.yaml.ftl";
+
+  public static final String HELLO_APPENGINE_MAIN_TEMPLATE = "HelloAppEngineMain.java.ftl";
+  public static final String HELLO_APPENGINE_HANDLER_TEMPLATE = "HelloAppEngineHandler.java.ftl";
+  public static final String HELLO_APPENGINE_HANDLER_TEST_TEMPLATE =
+      "HelloAppEngineHandlerTest.java.ftl";
+  public static final String MOCKHTTPEXCHANGE_TEMPLATE = "MockHttpExchange.java.ftl";
+
+  public static final String HELLO_APPENGINE_SPRING_BOOT_TEMPLATE =
+      "HelloAppEngineSpringBoot.java.ftl";
+  public static final String HELLO_APPENGINE_SPRING_BOOT_INTEGRATION_TEST_TEMPLATE =
+      "HelloAppEngineSpringBootIntegrationTest.java.ftl";
+
   public static final String POM_XML_STANDARD_TEMPLATE = "pom.xml.standard.ftl";
   public static final String POM_XML_FLEX_TEMPLATE = "pom.xml.flex.ftl";
+  public static final String POM_XML_FLEX_JAR_TEMPLATE = "pom.xml.flex.jar.ftl";
+  public static final String POM_XML_FLEX_SPRING_BOOT_TEMPLATE = "pom.xml.flex.spring.boot.ftl";
 
   private static Configuration configuration;
 

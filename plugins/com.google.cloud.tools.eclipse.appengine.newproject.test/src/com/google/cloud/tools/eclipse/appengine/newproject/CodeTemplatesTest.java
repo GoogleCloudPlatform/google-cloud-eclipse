@@ -102,6 +102,7 @@ public class CodeTemplatesTest {
   public void testMaterializeAppEngineFlexFiles()
       throws CoreException, ParserConfigurationException, SAXException, IOException {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setServiceName("database-service");
     IFile mostImportant = CodeTemplates.materializeAppEngineFlexFiles(project, config, monitor);
     validateNonConfigFiles(mostImportant, "http://xmlns.jcp.org/xml/ns/javaee",
         "http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd", "3.1");
@@ -124,19 +125,77 @@ public class CodeTemplatesTest {
     validatePomXml();
   }
 
+  @Test
+  public void testMaterializeAppEngineFlexJarFiles()
+      throws CoreException, ParserConfigurationException, SAXException, IOException  {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setUseMaven("my.project.group.id", "my-project-artifact-id", "98.76.54");
+    config.setServiceName("database-service");
+
+    IFile mostImportant = CodeTemplates.materializeFlexJar(project, config, monitor);
+
+    validateFlexJarNonConfigFiles(mostImportant);
+    validateAppYaml();
+    validatePomXml();
+  }
+
+  @Test
+  public void testMaterializeFlexSpringBoot()
+      throws CoreException, ParserConfigurationException, SAXException, IOException  {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setUseMaven("my.project.group.id", "my-project-artifact-id", "98.76.54");
+    config.setServiceName("database-service");
+
+    IFile mostImportant = CodeTemplates.materializeFlexSpringBoot(project, config, monitor);
+
+    validateFlexSpringBootNonConfigFiles(mostImportant);
+    validateAppYaml();
+    validatePomXml();
+  }
+
+  @Test
+  public void testMaterializeAppEngineFlexJarFiles_mainClassSet()
+      throws CoreException, ParserConfigurationException, SAXException, IOException  {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setUseMaven("my.project.group.id", "my-project-artifact-id", "98.76.54");
+    config.setPackageName("com.example");
+
+    IFile mostImportant = CodeTemplates.materializeFlexJar(project, config, monitor);
+    validateMainClassInPomXml("com.example", mostImportant);
+  }
+
+  @Test
+  public void testMaterializeAppEngineFlexJarFiles_defaultPackageMainClassSet()
+      throws CoreException, ParserConfigurationException, SAXException, IOException  {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setUseMaven("my.project.group.id", "my-project-artifact-id", "98.76.54");
+
+    IFile mostImportant = CodeTemplates.materializeFlexJar(project, config, monitor);
+    validateMainClassInPomXml(null /* expectedPackage */, mostImportant);
+  }
+
+  private void validateMainClassInPomXml(String expectedPackage, IFile mostImportant)
+      throws ParserConfigurationException, SAXException, IOException, CoreException {
+    String mainClassName = mostImportant.getFullPath().removeFileExtension().lastSegment();
+
+    IFile pomXml = project.getFile("pom.xml");
+    Element root = buildDocument(pomXml).getDocumentElement();
+    Element mainClass = (Element) root.getElementsByTagName("mainClass").item(0);
+    if (expectedPackage == null) {
+      Assert.assertEquals(mainClassName, mainClass.getTextContent());
+    } else {
+      Assert.assertEquals(expectedPackage + "." + mainClassName, mainClass.getTextContent());
+    }
+  }
+
   private void validateNonConfigFiles(IFile mostImportant,
       String webXmlNamespace, String webXmlSchemaUrl, String servletVersion)
       throws ParserConfigurationException, SAXException, IOException, CoreException {
-    IFolder src = project.getFolder("src");
-    IFolder main = src.getFolder("main");
-    IFolder java = main.getFolder("java");
-    IFile servlet = java.getFile("HelloAppEngine.java");
+    IFile servlet = project.getFile("src/main/java/HelloAppEngine.java");
     Assert.assertTrue(servlet.exists());
     Assert.assertEquals(servlet, mostImportant);
 
-    IFolder webapp = main.getFolder("webapp");
-    IFolder webinf = webapp.getFolder("WEB-INF");
-    IFile webXml = webinf.getFile("web.xml");
+    IFile webXml = project.getFile("src/main/webapp/WEB-INF/web.xml");
     Element root = buildDocument(webXml).getDocumentElement();
     Assert.assertEquals("web-app", root.getNodeName());
     Assert.assertEquals(webXmlNamespace, root.getNamespaceURI());
@@ -148,16 +207,35 @@ public class CodeTemplatesTest {
       Assert.assertEquals("HelloAppEngine", servletClass.getTextContent());
     }
     
-    IFile htmlFile = webapp.getFile("index.html");
+    IFile htmlFile = project.getFile("src/main/webapp/index.html");
     Element html = buildDocument(htmlFile).getDocumentElement();
     Assert.assertEquals("html", html.getNodeName());
 
-    IFolder test = src.getFolder("test");
-    IFolder testJava = test.getFolder("java");
-    IFile servletTest = testJava.getFile("HelloAppEngineTest.java");
+    IFile servletTest = project.getFile("src/test/java/HelloAppEngineTest.java");
     Assert.assertTrue(servletTest.exists());
-    IFile mockServletResponse = testJava.getFile("MockHttpServletResponse.java");
+    IFile mockServletResponse = project.getFile("src/test/java/MockHttpServletResponse.java");
     Assert.assertTrue(mockServletResponse.exists());
+  }
+
+  private void validateFlexJarNonConfigFiles(IFile mostImportant) {
+    IFile main = project.getFile("src/main/java/HelloAppEngineMain.java");
+    Assert.assertTrue(main.exists());
+    Assert.assertEquals(main, mostImportant);
+    IFile handler = project.getFile("src/main/java/HelloAppEngineHandler.java");
+    Assert.assertTrue(handler.exists());
+
+    IFile handlerTest = project.getFile("src/test/java/HelloAppEngineHandlerTest.java");
+    Assert.assertTrue(handlerTest.exists());
+    IFile mockHttpExchange = project.getFile("src/test/java/MockHttpExchange.java");
+    Assert.assertTrue(mockHttpExchange.exists());
+  }
+
+  private void validateFlexSpringBootNonConfigFiles(IFile mostImportant) {
+    IFile main = project.getFile("src/main/java/HelloAppEngineSpringBoot.java");
+    Assert.assertTrue(main.exists());
+    Assert.assertEquals(main, mostImportant);
+    IFile handler = project.getFile("src/test/java/HelloAppEngineSpringBootIntegrationTest.java");
+    Assert.assertTrue(handler.exists());
   }
 
   private void validateAppEngineWebXml(AppEngineRuntime runtime)
@@ -188,15 +266,14 @@ public class CodeTemplatesTest {
   }
 
   private void validateAppYaml() throws IOException, CoreException {
-    IFolder appengineFolder = project.getFolder("src/main/appengine");
-    Assert.assertTrue(appengineFolder.exists());
-    IFile appYaml = appengineFolder.getFile("app.yaml");
+    IFile appYaml = project.getFile("src/main/appengine/app.yaml");
     Assert.assertTrue(appYaml.exists());
 
     try (BufferedReader reader = new BufferedReader(
         new InputStreamReader(appYaml.getContents(), StandardCharsets.UTF_8))) {
       Assert.assertEquals("runtime: java", reader.readLine());
       Assert.assertEquals("env: flex", reader.readLine());
+      Assert.assertEquals("service: database-service", reader.readLine());
     }
   }
 

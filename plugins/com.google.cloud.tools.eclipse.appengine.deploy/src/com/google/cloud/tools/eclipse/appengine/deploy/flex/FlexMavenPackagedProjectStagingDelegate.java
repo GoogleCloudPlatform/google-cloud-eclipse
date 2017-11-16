@@ -20,6 +20,7 @@ import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import java.io.File;
 import org.apache.maven.project.MavenProject;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -113,8 +114,15 @@ public class FlexMavenPackagedProjectStagingDelegate extends FlexStagingDelegate
 
     String buildDirectory = mavenProject.getBuild().getDirectory();
     String finalName = mavenProject.getBuild().getFinalName();
-    String finalArtifactPath = buildDirectory + "/" + finalName + "." + mavenProject.getPackaging();
-    return new Path(finalArtifactPath);
+    String finalNamePath = buildDirectory + "/" + finalName;
+
+    String oneJarArtifactPath = finalNamePath + ".one-jar.jar";
+    if (new File(oneJarArtifactPath).exists()) {
+      return new Path(oneJarArtifactPath);
+    } else {
+      String finalArtifactPath = finalNamePath + "." + mavenProject.getPackaging();
+      return new Path(finalArtifactPath);
+    }
   }
 
   @VisibleForTesting
