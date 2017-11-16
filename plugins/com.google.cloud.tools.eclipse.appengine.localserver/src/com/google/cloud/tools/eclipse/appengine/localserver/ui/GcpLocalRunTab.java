@@ -283,7 +283,11 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
       return;
     }
 
-    configuration.setAttribute(ATTRIBUTE_ACCOUNT_EMAIL, accountEmailModel);
+    if (accountEmailModel.isEmpty()) {
+      configuration.setAttribute(ATTRIBUTE_ACCOUNT_EMAIL, (String) null);
+    } else {
+      configuration.setAttribute(ATTRIBUTE_ACCOUNT_EMAIL, accountEmailModel);
+    }
 
     Map<String, String> environmentMap = getEnvironmentMap(configuration);
     if (!gcpProjectIdModel.isEmpty()) {
@@ -305,7 +309,7 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
       // to re-initialize its UI with the changes made here.
       environmentTab.initializeFrom(configuration);
       // To make the dirty status correct, we also need to notify "EnvironmentTab" of the potential
-      // changes made here to the launch config working copy .
+      // changes made here to the launch config working copy.
       environmentTab.performApply(configuration);
     }
   }
