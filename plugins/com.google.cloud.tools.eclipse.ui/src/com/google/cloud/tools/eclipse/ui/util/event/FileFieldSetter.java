@@ -17,6 +17,9 @@
 package com.google.cloud.tools.eclipse.ui.util.event;
 
 import com.google.common.annotations.VisibleForTesting;
+
+import java.util.Arrays;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.SWT;
@@ -43,7 +46,7 @@ public class FileFieldSetter extends SelectionAdapter {
   @VisibleForTesting
   FileFieldSetter(Text fileField, String[] filterExtensions, FileDialog fileDialog) {
     this.fileField = fileField;
-    this.filterExtensions = filterExtensions;
+    this.filterExtensions = Arrays.copyOf(filterExtensions, filterExtensions.length);
     dialog = fileDialog;
   }
 
@@ -56,7 +59,7 @@ public class FileFieldSetter extends SelectionAdapter {
       filterPath = filterPath.removeLastSegments(1);
     }
     dialog.setFilterPath(filterPath.toString());
-    dialog.setFilterExtensions(filterExtensions);
+    dialog.setFilterExtensions(Arrays.copyOf(filterExtensions, filterExtensions.length));
 
     String result = dialog.open();
     if (result != null) {
