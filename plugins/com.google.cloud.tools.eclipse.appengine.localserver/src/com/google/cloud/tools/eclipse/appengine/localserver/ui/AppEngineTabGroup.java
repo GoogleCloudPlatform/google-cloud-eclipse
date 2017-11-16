@@ -40,13 +40,16 @@ public class AppEngineTabGroup extends AbstractLaunchConfigurationTabGroup {
 
   @Override
   public void createTabs(ILaunchConfigurationDialog dialog, String mode) {
-    ILaunchConfigurationTab[] tabs = new ILaunchConfigurationTab[3];
+    ILaunchConfigurationTab[] tabs = new ILaunchConfigurationTab[4];
     tabs[0] = new AppEngineServerLaunchConfigurationTab(SERVER_TYPE_IDS);
     tabs[0].setLaunchConfigurationDialog(dialog);
     tabs[1] = new JavaArgumentsTab();
     tabs[1].setLaunchConfigurationDialog(dialog);
-    tabs[2] = new EnvironmentTab();
+    EnvironmentTab environmentTab = new EnvironmentTab();
+    tabs[2] = environmentTab;
     tabs[2].setLaunchConfigurationDialog(dialog);
+    tabs[3] = new GcpLocalRunTab(environmentTab);
+    tabs[3].setLaunchConfigurationDialog(dialog);
     setTabs(tabs);
   }
 
