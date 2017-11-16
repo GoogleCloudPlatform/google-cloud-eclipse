@@ -74,7 +74,7 @@ public class LibraryClasspathContainerResolverService
   @Override
   public IStatus resolveAll(IJavaProject javaProject, IProgressMonitor monitor) {
     try {
-      MultiStatus status = StatusUtil.multi(this, Messages.getString("TaskResolveLibrariesError"));
+      MultiStatus status = StatusUtil.multi(this, Messages.getString("TaskResolveLibrariesError")); //$NON-NLS-1$
       IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
       SubMonitor subMonitor = SubMonitor.convert(monitor,
           Messages.getString("TaskResolveLibraries"), //$NON-NLS-1$
@@ -87,7 +87,8 @@ public class LibraryClasspathContainerResolverService
           status.add(resolveContainerStatus);
         }
       }
-      return status;
+      // rewrite if OK as otherwise Progress View shows the resolving error message
+      return StatusUtil.filter(status);
     } catch (CoreException ex) {
       return StatusUtil.error(this, 
           Messages.getString("TaskResolveLibrariesError"), ex); //$NON-NLS-1$

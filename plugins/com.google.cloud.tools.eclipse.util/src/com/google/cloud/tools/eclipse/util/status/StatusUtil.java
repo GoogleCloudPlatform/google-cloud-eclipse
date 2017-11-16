@@ -105,6 +105,10 @@ public class StatusUtil {
   public static IStatus filter(IStatus status) {
     if (!status.isMultiStatus()) {
       return status;
+    } else if (status.isOK()) {
+      // return OK_STATUS to avoids oddities like Progress View showing the MultiStatus's
+      // error message
+      return Status.OK_STATUS;
     }
     MultiStatus newStatus = new MultiStatus(status.getPlugin(), status.getCode(),
         status.getMessage(), status.getException());

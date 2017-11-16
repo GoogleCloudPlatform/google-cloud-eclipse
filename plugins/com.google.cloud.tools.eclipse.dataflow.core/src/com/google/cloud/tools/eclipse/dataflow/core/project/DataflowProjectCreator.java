@@ -188,7 +188,7 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
     List<IProject> projects = Collections.emptyList();
     List<CoreException> failures = new ArrayList<>();
     MultiStatus status = new MultiStatus(DataflowCorePlugin.PLUGIN_ID, 38, 
-        "Creating loading dataflow maven archetypes", null);
+        "Creating dataflow maven archetypes", null);
 
     for (ArtifactVersion attemptedVersion : archetypeVersions) {
       checkCancelled(progress);

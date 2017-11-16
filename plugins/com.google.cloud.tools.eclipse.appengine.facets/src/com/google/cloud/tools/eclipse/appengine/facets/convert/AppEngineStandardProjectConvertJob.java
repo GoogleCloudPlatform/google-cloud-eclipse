@@ -46,7 +46,8 @@ public class AppEngineStandardProjectConvertJob extends Job {
     MultiStatus status =
         StatusUtil.multi(this, Messages.getString("project.conversion.error", projectName));
     convert(status, monitor);
-    return monitor.isCanceled() ? Status.CANCEL_STATUS : status;
+    // rewrite if OK as otherwise Progress View shows the conversion error message
+    return monitor.isCanceled() ? Status.CANCEL_STATUS : StatusUtil.filter(status);
   }
 
   /**
