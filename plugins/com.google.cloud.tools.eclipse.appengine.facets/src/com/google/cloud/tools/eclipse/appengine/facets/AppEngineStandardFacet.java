@@ -237,7 +237,6 @@ public class AppEngineStandardFacet {
       }
 
       // So we must have a project with no appengine-web.xml.
-      // Need to figure out: what AES version do we install?
 
       /*
        * https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155

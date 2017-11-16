@@ -84,6 +84,18 @@ public class TemplatesTest {
 
     compareToFile("appengineWebXmlWithService.txt");
   }
+  
+  @Test
+  public void testCreateFileContent_appengineWebXmlWithRuntime()
+      throws CoreException, IOException {
+    dataMap.put("runtime", "java8");
+    Templates.createFileContent(fileLocation,
+        Templates.APPENGINE_WEB_XML_TEMPLATE,
+        dataMap);
+
+    compareToFile("appengineWebXmlWithRuntime.txt");
+  }
+
 
   @Test
   public void testCreateFileContent_appYamlWithService()
