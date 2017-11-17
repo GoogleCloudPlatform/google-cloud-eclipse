@@ -174,6 +174,9 @@ public class TemplatesTest {
   private static InputStream getDataFile(String fileName) throws IOException {
     Bundle bundle = FrameworkUtil.getBundle(TemplatesTest.class);
     URL expectedFileUrl = bundle.getResource("/testData/templates/appengine/" + fileName);
+    if (expectedFileUrl == null) {
+      throw new IOException("Could not find comparison file " + fileName);
+    }
     return expectedFileUrl.openStream();
   }
 

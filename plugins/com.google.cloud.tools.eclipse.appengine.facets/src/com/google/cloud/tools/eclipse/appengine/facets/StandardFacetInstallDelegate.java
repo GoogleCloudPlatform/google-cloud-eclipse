@@ -151,7 +151,7 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
     appEngineWebXml.create(new ByteArrayInputStream(new byte[0]), true, progress.newChild(2));
     String configFileLocation = appEngineWebXml.getLocation().toString();
     Map<String, String> parameters = new HashMap<>();
-    parameters.put("runtime", "java8");
+  // parameters.put("runtime", "java8");
     Templates.createFileContent(configFileLocation, Templates.APPENGINE_WEB_XML_TEMPLATE,
         parameters);
     progress.worked(4);
