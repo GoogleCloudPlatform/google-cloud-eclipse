@@ -32,6 +32,7 @@ public class AppEngineTabGroupTest {
     Assert.assertEquals("Server", group.getTabs()[0].getName());
     Assert.assertEquals("Arguments", group.getTabs()[1].getName());
     Assert.assertEquals("Environment", group.getTabs()[2].getName());
+    Assert.assertEquals("Cloud Platform", group.getTabs()[3].getName());
   }
 
 }
