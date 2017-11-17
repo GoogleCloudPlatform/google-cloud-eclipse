@@ -93,7 +93,7 @@ public class TemplatesTest {
         Templates.APPENGINE_WEB_XML_TEMPLATE,
         dataMap);
 
-    compareToFile("appengineWebXmlWithRuntime.txt");
+    compareToFile("appEngineWebXmlWithRuntime.txt");
   }
 
 
