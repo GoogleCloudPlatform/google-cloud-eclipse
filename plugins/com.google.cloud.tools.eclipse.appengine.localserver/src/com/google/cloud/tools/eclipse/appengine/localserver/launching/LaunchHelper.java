@@ -41,13 +41,13 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.ide.IDE;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerType;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.ServerUtil;
-import org.eclipse.wst.server.ui.internal.ServerUIPlugin;
 
 /**
  * A helper class for launching modules on a server
@@ -65,7 +65,8 @@ public class LaunchHelper {
         if (isRunning(existing)) {
           ILaunch launch = existing.getLaunch();
           Preconditions.checkNotNull(launch, "A running server should have a launch"); //$NON-NLS-1$
-          String detail = launchMode.equals(launch.getLaunchMode()) ? Messages.getString("SERVER_ALREADY_RUNNING") //$NON-NLS-1$
+          String detail = launchMode.equals(launch.getLaunchMode())
+              ? Messages.getString("SERVER_ALREADY_RUNNING") //$NON-NLS-1$
               : MessageFormat.format(Messages.getString("SERVER_ALREADY_RUNNING_IN_MODE"), //$NON-NLS-1$
                   launch.getLaunchMode());
           throw new CoreException(StatusUtil.info(this, detail));
@@ -136,10 +137,15 @@ public class LaunchHelper {
     // IServer#start() that prompts the user *as the server continues to launch*.
     // ServerUIPlugin.saveEditors() respects the "Save editors before starting the server"
     // preference.
-    if (!ServerUIPlugin.saveEditors()) {
-      return;
+    IModule[] modules = server.getModules();
+    ArrayList<IResource> resources = new ArrayList<>();
+    for (IModule module : modules) {
+      resources.add(module.getProject());
     }
-    server.start(launchMode, progress);
+    boolean ok = IDE.saveAllEditors(resources.toArray(new IResource[0]), true);
+    if (ok) {
+      server.start(launchMode, progress);
+    }
   }
 
   /** Identify the relevant modules from the selection. */
