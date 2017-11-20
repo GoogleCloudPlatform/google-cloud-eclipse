@@ -11,7 +11,7 @@
              class="com.google.cloud.tools.eclipse.appengine.facets.StringVersionComparator">
        </version-comparator>
        <default-version
-             version="JRE7">
+             version="JRE8">
        </default-version>
     </project-facet>
     <project-facet-version facet="com.google.cloud.tools.eclipse.appengine.facets.standard" version="JRE7">
