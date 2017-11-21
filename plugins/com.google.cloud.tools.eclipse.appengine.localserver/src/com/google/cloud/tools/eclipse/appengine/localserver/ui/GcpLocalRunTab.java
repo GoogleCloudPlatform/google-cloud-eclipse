@@ -116,7 +116,6 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
   public GcpLocalRunTab(EnvironmentTab environmentTab) {
     this(environmentTab,
         PlatformUI.getWorkbench().getService(IGoogleLoginService.class),
-        // or "com.google.api.services.iam.v1.Iam"?
         PlatformUI.getWorkbench().getService(IGoogleApiFactory.class),
         new ProjectRepository(PlatformUI.getWorkbench().getService(IGoogleApiFactory.class)));
   }
@@ -396,7 +395,8 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     }
   }
 
-  private void createServiceAccountKey() {
+  @VisibleForTesting
+  void createServiceAccountKey() {
     Credential credential = accountSelector.getSelectedCredential();
     String projectId = projectSelector.getSelectProjectId();
     Preconditions.checkNotNull(credential, "account not selected"); //$NON-NLS-1$
