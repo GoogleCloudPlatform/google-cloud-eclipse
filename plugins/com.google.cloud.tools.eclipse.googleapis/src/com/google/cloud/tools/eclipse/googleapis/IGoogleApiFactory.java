@@ -52,7 +52,7 @@ public interface IGoogleApiFactory {
   ServiceManagement newServiceManagementApi(Credential credential);
 
   /**
-   * @return a Identity and Access Management API client
+   * @return an Identity and Access Management API client
    */
   Iam newIamApi(Credential credential);
 }

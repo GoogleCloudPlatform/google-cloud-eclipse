@@ -10,6 +10,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-compute-v1-rev160-1.23.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-dataflow-v1b3-rev219-1.23.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-datastore-v1-rev34-1.23.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-services-iam-v1-rev222-1.23.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-oauth2-v2-rev131-1.23.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-pubsub-v1-rev363-1.23.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-servicemanagement-v1-rev368-1.23.0.jar"/>
@@ -21,6 +22,5 @@
 	<classpathentry exported="true" kind="lib" path="lib/google-oauth-client-java6-1.23.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-oauth-client-jetty-1.23.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/plugins-login-common-0.1.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/google-api-services-iam-v1-rev222-1.23.0.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

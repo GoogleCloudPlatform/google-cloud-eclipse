@@ -20,7 +20,9 @@ import com.google.cloud.tools.eclipse.util.Templates;
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.ByteArrayInputStream;
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -148,9 +150,10 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
     ResourceUtils.createFolders(webInfDir, progress.newChild(1));
     appEngineWebXml.create(new ByteArrayInputStream(new byte[0]), true, progress.newChild(2));
     String configFileLocation = appEngineWebXml.getLocation().toString();
-    Templates.createFileContent(
-        configFileLocation, Templates.APPENGINE_WEB_XML_TEMPLATE,
-        Collections.<String, String>emptyMap());
+    Map<String, String> parameters = new HashMap<>();
+    parameters.put("runtime", "java8");
+    Templates.createFileContent(configFileLocation, Templates.APPENGINE_WEB_XML_TEMPLATE,
+        parameters);
     progress.worked(4);
     appEngineWebXml.refreshLocal(IFile.DEPTH_ZERO, progress.newChild(1));
   }

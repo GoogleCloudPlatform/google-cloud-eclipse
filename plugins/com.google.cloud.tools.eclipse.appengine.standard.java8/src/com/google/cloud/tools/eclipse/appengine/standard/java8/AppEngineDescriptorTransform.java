@@ -29,11 +29,11 @@ import org.eclipse.core.runtime.CoreException;
  * Utility class for adding and removing the {@code <runtime>java8</runtime>} to/from an
  * {@code appengine-web.xml}.
  */
-public class AppEngineDescriptorTransform {
+class AppEngineDescriptorTransform {
   private static final Logger logger =
       Logger.getLogger(AppEngineDescriptorTransform.class.getName());
 
-  public static void removeJava8Runtime(IFile descriptor) {
+  static void removeJava8Runtime(IFile descriptor) {
     URL xslTemplate =
         AppEngineDescriptorTransform.class.getResource("/xslt/removeJava8Runtime.xsl");
     try {
@@ -44,7 +44,7 @@ public class AppEngineDescriptorTransform {
     }
   }
 
-  public static void addJava8Runtime(IFile descriptor) {
+  static void addJava8Runtime(IFile descriptor) {
     URL xslTemplate = AppEngineDescriptorTransform.class.getResource("/xslt/addJava8Runtime.xsl");
     try {
       logger.fine("Adding runtime:java8 from " + descriptor);
