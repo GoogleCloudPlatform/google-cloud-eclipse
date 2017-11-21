@@ -93,8 +93,9 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
   private AccountSelector accountSelector;
   private ProjectSelector projectSelector;
   private Text serviceKeyInput;
-  private ControlDecoration serviceKeyDecoration;
   private Button createServiceKey;
+  @VisibleForTesting
+  ControlDecoration serviceKeyDecoration;
 
   // We set up intermediary models between a run configuration and UI components for certain values,
   // because, e.g., the account selector cannot load an email if it is not logged in. In such a
@@ -236,7 +237,7 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     createServiceKey.addSelectionListener(new SelectionAdapter() {
       @Override
       public void widgetSelected(SelectionEvent event) {
-        createServiceAccountKey();
+        createServiceAccountKey(getServiceAccountKeyPath());
       }
     });
 
@@ -396,17 +397,24 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
   }
 
   @VisibleForTesting
-  void createServiceAccountKey() {
+  Path getServiceAccountKeyPath() {
+    Preconditions.checkState(!projectSelector.getSelection().isEmpty());
+
+    String projectId = projectSelector.getSelectProjectId();
+    String filename = "app-engine-default-service-account-key-" //$NON-NLS-1$
+        + projectId + ".json"; //$NON-NLS-1$
+    return Paths.get(System.getProperty("user.home")).resolve(filename); //$NON-NLS-1$
+  }
+
+  @VisibleForTesting
+  void createServiceAccountKey(Path keyFile) {
     Credential credential = accountSelector.getSelectedCredential();
     String projectId = projectSelector.getSelectProjectId();
     Preconditions.checkNotNull(credential, "account not selected"); //$NON-NLS-1$
     Preconditions.checkState(!projectId.isEmpty(), "project not selected"); //$NON-NLS-1$
 
-    String filename = "app-engine-default-service-account-key-" //$NON-NLS-1$
-        + projectId + ".json"; //$NON-NLS-1$
-    Path path = Paths.get(System.getProperty("user.home")).resolve(filename); //$NON-NLS-1$
-    if (Files.exists(path)) {
-      String message = Messages.getString("service.key.already.exists", path); //$NON-NLS-1$
+    if (Files.exists(keyFile)) {
+      String message = Messages.getString("service.key.already.exists", keyFile); //$NON-NLS-1$
       showServiceKeyDecorationMessage(message, true /* errorImage */);
       return;
     }
@@ -423,11 +431,12 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
 
       byte[] jsonKey = Base64.decodeBase64(key.getPrivateKeyData());
 
-      Files.write(path, jsonKey);
-      serviceKeyInput.setText(path.toString());
+      Files.write(keyFile, jsonKey);
+      serviceKeyInput.setText(keyFile.toString());
 
-      String message = Messages.getString("service.key.created", path); //$NON-NLS-1$
+      String message = Messages.getString("service.key.created", keyFile); //$NON-NLS-1$
       showServiceKeyDecorationMessage(message, false /* errorImage */);
+
     } catch (IOException e) {
       logger.log(Level.SEVERE, e.getMessage(), e);
       String message = Messages.getString("cannot.create.service.key",  //$NON-NLS-1$
