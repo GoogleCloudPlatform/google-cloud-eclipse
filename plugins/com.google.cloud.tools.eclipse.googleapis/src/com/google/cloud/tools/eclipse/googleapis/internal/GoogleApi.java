@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.googleapis.internal;
 import com.google.api.services.appengine.v1.Appengine;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager;
 import com.google.api.services.dataflow.Dataflow;
+import com.google.api.services.iam.v1.Iam;
 import com.google.api.services.servicemanagement.ServiceManagement;
 import com.google.api.services.storage.Storage;
 import java.net.URI;
@@ -33,50 +34,24 @@ import java.net.URISyntaxException;
  * </ol>
  */
 public enum GoogleApi {
-  APPENGINE_ADMIN_API(Messages.getString("api.appengine"), Appengine.DEFAULT_BASE_URL, //$NON-NLS-1$
-      "appengine.googleapis.com"), //$NON-NLS-1$
-  DATAFLOW_API(Messages.getString("api.dataflow"), Dataflow.DEFAULT_BASE_URL, //$NON-NLS-1$
-      "dataflow.googleapis.com"), //$NON-NLS-1$
-  CLOUDRESOURCE_MANAGER_API(Messages.getString("api.cloudresourcemanager"), //$NON-NLS-1$
-      CloudResourceManager.DEFAULT_BASE_URL, "cloudresourcemanager.googleapis.com"), //$NON-NLS-1$
-  CLOUD_STORAGE_API(Messages.getString("api.storage-json"), Storage.DEFAULT_BASE_URL, //$NON-NLS-1$
-      "storage-api.googleapis.com"), //$NON-NLS-1$
-  SERVICE_MANAGEMENT_API(Messages.getString("api.servicemanagement"), //$NON-NLS-1$
-      ServiceManagement.DEFAULT_BASE_URL, "servicemanagement.googleapis.com"); //$NON-NLS-1$
+  APPENGINE_ADMIN_API(Appengine.DEFAULT_BASE_URL, "appengine.googleapis.com"),
+  DATAFLOW_API(Dataflow.DEFAULT_BASE_URL, "dataflow.googleapis.com"),
+  CLOUDRESOURCE_MANAGER_API(
+      CloudResourceManager.DEFAULT_BASE_URL, "cloudresourcemanager.googleapis.com"),
+  CLOUD_STORAGE_API(Storage.DEFAULT_BASE_URL, "storage-api.googleapis.com"),
+  SERVICE_MANAGEMENT_API(ServiceManagement.DEFAULT_BASE_URL, "servicemanagement.googleapis.com"),
+  IAM_API(Iam.DEFAULT_BASE_URL, "iam.googleapis.com");
 
-  private final String name;
   private final URI uri;
   private final String serviceId;
 
-  /**
-   * Return the corresponding API with the specified service management ID.
-   * 
-   * @return the corresponding instance or {@code null} if not found
-   */
-  public static GoogleApi forServiceID(String serviceId) {
-    for (GoogleApi api : values()) {
-      if (serviceId.equals(api.serviceId)) {
-        return api;
-      }
-    }
-    return null;
-  }
-
-  private GoogleApi(String name, String url, String serviceId) {
+  private GoogleApi(String url, String serviceId) {
     try {
       uri = new URI(url);
     } catch (URISyntaxException ex) {
-      throw new RuntimeException("Fix URL"); //$NON-NLS-1$
+      throw new RuntimeException("Fix URL");
     }
-    this.name = name;
     this.serviceId = serviceId;
-  }
-
-  /**
-   * The API name.
-   */
-  public String getName() {
-    return name;
   }
 
   /**
