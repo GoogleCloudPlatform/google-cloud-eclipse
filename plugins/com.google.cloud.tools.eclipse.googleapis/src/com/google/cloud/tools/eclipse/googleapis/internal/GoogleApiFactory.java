@@ -24,6 +24,7 @@ import com.google.api.services.appengine.v1.Appengine;
 import com.google.api.services.appengine.v1.Appengine.Apps;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
+import com.google.api.services.iam.v1.Iam;
 import com.google.api.services.servicemanagement.ServiceManagement;
 import com.google.api.services.storage.Storage;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
@@ -120,7 +121,6 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     return appengine.apps();
   }
 
-
   @Override
   public ServiceManagement newServiceManagementApi(Credential credential) {
     Preconditions.checkNotNull(transportCache, "transportCache is null");
@@ -132,6 +132,18 @@ public class GoogleApiFactory implements IGoogleApiFactory {
         new ServiceManagement.Builder(transport, jsonFactory, credential)
             .setApplicationName(CloudToolsInfo.USER_AGENT).build();
     return serviceManagement;
+  }
+
+  @Override
+  public Iam newIamApi(Credential credential) {
+    Preconditions.checkNotNull(transportCache, "transportCache is null");
+    HttpTransport transport = transportCache.getUnchecked(GoogleApi.IAM_API);
+    Preconditions.checkNotNull(transport, "transport is null");
+    Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
+
+    Iam iam = new Iam.Builder(transport, jsonFactory, credential)
+        .setApplicationName(CloudToolsInfo.USER_AGENT).build();
+    return iam;
   }
 
   @Reference(policy=ReferencePolicy.DYNAMIC, cardinality=ReferenceCardinality.OPTIONAL)

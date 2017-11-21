@@ -17,6 +17,10 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.util.Base64;
+import com.google.api.services.iam.v1.Iam;
+import com.google.api.services.iam.v1.model.CreateServiceAccountKeyRequest;
+import com.google.api.services.iam.v1.model.ServiceAccountKey;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
@@ -29,6 +33,8 @@ import com.google.cloud.tools.eclipse.ui.util.event.FileFieldSetter;
 import com.google.cloud.tools.eclipse.ui.util.images.SharedImages;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -43,6 +49,8 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
 import org.eclipse.debug.ui.EnvironmentTab;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -51,6 +59,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -74,11 +84,13 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
 
   private final EnvironmentTab environmentTab;
   private final IGoogleLoginService loginService;
+  private final IGoogleApiFactory googleApiFactory;
   private final ProjectRepository projectRepository;
 
   private AccountSelector accountSelector;
   private ProjectSelector projectSelector;
   private Text serviceKeyInput;
+  private ControlDecoration serviceKeyDecoration;
 
   // We set up intermediary models between a run configuration and UI components for certain values,
   // because, e.g., the account selector cannot load an email if it is not logged in. In such a
@@ -98,15 +110,19 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
   private boolean activated;
 
   public GcpLocalRunTab(EnvironmentTab environmentTab) {
-    this(environmentTab, PlatformUI.getWorkbench().getService(IGoogleLoginService.class),
+    this(environmentTab,
+        PlatformUI.getWorkbench().getService(IGoogleLoginService.class),
+        // or "com.google.api.services.iam.v1.Iam"?
+        PlatformUI.getWorkbench().getService(IGoogleApiFactory.class),
         new ProjectRepository(PlatformUI.getWorkbench().getService(IGoogleApiFactory.class)));
   }
 
   @VisibleForTesting
-  GcpLocalRunTab(EnvironmentTab environmentTab,
-      IGoogleLoginService loginService, ProjectRepository projectRepository) {
+  GcpLocalRunTab(EnvironmentTab environmentTab, IGoogleLoginService loginService,
+      IGoogleApiFactory googleApiFactory, ProjectRepository projectRepository) {
     this.environmentTab = environmentTab;
     this.loginService = loginService;
+    this.googleApiFactory = googleApiFactory;
     this.projectRepository = projectRepository;
   }
 
@@ -198,6 +214,7 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     serviceKeyInput.addModifyListener(new ModifyListener() {
       @Override
       public void modifyText(ModifyEvent event) {
+        serviceKeyDecoration.hide();
         updateLaunchConfigurationDialog();
       }
     });
@@ -206,14 +223,37 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     String[] filterExtensions = new String[] {"*.json"}; //$NON-NLS-1$
     browse.addSelectionListener(new FileFieldSetter(serviceKeyInput, filterExtensions));
 
+    FieldDecorationRegistry registry = FieldDecorationRegistry.getDefault();
+    Image infoImage = registry.getFieldDecoration(FieldDecorationRegistry.DEC_INFORMATION)
+        .getImage();
+
+    serviceKeyDecoration = new ControlDecoration(serviceKeyInput, SWT.LEAD | SWT.TOP);
+    serviceKeyDecoration.setImage(infoImage);
+    serviceKeyDecoration.hide();
+
+    Button createKey = new Button(composite, SWT.NONE);
+    createKey.setText("Create New Key");
+    createKey.addSelectionListener(new SelectionAdapter() {
+      @Override
+      public void widgetSelected(SelectionEvent event) {
+        String path = createServiceAccountKey();
+        String keyCreatedMessage = "A service key (JSON) for the App Engine default service account created and set: " + path;
+        serviceKeyDecoration.show();
+        serviceKeyDecoration.setDescriptionText(keyCreatedMessage);
+        serviceKeyDecoration.showHoverText(keyCreatedMessage);
+      }
+    });
+
     GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.TOP).applyTo(projectLabel);
     GridDataFactory.fillDefaults().span(2, 1).applyTo(accountSelector);
+    GridDataFactory.swtDefaults().span(3, 1).align(SWT.END, SWT.CENTER).applyTo(createKey);
     GridLayoutFactory.swtDefaults().numColumns(3).generateLayout(composite);
 
     GridDataFactory.fillDefaults().span(2, 1).applyTo(projectSelectorComposite);
     GridDataFactory.fillDefaults().applyTo(filterField);
     GridDataFactory.fillDefaults().grab(true, false).hint(300, 200)
         .applyTo(projectSelector);
+
     GridLayoutFactory.fillDefaults().spacing(0, 0).generateLayout(projectSelectorComposite);
 
     setControl(composite);
@@ -357,5 +397,32 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
       logger.log(Level.WARNING, "Can't get value from launch configuration.", e); //$NON-NLS-1$
       return emptyMap;
     }
+  }
+
+  private String createServiceAccountKey() {
+    Credential credential = accountSelector.getSelectedCredential();
+    Iam iam = googleApiFactory.newIamApi(credential);
+
+    try {
+      CreateServiceAccountKeyRequest request = new CreateServiceAccountKeyRequest();
+      ServiceAccountKey key = iam.projects()
+          .serviceAccounts()
+          .keys()
+          .create("projects/chanseok-playground-new/serviceAccounts/chanseok-playground-new@appspot.gserviceaccount.com", request)
+          .execute();
+
+      // Convert the key data to OAuth key JSON format
+      // The key file is base64 encoded in the privateKeyData field of the IAM response
+      String jsonKey =
+          new String(Base64.decodeBase64(key.getPrivateKeyData()), StandardCharsets.UTF_8);
+
+      // key's JSON representation can now be displayed to the user / added to the
+      // project
+      System.out.println("[" + key.getPrivateKeyData() + "][" + jsonKey + "]");
+
+    } catch (IOException e) {
+      logger.log(Level.SEVERE, e.getMessage(), e);
+    }
+    return null;
   }
 }

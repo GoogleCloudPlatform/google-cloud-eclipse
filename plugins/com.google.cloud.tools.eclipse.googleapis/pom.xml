@@ -91,10 +91,14 @@
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.google.apis</groupId>
+                  <artifactId>google-api-services-iam</artifactId>
+                  <version>v1-rev222-1.23.0</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.google.apis</groupId>
                   <artifactId>google-api-services-oauth2</artifactId>
                   <version>v2-rev131-1.23.0</version>
                 </artifactItem>
-
                 <artifactItem>
                   <groupId>com.google.http-client</groupId>
                   <artifactId>google-http-client</artifactId>

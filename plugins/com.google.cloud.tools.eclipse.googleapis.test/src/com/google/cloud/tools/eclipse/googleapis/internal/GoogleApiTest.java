@@ -22,20 +22,6 @@ import org.junit.Test;
 
 public class GoogleApiTest {
   @Test
-  public void testForServiceId() {
-    for (GoogleApi api : GoogleApi.values()) {
-      assertNotNull(GoogleApi.forServiceID(api.getServiceId()));
-    }
-  }
-
-  @Test
-  public void testHasName() {
-    for (GoogleApi api : GoogleApi.values()) {
-      assertNotNull(api.getName());
-    }
-  }
-
-  @Test
   public void testHasUri() {
     for (GoogleApi api : GoogleApi.values()) {
       assertNotNull(api.toUri());
