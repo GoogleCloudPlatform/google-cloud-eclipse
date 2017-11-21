@@ -543,6 +543,7 @@ public class RunOptionsDefaultsComponent {
         return;
       }
       stagingLocationResults.hide();
+      messageTarget.clear();
 
       GcpProject project = getProject();
       String stagingLocation = getStagingLocation();
