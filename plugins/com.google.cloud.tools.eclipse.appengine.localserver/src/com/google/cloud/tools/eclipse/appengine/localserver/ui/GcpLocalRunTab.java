@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.util.Base64;
 import com.google.api.services.iam.v1.Iam;
+import com.google.api.services.iam.v1.Iam.Projects.ServiceAccounts.Keys;
 import com.google.api.services.iam.v1.model.CreateServiceAccountKeyRequest;
 import com.google.api.services.iam.v1.model.ServiceAccountKey;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
@@ -32,10 +33,11 @@ import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.ui.util.event.FileFieldSetter;
 import com.google.cloud.tools.eclipse.ui.util.images.SharedImages;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,6 +52,7 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
 import org.eclipse.debug.ui.EnvironmentTab;
 import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -91,6 +94,7 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
   private ProjectSelector projectSelector;
   private Text serviceKeyInput;
   private ControlDecoration serviceKeyDecoration;
+  private Button createServiceKey;
 
   // We set up intermediary models between a run configuration and UI components for certain values,
   // because, e.g., the account selector cannot load an email if it is not logged in. In such a
@@ -186,8 +190,10 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     projectSelector.addSelectionChangedListener(new ISelectionChangedListener() {
       @Override
       public void selectionChanged(SelectionChangedEvent event) {
+        boolean projectSelected = !projectSelector.getSelection().isEmpty();
+        createServiceKey.setEnabled(projectSelected);
+
         if (!initializingUiValues) {
-          boolean projectSelected = !projectSelector.getSelectProjectId().isEmpty();
           boolean savedIdAvailable = projectSelector.isProjectIdAvailable(gcpProjectIdModel);
           // 1. If some project is selected, always save it.
           // 2. Otherwise (no project selected), clear the saved project only when it is certain
@@ -223,30 +229,21 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     String[] filterExtensions = new String[] {"*.json"}; //$NON-NLS-1$
     browse.addSelectionListener(new FileFieldSetter(serviceKeyInput, filterExtensions));
 
-    FieldDecorationRegistry registry = FieldDecorationRegistry.getDefault();
-    Image infoImage = registry.getFieldDecoration(FieldDecorationRegistry.DEC_INFORMATION)
-        .getImage();
-
     serviceKeyDecoration = new ControlDecoration(serviceKeyInput, SWT.LEAD | SWT.TOP);
-    serviceKeyDecoration.setImage(infoImage);
     serviceKeyDecoration.hide();
 
-    Button createKey = new Button(composite, SWT.NONE);
-    createKey.setText("Create New Key");
-    createKey.addSelectionListener(new SelectionAdapter() {
+    createServiceKey = new Button(composite, SWT.NONE);
+    createServiceKey.setText("Create New Key");
+    createServiceKey.addSelectionListener(new SelectionAdapter() {
       @Override
       public void widgetSelected(SelectionEvent event) {
-        String path = createServiceAccountKey();
-        String keyCreatedMessage = "A service key (JSON) for the App Engine default service account created and set: " + path;
-        serviceKeyDecoration.show();
-        serviceKeyDecoration.setDescriptionText(keyCreatedMessage);
-        serviceKeyDecoration.showHoverText(keyCreatedMessage);
+        createServiceAccountKey();
       }
     });
 
     GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.TOP).applyTo(projectLabel);
     GridDataFactory.fillDefaults().span(2, 1).applyTo(accountSelector);
-    GridDataFactory.swtDefaults().span(3, 1).align(SWT.END, SWT.CENTER).applyTo(createKey);
+    GridDataFactory.swtDefaults().span(3, 1).align(SWT.END, SWT.CENTER).applyTo(createServiceKey);
     GridLayoutFactory.swtDefaults().numColumns(3).generateLayout(composite);
 
     GridDataFactory.fillDefaults().span(2, 1).applyTo(projectSelectorComposite);
@@ -399,30 +396,70 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     }
   }
 
-  private String createServiceAccountKey() {
+  private void createServiceAccountKey() {
     Credential credential = accountSelector.getSelectedCredential();
-    Iam iam = googleApiFactory.newIamApi(credential);
+    String projectId = projectSelector.getSelectProjectId();
+    Preconditions.checkNotNull(credential, "button enabled while account not selected");
+    Preconditions.checkState(!projectId.isEmpty(), "button enabled while project not selected");
 
     try {
-      CreateServiceAccountKeyRequest request = new CreateServiceAccountKeyRequest();
-      ServiceAccountKey key = iam.projects()
-          .serviceAccounts()
-          .keys()
-          .create("projects/chanseok-playground-new/serviceAccounts/chanseok-playground-new@appspot.gserviceaccount.com", request)
-          .execute();
+      String appEngineDefaultServiceAccount = projectId + "@appspot.gserviceaccount.com";
+      String keyId = "projects/" + projectId + "/serviceAccounts/" + appEngineDefaultServiceAccount;
 
-      // Convert the key data to OAuth key JSON format
-      // The key file is base64 encoded in the privateKeyData field of the IAM response
-      String jsonKey =
-          new String(Base64.decodeBase64(key.getPrivateKeyData()), StandardCharsets.UTF_8);
+      Iam iam = googleApiFactory.newIamApi(credential);
+      Keys keys = iam.projects().serviceAccounts().keys();
+      CreateServiceAccountKeyRequest createRequest = new CreateServiceAccountKeyRequest();
+      ServiceAccountKey key = keys.create(keyId, createRequest).execute();
 
-      // key's JSON representation can now be displayed to the user / added to the
-      // project
-      System.out.println("[" + key.getPrivateKeyData() + "][" + jsonKey + "]");
+      byte[] jsonKey = Base64.decodeBase64(key.getPrivateKeyData());
+
+      Path basePath = Paths.get(System.getProperty("user.home"));
+      String filePrefix = "app-engine-default-service-account-key-" + projectId;
+      Path savedKey = writeToFile(basePath, filePrefix, ".json", jsonKey);
+
+      serviceKeyInput.setText(savedKey.toString());
+      showServiceKeyDecorationMessage("A service key (JSON) for the App Engine default service account created and set:\n" + savedKey, false /* errorImage */);
 
     } catch (IOException e) {
       logger.log(Level.SEVERE, e.getMessage(), e);
+      showServiceKeyDecorationMessage("Failed to create a service account key: " + e.getLocalizedMessage(), true /* errorImage */);
     }
-    return null;
+
+  }
+
+  private void showServiceKeyDecorationMessage(String message, boolean errorImage) {
+    FieldDecorationRegistry registry = FieldDecorationRegistry.getDefault();
+    FieldDecoration fieldDecoration = registry.getFieldDecoration(
+        errorImage ? FieldDecorationRegistry.DEC_ERROR : FieldDecorationRegistry.DEC_INFORMATION);
+
+    serviceKeyDecoration.show();
+    serviceKeyDecoration.setImage(fieldDecoration.getImage());
+    serviceKeyDecoration.setDescriptionText(message);
+    serviceKeyDecoration.showHoverText(message);
+  }
+
+  /**
+   * Writes {@code contents} into a file {@code <basePath>/<filePostfix><filePostfix>}, if it does
+   * not exist. If the file exists, tries a filename augmented with an increasing tag number of the
+   * form {@code <basePath>/<filePostfix>-<tag number><filePostfix>} until it finds a non-exsting
+   * filename.
+   *
+   * Not intended to create a file inside a workspace or a project. (It works, but Eclipse needs to
+   * refresh the file to pick up the changes.)
+   *
+   * @return {@link Path} of the created file
+   */
+  private Path writeToFile(Path basePath, String filePrefix, String filePostfix, byte[] contents)
+      throws IOException {
+    Path path = basePath.resolve(filePrefix + filePostfix);
+    int tag = 1;
+    while (true) {
+      if (!Files.exists(path)) {
+        Files.write(path, contents);
+        return path;
+      }
+      path = basePath.resolve(filePrefix + "-" + tag + filePostfix);
+      tag++;
+    }
   }
 }
