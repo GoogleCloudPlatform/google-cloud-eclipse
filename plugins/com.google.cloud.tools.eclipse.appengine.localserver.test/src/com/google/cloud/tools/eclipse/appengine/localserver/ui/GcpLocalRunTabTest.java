@@ -110,6 +110,7 @@ public class GcpLocalRunTabTest {
   private AccountSelector accountSelector;
   private ProjectSelector projectSelector;
   private Text serviceKeyText;
+  private Path keyFile;
 
   @Before
   public void setUp() throws ProjectRepositoryException {
@@ -133,6 +134,8 @@ public class GcpLocalRunTabTest {
     assertNotNull(accountSelector);
     assertNotNull(projectSelector);
     assertNotNull(serviceKeyText);
+
+    keyFile = tempFolder.getRoot().toPath().resolve("key.json");
   }
 
   @After
@@ -362,7 +365,17 @@ public class GcpLocalRunTabTest {
   public void testCreateServiceAccountKey() throws IOException, CoreException {
     setUpServiceKeyCreation(false);
 
-    Path keyFile = tempFolder.getRoot().toPath().resolve("key.json");
+    tab.createServiceAccountKey(keyFile);
+
+    byte[] bytesRead = Files.readAllBytes(keyFile);
+    assertEquals("key data in JSON format", new String(bytesRead, StandardCharsets.UTF_8));
+  }
+
+  @Test
+  public void testCreateServiceAccountKey_replacesExistingKey() throws IOException, CoreException {
+    setUpServiceKeyCreation(false);
+
+    Files.write(keyFile, new byte[] {0, 1, 2});
     tab.createServiceAccountKey(keyFile);
 
     byte[] bytesRead = Files.readAllBytes(keyFile);
@@ -373,7 +386,6 @@ public class GcpLocalRunTabTest {
   public void testCreateServiceAccountKey_uiResult() throws IOException, CoreException {
     setUpServiceKeyCreation(false);
 
-    Path keyFile = tempFolder.getRoot().toPath().resolve("key.json");
     tab.createServiceAccountKey(keyFile);
 
     assertEquals(keyFile.toString(), serviceKeyText.getText());
@@ -385,7 +397,6 @@ public class GcpLocalRunTabTest {
   public void testCreateServiceAccountKey_ioException() throws IOException, CoreException {
     setUpServiceKeyCreation(true);
 
-    Path keyFile = tempFolder.getRoot().toPath().resolve("key.json");
     tab.createServiceAccountKey(keyFile);
 
     assertFalse(Files.exists(keyFile));

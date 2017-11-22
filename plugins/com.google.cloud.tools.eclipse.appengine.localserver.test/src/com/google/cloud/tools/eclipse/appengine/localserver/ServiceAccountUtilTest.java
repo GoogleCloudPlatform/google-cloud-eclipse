@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -51,6 +52,13 @@ public class ServiceAccountUtilTest {
 
   @Mock private Credential credential;
   @Mock private IGoogleApiFactory apiFactory;
+
+  private Path keyFile;
+
+  @Before
+  public void setUp() {
+    keyFile = tempFolder.getRoot().toPath().resolve("key.json");
+  }
 
   public static void setUpServiceKeyCreation(
       IGoogleApiFactory mockApiFactory, boolean throwException) throws IOException {
@@ -81,7 +89,18 @@ public class ServiceAccountUtilTest {
   public void testCreateServiceAccountKey() throws IOException {
     setUpServiceKeyCreation(apiFactory, false);
 
-    Path keyFile = tempFolder.getRoot().toPath().resolve("key.json");
+    ServiceAccountUtil.createServiceAccountKey(apiFactory, credential, "my-project",
+        "my-service-account@example.com",  keyFile);
+
+    byte[] bytesRead = Files.readAllBytes(keyFile);
+    assertEquals("key data in JSON format", new String(bytesRead, StandardCharsets.UTF_8));
+  }
+
+  @Test
+  public void testCreateServiceAccountKey_replacesExistingFile() throws IOException {
+    setUpServiceKeyCreation(apiFactory, false);
+
+    Files.write(keyFile, new byte[] {0, 1, 2});
     ServiceAccountUtil.createServiceAccountKey(apiFactory, credential, "my-project",
         "my-service-account@example.com",  keyFile);
 
@@ -93,7 +112,6 @@ public class ServiceAccountUtilTest {
   public void testCreateServiceAccountKey_ioException() throws IOException {
     setUpServiceKeyCreation(apiFactory, true);
 
-    Path keyFile = tempFolder.getRoot().toPath().resolve("key.json");
     try {
       ServiceAccountUtil.createServiceAccountKey(apiFactory, credential, "my-project",
           "my-service-account@example.com",  keyFile);
