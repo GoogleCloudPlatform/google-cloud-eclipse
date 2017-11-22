@@ -359,6 +359,25 @@ public class SwtBotTreeUtilities {
     });
   }
 
+  /**
+   * Wait until a tree item contains a child with the given text.
+   * 
+   * @throws TimeoutException if the child does not appear within the default timeout
+   */
+  public static void waitUntilTreeItemhasChild(SWTWorkbenchBot bot, final SWTBotTreeItem treeItem,
+      final String childText) {
+    bot.waitUntil(new DefaultCondition() {
+      @Override
+      public String getFailureMessage() {
+        return "Tree items never disappeared";
+      }
+
+      @Override
+      public boolean test() throws Exception {
+        return treeItem.getNodes().contains(childText);
+      }
+    });
+  }
 
   /**
    * Wait until the tree item contains the given text with the
