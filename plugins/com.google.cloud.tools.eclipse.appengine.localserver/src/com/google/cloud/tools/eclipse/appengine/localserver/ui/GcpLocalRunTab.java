@@ -245,16 +245,16 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     });
 
     GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.TOP).applyTo(projectLabel);
-    GridDataFactory.fillDefaults().span(2, 1).applyTo(accountSelector);
-    GridDataFactory.swtDefaults().span(3, 1).align(SWT.END, SWT.CENTER).applyTo(createServiceKey);
-    GridLayoutFactory.swtDefaults().numColumns(3).generateLayout(composite);
+    GridDataFactory.fillDefaults().span(3, 1).applyTo(accountSelector);
+    GridDataFactory.swtDefaults().align(SWT.END, SWT.CENTER).applyTo(createServiceKey);
 
-    GridDataFactory.fillDefaults().span(2, 1).applyTo(projectSelectorComposite);
+    GridDataFactory.fillDefaults().span(3, 1).applyTo(projectSelectorComposite);
     GridDataFactory.fillDefaults().applyTo(filterField);
     GridDataFactory.fillDefaults().grab(true, false).hint(300, 200)
         .applyTo(projectSelector);
 
     GridLayoutFactory.fillDefaults().spacing(0, 0).generateLayout(projectSelectorComposite);
+    GridLayoutFactory.swtDefaults().numColumns(4).generateLayout(composite);
 
     setControl(composite);
   }
