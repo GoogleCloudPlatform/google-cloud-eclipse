@@ -228,10 +228,16 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
 
     createServiceKey = new Button(composite, SWT.NONE);
     createServiceKey.setText(Messages.getString("create.new.service.key")); //$NON-NLS-1$
+    createServiceKey.setToolTipText(
+        Messages.getString("create.new.service.key.tooltip")); //$NON-NLS-1$
     createServiceKey.addSelectionListener(new SelectionAdapter() {
       @Override
       public void widgetSelected(SelectionEvent event) {
-        createServiceAccountKey(getServiceAccountKeyPath());
+        BusyIndicator.showWhile(createServiceKey.getDisplay(), new Runnable() {
+          @Override
+          public void run() {
+            createServiceAccountKey(getServiceAccountKeyPath());
+          }});
       }
     });
 
@@ -415,23 +421,23 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
 
       serviceKeyInput.setText(keyFile.toString());
       String message = Messages.getString("service.key.created", keyFile); //$NON-NLS-1$
-      showServiceKeyDecorationMessage(message, false /* errorImage */);
+      showServiceKeyDecorationMessage(message, false /* isError */);
 
     } catch (FileAlreadyExistsException e) {
       String message = Messages.getString("service.key.already.exists", keyFile); //$NON-NLS-1$
-      showServiceKeyDecorationMessage(message, true /* errorImage */);
+      showServiceKeyDecorationMessage(message, true /* isError */);
     } catch (IOException e) {
       logger.log(Level.SEVERE, e.getMessage(), e);
       String message = Messages.getString("cannot.create.service.key",  //$NON-NLS-1$
           e.getLocalizedMessage());
-      showServiceKeyDecorationMessage(message, true /* errorImage */);
+      showServiceKeyDecorationMessage(message, true /* isError */);
     }
   }
 
-  private void showServiceKeyDecorationMessage(String message, boolean errorImage) {
+  private void showServiceKeyDecorationMessage(String message, boolean isError) {
     FieldDecorationRegistry registry = FieldDecorationRegistry.getDefault();
     FieldDecoration fieldDecoration = registry.getFieldDecoration(
-        errorImage ? FieldDecorationRegistry.DEC_ERROR : FieldDecorationRegistry.DEC_INFORMATION);
+        isError ? FieldDecorationRegistry.DEC_ERROR : FieldDecorationRegistry.DEC_INFORMATION);
 
     serviceKeyDecoration.show();
     serviceKeyDecoration.setImage(fieldDecoration.getImage());
