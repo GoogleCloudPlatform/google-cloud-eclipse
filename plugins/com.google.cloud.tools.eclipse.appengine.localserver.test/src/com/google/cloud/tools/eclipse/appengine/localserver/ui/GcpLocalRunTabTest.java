@@ -56,6 +56,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
@@ -411,7 +412,7 @@ public class GcpLocalRunTabTest {
     accountSelector.selectAccount("email-1@example.com");
     projectSelector.selectProjectId("email-1-project-A");
 
-    Path expected = Paths.get(System.getProperty("user.home"))
+    Path expected = Paths.get(Platform.getConfigurationLocation().getURL().getPath())
         .resolve("app-engine-default-service-account-key-email-1-project-A.json");
     assertEquals(expected, tab.getServiceAccountKeyPath());
   }

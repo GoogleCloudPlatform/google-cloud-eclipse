@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
@@ -405,7 +406,7 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     String projectId = projectSelector.getSelectProjectId();
     String filename = "app-engine-default-service-account-key-" //$NON-NLS-1$
         + projectId + ".json"; //$NON-NLS-1$
-    return Paths.get(System.getProperty("user.home")).resolve(filename); //$NON-NLS-1$
+    return Paths.get(Platform.getConfigurationLocation().getURL().getPath()).resolve(filename);
   }
 
   @VisibleForTesting
