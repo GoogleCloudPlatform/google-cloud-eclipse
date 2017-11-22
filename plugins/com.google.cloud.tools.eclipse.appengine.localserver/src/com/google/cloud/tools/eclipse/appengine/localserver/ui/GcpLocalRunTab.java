@@ -32,7 +32,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.io.IOException;
-import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -84,6 +83,7 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
 
   private final EnvironmentTab environmentTab;
   private final IGoogleLoginService loginService;
+  private final IGoogleApiFactory googleApiFactory;
   private final ProjectRepository projectRepository;
 
   private AccountSelector accountSelector;
@@ -113,14 +113,16 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
   public GcpLocalRunTab(EnvironmentTab environmentTab) {
     this(environmentTab,
         PlatformUI.getWorkbench().getService(IGoogleLoginService.class),
+        PlatformUI.getWorkbench().getService(IGoogleApiFactory.class),
         new ProjectRepository(PlatformUI.getWorkbench().getService(IGoogleApiFactory.class)));
   }
 
   @VisibleForTesting
   GcpLocalRunTab(EnvironmentTab environmentTab, IGoogleLoginService loginService,
-      ProjectRepository projectRepository) {
+      IGoogleApiFactory googleApiFactory, ProjectRepository projectRepository) {
     this.environmentTab = environmentTab;
     this.loginService = loginService;
+    this.googleApiFactory = googleApiFactory;
     this.projectRepository = projectRepository;
   }
 
@@ -416,16 +418,13 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     try {
       String appEngineServiceAccountId = projectId + "@appspot.gserviceaccount.com"; //$NON-NLS-1$
 
-      ServiceAccountUtil.createServiceAccountKey(
+      ServiceAccountUtil.createServiceAccountKey(googleApiFactory,
           credential, projectId, appEngineServiceAccountId, keyFile);
 
       serviceKeyInput.setText(keyFile.toString());
       String message = Messages.getString("service.key.created", keyFile); //$NON-NLS-1$
       showServiceKeyDecorationMessage(message, false /* isError */);
 
-    } catch (FileAlreadyExistsException e) {
-      String message = Messages.getString("service.key.already.exists", keyFile); //$NON-NLS-1$
-      showServiceKeyDecorationMessage(message, true /* isError */);
     } catch (IOException e) {
       logger.log(Level.SEVERE, e.getMessage(), e);
       String message = Messages.getString("cannot.create.service.key",  //$NON-NLS-1$

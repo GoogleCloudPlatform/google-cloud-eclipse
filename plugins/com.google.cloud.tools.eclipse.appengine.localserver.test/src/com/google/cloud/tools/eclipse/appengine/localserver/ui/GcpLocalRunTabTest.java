@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -29,20 +28,12 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.util.Base64;
-import com.google.api.services.iam.v1.Iam;
-import com.google.api.services.iam.v1.Iam.Projects;
-import com.google.api.services.iam.v1.Iam.Projects.ServiceAccounts;
-import com.google.api.services.iam.v1.Iam.Projects.ServiceAccounts.Keys;
-import com.google.api.services.iam.v1.Iam.Projects.ServiceAccounts.Keys.Create;
-import com.google.api.services.iam.v1.model.CreateServiceAccountKeyRequest;
-import com.google.api.services.iam.v1.model.ServiceAccountKey;
+import com.google.cloud.tools.eclipse.appengine.localserver.ServiceAccountUtilTest;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
@@ -133,7 +124,7 @@ public class GcpLocalRunTabTest {
     when(projectRepository.getProjects(credential1)).thenReturn(projectsOfEmail1);
     when(projectRepository.getProjects(credential2)).thenReturn(projectsOfEmail2);
 
-    tab = new GcpLocalRunTab(environmentTab, loginService, projectRepository);
+    tab = new GcpLocalRunTab(environmentTab, loginService, apiFactory, projectRepository);
     tab.createControl(shell);
 
     accountSelector = CompositeUtil.findControl(shell, AccountSelector.class);
@@ -362,28 +353,7 @@ public class GcpLocalRunTabTest {
   }
 
   private void setUpServiceKeyCreation(boolean throwException) throws IOException, CoreException {
-    Iam iam = mock(Iam.class);
-    Projects projects = mock(Projects.class);
-    ServiceAccounts serviceAccounts = mock(ServiceAccounts.class);
-    Keys keys = mock(Keys.class);
-    Create create = mock(Create.class);
-
-    ServiceAccountKey serviceAccountKey = new ServiceAccountKey();
-    byte[] keyContent = "key data in JSON format".getBytes();
-    serviceAccountKey.setPrivateKeyData(Base64.encodeBase64String(keyContent));
-
-    when(apiFactory.newIamApi(any(Credential.class))).thenReturn(iam);
-    when(iam.projects()).thenReturn(projects);
-    when(projects.serviceAccounts()).thenReturn(serviceAccounts);
-    when(serviceAccounts.keys()).thenReturn(keys);
-    when(keys.create(anyString(), any(CreateServiceAccountKeyRequest.class))).thenReturn(create);
-
-    if (throwException) {
-      when(create.execute()).thenThrow(new IOException("log from unit test"));
-    } else {
-      when(create.execute()).thenReturn(serviceAccountKey);
-    }
-
+    ServiceAccountUtilTest.setUpServiceKeyCreation(apiFactory, throwException);
     mockLaunchConfig("email-1@example.com", "email-1-project-A", "");
     tab.initializeFrom(launchConfig);
   }
@@ -400,27 +370,15 @@ public class GcpLocalRunTabTest {
   }
 
   @Test
-  public void testCreateServiceAccountKey_decorationMessage() throws IOException, CoreException {
+  public void testCreateServiceAccountKey_uiResult() throws IOException, CoreException {
     setUpServiceKeyCreation(false);
 
     Path keyFile = tempFolder.getRoot().toPath().resolve("key.json");
     tab.createServiceAccountKey(keyFile);
 
-    assertThat(tab.serviceKeyDecoration.getDescriptionText(),
-        startsWith("A service key for the App Engine default service account created and set:"));
-  }
-
-  @Test
-  public void testCreateServiceAccountKey_creationFailure() throws IOException, CoreException {
-    setUpServiceKeyCreation(true);
-
-    Path keyFile = tempFolder.getRoot().toPath().resolve("key.json");
-    Files.write(keyFile, new byte[] {0, 1, 2});
-    tab.createServiceAccountKey(keyFile);
-
-    assertArrayEquals(new byte[] {0, 1, 2}, Files.readAllBytes(keyFile));
-    assertThat(tab.serviceKeyDecoration.getDescriptionText(),
-        startsWith("Failed to create a service account key. A file already exists:"));
+    assertEquals(keyFile.toString(), serviceKeyText.getText());
+    assertEquals("Created a service account key for the App Engine default service account:\n"
+        + keyFile, tab.serviceKeyDecoration.getDescriptionText());
   }
 
   @Test
@@ -432,7 +390,7 @@ public class GcpLocalRunTabTest {
 
     assertFalse(Files.exists(keyFile));
     assertThat(tab.serviceKeyDecoration.getDescriptionText(),
-        startsWith("Failed to create a service account key:"));
+        startsWith("Could not create a service account key:"));
     assertThat(tab.serviceKeyDecoration.getDescriptionText(), containsString("log from unit test"));
   }
 
