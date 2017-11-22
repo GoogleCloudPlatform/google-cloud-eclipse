@@ -133,7 +133,7 @@ public class GcpLocalRunTabTest {
     when(projectRepository.getProjects(credential1)).thenReturn(projectsOfEmail1);
     when(projectRepository.getProjects(credential2)).thenReturn(projectsOfEmail2);
 
-    tab = new GcpLocalRunTab(environmentTab, loginService, apiFactory, projectRepository);
+    tab = new GcpLocalRunTab(environmentTab, loginService, projectRepository);
     tab.createControl(shell);
 
     accountSelector = CompositeUtil.findControl(shell, AccountSelector.class);

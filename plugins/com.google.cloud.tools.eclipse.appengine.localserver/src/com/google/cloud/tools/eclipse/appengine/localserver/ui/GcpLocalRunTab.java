@@ -17,12 +17,8 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.util.Base64;
-import com.google.api.services.iam.v1.Iam;
-import com.google.api.services.iam.v1.Iam.Projects.ServiceAccounts.Keys;
-import com.google.api.services.iam.v1.model.CreateServiceAccountKeyRequest;
-import com.google.api.services.iam.v1.model.ServiceAccountKey;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
+import com.google.cloud.tools.eclipse.appengine.localserver.ServiceAccountUtil;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
@@ -36,6 +32,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -87,7 +84,6 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
 
   private final EnvironmentTab environmentTab;
   private final IGoogleLoginService loginService;
-  private final IGoogleApiFactory googleApiFactory;
   private final ProjectRepository projectRepository;
 
   private AccountSelector accountSelector;
@@ -117,16 +113,14 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
   public GcpLocalRunTab(EnvironmentTab environmentTab) {
     this(environmentTab,
         PlatformUI.getWorkbench().getService(IGoogleLoginService.class),
-        PlatformUI.getWorkbench().getService(IGoogleApiFactory.class),
         new ProjectRepository(PlatformUI.getWorkbench().getService(IGoogleApiFactory.class)));
   }
 
   @VisibleForTesting
   GcpLocalRunTab(EnvironmentTab environmentTab, IGoogleLoginService loginService,
-      IGoogleApiFactory googleApiFactory, ProjectRepository projectRepository) {
+      ProjectRepository projectRepository) {
     this.environmentTab = environmentTab;
     this.loginService = loginService;
-    this.googleApiFactory = googleApiFactory;
     this.projectRepository = projectRepository;
   }
 
@@ -413,30 +407,19 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     Preconditions.checkNotNull(credential, "account not selected"); //$NON-NLS-1$
     Preconditions.checkState(!projectId.isEmpty(), "project not selected"); //$NON-NLS-1$
 
-    if (Files.exists(keyFile)) {
-      String message = Messages.getString("service.key.already.exists", keyFile); //$NON-NLS-1$
-      showServiceKeyDecorationMessage(message, true /* errorImage */);
-      return;
-    }
-
     try {
-      String appEngineServiceAccount = projectId + "@appspot.gserviceaccount.com"; //$NON-NLS-1$
-      String keyId = "projects/" + projectId //$NON-NLS-1$
-          + "/serviceAccounts/" + appEngineServiceAccount; //$NON-NLS-1$
+      String appEngineServiceAccountId = projectId + "@appspot.gserviceaccount.com"; //$NON-NLS-1$
 
-      Iam iam = googleApiFactory.newIamApi(credential);
-      Keys keys = iam.projects().serviceAccounts().keys();
-      CreateServiceAccountKeyRequest createRequest = new CreateServiceAccountKeyRequest();
-      ServiceAccountKey key = keys.create(keyId, createRequest).execute();
+      ServiceAccountUtil.createServiceAccountKey(
+          credential, projectId, appEngineServiceAccountId, keyFile);
 
-      byte[] jsonKey = Base64.decodeBase64(key.getPrivateKeyData());
-
-      Files.write(keyFile, jsonKey);
       serviceKeyInput.setText(keyFile.toString());
-
       String message = Messages.getString("service.key.created", keyFile); //$NON-NLS-1$
       showServiceKeyDecorationMessage(message, false /* errorImage */);
 
+    } catch (FileAlreadyExistsException e) {
+      String message = Messages.getString("service.key.already.exists", keyFile); //$NON-NLS-1$
+      showServiceKeyDecorationMessage(message, true /* errorImage */);
     } catch (IOException e) {
       logger.log(Level.SEVERE, e.getMessage(), e);
       String message = Messages.getString("cannot.create.service.key",  //$NON-NLS-1$
