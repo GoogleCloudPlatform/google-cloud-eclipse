@@ -25,6 +25,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -169,10 +170,10 @@ public class RunOptionsDefaultsComponentTest {
     doReturn(storageApi).when(apiFactory).newStorageApi(credential);
     doReturn(bucketsApi).when(storageApi).buckets();
     doThrow(new IOException("not found")).when(bucketsApi).list(anyString());
-    doReturn(listApi).when(bucketsApi).list(projectId);
+    doReturn(listApi).when(bucketsApi).list(eq(projectId));
     doReturn(buckets).when(listApi).execute();
     
-    when(bucketsApi.insert(projectId, any(Bucket.class))).thenAnswer(new Answer<Insert>() {
+    when(bucketsApi.insert(eq(projectId), any(Bucket.class))).thenAnswer(new Answer<Insert>() {
       @Override
       public Insert answer(InvocationOnMock invocation) throws Throwable {
         final Bucket newBucket = invocation.getArgumentAt(1, Bucket.class);
@@ -425,18 +426,18 @@ public class RunOptionsDefaultsComponentTest {
   }
   
   @Test
-  public void testBucketNameStatus_createIsOk() {
+  public void testBucketNameStatus_createIsOk() throws InterruptedException {
     component.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
     waitUntilResolvedProject();
-    component.setStagingLocationText("gs://alice-bucket-2/non-existent");
-    spinEvents();
-    verify(messageTarget).setError("Could not fetch bucket gs://alice-bucket-2/non-existent");
+    component.setStagingLocationText("gs://alice-bucket-non-existent");
+    component.verifyStagingLocationJob.join();
+    component.validate();
+    verify(messageTarget).setError("Could not fetch bucket alice-bucket-non-existent.");
     
     new SWTBotButton(createButton).click();
-    spinEvents();
-    verify(messageTarget).clear();
-    verify(messageTarget).setInfo("Bucket gs://alice-bucket-2/non-existent created");
+    component.validate();
+    verify(messageTarget).setInfo("Created staging location at gs://alice-bucket-non-existent");
   }
 
   @Test

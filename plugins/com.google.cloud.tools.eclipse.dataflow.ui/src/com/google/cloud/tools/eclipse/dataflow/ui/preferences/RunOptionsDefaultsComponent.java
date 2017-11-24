@@ -414,6 +414,7 @@ public class RunOptionsDefaultsComponent {
 
   public void setStagingLocationText(String stagingLocation) {
     stagingLocationInput.setText(stagingLocation);
+    startStagingLocationCheck(0);
   }
 
   public void addAccountSelectionListener(Runnable listener) {
