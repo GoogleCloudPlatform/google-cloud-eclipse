@@ -105,12 +105,9 @@ public class RunOptionsDefaultsComponent {
   private SelectFirstMatchingPrefixListener completionListener;
   private ControlDecoration stagingLocationResults;
 
-  @VisibleForTesting
-  GcpProjectServicesJob checkProjectConfigurationJob;
-  @VisibleForTesting
-  FetchStagingLocationsJob fetchStagingLocationsJob;
-  @VisibleForTesting
-  VerifyStagingLocationJob verifyStagingLocationJob;
+  private GcpProjectServicesJob checkProjectConfigurationJob;
+  private FetchStagingLocationsJob fetchStagingLocationsJob;
+  private VerifyStagingLocationJob verifyStagingLocationJob;
 
   public RunOptionsDefaultsComponent(Composite target, int columns, MessageTarget messageTarget,
       DataflowPreferences preferences) {
