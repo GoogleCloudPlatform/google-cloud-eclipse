@@ -200,6 +200,18 @@ public abstract class BasePluginXmlTest {
         "Require-Bundle", "com.google.guava", "bundle-version=\"[20.0.0,21.0.0)\"");
   }
 
+  @Test
+  public final void testGoogleApisImportVersions() throws IOException {
+    checkDependencyDirectives(
+        "Import-Package", "com.google.api.", "version=\"[1.23.0,1.24.0)\"");
+  }
+
+  @Test
+  public final void testGoogleApisExportVersions() throws IOException {
+    checkDependencyDirectives(
+        "Export-Package", "com.google.api.", "version=\"1.23.0\"");
+  }
+
   private void checkDependencyDirectives(
       String attributeName, String prefixToCheck, String versionString) throws IOException {
     String value = getManifestAttributes().getValue(attributeName);

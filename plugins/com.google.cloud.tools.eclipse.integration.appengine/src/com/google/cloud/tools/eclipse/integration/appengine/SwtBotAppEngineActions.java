@@ -29,6 +29,7 @@ import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.eclipse.swtbot.swt.finder.widgets.TimeoutException;
 import org.eclipse.wst.common.project.facet.core.FacetedProjectFramework;
 import org.junit.Assert;
@@ -137,7 +138,10 @@ public class SwtBotAppEngineActions {
     shell.activate();
 
     SwtBotTreeUtilities.waitUntilTreeHasItems(bot, bot.tree());
-    bot.tree().expandNode("General").select("Existing Projects into Workspace");
+    SWTBotTreeItem treeItem = bot.tree().expandNode("General");
+    SwtBotTreeUtilities.waitUntilTreeItemhasChild(bot, treeItem,
+        "Existing Projects into Workspace");
+    treeItem.select("Existing Projects into Workspace");
     bot.button("Next >").click();
 
     // current comboBox is associated with a radio button

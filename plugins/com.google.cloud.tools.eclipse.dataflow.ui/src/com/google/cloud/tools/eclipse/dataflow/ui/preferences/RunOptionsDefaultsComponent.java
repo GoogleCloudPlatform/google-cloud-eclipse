@@ -102,10 +102,11 @@ public class RunOptionsDefaultsComponent {
   private final Combo stagingLocationInput;
   private final Button createButton;
 
-  private GcpProjectServicesJob checkProjectConfigurationJob;
   private SelectFirstMatchingPrefixListener completionListener;
   private ControlDecoration stagingLocationResults;
 
+  @VisibleForTesting
+  GcpProjectServicesJob checkProjectConfigurationJob;
   @VisibleForTesting
   FetchStagingLocationsJob fetchStagingLocationsJob;
   @VisibleForTesting
@@ -566,5 +567,19 @@ public class RunOptionsDefaultsComponent {
     if (page != null) {
       page.setPageComplete(complete);
     }
+  }
+
+  @VisibleForTesting
+  void join() throws InterruptedException {
+    if (fetchStagingLocationsJob != null) {
+      fetchStagingLocationsJob.join();
+    }
+    if (verifyStagingLocationJob != null) {
+      verifyStagingLocationJob.join();
+    }
+    if (checkProjectConfigurationJob != null) {
+      checkProjectConfigurationJob.join();
+    }
+    projectInput.join();
   }
 }
