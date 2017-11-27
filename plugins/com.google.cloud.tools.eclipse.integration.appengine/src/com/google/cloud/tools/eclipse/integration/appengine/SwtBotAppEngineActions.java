@@ -171,7 +171,6 @@ public class SwtBotAppEngineActions {
 
         SwtBotTreeUtilities.waitUntilTreeHasItems(bot, bot.tree());
         SWTBotTreeItem treeItem = bot.tree().expandNode("General");
-        if (tries == 1) throw new TimeoutException("");
         SwtBotTreeUtilities.waitUntilTreeItemHasChild(bot, treeItem,
             "Existing Projects into Workspace");
         treeItem.select("Existing Projects into Workspace");
@@ -179,8 +178,7 @@ public class SwtBotAppEngineActions {
       } catch (TimeoutException e) {
         if (tries == 2) {
           throw e;
-        }
-        if (shell != null) {
+        } else if (shell != null) {
           shell.close();
         }
       }
