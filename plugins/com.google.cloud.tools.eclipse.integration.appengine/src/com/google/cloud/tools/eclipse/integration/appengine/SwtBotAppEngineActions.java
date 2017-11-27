@@ -132,16 +132,8 @@ public class SwtBotAppEngineActions {
    */
   public static IProject importNativeProject(SWTWorkbenchBot bot, String projectName,
       File extractedLocation) {
-    bot.menu("File").menu("Import...").click();
 
-    SWTBotShell shell = bot.shell("Import");
-    shell.activate();
-
-    SwtBotTreeUtilities.waitUntilTreeHasItems(bot, bot.tree());
-    SWTBotTreeItem treeItem = bot.tree().expandNode("General");
-    SwtBotTreeUtilities.waitUntilTreeItemHasChild(bot, treeItem,
-        "Existing Projects into Workspace");
-    treeItem.select("Existing Projects into Workspace");
+    openImportExistingProjectsWizard(bot);
     bot.button("Next >").click();
 
     // current comboBox is associated with a radio button
@@ -169,6 +161,31 @@ public class SwtBotAppEngineActions {
     return project;
   }
 
+  private static void openImportExistingProjectsWizard(SWTWorkbenchBot bot) {
+    for (int tries = 1; true; tries++) {
+      SWTBotShell shell = null;
+      try {
+        bot.menu("File").menu("Import...").click();
+        shell = bot.shell("Import");
+        shell.activate();
+
+        SwtBotTreeUtilities.waitUntilTreeHasItems(bot, bot.tree());
+        SWTBotTreeItem treeItem = bot.tree().expandNode("General");
+        if (tries == 1) throw new TimeoutException("");
+        SwtBotTreeUtilities.waitUntilTreeItemHasChild(bot, treeItem,
+            "Existing Projects into Workspace");
+        treeItem.select("Existing Projects into Workspace");
+        break;
+      } catch (TimeoutException e) {
+        if (tries == 2) {
+          throw e;
+        }
+        if (shell != null) {
+          shell.close();
+        }
+      }
+    }
+  }
 
   /**
    * Import a Maven project from a zip file
