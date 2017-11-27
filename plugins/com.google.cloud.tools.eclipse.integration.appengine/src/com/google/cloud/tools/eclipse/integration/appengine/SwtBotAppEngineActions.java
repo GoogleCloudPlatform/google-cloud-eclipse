@@ -143,9 +143,9 @@ public class SwtBotAppEngineActions {
       SwtBotTreeUtilities.waitUntilTreeItemhasChild(bot, treeItem,
           "Existing Projects into Workspace");
     } catch (TimeoutException e) {
-      System.out.println(treeItem + ": expanded? " + treeItem.isExpanded());
+      System.err.println(treeItem + ": expanded? " + treeItem.isExpanded());
       for (SWTBotTreeItem childNode : treeItem.getItems()) {
-        System.out.println("    " + childNode);
+        System.err.println("    " + childNode);
       }
       throw e;
     }
