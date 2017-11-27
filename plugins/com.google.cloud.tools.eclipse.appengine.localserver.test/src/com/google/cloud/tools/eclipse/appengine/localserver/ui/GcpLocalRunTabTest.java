@@ -413,6 +413,7 @@ public class GcpLocalRunTabTest {
     projectSelector.selectProjectId("email-1-project-A");
 
     Path expected = Paths.get(Platform.getConfigurationLocation().getURL().getPath())
+        .resolve("com.google.cloud.tools.eclipse")
         .resolve("app-engine-default-service-account-key-email-1-project-A.json");
     assertEquals(expected, tab.getServiceAccountKeyPath());
   }

@@ -46,6 +46,11 @@ public class ServiceAccountUtil {
     Preconditions.checkNotNull(credential, "credential not given");
     Preconditions.checkState(!projectId.isEmpty(), "project ID empty");
     Preconditions.checkState(!serviceAccountId.isEmpty(), "service account empty");
+    Preconditions.checkArgument(destination.isAbsolute(), "destination not absolute");
+
+    if (!Files.exists(destination.getParent())) {
+      Files.createDirectories(destination.getParent());
+    }
 
     Iam iam = apiFactory.newIamApi(credential);
     Keys keys = iam.projects().serviceAccounts().keys();

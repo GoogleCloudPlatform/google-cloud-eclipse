@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -86,11 +87,21 @@ public class ServiceAccountUtilTest {
   }
 
   @Test
+  public void testCreateServiceAccountKey_destinationShouldBeAbsolute() throws IOException {
+    try {
+      ServiceAccountUtil.createServiceAccountKey(apiFactory, credential, "my-project",
+          "my-service-account@example.com", Paths.get("relative/path/to.json"));
+    } catch (IllegalArgumentException e) {
+      assertEquals("destination not absolute", e.getMessage());
+    }
+  }
+
+  @Test
   public void testCreateServiceAccountKey() throws IOException {
     setUpServiceKeyCreation(apiFactory, false);
 
     ServiceAccountUtil.createServiceAccountKey(apiFactory, credential, "my-project",
-        "my-service-account@example.com",  keyFile);
+        "my-service-account@example.com", keyFile);
 
     byte[] bytesRead = Files.readAllBytes(keyFile);
     assertEquals("key data in JSON format", new String(bytesRead, StandardCharsets.UTF_8));
@@ -102,7 +113,7 @@ public class ServiceAccountUtilTest {
 
     Files.write(keyFile, new byte[] {0, 1, 2});
     ServiceAccountUtil.createServiceAccountKey(apiFactory, credential, "my-project",
-        "my-service-account@example.com",  keyFile);
+        "my-service-account@example.com", keyFile);
 
     byte[] bytesRead = Files.readAllBytes(keyFile);
     assertEquals("key data in JSON format", new String(bytesRead, StandardCharsets.UTF_8));
@@ -114,10 +125,22 @@ public class ServiceAccountUtilTest {
 
     try {
       ServiceAccountUtil.createServiceAccountKey(apiFactory, credential, "my-project",
-          "my-service-account@example.com",  keyFile);
+          "my-service-account@example.com", keyFile);
     } catch (IOException e) {
       assertEquals("log from unit test", e.getMessage());
     }
     assertFalse(Files.exists(keyFile));
+  }
+
+  @Test
+  public void testCreateServiceAccountKey_createsRequiredDirectories() throws IOException {
+    setUpServiceKeyCreation(apiFactory, false);
+
+    Path keyFile = tempFolder.getRoot().toPath().resolve("non/existing/directory/key.json");
+    ServiceAccountUtil.createServiceAccountKey(apiFactory, credential, "my-project",
+          "my-service-account@example.com", keyFile);
+
+    byte[] bytesRead = Files.readAllBytes(keyFile);
+    assertEquals("key data in JSON format", new String(bytesRead, StandardCharsets.UTF_8));
   }
 }
