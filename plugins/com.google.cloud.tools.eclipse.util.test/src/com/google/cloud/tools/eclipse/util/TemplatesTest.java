@@ -84,6 +84,18 @@ public class TemplatesTest {
 
     compareToFile("appengineWebXmlWithService.txt");
   }
+  
+  @Test
+  public void testCreateFileContent_appengineWebXmlWithRuntime()
+      throws CoreException, IOException {
+    dataMap.put("runtime", "java8");
+    Templates.createFileContent(fileLocation,
+        Templates.APPENGINE_WEB_XML_TEMPLATE,
+        dataMap);
+
+    compareToFile("appEngineWebXmlWithRuntime.txt");
+  }
+
 
   @Test
   public void testCreateFileContent_appYamlWithService()
@@ -162,6 +174,9 @@ public class TemplatesTest {
   private static InputStream getDataFile(String fileName) throws IOException {
     Bundle bundle = FrameworkUtil.getBundle(TemplatesTest.class);
     URL expectedFileUrl = bundle.getResource("/testData/templates/appengine/" + fileName);
+    if (expectedFileUrl == null) {
+      throw new IOException("Could not find comparison file " + fileName);
+    }
     return expectedFileUrl.openStream();
   }
 

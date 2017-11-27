@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.googleapis.internal;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -32,6 +33,8 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.services.appengine.v1.Appengine.Apps;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
+import com.google.api.services.iam.v1.Iam;
+import com.google.api.services.servicemanagement.ServiceManagement;
 import com.google.api.services.storage.Storage;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.cache.LoadingCache;
@@ -69,9 +72,34 @@ public class GoogleApiFactoryTest {
   }
 
   @Test
-  public void testNewStorageApi_Url() {
+  public void testNewAppsApi() {
+    Apps apps = googleApiFactory.newAppsApi(mock(Credential.class));
+    assertNotNull(apps);
+  }
+
+  @Test
+  public void testNewProjectsApi() {
+    Projects projects = googleApiFactory.newProjectsApi(mock(Credential.class));
+    assertNotNull(projects);
+  }
+
+  @Test
+  public void testNewStorageApi() {
     Storage storage = googleApiFactory.newStorageApi(mock(Credential.class));
-    assertEquals("https://www.googleapis.com/", storage.getRootUrl());
+    assertEquals("https://www.googleapis.com/storage/v1/", storage.getBaseUrl());
+  }
+
+  @Test
+  public void testNewServceManagementApi() {
+    ServiceManagement serviceManagement =
+        googleApiFactory.newServiceManagementApi(mock(Credential.class));
+    assertEquals("https://servicemanagement.googleapis.com/", serviceManagement.getBaseUrl());
+  }
+
+  @Test
+  public void testNewIamApi() {
+    Iam iam = googleApiFactory.newIamApi(mock(Credential.class));
+    assertEquals("https://iam.googleapis.com/", iam.getBaseUrl());
   }
 
   @Test

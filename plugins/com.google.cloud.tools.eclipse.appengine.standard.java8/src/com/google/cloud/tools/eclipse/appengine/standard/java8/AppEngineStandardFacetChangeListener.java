@@ -78,9 +78,6 @@ public class AppEngineStandardFacetChangeListener implements IFacetedProjectList
         if (isFacetJava8) {
           logger.fine(project + ": adding <runtime>java8</runtime> to appengine-web.xml");
           AppEngineDescriptorTransform.addJava8Runtime(descriptor);
-        } else {
-          logger.fine(project + ": removing <runtime>java8</runtime> from appengine-web.xml");
-          AppEngineDescriptorTransform.removeJava8Runtime(descriptor);
         }
       }
     } catch (SAXException | IOException | CoreException ex) {

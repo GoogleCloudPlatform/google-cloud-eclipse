@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
@@ -47,7 +48,6 @@ import com.google.api.services.storage.Storage.Buckets.Insert;
 import com.google.api.services.storage.model.Bucket;
 import com.google.api.services.storage.model.Buckets;
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferences;
-import com.google.cloud.tools.eclipse.dataflow.core.project.VerifyStagingLocationJob.VerifyStagingLocationResult;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.MessageTarget;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
@@ -57,12 +57,9 @@ import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.cloud.tools.login.Account;
 import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.ListenableFuture;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.concurrent.Future;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
@@ -249,7 +246,7 @@ public class RunOptionsDefaultsComponentTest {
     Assert.assertNull(component.getProject());
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
-    waitUntilResolvedProject();
+    join();
     Assert.assertNotNull(component.getProject());
     Assert.assertEquals("project", component.getProject().getId());
   }
@@ -300,7 +297,7 @@ public class RunOptionsDefaultsComponentTest {
   public void testEnablement_selectedProject() {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
-    waitUntilResolvedProject();
+    join();
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
@@ -325,15 +322,10 @@ public class RunOptionsDefaultsComponentTest {
   public void testEnablement_existingStagingLocation() {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
-    waitUntilResolvedProject();
+    join();
     component.setStagingLocationText("alice-bucket-1");
     component.startStagingLocationCheck(0); // force right now
-    final ListenableFuture<SortedSet<String>> fetchResult =
-        component.fetchStagingLocationsJob.getFuture();
-    final ListenableFuture<VerifyStagingLocationResult> verifyResult =
-        component.verifyStagingLocationJob.getFuture();
-    waitForFuture(verifyResult);
-    waitForFuture(fetchResult);
+    join();
     component.validate();
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
@@ -347,15 +339,12 @@ public class RunOptionsDefaultsComponentTest {
   public void testEnablement_nonExistentStagingLocation() {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
-    waitUntilResolvedProject();
+    join();
     component.setStagingLocationText("non-existent-bucket");
     component.startStagingLocationCheck(0); // force right now
-    ListenableFuture<VerifyStagingLocationResult> verifyResult =
-        component.verifyStagingLocationJob.getFuture();
-    waitForFuture(verifyResult);
+    join();
     component.validate();
     bot.waitUntil(widgetIsEnabled(new SWTBotButton(createButton)));
-    assertTrue(verifyResult.isDone());
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
@@ -368,7 +357,7 @@ public class RunOptionsDefaultsComponentTest {
   public void testStagingLocation() {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
-    waitUntilResolvedProject();
+    join();
 
     component.setStagingLocationText("foobar");
     Assert.assertEquals("gs://foobar", component.getStagingLocation());
@@ -378,13 +367,11 @@ public class RunOptionsDefaultsComponentTest {
   public void testAccountSelector_loadBucketCombo() {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
-    waitUntilResolvedProject();
-    waitForFuture(component.fetchStagingLocationsJob.getFuture());
+    join();
     assertStagingLocationCombo("gs://alice-bucket-1", "gs://alice-bucket-2");
 
     selector.selectAccount("bob@example.com");
-    waitUntilResolvedProject();
-    waitForFuture(component.fetchStagingLocationsJob.getFuture());
+    join();
     assertStagingLocationCombo("gs://bob-bucket");
   }
 
@@ -409,9 +396,9 @@ public class RunOptionsDefaultsComponentTest {
   public void testBucketNameStatus_gcsPathWithObjectIsOk() {
     component.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
-    waitUntilResolvedProject();
+    join();
     component.setStagingLocationText("alice-bucket-2/object");
-    spinEvents();
+    join();
     verify(messageTarget, never()).setError(anyString());
   }
 
@@ -419,9 +406,9 @@ public class RunOptionsDefaultsComponentTest {
   public void testBucketNameStatus_gcsUrlPathWithObjectIsOk() {
     component.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
-    waitUntilResolvedProject();
+    join();
     component.setStagingLocationText("gs://alice-bucket-2/object");
-    spinEvents();
+    join();
     verify(messageTarget, never()).setError(anyString());
   }
   
@@ -429,13 +416,14 @@ public class RunOptionsDefaultsComponentTest {
   public void testBucketNameStatus_createIsOk() throws InterruptedException {
     component.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
-    waitUntilResolvedProject();
+    join();
     component.setStagingLocationText("gs://alice-bucket-non-existent");
-    component.verifyStagingLocationJob.join();
+    join();
     component.validate();
     verify(messageTarget).setError("Could not fetch bucket alice-bucket-non-existent.");
     
     new SWTBotButton(createButton).click();
+    join();
     component.validate();
     verify(messageTarget).setInfo("Created staging location at gs://alice-bucket-non-existent");
   }
@@ -458,59 +446,27 @@ public class RunOptionsDefaultsComponentTest {
   public void testPartialValidity_account_project() throws InterruptedException {
     testPartialValidity_account();
     component.setCloudProjectText("project");
-    int i = 0;
-    do {
-      while (Display.getCurrent().readAndDispatch()) {
-        // spin
-      }
-      Thread.sleep(50);
-    } while (i++ < 200 && !page.isPageComplete());
-
+    join();
     assertTrue("should be complete with account and project", page.isPageComplete());
-  }
-
-  /**
-   * Spin the display loop while the waitCondition is true or we timeout.
-   *
-   * @param waitCondition
-   */
-  private void waitForFuture(final Future<?> future) {
-    bot.waitUntil(new DefaultCondition() {
-      @Override
-      public boolean test() throws Exception {
-        if (Display.getCurrent() != null) {
-          // seems surprising that this is required?
-          while (Display.getCurrent().readAndDispatch());
-        }
-        return future.isDone();
-      }
-
-      @Override
-      public String getFailureMessage() {
-        return "Future never done";
-      }
-    });
   }
 
   /**
    * Spin until the RunOptionsDefaultsComponent has a project.
    */
-  private void waitUntilResolvedProject() {
-    bot.waitUntil(new DefaultCondition() {
-      @Override
-      public boolean test() throws Exception {
-        if (Display.getCurrent() != null) {
-          // seems surprising that this is required?
-          while (Display.getCurrent().readAndDispatch());
-        }
-        return component.getProject() != null;
-      }
-
-      @Override
-      public String getFailureMessage() {
-        return "RuntimeOptions project was never resolved";
-      }
-    });
+  private void join() {
+    if (Display.getCurrent() != null) {
+      // seems surprising that this is required?
+      while (Display.getCurrent().readAndDispatch());
+    }
+    try {
+      component.join();
+    } catch (InterruptedException ex) {
+      fail(ex.toString());
+    }
+    if (Display.getCurrent() != null) {
+      // seems surprising that this is required?
+      while (Display.getCurrent().readAndDispatch());
+    }
   }
 
   /**

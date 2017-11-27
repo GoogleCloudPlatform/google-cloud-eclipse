@@ -214,6 +214,13 @@ public class MiniSelector implements ISelectionProvider {
     comboViewer.removePostSelectionChangedListener(listener);
   }
 
+  @VisibleForTesting
+  public void join() throws InterruptedException {
+    if (fetchProjectsJob != null) {
+      fetchProjectsJob.join();
+    }
+  }
+
   /**
    * Simple job for fetching projects accessible to the current account.
    */
