@@ -75,6 +75,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
@@ -419,12 +420,13 @@ public class RunOptionsDefaultsComponentTest {
     join();
     component.setStagingLocationText("gs://alice-bucket-non-existent");
     join();
+    Mockito.reset(messageTarget);
     component.validate();
     verify(messageTarget).setError("Could not fetch bucket alice-bucket-non-existent.");
     
+    Mockito.reset(messageTarget);
     new SWTBotButton(createButton).click();
     join();
-    component.validate();
     verify(messageTarget).setInfo("Created staging location at gs://alice-bucket-non-existent");
   }
 
