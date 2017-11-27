@@ -139,8 +139,16 @@ public class SwtBotAppEngineActions {
 
     SwtBotTreeUtilities.waitUntilTreeHasItems(bot, bot.tree());
     SWTBotTreeItem treeItem = bot.tree().expandNode("General");
-    SwtBotTreeUtilities.waitUntilTreeItemhasChild(bot, treeItem,
-        "Existing Projects into Workspace");
+    try {
+      SwtBotTreeUtilities.waitUntilTreeItemhasChild(bot, treeItem,
+          "Existing Projects into Workspace");
+    } catch (TimeoutException e) {
+      System.out.println(treeItem + ": expanded? " + treeItem.isExpanded());
+      for (SWTBotTreeItem childNode : treeItem.getItems()) {
+        System.out.println("    " + childNode);
+      }
+      throw e;
+    }
     treeItem.select("Existing Projects into Workspace");
     bot.button("Next >").click();
 

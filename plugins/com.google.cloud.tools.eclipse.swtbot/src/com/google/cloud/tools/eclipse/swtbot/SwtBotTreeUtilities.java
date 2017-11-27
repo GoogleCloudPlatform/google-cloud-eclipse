@@ -369,7 +369,7 @@ public class SwtBotTreeUtilities {
     bot.waitUntil(new DefaultCondition() {
       @Override
       public String getFailureMessage() {
-        return "Tree items never disappeared";
+        return "Tree item never appeared";
       }
 
       @Override
