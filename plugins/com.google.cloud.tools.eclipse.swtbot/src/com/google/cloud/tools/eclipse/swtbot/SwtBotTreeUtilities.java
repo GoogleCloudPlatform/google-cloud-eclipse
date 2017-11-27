@@ -364,19 +364,27 @@ public class SwtBotTreeUtilities {
    * 
    * @throws TimeoutException if the child does not appear within the default timeout
    */
-  public static void waitUntilTreeItemhasChild(SWTWorkbenchBot bot, final SWTBotTreeItem treeItem,
+  public static void waitUntilTreeItemHasChild(SWTWorkbenchBot bot, final SWTBotTreeItem treeItem,
       final String childText) {
-    bot.waitUntil(new DefaultCondition() {
-      @Override
-      public String getFailureMessage() {
-        return "Tree item never appeared";
+    try {
+      bot.waitUntil(new DefaultCondition() {
+        @Override
+        public String getFailureMessage() {
+          return "Tree item never appeared";
+        }
+  
+        @Override
+        public boolean test() throws Exception {
+          return treeItem.getNodes().contains(childText);
+        }
+      });
+    } catch (TimeoutException e) {
+      System.err.println(treeItem + ": expanded? " + treeItem.isExpanded());
+      for (SWTBotTreeItem childNode : treeItem.getItems()) {
+        System.err.println("    " + childNode);
       }
-
-      @Override
-      public boolean test() throws Exception {
-        return treeItem.getNodes().contains(childText);
-      }
-    });
+      throw e;
+    }
   }
 
   /**
