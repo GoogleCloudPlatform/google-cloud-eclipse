@@ -455,4 +455,16 @@ public class GcpLocalRunTabTest {
         .resolve("app-engine-default-service-account-key-project-A.json");
     assertEquals(expected, tab.getServiceAccountKeyPath());
   }
+  
+  @Test
+  public void testGetServiceAccountKeyPath_internal() {
+    tab.initializeFrom(launchConfig);
+    accountSelector.selectAccount("account2@example.com");
+    projectSelector.selectProjectId("google.com:project-D");
+
+    Path expected = Paths.get(Platform.getConfigurationLocation().getURL().getPath())
+        .resolve("com.google.cloud.tools.eclipse")
+        .resolve("app-engine-default-service-account-key-google.com.project-D.json");
+    assertEquals(expected, tab.getServiceAccountKeyPath());
+  }
 }

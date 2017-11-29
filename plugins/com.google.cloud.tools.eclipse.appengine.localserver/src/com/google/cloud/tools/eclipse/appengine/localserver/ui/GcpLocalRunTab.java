@@ -406,6 +406,10 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     String projectId = projectSelector.getSelectedProjectId();
     String filename = "app-engine-default-service-account-key-" //$NON-NLS-1$
         + projectId + ".json"; //$NON-NLS-1$
+    
+    // can't use colons in filenames on Windows
+    filename = filename.replace(':', '.');
+    
     String configurationLocation = Platform.getConfigurationLocation().getURL().getPath();
     return Paths.get(configurationLocation + "/com.google.cloud.tools.eclipse/" + filename);
   }
