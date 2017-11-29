@@ -212,7 +212,9 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     });
 
     // Service key row
-    new Label(composite, SWT.LEAD).setText(Messages.getString("label.service.key")); //$NON-NLS-1$
+    Label serviceKeyLabel = new Label(composite, SWT.LEAD);
+    serviceKeyLabel.setText(Messages.getString("label.service.key")); //$NON-NLS-1$
+    
     serviceKeyInput = new Text(composite, SWT.BORDER);
     serviceKeyInput.addModifyListener(new ModifyListener() {
       @Override
@@ -252,6 +254,8 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     GridDataFactory.fillDefaults().applyTo(filterField);
     GridDataFactory.fillDefaults().grab(true, false).hint(300, 200)
         .applyTo(projectSelector);
+    GridDataFactory.swtDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false)
+        .applyTo(serviceKeyInput);
 
     GridLayoutFactory.fillDefaults().spacing(0, 0).generateLayout(projectSelectorComposite);
     GridLayoutFactory.swtDefaults().numColumns(4).generateLayout(composite);
