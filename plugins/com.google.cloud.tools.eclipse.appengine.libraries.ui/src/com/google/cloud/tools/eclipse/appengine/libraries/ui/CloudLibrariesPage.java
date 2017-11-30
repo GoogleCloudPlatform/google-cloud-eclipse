@@ -29,6 +29,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -129,7 +130,8 @@ public class CloudLibrariesPage extends WizardPage
     try {
       if (isMavenProject) {
         // No need for an Analytics ping here; addMavenLibraries will do it.
-        BuildPath.addMavenLibraries(project.getProject(), libraries, new NullProgressMonitor());
+        BuildPath.addMavenLibraries(project.getProject(), libraries, getAvailableLibraries(),
+            new NullProgressMonitor());
       } else {
         if (!libraries.isEmpty()) {
           AnalyticsLibraryPingHelper.sendLibrarySelectionPing(
@@ -171,7 +173,7 @@ public class CloudLibrariesPage extends WizardPage
   }
 
   @VisibleForTesting
-  void setSelectedLibraries(List<Library> selectedLibraries) {
+  void setSelectedLibraries(Collection<Library> selectedLibraries) {
     initialSelection = new ArrayList<>(selectedLibraries);
     if (!librariesSelectors.isEmpty()) {
       for (LibrarySelectorGroup librarySelector : librariesSelectors) {
@@ -182,17 +184,31 @@ public class CloudLibrariesPage extends WizardPage
 
   @Override
   public void setSelection(IClasspathEntry containerEntry) {
-    if (isMavenProject) {
-      // FIXME: read in current dependencies for maven projects
-      return;
-    }
     try {
-      List<Library> savedLibraries = BuildPath.loadLibraryList(project, new NullProgressMonitor());
+      Collection<Library> savedLibraries;
+      if (isMavenProject) {
+        // must pass in available libraries for filtering unrelated dependencies
+        savedLibraries = BuildPath.loadMavenLibraries(project, getAvailableLibraries(),
+            new NullProgressMonitor());
+      } else {
+        savedLibraries = BuildPath.loadLibraryList(project, new NullProgressMonitor());
+      }
       setSelectedLibraries(savedLibraries);
     } catch (CoreException ex) {
       logger.log(Level.WARNING,
           "Error loading selected library IDs for " + project.getElementName(), ex); //$NON-NLS-1$
     }
+  }
+
+  /**
+   * The libraries that are available for selection.
+   */
+  private List<Library> getAvailableLibraries() {
+    List<Library> available = new ArrayList<>();
+    for (String libraryGroupId : libraryGroups.keySet()) {
+      available.addAll(CloudLibraries.getLibraries(libraryGroupId));
+    }
+    return available;
   }
 
   @Override

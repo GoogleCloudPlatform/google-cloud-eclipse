@@ -51,7 +51,7 @@ public class BuildPathTest {
   public void testAddMavenLibraries_emptyList() throws CoreException {
     IProject project = null;
     List<Library> libraries = new ArrayList<>();
-    BuildPath.addMavenLibraries(project, libraries, monitor);
+    BuildPath.addMavenLibraries(project, libraries, null, monitor);
   }
 
   @Test

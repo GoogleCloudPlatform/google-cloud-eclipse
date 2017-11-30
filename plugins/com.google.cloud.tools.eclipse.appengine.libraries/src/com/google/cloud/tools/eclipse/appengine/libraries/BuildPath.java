@@ -26,6 +26,7 @@ import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -58,21 +59,41 @@ public class BuildPath {
 
   private static final Logger logger = Logger.getLogger(BuildPath.class.getName());
   
-  public static void addMavenLibraries(IProject project, List<Library> libraries,
-      IProgressMonitor monitor) throws CoreException {
-    if (libraries.isEmpty()) {
+  /**
+   * Set the Maven dependencies to the selected libraries, and optionally remove any traces of
+   * unselected libraries.
+   * 
+   * @param availableLibraries if provided, then remove dependencies that correspond to unselected
+   *        libraries from this list
+   */
+  public static void addMavenLibraries(IProject project, List<Library> selected,
+      Collection<Library> availableLibraries, IProgressMonitor monitor) throws CoreException {
+    if (selected.isEmpty() && (availableLibraries == null || availableLibraries.isEmpty())) {
+      // nothing to do: there are no dependencies to add and, without some libraries in
+      // availableLibraries, there are no dependencies to remove
       return;
     }
-    AnalyticsLibraryPingHelper.sendLibrarySelectionPing(AnalyticsEvents.MAVEN_PROJECT, libraries);
+    AnalyticsLibraryPingHelper.sendLibrarySelectionPing(AnalyticsEvents.MAVEN_PROJECT, selected);
 
-    // see m2e-core/org.eclipse.m2e.core.ui/src/org/eclipse/m2e/core/ui/internal/actions/AddDependencyAction.java
-    // m2e-core/org.eclipse.m2e.core.ui/src/org/eclipse/m2e/core/ui/internal/editing/AddDependencyOperation.java
+    IFile pomFile = project.getFile("pom.xml"); //$NON-NLS-1$
+    try {
+      Pom pom = Pom.parse(pomFile);
+      pom.addDependencies(selected, availableLibraries);
+    } catch (SAXException | IOException ex) {
+      IStatus status = StatusUtil.error(BuildPath.class, ex.getMessage(), ex);
+      throw new CoreException(status);
+    }
+  }
 
+  public static Collection<Library> loadMavenLibraries(IJavaProject javaProject,
+      Collection<Library> availableLibraries, IProgressMonitor monitor)
+      throws CoreException {
+    IProject project = javaProject.getProject();
     IFile pomFile = project.getFile("pom.xml"); //$NON-NLS-1$
 
     try {
       Pom pom = Pom.parse(pomFile);
-      pom.addDependencies(libraries);
+      return pom.resolveLibraries(availableLibraries);
     } catch (SAXException | IOException ex) {
       IStatus status = StatusUtil.error(BuildPath.class, ex.getMessage(), ex);
       throw new CoreException(status);

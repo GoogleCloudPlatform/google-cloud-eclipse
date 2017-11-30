@@ -173,4 +173,12 @@ public class CloudLibraries {
       library.setLibraryDependencies(transitiveDependencies);
     }
   }
+
+  /**
+   * @return
+   */
+  public static Object getAllLibraries() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 }
