@@ -69,6 +69,7 @@ public class BaseProjectTest {
         String fileName = SWTBotPreferences.SCREENSHOTS_DIR + "/" + "timeout-" + project.getName()
             + "." + SWTBotPreferences.SCREENSHOT_FORMAT.toLowerCase();
         SWTUtils.captureScreenshot(fileName);
+        logger.log(Level.INFO, "Screenshot saved as " + fileName);
       }
       project = null;
     }
