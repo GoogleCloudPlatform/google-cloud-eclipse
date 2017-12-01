@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
-import static com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates.coordinates;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -107,7 +106,8 @@ public class LibraryTest {
 
   @Test
   public void setLibraryFiles() {
-    MavenCoordinates mavenCoordinates = coordinates("groupId", "artifactId");
+    MavenCoordinates mavenCoordinates =
+        new MavenCoordinates.Builder().setGroupId("groupId").setArtifactId("artifactId").build();
     library.setLibraryFiles(Arrays.asList(new LibraryFile(mavenCoordinates)));
     List<LibraryFile> allDependencies = library.getAllDependencies();
     assertNotNull(allDependencies);
@@ -127,7 +127,10 @@ public class LibraryTest {
   public void testDirectDependencies() throws CoreException {
     // objectify depends on guava
     MavenCoordinates mavenCoordinates =
-        coordinates("com.googlecode.objectify", "objectify", "5.1.21");
+        new MavenCoordinates.Builder()
+            .setGroupId("com.googlecode.objectify")
+            .setArtifactId("objectify")
+            .setVersion("5.1.21").build();
     library.setLibraryFiles(Arrays.asList(new LibraryFile(mavenCoordinates)));
 
     List<LibraryFile> directFiles = library.getDirectDependencies();
@@ -142,8 +145,16 @@ public class LibraryTest {
   
   @Test
   public void testResolvedDuplicates() {
-    MavenCoordinates coordinates19 = coordinates("com.google.guava", "guava", "19.0");
-    MavenCoordinates coordinates20 = coordinates("com.google.guava", "guava", "20.0");
+    MavenCoordinates coordinates19 = new MavenCoordinates.Builder()
+        .setGroupId("com.google.guava")
+        .setArtifactId("guava")
+        .setVersion("19.0")
+        .build();    
+    MavenCoordinates coordinates20 = new MavenCoordinates.Builder()
+        .setGroupId("com.google.guava")
+        .setArtifactId("guava")
+        .setVersion("20.0")
+        .build();    
     
     LibraryFile guava19 = new LibraryFile(coordinates19);
     LibraryFile guava20 = new LibraryFile(coordinates20);
@@ -159,9 +170,21 @@ public class LibraryTest {
   
   @Test
   public void testResolvedDuplicates_semanticVersioning() {
-    MavenCoordinates coordinates1 = coordinates("com.google.guava", "guava", "19.0.1");
-    MavenCoordinates coordinates2 = coordinates("com.google.guava", "guava", "19.0.3");
-    MavenCoordinates coordinates3 = coordinates("com.google.guava", "guava", "19.0.2");
+    MavenCoordinates coordinates1 = new MavenCoordinates.Builder()
+        .setGroupId("com.google.guava")
+        .setArtifactId("guava")
+        .setVersion("19.0.1")
+        .build();    
+    MavenCoordinates coordinates2 = new MavenCoordinates.Builder()
+        .setGroupId("com.google.guava")
+        .setArtifactId("guava")
+        .setVersion("19.0.3")
+        .build();
+    MavenCoordinates coordinates3 = new MavenCoordinates.Builder()
+        .setGroupId("com.google.guava")
+        .setArtifactId("guava")
+        .setVersion("19.0.2")
+        .build();
     
     LibraryFile guava1 = new LibraryFile(coordinates1);
     LibraryFile guava2 = new LibraryFile(coordinates2);

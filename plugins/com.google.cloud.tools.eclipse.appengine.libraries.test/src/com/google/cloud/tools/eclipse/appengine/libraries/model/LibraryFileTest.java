@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
-import static com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates.coordinates;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -35,6 +34,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.junit.Assert;
 import org.junit.Before;
@@ -46,7 +46,10 @@ public class LibraryFileTest {
 
   @Before
   public void setUp() {
-    mavenCoordinates = coordinates("groupId", "artifactId");
+    mavenCoordinates = new MavenCoordinates.Builder()
+        .setGroupId("groupId")
+        .setArtifactId("artifactId")
+        .build();
   }
 
   @Test(expected = NullPointerException.class)
@@ -147,11 +150,16 @@ public class LibraryFileTest {
   
   @Test
   public void testCompareTo() {
-    MavenCoordinates m1 = coordinates("A1", "G1", "1");
-    MavenCoordinates m2 = coordinates("B1", "G1", "2");
-    MavenCoordinates m3 = coordinates("A1", "E1", "1");
-    MavenCoordinates m4 = coordinates("A1", "G1", "2");
-    MavenCoordinates m5 = coordinates("A1", "G1", "1");
+    MavenCoordinates m1 = new MavenCoordinates.Builder()
+        .setArtifactId("A1").setGroupId("G1").setVersion("1").build();
+    MavenCoordinates m2 = new MavenCoordinates.Builder()
+        .setArtifactId("B1").setGroupId("G1").setVersion("2").build();
+    MavenCoordinates m3 = new MavenCoordinates.Builder()
+        .setArtifactId("A1").setGroupId("E1").setVersion("1").build();
+    MavenCoordinates m4 = new MavenCoordinates.Builder()
+        .setArtifactId("A1").setGroupId("G1").setVersion("2").build();
+    MavenCoordinates m5 = new MavenCoordinates.Builder()
+        .setArtifactId("A1").setGroupId("G1").setVersion("1").build();
     
     LibraryFile libraryFile1 = new LibraryFile(m1);
     LibraryFile libraryFile2 = new LibraryFile(m2);
@@ -180,7 +188,11 @@ public class LibraryFileTest {
   
   @Test
   public void testEquals() {
-    MavenCoordinates m1 = coordinates("A1", "G1", "1");
+    MavenCoordinates m1 = new MavenCoordinates.Builder()
+        .setArtifactId("A1")
+        .setGroupId("G1")
+        .setVersion("1")
+        .build();
     LibraryFile libraryFile1 = new LibraryFile(m1);
 
     assertNotEquals(libraryFile1, null);
@@ -189,7 +201,11 @@ public class LibraryFileTest {
   
   @Test
   public void testUpdateVersion() {
-    MavenCoordinates mavenCoordinates = coordinates("com.google.guava", "guava", "15.0");
+    MavenCoordinates mavenCoordinates = new MavenCoordinates.Builder()
+        .setGroupId("com.google.guava")
+        .setArtifactId("guava")
+        .setVersion("15.0")
+        .build();
     
     LibraryFile file = new LibraryFile(mavenCoordinates);
     file.updateVersion();
@@ -206,4 +222,5 @@ public class LibraryFileTest {
     DefaultArtifactVersion older = new DefaultArtifactVersion("0.8.0");
     Assert.assertTrue(newer.compareTo(older) > 0);
   }
+
 }
