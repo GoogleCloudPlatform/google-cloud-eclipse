@@ -295,17 +295,17 @@ public class PomTest {
     return (Element) children.item(0);
   }
 
-  private Library newLibrary(String libraryId, LibraryFile... libraryFiles) {
+  private static Library newLibrary(String libraryId, LibraryFile... libraryFiles) {
     Library library = new Library(libraryId);
     library.setLibraryFiles(Arrays.asList(libraryFiles));
     return library;
   }
 
-  private MavenCoordinates coordinates(String groupId, String artifactId) {
+  private static MavenCoordinates coordinates(String groupId, String artifactId) {
     return new MavenCoordinates.Builder().setGroupId(groupId).setArtifactId(artifactId).build();
   }
 
-  private MavenCoordinates coordinates(String groupId, String artifactId, String version) {
+  private static MavenCoordinates coordinates(String groupId, String artifactId, String version) {
     return new MavenCoordinates.Builder().setGroupId(groupId).setArtifactId(artifactId)
         .setVersion(version).build();
   }
