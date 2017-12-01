@@ -200,7 +200,7 @@ public final class SwtBotWorkbenchActions {
         IWorkbenchWindow activeWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
         Shell[] shells = bot.getDisplay().getShells();
         for (Shell shell : shells) {
-          if (!isEclipseShell(shell, activeWindow)) {
+          if (!shell.isDisposed() && !isEclipseShell(shell, activeWindow)) {
             if (forceKill) {
               shell.dispose();
             } else {
