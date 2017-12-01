@@ -28,6 +28,16 @@ public class MavenCoordinates {
   public static final String JAR_TYPE = "jar";
   public static final String MAVEN_CENTRAL_REPO = "central";
 
+  public static MavenCoordinates coordinates(String groupId, String artifactId) {
+    return new MavenCoordinates.Builder().setGroupId(groupId).setArtifactId(artifactId).build();
+  }
+
+  public static MavenCoordinates coordinates(String groupId, String artifactId, String version) {
+    return new MavenCoordinates.Builder().setGroupId(groupId).setArtifactId(artifactId)
+        .setVersion(version).build();
+  }
+
+
   private String repository = MAVEN_CENTRAL_REPO;
   private String groupId;
   private String artifactId;

@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.libraries.model;
 import com.google.common.base.Preconditions;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -56,6 +57,11 @@ public final class Library {
     this.id = id;
   }
   
+  public Library(String id, LibraryFile... libraryFiles) {
+    this(id);
+    setLibraryFiles(Arrays.asList(libraryFiles));
+  }
+
   public String getId() {
     return id;
   }
