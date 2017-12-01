@@ -214,7 +214,7 @@ class Pom {
     for (Library library : selectedLibraries) {
       for (LibraryFile libraryFile : library.getDirectDependencies()) {
         MavenCoordinates coordinates = libraryFile.getMavenCoordinates();
-        String encoded = coordinates.getGroupId() + "|" + coordinates.getArtifactId();
+        String encoded = coordinates.getGroupId() + ":" + coordinates.getArtifactId(); //$NON-NLS-1$
         selectedDependencies.add(encoded);
       }
     }
@@ -226,9 +226,9 @@ class Pom {
       Node node = children.item(i);
       if (node.getNodeType() == Node.ELEMENT_NODE) {
         Element dependency = (Element) node;
-        String groupId = getValue(dependency, "groupId");
-        String artifactId = getValue(dependency, "artifactId");
-        String encoded = groupId + "|" + artifactId;
+        String groupId = getValue(dependency, "groupId"); //$NON-NLS-1$
+        String artifactId = getValue(dependency, "artifactId"); //$NON-NLS-1$
+        String encoded = groupId + ":" + artifactId; //$NON-NLS-1$
         currentDependencies.put(encoded, node);
       }
     }
@@ -241,7 +241,7 @@ class Pom {
       Set<Node> libraryNodes = new HashSet<>();
       for (LibraryFile file : library.getDirectDependencies()) {
         MavenCoordinates coord = file.getMavenCoordinates();
-        String encoded = coord.getGroupId() + "|" + coord.getArtifactId();
+        String encoded = coord.getGroupId() + ":" + coord.getArtifactId(); //$NON-NLS-1$
         allFound &= currentDependencies.containsKey(encoded);
         // if not required by selected libraries then mark for removal
         if (allFound && !selectedDependencies.contains(encoded)) {
