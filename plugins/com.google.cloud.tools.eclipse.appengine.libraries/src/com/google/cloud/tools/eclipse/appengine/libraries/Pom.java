@@ -129,8 +129,8 @@ class Pom {
    * unnecessary dependencies for the removed libraries.
    * 
    * @param selectedLibraries the set of libraries to be included
-   * @param removedLibraries these libraries dependencies are removed providing they are not
-   *        required by any of the {@code selectedLibraries}
+   * @param removedLibraries these library dependencies are removed providing they are not required
+   *        by any of the {@code selectedLibraries}
    */
   void updateDependencies(Collection<Library> selectedLibraries,
       Collection<Library> removedLibraries) throws CoreException {
