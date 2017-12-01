@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.persistence;
 
+import static com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates.coordinates;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -102,8 +103,7 @@ public class LibraryClasspathContainerSerializerTest {
 
     when(binaryBaseLocationProvider.getBaseLocation()).thenReturn(new Path("/test"));
     when(sourceBaseLocationProvider.getBaseLocation()).thenReturn(new Path("/test"));
-    MavenCoordinates coordinates = new MavenCoordinates.Builder()
-        .setGroupId("com.google").setArtifactId("jarartifact").build();
+    MavenCoordinates coordinates = coordinates("com.google", "jarartifact");
     LibraryFile libraryFile = new LibraryFile(coordinates);
     List<LibraryFile> libraryFiles = new ArrayList<>();
     libraryFiles.add(libraryFile);
