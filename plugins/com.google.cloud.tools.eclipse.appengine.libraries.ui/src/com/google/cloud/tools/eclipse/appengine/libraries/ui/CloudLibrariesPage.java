@@ -31,9 +31,11 @@ import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.runtime.CoreException;
@@ -129,8 +131,11 @@ public class CloudLibrariesPage extends WizardPage
     List<Library> libraries = getSelectedLibraries();
     try {
       if (isMavenProject) {
+        // remove any library that wasn't selected
+        Set<Library> removed = new HashSet<>(getAvailableLibraries());
+        removed.removeAll(libraries);
         // No need for an Analytics ping here; addMavenLibraries will do it.
-        BuildPath.addMavenLibraries(project.getProject(), libraries, getAvailableLibraries(),
+        BuildPath.updateMavenLibraries(project.getProject(), libraries, removed,
             new NullProgressMonitor());
       } else {
         if (!libraries.isEmpty()) {

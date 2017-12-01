@@ -22,19 +22,21 @@ import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class AnalyticsLibraryPingHelper {
 
-  public static void sendLibrarySelectionPing(String projectType, List<Library> librariesSelected) {
+  public static void sendLibrarySelectionPing(String projectType,
+      Collection<Library> librariesSelected) {
     Map<String, String> metadata = prepareMetadata(projectType, librariesSelected);
     AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.LIBRARY_SELECTED, metadata);
   }
 
   @VisibleForTesting
-  static Map<String, String> prepareMetadata(String projectType, List<Library> libraries) {
+  static Map<String, String> prepareMetadata(String projectType, Collection<Library> libraries) {
     String libraryIdsString = "null";
 
     if (!libraries.isEmpty()) {

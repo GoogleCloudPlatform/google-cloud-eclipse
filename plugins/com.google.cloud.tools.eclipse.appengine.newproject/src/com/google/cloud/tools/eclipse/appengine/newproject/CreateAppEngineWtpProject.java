@@ -148,9 +148,7 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
     SubMonitor progress = SubMonitor.convert(monitor, 12);
     if (config.getUseMaven()) {
       enableMavenNature(newProject, progress.newChild(5));
-      // pass availableLibraries=null since there are no libraries to unselect
-      BuildPath.addMavenLibraries(newProject, config.getAppEngineLibraries(),
-          null /* availableLibraries */, progress.newChild(7));
+      BuildPath.addMavenLibraries(newProject, config.getAppEngineLibraries(), progress.newChild(7));
     } else {
       addJunit4ToClasspath(newProject, progress.newChild(2));
       addJstl12ToClasspath(newProject, progress.newChild(2));

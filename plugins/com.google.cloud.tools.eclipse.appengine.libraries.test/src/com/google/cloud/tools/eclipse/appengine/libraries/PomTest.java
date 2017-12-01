@@ -263,7 +263,7 @@ public class PomTest {
     Library library1 = newLibrary("id1", file1);
     Library library2 = newLibrary("id2", file1, file2);
 
-    pom.addDependencies(Arrays.asList(library1), Arrays.asList(library1, library2));
+    pom.updateDependencies(Arrays.asList(library1), Arrays.asList(library1, library2));
 
     // library2 should not be resolved since file2 is not in the available libraries
     Collection<Library> resolved = pom.resolveLibraries(Arrays.asList(library1, library2));

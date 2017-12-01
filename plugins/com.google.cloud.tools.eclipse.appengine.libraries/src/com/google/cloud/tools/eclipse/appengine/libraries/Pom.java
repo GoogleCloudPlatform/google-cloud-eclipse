@@ -121,20 +121,19 @@ class Pom {
 
   /** Add dependencies required for the list of selected libraries. */
   void addDependencies(List<Library> selected) throws CoreException {
-    addDependencies(selected, null);
+    updateDependencies(selected, null);
   }
 
   /**
-   * Adjust dependencies required for the list of selected libraries, adding any necessary
-   * dependencies and removing any unnecessary dependencies.
+   * Adjust the pom to add any required dependencies for the selected libraries and remove any
+   * unnecessary dependencies for the removed libraries.
    * 
-   * @param selected the set of libraries to be included
-   * @param availableLibraries if not {@code null}, then remove any dependencies that match
-   *        unselected libraries in this set (i.e., they were unselected). If {@code null} then
-   *        libraries are never removed.
+   * @param selectedLibraries the set of libraries to be included
+   * @param removedLibraries these libraries dependencies are removed providing they are not
+   *        required by any of the {@code selectedLibraries}
    */
-  void addDependencies(List<Library> selected, Collection<Library> availableLibraries)
-      throws CoreException {
+  void updateDependencies(Collection<Library> selectedLibraries,
+      Collection<Library> removedLibraries) throws CoreException {
     // see
     // m2e-core/org.eclipse.m2e.core.ui/src/org/eclipse/m2e/core/ui/internal/actions/AddDependencyAction.java
     // m2e-core/org.eclipse.m2e.core.ui/src/org/eclipse/m2e/core/ui/internal/editing/AddDependencyOperation.java
@@ -147,11 +146,11 @@ class Pom {
       dependencies = document.createElement("dependencies");
     }
 
-    if (availableLibraries != null) {
-      removeUnusedDependencies(dependencies, selected, availableLibraries);
+    if (removedLibraries != null) {
+      removeUnusedDependencies(dependencies, selectedLibraries, removedLibraries);
     }
 
-    for (Library library : selected) {
+    for (Library library : selectedLibraries) {
       for (LibraryFile artifact : library.getDirectDependencies()) {
         MavenCoordinates coordinates = artifact.getMavenCoordinates();
         
@@ -199,17 +198,17 @@ class Pom {
   }
 
   /**
-   * Remove any dependencies that were required by the previously-selected libraries and that are
-   * not required by the currently selected libraries.
+   * Remove any dependencies that are not required by the currently selected libraries.
    * 
    * @param selectedLibraries the currently selected libraries
-   * @param previousLibraries the previously-selected libraries
+   * @param removedLibraries previously selected libraries
    */
   @VisibleForTesting
   static void removeUnusedDependencies(Element dependencies,
       Collection<Library> selectedLibraries,
-      Collection<Library> previousLibraries) {
+      Collection<Library> removedLibraries) {
 
+    // a list of group:artifact keys that are currently required and must not be removed
     Set<String> selectedDependencies = new HashSet<>();
     for (Library library : selectedLibraries) {
       for (LibraryFile libraryFile : library.getDirectDependencies()) {
@@ -220,6 +219,7 @@ class Pom {
     }
     Verify.verify(selectedDependencies.isEmpty() == selectedLibraries.isEmpty());
 
+    // the currently specified dependencies (group:artifact -> DOM element)
     Map<String, Node> currentDependencies = new HashMap<>();
     NodeList children = dependencies.getChildNodes();
     for (int i = 0; i < children.getLength(); i++) {
@@ -234,8 +234,10 @@ class Pom {
     }
     Verify.verify(currentDependencies.isEmpty() == (dependencies.getChildNodes().getLength() == 0));
 
+    // iterate through each library-to-remove and, providing all of its dependencies are
+    // present, then remove the dependencies that are not required by any selected library
     Set<Node> nodesToRemove = new HashSet<>();
-    for (Library library : previousLibraries) {
+    for (Library library : removedLibraries) {
       // true if all coordinates for this library are found
       boolean allFound = true;
       Set<Node> libraryNodes = new HashSet<>();
@@ -248,8 +250,9 @@ class Pom {
           libraryNodes.add(currentDependencies.get(encoded));
         }
       }
-      // previous library definition was satisfied
+      // all library dependencies were found (i.e., the library was previously specified)
       if (allFound) {
+        // remove all unnecessary dependencies
         nodesToRemove.addAll(libraryNodes);
       }
     }

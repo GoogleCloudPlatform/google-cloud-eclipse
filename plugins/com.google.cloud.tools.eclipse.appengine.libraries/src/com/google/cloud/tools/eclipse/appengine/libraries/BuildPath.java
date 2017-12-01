@@ -23,10 +23,12 @@ import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryCla
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.util.ClasspathUtil;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -60,31 +62,37 @@ public class BuildPath {
   private static final Logger logger = Logger.getLogger(BuildPath.class.getName());
   
   /**
-   * Set the Maven dependencies to the selected libraries, and optionally remove any traces of
-   * unselected libraries.
-   * 
-   * @param availableLibraries if provided, then remove dependencies that correspond to unselected
-   *        libraries from this list
+   * Add the selected libraries to the project's Maven's dependencies.
    */
   public static void addMavenLibraries(IProject project, List<Library> selected,
-      Collection<Library> availableLibraries, IProgressMonitor monitor) throws CoreException {
-    if (selected.isEmpty() && (availableLibraries == null || availableLibraries.isEmpty())) {
-      // nothing to do: there are no dependencies to add and, without some libraries in
-      // availableLibraries, there are no dependencies to remove
-      return;
+      IProgressMonitor monitor) throws CoreException {
+    updateMavenLibraries(project, selected, Collections.<Library>emptyList(), monitor);
+  }
+
+  /**
+   * Update the project's Maven dependencies to the selected libraries and remove any traces of
+   * removed libraries.
+   */
+  public static void updateMavenLibraries(IProject project, Collection<Library> selectedLibraries,
+      Collection<Library> removedLibraries, IProgressMonitor monitor) throws CoreException {
+    Preconditions.checkNotNull(selectedLibraries);
+    Preconditions.checkNotNull(removedLibraries);
+    if (selectedLibraries.isEmpty() && removedLibraries.isEmpty()) {
+      return; // nothing to do
     }
-    AnalyticsLibraryPingHelper.sendLibrarySelectionPing(AnalyticsEvents.MAVEN_PROJECT, selected);
+    AnalyticsLibraryPingHelper.sendLibrarySelectionPing(AnalyticsEvents.MAVEN_PROJECT, selectedLibraries);
 
     IFile pomFile = project.getFile("pom.xml"); //$NON-NLS-1$
     try {
       Pom pom = Pom.parse(pomFile);
-      pom.addDependencies(selected, availableLibraries);
+      pom.updateDependencies(selectedLibraries, removedLibraries);
     } catch (SAXException | IOException ex) {
       IStatus status = StatusUtil.error(BuildPath.class, ex.getMessage(), ex);
       throw new CoreException(status);
     }
   }
 
+  /** Return the libraries whose definitions are matched by the project's pom's dependencies. */
   public static Collection<Library> loadMavenLibraries(IJavaProject javaProject,
       Collection<Library> availableLibraries, IProgressMonitor monitor)
       throws CoreException {
