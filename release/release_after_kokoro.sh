@@ -230,7 +230,7 @@ echo "THIS WILL DELETE ALL FILES IN '$DESTINATION' IF THEY EXIST!"
 ask_proceed
 
 set -x
-gsutil -m rm $DESTINATION/** || true
+gsutil -m rm $DESTINATION/**
 gsutil cp $LOCAL_REPO/artifacts.jar $LOCAL_REPO/content.jar \
     $SIGNED_DIR/index.html \
     $DESTINATION && \
