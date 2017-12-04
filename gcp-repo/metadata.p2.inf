@@ -39,6 +39,8 @@ units.1.properties.4.name=org.eclipse.equinox.p2.contact
 units.1.properties.4.value=https://github.com/GoogleCloudPlatform/google-cloud-eclipse
 units.1.properties.5.name=org.eclipse.equinox.p2.doc.url
 units.1.properties.5.value=https://cloud.google.com/eclipse/docs/
+units.1.properties.5.name=org.eclipse.equinox.p2.description
+units.1.properties.5.value=Support development of Google Cloud Platform projects in Eclipse
 units.1.copyright =Copyright 2016, 2017 Google Inc.
 units.1.licenses.0 =\
 Cloud Tools for Eclipse is made available under the Apache License, Version 2.0. \
@@ -54,7 +56,7 @@ units.1.provides.1.version=1.0.0
 
 # Define the YEdit category IU
 units.2.id=org.dadacoalition.yedit.category
-units.2.version=1.0.20
+units.2.version=0.0.0
 units.2.properties.1.name=org.eclipse.equinox.p2.type.category
 units.2.properties.1.value=true
 units.2.properties.2.name=org.eclipse.equinox.p2.name
@@ -65,6 +67,8 @@ units.2.properties.4.name=org.eclipse.equinox.p2.contact
 units.2.properties.4.value=https://github.com/oyse/yedit
 units.2.properties.5.name=org.eclipse.equinox.p2.doc.url
 units.2.properties.5.value=https://github.com/oyse/yedit/wiki
+units.2.properties.6.name=org.eclipse.equinox.p2.description
+units.2.properties.6.value=Support editing YAML files in Eclipse
 units.2.licenses.0=\
 YEdit is made available under the Eclipse Public License
 units.2.licenses.0.location=https://www.eclipse.org/legal/epl-v10.html
@@ -77,7 +81,7 @@ units.2.provides.1.version=1.0.0
 
 # Define the Dockerfile Editor category IU
 units.3.id=eu.openanalytics.editor.docker.category
-units.3.version=1.0.0
+units.3.version=0.0.0
 units.3.properties.1.name=org.eclipse.equinox.p2.type.category
 units.3.properties.1.value=true
 units.3.properties.2.name=org.eclipse.equinox.p2.name
@@ -88,6 +92,8 @@ units.3.properties.4.name=org.eclipse.equinox.p2.contact
 units.3.properties.4.value=https://github.com/openanalytics/docker-editor/
 units.3.properties.5.name=org.eclipse.equinox.p2.doc.url
 units.3.properties.5.value=https://github.com/openanalytics/docker-editor/wiki/Getting-Started-with-Dockerfile-Editor
+units.3.properties.6.name=org.eclipse.equinox.p2.description
+units.3.properties.6.value=Support editing Dockerfiles in Eclipse
 units.3.licenses.0=\
 Docker Editor is made available under the Eclipse Public License
 units.3.licenses.0.location=https://www.eclipse.org/legal/epl-v10.html
