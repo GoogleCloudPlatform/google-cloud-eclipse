@@ -54,7 +54,7 @@ units.1.provides.1.version=1.0.0
 
 # Define the YEdit category IU
 units.2.id=org.dadacoalition.yedit.category
-units.2.version=$version$
+units.2.version=1.0.20
 units.2.properties.1.name=org.eclipse.equinox.p2.type.category
 units.2.properties.1.value=true
 units.2.properties.2.name=org.eclipse.equinox.p2.name
@@ -77,7 +77,7 @@ units.2.provides.1.version=1.0.0
 
 # Define the Dockerfile Editor category IU
 units.3.id=eu.openanalytics.editor.docker.category
-units.3.version=$version$
+units.3.version=1.0.0
 units.3.properties.1.name=org.eclipse.equinox.p2.type.category
 units.3.properties.1.value=true
 units.3.properties.2.name=org.eclipse.equinox.p2.name
