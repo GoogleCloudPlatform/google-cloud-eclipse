@@ -146,7 +146,10 @@
       <version>0.4.1</version>
     </dependency>
     <dependency>
-      <!-- bundle: org.apache.commons.compress -->
+      <!--
+        dependency used by appengine-plugins-core
+        bundle: org.apache.commons.compress
+      -->
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
       <version>1.14</version>
