@@ -87,7 +87,7 @@ public class GoogleLoginServiceTest {
   @Test
   public void testLogIn_successfulLogin() {
     GoogleLoginService loginService = newLoginServiceWithMockLoginState(true /* set up logins */);
-    Account account = loginService.logIn(null /* no dialog message */);
+    Account account = loginService.logIn();
 
     assertEquals(account1, account);
     assertTrue(loginService.hasAccounts());
@@ -99,7 +99,7 @@ public class GoogleLoginServiceTest {
   @Test
   public void testLogIn_failedLogin() {
     GoogleLoginService loginService = newLoginServiceWithMockLoginState(false /* failed login */);
-    Account account = loginService.logIn(null);
+    Account account = loginService.logIn();
 
     assertNull(account);
     assertFalse(loginService.hasAccounts());
@@ -110,18 +110,18 @@ public class GoogleLoginServiceTest {
   public void testMultipleLogins() {
     GoogleLoginService loginService = newLoginServiceWithMockLoginState(true);
 
-    loginService.logIn(null /* no dialog message */);
+    loginService.logIn();
     Set<Account> accounts1 = loginService.getAccounts();
     assertEquals(1, accounts1.size());
     assertTrue(accounts1.contains(account1));
 
-    loginService.logIn(null);
+    loginService.logIn();
     Set<Account> accounts2 = loginService.getAccounts();
     assertEquals(2, accounts2.size());
     assertTrue(accounts2.contains(account1));
     assertTrue(accounts2.contains(account2));
 
-    loginService.logIn(null);
+    loginService.logIn();
     Set<Account> accounts3 = loginService.getAccounts();
     assertEquals(3, accounts3.size());
     assertTrue(accounts3.contains(account1));
@@ -133,9 +133,9 @@ public class GoogleLoginServiceTest {
   public void testLogOutAll() {
     GoogleLoginService loginService = newLoginServiceWithMockLoginState(true);
 
-    loginService.logIn(null /* no dialog message */);
-    loginService.logIn(null);
-    loginService.logIn(null);
+    loginService.logIn();
+    loginService.logIn();
+    loginService.logIn();
 
     assertTrue(loginService.hasAccounts());
     assertFalse(loginService.getAccounts().isEmpty());
@@ -159,7 +159,7 @@ public class GoogleLoginServiceTest {
   @Test
   public void testGetCredential() {
     GoogleLoginService loginService = newLoginServiceWithMockLoginState(true);
-    loginService.logIn(null /* no dialog message */);
+    loginService.logIn();
     assertEquals(1, loginService.getAccounts().size());
 
     Credential credential = loginService.getCredential("some-email-1@example.com");
@@ -169,7 +169,7 @@ public class GoogleLoginServiceTest {
   @Test
   public void testGetCredential_emailNotLoggedIn() {
     GoogleLoginService loginService = newLoginServiceWithMockLoginState(true);
-    loginService.logIn(null /* no dialog message */);
+    loginService.logIn();
     assertEquals(1, loginService.getAccounts().size());
 
     assertNull(loginService.getCredential("non-existing@example.com"));

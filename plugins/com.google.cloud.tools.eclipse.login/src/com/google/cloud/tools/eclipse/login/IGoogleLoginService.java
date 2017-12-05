@@ -32,11 +32,10 @@ public interface IGoogleLoginService {
    *
    * Must be called from a UI context.
    *
-   * @param dialogMessage custom login dialog message. Can be {@code null}
    * @return signed-in {@link Account} for successful login; {@code null} otherwise,
    *     including failed and canceled login
    */
-  Account logIn(String dialogMessage);
+  Account logIn();
 
   /**
    * Clears all accounts. ("Logging out" from users' perspective.)

@@ -34,7 +34,7 @@ public class GoogleLoginCommandHandler extends AbstractHandler implements IEleme
     IGoogleLoginService loginService = ServiceUtils.getService(event, IGoogleLoginService.class);
 
     if (!loginService.hasAccounts()) {
-      loginService.logIn(null /* no custom dialog message */);
+      loginService.logIn();
     } else {
       new AccountsPanel(HandlerUtil.getActiveShell(event), loginService).open();
     }

@@ -158,7 +158,7 @@ public class AccountSelector extends Composite {
     @Override
     public void widgetSelected(SelectionEvent event) {
       if (combo.getText().equals(loginMessage)) {
-        Account account = loginService.logIn(null /* no custom dialog message */);
+        Account account = loginService.logIn();
         if (account != null) {
           // account is selected and saved
           addAndSelectAccount(account);

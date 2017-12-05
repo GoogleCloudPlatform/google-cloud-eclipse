@@ -142,7 +142,7 @@ public class AccountsPanel extends PopupDialog {
     @Override
     public void widgetSelected(SelectionEvent event) {
       close();
-      loginService.logIn(null /* no custom dialog title */);
+      loginService.logIn();
     }
   }
 

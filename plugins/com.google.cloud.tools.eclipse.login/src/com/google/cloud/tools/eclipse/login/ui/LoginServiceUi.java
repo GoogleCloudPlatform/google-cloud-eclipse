@@ -97,7 +97,7 @@ public class LoginServiceUi implements UiFacade {
         return null;
       }
 
-      String authorizationCode = showProgressDialogAndWaitForCode(message, codeReceiver);
+      String authorizationCode = showProgressDialogAndWaitForCode(codeReceiver);
       if (authorizationCode != null) {
         AnalyticsPingManager.getInstance().sendPingOnShell(shellProvider.getShell(),
             AnalyticsEvents.LOGIN_SUCCESS);
@@ -115,8 +115,8 @@ public class LoginServiceUi implements UiFacade {
     }
   }
 
-  private String showProgressDialogAndWaitForCode(final String message,
-      final LocalServerReceiver codeReceiver) throws IOException {
+  private String showProgressDialogAndWaitForCode(final LocalServerReceiver codeReceiver)
+      throws IOException {
     try {
       final ProgressMonitorDialog dialog = new ProgressMonitorDialog(shellProvider.getShell()) {
         @Override
@@ -139,8 +139,7 @@ public class LoginServiceUi implements UiFacade {
           AnalyticsPingManager.getInstance().sendPingOnShell(dialog.getShell(),
               AnalyticsEvents.LOGIN_START);
 
-          monitor.beginTask(
-              message != null ? message : Messages.getString("LOGIN_PROGRESS_DIALOG_MESSAGE"),
+          monitor.beginTask(Messages.getString("LOGIN_PROGRESS_DIALOG_MESSAGE"),
               IProgressMonitor.UNKNOWN);
           try {
             codeHolder[0] = codeReceiver.waitForCode();

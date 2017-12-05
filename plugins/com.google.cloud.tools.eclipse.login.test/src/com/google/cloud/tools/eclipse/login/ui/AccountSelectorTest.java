@@ -22,7 +22,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.auth.oauth2.Credential;
@@ -216,7 +215,7 @@ public class AccountSelectorTest {
   @Test
   public void testLogin_itemAddedAtTopAndSelected() {
     when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
-    when(loginService.logIn(anyString())).thenReturn(account3);
+    when(loginService.logIn()).thenReturn(account3);
     AccountSelector selector = new AccountSelector(shell, loginService);
     assertEquals(3, selector.combo.getItemCount());
 
@@ -235,7 +234,7 @@ public class AccountSelectorTest {
   public void testLogin_existingEmail() {
     when(loginService.getAccounts())
         .thenReturn(new HashSet<>(Arrays.asList(account1, account2, account3)));
-    when(loginService.logIn(anyString())).thenReturn(account1);
+    when(loginService.logIn()).thenReturn(account1);
     AccountSelector selector = new AccountSelector(shell, loginService);
     assertEquals(4, selector.combo.getItemCount());
     assertEquals(-1, selector.combo.getSelectionIndex());
@@ -253,7 +252,7 @@ public class AccountSelectorTest {
   @Test
   public void testFailedLogin_reselectLoginLinkItem() {
     when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
-    when(loginService.logIn(anyString())).thenReturn(null);
+    when(loginService.logIn()).thenReturn(null);
     AccountSelector selector = new AccountSelector(shell, loginService);
     assertEquals(3, selector.combo.getItemCount());
 

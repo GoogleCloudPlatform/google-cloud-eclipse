@@ -112,12 +112,12 @@ public class GoogleLoginService implements IGoogleLoginService {
   }
 
   @Override
-  public Account logIn(String dialogMessage) {
+  public Account logIn() {
     // TODO: holding a lock for a long period of time (especially when waiting for UI events)
     // should be avoided. Make the login library thread-safe, and don't lock during UI events.
     // (https://github.com/GoogleCloudPlatform/ide-login/issues/21)
     synchronized (loginState) {
-      Account account = loginState.logInWithLocalServer(dialogMessage);
+      Account account = loginState.logInWithLocalServer(null /* no custom login message */);
       if (account != null) {
         accounts = loginState.listAccounts();
       }
