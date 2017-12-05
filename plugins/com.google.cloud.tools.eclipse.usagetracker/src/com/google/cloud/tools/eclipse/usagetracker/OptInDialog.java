@@ -31,6 +31,10 @@ import org.eclipse.ui.PlatformUI;
 
 /**
  * A one-time dialog to suggest opt-in for sending client-side usage metrics.
+ *
+ * When the "Share" button is clicked, {@link #getReturnCode()} returns {@link Window#OK}. In all
+ * other cases of dialog dismissal including clicking the "Do Not Share" button, {@link
+ * #getReturnCode()} returns {@link Window#CANCEL}.
  */
 public class OptInDialog extends Dialog {
 
