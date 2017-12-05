@@ -77,8 +77,7 @@ fi
 echo "#"
 echo "# Now verifying whether jars are all signed."
 echo "#"
-for jar in $SIGNED_DIR/plugins/com.google.cloud.tools.eclipse.*.jar \
-        $SIGNED_DIR/features/com.google.cloud.tools.eclipse.*.jar; do
+for jar in $SIGNED_DIR/plugins/*.jar $SIGNED_DIR/features/*.jar; do
     echo -n "$( basename $jar ): "
     if ! jarsigner -strict -verify $jar; then
         die "Unsigned artifact found. Halting."
