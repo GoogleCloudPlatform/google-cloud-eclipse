@@ -17,17 +17,15 @@
 package com.google.cloud.tools.eclipse.usagetracker;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
 import org.junit.Before;
@@ -40,7 +38,6 @@ public class OptInDialogTest {
 
   private Shell shell;
   private OptInDialog dialog;
-  private Boolean answer;
 
   @Before
   public void setUp() {
@@ -49,50 +46,26 @@ public class OptInDialogTest {
   }
 
   @Test
-  public void testIsOptInYes_inUiThread() throws InterruptedException {
-    assertTrue(Display.getCurrent() != null);
-    try {
-      dialog.isOptInYes();
-      fail();
-    } catch (IllegalStateException ex) {
-      assertEquals("Cannot be called from the UI thread.", ex.getMessage());
-    }
+  public void testInitialReturnCode() {
+    assertEquals(Window.CANCEL, dialog.getReturnCode());
   }
 
   @Test
-  public void testIsOptInYes_okPressed() {
-    scheduleCallingIsOptInYes();
+  public void testReturnCode_okPressed() {
     scheduleClosingDialogAfterOpen(CloseAction.PRESS_OK);
-    dialog.open();
-    assertTrue(answer);
+    assertEquals(Window.OK, dialog.open());
   }
 
   @Test
-  public void testIsOptInYes_cancelPressed() {
-    scheduleCallingIsOptInYes();
+  public void testReturnCode_cancelPressed() {
     scheduleClosingDialogAfterOpen(CloseAction.PRESS_CANCEL);
-    dialog.open();
-    assertFalse(answer);
+    assertNotEquals(Window.OK, dialog.open());
   }
 
   @Test
-  public void testIsOptInYes_dialogClosed() {
-    scheduleCallingIsOptInYes();
+  public void testReturnCode_dialogClosed() {
     scheduleClosingDialogAfterOpen(CloseAction.CLOSE_SHELL);
-    dialog.open();
-    assertFalse(answer);
-  }
-
-  private void scheduleCallingIsOptInYes() {
-    Thread thread = new Thread(new Runnable() {
-      @Override
-      public void run() {
-        try {
-          answer = dialog.isOptInYes();
-        } catch (InterruptedException ex) {}
-      }
-    });
-    thread.start();
+    assertNotEquals(Window.OK, dialog.open());
   }
 
   private enum CloseAction { PRESS_OK, PRESS_CANCEL, CLOSE_SHELL };

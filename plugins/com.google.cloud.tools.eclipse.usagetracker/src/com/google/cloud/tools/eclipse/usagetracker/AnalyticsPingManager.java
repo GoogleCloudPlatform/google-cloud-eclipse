@@ -40,6 +40,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -276,15 +277,16 @@ public class AnalyticsPingManager {
     if (shouldShowOptInDialog()) {
       Display display = PlatformUI.getWorkbench().getDisplay();
 
-      final OptInDialog[] dialogHolder = new OptInDialog[1];
+      final Boolean[] optInAnswer = new Boolean[1];
       display.syncExec(new Runnable() {
         @Override
         public void run() {
-          dialogHolder[0] = new OptInDialog(findShell(parentShell));
-          dialogHolder[0].open();
+          OptInDialog dialog = new OptInDialog(findShell(parentShell));
+          dialog.open();
+          optInAnswer[0] = dialog.getReturnCode() == Window.OK;
         }
       });
-      registerOptInStatus(dialogHolder[0].isOptInYes());
+      registerOptInStatus(optInAnswer[0]);
     }
   }
 
