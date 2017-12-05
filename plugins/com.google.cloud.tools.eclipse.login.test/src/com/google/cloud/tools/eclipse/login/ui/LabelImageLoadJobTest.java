@@ -24,6 +24,7 @@ import com.google.cloud.tools.eclipse.test.util.http.TestHttpServer;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import java.net.MalformedURLException;
 import java.net.URL;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
@@ -105,5 +106,6 @@ public class LabelImageLoadJobTest {
       while (shellResource.getDisplay().readAndDispatch()) {
       }  // spin
     }
+    assertEquals(Status.OK_STATUS, loadJob.getResult());
   }
 }

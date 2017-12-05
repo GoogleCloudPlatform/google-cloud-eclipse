@@ -26,12 +26,14 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageDisposer;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 
 class LabelImageLoadJob extends Job {
 
   private final URL imageUrl;
   private final Label label;
+  private final Display display;
 
   private ImageData imageData;
 
@@ -39,6 +41,7 @@ class LabelImageLoadJob extends Job {
     super("Google User Profile Picture Fetch Job");
     this.imageUrl = Preconditions.checkNotNull(imageUrl);
     this.label = label;
+    display = label.getDisplay();  // Save display early while "label" is alive.
   }
 
   @Override
@@ -47,7 +50,7 @@ class LabelImageLoadJob extends Job {
     imageData = descriptor.getImageData();
     if (imageData != null) {
       LabelImageLoader.storeInCache(imageUrl.toString(), imageData);
-      label.getDisplay().syncExec(new SetImageRunnable());
+      display.syncExec(new SetImageRunnable());
     }
     return Status.OK_STATUS;
   }
