@@ -22,12 +22,31 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
+import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 public class OptInDialogTest {
 
-  private final OptInDialog dialog = new OptInDialog(null);
+  @Rule public ShellTestResource shellResource = new ShellTestResource();
+
+  private Shell shell;
+  private OptInDialog dialog;
+  private Boolean answer;
+
+  @Before
+  public void setUp() {
+    shell = shellResource.getShell();
+    dialog = new OptInDialog(shell);
+  }
 
   @Test
   public void testIsOptInYes_inUiThread() throws InterruptedException {
@@ -41,36 +60,68 @@ public class OptInDialogTest {
   }
 
   @Test
-  public void testIsOptInYes_okPressed() throws InterruptedException {
-    dialog.okPressed();
-    assertTrue(getIsOptInYes());
+  public void testIsOptInYes_okPressed() {
+    scheduleCallingIsOptInYes();
+    scheduleClosingDialogAfterOpen(CloseAction.PRESS_OK);
+    dialog.open();
+    assertTrue(answer);
   }
 
   @Test
-  public void testIsOptInYes_cancelPressed() throws InterruptedException {
-    dialog.cancelPressed();
-    assertFalse(getIsOptInYes());
+  public void testIsOptInYes_cancelPressed() {
+    scheduleCallingIsOptInYes();
+    scheduleClosingDialogAfterOpen(CloseAction.PRESS_CANCEL);
+    dialog.open();
+    assertFalse(answer);
   }
 
   @Test
-  public void testIsOptInYes_dialogDismissed() throws InterruptedException {
-    dialog.cancelPressed();
-    assertFalse(getIsOptInYes());
+  public void testIsOptInYes_dialogClosed() {
+    scheduleCallingIsOptInYes();
+    scheduleClosingDialogAfterOpen(CloseAction.CLOSE_SHELL);
+    dialog.open();
+    assertFalse(answer);
   }
 
-  private boolean getIsOptInYes() throws InterruptedException {
-    final Boolean[] answerHolder = new Boolean[1];
+  private void scheduleCallingIsOptInYes() {
     Thread thread = new Thread(new Runnable() {
       @Override
       public void run() {
         try {
-          answerHolder[0] = dialog.isOptInYes();
+          answer = dialog.isOptInYes();
         } catch (InterruptedException ex) {}
       }
     });
     thread.start();
-    thread.join();
-    assertNotNull(answerHolder[0]);
-    return answerHolder[0];
+  }
+
+  private enum CloseAction { PRESS_OK, PRESS_CANCEL, CLOSE_SHELL };
+
+  private void scheduleClosingDialogAfterOpen(final CloseAction closeAction) {
+    shell.addFocusListener(new FocusAdapter() {
+      @Override
+      public void focusGained(FocusEvent e) {
+        switch (closeAction) {
+          case PRESS_OK:
+            Button okButton = CompositeUtil.findButton(dialog.getShell(), "Share");
+            assertNotNull(okButton);
+            new SWTBotButton(okButton).click();
+            break;
+
+          case PRESS_CANCEL:
+            Button cancelButton = CompositeUtil.findButton(dialog.getShell(), "Do Not Share");
+            assertNotNull(cancelButton);
+            new SWTBotButton(cancelButton).click();
+            break;
+
+          case CLOSE_SHELL:
+            dialog.getShell().close();
+            break;
+
+          default:
+            throw new RuntimeException("bug");
+        };
+      }
+    });
   }
 }

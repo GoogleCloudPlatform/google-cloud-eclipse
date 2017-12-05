@@ -21,6 +21,8 @@ import java.util.concurrent.Semaphore;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
@@ -45,9 +47,6 @@ public class OptInDialog extends Dialog {
     setBlockOnOpen(false);
   }
 
-  /**
-   * Show this dialog at the top-right corner of some target window.
-   */
   @Override
   protected Point getInitialLocation(Point initialSize) {
     Shell targetShell = findTargetShell();
@@ -79,18 +78,19 @@ public class OptInDialog extends Dialog {
     }
   }
 
-  /**
-   * Set the dialog title.
-   */
   @Override
   protected void configureShell(Shell shell) {
     super.configureShell(shell);
     shell.setText(Messages.getString("OPT_IN_DIALOG_TITLE"));
+
+    shell.addDisposeListener(new DisposeListener() {
+      @Override
+      public void widgetDisposed(DisposeEvent e) {
+        answeredSignal.release();
+      }
+    });
   }
 
-  /**
-   * Create buttons.
-   */
   @Override
   protected void createButtonsForButtonBar(Composite parent) {
     createButton(parent, IDialogConstants.OK_ID, Messages.getString("OPT_IN_BUTTON"), false);
@@ -109,24 +109,8 @@ public class OptInDialog extends Dialog {
 
   @Override
   protected void okPressed() {
-    super.okPressed();
     optInYes = true;
-    answeredSignal.release();
-  }
-
-  @Override
-  protected void cancelPressed() {
-    super.cancelPressed();
-    answeredSignal.release();
-  }
-
-  /**
-   * When the dialog closes in other ways than pressing the buttons.
-   */
-  @Override
-  protected void handleShellCloseEvent() {
-    super.handleShellCloseEvent();
-    answeredSignal.release();
+    super.okPressed();
   }
 
   /**
