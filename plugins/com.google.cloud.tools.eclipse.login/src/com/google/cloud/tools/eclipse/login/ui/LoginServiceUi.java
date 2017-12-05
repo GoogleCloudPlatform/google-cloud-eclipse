@@ -33,6 +33,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.IShellProvider;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -126,9 +127,7 @@ public class LoginServiceUi implements UiFacade {
         @Override
         protected void cancelPressed() {
           stopLocalServerReceiver(codeReceiver);
-
-          AnalyticsPingManager.getInstance().sendPingOnShell(getParentShell(),
-              AnalyticsEvents.LOGIN_CANCELED);
+          super.cancelPressed();
         }
       };
 
@@ -150,6 +149,12 @@ public class LoginServiceUi implements UiFacade {
           }
         }
       });
+
+      if (dialog.getReturnCode() == Window.CANCEL) {
+        // Should be done after the dialog closes; don't do this in "cancelPressed()".
+        AnalyticsPingManager.getInstance().sendPingOnShell(shellProvider.getShell(),
+            AnalyticsEvents.LOGIN_CANCELED);
+      }
       return codeHolder[0];
 
     } catch (InvocationTargetException ex) {
