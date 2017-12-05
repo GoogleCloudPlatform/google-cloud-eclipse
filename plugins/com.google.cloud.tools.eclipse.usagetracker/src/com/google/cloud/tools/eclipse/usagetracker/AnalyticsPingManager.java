@@ -88,13 +88,10 @@ public class AnalyticsPingManager {
   final Job eventFlushJob = new Job("Analytics Event Submission") {
     @Override
     protected IStatus run(IProgressMonitor monitor) {
-      try {
-        while (!pingEventQueue.isEmpty() && !monitor.isCanceled()) {
-          PingEvent event = pingEventQueue.poll();
-          showOptInDialogIfNeeded(event.shell);
-          sendPingHelper(event);
-        }
-      } catch (InterruptedException ex) {  // Fall-through to die.
+      while (!pingEventQueue.isEmpty() && !monitor.isCanceled()) {
+        PingEvent event = pingEventQueue.poll();
+        showOptInDialogIfNeeded(event.shell);
+        sendPingHelper(event);
       }
       return Status.OK_STATUS;
     }
@@ -273,11 +270,11 @@ public class AnalyticsPingManager {
   /**
    * @param parentShell if null, tries to show the dialog at the workbench level.
    */
-  private void showOptInDialogIfNeeded(final Shell parentShell) throws InterruptedException {
+  private void showOptInDialogIfNeeded(final Shell parentShell) {
     if (shouldShowOptInDialog()) {
       Display display = PlatformUI.getWorkbench().getDisplay();
 
-      final Boolean[] optInAnswer = new Boolean[1];
+      final boolean[] optInAnswer = new boolean[1];
       display.syncExec(new Runnable() {
         @Override
         public void run() {
