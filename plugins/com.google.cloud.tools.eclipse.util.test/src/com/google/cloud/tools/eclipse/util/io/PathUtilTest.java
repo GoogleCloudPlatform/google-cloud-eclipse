@@ -17,10 +17,17 @@
 package com.google.cloud.tools.eclipse.util.io;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Paths;
+import java.util.Locale;
 import org.eclipse.core.runtime.Path;
+import org.junit.Assume;
 import org.junit.Test;
 
 public class PathUtilTest {
@@ -37,17 +44,20 @@ public class PathUtilTest {
 
   @Test
   public void testMakePathAbsolute_absolutePathReturnsSamePath() {
-    assertThat(PathUtil.makePathAbsolute(new Path("/path"), new Path("/foo")).toString(), is("/path"));
+    assertThat(PathUtil.makePathAbsolute(new Path("/path"), new Path("/foo")).toString(),
+        is("/path"));
   }
 
   @Test
   public void testMakePathAbsolute_relativePathReturnsAppendedPath() {
-    assertThat(PathUtil.makePathAbsolute(new Path("path"), new Path("/foo")).toString(), is("/foo/path"));
+    assertThat(PathUtil.makePathAbsolute(new Path("path"), new Path("/foo")).toString(),
+        is("/foo/path"));
   }
 
   @Test
   public void testMakePathAbsolute_relativeBasePathReturnsRelativeAppendedPath() {
-    assertThat(PathUtil.makePathAbsolute(new Path("path"), new Path("foo")).toString(), is("foo/path"));
+    assertThat(PathUtil.makePathAbsolute(new Path("path"), new Path("foo")).toString(),
+        is("foo/path"));
   }
 
   @Test
@@ -67,28 +77,64 @@ public class PathUtilTest {
 
   @Test
   public void testRelativizePath_pathNotPrefixOfBasePathReturnsPath() {
-    assertThat(PathUtil.relativizePath(new Path("/foo/bar"), new Path("/baz")).toString(), is("/foo/bar"));
+    assertThat(PathUtil.relativizePath(new Path("/foo/bar"), new Path("/baz")).toString(),
+        is("/foo/bar"));
   }
 
   @Test
   public void testRelativizePath_relativePathNotPrefixReturnsPath() {
-    assertThat(PathUtil.relativizePath(new Path("foo/bar"), new Path("/baz")).toString(), is("foo/bar"));
+    assertThat(PathUtil.relativizePath(new Path("foo/bar"), new Path("/baz")).toString(),
+        is("foo/bar"));
   }
 
   @Test
   public void testRelativizePath_pathPrefixOfBasePathReturnsRelativePath() {
-    assertThat(PathUtil.relativizePath(new Path("/foo/bar"), new Path("/foo")).toString(), is("bar"));
+    assertThat(PathUtil.relativizePath(new Path("/foo/bar"), new Path("/foo")).toString(),
+        is("bar"));
   }
 
   @Test
   public void testRelativizePath_relativeBasePathReturnsRelativePath() {
-    assertThat(PathUtil.relativizePath(new Path("foo/bar"), new Path("foo")).toString(), is("bar"));
+    assertThat(PathUtil.relativizePath(new Path("foo/bar"), new Path("foo")).toString(),
+        is("bar"));
   }
 
-  // this test is 1. implementation dependent, 2. environment dependent, but shows that if path is relative, it will
-  // likely be resolved to an absolute path that is not prefix of the basePath
+  // this test is 1. implementation dependent, 2. environment dependent, but shows that if path is
+  // relative, it will likely be resolved to an absolute path that is not prefix of the basePath
   @Test
   public void testRelativizePath_relativePathPotentialyPrefixOfAbsoluteBasePathReturnsRelativePath() {
-    assertThat(PathUtil.relativizePath(new Path("foo/bar"), new Path("/foo")).toString(), is("foo/bar"));
+    assertThat(PathUtil.relativizePath(new Path("foo/bar"), new Path("/foo")).toString(),
+        is("foo/bar"));
+  }
+
+  @Test
+  public void testGetJavaPathFromFileUrl_nonFileProtocol() throws MalformedURLException {
+    try {
+      PathUtil.getJavaPathFromFileUrl(new URL("ftp://example.com"));
+      fail();
+    } catch (IllegalArgumentException e) {
+      assertEquals("Protocol must be \"file\".", e.getMessage());
+    }
+  }
+
+  @Test
+  public void testGetJavaPathFromFileUrl_absolutePath() throws MalformedURLException {
+    URL url = new URL("file:///some/path/to/file.txt");
+    assertEquals(Paths.get("/some/path/to/file.txt"), PathUtil.getJavaPathFromFileUrl(url));
+  }
+
+  @Test
+  public void testGetJavaPathFromFileUrl_relativePath() throws MalformedURLException {
+    URL url = new URL("file:some/path/");
+    assertEquals(Paths.get("some/path"), PathUtil.getJavaPathFromFileUrl(url));
+  }
+
+  @Test
+  public void testGetJavaPathFromFileUrl_windowsDriveLetter() throws MalformedURLException {
+    boolean isWindows = System.getProperty("os.name").toLowerCase(Locale.US).contains("windows");
+    Assume.assumeTrue(isWindows);
+
+    URL url = new URL("file:///C:/some/path/");
+    assertEquals(Paths.get("C:/some/path"), PathUtil.getJavaPathFromFileUrl(url));
   }
 }
