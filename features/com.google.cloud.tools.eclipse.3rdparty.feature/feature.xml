@@ -3,7 +3,7 @@
       id="com.google.cloud.tools.eclipse.3rdparty.feature"
       label="3rd Party Features"
       version="0.1.0.qualifier"
-      provider-name="Google, Inc."
+      provider-name="Google Inc."
       license-feature="com.google.licenses.apache_v2">
 
    <description>
