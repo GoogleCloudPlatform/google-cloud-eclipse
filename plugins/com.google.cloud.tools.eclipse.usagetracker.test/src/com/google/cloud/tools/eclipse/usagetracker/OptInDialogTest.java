@@ -22,12 +22,16 @@ import static org.junit.Assert.assertNotNull;
 
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.window.Window;
-import org.eclipse.swt.events.FocusAdapter;
-import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
+import org.eclipse.ui.progress.UIJob;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -38,11 +42,19 @@ public class OptInDialogTest {
 
   private Shell shell;
   private OptInDialog dialog;
+  private Job dialogCloser;
 
   @Before
   public void setUp() {
     shell = shellResource.getShell();
     dialog = new OptInDialog(shell);
+  }
+
+  @After
+  public void tearDown() throws InterruptedException {
+    if (dialogCloser != null) {
+      dialogCloser.join();  // to exit cleanly without any potential job-running warning
+    }
   }
 
   @Test
@@ -68,33 +80,53 @@ public class OptInDialogTest {
     assertNotEquals(Window.OK, dialog.open());
   }
 
-  private enum CloseAction { PRESS_OK, PRESS_CANCEL, CLOSE_SHELL };
+  @Test
+  public void testReturnCode_dialogDisposed() {
+    scheduleClosingDialogAfterOpen(CloseAction.DISPOSE_SHELL);
+    assertNotEquals(Window.OK, dialog.open());
+  }
 
   private void scheduleClosingDialogAfterOpen(final CloseAction closeAction) {
-    shell.addFocusListener(new FocusAdapter() {
+    dialogCloser = new UIJob("dialog closer") {
       @Override
-      public void focusGained(FocusEvent e) {
-        switch (closeAction) {
-          case PRESS_OK:
-            Button okButton = CompositeUtil.findButton(dialog.getShell(), "Share");
-            assertNotNull(okButton);
-            new SWTBotButton(okButton).click();
-            break;
-
-          case PRESS_CANCEL:
-            Button cancelButton = CompositeUtil.findButton(dialog.getShell(), "Do Not Share");
-            assertNotNull(cancelButton);
-            new SWTBotButton(cancelButton).click();
-            break;
-
-          case CLOSE_SHELL:
-            dialog.getShell().close();
-            break;
-
-          default:
-            throw new RuntimeException("bug");
-        };
+      public IStatus runInUIThread(IProgressMonitor monitor) {
+        if (dialog.getShell() != null && dialog.getShell().isVisible()) {
+          closeDialog(closeAction);
+        } else {
+          schedule(100);
+        }
+        return Status.OK_STATUS;
       }
-    });
+    };
+    dialogCloser.schedule();
+  }
+
+  private enum CloseAction { PRESS_OK, PRESS_CANCEL, CLOSE_SHELL, DISPOSE_SHELL };
+
+  private void closeDialog(CloseAction closeAction) {
+    switch (closeAction) {
+      case PRESS_OK:
+        Button okButton = CompositeUtil.findButton(dialog.getShell(), "Share");
+        assertNotNull(okButton);
+        new SWTBotButton(okButton).click();
+        break;
+
+      case PRESS_CANCEL:
+        Button cancelButton = CompositeUtil.findButton(dialog.getShell(), "Do Not Share");
+        assertNotNull(cancelButton);
+        new SWTBotButton(cancelButton).click();
+        break;
+
+      case CLOSE_SHELL:
+        dialog.getShell().close();
+        break;
+
+      case DISPOSE_SHELL:
+        dialog.getShell().dispose();
+        break;
+
+      default:
+        throw new RuntimeException("bug");
+    }
   }
 }
