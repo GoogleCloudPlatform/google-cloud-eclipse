@@ -32,6 +32,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -241,7 +242,10 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
         BusyIndicator.showWhile(createServiceKey.getDisplay(), new Runnable() {
           @Override
           public void run() {
-            createServiceAccountKey(getServiceAccountKeyPath());
+            Path keyPath = getServiceAccountKeyPath();
+            if (keyPath != null) {
+              createServiceAccountKey(keyPath);
+            }
           }});
       }
     });
@@ -303,7 +307,7 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
 
   @Override
   public void initializeFrom(ILaunchConfiguration configuration) {
-    this.accountEmailModel = getAttribute(configuration, ATTRIBUTE_ACCOUNT_EMAIL, ""); //$NON-NLS-1$
+    accountEmailModel = getAttribute(configuration, ATTRIBUTE_ACCOUNT_EMAIL, ""); //$NON-NLS-1$
 
     Map<String, String> environmentMap = getEnvironmentMap(configuration);
     gcpProjectIdModel = Strings.nullToEmpty(environmentMap.get(PROJECT_ID_ENVIRONMENT_VARIABLE));
@@ -413,9 +417,14 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     
     // can't use colons in filenames on Windows
     filename = filename.replace(':', '.');
-    
-    String configurationLocation = Platform.getConfigurationLocation().getURL().getPath();
-    return Paths.get(configurationLocation + "/com.google.cloud.tools.eclipse/" + filename);
+
+    try {
+      Path configurationLocation = Paths.get(Platform.getConfigurationLocation().getURL().toURI());
+      return configurationLocation.resolve("com.google.cloud.tools.eclipse").resolve(filename);
+    } catch (URISyntaxException e) {
+      logger.log(Level.SEVERE, "Cannot convert configuration location into URI", e); //$NON-NLS-1$
+      return null;
+    }
   }
 
   @VisibleForTesting

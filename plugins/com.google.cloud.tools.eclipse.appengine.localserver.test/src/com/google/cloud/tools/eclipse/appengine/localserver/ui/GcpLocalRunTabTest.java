@@ -53,6 +53,7 @@ import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.cloud.tools.login.Account;
 import com.google.common.base.Predicate;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -445,24 +446,24 @@ public class GcpLocalRunTabTest {
   }
 
   @Test
-  public void testGetServiceAccountKeyPath() {
+  public void testGetServiceAccountKeyPath() throws URISyntaxException {
     tab.initializeFrom(launchConfig);
     accountSelector.selectAccount("account1@example.com");
     projectSelector.selectProjectId("project-A");
 
-    Path expected = Paths.get(Platform.getConfigurationLocation().getURL().getPath())
+    Path expected = Paths.get(Platform.getConfigurationLocation().getURL().toURI())
         .resolve("com.google.cloud.tools.eclipse")
         .resolve("app-engine-default-service-account-key-project-A.json");
     assertEquals(expected, tab.getServiceAccountKeyPath());
   }
   
   @Test
-  public void testGetServiceAccountKeyPath_internal() {
+  public void testGetServiceAccountKeyPath_internal() throws URISyntaxException {
     tab.initializeFrom(launchConfig);
     accountSelector.selectAccount("account2@example.com");
     projectSelector.selectProjectId("google.com:project-D");
 
-    Path expected = Paths.get(Platform.getConfigurationLocation().getURL().getPath())
+    Path expected = Paths.get(Platform.getConfigurationLocation().getURL().toURI())
         .resolve("com.google.cloud.tools.eclipse")
         .resolve("app-engine-default-service-account-key-google.com.project-D.json");
     assertEquals(expected, tab.getServiceAccountKeyPath());
