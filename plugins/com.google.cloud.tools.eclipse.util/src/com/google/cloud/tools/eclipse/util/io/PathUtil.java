@@ -16,11 +16,15 @@
 
 package com.google.cloud.tools.eclipse.util.io;
 
+import com.google.common.base.Preconditions;
+import java.net.URL;
+import java.nio.file.Paths;
+import java.util.Locale;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 /**
- * Provides {@link IPath} related utility methods
+ * Provides {@link IPath}, {@link Path}, and {@link java.nio.file.Path} related utility methods
  */
 public class PathUtil {
 
@@ -28,8 +32,8 @@ public class PathUtil {
   }
 
   /**
-   * Makes a relative path absolute based off of another path. If the initial path is not relative, than it will be
-   * returned without changes.
+   * Makes a relative path absolute based off of another path. If the initial path is not relative,
+   * than it will be returned without changes.
    *
    * @param path the relative path
    * @param basePath the base path to which the relative path is appended 
@@ -47,18 +51,20 @@ public class PathUtil {
   }
 
   /**
-   * Returns the relative path of the original <code>path</code> with respect to the <code>basePath</code> if they share
-   * the same prefix path, otherwise <code>path</code> is returned unchanged. If <code>path</code> is <code>null</code>,
-   * <code>basePath</code> is returned. If <code>basePath</code> is <code>null</code>, <code>path</code> is returned.
+   * Returns the relative path of the original <code>path</code> with respect to the
+   * <code>basePath</code> if they share the same prefix path, otherwise <code>path</code> is
+   * returned unchanged. If <code>path</code> is <code>null</code>, <code>basePath</code> is
+   * returned. If <code>basePath</code> is <code>null</code>, <code>path</code> is returned.
    */
   public static IPath relativizePath(IPath path, IPath basePath) {
     return relativizePath(path, basePath, false);
   }
 
   /**
-   * Returns the relative path of the original <code>path</code> with respect to the <code>basePath</code> if they share
-   * the same prefix path, otherwise <code>null</code>. If <code>path</code> is <code>null</code>,
-   * <code>basePath</code> is returned. If <code>basePath</code> is <code>null</code>, <code>path</code> is returned.
+   * Returns the relative path of the original <code>path</code> with respect to the
+   * <code>basePath</code> if they share the same prefix path, otherwise <code>null</code>. If
+   * <code>path</code> is <code>null</code>, <code>basePath</code> is returned. If
+   * <code>basePath</code> is <code>null</code>, <code>path</code> is returned.
    */
   public static IPath relativizePathStrict(IPath path, IPath basePath) {
     return relativizePath(path, basePath, true);
@@ -80,5 +86,32 @@ public class PathUtil {
     } else {
       return path;
     }
+  }
+
+  /**
+   * Constructs {@link java.nio.file.Path} from a {@code URL} representing a path in a file system.
+   * (That is, the {@code URL}'s protocol is {@code "file"}).
+   *
+   * Note that the result will be different from {@code Paths.get(url.toURI())} in a few ways. For
+   * example, {@code Paths.get(url.toURI()) will not strip the {@code "file"} protocol string.
+   *
+   * @param url URL whose protocol is {@code "file"}
+   */
+  public static java.nio.file.Path getJavaPathFromFileUrl(URL url) {
+    Preconditions.checkArgument(url.getProtocol().equals("file"), "Protocol must be \"file\".");
+
+    String pathString = url.getPath();
+
+    boolean isWindows = System.getProperty("os.name").toLowerCase(Locale.US).contains("windows");
+    // Paths.get("/C:/memo.txt") fails while Paths.get("C:/memo.txt") succeeds:
+    // users"https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2636
+    if (isWindows) {
+      boolean hasDriveLetter = pathString.contains(":");
+      // Per URL spec, the separator is always '/', even on Windows.
+      if (hasDriveLetter && pathString.charAt(0) == '/') {
+        pathString = pathString.substring(1);
+      }
+    }
+    return Paths.get(pathString);
   }
 }
