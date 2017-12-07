@@ -126,6 +126,9 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
    */
   private PipelineOptionsHierarchy hierarchy;
 
+  /** Set to {@code true} when this tab has been shown, and reset upon a new config. */
+  private boolean activated = false;
+
   public PipelineArgumentsTab() {
     this(ResourcesPlugin.getWorkspace().getRoot(), DataflowDependencyManager.create());
   }
@@ -280,7 +283,9 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
   @Override
   public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-    if (launchConfiguration == null) {
+    if (!activated) {
+      // this tab was never shown since it was last shown, and since our
+      // isValid() == true for this to be called, then there are no changes
       return;
     }
     PipelineRunner runner = getSelectedRunner();
@@ -334,6 +339,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     userOptionsSelector.setText(Strings.nullToEmpty(userOptionsName));
 
     updatePipelineOptionsForm();
+    activated = true;
   }
 
   /**
@@ -360,9 +366,10 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
       this.project = project;
       this.launchConfiguration = launchConfiguration;
       updateHierarchy();
+      activated = false;
       return true;
     } catch (CoreException | InvocationTargetException | InterruptedException ex) {
-      // TODO: Handle
+      activated = false;
       DataflowUiPlugin.logError(ex, "Error while initializing from existing configuration"); //$NON-NLS-1$
       project = null;
       launchConfiguration = null;
