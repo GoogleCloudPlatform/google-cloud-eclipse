@@ -481,9 +481,14 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     }
 
     @Override
-    public void widgetSelected(SelectionEvent e) {
-      launchConfiguration.setRunner(runner);
-      updatePipelineOptionsForm();
+    public void widgetSelected(SelectionEvent event) {
+      Preconditions.checkArgument(event.getSource() instanceof Button, "add listener to buttons");
+
+      Button button = (Button) event.getSource();
+      if (button.getSelection()) {
+        launchConfiguration.setRunner(runner);
+        updatePipelineOptionsForm();
+      }
     }
   }
 
