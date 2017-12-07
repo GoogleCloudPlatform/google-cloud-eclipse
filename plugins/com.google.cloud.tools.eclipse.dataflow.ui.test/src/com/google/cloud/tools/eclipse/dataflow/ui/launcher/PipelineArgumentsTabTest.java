@@ -39,7 +39,6 @@ import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.core.resources.IProject;
@@ -125,8 +124,7 @@ public class PipelineArgumentsTabTest {
     }
 
     @Test
-    public void testReload()
-        throws CoreException, InvocationTargetException, InterruptedException {
+    public void testReload() {
       assertTrue(pipelineArgumentsTab.reload(configuration1));
       assertFalse("cache should be ok", pipelineArgumentsTab.reload(configuration1)); //$NON-NLS-1$
       configuration1.setAttribute(PipelineConfigurationAttr.USER_OPTIONS_NAME.toString(), "bar"); //$NON-NLS-1$
@@ -139,7 +137,7 @@ public class PipelineArgumentsTabTest {
     }
 
     @Test
-    public void testInitializeFrom_accessibleProject() throws CoreException {
+    public void testInitializeFrom_accessibleProject() {
       pipelineArgumentsTab.initializeFrom(configuration1); // Should not throw NPE.
       // DirectPipelineRunner, DataflowPipelineRunner, BlockingDataflowPipelineRunner
       assertEquals(3, pipelineArgumentsTab.runnerButtons.size());
@@ -151,7 +149,7 @@ public class PipelineArgumentsTabTest {
 
     // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2165
     @Test
-    public void testInitializeFrom_noExceptionForNonAccessibleProject() throws CoreException {
+    public void testInitializeFrom_noExceptionForNonAccessibleProject() {
       when(project1.isAccessible()).thenReturn(false);
 
       pipelineArgumentsTab.initializeFrom(configuration1); // Should not throw NPE.
@@ -164,8 +162,7 @@ public class PipelineArgumentsTabTest {
     }
 
     @Test
-    public void testIsValid_errorOnNonDataflowProject()
-        throws CoreException, InvocationTargetException, InterruptedException {
+    public void testIsValid_errorOnNonDataflowProject() {
       doReturn(null).when(dependencyManager).getProjectMajorVersion(project1);
 
       pipelineArgumentsTab.isValid(configuration1);
@@ -174,8 +171,7 @@ public class PipelineArgumentsTabTest {
     }
 
     @Test
-    public void testIsValid_errorOnNonProject()
-        throws CoreException, InvocationTargetException, InterruptedException {
+    public void testIsValid_errorOnNonProject() {
       ILaunchConfiguration configuration = mock(ILaunchConfiguration.class);
 
       pipelineArgumentsTab.isValid(configuration);
