@@ -18,6 +18,9 @@ package com.google.cloud.tools.eclipse.dataflow.core.launcher;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyMap;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -57,22 +60,14 @@ public class PipelineLaunchConfigurationTest {
       throws CoreException {
     ILaunchConfiguration launchConfiguration = mock(ILaunchConfiguration.class);
     Map<String, String> requiredArgumentValues =
-        ImmutableMap.<String, String>builder()
-            .put("Spam", "foo")
-            .put("Ham", "bar")
-            .put("Eggs", "baz")
-            .build();
-    when(
-        launchConfiguration.getAttribute(
-            PipelineConfigurationAttr.ALL_ARGUMENT_VALUES.toString(),
-            Collections.<String, String>emptyMap())).thenReturn(requiredArgumentValues);
+        ImmutableMap.of("Spam", "foo","Ham", "bar", "Eggs", "baz");
+    when(launchConfiguration.getAttribute(
+        eq(PipelineConfigurationAttr.ALL_ARGUMENT_VALUES.toString()), anyMap()))
+        .thenReturn(requiredArgumentValues);
 
     PipelineRunner runner = PipelineRunner.DATAFLOW_PIPELINE_RUNNER;
-    when(
-        launchConfiguration.getAttribute(
-            PipelineConfigurationAttr.RUNNER_ARGUMENT.toString(),
-            PipelineLaunchConfiguration.defaultRunner(majorVersion).getRunnerName()))
-        .thenReturn(runner.getRunnerName());
+    when(launchConfiguration.getAttribute(eq(PipelineConfigurationAttr.RUNNER_ARGUMENT.toString()),
+        anyString())).thenReturn(runner.getRunnerName());
 
     PipelineLaunchConfiguration lc =
         PipelineLaunchConfiguration.fromLaunchConfiguration(launchConfiguration);
@@ -86,12 +81,7 @@ public class PipelineLaunchConfigurationTest {
     final PipelineRunner runner = PipelineRunner.DATAFLOW_PIPELINE_RUNNER;
     PipelineLaunchConfiguration lc = PipelineLaunchConfiguration.createDefault();
 
-    Map<String, String> argValues =
-        ImmutableMap.<String, String>builder()
-            .put("Spam", "foo")
-            .put("Ham", "bar")
-            .put("Eggs", "baz")
-            .build();
+    Map<String, String> argValues = ImmutableMap.of("Spam", "foo","Ham", "bar","Eggs", "baz");
     lc.setArgumentValues(argValues);
 
     lc.setRunner(runner);
@@ -163,9 +153,7 @@ public class PipelineLaunchConfigurationTest {
     lc.setUserOptionsName("myType");
 
     DataflowPreferences prefs = mapPrefs(
-        ImmutableMap.<String, String>builder()
-            .put(DataflowPreferences.PROJECT_PROPERTY, "bar")
-            .build());
+        ImmutableMap.of(DataflowPreferences.PROJECT_PROPERTY, "bar"));
 
     MissingRequiredProperties missingProperties = lc.getMissingRequiredProperties(opts, prefs);
 
@@ -184,9 +172,7 @@ public class PipelineLaunchConfigurationTest {
 
     PipelineLaunchConfiguration lc = PipelineLaunchConfiguration.createDefault();
     lc.setArgumentValues(
-        ImmutableMap.<String, String>builder()
-            .put(DataflowPreferences.PROJECT_PROPERTY, "bar")
-            .build());
+        ImmutableMap.of(DataflowPreferences.PROJECT_PROPERTY, "bar"));
     lc.setUserOptionsName("myType");
     lc.setUseDefaultLaunchOptions(false);
 
@@ -253,7 +239,7 @@ public class PipelineLaunchConfigurationTest {
     PipelineLaunchConfiguration lc = PipelineLaunchConfiguration.createDefault();
     lc.setUseDefaultLaunchOptions(true);
     lc.setUserOptionsName("myType");
-    lc.setArgumentValues(ImmutableMap.<String, String>builder().put("foo", "bar").build());
+    lc.setArgumentValues(ImmutableMap.of("foo", "bar"));
 
     DataflowPreferences prefs = absentPrefs();
 
@@ -275,7 +261,7 @@ public class PipelineLaunchConfigurationTest {
     PipelineLaunchConfiguration lc = PipelineLaunchConfiguration.createDefault();
     lc.setUseDefaultLaunchOptions(false);
     lc.setUserOptionsName("myType");
-    lc.setArgumentValues(ImmutableMap.<String, String>builder().put("foo", "bar").build());
+    lc.setArgumentValues(ImmutableMap.of("foo", "bar"));
 
     DataflowPreferences prefs = absentPrefs();
 
@@ -349,9 +335,7 @@ public class PipelineLaunchConfigurationTest {
     lc.setUseDefaultLaunchOptions(true);
 
     DataflowPreferences prefs = mapPrefs(
-        ImmutableMap.<String, String>builder()
-            .put(DataflowPreferences.PROJECT_PROPERTY, "bar")
-            .build());
+        ImmutableMap.of(DataflowPreferences.PROJECT_PROPERTY, "bar"));
 
     MissingRequiredProperties missingProperties = lc.getMissingRequiredProperties(opts, prefs);
 
@@ -373,10 +357,7 @@ public class PipelineLaunchConfigurationTest {
     PipelineLaunchConfiguration lc = PipelineLaunchConfiguration.createDefault();
     lc.setUseDefaultLaunchOptions(false);
     lc.setUserOptionsName("myType");
-    lc.setArgumentValues(
-        ImmutableMap.<String, String>builder()
-            .put(DataflowPreferences.PROJECT_PROPERTY, "bar")
-            .build());
+    lc.setArgumentValues(ImmutableMap.of(DataflowPreferences.PROJECT_PROPERTY, "bar"));
 
     DataflowPreferences prefs = absentPrefs();
 
@@ -468,7 +449,7 @@ public class PipelineLaunchConfigurationTest {
     PipelineLaunchConfiguration lc = PipelineLaunchConfiguration.createDefault();
     lc.setUseDefaultLaunchOptions(false);
     lc.setUserOptionsName("myType");
-    lc.setArgumentValues(ImmutableMap.<String, String>builder().put("foo", "bar").build());
+    lc.setArgumentValues(ImmutableMap.of("foo", "bar"));
 
     DataflowPreferences prefs = absentPrefs();
 
@@ -477,25 +458,23 @@ public class PipelineLaunchConfigurationTest {
     assertTrue(missingProperties.getMissingProperties().isEmpty());
   }
 
-  private PipelineOptionsHierarchy options(PipelineOptionsProperty property) {
+  private static PipelineOptionsHierarchy options(PipelineOptionsProperty property) {
     PipelineOptionsHierarchy hierarchy = mock(PipelineOptionsHierarchy.class);
     PipelineOptionsType type = new PipelineOptionsType(
         "myType", Collections.<PipelineOptionsType>emptySet(), ImmutableSet.of(property));
 
     Map<PipelineOptionsType, Set<PipelineOptionsProperty>> requiredOptions =
-        ImmutableMap.<PipelineOptionsType, Set<PipelineOptionsProperty>>builder()
-            .put(type, ImmutableSet.of(property))
-            .build();
+        ImmutableMap.of(type, (Set<PipelineOptionsProperty>) ImmutableSet.of(property));
     when(hierarchy.getRequiredOptionsByType(Mockito.<String>any(), Mockito.eq("myType")))
         .thenReturn(requiredOptions);
     return hierarchy;
   }
 
-  private DataflowPreferences absentPrefs() {
+  private static DataflowPreferences absentPrefs() {
     return mapPrefs(Collections.<String, String>emptyMap());
   }
 
-  private DataflowPreferences mapPrefs(Map<String, String> asMap) {
+  private static DataflowPreferences mapPrefs(Map<String, String> asMap) {
     DataflowPreferences preferences = mock(DataflowPreferences.class);
     when(preferences.asDefaultPropertyMap()).thenReturn(asMap);
     return preferences;

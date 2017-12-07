@@ -256,7 +256,7 @@ public class RunOptionsDefaultsComponentTest {
   public void testGetControl() {
     Assert.assertSame(shell, component.getControl());
   }
-
+ 
   @Test
   public void testAccountSelector() {
     Assert.assertNotNull(selector);
@@ -414,7 +414,7 @@ public class RunOptionsDefaultsComponentTest {
   }
   
   @Test
-  public void testBucketNameStatus_createIsOk() throws InterruptedException {
+  public void testBucketNameStatus_createIsOk() {
     component.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
     join();
@@ -445,7 +445,7 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testPartialValidity_account_project() throws InterruptedException {
+  public void testPartialValidity_account_project() {
     testPartialValidity_account();
     component.setCloudProjectText("project");
     join();

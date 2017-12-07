@@ -56,10 +56,10 @@ public class ServiceAccountUtil {
     // The appengine service account for google.com:gcloud-for-eclipse-testing 
     // would be gcloud-for-eclipse-testing.google.com@appspot.gserviceaccount.com.
     if (projectId.contains(":")) {
-      String[] parts = projectId.split(":"); //$NON-NLS-1$ 
+      String[] parts = projectId.split(":");
       projectEmail = parts[1] + "." + parts[0];
     }
-    String serviceAccountId = projectEmail + "@appspot.gserviceaccount.com"; //$NON-NLS-1$   
+    String serviceAccountId = projectEmail + "@appspot.gserviceaccount.com";
 
     String keyId = "projects/" + projectId + "/serviceAccounts/" + serviceAccountId;
     CreateServiceAccountKeyRequest createRequest = new CreateServiceAccountKeyRequest();

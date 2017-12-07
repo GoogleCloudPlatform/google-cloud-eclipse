@@ -115,7 +115,7 @@ public class DataflowDependencyManagerTest {
   public void testGetProjectMajorVersion() throws InvalidVersionSpecificationException {
     Dependency pinnedDep = pinnedDataflowDependency();
     when(model.getDependencies()).thenReturn(ImmutableList.of(pinnedDep));
-    DefaultArtifactVersion latestVersion = new DefaultArtifactVersion("1.2.3");
+    ArtifactVersion latestVersion = new DefaultArtifactVersion("1.2.3");
     when(
         artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
             DataflowMavenCoordinates.ARTIFACT_ID, 
@@ -126,7 +126,7 @@ public class DataflowDependencyManagerTest {
 
   @Test
   public void testGetLatestVersions() {
-    DefaultArtifactVersion latestVersionOne = new DefaultArtifactVersion("1.2.3");
+    ArtifactVersion latestVersionOne = new DefaultArtifactVersion("1.2.3");
     when(artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
         DataflowMavenCoordinates.ARTIFACT_ID, MajorVersion.ONE.getVersionRange()))
         .thenReturn(latestVersionOne);
@@ -135,11 +135,9 @@ public class DataflowDependencyManagerTest {
         DataflowMavenCoordinates.ARTIFACT_ID, MajorVersion.TWO.getVersionRange()))
         .thenReturn(latestVersionTwo);
 
-    Map<ArtifactVersion, MajorVersion> expected =
-        ImmutableMap.<ArtifactVersion, MajorVersion>builder()
-            .put(latestVersionOne, MajorVersion.ONE)
-            .put(latestVersionTwo, MajorVersion.TWO)
-            .build();
+    Map<ArtifactVersion, MajorVersion> expected = ImmutableMap.of(
+        latestVersionOne, MajorVersion.ONE,
+        latestVersionTwo, MajorVersion.TWO);
     assertEquals(
         expected,
         manager.getLatestVersions(ImmutableSortedSet.of(MajorVersion.ONE, MajorVersion.TWO)));
@@ -147,7 +145,7 @@ public class DataflowDependencyManagerTest {
 
   @Test
   public void testGetLatestVersionUnstableNoReleasedStableVersion() {
-    DefaultArtifactVersion latestVersion = new DefaultArtifactVersion("2.0.0-beta2");
+    ArtifactVersion latestVersion = new DefaultArtifactVersion("2.0.0-beta2");
     when(artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
         DataflowMavenCoordinates.ARTIFACT_ID, MajorVersion.QUALIFIED_TWO.getVersionRange()))
         .thenReturn(latestVersion);
@@ -163,11 +161,11 @@ public class DataflowDependencyManagerTest {
 
   @Test
   public void testGetLatestVersionUnstableWithStableVersionInMap() {
-    DefaultArtifactVersion latestQualified = new DefaultArtifactVersion("2.0.0-beta2");
+    ArtifactVersion latestQualified = new DefaultArtifactVersion("2.0.0-beta2");
     when(artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
         DataflowMavenCoordinates.ARTIFACT_ID, MajorVersion.QUALIFIED_TWO.getVersionRange()))
         .thenReturn(latestQualified);
-    DefaultArtifactVersion latestMajor = new DefaultArtifactVersion("2.0.0");
+    ArtifactVersion latestMajor = new DefaultArtifactVersion("2.0.0");
     when(artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
         DataflowMavenCoordinates.ARTIFACT_ID, MajorVersion.TWO.getVersionRange()))
         .thenReturn(latestMajor);
@@ -180,20 +178,18 @@ public class DataflowDependencyManagerTest {
 
   @Test
   public void testGetLatestVersionUnstableWithNoStableVersion() {
-    DefaultArtifactVersion latestOne = new DefaultArtifactVersion("1.9.0");
+    ArtifactVersion latestOne = new DefaultArtifactVersion("1.9.0");
     when(artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
         DataflowMavenCoordinates.ARTIFACT_ID, MajorVersion.ONE.getVersionRange()))
         .thenReturn(latestOne);
-    DefaultArtifactVersion latestQualifiedTwo = new DefaultArtifactVersion("2.0.0-beta2");
+    ArtifactVersion latestQualifiedTwo = new DefaultArtifactVersion("2.0.0-beta2");
     when(artifactRetriever.getLatestReleaseVersion(DataflowMavenCoordinates.GROUP_ID,
         DataflowMavenCoordinates.ARTIFACT_ID, MajorVersion.QUALIFIED_TWO.getVersionRange()))
         .thenReturn(latestQualifiedTwo);
 
-    Map<ArtifactVersion, MajorVersion> expected =
-        ImmutableMap.<ArtifactVersion, MajorVersion>builder()
-            .put(latestOne, MajorVersion.ONE)
-            .put(latestQualifiedTwo, MajorVersion.QUALIFIED_TWO)
-            .build();
+    Map<ArtifactVersion, MajorVersion> expected = ImmutableMap.of(
+        latestOne, MajorVersion.ONE,
+        latestQualifiedTwo, MajorVersion.QUALIFIED_TWO);
     assertEquals(
         expected,
         manager.getLatestVersions(

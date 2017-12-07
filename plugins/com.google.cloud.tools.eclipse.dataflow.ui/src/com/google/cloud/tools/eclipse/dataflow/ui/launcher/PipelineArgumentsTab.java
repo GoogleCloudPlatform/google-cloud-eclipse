@@ -134,7 +134,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     composite.setLayout(new GridLayout(1, false));
 
-    internalComposite = new Composite(this.composite, SWT.NULL);
+    internalComposite = new Composite(composite, SWT.NULL);
 
     GridData internalCompositeGridData = new GridData(SWT.FILL, SWT.FILL, true, true);
     internalComposite.setLayoutData(internalCompositeGridData);
@@ -347,13 +347,11 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   }
 
   /**
-   * Asynchronously updates the project hierarchy.
-   * 
-   * @throws InterruptedException if the update is interrupted
-   * @throws InvocationTargetException if an exception occurred during the update
+   * Synchronously updates the project hierarchy.
    */
   private void updateHierarchy(final MajorVersion majorVersion)
       throws InvocationTargetException, InterruptedException {
+    // blocking call (regardless of "fork"), returning only after the inner runnable completes
     getLaunchConfigurationDialog().run(true, true, new IRunnableWithProgress() {
       @Override
       public void run(IProgressMonitor monitor)
@@ -423,6 +421,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
       }
     }, displayExecutor);
     try {
+      // blocking call (regardless of "fork"), returning only after the inner runnable completes
       getLaunchConfigurationDialog().run(true, true, new IRunnableWithProgress() {
         @Override
         public void run(IProgressMonitor monitor)
