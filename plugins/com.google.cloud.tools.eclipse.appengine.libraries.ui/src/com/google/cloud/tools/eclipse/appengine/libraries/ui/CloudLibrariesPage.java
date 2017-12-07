@@ -78,8 +78,8 @@ public class CloudLibrariesPage extends WizardPage
   private IClasspathEntry newEntry;
 
   public CloudLibrariesPage() {
-    super(CloudLibraries.CLIENT_APIS_GROUP);
-    setTitle(Messages.getString("clientapis-title")); //$NON-NLS-1$
+    super("cloudPlatformLibrariesPage"); //$NON-NLS-1$
+    setTitle(Messages.getString("cloud-platform-libraries-title")); //$NON-NLS-1$
     setDescription(Messages.getString("apiclientlibrariespage-description")); //$NON-NLS-1$
     setImageDescriptor(SharedImages.GCP_WIZARD_IMAGE_DESCRIPTOR);
   }
