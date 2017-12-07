@@ -35,21 +35,18 @@ import com.google.cloud.tools.eclipse.dataflow.ui.page.MessageTarget;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.component.LabeledTextMapComponent;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.component.TextAndButtonComponent;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.component.TextAndButtonSelectionListener;
-import com.google.cloud.tools.eclipse.ui.util.DisplayExecutor;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.util.concurrent.SettableFuture;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -62,7 +59,6 @@ import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -86,8 +82,6 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   private static final Joiner MISSING_GROUP_MEMBER_JOINER = Joiner.on(", "); //$NON-NLS-1$
 
   private static final String ARGUMENTS_SEPARATOR = "="; //$NON-NLS-1$
-
-  private Executor displayExecutor;
 
   private ScrolledComposite composite;
   private Composite internalComposite;
@@ -129,12 +123,11 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   @Override
   public void createControl(Composite parent) {
     launchConfiguration = PipelineLaunchConfiguration.createDefault();
-    displayExecutor = DisplayExecutor.create(parent.getDisplay());
     composite = new ScrolledComposite(parent, SWT.V_SCROLL);
     composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     composite.setLayout(new GridLayout(1, false));
 
-    internalComposite = new Composite(this.composite, SWT.NULL);
+    internalComposite = new Composite(composite, SWT.NULL);
 
     GridData internalCompositeGridData = new GridData(SWT.FILL, SWT.FILL, true, true);
     internalComposite.setLayoutData(internalCompositeGridData);
@@ -197,7 +190,6 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
           launchConfiguration.setUserOptionsName(userOptionsName);
         }
         updatePipelineOptionsForm();
-        return;
       }
 
       @Override
@@ -401,35 +393,20 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   }
 
   private void updatePipelineOptionsForm() {
-    final SettableFuture<Map<PipelineOptionsType, Set<PipelineOptionsProperty>>> optionsHierarchyFuture =
-        SettableFuture.create();
-    optionsHierarchyFuture.addListener(new Runnable() {
-      @Override
-      public void run() {
-        if (internalComposite.isDisposed()) {
-          return;
-        }
-        BusyIndicator.showWhile(internalComposite.getDisplay(), new Runnable() {
-          @Override
-          public void run() {
-            try {
-              pipelineOptionsForm.updateForm(launchConfiguration, optionsHierarchyFuture.get());
-              updateLaunchConfigurationDialog();
-            } catch (InterruptedException | ExecutionException ex) {
-              DataflowUiPlugin.logError(ex, "Exception while updating available Pipeline Options"); //$NON-NLS-1$
-            }
-          }
-        });
-      }
-    }, displayExecutor);
     try {
+      // TODO: use "Holder" instead of "AtomicReference" when Java 8 is available.
+      final AtomicReference<Map<PipelineOptionsType, Set<PipelineOptionsProperty>>>
+          optionsHierarchy = new AtomicReference<>();
       getLaunchConfigurationDialog().run(true, true, new IRunnableWithProgress() {
         @Override
         public void run(IProgressMonitor monitor)
             throws InvocationTargetException, InterruptedException {
-          optionsHierarchyFuture.set(launchConfiguration.getOptionsHierarchy(hierarchy));
+          optionsHierarchy.set(launchConfiguration.getOptionsHierarchy(hierarchy));
         }
       });
+
+      pipelineOptionsForm.updateForm(launchConfiguration, optionsHierarchy.get());
+      updateLaunchConfigurationDialog();
     } catch (InvocationTargetException | InterruptedException ex) {
       DataflowUiPlugin.logError(ex, "Exception occurred while updating available Pipeline Options");
     }
@@ -508,7 +485,6 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     public void widgetSelected(SelectionEvent e) {
       launchConfiguration.setRunner(runner);
       updatePipelineOptionsForm();
-      updateLaunchConfigurationDialog();
     }
   }
 
