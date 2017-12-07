@@ -395,16 +395,12 @@ public class DataflowPipelineLaunchDelegateTest {
     when(configuration.getName()).thenReturn(configurationName);
 
     PipelineRunner runner = PipelineRunner.BLOCKING_DATAFLOW_PIPELINE_RUNNER;
-    when(
-        configuration.getAttribute(
-            PipelineConfigurationAttr.RUNNER_ARGUMENT.toString(),
-            PipelineLaunchConfiguration.defaultRunner(MajorVersion.ONE).getRunnerName()))
-        .thenReturn(runner.getRunnerName());
+    when(configuration.getAttribute(eq(PipelineConfigurationAttr.RUNNER_ARGUMENT.toString()),
+        anyString())).thenReturn(runner.getRunnerName());
 
     String projectName = "Test-project,Name";
-    when(configuration.getAttribute(
-        eq(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME), anyString()))
-        .thenReturn(projectName);
+    when(configuration.getAttribute(eq(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME),
+        anyString())).thenReturn(projectName);
     when(workspaceRoot.getProject(projectName)).thenReturn(project);
     when(project.exists()).thenReturn(true);
 

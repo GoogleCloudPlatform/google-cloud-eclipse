@@ -420,7 +420,8 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
 
     try {
       Path configurationLocation = Paths.get(Platform.getConfigurationLocation().getURL().toURI());
-      return configurationLocation.resolve("com.google.cloud.tools.eclipse").resolve(filename);
+      return configurationLocation.resolve("com.google.cloud.tools.eclipse") //$NON-NLS-1$
+          .resolve(filename);
     } catch (URISyntaxException e) {
       logger.log(Level.SEVERE, "Cannot convert configuration location into URI", e); //$NON-NLS-1$
       return null;

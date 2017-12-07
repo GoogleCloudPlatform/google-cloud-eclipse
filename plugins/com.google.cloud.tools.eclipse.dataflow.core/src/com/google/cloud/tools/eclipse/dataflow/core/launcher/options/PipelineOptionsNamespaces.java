@@ -31,14 +31,13 @@ public final class PipelineOptionsNamespaces {
   private static final String DATAFLOW_OPTIONS_BASE = "com.google.cloud.dataflow.sdk.options";
   private static final String BEAM_OPTIONS_BASE = "org.apache.beam.sdk.options";
 
-  private static final Map<MajorVersion, String> VERSION_PREFIXES =
-      ImmutableMap.<MajorVersion, String>builder()
-          .put(MajorVersion.ONE, DATAFLOW_OPTIONS_BASE + ".")
-          .put(MajorVersion.QUALIFIED_TWO, BEAM_OPTIONS_BASE + ".")
-          .put(MajorVersion.TWO, BEAM_OPTIONS_BASE + ".")
-          .put(MajorVersion.THREE_PLUS, BEAM_OPTIONS_BASE + ".")
-          .put(MajorVersion.ALL, BEAM_OPTIONS_BASE + ".")
-          .build();
+  private static final Map<MajorVersion, String> VERSION_PREFIXES = ImmutableMap.of(
+      MajorVersion.ONE, DATAFLOW_OPTIONS_BASE + ".",
+      MajorVersion.QUALIFIED_TWO, BEAM_OPTIONS_BASE + ".",
+      MajorVersion.TWO, BEAM_OPTIONS_BASE + ".",
+      MajorVersion.THREE_PLUS, BEAM_OPTIONS_BASE + ".",
+      MajorVersion.ALL, BEAM_OPTIONS_BASE + ".");
+
   private static final String VALIDATION_ANNOTATION = "Validation.Required";
   private static final String VALIDATION_REQUIRED_GROUPS = "groups";
 
