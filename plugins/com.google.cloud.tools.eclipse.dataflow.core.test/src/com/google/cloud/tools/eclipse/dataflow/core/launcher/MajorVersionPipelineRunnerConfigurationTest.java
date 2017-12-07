@@ -25,7 +25,6 @@ import static org.mockito.Mockito.mock;
 import com.google.cloud.tools.eclipse.dataflow.core.project.MajorVersion;
 import java.util.Arrays;
 import java.util.Set;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.hamcrest.CoreMatchers;
@@ -77,10 +76,9 @@ public class MajorVersionPipelineRunnerConfigurationTest {
   public void testFromLaunchConfiguration_defaultRunner() throws CoreException {
     ILaunchConfiguration empty =
         mock(ILaunchConfiguration.class, AdditionalAnswers.returnsSecondArg());
-    IProject project = mock(IProject.class);
-    PipelineLaunchConfiguration lc =
+    PipelineLaunchConfiguration launchConfiguration =
         PipelineLaunchConfiguration.fromLaunchConfiguration(majorVersion, empty);
-    assertEquals(PipelineLaunchConfiguration.defaultRunner(majorVersion), lc.getRunner());
+    assertEquals(PipelineLaunchConfiguration.defaultRunner(majorVersion), launchConfiguration.getRunner());
   }
 
 }
