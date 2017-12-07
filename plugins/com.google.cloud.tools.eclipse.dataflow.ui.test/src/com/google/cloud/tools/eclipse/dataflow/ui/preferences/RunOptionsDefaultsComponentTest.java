@@ -256,7 +256,7 @@ public class RunOptionsDefaultsComponentTest {
   public void testGetControl() {
     Assert.assertSame(shell, component.getControl());
   }
- 
+
   @Test
   public void testAccountSelector() {
     Assert.assertNotNull(selector);
