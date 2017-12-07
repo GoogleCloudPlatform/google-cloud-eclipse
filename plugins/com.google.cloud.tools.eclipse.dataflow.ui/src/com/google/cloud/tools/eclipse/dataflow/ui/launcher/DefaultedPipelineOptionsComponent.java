@@ -118,6 +118,7 @@ public class DefaultedPipelineOptionsComponent {
     }
   }
 
+  @VisibleForTesting
   public boolean isEnabled() {
     return useDefaultsButton.isEnabled();
   }

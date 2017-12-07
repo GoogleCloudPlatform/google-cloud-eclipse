@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.dataflow.ui.page.component;
 
 import com.google.cloud.tools.eclipse.dataflow.ui.util.ButtonFactory;
+import com.google.common.annotations.VisibleForTesting;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
@@ -53,6 +54,7 @@ public class TextAndButtonComponent {
     text.setText(value);
   }
 
+  @VisibleForTesting
   public boolean isEnabled() {
     // the button enablement state should reflect reality
     return button.isEnabled();
