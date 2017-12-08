@@ -42,6 +42,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.ui.ILaunchConfigurationDialog;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -82,7 +83,7 @@ public class PipelineArgumentsTabTest {
       when(workspaceRoot.getProject(anyString())).thenReturn(mock(IProject.class));
 
       ILaunchConfigurationDialog dialog = mock(ILaunchConfigurationDialog.class);
-      doAnswer(new RunnableExecutor())
+      doAnswer(new SynchronousIRunnableContextExecutor())
           .when(dialog).run(anyBoolean(), anyBoolean(), any(IRunnableWithProgress.class));
 
       ILaunchConfiguration configuration = mock(ILaunchConfiguration.class);
@@ -164,7 +165,12 @@ public class PipelineArgumentsTabTest {
     }
   }
 
-  private static class RunnableExecutor implements Answer<Void> {
+  /**
+   * Intended to mock {@link IRunnableContext#run(boolean, boolean, IRunnableWithProgress)} to run
+   * the given {@link IRunnableWithProgress} synchronously. The mock is incomplete and not general
+   * in that it ignores other parameters and runs the code synchronously in the caller's thread.
+   */
+  private static class SynchronousIRunnableContextExecutor implements Answer<Void> {
     @Override
     public Void answer(InvocationOnMock invocation)
         throws InvocationTargetException, InterruptedException {
