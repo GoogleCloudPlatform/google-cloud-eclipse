@@ -82,15 +82,8 @@ public class PipelineArgumentsTabTest {
       when(workspaceRoot.getProject(anyString())).thenReturn(mock(IProject.class));
 
       ILaunchConfigurationDialog dialog = mock(ILaunchConfigurationDialog.class);
-      doAnswer(new Answer<Void>() {
-        @Override
-        public Void answer(InvocationOnMock invocation)
-            throws InvocationTargetException, InterruptedException {
-          IRunnableWithProgress runnable = invocation.getArgumentAt(2, IRunnableWithProgress.class);
-          runnable.run(new NullProgressMonitor());
-          return null;
-        }
-      }).when(dialog).run(anyBoolean(), anyBoolean(), any(IRunnableWithProgress.class));
+      doAnswer(new RunnableExecutor())
+          .when(dialog).run(anyBoolean(), anyBoolean(), any(IRunnableWithProgress.class));
 
       ILaunchConfiguration configuration = mock(ILaunchConfiguration.class);
       when(configuration.getAttribute(
@@ -168,6 +161,16 @@ public class PipelineArgumentsTabTest {
           return control instanceof Button && ((Button) control).getSelection();
         }
       });
+    }
+  }
+
+  private static class RunnableExecutor implements Answer<Void> {
+    @Override
+    public Void answer(InvocationOnMock invocation)
+        throws InvocationTargetException, InterruptedException {
+      IRunnableWithProgress runnable = invocation.getArgumentAt(2, IRunnableWithProgress.class);
+      runnable.run(new NullProgressMonitor());
+      return null;
     }
   }
 }
