@@ -345,7 +345,8 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   private void updateHierarchy(final MajorVersion majorVersion)
       throws InvocationTargetException, InterruptedException {
     // blocking call (regardless of "fork"), returning only after the inner runnable completes
-    getLaunchConfigurationDialog().run(true, true, new IRunnableWithProgress() {
+    getLaunchConfigurationDialog().run(true /*fork*/, true /*cancelable*/,
+        new IRunnableWithProgress() {
       @Override
       public void run(IProgressMonitor monitor)
           throws InvocationTargetException, InterruptedException {
@@ -399,7 +400,8 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
       final AtomicReference<Map<PipelineOptionsType, Set<PipelineOptionsProperty>>>
           optionsHierarchy = new AtomicReference<>();
       // blocking call (regardless of "fork"), returning only after the inner runnable completes
-      getLaunchConfigurationDialog().run(true, true, new IRunnableWithProgress() {
+      getLaunchConfigurationDialog().run(true /*fork*/, true /*cancelable*/,
+          new IRunnableWithProgress() {
         @Override
         public void run(IProgressMonitor monitor)
             throws InvocationTargetException, InterruptedException {
