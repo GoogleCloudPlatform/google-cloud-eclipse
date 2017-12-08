@@ -350,8 +350,6 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
       @Override
       public void run(IProgressMonitor monitor)
           throws InvocationTargetException, InterruptedException {
-        monitor.beginTask(Messages.getString("loading.pipeline.options.hierarchy"), //$NON-NLS-1$
-            IProgressMonitor.UNKNOWN);
         hierarchy = getPipelineOptionsHierarchy(majorVersion, monitor);
       }
     });
@@ -368,6 +366,9 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
   private PipelineOptionsHierarchy getPipelineOptionsHierarchy(
       MajorVersion majorVersion, IProgressMonitor monitor) {
+    monitor.beginTask(Messages.getString("loading.pipeline.options.hierarchy"), //$NON-NLS-1$
+        IProgressMonitor.UNKNOWN);
+
     IProject project = getProject();
     if (project != null && project.isAccessible()) {
       try {
