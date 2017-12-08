@@ -40,7 +40,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.SettableFuture;
@@ -48,7 +47,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -61,7 +59,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -84,39 +81,30 @@ import org.eclipse.ui.forms.events.IExpansionListener;
 
 /**
  * A tab specifying arguments required to run a Dataflow Pipeline.
- * 
- * Computing the pipeline options hierarchy can be expensive, so we try to avoid doing so.
- * {@link #reload(ILaunchConfiguration)} is responsible for loading information derived from an
- * {@link ILaunchConfiguration}.
  */
 public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   private static final Joiner MISSING_GROUP_MEMBER_JOINER = Joiner.on(", "); //$NON-NLS-1$
 
   private static final String ARGUMENTS_SEPARATOR = "="; //$NON-NLS-1$
 
-  private final IWorkspaceRoot workspaceRoot;
   private Executor displayExecutor;
 
   private ScrolledComposite composite;
   private Composite internalComposite;
 
-  @VisibleForTesting
-  Map<PipelineRunner, Button> runnerButtons;
   private Group runnerGroup;
+  private Map<PipelineRunner, Button> runnerButtons;
 
-  @VisibleForTesting
-  DefaultedPipelineOptionsComponent defaultOptionsComponent;
+  private DefaultedPipelineOptionsComponent defaultOptionsComponent;
 
-  @VisibleForTesting
-  TextAndButtonComponent userOptionsSelector;
+  private TextAndButtonComponent userOptionsSelector;
   private PipelineOptionsFormComponent pipelineOptionsForm;
 
-  private final DataflowDependencyManager dependencyManager;
+  private PipelineLaunchConfiguration launchConfiguration;
+
+  private final DataflowDependencyManager dependencyManager = DataflowDependencyManager.create();
   private final PipelineOptionsHierarchyFactory pipelineOptionsHierarchyFactory =
       new ClasspathPipelineOptionsHierarchyFactory();
-
-  private IProject project;
-  private PipelineLaunchConfiguration launchConfiguration;
 
   /*
    * TODO: By default, this may include all PipelineOptions types, including custom user types that
@@ -126,28 +114,27 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
    */
   private PipelineOptionsHierarchy hierarchy;
 
-  /** Set to {@code true} when this tab has been shown, and reset upon a new config. */
-  private boolean activated = false;
+  private final IWorkspaceRoot workspaceRoot;
 
   public PipelineArgumentsTab() {
-    this(ResourcesPlugin.getWorkspace().getRoot(), DataflowDependencyManager.create());
+    this(ResourcesPlugin.getWorkspace().getRoot());
   }
 
   @VisibleForTesting
-  PipelineArgumentsTab(IWorkspaceRoot workspaceRoot, DataflowDependencyManager dependencyManager) {
+  PipelineArgumentsTab(IWorkspaceRoot workspaceRoot) {
     this.workspaceRoot = workspaceRoot;
-    this.dependencyManager = dependencyManager;
     hierarchy = pipelineOptionsHierarchyFactory.global(new NullProgressMonitor());
   }
 
   @Override
   public void createControl(Composite parent) {
+    launchConfiguration = PipelineLaunchConfiguration.createDefault();
     displayExecutor = DisplayExecutor.create(parent.getDisplay());
     composite = new ScrolledComposite(parent, SWT.V_SCROLL);
     composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     composite.setLayout(new GridLayout(1, false));
 
-    internalComposite = new Composite(this.composite, SWT.NULL);
+    internalComposite = new Composite(composite, SWT.NULL);
 
     GridData internalCompositeGridData = new GridData(SWT.FILL, SWT.FILL, true, true);
     internalComposite.setLayoutData(internalCompositeGridData);
@@ -219,7 +206,10 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   }
 
   private void populateRunners(MajorVersion majorVersion) {
-    clearRunners();
+    for (Control ctl : runnerGroup.getChildren()) {
+      ctl.dispose();
+    }
+    runnerButtons = new HashMap<>();
     // TODO: Retrieve automatically instead of from a hardcoded map
     for (PipelineRunner runner : PipelineRunner.inMajorVersion(majorVersion)) {
       Button runnerButton = createRunnerButton(runnerGroup, runner);
@@ -227,13 +217,6 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
           new UpdateLaunchConfigAndRequiredArgsSelectionListener(runner));
       runnerButtons.put(runner, runnerButton);
     }
-  }
-
-  private void clearRunners() {
-    for (Control ctl : runnerGroup.getChildren()) {
-      ctl.dispose();
-    }
-    runnerButtons = new HashMap<>();
   }
 
   private Button createRunnerButton(Group runnerSelectorGroup, PipelineRunner runner) {
@@ -279,15 +262,13 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   }
 
   @Override
-  public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {}
+  public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
+    launchConfiguration = PipelineLaunchConfiguration.createDefault();
+    launchConfiguration.toLaunchConfiguration(configuration);
+  }
 
   @Override
   public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-    if (!activated) {
-      // this tab was never shown since it was last shown, and since our
-      // isValid() == true for this to be called, then there are no changes
-      return;
-    }
     PipelineRunner runner = getSelectedRunner();
     launchConfiguration.setRunner(runner);
 
@@ -317,121 +298,71 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
   @Override
   public void initializeFrom(ILaunchConfiguration configuration) {
-    reload(configuration);
-    if (launchConfiguration == null) {
-      // any errors are picked up and reported by isValid()
-      clearRunners();
-      defaultOptionsComponent.setEnabled(false);
-      userOptionsSelector.setEnabled(false);
-      pipelineOptionsForm.updateForm(null, null);
-      return;
-    }
-
-    updateRunnerButtons(launchConfiguration);
-
-    defaultOptionsComponent.setEnabled(true);
-    defaultOptionsComponent.setUseDefaultValues(launchConfiguration.isUseDefaultLaunchOptions());
-    defaultOptionsComponent.setPreferences(getPreferences());
-    defaultOptionsComponent.setCustomValues(launchConfiguration.getArgumentValues());
-
-    userOptionsSelector.setEnabled(true);
-    String userOptionsName = launchConfiguration.getUserOptionsName();
-    userOptionsSelector.setText(Strings.nullToEmpty(userOptionsName));
-
-    updatePipelineOptionsForm();
-    activated = true;
-  }
-
-  /**
-   * Reload any computed information only if the launch configuration has changed in some meaningful
-   * way. This must be a fast check as this method is called from
-   * {{@link #isValid(ILaunchConfiguration)}}, which is called frequently.
-   * 
-   * @return true if values were reloaded, or false if the configuration was up-to-date
-   */
-  @VisibleForTesting
-  boolean reload(ILaunchConfiguration configuration) {
     try {
-      // recompute the features of interest from the provided launch configuration
-      IProject project = findProject(configuration);
-      MajorVersion majorVersion = project == null || !project.isAccessible() ? null
-          : dependencyManager.getProjectMajorVersion(project);
-      PipelineLaunchConfiguration launchConfiguration = majorVersion == null ? null
-          : PipelineLaunchConfiguration.fromLaunchConfiguration(majorVersion, configuration);
-      if (Objects.equals(project, this.project)
-          && Objects.equals(launchConfiguration, this.launchConfiguration)) {
-        // our features of interest are the same
-        return false;
+      launchConfiguration = PipelineLaunchConfiguration.fromLaunchConfiguration(configuration);
+
+      IProject project = getProject();
+      MajorVersion majorVersion = MajorVersion.ONE;
+      if (project != null && project.isAccessible()) {
+         majorVersion = dependencyManager.getProjectMajorVersion(project);
+         if (majorVersion == null) {
+            majorVersion = MajorVersion.ONE;
+         }
       }
-      this.project = project;
-      this.launchConfiguration = launchConfiguration;
-      updateHierarchy();
-      activated = false;
-      return true;
+
+      updateRunnerButtons(majorVersion);
+      updateHierarchy(majorVersion);
+
+      defaultOptionsComponent.setUseDefaultValues(launchConfiguration.isUseDefaultLaunchOptions());
+      defaultOptionsComponent.setPreferences(getPreferences());
+      defaultOptionsComponent.setCustomValues(launchConfiguration.getArgumentValues());
+
+      String userOptionsName = launchConfiguration.getUserOptionsName();
+      userOptionsSelector.setText(Strings.nullToEmpty(userOptionsName));
+
+      updatePipelineOptionsForm();
     } catch (CoreException | InvocationTargetException | InterruptedException ex) {
-      activated = false;
-      DataflowUiPlugin.logError(ex, "Error while initializing from existing configuration"); //$NON-NLS-1$
-      project = null;
-      launchConfiguration = null;
-      return true;
+      // TODO: Handle
+      DataflowUiPlugin.logError(ex, 
+          "Error while initializing from existing configuration"); //$NON-NLS-1$
     }
   }
-
-  /** Find the corresponding project or {@code null} if not found. */
-  private final IProject findProject(ILaunchConfiguration launchConfiguration) {
-    try {
-      String eclipseProjectName =
-          launchConfiguration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, "");
-      if (eclipseProjectName != null && !eclipseProjectName.isEmpty()) {
-        return workspaceRoot.getProject(eclipseProjectName);
-      }
-    } catch (CoreException ex) {
-      DataflowUiPlugin.logWarning("Exception when determining project", ex); //$NON-NLS-1$
-    }
-    return null;
-  }
-
-
 
   @VisibleForTesting
-  void updateRunnerButtons(PipelineLaunchConfiguration launchConfiguration) {
-    Preconditions.checkNotNull(launchConfiguration);
-    MajorVersion majorVersion = launchConfiguration.getMajorVersion();
+  void updateRunnerButtons(MajorVersion majorVersion) {
     populateRunners(majorVersion);
     for (Button button : runnerButtons.values()) {
       button.setSelection(false);
     }
 
     PipelineRunner runner = launchConfiguration.getRunner();
-    if (!runner.getSupportedVersions().contains(majorVersion)) {
-      runner = PipelineLaunchConfiguration.defaultRunner(majorVersion);
-      DataflowUiPlugin.logInfo("Changed pipeline runner to '%s'", runner.getRunnerName());
-    }
     Button runnerButton = runnerButtons.get(runner);
+    if (runnerButton == null) {
+      runnerButton = runnerButtons.get(PipelineLaunchConfiguration.defaultRunner(majorVersion));
+    }
     Preconditions.checkNotNull(runnerButton,
-        "runners for %s should always include %s", majorVersion, runner); //$NON-NLS-1$
+        "runners for %s should always include the default runner", majorVersion); //$NON-NLS-1$
     runnerButton.setSelection(true);
     runnerGroup.getParent().redraw();
   }
 
   /**
-   * Asynchronously updates the project hierarchy.
-   * 
-   * @throws InterruptedException if the update is interrupted
-   * @throws InvocationTargetException if an exception occurred during the update
+   * Synchronously updates the project hierarchy.
    */
-  private void updateHierarchy()
+  private void updateHierarchy(final MajorVersion majorVersion)
       throws InvocationTargetException, InterruptedException {
+    // blocking call (regardless of "fork"), returning only after the inner runnable completes
     getLaunchConfigurationDialog().run(true, true, new IRunnableWithProgress() {
       @Override
       public void run(IProgressMonitor monitor)
           throws InvocationTargetException, InterruptedException {
-        hierarchy = getPipelineOptionsHierarchy(monitor);
+        hierarchy = getPipelineOptionsHierarchy(majorVersion, monitor);
       }
     });
   }
 
   private DataflowPreferences getPreferences() {
+    IProject project = getProject();
     if (project != null && project.isAccessible()) {
       return ProjectOrWorkspaceDataflowPreferences.forProject(project);
     } else {
@@ -439,20 +370,27 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     }
   }
 
-  private PipelineOptionsHierarchy getPipelineOptionsHierarchy(IProgressMonitor monitor) {
-    monitor.beginTask(xxx, totalWork);
-    if (launchConfiguration != null) {
-      Verify.verify(project != null && project.isAccessible());
+  private PipelineOptionsHierarchy getPipelineOptionsHierarchy(
+      MajorVersion majorVersion, IProgressMonitor monitor) {
+    IProject project = getProject();
+    if (project != null && project.isAccessible()) {
       try {
-        return pipelineOptionsHierarchyFactory.forProject(project,
-            launchConfiguration.getMajorVersion(), monitor);
+        return pipelineOptionsHierarchyFactory.forProject(project, majorVersion, monitor);
       } catch (PipelineOptionsRetrievalException e) {
-        DataflowUiPlugin.logWarning("Couldn't retrieve Pipeline Options Hierarchy for project %s", //$NON-NLS-1$
-            project);
+        DataflowUiPlugin.logWarning(
+            "Couldn't retrieve Pipeline Options Hierarchy for project %s", project); //$NON-NLS-1$
         return pipelineOptionsHierarchyFactory.global(monitor);
       }
     }
     return pipelineOptionsHierarchyFactory.global(monitor);
+  }
+
+  private IProject getProject() {
+    String eclipseProjectName = launchConfiguration.getEclipseProjectName();
+    if (eclipseProjectName != null && !eclipseProjectName.isEmpty()) {
+      return workspaceRoot.getProject(eclipseProjectName);
+    }
+    return null;
   }
 
   @Override
@@ -473,13 +411,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
           @Override
           public void run() {
             try {
-              for (int i = 0; i < 100; i++) {
-                System.out.print("+");
-                internalComposite.getDisplay().readAndDispatch();
-                System.out.print("!");
-                pipelineOptionsForm.updateForm(launchConfiguration.getArgumentValues(),
-                    optionsHierarchyFuture.get());
-              }
+              pipelineOptionsForm.updateForm(launchConfiguration, optionsHierarchyFuture.get());
               updateLaunchConfigurationDialog();
             } catch (InterruptedException | ExecutionException ex) {
               DataflowUiPlugin.logError(ex, "Exception while updating available Pipeline Options"); //$NON-NLS-1$
@@ -489,6 +421,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
       }
     }, displayExecutor);
     try {
+      // blocking call (regardless of "fork"), returning only after the inner runnable completes
       getLaunchConfigurationDialog().run(true, true, new IRunnableWithProgress() {
         @Override
         public void run(IProgressMonitor monitor)
@@ -510,16 +443,6 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   }
 
   private boolean validatePage() {
-    if (launchConfiguration == null) {
-      setErrorMessage("Project is not configured for Dataflow");
-      return false;
-    } else if (!launchConfiguration.getRunner().getSupportedVersions()
-        .contains(launchConfiguration.getMajorVersion())) {
-      setErrorMessage(
-          "Incompatible pipeline runner: " + launchConfiguration.getRunner().getRunnerName());
-      return false;
-
-    }
     MissingRequiredProperties validationFailures =
         launchConfiguration.getMissingRequiredProperties(hierarchy, getPreferences());
 
@@ -558,8 +481,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   }
 
   @Override
-  public boolean isValid(ILaunchConfiguration configuration) {
-    reload(configuration);
+  public boolean isValid(ILaunchConfiguration launchConfig) {
     return validatePage();
   }
 
