@@ -89,6 +89,17 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
   private Executor displayExecutor;
 
+  /**
+   * When true, suppresses calls {@link #updateLaunchConfigurationDialog()} to avoid frequent
+   * updates during batch UI changes.
+   */
+  @VisibleForTesting
+  boolean suppressDialogUpdates = false;
+
+  @VisibleForTesting
+  UpdateLaunchConfigurationDialogChangedListener dialogChangedListener =
+      new UpdateLaunchConfigurationDialogChangedListener();
+
   private ScrolledComposite composite;
   private Composite internalComposite;
 
@@ -169,8 +180,8 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
     pipelineOptionsForm =
         new PipelineOptionsFormComponent(runnerOptionsGroup, ARGUMENTS_SEPARATOR, filterProperties);
-    pipelineOptionsForm.addModifyListener(new UpdateLaunchConfigurationDialogChangedListener());
-    pipelineOptionsForm.addExpandListener(new UpdateLaunchConfigurationDialogChangedListener());
+    pipelineOptionsForm.addModifyListener(dialogChangedListener);
+    pipelineOptionsForm.addExpandListener(dialogChangedListener);
 
     composite.setContent(internalComposite);
     composite.setExpandHorizontal(true);
@@ -254,8 +265,6 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     defaultOptionsComponent =
         new DefaultedPipelineOptionsComponent(composite, layoutData, target, getPreferences());
 
-    UpdateLaunchConfigurationDialogChangedListener dialogChangedListener =
-        new UpdateLaunchConfigurationDialogChangedListener();
     defaultOptionsComponent.addAccountSelectionListener(dialogChangedListener);
     defaultOptionsComponent.addButtonSelectionListener(dialogChangedListener);
     defaultOptionsComponent.addModifyListener(dialogChangedListener);
@@ -411,10 +420,13 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
           @Override
           public void run() {
             try {
+              suppressDialogUpdates = true;
               pipelineOptionsForm.updateForm(launchConfiguration, optionsHierarchyFuture.get());
               updateLaunchConfigurationDialog();
             } catch (InterruptedException | ExecutionException ex) {
               DataflowUiPlugin.logError(ex, "Exception while updating available Pipeline Options"); //$NON-NLS-1$
+            } finally {
+              suppressDialogUpdates = false;
             }
           }
         });
@@ -517,8 +529,10 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
    * arguments tab; and 2) the min size of the {@code ScrolledComposite} is updated to fit the
    * entire form.
    */
-  private class UpdateLaunchConfigurationDialogChangedListener
+  @VisibleForTesting
+  class UpdateLaunchConfigurationDialogChangedListener
       extends SelectionAdapter implements ModifyListener, IExpansionListener, Runnable {
+
     @Override
     public void widgetSelected(SelectionEvent event) {
       run();
@@ -540,7 +554,9 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
     @Override
     public void run() {
-      updateLaunchConfigurationDialog();
+      if (!suppressDialogUpdates) {
+        updateLaunchConfigurationDialog();
+      }
     }
   }
 }
