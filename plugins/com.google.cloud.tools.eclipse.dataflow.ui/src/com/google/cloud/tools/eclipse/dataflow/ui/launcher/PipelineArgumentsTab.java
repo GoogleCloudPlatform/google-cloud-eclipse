@@ -396,7 +396,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
   private void updatePipelineOptionsForm() {
     try {
-      // This is mere a reference holder; atomicity not required.
+      // This is merely a reference holder; atomicity not required.
       final AtomicReference<Map<PipelineOptionsType, Set<PipelineOptionsProperty>>>
           optionsHierarchy = new AtomicReference<>();
       // blocking call (regardless of "fork"), returning only after the inner runnable completes
