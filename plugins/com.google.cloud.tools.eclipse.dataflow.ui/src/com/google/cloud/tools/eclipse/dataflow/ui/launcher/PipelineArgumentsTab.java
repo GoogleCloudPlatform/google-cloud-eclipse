@@ -53,6 +53,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
@@ -350,7 +351,12 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
       @Override
       public void run(IProgressMonitor monitor)
           throws InvocationTargetException, InterruptedException {
-        hierarchy = getPipelineOptionsHierarchy(majorVersion, monitor);
+        // We want to display a meaningful label to users with "beginTask". Given that, we can't use
+        // "SubMonitor.convert()" because it calls "beginTask()" with a preset amount.
+        monitor.beginTask(Messages.getString("loading.pipeline.options.hierarchy"), //$NON-NLS-1$
+            IProgressMonitor.UNKNOWN);
+        SubProgressMonitor subMonitor = new SubProgressMonitor(monitor, 1);
+        hierarchy = getPipelineOptionsHierarchy(majorVersion, subMonitor);
       }
     });
   }
@@ -366,9 +372,6 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
   private PipelineOptionsHierarchy getPipelineOptionsHierarchy(
       MajorVersion majorVersion, IProgressMonitor monitor) {
-    monitor.beginTask(Messages.getString("loading.pipeline.options.hierarchy"), //$NON-NLS-1$
-        IProgressMonitor.UNKNOWN);
-
     IProject project = getProject();
     if (project != null && project.isAccessible()) {
       try {
