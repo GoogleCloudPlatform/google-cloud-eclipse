@@ -93,7 +93,19 @@ public class ProjectRepositoryTest {
     assertThat(gcpProject.getName(), is("projectName"));
     assertThat(gcpProject.getId(), is("projectId"));
   }
-  
+
+  @Test
+  public void testGetProjects_null() throws IOException, ProjectRepositoryException {
+    Projects.List list = initializeListRequest();
+    ListProjectsResponse response = new ListProjectsResponse();
+    response.setProjects(null);
+    when(list.execute()).thenReturn(response);
+
+    List<GcpProject> gcpProjects = repository.getProjects(mock(Credential.class));
+
+    assertNotNull(gcpProjects);
+  }
+
   @Test
   public void testGetProjects_pagination() throws IOException, ProjectRepositoryException {
     Projects.List list = initializeListRequest();

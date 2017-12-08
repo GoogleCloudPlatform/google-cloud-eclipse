@@ -25,6 +25,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.dataflow.core.launcher.PipelineConfigurationAttr;
@@ -100,6 +101,19 @@ public class PipelineArgumentsTabTest {
       tab.initializeFrom(configuration);  // Should not throw NPE.
 
       ProjectUtils.waitForProjects();  // Suppress some non-terminated-job error logs
+    }
+
+    @Test
+    public void testSuppressingUpdates() {
+      IWorkspaceRoot workspaceRoot = mock(IWorkspaceRoot.class);
+      when(workspaceRoot.getProject(anyString())).thenReturn(mock(IProject.class));
+      ILaunchConfigurationDialog dialog = mock(ILaunchConfigurationDialog.class);
+
+      PipelineArgumentsTab tab = new PipelineArgumentsTab(workspaceRoot);
+      tab.setLaunchConfigurationDialog(dialog);
+      tab.suppressDialogUpdates = true;
+      tab.dialogChangedListener.run();
+      verifyZeroInteractions(dialog);
     }
   }
 

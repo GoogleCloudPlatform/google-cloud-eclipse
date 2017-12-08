@@ -133,7 +133,7 @@ public class SwtBotAppEngineActions {
   public static IProject importNativeProject(SWTWorkbenchBot bot, String projectName,
       File extractedLocation) {
 
-    openImportExistingProjectsWizard(bot);
+    openImportProjectsWizard(bot, "General", "Existing Projects into Workspace");
     bot.button("Next >").click();
 
     // current comboBox is associated with a radio button
@@ -161,7 +161,8 @@ public class SwtBotAppEngineActions {
     return project;
   }
 
-  private static void openImportExistingProjectsWizard(SWTWorkbenchBot bot) {
+  private static void openImportProjectsWizard(SWTWorkbenchBot bot,
+      String wizardCategory, String importWizardName) {
     for (int tries = 1; true; tries++) {
       SWTBotShell shell = null;
       try {
@@ -170,10 +171,9 @@ public class SwtBotAppEngineActions {
         shell.activate();
 
         SwtBotTreeUtilities.waitUntilTreeHasItems(bot, bot.tree());
-        SWTBotTreeItem treeItem = bot.tree().expandNode("General");
-        SwtBotTreeUtilities.waitUntilTreeItemHasChild(bot, treeItem,
-            "Existing Projects into Workspace");
-        treeItem.select("Existing Projects into Workspace");
+        SWTBotTreeItem treeItem = bot.tree().expandNode(wizardCategory);
+        SwtBotTreeUtilities.waitUntilTreeItemHasChild(bot, treeItem, importWizardName);
+        treeItem.select(importWizardName);
         break;
       } catch (TimeoutException e) {
         if (tries == 2) {
@@ -191,13 +191,7 @@ public class SwtBotAppEngineActions {
   public static IProject importMavenProject(SWTWorkbenchBot bot, String projectName,
       File extractedLocation) {
 
-    bot.menu("File").menu("Import...").click();
-
-    SWTBotShell shell = bot.shell("Import");
-    shell.activate();
-
-    SwtBotTreeUtilities.waitUntilTreeHasItems(bot, bot.tree());
-    bot.tree().expandNode("Maven").select("Existing Maven Projects");
+    openImportProjectsWizard(bot, "Maven", "Existing Maven Projects");
     bot.button("Next >").click();
 
     bot.comboBoxWithLabel("Root Directory:").setText(extractedLocation.getAbsolutePath());
