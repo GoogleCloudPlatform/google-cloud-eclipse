@@ -90,7 +90,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   private Executor displayExecutor;
 
   /**
-   * When true, suppresses calls {@link #updateLaunchConfigurationDialog()} to avoid frequent
+   * When true, suppresses calls to {@link #updateLaunchConfigurationDialog()} to avoid frequent
    * updates during batch UI changes.
    */
   @VisibleForTesting
