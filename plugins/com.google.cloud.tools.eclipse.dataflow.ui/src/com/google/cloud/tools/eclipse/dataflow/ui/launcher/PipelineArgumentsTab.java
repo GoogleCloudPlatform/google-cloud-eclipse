@@ -59,6 +59,7 @@ import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -394,7 +395,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
   private void updatePipelineOptionsForm() {
     try {
-      // TODO: use "Holder" instead of "AtomicReference" when Java 8 is available.
+      // This is mere a reference holder; atomicity not required.
       final AtomicReference<Map<PipelineOptionsType, Set<PipelineOptionsProperty>>>
           optionsHierarchy = new AtomicReference<>();
       // blocking call (regardless of "fork"), returning only after the inner runnable completes
@@ -408,8 +409,13 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
         }
       });
 
-      pipelineOptionsForm.updateForm(launchConfiguration, optionsHierarchy.get());
-      updateLaunchConfigurationDialog();
+      BusyIndicator.showWhile(composite.getDisplay(), new Runnable() {
+        @Override
+        public void run() {
+          pipelineOptionsForm.updateForm(launchConfiguration, optionsHierarchy.get());
+          updateLaunchConfigurationDialog();
+        }
+      });
     } catch (InvocationTargetException | InterruptedException ex) {
       DataflowUiPlugin.logError(ex, "Exception occurred while updating available Pipeline Options");
     }
