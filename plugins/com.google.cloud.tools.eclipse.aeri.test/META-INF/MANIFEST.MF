@@ -8,3 +8,4 @@ Bundle-Vendor: Google Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Fragment-Host: com.google.cloud.tools.eclipse.aeri
 Require-Bundle: com.google.cloud.tools.eclipse.test.dependencies
+Import-Package: com.google.cloud.tools.eclipse.test.util

@@ -44,9 +44,7 @@ public abstract class BaseBuildPropertiesTest {
   public final void testBuildProperties() throws IOException {
     String[] binIncludes = buildProperties.get("bin.includes").split(",\\s*");
     Set<String> includes = Sets.newHashSet(binIncludes);
-    
-    Assert.assertTrue(includes.contains("plugin.xml"));
-    Assert.assertTrue(includes.contains("plugin.properties"));
+
     Assert.assertTrue(includes.contains("."));
     Assert.assertTrue(includes.contains("META-INF/"));
     

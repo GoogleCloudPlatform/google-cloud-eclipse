@@ -106,32 +106,12 @@ public abstract class BasePluginXmlTest {
   }
   
   @Test
-  public final void testBuildProperties() throws IOException {
+  public final void testBuildPropertiesContainsPluginFiles() throws IOException {
     String[] binIncludes = buildProperties.get("bin.includes").split(",\\s*");
     Set<String> includes = Sets.newHashSet(binIncludes);
     
     Assert.assertTrue(includes.contains("plugin.xml"));
     Assert.assertTrue(includes.contains("plugin.properties"));
-    Assert.assertTrue(includes.contains("."));
-    Assert.assertTrue(includes.contains("META-INF/"));
-    
-    testIncludedIfPresent(includes, "helpContexts.xml");
-    testIncludedIfPresent(includes, "icons/");
-    testIncludedIfPresent(includes, "lib/");
-    testIncludedIfPresent(includes, "README.md");
-    testIncludedIfPresent(includes, "epl-v10.html");
-    testIncludedIfPresent(includes, "OSGI-INF/");
-    testIncludedIfPresent(includes, "fragment.xml");
-    testIncludedIfPresent(includes, "fragment.properties");
-    testIncludedIfPresent(includes, "lifecycle-mapping-metadata.xml"); // for m2e extensions
-  }
-
-  private static void testIncludedIfPresent(Set<String> includes, String name) 
-      throws IOException {
-    String path = EclipseProperties.getHostBundlePath() + "/" + name;
-    if (Files.exists(Paths.get(path))) {
-      Assert.assertTrue(includes.contains(name));
-    }
   }
   
   @Test
