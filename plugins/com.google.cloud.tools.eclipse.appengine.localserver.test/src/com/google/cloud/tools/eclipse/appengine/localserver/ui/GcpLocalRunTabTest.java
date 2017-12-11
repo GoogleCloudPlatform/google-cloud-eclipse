@@ -184,6 +184,7 @@ public class GcpLocalRunTabTest {
     assertTrue(GcpLocalRunTab.getEnvironmentMap(launchConfig).isEmpty());
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   public void testGetEnvironmentMap() throws CoreException {
     Map<String, String> map = new HashMap<>();
@@ -251,6 +252,7 @@ public class GcpLocalRunTabTest {
     assertEquals("/usr/home/keystore/my-key.json", serviceKeyText.getText());
   }
 
+  @SuppressWarnings("unchecked")
   private void mockLaunchConfig(String accountEmail, String gcpProjectId, String serviceKey)
       throws CoreException {
     when(launchConfig.getAttribute("com.google.cloud.tools.eclipse.gcpEmulation.accountEmail", ""))
@@ -284,6 +286,7 @@ public class GcpLocalRunTabTest {
         mapCaptor.getValue().get("GOOGLE_APPLICATION_CREDENTIALS"));
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   public void testPerformApply_notActivated() throws CoreException {
     mockLaunchConfig("account1@example.com", "project-A", "/usr/home/key.json");
