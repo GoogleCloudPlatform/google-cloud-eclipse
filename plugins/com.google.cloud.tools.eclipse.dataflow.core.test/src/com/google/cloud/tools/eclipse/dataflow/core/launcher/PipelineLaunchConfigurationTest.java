@@ -56,6 +56,7 @@ public class PipelineLaunchConfigurationTest {
         pipelineLaunchConfig.getRunner());
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   public void testFromLaunchConfigurationCopiesArgumentsFromLaunchConfiguration()
       throws CoreException {
