@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.test.util;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.common.collect.Sets;
@@ -208,7 +209,7 @@ public abstract class BasePluginXmlTest {
   @Test
   public final void testBundleClasspath() throws IOException {
     Attributes manifest = getManifestAttributes();
-    assertEquals(".", manifest.getValue("Bundle-ClassPath"));
+    assertTrue(manifest.getValue("Bundle-ClassPath").contains("."));
     assertEquals("2", manifest.getValue("Bundle-ManifestVersion"));
   }
 
