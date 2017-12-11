@@ -210,7 +210,6 @@ public abstract class BasePluginXmlTest {
   public final void testBundleClasspath() throws IOException {
     Attributes manifest = getManifestAttributes();
     assertTrue(manifest.getValue("Bundle-ClassPath").contains("."));
-    assertEquals("2", manifest.getValue("Bundle-ManifestVersion"));
   }
 
   @Test
