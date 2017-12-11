@@ -1,6 +1,5 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-ClassPath: .
 Bundle-Name: Java 8 development support for App Engine standard
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.standard.java8;singleton:=true
 Bundle-Version: 0.1.0.qualifier

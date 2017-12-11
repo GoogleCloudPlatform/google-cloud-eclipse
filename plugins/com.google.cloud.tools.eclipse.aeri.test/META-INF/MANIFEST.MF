@@ -1,5 +1,4 @@
 Manifest-Version: 1.0
-Bundle-ClassPath: .
 Bundle-ManifestVersion: 2
 Bundle-Name: Tests for Cloud Tools for Eclipse Error Reporting
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.aeri.test

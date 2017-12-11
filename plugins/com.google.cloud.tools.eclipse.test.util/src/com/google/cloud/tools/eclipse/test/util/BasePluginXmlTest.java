@@ -207,12 +207,6 @@ public abstract class BasePluginXmlTest {
   }
 
   @Test
-  public final void testBundleClasspath() throws IOException {
-    Attributes manifest = getManifestAttributes();
-    assertTrue(manifest.getValue("Bundle-ClassPath").contains("."));
-  }
-
-  @Test
   public final void testBundleExecutionEnvironment() throws IOException {
     Attributes manifest = getManifestAttributes();
     assertEquals("JavaSE-1.7", manifest.getValue("Bundle-RequiredExecutionEnvironment"));
