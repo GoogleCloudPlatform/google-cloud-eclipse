@@ -24,7 +24,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-public class XmlTest extends BasePluginXmlTest {
+public class PluginXmlTest extends BasePluginXmlTest {
   
   @Test
   public void testFacetsDefined() {
