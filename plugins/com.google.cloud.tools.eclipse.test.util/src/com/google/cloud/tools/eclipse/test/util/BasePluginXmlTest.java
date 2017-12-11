@@ -191,6 +191,32 @@ public abstract class BasePluginXmlTest {
     }
     assertEquals("Google Inc.", vendor);
   }
+  
+  @Test
+  public final void testBundleActivationPolicyLazy() throws IOException {
+    String policy = getManifestAttributes().getValue("Bundle-ActivationPolicy");
+    assertEquals("lazy", policy);
+  }
+  
+  @Test
+  public final void testManifestVersion() throws IOException {
+    Attributes manifest = getManifestAttributes();
+    assertEquals("1.0", manifest.getValue("Manifest-Version"));
+    assertEquals("2", manifest.getValue("Bundle-ManifestVersion"));
+  }
+
+  @Test
+  public final void testBundleClasspath() throws IOException {
+    Attributes manifest = getManifestAttributes();
+    assertEquals(".", manifest.getValue("Bundle-ClassPath"));
+    assertEquals("2", manifest.getValue("Bundle-ManifestVersion"));
+  }
+
+  @Test
+  public final void testBundleExecutionEnvironment() throws IOException {
+    Attributes manifest = getManifestAttributes();
+    assertEquals("JavaSE-1.7", manifest.getValue("Bundle-RequiredExecutionEnvironment"));
+  }
 
   @Test
   public final void testGuavaImportVersions() throws IOException {
