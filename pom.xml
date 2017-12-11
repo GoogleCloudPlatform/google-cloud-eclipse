@@ -353,8 +353,10 @@
             <!--
               - maven.artifact.threads=1 to workaround repository corruption seen in
                 https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2284
+              - aether.connector.resumeDownloads=false & aether.connector.basic.threads=1
+                https://issues.apache.org/jira/browse/MNG-4706
             -->
-            <argLine>${jacoco.agentArgLine} -Dmaven.artifact.threads=1 -Dorg.eclipse.swtbot.search.timeout=${org.eclipse.swtbot.search.timeout} -Xms40m -Xmx1G -XX:MaxPermSize=512m -Djava.awt.headless=true ${os-jvm-flags}</argLine>
+            <argLine>${jacoco.agentArgLine} -Dmaven.artifact.threads=1 -Daether.connector.resumeDownloads=false -Daether.connector.basic.threads=1 -Dorg.eclipse.swtbot.search.timeout=${org.eclipse.swtbot.search.timeout} -Xms40m -Xmx1G -XX:MaxPermSize=512m -Djava.awt.headless=true ${os-jvm-flags}</argLine>
           </configuration>
         </plugin>
 
