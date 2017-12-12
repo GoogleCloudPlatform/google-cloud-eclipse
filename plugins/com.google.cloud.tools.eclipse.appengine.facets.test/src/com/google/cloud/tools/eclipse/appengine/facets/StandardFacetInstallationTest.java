@@ -24,18 +24,15 @@ import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
@@ -64,7 +61,7 @@ public class StandardFacetInstallationTest {
           project.delete(true, null);
         } catch (IllegalArgumentException ex) {
           // Get more information to diagnose odd test failures; remove when fixed
-          // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1196
+          // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2093
           System.err.println("JobManager state:\n" + Job.getJobManager());
           System.err.println("  Current job: " + Job.getJobManager().currentJob());
           System.err.println("  Current rule: " + Job.getJobManager().currentRule());
