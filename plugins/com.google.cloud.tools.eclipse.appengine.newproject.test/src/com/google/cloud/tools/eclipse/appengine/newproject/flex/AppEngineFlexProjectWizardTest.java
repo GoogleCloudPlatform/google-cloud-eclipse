@@ -24,7 +24,7 @@ public class AppEngineFlexProjectWizardTest {
   private AppEngineFlexProjectWizard wizard = new AppEngineFlexProjectWizard();
 
   @Test
-  public void testWindowTitle() {
+  public void testTitleSet() {
     Assert.assertEquals("New App Engine Flexible Project", wizard.getWindowTitle());
   }
 
