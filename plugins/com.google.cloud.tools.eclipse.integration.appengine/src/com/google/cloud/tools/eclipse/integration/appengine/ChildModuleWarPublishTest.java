@@ -50,8 +50,6 @@ public abstract class ChildModuleWarPublishTest {
 
   protected static void loadTestProjectZip(String testZip, String mainProject)
       throws IOException, CoreException {
-    ThreadDumpingWatchdog.report("ChildModuleWarPublishTest.setUp() from "
-        + Thread.currentThread() + " at " + System.nanoTime(), null);
     allProjects = ProjectUtils.importProjects(ChildModuleWarPublishTest.class,
         testZip, false /* checkBuildErrors */, monitor);
     for (IProject loaded : allProjects) {

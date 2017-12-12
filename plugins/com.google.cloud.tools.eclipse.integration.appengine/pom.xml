@@ -12,11 +12,11 @@
   <version>0.1.0-SNAPSHOT</version>
   <packaging>eclipse-test-plugin</packaging>
 
-  <!--
-    test dependencies: brought in here to avoid test instances from downloading
-    https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2284
-  -->
   <dependencies>
+    <!--
+      test dependencies: brought in here to avoid test instances from downloading
+      https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2284
+    -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
@@ -28,6 +28,11 @@
           <artifactId>spring-boot-starter-tomcat</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging</artifactId>
+      <version>1.2</version>
     </dependency>
   </dependencies>
 
