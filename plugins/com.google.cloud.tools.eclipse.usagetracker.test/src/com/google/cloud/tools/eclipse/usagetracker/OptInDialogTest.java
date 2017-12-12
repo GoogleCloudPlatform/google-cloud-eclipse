@@ -101,7 +101,9 @@ public class OptInDialogTest {
     dialogCloser.schedule();
   }
 
-  private enum CloseAction { PRESS_OK, PRESS_CANCEL, CLOSE_SHELL, DISPOSE_SHELL };
+  private enum CloseAction {
+    PRESS_OK, PRESS_CANCEL, CLOSE_SHELL, DISPOSE_SHELL
+  }
 
   private void closeDialog(CloseAction closeAction) {
     switch (closeAction) {

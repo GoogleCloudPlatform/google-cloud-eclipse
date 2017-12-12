@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Google Inc.
+ * Copyright 2017 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.newproject;
+package com.google.cloud.tools.eclipse.util;
 
-import com.google.cloud.tools.eclipse.test.util.BasePluginXmlTest;
+import com.google.cloud.tools.eclipse.test.util.BaseBuildPropertiesTest;
 
-public class XmlTest extends BasePluginXmlTest {
-  
+public class BuildPropertiesTest extends BaseBuildPropertiesTest {
+
 }
