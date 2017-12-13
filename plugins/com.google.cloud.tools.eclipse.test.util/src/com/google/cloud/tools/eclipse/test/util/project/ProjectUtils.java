@@ -144,7 +144,8 @@ public class ProjectUtils {
     // wait for any post-import operations too
     waitForProjects(projects);
     if (checkBuildErrors) {
-      failIfBuildErrors("Imported projects have errors", projects);
+      // changed from specific projects to see all possible errors
+      failIfBuildErrors("Imported projects have errors");
     }
 
     return projects;
