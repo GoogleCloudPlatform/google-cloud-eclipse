@@ -56,7 +56,7 @@ public class LocalAppEnginePublishOperationTest {
   private IServer server;
 
   @Before
-  public void setUp() throws IOException, CoreException {
+  public void setUp() throws IOException, CoreException, InterruptedException {
     projects = ProjectUtils.importProjects(getClass(),
         "projects/test-submodules.zip", true /* checkBuildErrors */, null);
     assertEquals(2, projects.size());
@@ -136,15 +136,24 @@ public class LocalAppEnginePublishOperationTest {
       boolean factoryEnabled = factory.isEnabled(project, null);
       System.out.println("    * " + factory + (!factoryEnabled? " (not enabled, skipping)" : ""));
 
-      if (factoryEnabled){
-        IModule[] modules = factory.getModules(project, null);
-        if (modules == null) {
-          System.out.println("      [null module list]");
-        } else {
-          for (IModule module : modules) {
-            System.out.println("      - " + module.getName());
-          }
-        }
+      System.out.print("      - All modules of the factory:");
+      printModules(factory.getDelegate(null).getModules());
+
+      if (factoryEnabled) {
+        System.out.print("      - Project modules:");
+        printModules(factory.getModules(project, null));
+      }
+    }
+  }
+
+  private static void printModules(IModule[] modules) {
+    if (modules == null) {
+      System.out.println(" <null>");
+    } else if (modules.length == 0) {
+      System.out.println(" <empty>");
+    } else {
+      for (IModule module : modules) {
+        System.out.println(" " + module.getName());
       }
     }
   }
