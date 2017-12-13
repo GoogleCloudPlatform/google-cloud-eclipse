@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.test.util;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.common.collect.Sets;
@@ -107,7 +106,7 @@ public abstract class BasePluginXmlTest {
   }
   
   @Test
-  public final void testBuildPropertiesContainsPluginFiles() throws IOException {
+  public final void testBuildPropertiesContainsPluginFiles() {
     String[] binIncludes = buildProperties.get("bin.includes").split(",\\s*");
     Set<String> includes = Sets.newHashSet(binIncludes);
     
