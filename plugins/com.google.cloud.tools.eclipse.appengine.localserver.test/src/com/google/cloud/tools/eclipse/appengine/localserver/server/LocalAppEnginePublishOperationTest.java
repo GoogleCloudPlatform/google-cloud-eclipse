@@ -56,7 +56,7 @@ public class LocalAppEnginePublishOperationTest {
   private IServer server;
 
   @Before
-  public void setUp() throws IOException, CoreException, InterruptedException {
+  public void setUp() throws IOException, CoreException {
     projects = ProjectUtils.importProjects(getClass(),
         "projects/test-submodules.zip", true /* checkBuildErrors */, null);
     assertEquals(2, projects.size());
