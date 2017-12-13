@@ -24,7 +24,7 @@ public class AppEngineStandardProjectWizardTest {
   private final AppEngineStandardProjectWizard wizard = new AppEngineStandardProjectWizard();
 
   @Test
-  public void testTitleSet() {
+  public void testWindowTitle() {
     Assert.assertEquals("New App Engine Standard Project", wizard.getWindowTitle());
   }
 
