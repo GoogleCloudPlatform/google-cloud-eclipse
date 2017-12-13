@@ -18,9 +18,6 @@ package com.google.cloud.tools.eclipse.appengine.localserver;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -51,32 +48,6 @@ public class Activator extends AbstractUIPlugin {
   public void stop(BundleContext context) throws Exception {
     plugin = null;
     super.stop(context);
-  }
-
-  /**
-   * Logs the specified message and opens an error dialog with the specified
-   * message and title. Ensures that the error dialog is opened on the UI
-   * thread.
-   *
-   * @param parent the parent shell of the dialog, or null if none
-   * @param title the dialog's title
-   * @param message the message
-   */
-  public static void logAndDisplayError(final Shell parent,
-                                        final String title,
-                                        final String message) {
-    logError(message);
-
-    if (Display.getCurrent() != null) {
-      MessageDialog.openError(parent, title, message);
-    } else {
-      Display.getDefault().asyncExec(new Runnable() {
-        @Override
-        public void run() {
-          MessageDialog.openError(parent, title, message);
-        }
-      });
-    }
   }
 
   /**
