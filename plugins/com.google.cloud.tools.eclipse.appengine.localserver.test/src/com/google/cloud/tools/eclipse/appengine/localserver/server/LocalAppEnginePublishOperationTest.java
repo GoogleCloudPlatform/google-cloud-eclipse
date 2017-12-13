@@ -136,7 +136,7 @@ public class LocalAppEnginePublishOperationTest {
       boolean factoryEnabled = factory.isEnabled(project, null);
       System.out.println("    * " + factory + (!factoryEnabled? " (not enabled, skipping)" : ""));
 
-      System.out.print("      - All modules of the factory:");
+      System.out.print("      - All factory modules:");
       printModules(factory.getDelegate(null).getModules());
 
       if (factoryEnabled) {
