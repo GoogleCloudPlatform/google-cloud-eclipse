@@ -43,6 +43,7 @@ public class BannedElementTest {
         null);
   }
   
+  @SuppressWarnings("unlikely-arg-type")
   @Test
   public void testEquals() {
     BannedElement element1 = new BannedElement("message");

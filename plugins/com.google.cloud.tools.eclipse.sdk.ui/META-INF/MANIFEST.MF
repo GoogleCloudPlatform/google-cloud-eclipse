@@ -1,5 +1,4 @@
 Manifest-Version: 1.0
-Bundle-ClassPath: .
 Bundle-ManifestVersion: 2
 Bundle-Name: Cloud Tools for Eclipse User Interface for the Cloud SDK
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.sdk.ui;singleton:=true

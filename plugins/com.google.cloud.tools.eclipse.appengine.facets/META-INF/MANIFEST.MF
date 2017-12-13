@@ -1,11 +1,11 @@
 Manifest-Version: 1.0
-Bundle-ClassPath: .
 Bundle-ManifestVersion: 2
 Bundle-Name: Cloud Tools for Eclipse App Engine Facets
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.facets;singleton:=true
 Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: Google Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
 Require-Bundle: com.google.cloud.tools.appengine;bundle-version="0.4.1",
  com.google.guava;bundle-version="[20.0.0,21.0.0)",
