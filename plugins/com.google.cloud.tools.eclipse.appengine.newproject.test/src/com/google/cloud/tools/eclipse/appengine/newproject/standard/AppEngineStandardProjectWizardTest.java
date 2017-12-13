@@ -21,7 +21,7 @@ import org.junit.Test;
 
 public class AppEngineStandardProjectWizardTest {
 
-  private AppEngineStandardProjectWizard wizard = new AppEngineStandardProjectWizard();
+  private final AppEngineStandardProjectWizard wizard = new AppEngineStandardProjectWizard();
 
   @Test
   public void testTitleSet() {
