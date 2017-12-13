@@ -25,6 +25,7 @@ import com.google.cloud.tools.eclipse.test.util.ZipUtil;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -33,9 +34,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.junit.AfterClass;
+import org.junit.Rule;
 import org.junit.Test;
 
 public abstract class ChildModuleWarPublishTest {
+
+  @Rule
+  public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
   private static final IProgressMonitor monitor = new NullProgressMonitor();
   private static List<IProject> allProjects;
@@ -45,8 +50,6 @@ public abstract class ChildModuleWarPublishTest {
 
   protected static void loadTestProjectZip(String testZip, String mainProject)
       throws IOException, CoreException {
-    ThreadDumpingWatchdog.report("ChildModuleWarPublishTest.setUp() from "
-        + Thread.currentThread() + " at " + System.nanoTime(), null);
     allProjects = ProjectUtils.importProjects(ChildModuleWarPublishTest.class,
         testZip, false /* checkBuildErrors */, monitor);
     for (IProject loaded : allProjects) {
