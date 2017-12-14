@@ -47,8 +47,6 @@ import org.eclipse.wst.server.core.model.ServerDelegate;
 public class LocalAppEngineServerDelegate extends ServerDelegate implements IURLProvider {
   private static final Logger logger =
       Logger.getLogger(LocalAppEngineServerDelegate.class.getName());
-  public static final String RUNTIME_TYPE_ID =
-      "com.google.cloud.tools.eclipse.appengine.standard.runtime"; //$NON-NLS-1$
   public static final String SERVER_TYPE_ID =
       "com.google.cloud.tools.eclipse.appengine.standard.server"; //$NON-NLS-1$
 
