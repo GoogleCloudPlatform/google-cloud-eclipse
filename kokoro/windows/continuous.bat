@@ -1,10 +1,7 @@
 @echo on
 cd github\google-cloud-eclipse
 
-gsutil
-tar
-zip
-unzip
+tar || zip || unzip || echo
 
 rem Pre-download all dependency JARs that test projects from the integration
 rem test require to avoid the concurrent download issue:
