@@ -1,7 +1,7 @@
 @echo on
 cd github\google-cloud-eclipse
 
-tar || zip || unzip || echo
+tar zxvf fake.zip
 
 rem Pre-download all dependency JARs that test projects from the integration
 rem test require to avoid the concurrent download issue:
