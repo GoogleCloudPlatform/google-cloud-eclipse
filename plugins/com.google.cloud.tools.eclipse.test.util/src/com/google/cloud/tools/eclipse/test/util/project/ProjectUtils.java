@@ -153,16 +153,16 @@ public class ProjectUtils {
   private static void waitUntilNoBuildError() throws CoreException {
     try {
       Stopwatch elapsed = Stopwatch.createStarted();
-      Set<String> errors;
-      do {
-        errors = getAllBuildErrors();
-        if (errors.size() > 0) {
-          if (Display.getCurrent() != null) {
-            while (Display.getCurrent().readAndDispatch());
-          }
-          Thread.sleep(50);
+      while (true) {
+        Set<String> errors = getAllBuildErrors();
+        if (errors.isEmpty() || elapsed.elapsed(TimeUnit.SECONDS) > 300) {
+          return;
         }
-      } while (elapsed.elapsed(TimeUnit.SECONDS) < 300 && errors.size() > 0);
+        if (Display.getCurrent() != null) {
+          while (Display.getCurrent().readAndDispatch());
+        }
+        Thread.sleep(50);
+      }
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
     }
