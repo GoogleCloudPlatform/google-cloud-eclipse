@@ -9,6 +9,24 @@ call gcloud.cmd components install app-engine-java --quiet
 
 mvn -B --settings kokoro\windows\m2-settings.xml ^
     -N io.takari:maven:wrapper -Dmaven=3.5.0
+
+zip
+unzip
+z7
+wzzip
+powershell
+
+echo ################################################################################
+echo ################################################################################
+echo ################################################################################
+echo ################################################################################
+
+cd plugins/com.google.cloud.tools.eclipse.integration.appengine/test-projects
+powershell.exe -nologo -noprofile -command ^
+    "& { Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('web-fragment-example.zip', '.'); }"
+dir /s
+cd ../../..
+
 mvnw.cmd -B --settings kokoro\windows\m2-settings.xml ^
          --fail-at-end -Ptravis -Declipse.target=oxygen verify
 
