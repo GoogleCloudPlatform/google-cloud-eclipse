@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import org.eclipse.core.runtime.CoreException;
 import org.junit.Test;
 
 public class LibraryTest {
@@ -124,7 +123,7 @@ public class LibraryTest {
   }
 
   @Test
-  public void testDirectDependencies() throws CoreException {
+  public void testDirectDependencies() {
     // objectify depends on guava
     MavenCoordinates mavenCoordinates =
         new MavenCoordinates.Builder()
