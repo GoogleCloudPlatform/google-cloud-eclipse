@@ -1,7 +1,9 @@
 @echo on
 cd github\google-cloud-eclipse
 
-tar zxvf fake.zip
+gsutil cp gs://ct4e-m2-repositories/m2-oxygen.tar ..
+tar xf ../m2-oxygen.tar
+dir /b ../m2-oxygen
 
 rem Pre-download all dependency JARs that test projects from the integration
 rem test require to avoid the concurrent download issue:
@@ -10,7 +12,8 @@ pushd plugins\com.google.cloud.tools.eclipse.integration.appengine\test-projects
 mkdir tmp-unzip-area
 cd tmp-unzip-area
 for %%i in (..\*.zip) do jar xf %%i
-for /f %%i in ('dir /b /s pom.xml') do mvn -B -q -f "%%i" package
+for /f %%i in ('dir /b /s pom.xml') do ^
+    mvn -B -Dmaven.repo.local=../m2-oxygen/repository -f "%%i" package
 cd ..
 rmdir /s /q tmp-unzip-area
 popd
@@ -22,8 +25,10 @@ call gcloud.cmd components install app-engine-java --quiet
 @echo on
 
 mvn -B --settings kokoro\windows\m2-settings.xml ^
+    -Dmaven.repo.local=../m2-oxygen/repository ^
     -N io.takari:maven:wrapper -Dmaven=3.5.0
 mvnw.cmd -B --settings kokoro\windows\m2-settings.xml ^
+         -Dmaven.repo.local=../m2-oxygen/repository ^
          --fail-at-end -Ptravis -Declipse.target=oxygen verify
 
 exit /b %ERRORLEVEL%
