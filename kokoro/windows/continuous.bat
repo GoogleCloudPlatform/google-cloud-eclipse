@@ -1,8 +1,8 @@
 @echo on
 cd github\google-cloud-eclipse
 
-gsutil cp gs://ct4e-m2-repositories/m2-oxygen.tar ..
-tar xf ../m2-oxygen.tar
+call gsutil cp gs://ct4e-m2-repositories/m2-oxygen.tar ..
+tar xvf ../m2-oxygen.tar
 dir /b ../m2-oxygen
 
 rem Pre-download all dependency JARs that test projects from the integration
