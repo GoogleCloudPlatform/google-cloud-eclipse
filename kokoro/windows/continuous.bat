@@ -2,15 +2,8 @@
 cd github\google-cloud-eclipse
 
 pushd plugins\com.google.cloud.tools.eclipse.integration.appengine\test-projects
-for %%i in (*.zip) do jar xvf %%i
-
-for /r . %%i in (pom.xml) do if exist %%i (
-    echo %%i
-    echo %%~fi
-    echo %%~dpnxi
-    mvn -f "%%i" package
-    mvn -f %%i package)
-dir /s
+for %%i in (*.zip) do jar xf %%i
+for /r . %%i in (pom.xml) do @if exist %%i mvn -B -f "%%i" package
 popd
 
 set CLOUDSDK_CORE_DISABLE_USAGE_REPORTING=true
