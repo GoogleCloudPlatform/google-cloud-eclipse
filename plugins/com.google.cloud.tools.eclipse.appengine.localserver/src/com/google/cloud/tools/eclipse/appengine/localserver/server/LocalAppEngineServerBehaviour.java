@@ -347,7 +347,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     PortChecker portInUse = new PortChecker() {
       @Override
       public boolean isInUse(InetAddress addr, int port) {
-        Preconditions.checkNotNull(port);
+        Preconditions.checkArgument(port >= 0, "invalid port");
         return SocketUtil.isPortInUse(addr, port);
       }
     };
