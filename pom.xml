@@ -122,6 +122,12 @@
     <org.eclipse.swtbot.search.timeout>30000</org.eclipse.swtbot.search.timeout>
 
     <jgit.dirtyWorkingTree>warning</jgit.dirtyWorkingTree>
+
+    <!--
+      jgit provider uses git commit hash to generate bundle/feature version
+      qualifier; set to empty to work around bug building from git-worktrees
+    -->
+    <tycho.buildtimestamp.provider>jgit</tycho.buildtimestamp.provider>
   </properties>
 
   <!--
@@ -297,7 +303,7 @@
           </dependency>
         </dependencies>
         <configuration>
-          <timestampProvider>jgit</timestampProvider>
+          <timestampProvider>${tycho.buildtimestamp.provider}</timestampProvider>
           <jgit.dirtyWorkingTree>${jgit.dirtyWorkingTree}</jgit.dirtyWorkingTree>
           <jgit.ignore>
             pom.xml
