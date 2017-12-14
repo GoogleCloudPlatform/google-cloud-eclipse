@@ -97,8 +97,7 @@ public class ProjectUtils {
    * @throws CoreException if a project cannot be imported
    */
   public static List<IProject> importProjects(URL fileLocation,
-      boolean checkBuildErrors, IProgressMonitor monitor) throws IOException, CoreException
-  {
+      boolean checkBuildErrors, IProgressMonitor monitor) throws IOException, CoreException {
     SubMonitor progress = SubMonitor.convert(monitor, 100);
     URL zipLocation = FileLocator.toFileURL(fileLocation);
     if (!zipLocation.getProtocol().equals("file")) {
@@ -132,8 +131,7 @@ public class ProjectUtils {
     System.out.printf("Importing %d projects:\n", projectFiles.size());
     for (IPath projectFile : projectFiles) {
       System.out.println("    " + projectFile);
-      IProjectDescription descriptor =
-          root.getWorkspace().loadProjectDescription(projectFile);
+      IProjectDescription descriptor = root.getWorkspace().loadProjectDescription(projectFile);
       IProject project = root.getProject(descriptor.getName());
       // bring in the project to the workspace
       project.create(descriptor, progress.newChild(2));
@@ -144,11 +142,30 @@ public class ProjectUtils {
     // wait for any post-import operations too
     waitForProjects(projects);
     if (checkBuildErrors) {
+      waitUntilNoBuildError();
       // changed from specific projects to see all possible errors
       failIfBuildErrors("Imported projects have errors");
     }
 
     return projects;
+  }
+
+  private static void waitUntilNoBuildError() throws CoreException {
+    try {
+      Stopwatch elapsed = Stopwatch.createStarted();
+      while (true) {
+        Set<String> errors = getAllBuildErrors();
+        if (errors.isEmpty() || elapsed.elapsed(TimeUnit.SECONDS) > 300) {
+          return;
+        }
+        if (Display.getCurrent() != null) {
+          while (Display.getCurrent().readAndDispatch());
+        }
+        Thread.sleep(50);
+      }
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+    }
   }
 
   /** Fail if there are any build errors on any project in the workspace. */
@@ -350,7 +367,7 @@ public class ProjectUtils {
 
 
   /**
-   * Wait until the project has finished building and markers have been registered.
+   * Wait until the project has finished building and markers have disappeared.
    * 
    * @throws AssertionError if markers are still present
    */
@@ -378,7 +395,7 @@ public class ProjectUtils {
   }
 
   /**
-   * Wait until the project has finished building and markers have disappeared.
+   * Wait until the project has finished building and markers have been registered.
    * 
    * @throws AssertionError if there are no markers by the timeout
    */
