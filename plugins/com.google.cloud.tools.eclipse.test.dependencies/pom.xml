@@ -24,12 +24,24 @@
       - it uses `Require-Bundle` to pull in and re-export the existing Hamcrest and JUnit bundles
         (which are ok)
       - it copies all Maven dependencies with test-scope into the `lib` directory using
-        the `dependency:copy` goal, and then exports their packages.
+        the `dependency:copy-dependencies` goal, and then exports their packages.
 
     This approach ideally requires use of Ian Brandt's "Maven Dependency Plugin" for m2e, which
     causes the `dependency:copy-dependencies` to be performed during the _process-sources_ phase
     on a full build.
    -->
+  <dependencies>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.objenesis</groupId>
+      <artifactId>objenesis</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
   <build>
     <plugins>
@@ -39,25 +51,18 @@
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
           <execution>
-            <id>copy</id>
+            <id>assemble-bundle-lib</id>
             <goals>
-              <goal>copy</goal>
+              <goal>copy-dependencies</goal>
             </goals>
             <configuration>
+              <includeScope>test</includeScope>
+              <!-- the groupIds of the dependencies above -->
+              <includeGroupIds>
+                org.mockito,
+                org.objenesis,
+              </includeGroupIds>
               <outputDirectory>lib</outputDirectory>
-              <!--
-                Dependencies that are then exported to OSGi bundles.
-              -->
-              <artifactItems>
-                <artifactItem>
-                  <groupId>org.mockito</groupId>
-                  <artifactId>mockito-core</artifactId>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>org.objenesis</groupId>
-                  <artifactId>objenesis</artifactId>
-                </artifactItem>
-              </artifactItems>
             </configuration>
           </execution>
         </executions>
