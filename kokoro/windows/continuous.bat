@@ -1,18 +1,16 @@
 @echo on
 
-echo %USERPROFILE%
-dir %USERPROFILE%
-dir %USERPROFILE%/.m2
-
 pushd %USERPROFILE%
+rmdir /s /q .m2
 call gsutil -q cp "gs://ct4e-m2-repositories/m2-oxygen.tar" .
 echo on
 tar xf m2-oxygen.tar
+del m2-oxygen.tar
 rename m2-oxygen .m2
 dir
 popd
 
-cd github/google-cloud-eclipse
+cd github\google-cloud-eclipse
 
 rem Pre-download all dependency JARs that test projects from the integration
 rem test require to avoid the concurrent download issue:
@@ -41,15 +39,14 @@ call mvnw.cmd -B --settings kokoro\windows\m2-settings.xml ^
               --fail-at-end -Ptravis -Declipse.target=oxygen verify
 echo on
 
-cd ..
-echo %CD%
-rmdir /s /q google-cloud-eclipse
-dir
-
-cd %USERPROFILE%
-tar cf m2-oxygen-userprofile.tar .m2
-call gsutil cp m2-oxygen-userprofile.tar "gs://ct4e-m2-repositories/"
+pushd %USERPROFILE%
+tar cf m2-oxygen-final2.tar .m2
+call gsutil cp m2-oxygen-final2.tar "gs://ct4e-m2-repositories/"
 echo on
 rmdir /s /q .m2
+del m2-oxygen-final.tar
+popd
+
+call mvnw.cmd -B clean
 
 exit /b %ERRORLEVEL%
