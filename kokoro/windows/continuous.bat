@@ -48,7 +48,7 @@ dir
 
 cd %HOMEPATH%
 tar cf m2-oxygen-home.tar .m2
-call gsutil cp m2-oxygen-home.tar "gs://ct4e-m2-repositories/" .
+call gsutil cp m2-oxygen-home.tar "gs://ct4e-m2-repositories/"
 echo on
 rmdir /s /q .m2
 
