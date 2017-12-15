@@ -17,9 +17,10 @@
     can be consumed by Eclipse/OSGi projects as many of these APIs
     are not distributed as OSGi bundles.
 
-    This approach ideally requires use of Ian Brandt's "Maven Dependency Plugin" for m2e, which
-    causes the `dependency:copy` to be performed during the _process-sources_ phase
-    on a full build.
+    This approach requires use of Ian Brandt's "Maven Dependency
+    Plugin" for m2e, which causes the `dependency:copy-dependencies`
+    to be performed during the _process-sources_ phase on a full
+    build.
    -->
 
   <dependencies>
