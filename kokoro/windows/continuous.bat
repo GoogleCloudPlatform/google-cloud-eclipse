@@ -35,14 +35,17 @@ mvn -B --settings kokoro\windows\m2-settings.xml ^
     -Dmaven.repo.local=%M2_OXYGEN% ^
     -N io.takari:maven:wrapper -Dmaven=3.5.0
 call mvnw.cmd -B --settings kokoro\windows\m2-settings.xml ^
-         -Dmaven.repo.local=%M2_OXYGEN% ^
-         --fail-at-end -Ptravis -Declipse.target=oxygen verify
-
+              -Dmaven.repo.local=%M2_OXYGEN% ^
+              --fail-at-end -Ptravis -Declipse.target=oxygen verify
 echo on
+
 cd ..
 echo %CD%
-tar cf m2-oxygen-new.tar m2-oxygen
-call gsutil cp m2-oxygen-new.tar "gs://ct4e-m2-repositories/" .
-echo on
+rmdir /s /q google-cloud-eclipse
+rmdir /s /q m2-oxygen
+dir
+rem tar cf m2-oxygen-new.tar m2-oxygen
+rem call gsutil cp m2-oxygen-new.tar "gs://ct4e-m2-repositories/" .
+rem echo on
 
 exit /b %ERRORLEVEL%
