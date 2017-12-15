@@ -34,10 +34,11 @@ call gcloud.cmd components install app-engine-java --quiet
 mvn -B --settings kokoro\windows\m2-settings.xml ^
     -Dmaven.repo.local=%M2_OXYGEN% ^
     -N io.takari:maven:wrapper -Dmaven=3.5.0
-mvnw.cmd -B --settings kokoro\windows\m2-settings.xml ^
+call mvnw.cmd -B --settings kokoro\windows\m2-settings.xml ^
          -Dmaven.repo.local=%M2_OXYGEN% ^
          --fail-at-end -Ptravis -Declipse.target=oxygen verify
 
+echo on
 cd ..
 echo %CD%
 tar cf m2-oxygen-new.tar m2-oxygen
