@@ -1,10 +1,10 @@
 @echo on
 
-echo %HOMEPATH%
-dir %HOMEPATH%
-dir %HOMEPATH%/.m2
+echo %USERPROFILE%
+dir %USERPROFILE%
+dir %USERPROFILE%/.m2
 
-pushd %HOMEPATH%
+pushd %USERPROFILE%
 call gsutil -q cp "gs://ct4e-m2-repositories/m2-oxygen.tar" .
 echo on
 tar xf m2-oxygen.tar
@@ -24,7 +24,7 @@ pushd plugins\com.google.cloud.tools.eclipse.integration.appengine\test-projects
 mkdir tmp-unzip-area
 cd tmp-unzip-area
 for %%i in (..\*.zip) do jar xf %%i
-for /f %%i in ('dir /b /s pom.xml') do mvn -B -f "%%i" package)
+for /f %%i in ('dir /b /s pom.xml') do mvn -B -f "%%i" package
 cd ..
 rmdir /s /q tmp-unzip-area
 popd
@@ -46,9 +46,9 @@ echo %CD%
 rmdir /s /q google-cloud-eclipse
 dir
 
-cd %HOMEPATH%
-tar cf m2-oxygen-home.tar .m2
-call gsutil cp m2-oxygen-home.tar "gs://ct4e-m2-repositories/"
+cd %USERPROFILE%
+tar cf m2-oxygen-userprofile.tar .m2
+call gsutil cp m2-oxygen-userprofile.tar "gs://ct4e-m2-repositories/"
 echo on
 rmdir /s /q .m2
 
