@@ -1,4 +1,12 @@
 @echo on
+
+rem To speed up build, download and unpack an M2 repo cache.
+pushd %USERPROFILE%
+call gsutil -q cp "gs://ct4e-m2-repositories/m2-oxygen.tar" .
+echo on
+tar xf m2-oxygen.tar && del m2-oxygen.tar
+popd
+
 cd github\google-cloud-eclipse
 
 rem Pre-download all dependency JARs that test projects from the integration
