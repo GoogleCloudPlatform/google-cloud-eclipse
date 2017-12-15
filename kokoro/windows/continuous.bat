@@ -40,13 +40,11 @@ call mvnw.cmd -B --settings kokoro\windows\m2-settings.xml ^
 echo on
 
 pushd %USERPROFILE%
-tar cf m2-oxygen-final2.tar .m2
-call gsutil cp m2-oxygen-final2.tar "gs://ct4e-m2-repositories/"
+tar cf m2-oxygen-final.tar .m2
+call gsutil cp m2-oxygen-final.tar "gs://ct4e-m2-repositories/"
 echo on
 rmdir /s /q .m2
 del m2-oxygen-final.tar
 popd
-
-call mvnw.cmd -B clean
 
 exit /b %ERRORLEVEL%
