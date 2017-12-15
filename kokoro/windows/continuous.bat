@@ -38,4 +38,10 @@ mvnw.cmd -B --settings kokoro\windows\m2-settings.xml ^
          -Dmaven.repo.local=%M2_OXYGEN% ^
          --fail-at-end -Ptravis -Declipse.target=oxygen verify
 
+cd ..
+echo %CD%
+tar cf m2-oxygen-new.tar m2-oxygen
+call gsutil cp m2-oxygen-new.tar "gs://ct4e-m2-repositories/" .
+echo on
+
 exit /b %ERRORLEVEL%
