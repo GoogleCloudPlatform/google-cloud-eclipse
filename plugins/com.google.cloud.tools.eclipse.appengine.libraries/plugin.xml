@@ -49,7 +49,7 @@
           siteUri="https://github.com/objectify/objectify/wiki" >
       <libraryFile
           export="true"
-          javadocUri="https://www.javadoc.io/doc/com.googlecode.objectify/objectify/5.1.21">
+          javadocUri="https://www.javadoc.io/doc/com.googlecode.objectify/objectify/">
         <mavenCoordinates
               artifactId="objectify"
               groupId="com.googlecode.objectify" />
