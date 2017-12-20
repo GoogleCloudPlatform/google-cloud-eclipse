@@ -17,7 +17,8 @@
           export="false">
         <mavenCoordinates
               artifactId="appengine-api-1.0-sdk"
-              groupId="com.google.appengine" />
+              groupId="com.google.appengine"
+              version="LATEST" />
         <exclusionFilter pattern="com/google/appengine/repackaged/**" />
         <exclusionFilter pattern="com/google/appengine/labs/repackaged/**" />
         <inclusionFilter pattern="com/google/apphosting/api/**" />
@@ -35,7 +36,8 @@
             javadocUri="https://cloud.google.com/endpoints/docs/frameworks/java/javadoc/">
         <mavenCoordinates
               artifactId="endpoints-framework"
-              groupId="com.google.endpoints" />
+              groupId="com.google.endpoints"
+              version="LATEST" />
         <exclusionFilter pattern="com/google/appengine/repackaged/**" />
       </libraryFile>
     </library>
@@ -52,7 +54,8 @@
           javadocUri="https://www.javadoc.io/doc/com.googlecode.objectify/objectify/">
         <mavenCoordinates
               artifactId="objectify"
-              groupId="com.googlecode.objectify" />
+              groupId="com.googlecode.objectify"
+              version="LATEST" />
       </libraryFile>
     </library>
 
