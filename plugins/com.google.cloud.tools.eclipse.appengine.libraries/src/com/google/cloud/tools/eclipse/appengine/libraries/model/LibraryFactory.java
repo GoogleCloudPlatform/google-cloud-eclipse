@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.libraries.model;
 import com.google.cloud.tools.eclipse.appengine.libraries.Messages;
 import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
 import com.google.cloud.tools.eclipse.util.DependencyResolver;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -129,7 +130,8 @@ class LibraryFactory {
     return dependencies;
   }
 
-  private static LibraryFile loadSingleFile(IConfigurationElement libraryFileElement,
+  @VisibleForTesting
+  static LibraryFile loadSingleFile(IConfigurationElement libraryFileElement,
       MavenCoordinates mavenCoordinates) throws URISyntaxException {
     IConfigurationElement mavenCoordinatesElement = getMavenCoordinatesElement(libraryFileElement);
     String version = mavenCoordinatesElement.getAttribute(ATTRIBUTE_NAME_VERSION);

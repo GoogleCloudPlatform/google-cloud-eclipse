@@ -136,4 +136,8 @@ public class LibraryFile implements Comparable<LibraryFile> {
     }
   }
 
+  @VisibleForTesting
+  boolean isVersionFixed() {
+    return fixedVersion;
+  }
 }

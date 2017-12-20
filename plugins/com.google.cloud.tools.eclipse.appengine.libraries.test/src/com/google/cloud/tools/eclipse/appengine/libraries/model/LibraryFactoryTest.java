@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
+import java.net.URISyntaxException;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.junit.Assert;
@@ -75,6 +76,24 @@ public class LibraryFactoryTest {
     String version = library.getAllDependencies().get(0).getMavenCoordinates().getVersion();
     int majorVersion = new DefaultArtifactVersion(version).getMajorVersion();
     Assert.assertEquals(19, majorVersion);
+  }
+
+  @Test
+  public void testLoadSingleFile_versionGiven() throws URISyntaxException {
+    Mockito.when(mavenCoordinates[0].getAttribute("version")).thenReturn("19.0");
+
+    LibraryFile libraryFile = LibraryFactory.loadSingleFile(libraryFiles[0],
+        Mockito.mock(MavenCoordinates.class));
+    Assert.assertTrue(libraryFile.isVersionFixed());
+  }
+
+  @Test
+  public void testLoadSingleFile_latestVersion() throws URISyntaxException {
+    Mockito.when(mavenCoordinates[0].getAttribute("version")).thenReturn("LATEST");
+
+    LibraryFile libraryFile = LibraryFactory.loadSingleFile(libraryFiles[0],
+        Mockito.mock(MavenCoordinates.class));
+    Assert.assertFalse(libraryFile.isVersionFixed());
   }
 
   @Test
