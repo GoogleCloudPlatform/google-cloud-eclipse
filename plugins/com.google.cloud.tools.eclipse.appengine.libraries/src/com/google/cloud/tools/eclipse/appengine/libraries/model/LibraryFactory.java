@@ -104,8 +104,7 @@ class LibraryFactory {
     List<LibraryFile> libraryFiles = new ArrayList<>();
     for (IConfigurationElement libraryFileElement : children) {
       if (ELEMENT_NAME_LIBRARY_FILE.equals(libraryFileElement.getName())) {
-        MavenCoordinates mavenCoordinates = getMavenCoordinates(
-            libraryFileElement.getChildren(ELEMENT_NAME_MAVEN_COORDINATES));
+        MavenCoordinates mavenCoordinates = getMavenCoordinates(libraryFileElement);
         LibraryFile libraryFile = loadSingleFile(libraryFileElement, mavenCoordinates);
         libraryFiles.add(libraryFile);
       }
@@ -132,7 +131,11 @@ class LibraryFactory {
 
   private static LibraryFile loadSingleFile(IConfigurationElement libraryFileElement,
       MavenCoordinates mavenCoordinates) throws URISyntaxException {
-    LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
+    IConfigurationElement mavenCoordinatesElement = getMavenCoordinatesElement(libraryFileElement);
+    String version = mavenCoordinatesElement.getAttribute(ATTRIBUTE_NAME_VERSION);
+    boolean fixedVersion = !Strings.isNullOrEmpty(version) && !"LATEST".equals(version);
+
+    LibraryFile libraryFile = new LibraryFile(mavenCoordinates, fixedVersion);
     libraryFile.setFilters(getFilters(libraryFileElement.getChildren()));
     // todo do we really want these next two to be required?
     libraryFile.setSourceUri(
@@ -154,13 +157,20 @@ class LibraryFactory {
     }
   }
 
-  private static MavenCoordinates getMavenCoordinates(IConfigurationElement[] children) {
+  private static IConfigurationElement getMavenCoordinatesElement(
+      IConfigurationElement libraryFileElement) {
+    IConfigurationElement[] children =
+        libraryFileElement.getChildren(ELEMENT_NAME_MAVEN_COORDINATES);
     if (children.length != 1) {
       logger.warning(
           "Single configuration element for MavenCoordinates was expected, found: " //$NON-NLS-1$
           + children.length);
     }
-    IConfigurationElement mavenCoordinatesElement = children[0];
+    return children[0];
+  }
+
+  private static MavenCoordinates getMavenCoordinates(IConfigurationElement libraryFileElement) {
+    IConfigurationElement mavenCoordinatesElement = getMavenCoordinatesElement(libraryFileElement);
     String groupId = mavenCoordinatesElement.getAttribute(ATTRIBUTE_NAME_GROUP_ID);
     String artifactId = mavenCoordinatesElement.getAttribute(ATTRIBUTE_NAME_ARTIFACT_ID);
 
