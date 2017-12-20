@@ -29,7 +29,6 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -44,6 +43,7 @@ import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.wst.common.componentcore.ComponentCore;
 import org.eclipse.wst.common.componentcore.resources.IVirtualComponent;
+import org.eclipse.wst.common.componentcore.resources.IVirtualFile;
 import org.eclipse.wst.common.componentcore.resources.IVirtualFolder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -181,15 +181,15 @@ public class WebXmlValidator implements XmlValidationHelper {
     //    /            -> src/main/webapp
     // WEB-INF/classes -> src/main/java
     // WEB-INF/lib     -> src/main/webapp/WEB-INF/lib
-    IFile file = root.getFile(fileName).getUnderlyingFile();
+    IVirtualFile file = root.getFile(fileName);
     if (file.exists()) {
       return true;
     }
-    file = root.getFile("WEB-INF/" + fileName).getUnderlyingFile();
+    file = root.getFile("WEB-INF/" + fileName);
     if (file.exists()) {
       return true;
     }
-    file = root.getFile("WEB-INF/classes/" + fileName).getUnderlyingFile();
+    file = root.getFile("WEB-INF/classes/" + fileName);
     if (file.exists()) {
       return true;
     }
