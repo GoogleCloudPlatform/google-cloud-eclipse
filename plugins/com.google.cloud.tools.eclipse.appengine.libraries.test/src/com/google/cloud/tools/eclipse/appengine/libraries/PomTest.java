@@ -225,7 +225,7 @@ public class PomTest {
     Pom.removeUnusedDependencies(dependencies, Arrays.asList(library1),
         Arrays.asList(library1, library2));
     Assert.assertEquals(1, dependencies.getElementsByTagName("dependency").getLength());
-    Element dependency = getOnlyChild(((Element) dependencies), "dependency");
+    Element dependency = getOnlyChild(dependencies, "dependency");
     Element groupId = getOnlyChild(dependency, "groupId");
     Assert.assertEquals("com.example.group1", groupId.getTextContent());
     Element artifactId = getOnlyChild(dependency, "artifactId");

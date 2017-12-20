@@ -23,7 +23,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
@@ -38,15 +37,20 @@ public class LibraryFile implements Comparable<LibraryFile> {
   private URI javadocUri;
   private URI sourceUri;
   private boolean export = true;
-  
-  /** Version has been checked against Maven Central **/
+
+  /** Version can no longer be updated **/
   // todo could mark this transient and on deserialization set depending on whether
   // version is still LATEST_VERSION or not
   private boolean fixedVersion = false;
 
   public LibraryFile(MavenCoordinates mavenCoordinates) {
+    this(mavenCoordinates, false /* fixedVersion */);
+  }
+
+  public LibraryFile(MavenCoordinates mavenCoordinates, boolean fixedVersion) {
     Preconditions.checkNotNull(mavenCoordinates, "mavenCoordinates is null");
     this.mavenCoordinates = mavenCoordinates;
+    this.fixedVersion = fixedVersion;
   }
 
   public MavenCoordinates getMavenCoordinates() {
@@ -95,7 +99,7 @@ public class LibraryFile implements Comparable<LibraryFile> {
 
   @Override
   public int compareTo(LibraryFile other) {
-    return this.mavenCoordinates.toStringCoordinates()
+    return mavenCoordinates.toStringCoordinates()
         .compareTo(other.mavenCoordinates.toStringCoordinates());
   }
 
@@ -104,13 +108,13 @@ public class LibraryFile implements Comparable<LibraryFile> {
     if (other == null || !(other instanceof LibraryFile)) {
       return false;
     }
-    return this.mavenCoordinates.toStringCoordinates()
+    return mavenCoordinates.toStringCoordinates()
         .equals((((LibraryFile) other).mavenCoordinates.toStringCoordinates()));
   }
   
   @Override
   public int hashCode() {
-    return this.mavenCoordinates.toStringCoordinates().hashCode();
+    return mavenCoordinates.toStringCoordinates().hashCode();
   }
 
   /**
@@ -132,4 +136,8 @@ public class LibraryFile implements Comparable<LibraryFile> {
     }
   }
 
+  @VisibleForTesting
+  boolean isVersionFixed() {
+    return fixedVersion;
+  }
 }

@@ -6,7 +6,7 @@
 
   <extension point="com.google.cloud.tools.eclipse.appengine.libraries"
              id="com.google.cloud.tools.eclipse.appengine.libraries.defaultapis">       
-             
+
     <library 
           id="appengine-api"
           group="appengine-api"
@@ -17,8 +17,8 @@
           export="false">
         <mavenCoordinates
               artifactId="appengine-api-1.0-sdk"
-              groupId="com.google.appengine" 
-              version="1.9.59" />
+              groupId="com.google.appengine"
+              version="LATEST" />
         <exclusionFilter pattern="com/google/appengine/repackaged/**" />
         <exclusionFilter pattern="com/google/appengine/labs/repackaged/**" />
         <inclusionFilter pattern="com/google/apphosting/api/**" />
@@ -36,8 +36,8 @@
             javadocUri="https://cloud.google.com/endpoints/docs/frameworks/java/javadoc/">
         <mavenCoordinates
               artifactId="endpoints-framework"
-              groupId="com.google.endpoints" 
-              version="2.0.9"/>
+              groupId="com.google.endpoints"
+              version="LATEST" />
         <exclusionFilter pattern="com/google/appengine/repackaged/**" />
       </libraryFile>
     </library>
@@ -51,11 +51,11 @@
           siteUri="https://github.com/objectify/objectify/wiki" >
       <libraryFile
           export="true"
-          javadocUri="https://www.javadoc.io/doc/com.googlecode.objectify/objectify/5.1.21">
+          javadocUri="https://www.javadoc.io/doc/com.googlecode.objectify/objectify/">
         <mavenCoordinates
               artifactId="objectify"
               groupId="com.googlecode.objectify"
-              version="5.1.21" />
+              version="LATEST" />
       </libraryFile>
     </library>
 
