@@ -145,13 +145,16 @@ public class WebProjectUtil {
     }
     // Otherwise check the standard places
     for (String possibleWebInfContainer : DEFAULT_WEB_PATHS) {
-      // simplify mocking: get the location as two parts and check for null despite that getFolder()
-      // should be @NonNull
+      // check each directory component to simplify mocking in tests
+      // so we can just say WEB-INF doesn't exist
       IFolder defaultLocation = project.getFolder(possibleWebInfContainer);
       if (defaultLocation != null && defaultLocation.exists()) {
-        IFile resourceFile = defaultLocation.getFolder(WEB_INF).getFile(filePath);
-        if (resourceFile.exists()) {
-          return resourceFile;
+        defaultLocation = defaultLocation.getFolder(WEB_INF);
+        if (defaultLocation != null && defaultLocation.exists()) {
+          IFile resourceFile = defaultLocation.getFile(filePath);
+          if (resourceFile.exists()) {
+            return resourceFile;
+          }
         }
       }
     }
