@@ -132,7 +132,7 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
     SubMonitor progress = SubMonitor.convert(monitor, 10);
 
     IFile appEngineWebXml = WebProjectUtil.findInWebInf(project, new Path(APPENGINE_WEB_XML));
-    if (appEngineWebXml.exists()) {
+    if (appEngineWebXml != null && appEngineWebXml.exists()) {
       return;
     }
 
