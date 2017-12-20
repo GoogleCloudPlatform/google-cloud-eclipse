@@ -16,20 +16,28 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets;
 
+import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import com.google.common.collect.ImmutableList;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jst.j2ee.componentcore.J2EEModuleVirtualComponent;
 import org.eclipse.wst.common.componentcore.ComponentCore;
 import org.eclipse.wst.common.componentcore.resources.IVirtualComponent;
+import org.eclipse.wst.common.componentcore.resources.IVirtualFile;
 import org.eclipse.wst.common.componentcore.resources.IVirtualFolder;
 
 /**
@@ -45,22 +53,63 @@ public class WebProjectUtil {
 
   static final String WEB_INF = "WEB-INF";
 
+  /**
+   * Create a file in the project's WEB-INF, respecting the order and tags on the WTP virtual
+   * component model. Specifically, we create files and directories in the
+   * {@code &lt;wb-resource&gt;} with the {@code defaultRootSource} tag, if found. We do not
+   * overwrite the file.
+   * 
+   * @param project the hosting project
+   * @param filePath the path of the file within the project's {@code WEB-INF}
+   * @param contents the content for the file
+   * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=448544">Eclipse bug 448544</a>
+   */
+  public static IFile createWebInfFile(IProject project, IPath filePath, InputStream contents,
+      IProgressMonitor monitor) throws CoreException {
+    SubMonitor progress = SubMonitor.convert(monitor, 2);
+    IFolder webInfDir = findWebInfForNewResource(project);
+    IFile file = webInfDir.getFile(filePath);
+    if (!file.exists()) {
+      ResourceUtils.createFolders(file.getParent(), progress.newChild(1));
+      file.create(contents, true, progress.newChild(1));
+    }
+    return file;
+  }
+
 
   /**
-   * Return the project's <code>WEB-INF</code> directory. There is no guarantee that the contents
-   * are actually published.
-   *
-   * @return the <code>IFolder</code> or null if not present
+   * Create a folder in the project's WEB-INF, respecting the order and tags on the WTP virtual
+   * component model. Specifically, we create files and directories in the
+   * {@code &lt;wb-resource&gt;} with the {@code defaultRootSource} tag, if found.
+   * 
+   * @param project the hosting project
+   * @param folderPath the path of the folder within the project's {@code WEB-INF}
+   * @param contents the content for the file
+   * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=448544">Eclipse bug 448544</a>
    */
-  public static IFolder getWebInfDirectory(IProject project) {
-    // Try to obtain the directory as if it was a Dynamic Web Project
+  public static IFolder createWebInfFolder(IProject project, Path folderPath,
+      IProgressMonitor monitor) throws CoreException {
+    SubMonitor progress = SubMonitor.convert(monitor, 2);
+    IFolder webInfDir = findWebInfForNewResource(project);
+    IFolder folder = webInfDir.getFolder(folderPath);
+    if (!folder.exists()) {
+      ResourceUtils.createFolders(folder, progress.newChild(1));
+    }
+    return folder;
+  }
+
+  private static IFolder findWebInfForNewResource(IProject project) {
+    // Check if the project is a faceted project, and use the deployment assembly information
     IVirtualComponent component = ComponentCore.createComponent(project);
     if (component != null && component.exists()) {
       IVirtualFolder root = component.getRootFolder();
-      // the root should exist, but the WEB-INF may not yet exist
-      if (root.exists()) {
-        return (IFolder) root.getFolder(WEB_INF).getUnderlyingFolder();
+      // first see if there is a resource tagged as the defaultSourceRoot
+      IPath defaultPath = J2EEModuleVirtualComponent.getDefaultDeploymentDescriptorFolder(root);
+      if (defaultPath != null) {
+        return project.getFolder(defaultPath).getFolder(WEB_INF);
       }
+      // otherwise use the first
+      return (IFolder) root.getFolder(WEB_INF).getUnderlyingFolder();
     }
     // Otherwise it's seemingly fair game
     for (String possibleWebInfContainer : DEFAULT_WEB_PATHS) {
@@ -74,7 +123,7 @@ public class WebProjectUtil {
         }
       }
     }
-    return null;
+    return project.getFolder(DEFAULT_WEB_PATH).getFolder(WEB_INF);
   }
 
   /**
@@ -83,12 +132,30 @@ public class WebProjectUtil {
    * @return the file location or {@code null} if not found
    */
   public static IFile findInWebInf(IProject project, IPath filePath) {
-    IFolder webInfFolder = getWebInfDirectory(project);
-    if (webInfFolder == null) {
+    // Try to obtain the directory as if it was a Dynamic Web Project
+    IVirtualComponent component = ComponentCore.createComponent(project);
+    if (component != null && component.exists()) {
+      IVirtualFolder root = component.getRootFolder();
+      // the root should exist, but the WEB-INF may not yet exist
+      IVirtualFile file = root.getFolder(WEB_INF).getFile(filePath);
+      if (file != null && file.exists()) {
+        return file.getUnderlyingFile();
+      }
       return null;
     }
-    IFile file = webInfFolder.getFile(filePath);
-    return file.exists() ? file : null;
+    // Otherwise check the standard places
+    for (String possibleWebInfContainer : DEFAULT_WEB_PATHS) {
+      // simplify mocking: get the location as two parts and check for null despite that getFolder()
+      // should be @NonNull
+      IFolder defaultLocation = project.getFolder(possibleWebInfContainer);
+      if (defaultLocation != null && defaultLocation.exists()) {
+        IFile resourceFile = defaultLocation.getFolder(WEB_INF).getFile(filePath);
+        if (resourceFile.exists()) {
+          return resourceFile;
+        }
+      }
+    }
+    return null;
   }
 
   /**
@@ -114,5 +181,4 @@ public class WebProjectUtil {
       return Collections.emptyList();
     }
   }
-
 }
