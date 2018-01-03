@@ -42,8 +42,11 @@ public class BugReportCommandHandlerTest {
     //@formatter:off
     // check that values are properly filled in
     Pattern pattern = Pattern.compile("body="
+        
         + "Before\\+reporting\\+a\\+possible\\+bug%3A%0A%0A"
         + "1.\\+Please\\+ensure\\+you\\+are\\+running\\+the\\+latest\\+version\\+of\\+CT4E\\+with\\+_Help\\+%3E\\+Check\\+for\\+Updates_%0A"
+        + "2.\\+If\\+the\\+problem\\+occurs\\+when\\+you\\+deploy\\+or\\+after\\+the\\+application\\+has\\+been\\+deployed%2C\\+try\\+deploying\\+from\\+the\\+command\\+line\\+using\\+gcloud\\+or\\+Maven."
+        + "\\+If\\+the\\+problem\\+does\\+not\\+go\\+away%2C\\+then\\+the\\+issue\\+is\\+likely\\+not\\+with\\+Cloud\\+Tools\\+for\\+Eclipse.%0A%0A"
         + "-\\+Cloud\\+Tools\\+for\\+Eclipse\\+version%3A\\+(?<toolVersion>.*)%0A"
         + "-\\+Google\\+Cloud\\+SDK\\+version%3A\\+(?<gcloudVersion>.*)%0A"
         + "-\\+Eclipse\\+version%3A\\+(?<eclipseVersion>.*)%0A"
