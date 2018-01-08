@@ -232,7 +232,7 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
 
     // locate WEB-INF/lib
     IFolder libFolder =
-        WebProjectUtil.createWebInfFolder(newProject, new Path("lib"), subMonitor.newChild(5)); //$NON-NLS-1$
+        WebProjectUtil.createFolderInWebInf(newProject, new Path("lib"), subMonitor.newChild(5)); //$NON-NLS-1$
     MavenCoordinates jstl = new MavenCoordinates.Builder()
         .setGroupId("jstl") //$NON-NLS-1$
         .setArtifactId("jstl") //$NON-NLS-1$

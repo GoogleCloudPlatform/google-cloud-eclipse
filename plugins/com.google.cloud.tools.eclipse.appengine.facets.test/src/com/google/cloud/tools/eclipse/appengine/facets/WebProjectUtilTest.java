@@ -75,7 +75,7 @@ public class WebProjectUtilTest {
     IProject project = testProjectCreator.getProject();
     // default webapp location is src/main/webapp
     IFile fooTxt =
-        WebProjectUtil.createWebInfFile(project, new Path("foo.txt"), asInputStream("foo"), null);
+        WebProjectUtil.createFileInWebInf(project, new Path("foo.txt"), asInputStream("foo"), null);
     assertNotNull(fooTxt);
     assertTrue(fooTxt.exists());
     assertEquals("src/main/webapp/WEB-INF/foo.txt", fooTxt.getProjectRelativePath().toString());
@@ -87,7 +87,7 @@ public class WebProjectUtilTest {
   public void testCreateWebInfFolder_plainEmpty() throws CoreException {
     IProject project = testProjectCreator.getProject();
     // default webapp location is src/main/webapp
-    IFolder libFolder = WebProjectUtil.createWebInfFolder(project, new Path("lib"), null);
+    IFolder libFolder = WebProjectUtil.createFolderInWebInf(project, new Path("lib"), null);
     assertNotNull(libFolder);
     assertTrue(libFolder.exists());
     assertEquals("src/main/webapp/WEB-INF/lib", libFolder.getProjectRelativePath().toString());
@@ -114,7 +114,7 @@ public class WebProjectUtilTest {
 
     // should be found alongside the web.xml
     IFile fooTxt =
-        WebProjectUtil.createWebInfFile(project, new Path("foo.txt"), asInputStream("foo"), null);
+        WebProjectUtil.createFileInWebInf(project, new Path("foo.txt"), asInputStream("foo"), null);
     assertNotNull(fooTxt);
     assertTrue(fooTxt.exists());
     assertEquals("src/main/webapp/WEB-INF/foo.txt", fooTxt.getProjectRelativePath().toString());
@@ -131,7 +131,7 @@ public class WebProjectUtilTest {
     assertTrue(webXml.exists());
 
     // should be found alongside the web.xml
-    IFolder libFolder = WebProjectUtil.createWebInfFolder(project, new Path("lib"), null);
+    IFolder libFolder = WebProjectUtil.createFolderInWebInf(project, new Path("lib"), null);
     assertNotNull(libFolder);
     assertTrue(libFolder.exists());
     assertEquals("src/main/webapp/WEB-INF/lib", libFolder.getProjectRelativePath().toString());
@@ -159,7 +159,7 @@ public class WebProjectUtilTest {
 
     // should be found alongside the web.xml
     IFile fooTxt =
-        WebProjectUtil.createWebInfFile(project, new Path("foo.txt"), asInputStream("foo"), null);
+        WebProjectUtil.createFileInWebInf(project, new Path("foo.txt"), asInputStream("foo"), null);
     assertNotNull(fooTxt);
     assertTrue(fooTxt.exists());
     assertEquals("WebContent/WEB-INF/foo.txt", fooTxt.getProjectRelativePath().toString());
@@ -176,7 +176,7 @@ public class WebProjectUtilTest {
     assertTrue(webXml.exists());
 
     // should be found alongside the web.xml
-    IFolder libFolder = WebProjectUtil.createWebInfFolder(project, new Path("lib"), null);
+    IFolder libFolder = WebProjectUtil.createFolderInWebInf(project, new Path("lib"), null);
     assertNotNull(libFolder);
     assertTrue(libFolder.exists());
     assertEquals("WebContent/WEB-INF/lib", libFolder.getProjectRelativePath().toString());
@@ -204,7 +204,7 @@ public class WebProjectUtilTest {
 
     // should be found alongside the web.xml
     IFile fooTxt =
-        WebProjectUtil.createWebInfFile(project, new Path("foo.txt"), asInputStream("foo"), null);
+        WebProjectUtil.createFileInWebInf(project, new Path("foo.txt"), asInputStream("foo"), null);
     assertNotNull(fooTxt);
     assertTrue(fooTxt.exists());
     assertEquals("web/WEB-INF/foo.txt", fooTxt.getProjectRelativePath().toString());
@@ -221,7 +221,7 @@ public class WebProjectUtilTest {
     assertTrue(webXml.exists());
 
     // should be found alongside the web.xml
-    IFolder libFolder = WebProjectUtil.createWebInfFolder(project, new Path("lib"), null);
+    IFolder libFolder = WebProjectUtil.createFolderInWebInf(project, new Path("lib"), null);
     assertNotNull(libFolder);
     assertTrue(libFolder.exists());
     assertEquals("web/WEB-INF/lib", libFolder.getProjectRelativePath().toString());
@@ -250,7 +250,7 @@ public class WebProjectUtilTest {
 
     // should be found alongside the web.xml
     IFile fooTxt =
-        WebProjectUtil.createWebInfFile(project, new Path("foo.txt"), asInputStream("foo"), null);
+        WebProjectUtil.createFileInWebInf(project, new Path("foo.txt"), asInputStream("foo"), null);
     assertNotNull(fooTxt);
     assertTrue(fooTxt.exists());
     assertEquals(webInfDir.getProjectRelativePath().append("foo.txt").toString(),
@@ -269,7 +269,7 @@ public class WebProjectUtilTest {
     IFolder webInfDir = (IFolder) webXml.getParent();
 
     // should be found alongside the web.xml
-    IFolder libFolder = WebProjectUtil.createWebInfFolder(project, new Path("lib"), null);
+    IFolder libFolder = WebProjectUtil.createFolderInWebInf(project, new Path("lib"), null);
     assertNotNull(libFolder);
     assertTrue(libFolder.exists());
     assertEquals(webInfDir.getProjectRelativePath().append("lib").toString(),
@@ -323,7 +323,7 @@ public class WebProjectUtilTest {
     importedProject = projects.get(0);
 
     IFile fooTxt =
-        WebProjectUtil.createWebInfFile(importedProject, new Path("foo.txt"), asInputStream("foo"),
+        WebProjectUtil.createFileInWebInf(importedProject, new Path("foo.txt"), asInputStream("foo"),
             null);
 
     // foo.txt should be created in the <wb-resource> tagged with `defaultRootSource`
@@ -343,7 +343,7 @@ public class WebProjectUtilTest {
         "projects/test-dynamic-web-project-dynamicrootsource.zip", true, null);
     assertEquals(1, projects.size());
     importedProject = projects.get(0);
-    IFolder libFolder = WebProjectUtil.createWebInfFolder(importedProject, new Path("lib"), null);
+    IFolder libFolder = WebProjectUtil.createFolderInWebInf(importedProject, new Path("lib"), null);
 
     // lib should be created in the <wb-resource> tagged with `defaultRootSource`
     assertNotNull(libFolder);
