@@ -38,7 +38,12 @@ public class BugReportCommandHandler extends AbstractHandler {
   //@formatter:off
   // should be kept up to date with .github/ISSUE_TEMPLATE.md
   private static final String BODY_TEMPLATE =
-      "(please ensure you are running the latest version of CT4E with _Help > Check for Updates_)\n"
+      "Before reporting a possible bug:\n\n" 
+      + "1. Please ensure you are running the latest version of CT4E with _Help > Check for Updates_\n"
+      + "2. If the problem occurs when you deploy or after the application has been deployed, "
+      + "try deploying from the command line using gcloud or Maven. "
+      + "If the problem does not go away, then the issue is likely "
+      + "not with Cloud Tools for Eclipse.\n\n"
       + "- Cloud Tools for Eclipse version: {0}\n"
       + "- Google Cloud SDK version: {1}\n"
       + "- Eclipse version: {2}\n"
@@ -51,7 +56,7 @@ public class BugReportCommandHandler extends AbstractHandler {
       + "\n"
       + "**What did you see instead?**\n"
       + "\n"
-      + "(screenshots are helpful)";
+      + "Screenshots and stacktraces are helpful.";
   //@formatter:on
 
   @Override
