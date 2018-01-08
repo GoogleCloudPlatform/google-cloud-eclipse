@@ -229,7 +229,7 @@ public class WebProjectUtilTest {
 
 
   @Test
-  public void testFindWebInfFile_dwpProject() {
+  public void testFindWebInfFile_dynamicWebProject() {
     // WTP's Dynamic Web Project should create a web.xml
     IProject project = testProjectCreator
         .withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25).getProject();
@@ -240,7 +240,7 @@ public class WebProjectUtilTest {
   }
 
   @Test
-  public void testCreateWebInfFile_dwpProject() throws CoreException, IOException {
+  public void testCreateWebInfFile_dynamicWebProject() throws CoreException, IOException {
     IProject project = testProjectCreator
         .withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25).getProject();
     IFile webXml = WebProjectUtil.findInWebInf(project, new Path("web.xml"));
@@ -260,7 +260,7 @@ public class WebProjectUtilTest {
   }
 
   @Test
-  public void testCreateWebInfFolder_dwpProject() throws CoreException {
+  public void testCreateWebInfFolder_dynamicWebProject() throws CoreException {
     IProject project = testProjectCreator
         .withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25).getProject();
     IFile webXml = WebProjectUtil.findInWebInf(project, new Path("web.xml"));
@@ -278,7 +278,8 @@ public class WebProjectUtilTest {
 
 
   @Test
-  public void testFindWebInfFile_dwpDefaultRootSourceProject() throws CoreException, IOException {
+  public void testFindWebInfFile_dynamicWebProject_defaultRootSourceProject()
+      throws CoreException, IOException {
     // WTP's Dynamic Web Project with multiple <wb-resource> elements
     // - looking up a file should look in the wb-resource in order
     List<IProject> projects = ProjectUtils.importProjects(getClass(),
@@ -312,7 +313,8 @@ public class WebProjectUtilTest {
   }
 
   @Test
-  public void testCreateWebInfFile_dwpDefaultRootSourceProject() throws CoreException, IOException {
+  public void testCreateWebInfFile_dynamicWebProject_defaultRootSourceProject()
+      throws CoreException, IOException {
     // WTP's Dynamic Web Project with multiple <wb-resource> elements
     // - creating a file should be put in the defaultRootSource
     List<IProject> projects = ProjectUtils.importProjects(getClass(),
@@ -333,7 +335,7 @@ public class WebProjectUtilTest {
   }
 
   @Test
-  public void testCreateWebInfFolder_dwpDefaultRootSourceProject()
+  public void testCreateWebInfFolder_dynamicWebProject_defaultRootSourceProject()
       throws CoreException, IOException {
     // WTP's Dynamic Web Project with multiple <wb-resource> elements
     // - creating a file should be put in the defaultRootSource
