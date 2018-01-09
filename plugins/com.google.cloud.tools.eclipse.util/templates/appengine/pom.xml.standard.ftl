@@ -11,7 +11,7 @@
   <artifactId>${projectArtifactId}</artifactId>
 
   <properties>
-    <appengine.maven.plugin.version>1.3.1</appengine.maven.plugin.version>
+    <appengine.maven.plugin.version>${mavenPluginVersion}</appengine.maven.plugin.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.compiler.source>${compilerVersion}</maven.compiler.source>

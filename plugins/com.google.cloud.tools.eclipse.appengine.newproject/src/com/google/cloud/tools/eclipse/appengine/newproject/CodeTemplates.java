@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
+import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
 import com.google.cloud.tools.eclipse.util.Templates;
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import com.google.common.annotations.VisibleForTesting;
@@ -195,6 +196,15 @@ public class CodeTemplates {
     properties.put("projectGroupId", config.getMavenGroupId()); //$NON-NLS-1$
     properties.put("projectArtifactId", config.getMavenArtifactId()); //$NON-NLS-1$
     properties.put("projectVersion", config.getMavenVersion()); //$NON-NLS-1$
+    
+    String mavenPluginVersion = ArtifactRetriever.DEFAULT.getLatestReleaseVersion(
+        "com.google.cloud.tools", "appengine-maven-plugin") //$NON-NLS-1$ $NON-NLS-2$
+        .toString(); 
+    if (mavenPluginVersion == null) {
+      mavenPluginVersion = "1.3.2";  //$NON-NLS-1$
+    }
+    
+    properties.put("mavenPluginVersion", mavenPluginVersion); //$NON-NLS-1$
 
     if (isStandardProject) {
       if (Objects.equal(AppEngineRuntime.STANDARD_JAVA_7.getId(), config.getRuntimeId())) {

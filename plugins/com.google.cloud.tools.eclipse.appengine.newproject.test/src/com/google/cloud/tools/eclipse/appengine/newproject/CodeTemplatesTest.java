@@ -41,6 +41,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.osgi.framework.Version;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -216,6 +217,13 @@ public class CodeTemplatesTest {
     Assert.assertEquals("my-project-artifact-id", artifactId.getTextContent());
     Element version = (Element) root.getElementsByTagName("version").item(0);
     Assert.assertEquals("98.76.54", version.getTextContent());
+    
+    Element pluginVersion =
+        (Element) root.getElementsByTagName("appengine.maven.plugin.version").item(0);
+    Version v = new Version(pluginVersion.getTextContent());
+    Assert.assertTrue(v.getMajor() >= 1);
+    Assert.assertTrue(v.getMinor() >= 3);
+    Assert.assertTrue(v.getMicro() >= 2);
   }
 
   private Document buildDocument(IFile xml)
