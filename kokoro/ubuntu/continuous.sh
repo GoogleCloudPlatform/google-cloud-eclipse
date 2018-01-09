@@ -19,4 +19,4 @@ metacity --sm-disable --replace &
 sleep 3 
 
 cd github/google-cloud-eclipse
-mvn -Ptravis --fail-at-end verify
+mvn -V -Ptravis --fail-at-end verify
