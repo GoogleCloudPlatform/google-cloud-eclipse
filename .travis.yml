@@ -7,7 +7,7 @@ install:
   # use mvn ≥ 3.3.9 to ensure faulty test exit states fail the build (#1276)
   - mvn -B -N io.takari:maven:wrapper -Dmaven=3.5.0
   # download and install Cloud SDK (may be cached)
-  - build/install-cloudsdk.sh 171.0.0 $HOME
+  - build/install-cloudsdk.sh 183.0.0 $HOME
 # Tycho ≥ 0.26 requires Java 8
 jdk: oraclejdk8
 env:
@@ -19,7 +19,7 @@ env:
     - JAVA_RUNTIME=JavaSE-1.8 ECLIPSE_TARGET=neon
     - JAVA_RUNTIME=JavaSE-1.8 ECLIPSE_TARGET=oxygen MAVEN_FLAGS=-Pjacoco
   global:
-    - PATH=$PWD/google-cloud-sdk/bin:$PATH
+    - PATH=$HOME/google-cloud-sdk/bin:$PATH
     # Our maven build typically reports about 512m
     - MAVEN_OPTS=-Xmx700m
     - CLOUDSDK_CORE_DISABLE_USAGE_REPORTING=true
