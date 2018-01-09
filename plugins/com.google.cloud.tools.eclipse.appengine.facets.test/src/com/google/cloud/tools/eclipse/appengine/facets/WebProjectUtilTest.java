@@ -79,8 +79,7 @@ public class WebProjectUtilTest {
     assertNotNull(fooTxt);
     assertTrue(fooTxt.exists());
     assertEquals("src/main/webapp/WEB-INF/foo.txt", fooTxt.getProjectRelativePath().toString());
-    assertEquals("foo",
-        new String(ByteStreams.toByteArray(fooTxt.getContents()), StandardCharsets.UTF_8));
+    assertEquals("foo", readAsString(fooTxt));
   }
 
   @Test
@@ -118,8 +117,7 @@ public class WebProjectUtilTest {
     assertNotNull(fooTxt);
     assertTrue(fooTxt.exists());
     assertEquals("src/main/webapp/WEB-INF/foo.txt", fooTxt.getProjectRelativePath().toString());
-    assertEquals("foo",
-        new String(ByteStreams.toByteArray(fooTxt.getContents()), StandardCharsets.UTF_8));
+    assertEquals("foo", readAsString(fooTxt));
   }
 
   @Test
@@ -330,8 +328,7 @@ public class WebProjectUtilTest {
     assertNotNull(fooTxt);
     assertTrue(fooTxt.exists());
     assertEquals("src/main/webapp/WEB-INF/foo.txt", fooTxt.getProjectRelativePath().toString());
-    assertEquals("foo",
-        new String(ByteStreams.toByteArray(fooTxt.getContents()), StandardCharsets.UTF_8));
+    assertEquals("foo", readAsString(fooTxt));
   }
 
   @Test
@@ -371,5 +368,14 @@ public class WebProjectUtilTest {
    */
   private static InputStream asInputStream(String content) {
     return new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
+  }
+
+  /**
+   * Read the contents of the provided file as a UTF-8-encoded string.
+   */
+  private Object readAsString(IFile file) throws IOException, CoreException {
+    try (InputStream input = file.getContents()) {
+      return new String(ByteStreams.toByteArray(input), StandardCharsets.UTF_8);
+    }
   }
 }
