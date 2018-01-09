@@ -1,4 +1,6 @@
 @echo on
+rem Tycho 1.0.0 does not support Java 9
+set JAVA_HOME="C:\Program Files\Java\jdk1.8.0_152"
 
 rem To speed up build, download and unpack an M2 repo cache.
 pushd %USERPROFILE%
