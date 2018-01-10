@@ -161,8 +161,7 @@ public class WebProjectUtilTest {
     assertNotNull(fooTxt);
     assertTrue(fooTxt.exists());
     assertEquals("WebContent/WEB-INF/foo.txt", fooTxt.getProjectRelativePath().toString());
-    assertEquals("foo",
-        new String(ByteStreams.toByteArray(fooTxt.getContents()), StandardCharsets.UTF_8));
+    assertEquals("foo", readAsString(fooTxt));
   }
 
   @Test
@@ -206,8 +205,7 @@ public class WebProjectUtilTest {
     assertNotNull(fooTxt);
     assertTrue(fooTxt.exists());
     assertEquals("web/WEB-INF/foo.txt", fooTxt.getProjectRelativePath().toString());
-    assertEquals("foo",
-        new String(ByteStreams.toByteArray(fooTxt.getContents()), StandardCharsets.UTF_8));
+    assertEquals("foo", readAsString(fooTxt));
   }
 
   @Test
@@ -253,8 +251,7 @@ public class WebProjectUtilTest {
     assertTrue(fooTxt.exists());
     assertEquals(webInfDir.getProjectRelativePath().append("foo.txt").toString(),
         fooTxt.getProjectRelativePath().toString());
-    assertEquals("foo",
-        new String(ByteStreams.toByteArray(fooTxt.getContents()), StandardCharsets.UTF_8));
+    assertEquals("foo", readAsString(fooTxt));
   }
 
   @Test
@@ -298,16 +295,14 @@ public class WebProjectUtilTest {
     assertTrue(fooTxt.exists());
     assertEquals("target/m2e-wtp/web-resources/WEB-INF/foo.txt",
         fooTxt.getProjectRelativePath().toString());
-    assertEquals("m2e-wtp",
-        new String(ByteStreams.toByteArray(fooTxt.getContents()), StandardCharsets.UTF_8));
+    assertEquals("m2e-wtp", readAsString(fooTxt));
 
     // bar.txt should be resolved to the second <wb-resource>
     IFile barTxt = WebProjectUtil.findInWebInf(importedProject, new Path("bar.txt"));
     assertNotNull(barTxt);
     assertTrue(barTxt.exists());
     assertEquals("src/main/webapp/WEB-INF/bar.txt", barTxt.getProjectRelativePath().toString());
-    assertEquals("webapp",
-        new String(ByteStreams.toByteArray(barTxt.getContents()), StandardCharsets.UTF_8));
+    assertEquals("webapp", readAsString(barTxt));
   }
 
   @Test
