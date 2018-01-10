@@ -1,4 +1,6 @@
 @echo on
+rem Tycho 1.0.0 does not support Java 9
+set "JAVA_HOME=C:\Program Files\Java\jdk1.8.0_152"
 
 rem To speed up build, download and unpack an M2 repo cache.
 pushd %USERPROFILE%
@@ -27,9 +29,9 @@ call gcloud.cmd components update --quiet
 call gcloud.cmd components install app-engine-java --quiet
 @echo on
 
-mvn -B --settings kokoro\windows\m2-settings.xml ^
+mvn -V -B --settings kokoro\windows\m2-settings.xml ^
     -N io.takari:maven:wrapper -Dmaven=3.5.0
-mvnw.cmd -B --settings kokoro\windows\m2-settings.xml ^
+mvnw.cmd -V -B --settings kokoro\windows\m2-settings.xml ^
          --fail-at-end -Ptravis -Declipse.target=oxygen verify
 
 exit /b %ERRORLEVEL%
