@@ -142,7 +142,7 @@ public class ProjectUtils {
     // wait for any post-import operations too
     waitForProjects(projects);
     if (checkBuildErrors) {
-      waitUntilNoBuildError();
+      waitUntilNoBuildErrors();
       // changed from specific projects to see all possible errors
       failIfBuildErrors("Imported projects have errors");
     }
@@ -150,12 +150,12 @@ public class ProjectUtils {
     return projects;
   }
 
-  public static void waitUntilNoBuildError() throws CoreException {
+  public static void waitUntilNoBuildErrors() throws CoreException {
     IProject[] projects = getWorkspace().getRoot().getProjects();
-    waitUntilNoBuildError(projects);
+    waitUntilNoBuildErrors(projects);
   }
 
-  public static void waitUntilNoBuildError(IProject... projects) throws CoreException {
+  public static void waitUntilNoBuildErrors(IProject... projects) throws CoreException {
     try {
       Stopwatch elapsed = Stopwatch.createStarted();
       while (true) {

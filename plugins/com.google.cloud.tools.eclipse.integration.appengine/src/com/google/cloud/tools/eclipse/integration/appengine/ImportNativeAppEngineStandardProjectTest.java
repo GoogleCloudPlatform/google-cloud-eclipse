@@ -66,7 +66,7 @@ public class ImportNativeAppEngineStandardProjectTest extends BaseProjectTest {
     updateOldContainers();
 
     ProjectUtils.waitForProjects(project);
-    ProjectUtils.waitUntilNoBuildError(project);
+    ProjectUtils.waitUntilNoBuildErrors(project);
 
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     assertNotNull("should be a faceted project", facetedProject);
@@ -94,7 +94,7 @@ public class ImportNativeAppEngineStandardProjectTest extends BaseProjectTest {
     updateOldContainers();
 
     ProjectUtils.waitForProjects(project);
-    ProjectUtils.waitUntilNoBuildError(project);
+    ProjectUtils.waitUntilNoBuildErrors(project);
 
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     assertNotNull("should be a faceted project", facetedProject);
