@@ -41,7 +41,7 @@ units.1.properties.5.name=org.eclipse.equinox.p2.doc.url
 units.1.properties.5.value=https://cloud.google.com/eclipse/docs/
 units.1.properties.6.name=org.eclipse.equinox.p2.description
 units.1.properties.6.value=Supports development of Google Cloud Platform projects in Eclipse.
-units.1.copyright =Copyright 2016, 2017 Google Inc.
+units.1.copyright =Copyright 2016-2018 Google Inc.
 units.1.licenses.0 =\
 Cloud Tools for Eclipse is made available under the Apache License, Version 2.0. \
 Please visit the following URL for details:\n\n\

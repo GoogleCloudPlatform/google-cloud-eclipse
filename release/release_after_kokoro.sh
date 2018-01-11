@@ -188,7 +188,7 @@ set +x
 repoName="Google Cloud Tools for Eclipse"
 categoryId=com.google.cloud.tools.eclipse.category
 featureId=com.google.cloud.tools.eclipse.suite.e45.feature.feature.group
-copyrightText="Copyright 2016, 2017 Google Inc."
+copyrightText="Copyright 2016-2018 Google Inc."
 licenseUri=https://www.apache.org/licenses/LICENSE-2.0
 licenseText="Cloud Tools for Eclipse is made available under the Apache\
  License, Version 2.0. Please visit the following URL for details:\
