@@ -34,13 +34,15 @@ public class GpeConvertCommandHandler extends AbstractHandler {
     try {
       IProject project = ProjectFromSelectionHelper.getFirstProject(event);
       if (project == null) {
-        throw new NullPointerException("Convert menu enabled for non-project resources");
+        throw new NullPointerException(
+            "Convert menu should not be enabled for non-project resources");
       }
 
       IFacetedProject facetedProject = ProjectFacetsManager.create(project,
           true /* convert to faceted project if necessary */, null /* no monitor here */);
       if (AppEngineStandardFacet.hasFacet(facetedProject)) {
-        throw new IllegalStateException("Convert menu enabled for App Engine standard projects");
+        throw new IllegalStateException(
+            "Convert menu should not be enabled for App Engine standard projects");
       }
 
       GpeConvertJob job = new GpeConvertJob(facetedProject);
