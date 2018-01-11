@@ -67,6 +67,7 @@
           export="false"
           pinned="true">
       <libraryFile
+            pinned="true"
             javadocUri="https://docs.oracle.com/cd/E17802_01/products/products/servlet/2.5/docs/servlet-2_5-mr2/">
         <mavenCoordinates
               groupId="javax.servlet"
@@ -80,9 +81,9 @@
           group="servlet"
           name="Java Server Pages API 2.1"
           siteUri="http://www.oracle.com/technetwork/java/javaee/jsp/index.html"
-          export="false"
-          pinned="true">
+          export="false">
       <libraryFile
+            pinned="true"
             javadocUri="http://docs.oracle.com/cd/E17802_01/products/products/jsp/2.1/docs/jsp-2_1-pfd2/">
         <mavenCoordinates
               groupId="javax.servlet.jsp"
