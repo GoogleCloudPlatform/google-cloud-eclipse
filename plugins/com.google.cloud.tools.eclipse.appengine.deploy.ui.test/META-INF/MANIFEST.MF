@@ -6,6 +6,7 @@ Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.deploy.ui.test
 Bundle-Vendor: Google Inc.
 Bundle-Version: 0.1.0.qualifier
 Fragment-Host: com.google.cloud.tools.eclipse.appengine.deploy.ui
+Comment: .appengine.localserver required for WTP server runtime definitions
 Require-Bundle: com.google.cloud.tools.eclipse.test.dependencies,
  com.google.cloud.tools.eclipse.appengine.localserver
 Import-Package: com.google.cloud.tools.eclipse.swtbot,
