@@ -4,6 +4,7 @@ before_install:
   # change reference from now-defunct maven repository (#1406)
   - sed -i.bak -e 's|https://nexus.codehaus.org/snapshots/|https://oss.sonatype.org/content/repositories/codehaus-snapshots/|g' ~/.m2/settings.xml
 install: 
+  - env
   # use mvn ≥ 3.3.9 to ensure faulty test exit states fail the build (#1276)
   - mvn -B -N io.takari:maven:wrapper -Dmaven=3.5.0
   # download and install Cloud SDK (may be cached)
@@ -43,5 +44,6 @@ cache:
    - $HOME/.m2
    - $HOME/google-cloud-sdk
 after_success:
+  - echo TRAVIS_SECURE_ENV_VARS="${TRAVIS_SECURE_ENV_VARS}"
   # test req'd as we don't run coverage on all elements of the matrix
   - if [ -d build/jacoco/target ]; then bash <(curl -s https://codecov.io/bash); fi
