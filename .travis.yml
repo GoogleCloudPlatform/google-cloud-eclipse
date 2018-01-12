@@ -57,15 +57,16 @@ after_script:
   - if [ "$TRAVIS_SECURE_ENV_VARS" = true ]; then
       openssl aes-256-cbc -K $encrypted_7e6c351b4cee_key -iv $encrypted_7e6c351b4cee_iv
         -in .travisci/travis-service-account.json.enc -out /tmp/travis-service-account.json -d;
+      BUILDTIMESTAMP=`date '+%Y%m%d-%H%M'`
       $CLOUD_SDK_HOME/bin/gcloud auth activate-service-account --key-file=/tmp/travis-service-account.json;
       mkdir build-results && .travisci/copy-test-results.sh plugins build-results;
       $CLOUD_SDK_HOME/bin/gsutil -m -q
         cp -r -z 'txt,xml,html' -a public-read
           build-results/*
-          $GCS_BUILD_BUCKET/travis/${TRAVIS_BUILD_NUMBER}/${TRAVIS_JOB_NUMBER}-${TRAVIS_OS_NAME}/;
+          $GCS_BUILD_BUCKET/travis/${TRAVIS_BUILD_NUMBER}/${TRAVIS_JOB_NUMBER}-${TRAVIS_OS_NAME}-${BUILDTIMESTAMP}/;
       if [ -d gcp-repo/target/repository -a -d build/jacoco/target ]; then
         $CLOUD_SDK_HOME/bin/gsutil -m -q
-          cp -r -z 'txt,xml,html' -a public-read
+          rsync -d -r -a public-read
             gcp-repo/target/repository/*
             $GCS_BUILD_BUCKET/travis/${TRAVIS_BUILD_NUMBER}/repository/;
       fi;
