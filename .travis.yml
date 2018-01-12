@@ -43,5 +43,6 @@ cache:
    - $HOME/.m2
    - $HOME/google-cloud-sdk
 after_success:
+  - echo TRAVIS_SECURE_ENV_VARS="${TRAVIS_SECURE_ENV_VARS}"
   # test req'd as we don't run coverage on all elements of the matrix
   - if [ -d build/jacoco/target ]; then bash <(curl -s https://codecov.io/bash); fi
