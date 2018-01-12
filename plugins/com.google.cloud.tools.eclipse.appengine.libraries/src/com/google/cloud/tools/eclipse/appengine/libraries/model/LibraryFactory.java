@@ -134,7 +134,8 @@ class LibraryFactory {
   private static LibraryFile loadSingleFile(IConfigurationElement libraryFileElement,
       MavenCoordinates mavenCoordinates) throws URISyntaxException {
     LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
-    if ("true".equalsIgnoreCase(libraryFileElement.getAttribute("pinned"))) {
+    String pinned = libraryFileElement.getAttribute("pinned");
+    if ("true".equalsIgnoreCase(pinned)) {
       libraryFile.setPinned(true);
     }
     libraryFile.setFilters(getFilters(libraryFileElement.getChildren()));
