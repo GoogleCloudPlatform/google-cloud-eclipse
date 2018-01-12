@@ -72,7 +72,6 @@
     <module>plugins/com.google.cloud.tools.eclipse.sdk.ui.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.test.dependencies</module>
     <module>plugins/com.google.cloud.tools.eclipse.test.util</module>
-    <module>plugins/com.google.cloud.tools.eclipse.test.logback</module>
     <module>plugins/com.google.cloud.tools.eclipse.usagetracker</module>
     <module>plugins/com.google.cloud.tools.eclipse.usagetracker.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.ui</module>
@@ -156,8 +155,8 @@
     </dependency>
     <dependency>
       <!--
-        dependency used by appengine-plugins-core
         bundle: org.apache.commons.compress
+        dependency used by appengine-plugins-core
       -->
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
@@ -373,7 +372,12 @@
               - maven.artifact.threads=1 to workaround repository corruption seen in
                 https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2284
             -->
-            <argLine>${jacoco.agentArgLine} -Dmaven.artifact.threads=1 -Dorg.eclipse.swtbot.search.timeout=${org.eclipse.swtbot.search.timeout} -Xms40m -Xmx1G -XX:MaxPermSize=512m -Djava.awt.headless=true ${os-jvm-flags}</argLine>
+            <argLine>${jacoco.agentArgLine} -Dmaven.artifact.threads=1
+              -Dorg.eclipse.swtbot.search.timeout=${org.eclipse.swtbot.search.timeout}
+              -Xms40m -Xmx1G -XX:MaxPermSize=512m
+              -Djava.awt.headless=true
+              -Dlogback.configurationFile=platform:/plugin/com.google.cloud.tools.eclipse.test.dependencies/logback.xml
+              ${os-jvm-flags}</argLine>
           </configuration>
         </plugin>
 

@@ -1,4 +1,6 @@
 <settings>
+<!--
+  Remove mirror as it's currently out of date.
   <mirrors>
     <mirror>
       <id>eclipse-oxygen-target</id>
@@ -8,4 +10,5 @@
       <mirrorOfLayouts>p2</mirrorOfLayouts>
     </mirror>
   </mirrors>
+-->
 </settings>
