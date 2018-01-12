@@ -54,8 +54,7 @@ after_script:
   #   2. Copy build results (if successful). This step is conditioned
   #      on jacoco as we already ensure jacoco is only performed
   #      for a single element of the build matrix.
-  - echo TRAVIS_JOB_ID=${TRAVIS_JOB_ID} TRAVIS_SECURE_ENV_VARS=${TRAVIS_SECURE_ENV_VARS}
-  - if [ -n "$encrypted_7e6c351b4cee_key" -a -n "$encrypted_7e6c351b4cee_iv" ]; then
+  - if [ "$TRAVIS_SECURE_ENV_VARS" = true ]; then
       openssl aes-256-cbc -K $encrypted_7e6c351b4cee_key -iv $encrypted_7e6c351b4cee_iv
         -in .travisci/travis-service-account.json.enc -out /tmp/travis-service-account.json -d;
       $CLOUD_SDK_HOME/bin/gcloud auth activate-service-account --key-file=/tmp/travis-service-account.json
