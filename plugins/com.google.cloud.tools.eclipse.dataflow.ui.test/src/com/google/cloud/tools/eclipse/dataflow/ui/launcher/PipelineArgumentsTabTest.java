@@ -51,6 +51,8 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.ILaunchConfigurationDialog;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -87,8 +89,10 @@ public class PipelineArgumentsTabTest {
     private PipelineArgumentsTab pipelineArgumentsTab;
 
     private IProject project1;
+    private IJavaProject javaProject1;
     private ILaunchConfigurationWorkingCopy configuration1;
     private IProject project2;
+    private IJavaProject javaProject2;
     private ILaunchConfigurationWorkingCopy configuration2;
 
     @Before
@@ -97,13 +101,21 @@ public class PipelineArgumentsTabTest {
       dependencyManager = mock(DataflowDependencyManager.class);
 
       project1 = mockProject("project1");
+      javaProject1 = mock(IJavaProject.class);
       when(workspaceRoot.getProject(eq("project1"))).thenReturn(project1);
+      when(project1.getAdapter(IJavaElement.class)).thenReturn(javaProject1);
+      when(javaProject1.getJavaProject()).thenReturn(javaProject1);
+
       configuration1 = mockLaunchConfiguration();
       when(configuration1.getAttribute(eq(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME),
           anyString())).thenReturn("project1");
       doReturn(MajorVersion.ONE).when(dependencyManager).getProjectMajorVersion(project1);
 
       project2 = mockProject("project2");
+      javaProject2 = mock(IJavaProject.class);
+      when(project2.getAdapter(IJavaElement.class)).thenReturn(javaProject2);
+      when(javaProject2.getJavaProject()).thenReturn(javaProject2);
+
       when(workspaceRoot.getProject(eq("project2"))).thenReturn(project2);
       configuration2 = mockLaunchConfiguration();
       when(configuration2.getAttribute(eq(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME),
