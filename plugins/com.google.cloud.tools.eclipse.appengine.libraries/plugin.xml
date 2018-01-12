@@ -64,8 +64,7 @@
           name="Servlet API 2.5"
           group="servlet"
           siteUri="http://www.oracle.com/technetwork/java/javaee/servlet/index.html"
-          export="false"
-          pinned="true">
+          export="false">
       <libraryFile
             pinned="true"
             javadocUri="https://docs.oracle.com/cd/E17802_01/products/products/servlet/2.5/docs/servlet-2_5-mr2/">
