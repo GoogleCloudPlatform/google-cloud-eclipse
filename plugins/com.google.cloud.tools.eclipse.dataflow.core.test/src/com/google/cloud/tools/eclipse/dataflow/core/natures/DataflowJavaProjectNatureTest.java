@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.dataflow.core.natures;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -118,6 +119,7 @@ public class DataflowJavaProjectNatureTest {
     try {
       DataflowJavaProjectNature.removeDataflowJavaNatureFromProject(
           project, new NullProgressMonitor());
+      fail();
     } catch (CoreException ex) {
       assertEquals("Can't remove the Dataflow nature from closed project null", ex.getMessage());
     }

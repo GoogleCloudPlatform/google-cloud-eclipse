@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.appengine.facets.ui;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.convert.AppEngineStandardProjectConvertJob;
-import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPrompter;
 import com.google.cloud.tools.eclipse.ui.util.ProjectFromSelectionHelper;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import org.eclipse.core.commands.AbstractHandler;
@@ -26,8 +25,6 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
@@ -35,23 +32,18 @@ public class AppEngineStandardProjectConvertCommandHandler extends AbstractHandl
 
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
-    Shell shell = HandlerUtil.getActiveShellChecked(event);
     try {
       IProject project = ProjectFromSelectionHelper.getFirstProject(event);
       if (project == null) {
-        throw new NullPointerException("Convert menu enabled for non-project resources");
-      }
-
-      // prompt user if Cloud SDK is not configured
-      if (CloudSdkPrompter.getCloudSdkLocation(shell) == null) {
-        // no further action required: user chose to not configure
-        return null;
+        throw new NullPointerException(
+            "Convert menu should not be enabled for non-project resources");
       }
 
       IFacetedProject facetedProject = ProjectFacetsManager.create(project,
           true /* convert to faceted project if necessary */, null /* no monitor here */);
       if (AppEngineStandardFacet.hasFacet(facetedProject)) {
-        throw new IllegalStateException("Convert menu enabled for App Engine projects");
+        throw new IllegalStateException(
+            "Convert menu should not be enabled for App Engine standard projects");
       }
 
       AppEngineStandardProjectConvertJob job =

@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyMap;
@@ -28,6 +29,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.dataflow.core.launcher.PipelineConfigurationAttr;
@@ -39,15 +41,19 @@ import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.ILaunchConfigurationDialog;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -86,7 +92,7 @@ public class PipelineArgumentsTabTest {
     private ILaunchConfigurationWorkingCopy configuration2;
 
     @Before
-    public void setUp() throws CoreException {
+    public void setUp() throws CoreException, InvocationTargetException, InterruptedException {
       workspaceRoot = mock(IWorkspaceRoot.class);
       dependencyManager = mock(DataflowDependencyManager.class);
 
@@ -105,6 +111,9 @@ public class PipelineArgumentsTabTest {
       doReturn(MajorVersion.TWO).when(dependencyManager).getProjectMajorVersion(project2);
 
       ILaunchConfigurationDialog dialog = mock(ILaunchConfigurationDialog.class);
+      doAnswer(new SynchronousIRunnableContextExecutor()).when(dialog).run(anyBoolean(),
+          anyBoolean(), any(IRunnableWithProgress.class));
+
       pipelineArgumentsTab = new PipelineArgumentsTab(workspaceRoot, dependencyManager);
       pipelineArgumentsTab.setLaunchConfigurationDialog(dialog);
       pipelineArgumentsTab.createControl(shellResource.getShell());
@@ -177,6 +186,19 @@ public class PipelineArgumentsTabTest {
       pipelineArgumentsTab.isValid(configuration);
       assertEquals("Project is not configured for Dataflow",
           pipelineArgumentsTab.getErrorMessage());
+    }
+
+    @Test
+    public void testSuppressingUpdates() {
+      IWorkspaceRoot workspaceRoot = mock(IWorkspaceRoot.class);
+      when(workspaceRoot.getProject(anyString())).thenReturn(mock(IProject.class));
+      ILaunchConfigurationDialog dialog = mock(ILaunchConfigurationDialog.class);
+
+      PipelineArgumentsTab tab = new PipelineArgumentsTab(workspaceRoot, dependencyManager);
+      tab.setLaunchConfigurationDialog(dialog);
+      tab.suppressDialogUpdates = true;
+      tab.dialogChangedListener.run();
+      verifyZeroInteractions(dialog);
     }
   }
 
@@ -278,6 +300,21 @@ public class PipelineArgumentsTabTest {
           return control instanceof Button && ((Button) control).getSelection();
         }
       });
+    }
+  }
+
+  /**
+   * Intended to mock {@link IRunnableContext#run(boolean, boolean, IRunnableWithProgress)} to run
+   * the given {@link IRunnableWithProgress} synchronously. The mock is incomplete and not general
+   * in that it ignores other parameters and runs the code synchronously in the caller's thread.
+   */
+  private static class SynchronousIRunnableContextExecutor implements Answer<Void> {
+    @Override
+    public Void answer(InvocationOnMock invocation)
+        throws InvocationTargetException, InterruptedException {
+      IRunnableWithProgress runnable = invocation.getArgumentAt(2, IRunnableWithProgress.class);
+      runnable.run(new NullProgressMonitor());
+      return null;
     }
   }
 }

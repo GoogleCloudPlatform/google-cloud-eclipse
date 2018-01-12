@@ -30,6 +30,8 @@ import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+
+import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.runtime.jobs.Job;
@@ -48,10 +50,9 @@ public class GcpProjectQueryJobTest {
   @Mock private ProjectRepository projectRepository;
   @Mock private ProjectSelector projectSelector;
   @Mock private Predicate<Job> isLatestQueryJob;
-  @Mock private List<GcpProject> projects;
 
-  // DataBindingContext.updateTargets() is not mockable.
   private final DataBindingContext dataBindingContext = new DataBindingContext();
+  private final List<GcpProject> projects = new ArrayList<>();
 
   private Job queryJob;
 
@@ -118,7 +119,9 @@ public class GcpProjectQueryJobTest {
     // Prepare another concurrent query job.
     Credential staleCredential = mock(Credential.class);
 
-    List<GcpProject> anotherProjectList = mock(List.class);
+    List<GcpProject> anotherProjectList = new ArrayList<>();
+    anotherProjectList.add(null); // so not equals to projects
+    
     ProjectRepository projectRepository2 = mock(ProjectRepository.class);
     when(projectRepository2.getProjects(staleCredential)).thenReturn(anotherProjectList);
 

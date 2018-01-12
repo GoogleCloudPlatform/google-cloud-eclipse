@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.test.util.ui;
 
 import com.google.common.base.Predicate;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -29,6 +30,15 @@ public class CompositeUtil {
       @Override
       public boolean apply(Control control) {
         return type.isInstance(control);
+      }
+    });
+  }
+
+  public static Button findButton(Composite composite, final String text) {
+    return (Button) findControl(composite, new Predicate<Control>() {
+      @Override
+      public boolean apply(Control control) {
+        return control instanceof Button && ((Button) control).getText().equals(text);
       }
     });
   }
@@ -53,7 +63,7 @@ public class CompositeUtil {
    */
   @SuppressWarnings("unchecked")
   public static <T> T findControlAfterLabel(Composite composite, Class<T> type, String label) {
-    return (T) CompositeUtil.findControl(composite, new AfterLabel<T>(type, label));
+    return (T) CompositeUtil.findControl(composite, new AfterLabel<>(type, label));
   }
 
   private static class AfterLabel<T> implements Predicate<Control> {

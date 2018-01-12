@@ -14,20 +14,10 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.ui;
+package com.google.cloud.tools.eclipse.sdk;
 
-import org.junit.Assert;
-import org.junit.Test;
+import com.google.cloud.tools.eclipse.test.util.BaseBuildPropertiesTest;
 
-public class MessagesTest {
-
-  @Test
-  public void test() {
-    Assert.assertEquals(
-        "Cannot create an App Engine Eclipse project because the Cloud SDK App Engine Java"
-        + " component is not installed. Fix by running "
-        + "'gcloud components install app-engine-java' on the command-line.",
-        Messages.getString("fix.appengine.java.component"));
-  }
+public class BuildPropertiesTest extends BaseBuildPropertiesTest {
 
 }

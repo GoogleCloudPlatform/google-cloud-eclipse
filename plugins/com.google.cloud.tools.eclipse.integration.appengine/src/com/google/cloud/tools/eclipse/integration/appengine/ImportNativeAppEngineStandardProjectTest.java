@@ -66,8 +66,7 @@ public class ImportNativeAppEngineStandardProjectTest extends BaseProjectTest {
     updateOldContainers();
 
     ProjectUtils.waitForProjects(project);
-    ProjectUtils.failIfBuildErrors("Imported App Engine standard Java 7 project has errors",
-        project);
+    ProjectUtils.waitUntilNoBuildErrors(project);
 
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     assertNotNull("should be a faceted project", facetedProject);
@@ -95,8 +94,7 @@ public class ImportNativeAppEngineStandardProjectTest extends BaseProjectTest {
     updateOldContainers();
 
     ProjectUtils.waitForProjects(project);
-    ProjectUtils.failIfBuildErrors("Imported App Engine standard Java 8 project has errors",
-        project);
+    ProjectUtils.waitUntilNoBuildErrors(project);
 
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     assertNotNull("should be a faceted project", facetedProject);

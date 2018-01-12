@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets;
 
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
@@ -164,6 +165,7 @@ public class AppEngineFlexWarFacetTest {
     try {
       AppEngineFlexWarFacet.installAppEngineFacet(facetedProject,
           false /* installDependentFacets */, new NullProgressMonitor());
+      fail();
     } catch (CoreException e) {
       Assert.assertNotNull(e.getMessage());
     }

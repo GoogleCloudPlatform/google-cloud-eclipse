@@ -77,8 +77,7 @@ fi
 echo "#"
 echo "# Now verifying whether jars are all signed."
 echo "#"
-for jar in $SIGNED_DIR/plugins/com.google.cloud.tools.eclipse.*.jar \
-        $SIGNED_DIR/features/com.google.cloud.tools.eclipse.*.jar; do
+for jar in $SIGNED_DIR/plugins/*.jar $SIGNED_DIR/features/*.jar; do
     echo -n "$( basename $jar ): "
     if ! jarsigner -strict -verify $jar; then
         die "Unsigned artifact found. Halting."
@@ -189,7 +188,7 @@ set +x
 repoName="Google Cloud Tools for Eclipse"
 categoryId=com.google.cloud.tools.eclipse.category
 featureId=com.google.cloud.tools.eclipse.suite.e45.feature.feature.group
-copyrightText="Copyright 2016, 2017 Google Inc."
+copyrightText="Copyright 2016-2018 Google Inc."
 licenseUri=https://www.apache.org/licenses/LICENSE-2.0
 licenseText="Cloud Tools for Eclipse is made available under the Apache\
  License, Version 2.0. Please visit the following URL for details:\
@@ -230,7 +229,7 @@ echo "THIS WILL DELETE ALL FILES IN '$DESTINATION' IF THEY EXIST!"
 ask_proceed
 
 set -x
-gsutil -m rm $DESTINATION/** && \
+gsutil -m rm $DESTINATION/**
 gsutil cp $LOCAL_REPO/artifacts.jar $LOCAL_REPO/content.jar \
     $SIGNED_DIR/index.html \
     $DESTINATION && \

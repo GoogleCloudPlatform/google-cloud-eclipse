@@ -100,6 +100,9 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <eclipse.target>mars</eclipse.target>
 
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
+
     <!-- log surefire tests to stdout -->
     <tycho.showEclipseLog>true</tycho.showEclipseLog>
 
@@ -122,6 +125,12 @@
     <org.eclipse.swtbot.search.timeout>30000</org.eclipse.swtbot.search.timeout>
 
     <jgit.dirtyWorkingTree>warning</jgit.dirtyWorkingTree>
+
+    <!--
+      jgit provider uses git commit hash to generate bundle/feature version
+      qualifier; set to empty to work around bug building from git-worktrees
+    -->
+    <tycho.buildtimestamp.provider>jgit</tycho.buildtimestamp.provider>
   </properties>
 
   <!--
@@ -137,13 +146,22 @@
       <!-- bundle: com.google.gson -->
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
-      <version>2.7</version>
+      <version>2.8.2</version>
     </dependency>
     <dependency>
       <!-- bundle: com.google.cloud.tools.appengine -->
       <groupId>com.google.cloud.tools</groupId>
       <artifactId>appengine-plugins-core</artifactId>
-      <version>0.4.1</version>
+      <version>0.4.2</version>
+    </dependency>
+    <dependency>
+      <!--
+        dependency used by appengine-plugins-core
+        bundle: org.apache.commons.compress
+      -->
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-compress</artifactId>
+      <version>1.14</version>
     </dependency>
     <dependency>
       <!-- bundle: com.google.guava -->
@@ -211,6 +229,16 @@
         <groupId>org.objenesis</groupId>
         <artifactId>objenesis</artifactId>
         <version>2.2</version>
+      </dependency>
+      <dependency>
+        <groupId>org.hamcrest</groupId>
+        <artifactId>hamcrest-core</artifactId>
+        <version>1.3</version>
+      </dependency>
+      <dependency>
+        <groupId>org.hamcrest</groupId>
+        <artifactId>hamcrest-library</artifactId>
+        <version>1.3</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -288,7 +316,7 @@
           </dependency>
         </dependencies>
         <configuration>
-          <timestampProvider>jgit</timestampProvider>
+          <timestampProvider>${tycho.buildtimestamp.provider}</timestampProvider>
           <jgit.dirtyWorkingTree>${jgit.dirtyWorkingTree}</jgit.dirtyWorkingTree>
           <jgit.ignore>
             pom.xml
@@ -370,7 +398,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>2.5.1</version>
+          <version>3.6.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -651,6 +679,45 @@
                 </configuration>
               </execution>
             </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>errorprone</id>
+      <!-- add separate compilation step using the errorprone compiler -->
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>compile</phase>
+                <goals>
+                  <goal>compile</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <compilerId>javac-with-errorprone</compilerId>
+              <forceJavacCompilerUse>true</forceJavacCompilerUse>
+            </configuration>
+            <dependencies>
+              <dependency>
+                <groupId>org.codehaus.plexus</groupId>
+                <artifactId>plexus-compiler-javac-errorprone</artifactId>
+                <version>2.8.1</version>
+              </dependency>
+              <!-- override plexus-compiler-javac-errorprone's dependency on
+                 Error Prone with the latest version -->
+              <dependency>
+                <groupId>com.google.errorprone</groupId>
+                <artifactId>error_prone_core</artifactId>
+                <version>2.0.15</version>
+              </dependency>
+            </dependencies>
           </plugin>
         </plugins>
       </build>

@@ -23,9 +23,12 @@ import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryCla
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.util.ClasspathUtil;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -58,21 +61,47 @@ public class BuildPath {
 
   private static final Logger logger = Logger.getLogger(BuildPath.class.getName());
   
-  public static void addMavenLibraries(IProject project, List<Library> libraries,
+  /**
+   * Add the selected libraries to the project's Maven's dependencies.
+   */
+  public static void addMavenLibraries(IProject project, List<Library> selected,
       IProgressMonitor monitor) throws CoreException {
-    if (libraries.isEmpty()) {
-      return;
+    updateMavenLibraries(project, selected, Collections.<Library>emptyList(), monitor);
+  }
+
+  /**
+   * Update the project's Maven dependencies to the selected libraries and remove any traces of
+   * removed libraries.
+   */
+  public static void updateMavenLibraries(IProject project, Collection<Library> selectedLibraries,
+      Collection<Library> removedLibraries, IProgressMonitor monitor) throws CoreException {
+    Preconditions.checkNotNull(selectedLibraries);
+    Preconditions.checkNotNull(removedLibraries);
+    if (selectedLibraries.isEmpty() && removedLibraries.isEmpty()) {
+      return; // nothing to do
     }
-    AnalyticsLibraryPingHelper.sendLibrarySelectionPing(AnalyticsEvents.MAVEN_PROJECT, libraries);
+    AnalyticsLibraryPingHelper.sendLibrarySelectionPing(AnalyticsEvents.MAVEN_PROJECT, selectedLibraries);
 
-    // see m2e-core/org.eclipse.m2e.core.ui/src/org/eclipse/m2e/core/ui/internal/actions/AddDependencyAction.java
-    // m2e-core/org.eclipse.m2e.core.ui/src/org/eclipse/m2e/core/ui/internal/editing/AddDependencyOperation.java
+    IFile pomFile = project.getFile("pom.xml"); //$NON-NLS-1$
+    try {
+      Pom pom = Pom.parse(pomFile);
+      pom.updateDependencies(selectedLibraries, removedLibraries);
+    } catch (SAXException | IOException ex) {
+      IStatus status = StatusUtil.error(BuildPath.class, ex.getMessage(), ex);
+      throw new CoreException(status);
+    }
+  }
 
+  /** Return the libraries whose definitions are matched by the project's pom's dependencies. */
+  public static Collection<Library> loadMavenLibraries(IJavaProject javaProject,
+      Collection<Library> availableLibraries, IProgressMonitor monitor)
+      throws CoreException {
+    IProject project = javaProject.getProject();
     IFile pomFile = project.getFile("pom.xml"); //$NON-NLS-1$
 
     try {
       Pom pom = Pom.parse(pomFile);
-      pom.addDependencies(libraries);
+      return pom.resolveLibraries(availableLibraries);
     } catch (SAXException | IOException ex) {
       IStatus status = StatusUtil.error(BuildPath.class, ex.getMessage(), ex);
       throw new CoreException(status);

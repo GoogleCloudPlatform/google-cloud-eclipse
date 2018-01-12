@@ -28,19 +28,19 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.wst.common.project.facet.core.IDelegate;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
 /**
  * Creates {@code src/main/appengine/app.yaml} if not present. Applies to both the WAR facet and
  * the JAR facet.
  */
-public class FlexFacetInstallDelegate extends AppEngineFacetInstallDelegate {
+public class FlexFacetInstallDelegate implements IDelegate {
   @Override
   public void execute(IProject project,
                       IProjectFacetVersion version,
                       Object config,
                       IProgressMonitor monitor) throws CoreException {
-    super.execute(project, version, config, monitor);
     createConfigFiles(project, monitor);
   }
 

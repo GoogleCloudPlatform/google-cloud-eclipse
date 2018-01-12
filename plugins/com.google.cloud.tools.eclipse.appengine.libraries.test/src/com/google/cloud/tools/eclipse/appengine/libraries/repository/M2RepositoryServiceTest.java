@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.libraries.repository;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
@@ -38,6 +39,7 @@ public class M2RepositoryServiceTest {
     URI noSchemeUri = new URI("host");
     try {
       noSchemeUri.toURL();
+      fail();
     } catch (IllegalArgumentException ex) {
       assertEquals("URI is not absolute", ex.getMessage());
     }

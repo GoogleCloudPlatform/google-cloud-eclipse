@@ -23,17 +23,16 @@ import static org.junit.Assert.assertTrue;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
@@ -62,7 +61,7 @@ public class StandardFacetInstallationTest {
           project.delete(true, null);
         } catch (IllegalArgumentException ex) {
           // Get more information to diagnose odd test failures; remove when fixed
-          // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1196
+          // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2093
           System.err.println("JobManager state:\n" + Job.getJobManager());
           System.err.println("  Current job: " + Job.getJobManager().currentJob());
           System.err.println("  Current rule: " + Job.getJobManager().currentRule());
@@ -107,7 +106,8 @@ public class StandardFacetInstallationTest {
       throws CoreException, IOException {
     // Create an empty web.xml.
     IProject project = projectCreator.getProject();
-    createFolders(project, new Path("src/main/webapp/WEB-INF"));
+    IFolder folder = project.getFolder(new Path("src/main/webapp/WEB-INF"));
+    ResourceUtils.createFolders(folder, null);
     IFile webXml = project.getFile("src/main/webapp/WEB-INF/web.xml");
     webXml.create(new ByteArrayInputStream(new byte[0]), true, null);
     assertEmptyFile(webXml);
@@ -117,16 +117,6 @@ public class StandardFacetInstallationTest {
     ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
 
     assertEmptyFile(webXml);
-  }
-
-  private static void createFolders(IContainer parent, IPath path) throws CoreException {
-    if (!path.isEmpty()) {
-      IFolder folder = parent.getFolder(new Path(path.segment(0)));
-      if (!folder.exists()) {
-        folder.create(true, true, null);
-      }
-      createFolders(folder, path.removeFirstSegments(1));
-    }
   }
 
   private static void assertEmptyFile(IFile file) throws IOException, CoreException {

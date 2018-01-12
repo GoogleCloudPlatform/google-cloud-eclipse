@@ -7,18 +7,19 @@ install:
   # use mvn ≥ 3.3.9 to ensure faulty test exit states fail the build (#1276)
   - mvn -B -N io.takari:maven:wrapper -Dmaven=3.5.0
   # download and install Cloud SDK (may be cached)
-  - build/install-cloudsdk.sh 171.0.0 $HOME
+  - build/install-cloudsdk.sh 183.0.0 $HOME
 # Tycho ≥ 0.26 requires Java 8
 jdk: oraclejdk8
 env:
   matrix:
     # ECLIPSE_TARGET is the targeted platform: mars is the default target
     # JAVA_RUNTIME specifies the execution runtime for tests; must match an <id> in .travis-toolchains.xml
-    - JAVA_RUNTIME=JavaSE-1.7
+    # SWT_GTK3=0 to force GTK2 on Mars as its GTK3 support is buggy
+    - JAVA_RUNTIME=JavaSE-1.7 SWT_GTK3=0
     - JAVA_RUNTIME=JavaSE-1.8 ECLIPSE_TARGET=neon
     - JAVA_RUNTIME=JavaSE-1.8 ECLIPSE_TARGET=oxygen MAVEN_FLAGS=-Pjacoco
   global:
-    - PATH=$PWD/google-cloud-sdk/bin:$PATH
+    - PATH=$HOME/google-cloud-sdk/bin:$PATH
     # Our maven build typically reports about 512m
     - MAVEN_OPTS=-Xmx700m
     - CLOUDSDK_CORE_DISABLE_USAGE_REPORTING=true
@@ -28,7 +29,8 @@ before_script:
   - sleep 3 # give xvfb some time to start
   - metacity --sm-disable --replace &
   - sleep 3 # give metacity some time to start
-script: ./mvnw -V -B -Ptravis --fail-at-end verify ${MAVEN_FLAGS}
+script: ./mvnw -V -B --fail-at-end verify ${MAVEN_FLAGS}
+     -Ptravis -Perrorprone
      ${ECLIPSE_TARGET:+-Declipse.target=${ECLIPSE_TARGET}}
      --toolchains=.travis-toolchains.xml
      -Dtoolchain.java.runtime=${JAVA_RUNTIME}

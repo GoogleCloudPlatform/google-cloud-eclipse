@@ -72,6 +72,7 @@ public class GcpProjectTest {
   }
 
   @Test
+  @SuppressWarnings("SelfEquals") // errorprone
   public void testEqualsItself() {
     GcpProject gcpProject = new GcpProject("name", "id");
     assertTrue(gcpProject.equals(gcpProject));

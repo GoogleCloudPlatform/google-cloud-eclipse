@@ -66,7 +66,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
   public Control createContents(Composite parent) {
     Composite contents = new Composite(parent, SWT.NONE);
     Link instructions = new Link(contents, SWT.WRAP);
-    instructions.setText(SdkUiMessages.getString("CloudSdkRequired"));
+    instructions.setText(Messages.getString("CloudSdkRequired"));
     instructions.setFont(contents.getFont());
     instructions.addSelectionListener(new SelectionAdapter() {
       @Override
@@ -77,7 +77,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
     Composite fieldContents = new Composite(parent, SWT.NONE);
     sdkLocation = new CloudSdkDirectoryFieldEditor(PreferenceConstants.CLOUDSDK_PATH,
-        SdkUiMessages.getString("SdkLocation"), fieldContents);
+        Messages.getString("SdkLocation"), fieldContents);
     Path defaultLocation = getDefaultSdkLocation();
     if (defaultLocation != null) {
       sdkLocation.setFilterPath(defaultLocation.toFile());
@@ -140,15 +140,15 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       // accept a seemingly invalid location in case the SDK organization
       // has changed and the CloudSdk#validate() code is out of date
       status = new Status(IStatus.WARNING, getClass().getName(),
-          SdkUiMessages.getString("CloudSdkNotFound", sdk.getSdkPath()));
+          Messages.getString("CloudSdkNotFound", sdk.getSdkPath()));
       return false;
     } catch (AppEngineJavaComponentsNotInstalledException ex) {
       status = new Status(IStatus.WARNING, getClass().getName(),
-          SdkUiMessages.getString("AppEngineJavaComponentsNotInstalled", ex.getMessage()));
+          Messages.getString("AppEngineJavaComponentsNotInstalled", ex.getMessage()));
       return false;
     } catch (CloudSdkOutOfDateException ex) {
       status = new Status(IStatus.ERROR, getClass().getName(),
-          SdkUiMessages.getString("CloudSdkOutOfDate"));
+          Messages.getString("CloudSdkOutOfDate"));
         return false;
     }
   }
@@ -188,11 +188,11 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
       Path location = Paths.get(directory);
       if (!Files.exists(location)) {
-        String message = SdkUiMessages.getString("NoSuchDirectory", location);
+        String message = Messages.getString("NoSuchDirectory", location);
         status = new Status(IStatus.ERROR, getClass().getName(), message);
         return false;
       } else if (!Files.isDirectory(location)) {
-        String message = SdkUiMessages.getString("FileNotDirectory", location);
+        String message = Messages.getString("FileNotDirectory", location);
         status = new Status(IStatus.ERROR, getClass().getName(), message);
         return false;
       }

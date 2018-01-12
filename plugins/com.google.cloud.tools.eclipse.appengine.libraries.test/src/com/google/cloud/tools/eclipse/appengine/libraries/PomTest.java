@@ -25,6 +25,9 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -32,6 +35,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -72,48 +76,14 @@ public class PomTest {
   public void testAddDependencies() 
       throws CoreException, ParserConfigurationException, IOException, SAXException {
     
-    MavenCoordinates.Builder builder = new MavenCoordinates.Builder()
-        .setGroupId("com.example.group0")
-        .setArtifactId("artifact0")
-        .setVersion("1.2.3"); 
-
-    MavenCoordinates coordinates0 = builder.build();
-    LibraryFile file0 = new LibraryFile(coordinates0);
-    List<LibraryFile> list0 = new ArrayList<>();
-    list0.add(file0);
-    
-    MavenCoordinates coordinates1 = new MavenCoordinates.Builder()
-        .setGroupId("com.example.group1")
-        .setArtifactId("artifact1")
-        .build();
-    List<LibraryFile> list1 = new ArrayList<>();
-    LibraryFile file1 = new LibraryFile(coordinates1);
-    list1.add(file1);
-    
-    MavenCoordinates coordinates2 = new MavenCoordinates.Builder()
-        .setGroupId("com.example.group2")
-        .setArtifactId("artifact2")
-        .build();
-    MavenCoordinates coordinates3 = new MavenCoordinates.Builder()
-        .setGroupId("com.example.group3")
-        .setArtifactId("artifact3")
-        .build();
-    List<LibraryFile> list2 = new ArrayList<>();
-    LibraryFile file2 = new LibraryFile(coordinates2);
-    LibraryFile file3 = new LibraryFile(coordinates3);
-    list2.add(file2);
-    list2.add(file3);
-    
-    Library library0 = new Library("id0");
-    library0.setLibraryFiles(list0);
-    Library library1 = new Library("id1");
-    library1.setLibraryFiles(list1);
-    Library library2 = new Library("id2");
-    library2.setLibraryFiles(list2);
-    List<Library> libraries = new ArrayList<>();
-    libraries.add(library0);
-    libraries.add(library1);
-    libraries.add(library2);
+    Library library0 =
+        newLibrary("id0", new LibraryFile(coordinates("com.example.group0", "artifact0", "1.2.3")));
+    Library library1 =
+        newLibrary("id1", new LibraryFile(coordinates("com.example.group1", "artifact1")));
+    Library library2 =
+        newLibrary("id2", new LibraryFile(coordinates("com.example.group2", "artifact2")),
+            new LibraryFile(coordinates("com.example.group3", "artifact3")));
+    List<Library> libraries = Arrays.asList(library0, library1, library2);
     
     pom.addDependencies(libraries);
     
@@ -150,29 +120,11 @@ public class PomTest {
   @Test
   public void testAddDependencies_withDuplicates() 
       throws CoreException, ParserConfigurationException, IOException, SAXException {
-
-    MavenCoordinates coordinates1 = new MavenCoordinates.Builder()
-        .setGroupId("com.example.group1")
-        .setArtifactId("artifact1")
-        .build();
-    MavenCoordinates coordinates2 = new MavenCoordinates.Builder()
-        .setGroupId("com.example.group2")
-        .setArtifactId("artifact2")
-        .build();
-
-    List<LibraryFile> list1 = new ArrayList<>();
-    LibraryFile file1 = new LibraryFile(coordinates1);
-    list1.add(file1);
+    LibraryFile file1 = new LibraryFile(coordinates("com.example.group1", "artifact1"));
+    LibraryFile file2 = new LibraryFile(coordinates("com.example.group2", "artifact2"));
     
-    List<LibraryFile> list2 = new ArrayList<>();
-    LibraryFile file2 = new LibraryFile(coordinates2);
-    list2.add(file1);
-    list2.add(file2);
-    
-    Library library1 = new Library("id1");
-    library1.setLibraryFiles(list1);
-    Library library2 = new Library("id2");
-    library2.setLibraryFiles(list2);
+    Library library1 = newLibrary("id1", file1);
+    Library library2 = newLibrary("id2", file1, file2);
 
     List<Library> libraries = new ArrayList<>();
     libraries.add(library1);
@@ -206,18 +158,8 @@ public class PomTest {
       throws CoreException, ParserConfigurationException, IOException, SAXException {
     
     // objectify depends on guava
-    MavenCoordinates coordinates =
-        new MavenCoordinates.Builder()
-            .setGroupId("com.googlecode.objectify")
-            .setArtifactId("objectify")
-            .setVersion("5.1.10").build(); // to be upgraded
-    
-    List<LibraryFile> files = new ArrayList<>();
-    LibraryFile file = new LibraryFile(coordinates);
-    files.add(file);
-    
-    Library library = new Library("objectify");
-    library.setLibraryFiles(files);
+    Library library = newLibrary("objectify",
+        new LibraryFile(coordinates("com.googlecode.objectify", "objectify", "5.1.10")));
     
     List<Library> libraries = new ArrayList<>();
     libraries.add(library);
@@ -239,6 +181,104 @@ public class PomTest {
     Assert.assertNotEquals("5.1.10", version.getTextContent());
   }
 
+  @Test
+  public void testRemoveUnusedDependencies_selectAll()
+      throws CoreException, ParserConfigurationException, IOException, SAXException {
+    LibraryFile file1 = new LibraryFile(coordinates("com.example.group1", "artifact1"));
+    LibraryFile file2 = new LibraryFile(coordinates("com.example.group2", "artifact2"));
+    Library library1 = newLibrary("id1", file1);
+    Library library2 = newLibrary("id2", file1, file2);
+
+    pom.addDependencies(Arrays.asList(library1, library2));
+    InputStream contents = pomFile.getContents();
+    Document actual = parse(contents);
+    NodeList dependenciesList = actual.getElementsByTagName("dependencies");
+    Assert.assertEquals(1, dependenciesList.getLength());
+    Assert.assertTrue(dependenciesList.item(0) instanceof Element);
+    Element dependencies = (Element) dependenciesList.item(0);
+    Assert.assertEquals(2, dependencies.getElementsByTagName("dependency").getLength());
+
+    // no dependencies should be removed
+    Pom.removeUnusedDependencies(dependencies, Arrays.asList(library1, library2),
+        Arrays.asList(library1, library2));
+    Assert.assertEquals(2, dependencies.getElementsByTagName("dependency").getLength());
+  }
+
+  @Test
+  public void testRemoveUnusedDependencies_keepLibrary1()
+      throws CoreException, ParserConfigurationException, IOException, SAXException {
+    LibraryFile file1 = new LibraryFile(coordinates("com.example.group1", "artifact1"));
+    LibraryFile file2 = new LibraryFile(coordinates("com.example.group2", "artifact2"));
+    Library library1 = newLibrary("id1", file1);
+    Library library2 = newLibrary("id2", file1, file2);
+
+    pom.addDependencies(Arrays.asList(library1, library2));
+    InputStream contents = pomFile.getContents();
+    Document actual = parse(contents);
+    NodeList dependenciesList = actual.getElementsByTagName("dependencies");
+    Assert.assertEquals(1, dependenciesList.getLength());
+    Assert.assertTrue(dependenciesList.item(0) instanceof Element);
+    Element dependencies = (Element) dependenciesList.item(0);
+    Assert.assertEquals(2, dependencies.getElementsByTagName("dependency").getLength());
+
+    // dependencies from library2 should be removed
+    Pom.removeUnusedDependencies(dependencies, Arrays.asList(library1),
+        Arrays.asList(library1, library2));
+    Assert.assertEquals(1, dependencies.getElementsByTagName("dependency").getLength());
+    Element dependency = getOnlyChild(((Element) dependencies), "dependency");
+    Element groupId = getOnlyChild(dependency, "groupId");
+    Assert.assertEquals("com.example.group1", groupId.getTextContent());
+    Element artifactId = getOnlyChild(dependency, "artifactId");
+    Assert.assertEquals("artifact1", artifactId.getTextContent());
+  }
+
+  @Test
+  public void testRemoveUnusedDependencies_removesAll()
+      throws CoreException, ParserConfigurationException, IOException, SAXException {
+    LibraryFile file1 = new LibraryFile(coordinates("com.example.group1", "artifact1"));
+    LibraryFile file2 = new LibraryFile(coordinates("com.example.group2", "artifact2"));
+    Library library1 = newLibrary("id1", file1);
+    Library library2 = newLibrary("id2", file1, file2);
+
+    pom.addDependencies(Arrays.asList(library1, library2));
+    InputStream contents = pomFile.getContents();
+    Document actual = parse(contents);
+    NodeList dependenciesList = actual.getElementsByTagName("dependencies");
+    Assert.assertEquals(1, dependenciesList.getLength());
+    Assert.assertTrue(dependenciesList.item(0) instanceof Element);
+    Element dependencies = (Element) dependenciesList.item(0);
+    Assert.assertEquals(2, dependencies.getElementsByTagName("dependency").getLength());
+
+    // all dependencies should be removed
+    Pom.removeUnusedDependencies(dependencies, Collections.<Library>emptyList(),
+        Arrays.asList(library1, library2));
+    Assert.assertEquals(0, dependencies.getElementsByTagName("dependency").getLength());
+  }
+
+  @Test
+  public void testResolveLibraries() throws CoreException {
+    LibraryFile file1 = new LibraryFile(coordinates("com.example.group1", "artifact1"));
+    LibraryFile file2 = new LibraryFile(coordinates("com.example.group2", "artifact2"));
+
+    Library library1 = newLibrary("id1", file1);
+    Library library2 = newLibrary("id2", file1, file2);
+
+    pom.updateDependencies(Arrays.asList(library1), Arrays.asList(library1, library2));
+
+    // library2 should not be resolved since file2 is not in the available libraries
+    Collection<Library> resolved = pom.resolveLibraries(Arrays.asList(library1, library2));
+    Assert.assertEquals(1, resolved.size());
+    Assert.assertEquals(library1, resolved.iterator().next());
+
+    pom.addDependencies(Arrays.asList(library2));
+
+    // now both library1 and library2 should be resolved
+    resolved = pom.resolveLibraries(Arrays.asList(library1, library2));
+    Assert.assertEquals(2, resolved.size());
+    Assert.assertThat(resolved, Matchers.hasItem(library1));
+    Assert.assertThat(resolved, Matchers.hasItem(library2));
+  }
+
   private static Document parse(InputStream in)
       throws ParserConfigurationException, IOException, SAXException {
     DocumentBuilder builder = factory.newDocumentBuilder();
@@ -254,5 +294,21 @@ public class PomTest {
     Assert.assertEquals("More than one " + name, 1, children.getLength());
     return (Element) children.item(0);
   }
+
+  private static Library newLibrary(String libraryId, LibraryFile... libraryFiles) {
+    Library library = new Library(libraryId);
+    library.setLibraryFiles(Arrays.asList(libraryFiles));
+    return library;
+  }
+
+  private static MavenCoordinates coordinates(String groupId, String artifactId) {
+    return new MavenCoordinates.Builder().setGroupId(groupId).setArtifactId(artifactId).build();
+  }
+
+  private static MavenCoordinates coordinates(String groupId, String artifactId, String version) {
+    return new MavenCoordinates.Builder().setGroupId(groupId).setArtifactId(artifactId)
+        .setVersion(version).build();
+  }
+
 
 }

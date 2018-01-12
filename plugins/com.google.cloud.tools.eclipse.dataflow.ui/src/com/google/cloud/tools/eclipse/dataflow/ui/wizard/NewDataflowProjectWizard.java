@@ -69,7 +69,8 @@ public class NewDataflowProjectWizard extends Wizard implements INewWizard {
 
   @Override
   public void addPages() {
-    AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.DATAFLOW_NEW_PROJECT_WIZARD);
+    AnalyticsPingManager.getInstance().sendPingOnShell(getShell(),
+        AnalyticsEvents.DATAFLOW_NEW_PROJECT_WIZARD);
 
     landingPage = new NewDataflowProjectWizardLandingPage(creator);
     addPage(landingPage);

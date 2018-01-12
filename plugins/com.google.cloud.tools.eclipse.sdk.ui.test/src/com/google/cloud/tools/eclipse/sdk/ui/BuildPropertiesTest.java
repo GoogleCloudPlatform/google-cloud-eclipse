@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Google Inc.
+ * Copyright 2017 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,10 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.ui;
+package com.google.cloud.tools.eclipse.sdk.ui;
 
-/**
- * Wizard page that displays a message that cloud SDK is
- * missing with instructions on how to install it. This page disables the 'Finish' button.
- */
-public class CloudSdkMissingPage extends MissingComponentPage {
+import com.google.cloud.tools.eclipse.test.util.BaseBuildPropertiesTest;
 
-  public CloudSdkMissingPage() {
-    super("cloudSdkMissingComponentPage",  //$NON-NLS-1$
-        Messages.getString("cloud.sdk.missing"),
-        Messages.getString("cloud.sdk.not.installed"),
-        Messages.getString("fix.cloud.sdk.location"));
-  }
+public class BuildPropertiesTest extends BaseBuildPropertiesTest {
 
 }

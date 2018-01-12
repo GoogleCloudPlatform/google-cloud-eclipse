@@ -25,7 +25,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
@@ -53,6 +52,7 @@ import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.cloud.tools.login.Account;
 import com.google.common.base.Predicate;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -186,7 +186,8 @@ public class GcpLocalRunTabTest {
   @Test
   public void testGetEnvironmentMap() throws CoreException {
     Map<String, String> map = new HashMap<>();
-    when(launchConfig.getAttribute(eq(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES), anyMap()))
+    when(launchConfig.getAttribute(eq(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES),
+        Matchers.anyMapOf(String.class, String.class)))
         .thenReturn(map);
     assertEquals(map, GcpLocalRunTab.getEnvironmentMap(launchConfig));
   }
@@ -258,7 +259,8 @@ public class GcpLocalRunTabTest {
     Map<String, String> environmentMap = new HashMap<>();
     environmentMap.put("GOOGLE_CLOUD_PROJECT", gcpProjectId);
     environmentMap.put("GOOGLE_APPLICATION_CREDENTIALS", serviceKey);
-    when(launchConfig.getAttribute(eq(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES), anyMap()))
+    when(launchConfig.getAttribute(eq(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES), 
+        Matchers.anyMapOf(String.class, String.class)))
         .thenReturn(environmentMap);
   }
 
@@ -297,7 +299,8 @@ public class GcpLocalRunTabTest {
     verify(launchConfig, never()).setAttribute(
         "com.google.cloud.tools.eclipse.gcpEmulation.accountEmail", "account2@example.com");
     verify(launchConfig, never()).setAttribute(
-        eq(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES), anyMap());
+        eq(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES),
+        Matchers.anyMapOf(String.class, String.class));
   }
 
   @Test
@@ -401,7 +404,8 @@ public class GcpLocalRunTabTest {
     when(iam.projects()).thenReturn(projects);
     when(projects.serviceAccounts()).thenReturn(serviceAccounts);
     when(serviceAccounts.keys()).thenReturn(keys);
-    when(keys.create(anyString(), Matchers.any(CreateServiceAccountKeyRequest.class))).thenReturn(create);
+    when(keys.create(anyString(), Matchers.any(CreateServiceAccountKeyRequest.class)))
+        .thenReturn(create);
 
     if (throwException) {
       when(create.execute()).thenThrow(new IOException("log from unit test"));
@@ -445,24 +449,24 @@ public class GcpLocalRunTabTest {
   }
 
   @Test
-  public void testGetServiceAccountKeyPath() {
+  public void testGetServiceAccountKeyPath() throws URISyntaxException {
     tab.initializeFrom(launchConfig);
     accountSelector.selectAccount("account1@example.com");
     projectSelector.selectProjectId("project-A");
 
-    Path expected = Paths.get(Platform.getConfigurationLocation().getURL().getPath())
+    Path expected = Paths.get(Platform.getConfigurationLocation().getURL().toURI())
         .resolve("com.google.cloud.tools.eclipse")
         .resolve("app-engine-default-service-account-key-project-A.json");
     assertEquals(expected, tab.getServiceAccountKeyPath());
   }
   
   @Test
-  public void testGetServiceAccountKeyPath_internal() {
+  public void testGetServiceAccountKeyPath_internal() throws URISyntaxException {
     tab.initializeFrom(launchConfig);
     accountSelector.selectAccount("account2@example.com");
     projectSelector.selectProjectId("google.com:project-D");
 
-    Path expected = Paths.get(Platform.getConfigurationLocation().getURL().getPath())
+    Path expected = Paths.get(Platform.getConfigurationLocation().getURL().toURI())
         .resolve("com.google.cloud.tools.eclipse")
         .resolve("app-engine-default-service-account-key-google.com.project-D.json");
     assertEquals(expected, tab.getServiceAccountKeyPath());

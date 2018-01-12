@@ -16,23 +16,8 @@
 
 package com.google.cloud.tools.eclipse.appengine.ui;
 
-import static org.junit.Assert.assertFalse;
+import com.google.cloud.tools.eclipse.test.util.BaseBuildPropertiesTest;
 
-import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
-import org.eclipse.jface.wizard.WizardPage;
-import org.junit.Rule;
-import org.junit.Test;
-
-public class MissingComponentPageTest {
-
-  @Rule public ShellTestResource shellResource = new ShellTestResource();
-
-  @Test
-  public void testPageComplete() {
-    WizardPage page = new MissingComponentPage("pageName", "title", "errorMessage", "message");
-    page.createControl(shellResource.getShell());
-    // Should be false to disable "Finish", which will prevent sending Analytics pings.
-    assertFalse(page.isPageComplete());
-  }
+public class BuildPropertiesTest extends BaseBuildPropertiesTest {
 
 }

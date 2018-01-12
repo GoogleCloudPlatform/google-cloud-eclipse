@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Google Inc.
+ * Copyright 2017 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,10 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.ui;
+package com.google.cloud.tools.eclipse.aeri;
 
-/**
- * Wizard page that displays a message that the Cloud SDK is
- * out of date with instructions on how to update it. This page disables the 'Finish' button.
- */
-public class CloudSdkOutOfDatePage extends MissingComponentPage {
+import com.google.cloud.tools.eclipse.test.util.BaseBuildPropertiesTest;
 
-  public CloudSdkOutOfDatePage() {
-    super("cloudSdkOutOfDatePage", //$NON-NLS-1$
-        Messages.getString("cloud.sdk.out.of.date"),
-        Messages.getString("cloud.sdk.out.of.date"),
-        Messages.getString("fix.cloud.sdk.version"));
-  }
+public class BuildPropertiesTest extends BaseBuildPropertiesTest {
 
 }

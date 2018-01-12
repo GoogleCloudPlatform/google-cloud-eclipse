@@ -31,6 +31,6 @@ public class WebFragmentWarPublishTest extends ChildModuleWarPublishTest {
 
   @Override
   protected List<String> getExpectedChildModuleNames() {
-    return Collections.singletonList("spring-web-4.3.8.RELEASE.jar");
+    return Collections.singletonList("spring-web-4.3.10.RELEASE.jar");
   }
 }

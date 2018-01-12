@@ -22,7 +22,7 @@ import org.w3c.dom.Element;
 
 import com.google.cloud.tools.eclipse.test.util.BasePluginXmlTest;
 
-public class XmlTest extends BasePluginXmlTest {
+public class PluginXmlTest extends BasePluginXmlTest {
   
   @Test
   public void testLoadCompilationParticipant() {

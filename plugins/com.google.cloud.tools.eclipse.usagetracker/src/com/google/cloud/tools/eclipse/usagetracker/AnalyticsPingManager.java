@@ -40,6 +40,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -87,13 +88,10 @@ public class AnalyticsPingManager {
   final Job eventFlushJob = new Job("Analytics Event Submission") {
     @Override
     protected IStatus run(IProgressMonitor monitor) {
-      try {
-        while (!pingEventQueue.isEmpty() && !monitor.isCanceled()) {
-          PingEvent event = pingEventQueue.poll();
-          showOptInDialogIfNeeded(event.shell);
-          sendPingHelper(event);
-        }
-      } catch (InterruptedException ex) {  // Fall-through to die.
+      while (!pingEventQueue.isEmpty() && !monitor.isCanceled()) {
+        PingEvent event = pingEventQueue.poll();
+        showOptInDialogIfNeeded(event.shell);
+        sendPingHelper(event);
       }
       return Status.OK_STATUS;
     }
@@ -272,19 +270,19 @@ public class AnalyticsPingManager {
   /**
    * @param parentShell if null, tries to show the dialog at the workbench level.
    */
-  private void showOptInDialogIfNeeded(final Shell parentShell) throws InterruptedException {
+  private void showOptInDialogIfNeeded(final Shell parentShell) {
     if (shouldShowOptInDialog()) {
       Display display = PlatformUI.getWorkbench().getDisplay();
 
-      final OptInDialog[] dialogHolder = new OptInDialog[1];
       display.syncExec(new Runnable() {
         @Override
         public void run() {
-          dialogHolder[0] = new OptInDialog(findShell(parentShell));
-          dialogHolder[0].open();
+          OptInDialog dialog = new OptInDialog(findShell(parentShell));
+          dialog.open();
+          boolean optIn = dialog.getReturnCode() == Window.OK;
+          registerOptInStatus(optIn);
         }
       });
-      registerOptInStatus(dialogHolder[0].isOptInYes());
     }
   }
 

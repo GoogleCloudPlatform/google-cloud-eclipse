@@ -35,7 +35,6 @@ import com.google.cloud.tools.eclipse.dataflow.ui.page.MessageTarget;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.component.LabeledTextMapComponent;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.component.TextAndButtonComponent;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.component.TextAndButtonSelectionListener;
-import com.google.cloud.tools.eclipse.ui.util.DisplayExecutor;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
@@ -43,21 +42,20 @@ import com.google.common.base.Strings;
 import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.util.concurrent.SettableFuture;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
@@ -95,7 +93,17 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   private static final String ARGUMENTS_SEPARATOR = "="; //$NON-NLS-1$
 
   private final IWorkspaceRoot workspaceRoot;
-  private Executor displayExecutor;
+
+  /**
+   * When true, suppresses calls to {@link #updateLaunchConfigurationDialog()} to avoid frequent
+   * updates during batch UI changes.
+   */
+  @VisibleForTesting
+  boolean suppressDialogUpdates = false;
+
+  @VisibleForTesting
+  UpdateLaunchConfigurationDialogChangedListener dialogChangedListener =
+      new UpdateLaunchConfigurationDialogChangedListener();
 
   private ScrolledComposite composite;
   private Composite internalComposite;
@@ -142,12 +150,11 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
   @Override
   public void createControl(Composite parent) {
-    displayExecutor = DisplayExecutor.create(parent.getDisplay());
     composite = new ScrolledComposite(parent, SWT.V_SCROLL);
     composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     composite.setLayout(new GridLayout(1, false));
 
-    internalComposite = new Composite(this.composite, SWT.NULL);
+    internalComposite = new Composite(composite, SWT.NULL);
 
     GridData internalCompositeGridData = new GridData(SWT.FILL, SWT.FILL, true, true);
     internalComposite.setLayoutData(internalCompositeGridData);
@@ -182,8 +189,8 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
     pipelineOptionsForm =
         new PipelineOptionsFormComponent(runnerOptionsGroup, ARGUMENTS_SEPARATOR, filterProperties);
-    pipelineOptionsForm.addModifyListener(new UpdateLaunchConfigurationDialogChangedListener());
-    pipelineOptionsForm.addExpandListener(new UpdateLaunchConfigurationDialogChangedListener());
+    pipelineOptionsForm.addModifyListener(dialogChangedListener);
+    pipelineOptionsForm.addExpandListener(dialogChangedListener);
 
     composite.setContent(internalComposite);
     composite.setExpandHorizontal(true);
@@ -210,7 +217,6 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
           launchConfiguration.setUserOptionsName(userOptionsName);
         }
         updatePipelineOptionsForm();
-        return;
       }
 
       @Override
@@ -271,8 +277,6 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     defaultOptionsComponent =
         new DefaultedPipelineOptionsComponent(composite, layoutData, target, getPreferences());
 
-    UpdateLaunchConfigurationDialogChangedListener dialogChangedListener =
-        new UpdateLaunchConfigurationDialogChangedListener();
     defaultOptionsComponent.addAccountSelectionListener(dialogChangedListener);
     defaultOptionsComponent.addButtonSelectionListener(dialogChangedListener);
     defaultOptionsComponent.addModifyListener(dialogChangedListener);
@@ -284,8 +288,11 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   @Override
   public void performApply(ILaunchConfigurationWorkingCopy configuration) {
     if (!activated) {
-      // this tab was never shown since it was last shown, and since our
-      // isValid() == true for this to be called, then there are no changes
+      // activated == false means initializeFrom() has not been called since
+      // reload() was last called (on isValid() or initializeFrom()) and so
+      // the UI elements are out of sync with this configuration.
+      // Since isValid() must be true for performApply() to be called,
+      // then we have no changes to apply.
       return;
     }
     PipelineRunner runner = getSelectedRunner();
@@ -415,20 +422,21 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   }
 
   /**
-   * Asynchronously updates the project hierarchy.
-   * 
-   * @throws InterruptedException if the update is interrupted
-   * @throws InvocationTargetException if an exception occurred during the update
+   * Synchronously updates the project hierarchy.
    */
   private void updateHierarchy()
       throws InvocationTargetException, InterruptedException {
-    getLaunchConfigurationDialog().run(true, true, new IRunnableWithProgress() {
+    // blocking call (regardless of "fork"), returning only after the inner runnable completes
+    getLaunchConfigurationDialog().run(true /*fork*/, true /*cancelable*/,
+        new IRunnableWithProgress() {
       @Override
-      public void run(IProgressMonitor monitor)
-          throws InvocationTargetException, InterruptedException {
-        hierarchy = getPipelineOptionsHierarchy(monitor);
-      }
-    });
+          public void run(IProgressMonitor monitor)
+              throws InvocationTargetException, InterruptedException {
+            SubMonitor subMonitor = SubMonitor.convert(monitor,
+                Messages.getString("loading.pipeline.options.hierarchy"), 100);
+            hierarchy = getPipelineOptionsHierarchy(subMonitor.newChild(100));
+          }
+        });
   }
 
   private DataflowPreferences getPreferences() {
@@ -460,33 +468,32 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   }
 
   private void updatePipelineOptionsForm() {
-    final SettableFuture<Map<PipelineOptionsType, Set<PipelineOptionsProperty>>> optionsHierarchyFuture =
-        SettableFuture.create();
-    optionsHierarchyFuture.addListener(new Runnable() {
-      @Override
-      public void run() {
-        if (internalComposite.isDisposed()) {
-          return;
-        }
-        BusyIndicator.showWhile(internalComposite.getDisplay(), new Runnable() {
-          @Override
-          public void run() {
-            try {
-              pipelineOptionsForm.updateForm(launchConfiguration, optionsHierarchyFuture.get());
-              updateLaunchConfigurationDialog();
-            } catch (InterruptedException | ExecutionException ex) {
-              DataflowUiPlugin.logError(ex, "Exception while updating available Pipeline Options"); //$NON-NLS-1$
-            }
-          }
-        });
-      }
-    }, displayExecutor);
     try {
-      getLaunchConfigurationDialog().run(true, true, new IRunnableWithProgress() {
+      // This is merely a reference holder; atomicity not required.
+      final AtomicReference<Map<PipelineOptionsType, Set<PipelineOptionsProperty>>>
+          optionsHierarchy = new AtomicReference<>();
+      // blocking call (regardless of "fork"), returning only after the inner runnable completes
+      getLaunchConfigurationDialog().run(true /*fork*/, true /*cancelable*/,
+          new IRunnableWithProgress() {
         @Override
         public void run(IProgressMonitor monitor)
             throws InvocationTargetException, InterruptedException {
-          optionsHierarchyFuture.set(launchConfiguration.getOptionsHierarchy(hierarchy));
+          monitor.beginTask(Messages.getString("updating.pipeline.options"), //$NON-NLS-1$
+              IProgressMonitor.UNKNOWN);
+          optionsHierarchy.set(launchConfiguration.getOptionsHierarchy(hierarchy));
+        }
+      });
+
+      BusyIndicator.showWhile(composite.getDisplay(), new Runnable() {
+        @Override
+        public void run() {
+          try {
+            suppressDialogUpdates = true;
+            pipelineOptionsForm.updateForm(launchConfiguration, optionsHierarchy.get());
+            updateLaunchConfigurationDialog();
+          } finally {
+            suppressDialogUpdates = false;
+          }
         }
       });
     } catch (InvocationTargetException | InterruptedException ex) {
@@ -575,10 +582,14 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     }
 
     @Override
-    public void widgetSelected(SelectionEvent e) {
-      launchConfiguration.setRunner(runner);
-      updatePipelineOptionsForm();
-      updateLaunchConfigurationDialog();
+    public void widgetSelected(SelectionEvent event) {
+      Preconditions.checkArgument(event.getSource() instanceof Button, "add listener to buttons");
+
+      Button button = (Button) event.getSource();
+      if (button.getSelection()) {
+        launchConfiguration.setRunner(runner);
+        updatePipelineOptionsForm();
+      }
     }
   }
 
@@ -588,8 +599,10 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
    * arguments tab; and 2) the min size of the {@code ScrolledComposite} is updated to fit the
    * entire form.
    */
-  private class UpdateLaunchConfigurationDialogChangedListener
+  @VisibleForTesting
+  class UpdateLaunchConfigurationDialogChangedListener
       extends SelectionAdapter implements ModifyListener, IExpansionListener, Runnable {
+
     @Override
     public void widgetSelected(SelectionEvent event) {
       run();
@@ -611,7 +624,9 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
     @Override
     public void run() {
-      updateLaunchConfigurationDialog();
+      if (!suppressDialogUpdates) {
+        updateLaunchConfigurationDialog();
+      }
     }
   }
 }

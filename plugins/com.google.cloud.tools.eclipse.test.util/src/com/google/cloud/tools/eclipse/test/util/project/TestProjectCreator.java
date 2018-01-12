@@ -33,7 +33,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -184,8 +183,8 @@ public final class TestProjectCreator extends ExternalResource {
   }
 
   public void setAppEngineServiceId(String serviceId) throws CoreException {
-    IFolder webinf = WebProjectUtil.getWebInfDirectory(getProject());
-    IFile appEngineWebXml = webinf.getFile("appengine-web.xml");
+    IFile appEngineWebXml =
+        WebProjectUtil.findInWebInf(getProject(), new Path("appengine-web.xml"));
     assertTrue("Project should have AppEngine Standard facet", appEngineWebXml.exists());
     String contents = "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>\n"
         + "<service>" + serviceId + "</service>\n</appengine-web-app>\n";

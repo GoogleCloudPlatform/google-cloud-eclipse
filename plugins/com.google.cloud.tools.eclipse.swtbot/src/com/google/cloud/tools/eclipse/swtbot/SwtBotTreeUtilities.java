@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.swtbot;
 
+import java.util.Arrays;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.SWTBot;
@@ -99,8 +100,8 @@ public class SwtBotTreeUtilities {
       }
     }
 
-    throw new WidgetNotFoundException("One of the " + itemNames + " nodes with a child of "
-        + subchildName + " must exist in the tree.");
+    throw new WidgetNotFoundException("One of the " + Arrays.toString(itemNames)
+        + " nodes with a child of " + subchildName + " must exist in the tree.");
   }
 
   private static class TreeCollapsedCondition extends DefaultCondition {

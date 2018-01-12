@@ -16,18 +16,9 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
-import com.google.cloud.tools.appengine.cloudsdk.AppEngineJavaComponentsNotInstalledException;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
-import com.google.cloud.tools.eclipse.appengine.ui.AppEngineJavaComponentMissingPage;
-import com.google.cloud.tools.eclipse.appengine.ui.CloudSdkMissingPage;
-import com.google.cloud.tools.eclipse.appengine.ui.CloudSdkOutOfDatePage;
-import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPrompter;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Preconditions;
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IAdaptable;
@@ -57,22 +48,12 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
 
   @Override
   public void addPages() {
-    try {
-      // Clear interrupted state
-      // (https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2064)
-      Thread.interrupted();
-      CloudSdk sdk = new CloudSdk.Builder().build();
-      sdk.validateCloudSdk();
-      sdk.validateAppEngineJavaComponents();
-      page = createWizardPage();
-      addPage(page);
-    } catch (CloudSdkNotFoundException ex) {
-      addPage(new CloudSdkMissingPage());
-    } catch (CloudSdkOutOfDateException ex) {
-      addPage(new CloudSdkOutOfDatePage());
-    } catch (AppEngineJavaComponentsNotInstalledException ex) {
-      addPage(new AppEngineJavaComponentMissingPage());
-    }
+    // Clear interrupted state
+    // (https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2064)
+    Thread.interrupted();
+
+    page = createWizardPage();
+    addPage(page);
   }
 
   @Override
@@ -129,12 +110,5 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
   @Override
   public void init(IWorkbench workbench, IStructuredSelection selection) {
     this.workbench = workbench;
-    if (config.getCloudSdkLocation() == null) {
-      File location = CloudSdkPrompter.getCloudSdkLocation(getShell());
-      // if the user doesn't provide the Cloud SDK then we'll error in performFinish() too
-      if (location != null) {
-        config.setCloudSdkLocation(location);
-      }
-    }
   }
 }

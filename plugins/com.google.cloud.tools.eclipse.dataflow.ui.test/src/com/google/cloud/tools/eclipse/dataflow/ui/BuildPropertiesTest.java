@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Google Inc.
+ * Copyright 2017 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,10 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.ui;
+package com.google.cloud.tools.eclipse.dataflow.ui;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import com.google.cloud.tools.eclipse.test.util.BaseBuildPropertiesTest;
 
-public class CloudSdkMissingPageTest {
-
-  private CloudSdkMissingPage page;
-
-  @Before
-  public void setUp() {
-    page = new CloudSdkMissingPage();
-  }
-
-  @Test
-  public void testTitle() {
-    Assert.assertEquals("Cloud SDK missing", page.getTitle());
-  }
-
-  @Test
-  public void testErrorMessage() {
-    Assert.assertEquals("Could not find the Google Cloud SDK", page.getErrorMessage());
-  }
+public class BuildPropertiesTest extends BaseBuildPropertiesTest {
 
 }

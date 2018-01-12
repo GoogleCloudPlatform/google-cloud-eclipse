@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets.convert;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -25,6 +26,7 @@ import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -55,14 +57,15 @@ public class AppEngineStandardProjectConvertJobTest {
     assertTrue(AppEngineStandardFacet.hasFacet(facetedProject));
 
     // verify App Engine standard files are present
-    IFolder webInfFolder = WebProjectUtil.getWebInfDirectory(project);
-    assertTrue(webInfFolder.exists());
-    assertTrue(webInfFolder.exists(Path.fromPortableString("web.xml")));
-    assertTrue(webInfFolder.exists(Path.fromPortableString("appengine-web.xml")));
+    IFile webXml = WebProjectUtil.findInWebInf(project, new Path("web.xml"));
+    assertTrue(webXml.exists());
+    assertTrue(WebProjectUtil.findInWebInf(project, new Path("appengine-web.xml")).exists());
 
     // verify no overlap in WEB-INF and source paths
     // Java 1.7 facet sets the source path to src/ which will overlap with the
     // default src/main/webapp used in the AppEngineStandardFacet installer
+    IFolder webInfFolder = (IFolder) webXml.getParent();
+    assertEquals("WEB-INF", webInfFolder.getName());
     IPath webInfPath = webInfFolder.getProjectRelativePath();
     List<IPath> sourcePaths = WebProjectUtil.getJavaSourcePaths(project);
     for (IPath sourcePath : sourcePaths) {

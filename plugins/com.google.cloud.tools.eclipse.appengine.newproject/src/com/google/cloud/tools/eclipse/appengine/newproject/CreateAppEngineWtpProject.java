@@ -231,12 +231,8 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
     SubMonitor subMonitor = SubMonitor.convert(monitor, 15);
 
     // locate WEB-INF/lib
-    IFolder webInfFolder = WebProjectUtil.getWebInfDirectory(newProject);
-    IFolder libFolder = webInfFolder.getFolder("lib"); //$NON-NLS-1$
-    if (!libFolder.exists()) {
-      libFolder.create(true, true, subMonitor.newChild(5));
-    }
-
+    IFolder libFolder =
+        WebProjectUtil.createFolderInWebInf(newProject, new Path("lib"), subMonitor.newChild(5)); //$NON-NLS-1$
     MavenCoordinates jstl = new MavenCoordinates.Builder()
         .setGroupId("jstl") //$NON-NLS-1$
         .setArtifactId("jstl") //$NON-NLS-1$

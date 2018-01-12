@@ -31,6 +31,8 @@ import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -216,6 +218,13 @@ public class CodeTemplatesTest {
     Assert.assertEquals("my-project-artifact-id", artifactId.getTextContent());
     Element version = (Element) root.getElementsByTagName("version").item(0);
     Assert.assertEquals("98.76.54", version.getTextContent());
+    
+    Element pluginVersion =
+        (Element) root.getElementsByTagName("appengine.maven.plugin.version").item(0);
+    DefaultArtifactVersion artifactVersion =
+        new DefaultArtifactVersion(pluginVersion.getTextContent());
+    DefaultArtifactVersion expected = new DefaultArtifactVersion("1.3.2");
+    Assert.assertTrue(artifactVersion.compareTo(expected ) >= 0);
   }
 
   private Document buildDocument(IFile xml)

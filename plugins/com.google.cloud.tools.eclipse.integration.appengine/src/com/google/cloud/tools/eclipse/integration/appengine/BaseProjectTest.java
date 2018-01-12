@@ -19,10 +19,14 @@ package com.google.cloud.tools.eclipse.integration.appengine;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotWorkbenchActions;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
+import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
+import org.eclipse.swtbot.swt.finder.utils.SWTUtils;
 import org.eclipse.swtbot.swt.finder.widgets.TimeoutException;
 import org.junit.After;
 import org.junit.BeforeClass;
@@ -31,6 +35,7 @@ import org.junit.BeforeClass;
  * Common infrastructure for workbench-based tests that create a single project.
  */
 public class BaseProjectTest {
+  private static final Logger logger = Logger.getLogger(BaseProjectTest.class.getName());
 
   protected static SWTWorkbenchBot bot;
   protected IProject project;
@@ -60,6 +65,11 @@ public class BaseProjectTest {
         SwtBotProjectActions.deleteProject(bot, project.getName());
       } catch (TimeoutException ex) {
         // If this fails it shouldn't fail the test, which has already run
+        logger.log(Level.SEVERE, "Timeout deleting project: " + project.getName(), ex);
+        String fileName = SWTBotPreferences.SCREENSHOTS_DIR + "/" + "timeout-" + project.getName()
+            + "." + SWTBotPreferences.SCREENSHOT_FORMAT.toLowerCase();
+        SWTUtils.captureScreenshot(fileName);
+        logger.log(Level.INFO, "Screenshot saved as " + fileName);
       }
       project = null;
     }

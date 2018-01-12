@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -35,6 +36,8 @@ import org.eclipse.wst.server.core.IServerType;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.ServerUtil;
+import org.eclipse.wst.server.core.internal.ModuleFactory;
+import org.eclipse.wst.server.core.internal.ServerPlugin;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -65,6 +68,10 @@ public class LocalAppEnginePublishOperationTest {
     assertNotNull("sox-server", serverProject);
     sharedProject = projects.get("sox-shared".equals(projects.get(0).getName()) ? 0 : 1);
     assertNotNull("sox-shared", sharedProject);
+
+    // To diagnose https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1798.
+    logModules(serverProject);
+    logModules(sharedProject);
 
     serverModule = ServerUtil.getModule(serverProject);
     assertNotNull(serverModule);
@@ -114,5 +121,40 @@ public class LocalAppEnginePublishOperationTest {
     assertTrue(new File(webInf, "classes/sox/server/GreetingServiceImpl.class").isFile());
     assertTrue(new File(webInf, "lib/servlet-2.5.jar").isFile());
     assertTrue(new File(webInf, "lib/sox-shared.jar").isFile());
+  }
+
+  // Code taken from "ServerUtil.getModules()" (which "ServerUtil.getModule()" calls) to diagnose
+  // one of the failures in https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1798.
+  private static void logModules(IProject project) {
+    System.out.println("  #### Testing getModules(" + project.getName() + ") ####");
+
+    ModuleFactory[] factories = ServerPlugin.getModuleFactories();
+    assertNotNull(factories);
+    assertNotEquals(0, factories.length);
+
+    for (ModuleFactory factory : factories) {
+      boolean factoryEnabled = factory.isEnabled(project, null);
+      System.out.println("    * " + factory + (!factoryEnabled? " (not enabled, skipping)" : ""));
+
+      System.out.print("      - All factory modules:");
+      printModules(factory.getDelegate(null).getModules());
+
+      if (factoryEnabled) {
+        System.out.print("      - Project modules:");
+        printModules(factory.getModules(project, null));
+      }
+    }
+  }
+
+  private static void printModules(IModule[] modules) {
+    if (modules == null) {
+      System.out.println(" <null>");
+    } else if (modules.length == 0) {
+      System.out.println(" <empty>");
+    } else {
+      for (IModule module : modules) {
+        System.out.println(" " + module.getName());
+      }
+    }
   }
 }

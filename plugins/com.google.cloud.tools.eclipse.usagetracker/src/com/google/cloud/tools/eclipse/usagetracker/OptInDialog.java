@@ -16,16 +16,14 @@
 
 package com.google.cloud.tools.eclipse.usagetracker;
 
-import com.google.common.base.Preconditions;
-import java.util.concurrent.Semaphore;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -33,21 +31,19 @@ import org.eclipse.ui.PlatformUI;
 
 /**
  * A one-time dialog to suggest opt-in for sending client-side usage metrics.
+ *
+ * When the "Share" button is clicked, {@link #getReturnCode()} returns {@link Window#OK}. In all
+ * other cases of dialog dismissal including clicking the "Do Not Share" button, {@link
+ * #getReturnCode()} returns {@link Window#CANCEL}.
  */
 public class OptInDialog extends Dialog {
-
-  private final Semaphore answeredSignal = new Semaphore(0);
-  private boolean optInYes;
 
   public OptInDialog(Shell parentShell) {
     super(parentShell);
     setShellStyle(SWT.TITLE | SWT.CLOSE | SWT.MODELESS);
-    setBlockOnOpen(false);
+    setReturnCode(Window.CANCEL);
   }
 
-  /**
-   * Show this dialog at the top-right corner of some target window.
-   */
   @Override
   protected Point getInitialLocation(Point initialSize) {
     Shell targetShell = findTargetShell();
@@ -79,18 +75,12 @@ public class OptInDialog extends Dialog {
     }
   }
 
-  /**
-   * Set the dialog title.
-   */
   @Override
   protected void configureShell(Shell shell) {
     super.configureShell(shell);
     shell.setText(Messages.getString("OPT_IN_DIALOG_TITLE"));
   }
 
-  /**
-   * Create buttons.
-   */
   @Override
   protected void createButtonsForButtonBar(Composite parent) {
     createButton(parent, IDialogConstants.OK_ID, Messages.getString("OPT_IN_BUTTON"), false);
@@ -105,40 +95,5 @@ public class OptInDialog extends Dialog {
     label.setText(Messages.getString("OPT_IN_DIALOG_TEXT"));
 
     return container;
-  }
-
-  @Override
-  protected void okPressed() {
-    super.okPressed();
-    optInYes = true;
-    answeredSignal.release();
-  }
-
-  @Override
-  protected void cancelPressed() {
-    super.cancelPressed();
-    answeredSignal.release();
-  }
-
-  /**
-   * When the dialog closes in other ways than pressing the buttons.
-   */
-  @Override
-  protected void handleShellCloseEvent() {
-    super.handleShellCloseEvent();
-    answeredSignal.release();
-  }
-
-  /**
-   * Blocks until the dialog closes and returns the opt-in answer. Must not be called from the UI
-   * thread, and should be called only once at most.
-   *
-   * @return {@code true} if answered yes; {@code false} if answered no or not answered by closing
-   *     the dialog.
-   */
-  boolean isOptInYes() throws InterruptedException {
-    Preconditions.checkState(Display.getCurrent() == null, "Cannot be called from the UI thread.");
-    answeredSignal.acquire();
-    return optInYes;
   }
 }

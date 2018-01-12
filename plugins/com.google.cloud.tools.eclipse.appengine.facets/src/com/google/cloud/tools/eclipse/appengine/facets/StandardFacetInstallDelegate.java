@@ -17,28 +17,27 @@
 package com.google.cloud.tools.eclipse.appengine.facets;
 
 import com.google.cloud.tools.eclipse.util.Templates;
-import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.ByteArrayInputStream;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jst.j2ee.refactor.listeners.J2EEElementChangedListener;
+import org.eclipse.wst.common.project.facet.core.IDelegate;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacet;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
-public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate {
+public class StandardFacetInstallDelegate implements IDelegate {
   private static final String APPENGINE_WEB_XML = "appengine-web.xml";
 
   private static final String JSDT_FACET_ID = "wst.jsdt.web";
@@ -49,7 +48,6 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
                       IProjectFacetVersion version,
                       Object config,
                       IProgressMonitor monitor) throws CoreException {
-    super.execute(project, version, config, monitor);
     createConfigFiles(project, monitor);
     installAppEngineRuntimes(project);
   }
@@ -133,22 +131,14 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
       throws CoreException {
     SubMonitor progress = SubMonitor.convert(monitor, 10);
 
-    // The virtual component model is very flexible, but we assume that
-    // the WEB-INF/appengine-web.xml isn't a virtual file remapped elsewhere
-    IFolder webInfDir = WebProjectUtil.getWebInfDirectory(project);
-    if (webInfDir == null) {
-      webInfDir =
-          project.getFolder(WebProjectUtil.DEFAULT_WEB_PATH).getFolder(WebProjectUtil.WEB_INF);
-    }
-    progress.worked(1);
-
-    IFile appEngineWebXml = webInfDir.getFile(APPENGINE_WEB_XML);
-    if (appEngineWebXml.exists()) {
+    IFile appEngineWebXml = WebProjectUtil.findInWebInf(project, new Path(APPENGINE_WEB_XML));
+    if (appEngineWebXml != null && appEngineWebXml.exists()) {
       return;
     }
 
-    ResourceUtils.createFolders(webInfDir, progress.newChild(1));
-    appEngineWebXml.create(new ByteArrayInputStream(new byte[0]), true, progress.newChild(2));
+    // Use the virtual component model decide where to create the appengine-web.xml
+    appEngineWebXml = WebProjectUtil.createFileInWebInf(project, new Path(APPENGINE_WEB_XML),
+        new ByteArrayInputStream(new byte[0]), progress.newChild(2));
     String configFileLocation = appEngineWebXml.getLocation().toString();
     Map<String, String> parameters = new HashMap<>();
     parameters.put("runtime", "java8");

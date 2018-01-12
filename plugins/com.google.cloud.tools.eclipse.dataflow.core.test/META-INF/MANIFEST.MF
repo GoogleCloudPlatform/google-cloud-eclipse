@@ -5,7 +5,6 @@ Bundle-SymbolicName: com.google.cloud.tools.eclipse.dataflow.core.test
 Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Fragment-Host: com.google.cloud.tools.eclipse.dataflow.core

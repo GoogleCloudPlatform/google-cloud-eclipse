@@ -33,6 +33,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.IShellProvider;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -96,7 +97,7 @@ public class LoginServiceUi implements UiFacade {
         return null;
       }
 
-      String authorizationCode = showProgressDialogAndWaitForCode(message, codeReceiver);
+      String authorizationCode = showProgressDialogAndWaitForCode(codeReceiver);
       if (authorizationCode != null) {
         AnalyticsPingManager.getInstance().sendPingOnShell(shellProvider.getShell(),
             AnalyticsEvents.LOGIN_SUCCESS);
@@ -114,8 +115,8 @@ public class LoginServiceUi implements UiFacade {
     }
   }
 
-  private String showProgressDialogAndWaitForCode(final String message,
-      final LocalServerReceiver codeReceiver) throws IOException {
+  private String showProgressDialogAndWaitForCode(final LocalServerReceiver codeReceiver)
+      throws IOException {
     try {
       final ProgressMonitorDialog dialog = new ProgressMonitorDialog(shellProvider.getShell()) {
         @Override
@@ -126,9 +127,7 @@ public class LoginServiceUi implements UiFacade {
         @Override
         protected void cancelPressed() {
           stopLocalServerReceiver(codeReceiver);
-
-          AnalyticsPingManager.getInstance().sendPingOnShell(getParentShell(),
-              AnalyticsEvents.LOGIN_CANCELED);
+          super.cancelPressed();
         }
       };
 
@@ -140,8 +139,7 @@ public class LoginServiceUi implements UiFacade {
           AnalyticsPingManager.getInstance().sendPingOnShell(dialog.getShell(),
               AnalyticsEvents.LOGIN_START);
 
-          monitor.beginTask(
-              message != null ? message : Messages.getString("LOGIN_PROGRESS_DIALOG_MESSAGE"),
+          monitor.beginTask(Messages.getString("LOGIN_PROGRESS_DIALOG_MESSAGE"),
               IProgressMonitor.UNKNOWN);
           try {
             codeHolder[0] = codeReceiver.waitForCode();
@@ -150,6 +148,12 @@ public class LoginServiceUi implements UiFacade {
           }
         }
       });
+
+      if (dialog.getReturnCode() == Window.CANCEL) {
+        // Should be done after the dialog closes; don't do this in "cancelPressed()".
+        AnalyticsPingManager.getInstance().sendPingOnShell(shellProvider.getShell(),
+            AnalyticsEvents.LOGIN_CANCELED);
+      }
       return codeHolder[0];
 
     } catch (InvocationTargetException ex) {

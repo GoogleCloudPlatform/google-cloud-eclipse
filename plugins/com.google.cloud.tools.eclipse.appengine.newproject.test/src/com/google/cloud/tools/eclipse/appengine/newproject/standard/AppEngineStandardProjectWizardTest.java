@@ -17,25 +17,14 @@
 package com.google.cloud.tools.eclipse.appengine.newproject.standard;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 public class AppEngineStandardProjectWizardTest {
 
-  private AppEngineStandardProjectWizard wizard;
-
-  @Before
-  public void setUp() {
-    try {
-      wizard = new AppEngineStandardProjectWizard();
-      // I don't know why this fails the first time and passes the second, but it does.
-    } catch (NullPointerException ex) {
-      wizard = new AppEngineStandardProjectWizard();
-    }
-  }
+  private final AppEngineStandardProjectWizard wizard = new AppEngineStandardProjectWizard();
 
   @Test
-  public void testTitleSet() {
+  public void testWindowTitle() {
     Assert.assertEquals("New App Engine Standard Project", wizard.getWindowTitle());
   }
 
