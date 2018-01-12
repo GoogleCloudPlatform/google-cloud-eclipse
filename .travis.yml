@@ -66,8 +66,8 @@ after_script:
           $GCS_BUILD_BUCKET/travis/${TRAVIS_BUILD_NUMBER}/${TRAVIS_JOB_NUMBER}-${TRAVIS_OS_NAME}-${BUILDTIMESTAMP}/;
       if [ -d gcp-repo/target/repository -a -d build/jacoco/target ]; then
         $CLOUD_SDK_HOME/bin/gsutil -m -q
-          rsync -d -r -a public-read
-            gcp-repo/target/repository/
+          cp -r -z 'txt,xml,html' -a public-read
+            gcp-repo/target/repository/*
             $GCS_BUILD_BUCKET/travis/${TRAVIS_BUILD_NUMBER}/repository/;
       fi;
     fi
