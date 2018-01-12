@@ -57,7 +57,7 @@ after_script:
   - if [ "$TRAVIS_SECURE_ENV_VARS" = true ]; then
       openssl aes-256-cbc -K $encrypted_7e6c351b4cee_key -iv $encrypted_7e6c351b4cee_iv
         -in .travisci/travis-service-account.json.enc -out /tmp/travis-service-account.json -d;
-      BUILDTIMESTAMP=`date '+%Y%m%d-%H%M'`
+      BUILDTIMESTAMP=`date '+%Y%m%d-%H%M'`;
       $CLOUD_SDK_HOME/bin/gcloud auth activate-service-account --key-file=/tmp/travis-service-account.json;
       mkdir build-results && .travisci/copy-test-results.sh plugins build-results;
       $CLOUD_SDK_HOME/bin/gsutil -m -q
