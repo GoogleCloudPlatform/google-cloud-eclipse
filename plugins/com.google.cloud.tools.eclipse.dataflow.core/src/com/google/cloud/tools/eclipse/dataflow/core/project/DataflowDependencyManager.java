@@ -41,8 +41,8 @@ import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.IMavenProjectRegistry;
 
 /**
- * {@link DataflowDependencyManager} provides {@code Dependency} instances for Dataflow and the
- * Dataflow Examples.
+ * {@link DataflowDependencyManager} parses a project's POM to determine possible versions of the
+ * {@link DataflowMavenCoordinates Dataflow Java SDK}.
  */
 public class DataflowDependencyManager {
 
@@ -126,7 +126,7 @@ public class DataflowDependencyManager {
   }
 
   /**
-   * Returns a possible version range for the given project.
+   * Returns a possible version range from the given project's POM.
    * 
    * @throws IllegalStateException if the version range is invalid
    */
@@ -136,10 +136,11 @@ public class DataflowDependencyManager {
   }
 
   /**
-   * Returns the encoded version range for the given project or {@code null} if not found.
+   * Returns the encoded version range from the given project's POM, or {@code null} if no version
+   * is specified.
    * 
-   * @return the version range or {@code null} if not found
-   * @throws IllegalStateException if the version range is invalid
+   * @return the version range or {@code null} if a version range is not specified
+   * @throws IllegalStateException if the encoded version range is not a valid version specification
    */
   private VersionRange getActualDataflowVersionRange(IProject project) {
     Model model = getModelFromProject(project);

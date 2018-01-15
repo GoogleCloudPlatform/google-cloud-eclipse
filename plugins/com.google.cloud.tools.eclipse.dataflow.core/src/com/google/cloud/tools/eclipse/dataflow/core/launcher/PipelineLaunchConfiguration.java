@@ -42,7 +42,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 
 /**
- * A POJO that contains options specific to launching a dataflow pipeline. Force having a project
+ * A POJO that contains options specific to launching a dataflow pipeline. Forces having a project
  * and major version as it doesn't make sense to launch without.
  */
 public class PipelineLaunchConfiguration {
@@ -137,13 +137,15 @@ public class PipelineLaunchConfiguration {
     PipelineLaunchConfiguration other = (PipelineLaunchConfiguration) obj;
     return Objects.equals(majorVersion, other.majorVersion)
         && Objects.equals(argumentValues, other.argumentValues)
+        && useDefaultLaunchOptions == other.useDefaultLaunchOptions
         && Objects.equals(runner, other.runner)
         && Objects.equals(userOptionsName, other.userOptionsName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(majorVersion, argumentValues, runner, userOptionsName);
+    return Objects.hash(majorVersion, argumentValues, useDefaultLaunchOptions, runner,
+        userOptionsName);
   }
 
   @Override

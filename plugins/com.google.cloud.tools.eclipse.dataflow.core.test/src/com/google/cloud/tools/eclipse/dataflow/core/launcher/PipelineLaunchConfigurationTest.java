@@ -36,7 +36,6 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -61,7 +60,6 @@ public class PipelineLaunchConfigurationTest {
   @Test
   public void testFromLaunchConfigurationCopiesArgumentsFromLaunchConfiguration()
       throws CoreException {
-    IProject project = mock(IProject.class);
     ILaunchConfiguration launchConfiguration = mock(ILaunchConfiguration.class);
     Map<String, String> requiredArgumentValues =
         ImmutableMap.<String, String>builder()

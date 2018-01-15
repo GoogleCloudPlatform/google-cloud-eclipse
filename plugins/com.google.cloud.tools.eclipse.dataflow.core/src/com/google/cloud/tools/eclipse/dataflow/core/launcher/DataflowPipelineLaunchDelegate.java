@@ -124,10 +124,6 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
         configuration.getAttributes());
     MajorVersion majorVersion = dependencyManager.getProjectMajorVersion(project);
 
-    PipelineLaunchConfiguration pipelineConfig =
-        PipelineLaunchConfiguration.fromLaunchConfiguration(majorVersion, configuration);
-    PipelineRunner pipelineRunner = pipelineConfig.getRunner();
-
     PipelineOptionsHierarchy hierarchy;
     try {
       hierarchy = optionsRetrieverFactory.forProject(project, majorVersion, progress.newChild(1));
@@ -135,6 +131,10 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
       throw new CoreException(new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID,
           "Could not retrieve Pipeline Options Hierarchy for project " + projectName, e));
     }
+
+    PipelineLaunchConfiguration pipelineConfig =
+        PipelineLaunchConfiguration.fromLaunchConfiguration(majorVersion, configuration);
+    PipelineRunner pipelineRunner = pipelineConfig.getRunner();
 
     DataflowPreferences preferences = ProjectOrWorkspaceDataflowPreferences.forProject(project);
     if (!pipelineConfig.isValid(hierarchy, preferences)) {
@@ -145,7 +145,7 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
     Map<String, String> effectiveArguments = getEffectiveArguments(pipelineConfig, preferences);
 
     List<String> argComponents =
-        getArguments(configuration, pipelineRunner, pipelineConfig, hierarchy, effectiveArguments);
+        getArguments(configuration, pipelineConfig, hierarchy, effectiveArguments);
 
     ILaunchConfigurationWorkingCopy workingCopy =
         configuration.copy(DATAFLOW_LAUNCH_CONFIG_WORKING_COPY_PREFIX + configuration.getName());
@@ -155,9 +155,8 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
     String accountEmail = effectiveArguments.get("accountEmail");
     setLoginCredential(workingCopy, accountEmail);
 
-    PipelineRunner runner = pipelineConfig.getRunner();
     AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.DATAFLOW_RUN,
-        AnalyticsEvents.DATAFLOW_RUN_RUNNER, runner.getRunnerName());
+        AnalyticsEvents.DATAFLOW_RUN_RUNNER, pipelineRunner.getRunnerName());
 
     delegate.launch(workingCopy, mode, launch, progress.newChild(1));
   }
@@ -211,13 +210,13 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
 
   private List<String> getArguments(
       ILaunchConfiguration configuration,
-      PipelineRunner runner,
       PipelineLaunchConfiguration pipelineConfig,
       PipelineOptionsHierarchy optionsHierarchy,
       Map<String, String> effectiveArguments)
       throws CoreException {
     List<String> argComponents = new ArrayList<>();
 
+    PipelineRunner runner = pipelineConfig.getRunner();
     argComponents.add(String.format(ARGUMENT_FORMAT_STR, RUNNER_COMMAND_LINE_STRING,
         runner.getRunnerName()));
 

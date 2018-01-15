@@ -380,7 +380,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
       DataflowUiPlugin.logError(ex, "Error while initializing from existing configuration"); //$NON-NLS-1$
       project = null;
       launchConfiguration = null;
-      return true;
+      return true; // values were changed
     }
   }
 
@@ -397,8 +397,6 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     }
     return null;
   }
-
-
 
   @VisibleForTesting
   void updateRunnerButtons(PipelineLaunchConfiguration launchConfiguration) {
@@ -518,8 +516,8 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
       setErrorMessage(
           "Incompatible pipeline runner: " + launchConfiguration.getRunner().getRunnerName());
       return false;
-
     }
+
     MissingRequiredProperties validationFailures =
         launchConfiguration.getMissingRequiredProperties(hierarchy, getPreferences());
 
