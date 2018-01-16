@@ -130,6 +130,7 @@ public class LaunchHelper {
     return serverWorkingCopy.save(false, progress.newChild(2));
   }
 
+  @VisibleForTesting
   protected void launch(IServer server, String launchMode, SubMonitor progress)
       throws CoreException {
     // Explicitly offer to save dirty editors to avoid the puzzling prompt-to-save in
