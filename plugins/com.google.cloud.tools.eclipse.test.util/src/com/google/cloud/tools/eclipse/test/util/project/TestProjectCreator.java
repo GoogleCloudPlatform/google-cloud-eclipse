@@ -93,14 +93,14 @@ public final class TestProjectCreator extends ExternalResource {
   protected void after() {
     if (project != null) {
       try {
+        if (getFacetedProject().hasProjectFacet(WebFacetUtils.WEB_FACET)) {
+          // Wait for the WTP validation job as it runs without the workspace protection lock
+          ProjectUtils.waitForProjects(project);
+        }
         try {
           project.close(new NullProgressMonitor());
         } catch (CoreException ex) {
           logger.log(Level.SEVERE, "Exception closing test project: " + project, ex);
-        }
-        if (getFacetedProject().hasProjectFacet(WebFacetUtils.WEB_FACET)) {
-          // Wait for the WTP validation job as it runs without the workspace protection lock
-          ProjectUtils.waitForProjects(project);
         }
         project.delete(true, null);
       } catch (IllegalArgumentException ex) {

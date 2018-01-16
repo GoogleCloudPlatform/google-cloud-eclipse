@@ -60,14 +60,14 @@ public class BaseProjectTest {
     if (project != null) {
       // close editors, so no property changes are dispatched on delete
       bot.closeAllEditors();
+      // ensure there are no jobs
+      SwtBotWorkbenchActions.waitForProjects(bot, project);
+
       try {
         project.close(new NullProgressMonitor());
       } catch (CoreException ex) {
         logger.log(Level.SEVERE, "Exception closing test project: " + project, ex);
       }
-
-      // ensure there are no jobs
-      SwtBotWorkbenchActions.waitForProjects(bot, project);
       try {
         SwtBotProjectActions.deleteProject(bot, project.getName());
       } catch (TimeoutException ex) {
