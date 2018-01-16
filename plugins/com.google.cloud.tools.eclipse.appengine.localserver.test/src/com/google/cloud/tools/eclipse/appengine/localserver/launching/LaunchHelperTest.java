@@ -65,8 +65,7 @@ public class LaunchHelperTest {
   public void setUp() {
     handler = new LaunchHelper() {
       @Override
-      protected void launch(IServer server, String launchMode, SubMonitor progress)
-          throws CoreException {
+      protected void launch(IServer server, String launchMode, SubMonitor progress) {
         // do nothing
       }
 

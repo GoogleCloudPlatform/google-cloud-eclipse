@@ -35,7 +35,11 @@ import java.util.logging.Logger;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -130,8 +134,7 @@ public class LaunchHelper {
     return serverWorkingCopy.save(false, progress.newChild(2));
   }
 
-  protected void launch(IServer server, String launchMode, SubMonitor progress)
-      throws CoreException {
+  protected void launch(final IServer server, final String launchMode, SubMonitor progress) {
     // Explicitly offer to save dirty editors to avoid the puzzling prompt-to-save in
     // IServer#start() that prompts the user *as the server continues to launch*.
     // ServerUIPlugin.saveEditors() respects the "Save editors before starting the server"
@@ -139,7 +142,21 @@ public class LaunchHelper {
     if (!ServerUIPlugin.saveEditors()) {
       return;
     }
-    server.start(launchMode, progress);
+
+    // Launch in a Job. IServer#start()'s javadoc is incorrect: the server is not launched
+    // asynchronously but instead respects the serverType's `synchronousStart` setting.
+    Job launchJob = new Job(Messages.getString("STARTING_SERVER", server.getName())) { //$NON-NLS-1$
+      @Override
+      protected IStatus run(IProgressMonitor monitor) {
+        try {
+          server.start(launchMode, monitor);
+          return Status.OK_STATUS;
+        } catch (CoreException ex) {
+          return ex.getStatus();
+        }
+      }
+    };
+    launchJob.schedule();
   }
 
   /** Identify the relevant modules from the selection. */
@@ -181,7 +198,7 @@ public class LaunchHelper {
         return module;
       }
     }
-    logger.warning("Unable to map to a module: " + object);
+    logger.warning("Unable to map to a module: " + object); //$NON-NLS-1$
     throw new CoreException(
         StatusUtil.error(this, Messages.getString("CANNOT_DETERMINE_EXECUTION_CONTEXT"))); //$NON-NLS-1$
   }
