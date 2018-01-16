@@ -145,7 +145,7 @@ public class LaunchHelper {
 
     // Launch in a Job. IServer#start()'s javadoc is incorrect: the server is not launched
     // asynchronously but instead respects the serverType's `synchronousStart` setting.
-    Job launchJob = new Job(Messages.getString("STARTING_SERVER", server.getName())) { //$NON-NLS-1$
+    Job launchJob = new Job(Messages.getString("LAUNCHING_SERVER", server.getName())) { //$NON-NLS-1$
       @Override
       protected IStatus run(IProgressMonitor monitor) {
         try {
