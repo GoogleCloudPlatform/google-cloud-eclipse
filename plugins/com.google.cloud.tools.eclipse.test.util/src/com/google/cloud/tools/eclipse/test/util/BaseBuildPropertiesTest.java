@@ -50,6 +50,7 @@ public abstract class BaseBuildPropertiesTest {
     testIncludedIfPresent(includes, "fragment.xml");
     testIncludedIfPresent(includes, "fragment.properties");
     testIncludedIfPresent(includes, "lifecycle-mapping-metadata.xml"); // for m2e extensions
+    testIncludedIfPresent(includes, ".options");
   }
 
   private static void testIncludedIfPresent(Set<String> includes, String name) 

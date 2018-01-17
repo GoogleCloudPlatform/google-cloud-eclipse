@@ -22,20 +22,23 @@ import org.eclipse.ui.internal.WorkbenchPlugin;
 public class CloudSdkManager {
 
   private static final String OPTION_MANAGED_CLOUD_SDK =
-      "com.google.cloud.tools.eclipse.sdk/managed-cloud-sdk";
+      "com.google.cloud.tools.eclipse.sdk/managed.cloud.sdk";
 
   public final static boolean MANAGED_SDK;
 
   static {
+    System.out.println(">>>> 1");
     WorkbenchPlugin activator = WorkbenchPlugin.getDefault();
     if (activator == null) {
-      MANAGED_SDK = true;
+      MANAGED_SDK = false;
     } else {
+      System.out.println(">>>> 2");
       DebugOptions debugOptions = activator.getDebugOptions();
       if (debugOptions == null) {
-        MANAGED_SDK = true;
+        MANAGED_SDK = false;
       } else {
-        MANAGED_SDK = debugOptions.getBooleanOption(OPTION_MANAGED_CLOUD_SDK, true);
+        System.out.println(">>>> 3");
+        MANAGED_SDK = debugOptions.getBooleanOption(OPTION_MANAGED_CLOUD_SDK, false);
       }
     }
   }
