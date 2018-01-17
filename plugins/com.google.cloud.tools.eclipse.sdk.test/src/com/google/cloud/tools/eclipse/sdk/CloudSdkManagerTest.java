@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.sdk;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 import org.junit.Test;
 
@@ -24,6 +24,6 @@ public class CloudSdkManagerTest {
 
   @Test
   public void testManagedSdkOption() {
-    assertTrue(CloudSdkManager.MANAGED_SDK);
+    assertFalse(CloudSdkManager.MANAGED_SDK);
   }
 }
