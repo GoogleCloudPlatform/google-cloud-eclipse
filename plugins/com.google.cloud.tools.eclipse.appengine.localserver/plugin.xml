@@ -44,8 +44,7 @@
             runtime="true"
             runtimeTypeId="com.google.cloud.tools.eclipse.appengine.standard.runtime"
             startBeforePublish="false"
-            supportsRemoteHosts="true"
-            synchronousStart="true">
+            supportsRemoteHosts="true">
       </serverType>
    </extension>
 
