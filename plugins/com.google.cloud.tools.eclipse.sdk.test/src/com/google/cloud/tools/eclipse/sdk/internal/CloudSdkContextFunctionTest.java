@@ -59,7 +59,7 @@ public class CloudSdkContextFunctionTest {
   @Ignore
   public void testNoLocationFails() {
     CloudSdkContextFunction function = new CloudSdkContextFunction();
-    context.set(PreferenceConstants.CLOUDSDK_PATH, "path/does/not/exist");
+    context.set(PreferenceConstants.CLOUD_SDK_PATH, "path/does/not/exist");
     Object instance = function.compute(context, CloudSdk.class.getName());
     assertEquals(CloudSdkContextFunction.NOT_A_VALUE, instance);
   }
@@ -67,7 +67,7 @@ public class CloudSdkContextFunctionTest {
   @Ignore("mocks don't handle the version check")
   public void testRetrieveWithLocation() throws Exception {
     mockSdk = MockSdkGenerator.createMockSdk();
-    context.set(PreferenceConstants.CLOUDSDK_PATH, mockSdk.toString());
+    context.set(PreferenceConstants.CLOUD_SDK_PATH, mockSdk.toString());
     CloudSdkContextFunction function = new CloudSdkContextFunction();
 
     CloudSdk instance = (CloudSdk) (function.compute(context, CloudSdk.class.getName()));
@@ -76,13 +76,13 @@ public class CloudSdkContextFunctionTest {
 
   @Ignore("affected from changes in global state")
   public void testContextFunctionReinvoked() throws Exception {
-    context.set(PreferenceConstants.CLOUDSDK_PATH, "path/does/not/exist");
+    context.set(PreferenceConstants.CLOUD_SDK_PATH, "path/does/not/exist");
     CloudSdk instance = context.get(CloudSdk.class);
     assertNull(instance);
 
     mockSdk = MockSdkGenerator.createMockSdk();
     // setting CLOUDSDK_PATH should cause any previously computed results to be recomputed
-    context.set(PreferenceConstants.CLOUDSDK_PATH, mockSdk.toString());
+    context.set(PreferenceConstants.CLOUD_SDK_PATH, mockSdk.toString());
     instance = context.get(CloudSdk.class);
     assertNotNull(instance);
     assertEquals(mockSdk, ReflectionUtil.getField(instance, "sdkPath", Path.class));

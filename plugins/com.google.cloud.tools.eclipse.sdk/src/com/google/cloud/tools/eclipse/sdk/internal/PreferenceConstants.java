@@ -28,10 +28,26 @@ public final class PreferenceConstants {
   // host bundle for the preference
   static final String BUNDLEID = "com.google.cloud.tools.eclipse.sdk";
 
+  public static enum CloudSdkManagement {
+    MANAGED, CUSTOM
+  }
+
+  /**
+   * Preference name for how the Google Cloud SDK is managed.
+   *
+   * @see CloudSdkManagement
+   */
+  public static final String CLOUD_SDK_MANAGEMENT = "cloudSdkManagement";
+
+  /**
+   * Preference name for the auto-update flag (Boolean).
+   */
+  public static final String CLOUD_SDK_AUTO_UPDATE = "cloudSdkAutoUpdate";
+
   /**
    * Preference name for the path to the Google Cloud SDK.
    */
-  public static final String CLOUDSDK_PATH = "cloudSdkPath";
+  public static final String CLOUD_SDK_PATH = "cloudSdkPath";
 
   static IPreferenceStore getPreferenceStore() {
     return new ScopedPreferenceStore(InstanceScope.INSTANCE, BUNDLEID);

@@ -38,7 +38,7 @@ public class CloudSdkPreferenceResolver implements CloudSdkResolver {
 
   @Override
   public Path getCloudSdkPath() {
-    String value = preferences.getString(PreferenceConstants.CLOUDSDK_PATH);
+    String value = preferences.getString(PreferenceConstants.CLOUD_SDK_PATH);
     if (value != null && !value.isEmpty()) {
       return Paths.get(value);
     }

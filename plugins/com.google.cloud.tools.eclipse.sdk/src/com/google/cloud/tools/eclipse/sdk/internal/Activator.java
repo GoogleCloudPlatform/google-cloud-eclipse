@@ -27,7 +27,7 @@ public class Activator implements BundleActivator {
     @Override
     public void preferenceChange(PreferenceChangeEvent event) {
       Object newValue = event.getNewValue();
-      if (PreferenceConstants.CLOUDSDK_PATH.equals(event.getKey())
+      if (PreferenceConstants.CLOUD_SDK_PATH.equals(event.getKey())
           && (newValue == null || newValue instanceof String)) {
         CloudSdkContextFunction.sdkPathChanged((String) newValue);
       }

@@ -22,7 +22,9 @@ import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
 import com.google.cloud.tools.eclipse.preferences.areas.PreferenceArea;
+import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
 import com.google.cloud.tools.eclipse.sdk.internal.PreferenceConstants;
+import com.google.cloud.tools.eclipse.sdk.internal.PreferenceConstants.CloudSdkManagement;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import java.io.File;
 import java.nio.file.Files;
@@ -33,12 +35,14 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Link;
@@ -48,7 +52,14 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
   /** Preference Page ID that hosts this area. */
   public static final String PAGE_ID = "com.google.cloud.tools.eclipse.preferences.main";
 
+  private Button managedSdkRadio;
+  private Button autoUpdateCheck;
+  private Button updateNow;
+
+  private Button customSdkRadio;
+  private Composite sdkLocationRow;
   private CloudSdkDirectoryFieldEditor sdkLocation;
+
   private IStatus status = Status.OK_STATUS;
   private IPropertyChangeListener wrappedPropertyChangeListener = new IPropertyChangeListener() {
 
@@ -75,22 +86,76 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       }
     });
 
-    Composite fieldContents = new Composite(parent, SWT.NONE);
-    sdkLocation = new CloudSdkDirectoryFieldEditor(PreferenceConstants.CLOUDSDK_PATH,
-        Messages.getString("SdkLocation"), fieldContents);
+    if (CloudSdkManager.managedFeatureEnabled()) {
+      managedSdkRadio = new Button(parent, SWT.RADIO);
+      managedSdkRadio.setText("Managed SDK");
+      managedSdkRadio.addSelectionListener(new SelectionAdapter() {
+        @Override
+        public void widgetSelected(SelectionEvent e) {
+          updateControlEnablement();
+        }
+      });
+
+      Composite updateRow = new Composite(parent, SWT.NONE);
+      autoUpdateCheck = new Button(updateRow, SWT.CHECK | SWT.LEAD);
+      autoUpdateCheck.setText("Automatically update");
+
+      updateNow = new Button(updateRow, SWT.NONE);
+      updateNow.setText("Update Now");
+
+      customSdkRadio = new Button(parent, SWT.RADIO | SWT.LEAD);
+      customSdkRadio.setText("Custom SDK");
+
+      GridLayoutFactory.fillDefaults().numColumns(2).extendedMargins(10, 0, 0, 0)
+          .generateLayout(updateRow);
+    }
+
+    sdkLocationRow = new Composite(parent, SWT.NONE);
+    sdkLocation = new CloudSdkDirectoryFieldEditor(PreferenceConstants.CLOUD_SDK_PATH,
+        Messages.getString("SdkLocation"), sdkLocationRow);
     Path defaultLocation = getDefaultSdkLocation();
     if (defaultLocation != null) {
       sdkLocation.setFilterPath(defaultLocation.toFile());
     }
     sdkLocation.setPreferenceStore(getPreferenceStore());
     sdkLocation.setPropertyChangeListener(wrappedPropertyChangeListener);
-    GridLayoutFactory.fillDefaults().numColumns(sdkLocation.getNumberOfControls())
-        .generateLayout(fieldContents);
 
+    if (CloudSdkManager.managedFeatureEnabled()) {
+      initializeControls();
+
+      GridLayoutFactory.fillDefaults().numColumns(sdkLocation.getNumberOfControls())
+          .extendedMargins(10, 0, 0, 0).generateLayout(sdkLocationRow);
+    } else {
+      GridLayoutFactory.fillDefaults().numColumns(sdkLocation.getNumberOfControls())
+          .generateLayout(sdkLocationRow);
+    }
     GridLayoutFactory.fillDefaults().generateLayout(contents);
 
     Dialog.applyDialogFont(contents);
     return contents;
+  }
+
+  private void initializeControls() {
+    // TODO(chanseok): ensure that the managed SDK settings are set up, e.g., call
+    // CloudSdkManager.setUpPreferences().
+
+    IPreferenceStore preferenceStore = getPreferenceStore();
+    String managementValue = preferenceStore.getString(PreferenceConstants.CLOUD_SDK_MANAGEMENT);
+    boolean managed = CloudSdkManagement.MANAGED.name().equals(managementValue);
+    managedSdkRadio.setSelection(managed);
+    customSdkRadio.setSelection(!managed);
+
+    boolean autoUpdate = preferenceStore.getBoolean(PreferenceConstants.CLOUD_SDK_AUTO_UPDATE);
+    autoUpdateCheck.setSelection(autoUpdate);
+
+    updateControlEnablement();
+  }
+
+  private void updateControlEnablement() {
+    boolean managed = managedSdkRadio.getSelection();
+    autoUpdateCheck.setEnabled(managed);
+    updateNow.setEnabled(managed);
+    sdkLocation.setEnabled(!managed, sdkLocationRow);
   }
 
   @Override
