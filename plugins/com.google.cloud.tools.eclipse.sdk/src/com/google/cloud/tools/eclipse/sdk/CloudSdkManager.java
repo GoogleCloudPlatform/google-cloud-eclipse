@@ -17,26 +17,17 @@
 package com.google.cloud.tools.eclipse.sdk;
 
 import org.eclipse.osgi.service.debug.DebugOptions;
-import org.eclipse.ui.internal.WorkbenchPlugin;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 
 public class CloudSdkManager {
 
   private static final String OPTION_MANAGED_CLOUD_SDK =
       "com.google.cloud.tools.eclipse.sdk/managed.cloud.sdk";
 
-  public final static boolean MANAGED_SDK;
-
-  static {
-    WorkbenchPlugin activator = WorkbenchPlugin.getDefault();
-    if (activator == null) {
-      MANAGED_SDK = false;
-    } else {
-      DebugOptions debugOptions = activator.getDebugOptions();
-      if (debugOptions == null) {
-        MANAGED_SDK = false;
-      } else {
-        MANAGED_SDK = debugOptions.getBooleanOption(OPTION_MANAGED_CLOUD_SDK, false);
-      }
-    }
+  public static boolean isManaged() {
+    BundleContext context = FrameworkUtil.getBundle(CloudSdkManager.class).getBundleContext();
+    DebugOptions debugOptions = context.getService(context.getServiceReference(DebugOptions.class));
+    return debugOptions.getBooleanOption(OPTION_MANAGED_CLOUD_SDK, false);
   }
 }
