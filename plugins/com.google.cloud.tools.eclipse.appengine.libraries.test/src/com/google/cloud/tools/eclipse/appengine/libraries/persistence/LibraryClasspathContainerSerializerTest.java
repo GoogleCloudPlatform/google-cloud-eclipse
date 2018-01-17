@@ -162,8 +162,7 @@ public class LibraryClasspathContainerSerializerTest {
         serializer.loadContainer(javaProject, new Path(CONTAINER_PATH));
     compare(container, containerFromFile);
   }
-  
-  
+
   @Test
   public void testSaveContainer() throws CoreException, IOException {
     Path stateFilePath = new Path(stateFolder.newFile().getAbsolutePath());

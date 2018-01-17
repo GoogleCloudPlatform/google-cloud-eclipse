@@ -18,7 +18,7 @@
         <mavenCoordinates
               artifactId="appengine-api-1.0-sdk"
               groupId="com.google.appengine" 
-              version="1.9.59" />
+              version="1.9.60" />
         <exclusionFilter pattern="com/google/appengine/repackaged/**" />
         <exclusionFilter pattern="com/google/appengine/labs/repackaged/**" />
         <inclusionFilter pattern="com/google/apphosting/api/**" />
@@ -37,7 +37,7 @@
         <mavenCoordinates
               artifactId="endpoints-framework"
               groupId="com.google.endpoints" 
-              version="2.0.10"/>
+              version="2.0.11"/>
         <exclusionFilter pattern="com/google/appengine/repackaged/**" />
       </libraryFile>
     </library>
@@ -66,6 +66,7 @@
           siteUri="http://www.oracle.com/technetwork/java/javaee/servlet/index.html"
           export="false">
       <libraryFile
+            pinned="true"
             javadocUri="https://docs.oracle.com/cd/E17802_01/products/products/servlet/2.5/docs/servlet-2_5-mr2/">
         <mavenCoordinates
               groupId="javax.servlet"
@@ -81,6 +82,7 @@
           siteUri="http://www.oracle.com/technetwork/java/javaee/jsp/index.html"
           export="false">
       <libraryFile
+            pinned="true"
             javadocUri="http://docs.oracle.com/cd/E17802_01/products/products/jsp/2.1/docs/jsp-2_1-pfd2/">
         <mavenCoordinates
               groupId="javax.servlet.jsp"

@@ -181,7 +181,15 @@ element's &lt;tt&gt;export&lt;/tt&gt; attribute is false, the &lt;tt&gt;export&l
                </xs:choice>
             </xs:sequence>
          </xs:sequence>
-         <xs:attribute name="export" type="xs:boolean">
+         <xs:attribute name="pinned" type="xs:boolean" default="false">
+            <xs:annotation>
+               <xs:documentation>
+                  If &lt;tt&gt;pinned&lt;/tt&gt; attribute is true, then the exact version will be used.
+even if a more recent version is available. Defaults to false.
+               </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+         <xs:attribute name="export" type="xs:boolean" default="true">
             <xs:annotation>
                <xs:documentation>
                   If &lt;tt&gt;export&lt;/tt&gt; attribute is true, then the corresponding file will be included in the

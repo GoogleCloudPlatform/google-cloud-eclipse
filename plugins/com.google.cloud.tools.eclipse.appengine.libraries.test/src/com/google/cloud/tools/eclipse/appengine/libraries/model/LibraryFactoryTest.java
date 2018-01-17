@@ -70,7 +70,8 @@ public class LibraryFactoryTest {
   public void testCreate_useSpecificVersion() throws LibraryFactoryException {
     Mockito.when(configuration.getChildren("libraryFile")).thenReturn(libraryFiles);
     Mockito.when(mavenCoordinates[0].getAttribute("version")).thenReturn("19.0");
-    
+    Mockito.when(libraryFiles[0].getAttribute("pinned")).thenReturn("true");
+
     Library library = LibraryFactory.create(configuration);
     String version = library.getAllDependencies().get(0).getMavenCoordinates().getVersion();
     int majorVersion = new DefaultArtifactVersion(version).getMajorVersion();

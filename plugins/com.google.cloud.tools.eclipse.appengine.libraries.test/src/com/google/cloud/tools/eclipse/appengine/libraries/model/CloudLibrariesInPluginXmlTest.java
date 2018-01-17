@@ -76,7 +76,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(mavenCoordinates.getRepository(), is("central"));
     assertThat(mavenCoordinates.getGroupId(), is("com.google.appengine"));
     assertThat(mavenCoordinates.getArtifactId(), is("appengine-api-1.0-sdk"));
-    assertThat(mavenCoordinates.getVersion(), is("1.9.59"));
+    assertThat(mavenCoordinates.getVersion(), is("1.9.60"));
     assertThat(mavenCoordinates.getType(), is("jar"));
     assertNull(mavenCoordinates.getClassifier());
 
@@ -114,7 +114,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(mavenCoordinates.getRepository(), is("central"));
     assertThat(mavenCoordinates.getGroupId(), is("com.google.endpoints"));
     assertThat(mavenCoordinates.getArtifactId(), is("endpoints-framework"));
-    assertThat(mavenCoordinates.getVersion(), is("2.0.10"));
+    assertThat(mavenCoordinates.getVersion(), is("2.0.11"));
     assertThat(mavenCoordinates.getType(), is("jar"));
     assertNull(mavenCoordinates.getClassifier());
     assertThat(libraryFile.getJavadocUri(),

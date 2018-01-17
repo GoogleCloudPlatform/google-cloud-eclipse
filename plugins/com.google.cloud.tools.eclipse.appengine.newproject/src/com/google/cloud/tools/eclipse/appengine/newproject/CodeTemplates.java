@@ -26,6 +26,8 @@ import com.google.common.base.Strings;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -197,15 +199,14 @@ public class CodeTemplates {
     properties.put("projectArtifactId", config.getMavenArtifactId()); //$NON-NLS-1$
     properties.put("projectVersion", config.getMavenVersion()); //$NON-NLS-1$
     
-    String mavenPluginVersion = ArtifactRetriever.DEFAULT.getLatestReleaseVersion(
-        "com.google.cloud.tools", "appengine-maven-plugin") //$NON-NLS-1$ $NON-NLS-2$
-        .toString(); 
-    if (mavenPluginVersion == null) {
-      mavenPluginVersion = "1.3.2";  //$NON-NLS-1$
-    }
-    
+    String mavenPluginVersion = getCurrentVersion(
+        "com.google.cloud.tools", "appengine-maven-plugin", "1.3.2"); //$NON-NLS-1$ $NON-NLS-2$ $NON-NLS-3$
     properties.put("mavenPluginVersion", mavenPluginVersion); //$NON-NLS-1$
 
+    String sdkVersion = getCurrentVersion(
+        "com.google.appengine", "appengine-api-1.0-sdk", "1.9.60"); //$NON-NLS-1$ $NON-NLS-2$ $NON-NLS-3$
+    properties.put("appEngineApiSdkVersion", sdkVersion); //$NON-NLS-1$
+    
     if (isStandardProject) {
       if (Objects.equal(AppEngineRuntime.STANDARD_JAVA_7.getId(), config.getRuntimeId())) {
         properties.put("servletVersion", "2.5"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -220,6 +221,14 @@ public class CodeTemplates {
       createChildFile("pom.xml", Templates.POM_XML_FLEX_TEMPLATE, //$NON-NLS-1$
           project, properties, monitor);
     }
+  }
+
+  private static String getCurrentVersion(String group, String artifact, String defaultVersion) {
+    ArtifactVersion version = ArtifactRetriever.DEFAULT.getLatestReleaseVersion(group, artifact);
+    if (version == null) {
+      return defaultVersion;
+    }
+    return version.toString();
   }
 
   @VisibleForTesting

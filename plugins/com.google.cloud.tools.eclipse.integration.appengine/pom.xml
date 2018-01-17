@@ -53,21 +53,6 @@
                 <versionRange>0.0.0</versionRange>
               </requirement>
               <requirement>
-                <type>eclipse-plugin</type>
-                <id>ch.qos.logback.slf4j</id>
-                <versionRange>0.0.0</versionRange>
-              </requirement>
-              <requirement>
-                <type>eclipse-plugin</type>
-                <id>org.slf4j.log4j</id>
-                <versionRange>0.0.0</versionRange>
-              </requirement>
-              <requirement>
-                <type>eclipse-plugin</type>
-                <id>com.google.cloud.tools.eclipse.test.logback</id>
-                <versionRange>0.0.0</versionRange>
-              </requirement>
-              <requirement>
                 <type>eclipse-feature</type>
                 <id>org.eclipse.rcp</id>
                 <versionRange>0.0.0</versionRange>

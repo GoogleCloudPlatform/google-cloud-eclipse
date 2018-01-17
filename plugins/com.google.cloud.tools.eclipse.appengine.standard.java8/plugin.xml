@@ -92,7 +92,7 @@
           siteUri="http://www.oracle.com/technetwork/java/javaee/servlet/index.html"
           export="false">
     
-      <libraryFile>
+      <libraryFile pinned="true">
         <mavenCoordinates
               groupId="javax.servlet"
               artifactId="javax.servlet-api"
@@ -105,7 +105,7 @@
           name="Java Server Pages API 2.3"
           siteUri="http://www.oracle.com/technetwork/java/javaee/jsp/index.html"
           export="false">
-      <libraryFile>
+      <libraryFile pinned="true">
         <mavenCoordinates
               groupId="javax.servlet.jsp"
               artifactId="javax.servlet.jsp-api"

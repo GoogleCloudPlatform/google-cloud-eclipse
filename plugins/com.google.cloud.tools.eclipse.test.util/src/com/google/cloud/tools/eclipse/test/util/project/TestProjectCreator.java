@@ -32,11 +32,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -58,6 +61,7 @@ import org.junit.rules.ExternalResource;
  */
 @SuppressWarnings("restriction") // For FacetedProjectNature
 public final class TestProjectCreator extends ExternalResource {
+  private static final Logger logger = Logger.getLogger(TestProjectCreator.class.getName());
 
   private IProject project;
   private IJavaProject javaProject;
@@ -92,6 +96,11 @@ public final class TestProjectCreator extends ExternalResource {
         if (getFacetedProject().hasProjectFacet(WebFacetUtils.WEB_FACET)) {
           // Wait for the WTP validation job as it runs without the workspace protection lock
           ProjectUtils.waitForProjects(project);
+        }
+        try {
+          project.close(new NullProgressMonitor());
+        } catch (CoreException ex) {
+          logger.log(Level.SEVERE, "Exception closing test project: " + project, ex);
         }
         project.delete(true, null);
       } catch (IllegalArgumentException ex) {

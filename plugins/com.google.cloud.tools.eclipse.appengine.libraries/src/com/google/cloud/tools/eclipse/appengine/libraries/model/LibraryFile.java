@@ -40,9 +40,10 @@ public class LibraryFile implements Comparable<LibraryFile> {
   private boolean export = true;
   
   /** Version has been checked against Maven Central **/
-  // todo could mark this transient and on deserialization set depending on whether
-  // version is still LATEST_VERSION or not
   private boolean fixedVersion = false;
+  
+  /** whether to stick to specified version even if there's a later version in Maven central **/
+  private boolean pinned = false; 
 
   public LibraryFile(MavenCoordinates mavenCoordinates) {
     Preconditions.checkNotNull(mavenCoordinates, "mavenCoordinates is null");
@@ -118,7 +119,7 @@ public class LibraryFile implements Comparable<LibraryFile> {
    * This check is made at most once. Subsequent checks are no-ops.
    */
   void updateVersion() {
-    if (!fixedVersion) {
+    if (!fixedVersion && !isPinned()) {
       ArtifactVersion remoteVersion = ArtifactRetriever.DEFAULT.getBestVersion(
           mavenCoordinates.getGroupId(), mavenCoordinates.getArtifactId());
       if (remoteVersion != null) {
@@ -130,6 +131,14 @@ public class LibraryFile implements Comparable<LibraryFile> {
       }
       fixedVersion = true;
     }
+  }
+
+  private boolean isPinned() {
+    return pinned;
+  }
+
+  void setPinned(boolean pinned) {
+    this.pinned = pinned;
   }
 
 }
