@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.persistence;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -243,6 +244,20 @@ public class LibraryClasspathContainerSerializerTest {
     assertTrue(librariesFilePath.toFile().exists());
     List<String> libraryIds = serializer.loadLibraryIds(javaProject);
     assertThat(libraryIds, Matchers.contains("a", "b"));
+  }
+
+  @Test
+  public void testRemoveLibraryIds_noFile() throws IOException, CoreException {
+    Path stateFilePath = new Path(stateFolder.newFile().getAbsolutePath());
+    when(stateLocationProvider.getContainerStateFile(any(IJavaProject.class), anyString(),
+        anyBoolean())).thenReturn(stateFilePath);
+    Files.write(stateFilePath.toFile().toPath(), "[]".getBytes(StandardCharsets.UTF_8),
+        StandardOpenOption.TRUNCATE_EXISTING);
+
+    LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer(
+        stateLocationProvider, binaryBaseLocationProvider, sourceBaseLocationProvider);
+    serializer.removeLibraryIds(javaProject);
+    assertFalse(stateFilePath.toFile().exists());
   }
 
   // todo would it be clearer simply to define an equals method?
