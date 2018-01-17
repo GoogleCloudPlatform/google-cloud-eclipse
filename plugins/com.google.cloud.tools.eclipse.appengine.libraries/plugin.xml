@@ -37,7 +37,7 @@
         <mavenCoordinates
               artifactId="endpoints-framework"
               groupId="com.google.endpoints" 
-              version="2.0.10"/>
+              version="2.0.11"/>
         <exclusionFilter pattern="com/google/appengine/repackaged/**" />
       </libraryFile>
     </library>
