@@ -27,17 +27,14 @@ public class CloudSdkManager {
   public final static boolean MANAGED_SDK;
 
   static {
-    System.out.println(">>>> 1");
     WorkbenchPlugin activator = WorkbenchPlugin.getDefault();
     if (activator == null) {
       MANAGED_SDK = false;
     } else {
-      System.out.println(">>>> 2");
       DebugOptions debugOptions = activator.getDebugOptions();
       if (debugOptions == null) {
         MANAGED_SDK = false;
       } else {
-        System.out.println(">>>> 3");
         MANAGED_SDK = debugOptions.getBooleanOption(OPTION_MANAGED_CLOUD_SDK, false);
       }
     }
