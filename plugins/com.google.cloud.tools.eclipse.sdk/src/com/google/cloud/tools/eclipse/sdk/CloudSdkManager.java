@@ -23,11 +23,14 @@ import org.osgi.framework.FrameworkUtil;
 public class CloudSdkManager {
 
   private static final String OPTION_MANAGED_CLOUD_SDK =
-      "com.google.cloud.tools.eclipse.sdk/managed.cloud.sdk";
+      "com.google.cloud.tools.eclipse.sdk/enable.managed.cloud.sdk";
 
   public static boolean isManaged() {
     BundleContext context = FrameworkUtil.getBundle(CloudSdkManager.class).getBundleContext();
     DebugOptions debugOptions = context.getService(context.getServiceReference(DebugOptions.class));
-    return debugOptions.getBooleanOption(OPTION_MANAGED_CLOUD_SDK, false);
+    if (debugOptions != null) {
+      return debugOptions.getBooleanOption(OPTION_MANAGED_CLOUD_SDK, false);
+    }
+    return false;
   }
 }
