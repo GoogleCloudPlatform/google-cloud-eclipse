@@ -22,23 +22,22 @@ import static org.junit.Assert.assertNull;
 
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.test.util.reflection.ReflectionUtil;
+import java.io.IOException;
+import java.nio.file.Path;
 import org.eclipse.e4.core.contexts.EclipseContextFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
+import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
-
-import java.io.IOException;
-import java.nio.file.Path;
 
 // TODO important: these tests need to not touch global static state
 public class CloudSdkContextFunctionTest {
   private IEclipseContext context;
   private Path mockSdk;
 
-  /** Set up. */
   @Before
   public void setUp() {
     BundleContext bundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
@@ -46,7 +45,6 @@ public class CloudSdkContextFunctionTest {
     assertNotNull(context);
   }
 
-  /** Tear down. */
   @After
   public void tearDown() throws IOException {
     context.dispose();
@@ -56,7 +54,7 @@ public class CloudSdkContextFunctionTest {
   }
 
   /** Retrieving with an invalid path should return NOT_A_VALUE. */
-  @Ignore
+  @Ignore("affected by external state (e.g., if SDK exists in well-known locations)")
   public void testNoLocationFails() {
     CloudSdkContextFunction function = new CloudSdkContextFunction();
     context.set(PreferenceConstants.CLOUDSDK_PATH, "path/does/not/exist");
@@ -64,7 +62,7 @@ public class CloudSdkContextFunctionTest {
     assertEquals(CloudSdkContextFunction.NOT_A_VALUE, instance);
   }
 
-  @Ignore("mocks don't handle the version check")
+  @Test
   public void testRetrieveWithLocation() throws Exception {
     mockSdk = MockSdkGenerator.createMockSdk();
     context.set(PreferenceConstants.CLOUDSDK_PATH, mockSdk.toString());
@@ -74,7 +72,7 @@ public class CloudSdkContextFunctionTest {
     assertEquals(mockSdk, instance.getSdkPath());
   }
 
-  @Ignore("affected from changes in global state")
+  @Ignore("affected by external state (e.g., if SDK exists in well-known locations)")
   public void testContextFunctionReinvoked() throws Exception {
     context.set(PreferenceConstants.CLOUDSDK_PATH, "path/does/not/exist");
     CloudSdk instance = context.get(CloudSdk.class);

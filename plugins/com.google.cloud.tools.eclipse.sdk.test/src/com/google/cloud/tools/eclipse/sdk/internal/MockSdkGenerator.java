@@ -19,8 +19,8 @@ package com.google.cloud.tools.eclipse.sdk.internal;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.util.io.DeleteAllVisitor;
-
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -47,6 +47,7 @@ public class MockSdkGenerator {
     createEmptyFile(mockSdk
         .resolve("platform/google_appengine/google/appengine/tools/java/lib/shared/jsp-api.jar"));
     createEmptyFile(mockSdk.resolve("platform/bundledpython/python.exe"));
+    createFile(mockSdk.resolve("VERSION"), "184.0.0");
     return mockSdk;
   }
 
@@ -56,9 +57,13 @@ public class MockSdkGenerator {
   }
 
   private static void createEmptyFile(Path path) throws Exception {
+    createFile(path, "");
+  }
+
+  private static void createFile(Path path, String content) throws Exception {
     Files.createDirectories(path.getParent());
     assertTrue(path.getParent().toFile().isDirectory());
-    Files.createFile(path);
+    Files.write(path, content.getBytes(StandardCharsets.UTF_8));
     assertTrue(Files.isRegularFile(path));
   }
 
