@@ -88,7 +88,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       }
     });
 
-    if (CloudSdkManager.managedFeatureEnabled()) {
+    if (CloudSdkManager.managedSdkFeatureEnabled()) {
       managedSdkRadio = new Button(parent, SWT.RADIO);
       managedSdkRadio.setText("Managed SDK");
       managedSdkRadio.addSelectionListener(new SelectionAdapter() {
@@ -123,7 +123,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     sdkLocation.setPreferenceStore(getPreferenceStore());
     sdkLocation.setPropertyChangeListener(wrappedPropertyChangeListener);
 
-    if (CloudSdkManager.managedFeatureEnabled()) {
+    if (CloudSdkManager.managedSdkFeatureEnabled()) {
       initializeControls();
 
       GridLayoutFactory.fillDefaults().numColumns(sdkLocation.getNumberOfControls())
