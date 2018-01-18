@@ -56,4 +56,9 @@ public final class PreferenceConstants {
   static IEclipsePreferences getPreferenceNode() {
     return InstanceScope.INSTANCE.getNode(BUNDLEID);
   }
+
+  static void initializeDefaults() {
+    getPreferenceStore().setDefault(CLOUD_SDK_MANAGEMENT, CloudSdkManagement.MANAGED.name());
+    getPreferenceStore().setDefault(CLOUD_SDK_AUTO_UPDATE, true);
+  }
 }

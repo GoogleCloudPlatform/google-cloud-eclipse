@@ -36,6 +36,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
@@ -56,11 +57,12 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       "com.google.cloud.tools.eclipse.preferences.main"; //$NON-NLS-1$
 
   private Button managedSdkRadio;
-  private Button autoUpdateCheck;
+  private Composite managedSdkSubArea;
+  private BooleanFieldEditor autoUpdateCheck;
   private Button updateNow;
 
   private Button customSdkRadio;
-  private Composite sdkLocationRow;
+  private Composite customSdkSubArea;
   private CloudSdkDirectoryFieldEditor sdkLocation;
 
   private IStatus status = Status.OK_STATUS;
@@ -99,24 +101,22 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
         }
       });
 
-      Composite updateRow = new Composite(parent, SWT.NONE);
-      autoUpdateCheck = new Button(updateRow, SWT.CHECK | SWT.LEAD);
-      autoUpdateCheck.setText(Messages.getString("AutoUpdate")); //$NON-NLS-1$
+      managedSdkSubArea = new Composite(parent, SWT.NONE);
+      autoUpdateCheck = new BooleanFieldEditor(
+          PreferenceConstants.CLOUD_SDK_AUTO_UPDATE,
+          Messages.getString("AutoUpdate"), BooleanFieldEditor.DEFAULT, managedSdkSubArea);
+      autoUpdateCheck.setPreferenceStore(getPreferenceStore());
 
-      updateNow = new Button(updateRow, SWT.NONE);
+      updateNow = new Button(managedSdkSubArea, SWT.NONE);
       updateNow.setText(Messages.getString("UpdateNow")); //$NON-NLS-1$
 
-      customSdkRadio = new Button(parent, SWT.RADIO | SWT.LEAD);
+      customSdkRadio = new Button(parent, SWT.RADIO);
       customSdkRadio.setText(Messages.getString("CustomSdk")); //$NON-NLS-1$
-
-      GridLayoutFactory.fillDefaults().numColumns(2)
-          .extendedMargins(IDialogConstants.LEFT_MARGIN, 0, 0, 0)
-          .generateLayout(updateRow);
     }
 
-    sdkLocationRow = new Composite(parent, SWT.NONE);
+    customSdkSubArea = new Composite(parent, SWT.NONE);
     sdkLocation = new CloudSdkDirectoryFieldEditor(PreferenceConstants.CLOUD_SDK_PATH,
-        Messages.getString("SdkLocation"), sdkLocationRow); //$NON-NLS-1$
+        Messages.getString("SdkLocation"), customSdkSubArea); //$NON-NLS-1$
     Path defaultLocation = getDefaultSdkLocation();
     if (defaultLocation != null) {
       sdkLocation.setFilterPath(defaultLocation.toFile());
@@ -125,14 +125,15 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     sdkLocation.setPropertyChangeListener(wrappedPropertyChangeListener);
 
     if (CloudSdkManager.managedSdkFeatureEnabled()) {
-      initializeControls();
-
+      GridLayoutFactory.fillDefaults().numColumns(2)
+          .extendedMargins(IDialogConstants.LEFT_MARGIN, 0, 0, 0)
+          .generateLayout(managedSdkSubArea);
       GridLayoutFactory.fillDefaults().numColumns(sdkLocation.getNumberOfControls())
           .extendedMargins(IDialogConstants.LEFT_MARGIN, 0, 0, 0)
-          .generateLayout(sdkLocationRow);
+          .generateLayout(customSdkSubArea);
     } else {
       GridLayoutFactory.fillDefaults().numColumns(sdkLocation.getNumberOfControls())
-          .generateLayout(sdkLocationRow);
+          .generateLayout(customSdkSubArea);
     }
     GridLayoutFactory.fillDefaults().generateLayout(contents);
 
@@ -141,37 +142,42 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
   }
 
   @VisibleForTesting
-  void initializeControls() {
-    CloudSdkManager.setUpInitialPreferences();
-
+  void loadSdkManagement(boolean loadDefault) {
     IPreferenceStore preferenceStore = getPreferenceStore();
-    String managementValue = preferenceStore.getString(PreferenceConstants.CLOUD_SDK_MANAGEMENT);
-    boolean managed = CloudSdkManagement.MANAGED.name().equals(managementValue);
+    String value;
+    if (loadDefault) {
+      value = preferenceStore.getDefaultString(PreferenceConstants.CLOUD_SDK_MANAGEMENT);
+    } else {
+      value = preferenceStore.getString(PreferenceConstants.CLOUD_SDK_MANAGEMENT);
+    }
+
+    boolean managed = CloudSdkManagement.MANAGED.name().equals(value);
     managedSdkRadio.setSelection(managed);
     customSdkRadio.setSelection(!managed);
-
-    boolean autoUpdate = preferenceStore.getBoolean(PreferenceConstants.CLOUD_SDK_AUTO_UPDATE);
-    autoUpdateCheck.setSelection(autoUpdate);
-
-    updateControlEnablement();
   }
 
   private void updateControlEnablement() {
     boolean managed = managedSdkRadio.getSelection();
-    autoUpdateCheck.setEnabled(managed);
+    autoUpdateCheck.setEnabled(managed, managedSdkSubArea);
     updateNow.setEnabled(managed);
-    sdkLocation.setEnabled(!managed, sdkLocationRow);
+    sdkLocation.setEnabled(!managed, customSdkSubArea);
   }
 
   @Override
   public void load() {
+    loadSdkManagement(false /* loadDefault */);
+    autoUpdateCheck.load();
     sdkLocation.load();
+    updateControlEnablement();
     fireValueChanged(VALUE, "", ""); //$NON-NLS-1$ //$NON-NLS-2$
   }
 
   @Override
   public void loadDefault() {
+    loadSdkManagement(true /* loadDefault */);
+    autoUpdateCheck.loadDefault();
     sdkLocation.loadDefault();
+    updateControlEnablement();
   }
 
   @Override
@@ -181,6 +187,14 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
   @Override
   public void performApply() {
+    if (managedSdkRadio.getSelection()) {
+      getPreferenceStore().putValue(PreferenceConstants.CLOUD_SDK_MANAGEMENT,
+          CloudSdkManagement.MANAGED.name());
+    } else {
+      getPreferenceStore().putValue(PreferenceConstants.CLOUD_SDK_MANAGEMENT,
+          CloudSdkManagement.CUSTOM.name());
+    }
+    autoUpdateCheck.store();
     sdkLocation.store();
   }
 
