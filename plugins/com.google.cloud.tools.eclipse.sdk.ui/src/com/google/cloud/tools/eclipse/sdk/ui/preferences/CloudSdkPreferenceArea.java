@@ -26,6 +26,7 @@ import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
 import com.google.cloud.tools.eclipse.sdk.internal.PreferenceConstants;
 import com.google.cloud.tools.eclipse.sdk.internal.PreferenceConstants.CloudSdkManagement;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
+import com.google.common.annotations.VisibleForTesting;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,6 +34,7 @@ import java.nio.file.Paths;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -106,7 +108,8 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       customSdkRadio = new Button(parent, SWT.RADIO | SWT.LEAD);
       customSdkRadio.setText("Custom SDK");
 
-      GridLayoutFactory.fillDefaults().numColumns(2).extendedMargins(10, 0, 0, 0)
+      GridLayoutFactory.fillDefaults().numColumns(2)
+          .extendedMargins(IDialogConstants.LEFT_MARGIN, 0, 0, 0)
           .generateLayout(updateRow);
     }
 
@@ -124,7 +127,8 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       initializeControls();
 
       GridLayoutFactory.fillDefaults().numColumns(sdkLocation.getNumberOfControls())
-          .extendedMargins(10, 0, 0, 0).generateLayout(sdkLocationRow);
+          .extendedMargins(IDialogConstants.LEFT_MARGIN, 0, 0, 0)
+          .generateLayout(sdkLocationRow);
     } else {
       GridLayoutFactory.fillDefaults().numColumns(sdkLocation.getNumberOfControls())
           .generateLayout(sdkLocationRow);
@@ -135,9 +139,9 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     return contents;
   }
 
-  private void initializeControls() {
-    // TODO(chanseok): ensure that the managed SDK settings are set up, e.g., call
-    // CloudSdkManager.setUpPreferences().
+  @VisibleForTesting
+  void initializeControls() {
+    CloudSdkManager.setUpInitialPreferences();
 
     IPreferenceStore preferenceStore = getPreferenceStore();
     String managementValue = preferenceStore.getString(PreferenceConstants.CLOUD_SDK_MANAGEMENT);
@@ -179,10 +183,8 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     sdkLocation.store();
   }
 
-  /**
-   * Sets the new value or {@code null} for the empty string.
-   */
-  public void setStringValue(String value) {
+  @VisibleForTesting
+  public void setSdkLocation(String value) {
     sdkLocation.setStringValue(value);
   }
 

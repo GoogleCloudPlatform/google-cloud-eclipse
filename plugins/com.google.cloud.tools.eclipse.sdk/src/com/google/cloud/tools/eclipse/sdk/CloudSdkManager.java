@@ -26,11 +26,12 @@ public class CloudSdkManager {
   private static final String OPTION_MANAGED_CLOUD_SDK =
       "com.google.cloud.tools.eclipse.sdk/enable.managed.cloud.sdk";
 
+  // To be able to write tests for the managed Cloud SDK feature, which is disabled at the moment.
   @VisibleForTesting
-  static boolean enabledForTesting = true;
+  public static boolean forceManagedSdkFeature;
 
   public static boolean managedFeatureEnabled() {
-    if (enabledForTesting) {
+    if (forceManagedSdkFeature) {
       return true;
     }
 
@@ -40,5 +41,13 @@ public class CloudSdkManager {
       return debugOptions.getBooleanOption(OPTION_MANAGED_CLOUD_SDK, false);
     }
     return false;
+  }
+
+  /**
+   * Performs a one-time setup of preferences for the Managed Cloud SDK feature if it has never been
+   * set up.
+   */
+  public static void setUpInitialPreferences() {
+    // TODO(chanseok): to be implemented.
   }
 }

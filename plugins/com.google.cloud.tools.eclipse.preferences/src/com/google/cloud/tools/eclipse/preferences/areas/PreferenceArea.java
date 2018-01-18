@@ -78,7 +78,7 @@ public abstract class PreferenceArea {
     return preferences;
   }
 
-  /** Provides the specified preferences node. */
+  /** Sets the specified preferences node. */
   public void setPreferenceStore(IPreferenceStore preferences) {
     this.preferences = preferences;
   }

@@ -30,7 +30,7 @@ public class CloudSdkManagerTest {
 
   @Test
   public void testManagedSdkOption_overriableForTesting() {
-    CloudSdkManager.enabledForTesting = true;
+    CloudSdkManager.forceManagedSdkFeature = true;
     assertTrue(CloudSdkManager.managedFeatureEnabled());
   }
 }

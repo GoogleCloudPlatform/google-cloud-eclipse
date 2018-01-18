@@ -19,16 +19,22 @@ package com.google.cloud.tools.eclipse.sdk.ui;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
+import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
+import com.google.cloud.tools.eclipse.sdk.internal.PreferenceConstants;
 import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPreferenceArea;
+import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import java.io.File;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,12 +55,19 @@ public class CloudSdkPreferenceAreaTest {
   private CloudSdkPreferenceArea area;
   private Shell shell;
 
+  private Button managedSdkRadio;
+  private Button autoUpdateCheck;
+  private Button updateNow;
+  private Button customSdkRadio;
+  private Text sdkLocation;
+
   @Test
   public void testNonExistentPath() {
     when(preferences.getString(anyString())).thenReturn(null);
 
-    show();
-    area.setStringValue("/non-existent");
+    createPreferenceArea();
+    runEvents();
+    area.setSdkLocation("/non-existent");
     assertFalse(area.getStatus().isOK());
     assertEquals(IStatus.ERROR, area.getStatus().getSeverity());
   }
@@ -74,26 +87,85 @@ public class CloudSdkPreferenceAreaTest {
     assertNotNull("No root directory!?", root);
     assertTrue("Root doesn't exist!?", root.exists());
 
-    show();
-    area.setStringValue(root.getAbsolutePath());
+    createPreferenceArea();
+    runEvents();
+    area.setSdkLocation(root.getAbsolutePath());
     assertEquals(IStatus.WARNING, area.getStatus().getSeverity());
 
-    area.setStringValue("");
+    area.setSdkLocation("");
     assertEquals(IStatus.OK, area.getStatus().getSeverity());
   }
 
-  private void show() {
+  private void createPreferenceArea() {
     shell = shellResource.getShell();
     area = new CloudSdkPreferenceArea();
-    area.createContents(shell);
     area.setPreferenceStore(preferences);
+    area.createContents(shell);
 
-    runEvents();
+    managedSdkRadio = CompositeUtil.findButton(shell, "Managed SDK");
+    autoUpdateCheck = CompositeUtil.findButton(shell, "Automatically update");
+    updateNow = CompositeUtil.findButton(shell, "Update Now");
+    customSdkRadio = CompositeUtil.findButton(shell, "Custom SDK");
+    sdkLocation = CompositeUtil.findControlAfterLabel(shell, Text.class, "&SDK location:");
   }
 
   private void runEvents() {
-    while (!shell.isDisposed() && shell.getDisplay().readAndDispatch()) {
+    while (shell.getDisplay().readAndDispatch()) {
       /* spin */
     }
+  }
+
+  @Test
+  public void testUi_noSdkManagementFeature() {
+    createPreferenceArea();
+
+    assertNull(managedSdkRadio);
+    assertNull(autoUpdateCheck);
+    assertNull(updateNow);
+    assertNull(customSdkRadio);
+    assertNotNull(sdkLocation);
+    assertTrue(sdkLocation.isEnabled());
+  }
+
+  @Test
+  public void testUi_sdkManagementFeature() {
+    CloudSdkManager.forceManagedSdkFeature = true;
+    createPreferenceArea();
+
+    assertNotNull(managedSdkRadio);
+    assertNotNull(autoUpdateCheck);
+    assertNotNull(updateNow);
+    assertNotNull(customSdkRadio);
+    assertNotNull(sdkLocation);
+  }
+
+  @Test
+  public void testControlStates_managedSdk() {
+    CloudSdkManager.forceManagedSdkFeature = true;
+    when(preferences.getString(PreferenceConstants.CLOUD_SDK_MANAGEMENT)).thenReturn("MANAGED");
+    when(preferences.getBoolean(PreferenceConstants.CLOUD_SDK_AUTO_UPDATE)).thenReturn(true);
+    createPreferenceArea();
+
+    assertTrue(managedSdkRadio.getSelection());
+    assertTrue(autoUpdateCheck.isEnabled());
+    assertTrue(autoUpdateCheck.getSelection());
+    assertTrue(updateNow.isEnabled());
+    assertFalse(customSdkRadio.getSelection());
+    assertFalse(sdkLocation.isEnabled());
+  }
+
+  @Test
+  public void testControlStates_customSdk() {
+    CloudSdkManager.forceManagedSdkFeature = true;
+    when(preferences.getString(PreferenceConstants.CLOUD_SDK_MANAGEMENT)).thenReturn("CUSTOM");
+    when(preferences.getBoolean(PreferenceConstants.CLOUD_SDK_AUTO_UPDATE)).thenReturn(true);
+    createPreferenceArea();
+
+    assertFalse(managedSdkRadio.getSelection());
+    assertFalse(autoUpdateCheck.isEnabled());
+    assertTrue(autoUpdateCheck.getSelection());
+    assertFalse(updateNow.isEnabled());
+    assertTrue(customSdkRadio.getSelection());
+    assertTrue(sdkLocation.isEnabled());
   }
 }
