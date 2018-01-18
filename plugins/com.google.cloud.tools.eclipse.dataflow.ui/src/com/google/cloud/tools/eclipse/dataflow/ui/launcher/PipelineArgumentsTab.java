@@ -135,7 +135,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   private PipelineOptionsHierarchy hierarchy;
 
   /** Set to {@code true} when this tab has been shown, and reset upon a new config. */
-  private boolean activated = false;
+  private boolean uiUpToDate = false;
 
   public PipelineArgumentsTab() {
     this(ResourcesPlugin.getWorkspace().getRoot(), DataflowDependencyManager.create());
@@ -287,8 +287,8 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
   @Override
   public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-    if (!activated) {
-      // activated == false means initializeFrom() has not been called since
+    if (!uiUpToDate) {
+      // uiUpToDate == false means initializeFrom() has not been called since
       // reload() was last called (on isValid() or initializeFrom()) and so
       // the UI elements are out of sync with this configuration.
       // Since isValid() must be true for performApply() to be called,
@@ -334,19 +334,31 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
       return;
     }
 
-    updateRunnerButtons(launchConfiguration);
+    try {
+      // the following requests update UI elements which normally triggers
+      // updateLaunchConfigDialog(), which has a side-effect of calling
+      // isValid(ILaunchConfiguration) and reloading from the ILaunchConfiguration
+      suppressDialogUpdates = true;
 
-    defaultOptionsComponent.setEnabled(true);
-    defaultOptionsComponent.setUseDefaultValues(launchConfiguration.isUseDefaultLaunchOptions());
-    defaultOptionsComponent.setPreferences(getPreferences());
-    defaultOptionsComponent.setCustomValues(launchConfiguration.getArgumentValues());
+      updateRunnerButtons(launchConfiguration);
 
-    userOptionsSelector.setEnabled(true);
-    String userOptionsName = launchConfiguration.getUserOptionsName();
-    userOptionsSelector.setText(Strings.nullToEmpty(userOptionsName));
+      defaultOptionsComponent.setEnabled(true);
+      defaultOptionsComponent.setUseDefaultValues(launchConfiguration.isUseDefaultLaunchOptions());
+      defaultOptionsComponent.setPreferences(getPreferences());
+      defaultOptionsComponent.setCustomValues(launchConfiguration.getArgumentValues());
 
+      userOptionsSelector.setEnabled(true);
+      String userOptionsName = launchConfiguration.getUserOptionsName();
+      userOptionsSelector.setText(Strings.nullToEmpty(userOptionsName));
+    } finally {
+      suppressDialogUpdates = false;
+    }
     updatePipelineOptionsForm();
-    activated = true;
+
+    // updateLaunchConfigurationDialog() will call performApply() on the active tab
+    // thus writing out the current UI state, like an updated runner
+    uiUpToDate = true;
+    updateLaunchConfigurationDialog();
   }
 
   /**
@@ -373,10 +385,10 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
       this.project = project;
       this.launchConfiguration = launchConfiguration;
       updateHierarchy();
-      activated = false;
+      uiUpToDate = false;
       return true;
     } catch (CoreException | InvocationTargetException | InterruptedException ex) {
-      activated = false;
+      uiUpToDate = false;
       DataflowUiPlugin.logError(ex, "Error while initializing from existing configuration"); //$NON-NLS-1$
       project = null;
       launchConfiguration = null;
@@ -409,7 +421,9 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
     PipelineRunner runner = launchConfiguration.getRunner();
     if (!runner.getSupportedVersions().contains(majorVersion)) {
+      // updates the selected button since it has an invalid runner
       runner = PipelineLaunchConfiguration.defaultRunner(majorVersion);
+      launchConfiguration.setRunner(runner);
       DataflowUiPlugin.logInfo("Changed pipeline runner to '%s'", runner.getRunnerName());
     }
     Button runnerButton = runnerButtons.get(runner);
@@ -488,7 +502,6 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
           try {
             suppressDialogUpdates = true;
             pipelineOptionsForm.updateForm(launchConfiguration, optionsHierarchy.get());
-            updateLaunchConfigurationDialog();
           } finally {
             suppressDialogUpdates = false;
           }
