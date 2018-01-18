@@ -233,8 +233,7 @@ public class DataflowPipelineLaunchDelegateTest {
   }
 
   @Test
-  public void testLaunchWithProjectThatDoesNotExistThrowsIllegalArgumentException()
-      throws CoreException {
+  public void testLaunchWithProjectThatDoesNotExistThrowsCoreException() throws CoreException {
     ILaunchConfiguration configuration = mockILaunchConfiguration();
     when(project.exists()).thenReturn(false);
 
@@ -244,9 +243,9 @@ public class DataflowPipelineLaunchDelegateTest {
     try {
       dataflowDelegate.launch(configuration, mode, launch, monitor);
       fail();
-    } catch (IllegalArgumentException ex) {
+    } catch (CoreException ex) {
       assertTrue(
-          ex.getMessage().contains("Project with name Test-project,Name must exist to launch."));
+          ex.getMessage().contains("Project \"Test-project,Name\" does not exist"));
     }
   }
 
