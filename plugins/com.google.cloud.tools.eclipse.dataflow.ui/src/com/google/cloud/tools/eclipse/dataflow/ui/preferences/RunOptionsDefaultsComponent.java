@@ -433,7 +433,7 @@ public class RunOptionsDefaultsComponent {
   }
 
   @VisibleForTesting
-  boolean isEnabled() {
+  public boolean isEnabled() {
     // the accountSelector is the top-level item and its enablement state should reflect reality
     return accountSelector.isEnabled();
   }
