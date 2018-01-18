@@ -53,7 +53,7 @@ public final class PreferenceConstants {
     return new ScopedPreferenceStore(InstanceScope.INSTANCE, BUNDLEID);
   }
 
-  public static IEclipsePreferences getPreferenceNode() {
+  static IEclipsePreferences getPreferenceNode() {
     return InstanceScope.INSTANCE.getNode(BUNDLEID);
   }
 }
