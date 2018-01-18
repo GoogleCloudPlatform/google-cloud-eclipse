@@ -62,11 +62,10 @@ public class PipelineLaunchConfigurationTest {
       throws CoreException {
     ILaunchConfiguration launchConfiguration = mock(ILaunchConfiguration.class);
     Map<String, String> requiredArgumentValues =
-        ImmutableMap.<String, String>builder()
-            .put("Spam", "foo")
-            .put("Ham", "bar")
-            .put("Eggs", "baz")
-            .build();
+        ImmutableMap.of(
+            "Spam", "foo", //$NON-NLS-1$ //$NON-NLS-2$
+            "Ham", "bar", //$NON-NLS-1$ //$NON-NLS-2$
+            "Eggs", "baz"); //$NON-NLS-1$ //$NON-NLS-2$
     when(launchConfiguration.getAttribute(
         eq(PipelineConfigurationAttr.ALL_ARGUMENT_VALUES.toString()),
         anyMapOf(String.class, String.class))).thenReturn(requiredArgumentValues);
