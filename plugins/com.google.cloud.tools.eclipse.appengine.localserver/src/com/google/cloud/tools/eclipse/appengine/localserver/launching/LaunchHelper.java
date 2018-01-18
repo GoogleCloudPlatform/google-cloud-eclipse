@@ -96,8 +96,9 @@ public class LaunchHelper {
       SubMonitor progress) {
     if (modules.length == 1) {
       IServer defaultServer = ServerCore.getDefaultServer(modules[0]);
-      if (defaultServer != null && LocalAppEngineServerDelegate.SERVER_TYPE_ID
-          .equals(defaultServer.getServerType().getId())) {
+      if (defaultServer != null && defaultServer.getServerType() != null
+          && LocalAppEngineServerDelegate.SERVER_TYPE_ID
+              .equals(defaultServer.getServerType().getId())) {
         return Collections.singletonList(defaultServer);
       }
     }
