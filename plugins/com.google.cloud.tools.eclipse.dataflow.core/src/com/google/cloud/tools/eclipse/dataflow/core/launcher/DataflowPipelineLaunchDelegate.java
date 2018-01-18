@@ -16,8 +16,6 @@
 
 package com.google.cloud.tools.eclipse.dataflow.core.launcher;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.dataflow.core.DataflowCorePlugin;
 import com.google.cloud.tools.eclipse.dataflow.core.launcher.options.PipelineOptionsHierarchy;
@@ -29,6 +27,7 @@ import com.google.cloud.tools.eclipse.login.CredentialHelper;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
@@ -113,15 +112,7 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
       throws CoreException {
     SubMonitor progress = SubMonitor.convert(monitor, 3);
 
-    String projectName =
-        configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, "");
-    checkArgument(!projectName.isEmpty(), "Cannot determine project");
-    IProject project = workspaceRoot.getProject(projectName);
-    checkArgument(
-        project.exists(),
-        "Project with name %s must exist to launch. Got launch attributes %s",
-        projectName,
-        configuration.getAttributes());
+    IProject project = getProject(configuration);
     MajorVersion majorVersion = dependencyManager.getProjectMajorVersion(project);
 
     PipelineOptionsHierarchy hierarchy;
@@ -129,7 +120,7 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
       hierarchy = optionsRetrieverFactory.forProject(project, majorVersion, progress.newChild(1));
     } catch (PipelineOptionsRetrievalException e) {
       throw new CoreException(new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID,
-          "Could not retrieve Pipeline Options Hierarchy for project " + projectName, e));
+          "Could not retrieve Pipeline Options Hierarchy for project " + project.getName(), e));
     }
 
     PipelineLaunchConfiguration pipelineConfig =
@@ -159,6 +150,20 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
         AnalyticsEvents.DATAFLOW_RUN_RUNNER, pipelineRunner.getRunnerName());
 
     delegate.launch(workingCopy, mode, launch, progress.newChild(1));
+  }
+
+  private IProject getProject(ILaunchConfiguration configuration) throws CoreException {
+    String projectName =
+        configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, "");
+    if (projectName.isEmpty()) {
+      throw new CoreException(StatusUtil.error(this, "Cannot determine project"));
+    }
+    IProject project = workspaceRoot.getProject(projectName);
+    if (!project.exists()) {
+      String errorMessage = String.format("Project \"%s\" does not exist", projectName);
+      throw new CoreException(StatusUtil.error(this, errorMessage));
+    }
+    return project;
   }
 
   @VisibleForTesting
