@@ -103,7 +103,7 @@ public class CloudSdkPreferenceAreaTest {
     area.createContents(shell);
 
     managedSdkRadio = CompositeUtil.findButton(shell, "Managed SDK");
-    autoUpdateCheck = CompositeUtil.findButton(shell, "Automatically update");
+    autoUpdateCheck = CompositeUtil.findButton(shell, "Update automatically");
     updateNow = CompositeUtil.findButton(shell, "Update Now");
     customSdkRadio = CompositeUtil.findButton(shell, "Custom SDK");
     sdkLocation = CompositeUtil.findControlAfterLabel(shell, Text.class, "&SDK location:");

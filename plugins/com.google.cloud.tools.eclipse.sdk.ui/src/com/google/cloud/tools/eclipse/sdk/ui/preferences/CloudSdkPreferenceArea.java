@@ -52,7 +52,8 @@ import org.eclipse.ui.PlatformUI;
 
 public class CloudSdkPreferenceArea extends PreferenceArea {
   /** Preference Page ID that hosts this area. */
-  public static final String PAGE_ID = "com.google.cloud.tools.eclipse.preferences.main";
+  public static final String PAGE_ID =
+      "com.google.cloud.tools.eclipse.preferences.main"; //$NON-NLS-1$
 
   private Button managedSdkRadio;
   private Button autoUpdateCheck;
@@ -79,7 +80,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
   public Control createContents(Composite parent) {
     Composite contents = new Composite(parent, SWT.NONE);
     Link instructions = new Link(contents, SWT.WRAP);
-    instructions.setText(Messages.getString("CloudSdkRequired"));
+    instructions.setText(Messages.getString("CloudSdkRequired")); //$NON-NLS-1$
     instructions.setFont(contents.getFont());
     instructions.addSelectionListener(new SelectionAdapter() {
       @Override
@@ -90,7 +91,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
     if (CloudSdkManager.managedSdkFeatureEnabled()) {
       managedSdkRadio = new Button(parent, SWT.RADIO);
-      managedSdkRadio.setText("Managed SDK");
+      managedSdkRadio.setText(Messages.getString("ManagedSdk")); //$NON-NLS-1$
       managedSdkRadio.addSelectionListener(new SelectionAdapter() {
         @Override
         public void widgetSelected(SelectionEvent e) {
@@ -100,13 +101,13 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
       Composite updateRow = new Composite(parent, SWT.NONE);
       autoUpdateCheck = new Button(updateRow, SWT.CHECK | SWT.LEAD);
-      autoUpdateCheck.setText("Automatically update");
+      autoUpdateCheck.setText(Messages.getString("AutoUpdate")); //$NON-NLS-1$
 
       updateNow = new Button(updateRow, SWT.NONE);
-      updateNow.setText("Update Now");
+      updateNow.setText(Messages.getString("UpdateNow")); //$NON-NLS-1$
 
       customSdkRadio = new Button(parent, SWT.RADIO | SWT.LEAD);
-      customSdkRadio.setText("Custom SDK");
+      customSdkRadio.setText(Messages.getString("CustomSdk")); //$NON-NLS-1$
 
       GridLayoutFactory.fillDefaults().numColumns(2)
           .extendedMargins(IDialogConstants.LEFT_MARGIN, 0, 0, 0)
@@ -115,7 +116,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
     sdkLocationRow = new Composite(parent, SWT.NONE);
     sdkLocation = new CloudSdkDirectoryFieldEditor(PreferenceConstants.CLOUD_SDK_PATH,
-        Messages.getString("SdkLocation"), sdkLocationRow);
+        Messages.getString("SdkLocation"), sdkLocationRow); //$NON-NLS-1$
     Path defaultLocation = getDefaultSdkLocation();
     if (defaultLocation != null) {
       sdkLocation.setFilterPath(defaultLocation.toFile());
@@ -165,7 +166,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
   @Override
   public void load() {
     sdkLocation.load();
-    fireValueChanged(VALUE, "", "");
+    fireValueChanged(VALUE, "", ""); //$NON-NLS-1$ //$NON-NLS-2$
   }
 
   @Override
@@ -207,15 +208,15 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       // accept a seemingly invalid location in case the SDK organization
       // has changed and the CloudSdk#validate() code is out of date
       status = new Status(IStatus.WARNING, getClass().getName(),
-          Messages.getString("CloudSdkNotFound", sdk.getSdkPath()));
+          Messages.getString("CloudSdkNotFound", sdk.getSdkPath())); //$NON-NLS-1$
       return false;
     } catch (AppEngineJavaComponentsNotInstalledException ex) {
       status = new Status(IStatus.WARNING, getClass().getName(),
-          Messages.getString("AppEngineJavaComponentsNotInstalled", ex.getMessage()));
+          Messages.getString("AppEngineJavaComponentsNotInstalled", ex.getMessage())); //$NON-NLS-1$
       return false;
     } catch (CloudSdkOutOfDateException ex) {
       status = new Status(IStatus.ERROR, getClass().getName(),
-          Messages.getString("CloudSdkOutOfDate"));
+          Messages.getString("CloudSdkOutOfDate")); //$NON-NLS-1$
         return false;
     }
   }
@@ -255,11 +256,11 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
       Path location = Paths.get(directory);
       if (!Files.exists(location)) {
-        String message = Messages.getString("NoSuchDirectory", location);
+        String message = Messages.getString("NoSuchDirectory", location); //$NON-NLS-1$
         status = new Status(IStatus.ERROR, getClass().getName(), message);
         return false;
       } else if (!Files.isDirectory(location)) {
-        String message = Messages.getString("FileNotDirectory", location);
+        String message = Messages.getString("FileNotDirectory", location); //$NON-NLS-1$
         status = new Status(IStatus.ERROR, getClass().getName(), message);
         return false;
       }
