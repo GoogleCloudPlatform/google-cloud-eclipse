@@ -300,33 +300,31 @@ public class BuildPath {
     }
     progress.worked(1);
 
-    // Check if we can find our master library container
-    IClasspathEntry[] rawClasspath;
     try {
-      rawClasspath = javaProject.getRawClasspath();
-    } catch (JavaModelException ex) {
-      logger.log(Level.WARNING, "Unable to check classpath containers for: ");
-      return;
-    }
-    progress.worked(2);
-    IPath containerPath = new Path(LibraryClasspathContainer.CONTAINER_PATH_PREFIX)
-        .append(CloudLibraries.MASTER_CONTAINER_ID);
-    for (IClasspathEntry entry : rawClasspath) {
-      if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER
-          && containerPath.equals(entry.getPath())) {
-        // container found, so library list should stay
-        return;
+      // Check if we can find our master library container
+      IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
+      progress.worked(2);
+      IPath containerPath = new Path(LibraryClasspathContainer.CONTAINER_PATH_PREFIX)
+          .append(CloudLibraries.MASTER_CONTAINER_ID);
+      for (IClasspathEntry entry : rawClasspath) {
+        if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER
+            && containerPath.equals(entry.getPath())) {
+          // container found, so library list should stay
+          return;
+        }
       }
-    }
-    progress.worked(1);
+      progress.worked(1);
 
-    try {
       serializer.removeLibraryIds(javaProject);
       serializer.resetContainer(javaProject, containerPath);
+      progress.worked(1);
+    } catch (JavaModelException ex) {
+      logger.log(Level.WARNING,
+          "Unable to check classpath containers for: " + javaProject.getProject().getName());
+      return;
     } catch (CoreException ex) {
       logger.log(Level.SEVERE, "Unable to remove library ids", ex);
     }
-    progress.worked(1);
   }
 
 }
