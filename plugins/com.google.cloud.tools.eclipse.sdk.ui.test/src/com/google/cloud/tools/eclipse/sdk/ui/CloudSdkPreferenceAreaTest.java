@@ -28,7 +28,6 @@ import com.google.cloud.tools.eclipse.sdk.internal.PreferenceConstants;
 import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPreferenceArea;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
-import java.io.File;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.widgets.Button;
@@ -128,13 +127,13 @@ public class CloudSdkPreferenceAreaTest {
   public void testControlStates_managedSdk() {
     CloudSdkManager.forceManagedSdkFeature = true;
     when(preferences.getString(PreferenceConstants.CLOUD_SDK_MANAGEMENT)).thenReturn("MANAGED");
-    when(preferences.getBoolean(PreferenceConstants.CLOUD_SDK_AUTO_UPDATE)).thenReturn(true);
+    when(preferences.getBoolean(PreferenceConstants.CLOUD_SDK_AUTO_UPDATE)).thenReturn(false);
     when(preferences.getString(PreferenceConstants.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
 
     assertTrue(managedSdkRadio.getSelection());
     assertTrue(autoUpdateCheck.isEnabled());
-    assertTrue(autoUpdateCheck.getSelection());
+    assertFalse(autoUpdateCheck.getSelection());
     assertTrue(updateNow.isEnabled());
     assertFalse(customSdkRadio.getSelection());
     assertFalse(sdkLocation.isEnabled());
