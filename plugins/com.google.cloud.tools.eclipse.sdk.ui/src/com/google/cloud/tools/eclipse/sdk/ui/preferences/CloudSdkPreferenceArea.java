@@ -165,19 +165,23 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
   @Override
   public void load() {
-    loadSdkManagement(false /* loadDefault */);
-    autoUpdateCheck.load();
+    if (CloudSdkManager.managedSdkFeatureEnabled()) {
+      loadSdkManagement(false /* loadDefault */);
+      autoUpdateCheck.load();
+      updateControlEnablement();
+    }
     sdkLocation.load();
-    updateControlEnablement();
     fireValueChanged(VALUE, "", ""); //$NON-NLS-1$ //$NON-NLS-2$
   }
 
   @Override
   public void loadDefault() {
-    loadSdkManagement(true /* loadDefault */);
-    autoUpdateCheck.loadDefault();
+    if (CloudSdkManager.managedSdkFeatureEnabled()) {
+      loadSdkManagement(true /* loadDefault */);
+      autoUpdateCheck.loadDefault();
+      updateControlEnablement();
+    }
     sdkLocation.loadDefault();
-    updateControlEnablement();
   }
 
   @Override
@@ -187,14 +191,16 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
   @Override
   public void performApply() {
-    if (managedSdkRadio.getSelection()) {
-      getPreferenceStore().putValue(PreferenceConstants.CLOUD_SDK_MANAGEMENT,
-          CloudSdkManagement.MANAGED.name());
-    } else {
-      getPreferenceStore().putValue(PreferenceConstants.CLOUD_SDK_MANAGEMENT,
-          CloudSdkManagement.CUSTOM.name());
+    if (CloudSdkManager.managedSdkFeatureEnabled()) {
+      if (managedSdkRadio.getSelection()) {
+        getPreferenceStore().putValue(PreferenceConstants.CLOUD_SDK_MANAGEMENT,
+            CloudSdkManagement.MANAGED.name());
+      } else {
+        getPreferenceStore().putValue(PreferenceConstants.CLOUD_SDK_MANAGEMENT,
+            CloudSdkManagement.CUSTOM.name());
+      }
+      autoUpdateCheck.store();
     }
-    autoUpdateCheck.store();
     sdkLocation.store();
   }
 

@@ -21,7 +21,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
@@ -37,6 +36,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -48,6 +48,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class CloudSdkPreferenceAreaTest {
 
   @Rule public ShellTestResource shellResource = new ShellTestResource();
+  @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
   @Mock
   private IPreferenceStore preferences;
@@ -63,44 +64,32 @@ public class CloudSdkPreferenceAreaTest {
 
   @Test
   public void testNonExistentPath() {
-    when(preferences.getString(anyString())).thenReturn(null);
-
+    when(preferences.getString(PreferenceConstants.CLOUD_SDK_PATH)).thenReturn("/non-existent");
     createPreferenceArea();
-    runEvents();
-    area.setSdkLocation("/non-existent");
+
     assertFalse(area.getStatus().isOK());
     assertEquals(IStatus.ERROR, area.getStatus().getSeverity());
   }
 
   @Test
   public void testInvalidPath() {
-    when(preferences.getString(anyString())).thenReturn(null);
-
-    File root = null;
-    for (File directory : File.listRoots()) {
-      if (directory.exists()) {
-        // must check as roots includes A: on Windows for the floppy
-        root = directory;
-      }
-    }
-    // root should exist but not contain a valid Cloud SDK
-    assertNotNull("No root directory!?", root);
-    assertTrue("Root doesn't exist!?", root.exists());
-
+    when(preferences.getString(PreferenceConstants.CLOUD_SDK_PATH))
+        .thenReturn(tempFolder.getRoot().getAbsolutePath());
     createPreferenceArea();
-    runEvents();
-    area.setSdkLocation(root.getAbsolutePath());
     assertEquals(IStatus.WARNING, area.getStatus().getSeverity());
 
-    area.setSdkLocation("");
+    when(preferences.getString(PreferenceConstants.CLOUD_SDK_PATH)).thenReturn("");
+    area.load();
     assertEquals(IStatus.OK, area.getStatus().getSeverity());
   }
 
+  // TODO(chanseok): can become "@Before setUp()" once we remove the managed SDK debug feature flag.
   private void createPreferenceArea() {
     shell = shellResource.getShell();
     area = new CloudSdkPreferenceArea();
     area.setPreferenceStore(preferences);
     area.createContents(shell);
+    area.load();
 
     managedSdkRadio = CompositeUtil.findButton(shell, "Managed SDK");
     autoUpdateCheck = CompositeUtil.findButton(shell, "Update automatically");
@@ -109,14 +98,9 @@ public class CloudSdkPreferenceAreaTest {
     sdkLocation = CompositeUtil.findControlAfterLabel(shell, Text.class, "&SDK location:");
   }
 
-  private void runEvents() {
-    while (shell.getDisplay().readAndDispatch()) {
-      /* spin */
-    }
-  }
-
   @Test
   public void testUi_noSdkManagementFeature() {
+    when(preferences.getString(PreferenceConstants.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
 
     assertNull(managedSdkRadio);
@@ -130,6 +114,7 @@ public class CloudSdkPreferenceAreaTest {
   @Test
   public void testUi_sdkManagementFeature() {
     CloudSdkManager.forceManagedSdkFeature = true;
+    when(preferences.getString(PreferenceConstants.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
 
     assertNotNull(managedSdkRadio);
@@ -144,6 +129,7 @@ public class CloudSdkPreferenceAreaTest {
     CloudSdkManager.forceManagedSdkFeature = true;
     when(preferences.getString(PreferenceConstants.CLOUD_SDK_MANAGEMENT)).thenReturn("MANAGED");
     when(preferences.getBoolean(PreferenceConstants.CLOUD_SDK_AUTO_UPDATE)).thenReturn(true);
+    when(preferences.getString(PreferenceConstants.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
 
     assertTrue(managedSdkRadio.getSelection());
@@ -159,6 +145,7 @@ public class CloudSdkPreferenceAreaTest {
     CloudSdkManager.forceManagedSdkFeature = true;
     when(preferences.getString(PreferenceConstants.CLOUD_SDK_MANAGEMENT)).thenReturn("CUSTOM");
     when(preferences.getBoolean(PreferenceConstants.CLOUD_SDK_AUTO_UPDATE)).thenReturn(true);
+    when(preferences.getString(PreferenceConstants.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
 
     assertFalse(managedSdkRadio.getSelection());
