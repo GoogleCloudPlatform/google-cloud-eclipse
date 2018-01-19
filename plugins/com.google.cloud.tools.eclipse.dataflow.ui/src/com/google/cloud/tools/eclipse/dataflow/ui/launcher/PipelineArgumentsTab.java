@@ -217,6 +217,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
           launchConfiguration.setUserOptionsName(userOptionsName);
         }
         updatePipelineOptionsForm();
+        updateLaunchConfigurationDialog();
       }
 
       @Override
@@ -600,6 +601,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
       if (button.getSelection()) {
         launchConfiguration.setRunner(runner);
         updatePipelineOptionsForm();
+        updateLaunchConfigurationDialog();
       }
     }
   }
