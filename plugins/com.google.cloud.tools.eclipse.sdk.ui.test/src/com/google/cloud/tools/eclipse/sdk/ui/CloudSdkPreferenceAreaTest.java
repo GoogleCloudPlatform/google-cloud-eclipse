@@ -121,6 +121,7 @@ public class CloudSdkPreferenceAreaTest {
     assertNotNull(updateNow);
     assertNotNull(customSdkRadio);
     assertNotNull(sdkLocation);
+    CloudSdkManager.forceManagedSdkFeature = false;
   }
 
   @Test
@@ -137,6 +138,7 @@ public class CloudSdkPreferenceAreaTest {
     assertTrue(updateNow.isEnabled());
     assertFalse(customSdkRadio.getSelection());
     assertFalse(sdkLocation.isEnabled());
+    CloudSdkManager.forceManagedSdkFeature = false;
   }
 
   @Test
@@ -153,5 +155,11 @@ public class CloudSdkPreferenceAreaTest {
     assertFalse(updateNow.isEnabled());
     assertTrue(customSdkRadio.getSelection());
     assertTrue(sdkLocation.isEnabled());
+    CloudSdkManager.forceManagedSdkFeature = false;
+  }
+
+  @Test
+  public void testPerformApply_preferencesSaved() {
+    
   }
 }

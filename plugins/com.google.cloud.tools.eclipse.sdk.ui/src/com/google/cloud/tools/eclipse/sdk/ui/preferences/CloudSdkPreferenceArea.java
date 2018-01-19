@@ -204,11 +204,6 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     sdkLocation.store();
   }
 
-  @VisibleForTesting
-  public void setSdkLocation(String value) {
-    sdkLocation.setStringValue(value);
-  }
-
   private static Path getDefaultSdkLocation() {
     try {
       return new CloudSdk.Builder().build().getSdkPath();

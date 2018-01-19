@@ -32,5 +32,6 @@ public class CloudSdkManagerTest {
   public void testManagedSdkOption_featureForced() {
     CloudSdkManager.forceManagedSdkFeature = true;
     assertTrue(CloudSdkManager.managedSdkFeatureEnabled());
+    CloudSdkManager.forceManagedSdkFeature = false;
   }
 }
