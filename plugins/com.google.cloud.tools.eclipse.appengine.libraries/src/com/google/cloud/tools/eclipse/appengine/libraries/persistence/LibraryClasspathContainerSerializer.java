@@ -164,6 +164,20 @@ public class LibraryClasspathContainerSerializer {
     }
   }
 
+  /** Return {@code true} if the project has a list of selected library IDs. */
+  public boolean hasLibraryIds(IJavaProject javaProject) {
+    try {
+      File stateFile = getContainerStateFile(javaProject, CONTAINER_LIBRARY_LIST_FILE_ID, false);
+      return stateFile != null;
+    } catch (CoreException ex) {
+      return false;
+    }
+  }
+
+  public void removeLibraryIds(IJavaProject javaProject) throws CoreException {
+    stateLocationProvider.removeContainerStateFile(javaProject, CONTAINER_LIBRARY_LIST_FILE_ID);
+  }
+
   private File getContainerStateFile(IJavaProject javaProject, String fileId, boolean create)
       throws CoreException {
     IPath containerStateFile =

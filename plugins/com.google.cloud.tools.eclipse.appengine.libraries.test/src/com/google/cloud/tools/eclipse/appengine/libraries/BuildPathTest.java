@@ -16,14 +16,20 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
@@ -76,4 +82,31 @@ public class BuildPathTest {
     Assert.assertEquals(initialClasspathSize + 1, project.getRawClasspath().length);
   }
 
+  @Test
+  public void testCheckLibraries() throws CoreException {
+    IPath librariesIdPath =
+        new Path(".settings").append(LibraryClasspathContainer.CONTAINER_PATH_PREFIX)
+            .append("_libraries.container");
+
+    // original classpath without our master-library container
+    IClasspathEntry[] originalClasspath = project.getRawClasspath();
+
+    Library library = new Library("libraryId");
+    List<Library> libraries = new ArrayList<>();
+    libraries.add(library);
+
+    BuildPath.addNativeLibrary(project, libraries, monitor);
+    Assert.assertEquals(initialClasspathSize + 1, project.getRawClasspath().length);
+    assertTrue(project.getProject().exists(librariesIdPath));
+
+    // master-library container exists, so checkLibraryList should make no change
+    BuildPath.checkLibraryList(project, null);
+    Assert.assertEquals(initialClasspathSize + 1, project.getRawClasspath().length);
+    assertTrue(project.getProject().exists(librariesIdPath));
+
+    // remove the master-library container, so checkLibraryList should remove the library ids file
+    project.setRawClasspath(originalClasspath, null);
+    BuildPath.checkLibraryList(project, null);
+    assertFalse(project.getProject().exists(librariesIdPath));
+  }
 }

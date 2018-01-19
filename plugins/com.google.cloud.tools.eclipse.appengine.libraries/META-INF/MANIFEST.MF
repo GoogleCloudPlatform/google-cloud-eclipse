@@ -42,3 +42,4 @@ Import-Package: com.google.cloud.tools.appengine.cloudsdk;version="0.4.2",
  org.eclipse.osgi.util,
  org.osgi.framework;version="1.8.0",
  org.osgi.service.component.annotations;resolution:=optional
+Bundle-Activator: com.google.cloud.tools.eclipse.appengine.libraries.Activator
