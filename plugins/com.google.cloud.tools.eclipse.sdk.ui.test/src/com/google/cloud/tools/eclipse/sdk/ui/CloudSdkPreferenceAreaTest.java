@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
@@ -33,6 +34,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -60,6 +62,11 @@ public class CloudSdkPreferenceAreaTest {
   private Button updateNow;
   private Button customSdkRadio;
   private Text sdkLocation;
+
+  @After
+  public void tearDown() {
+    CloudSdkManager.forceManagedSdkFeature = false;
+  }
 
   @Test
   public void testNonExistentPath() {
@@ -121,7 +128,6 @@ public class CloudSdkPreferenceAreaTest {
     assertNotNull(updateNow);
     assertNotNull(customSdkRadio);
     assertNotNull(sdkLocation);
-    CloudSdkManager.forceManagedSdkFeature = false;
   }
 
   @Test
@@ -138,7 +144,6 @@ public class CloudSdkPreferenceAreaTest {
     assertTrue(updateNow.isEnabled());
     assertFalse(customSdkRadio.getSelection());
     assertFalse(sdkLocation.isEnabled());
-    CloudSdkManager.forceManagedSdkFeature = false;
   }
 
   @Test
@@ -155,11 +160,21 @@ public class CloudSdkPreferenceAreaTest {
     assertFalse(updateNow.isEnabled());
     assertTrue(customSdkRadio.getSelection());
     assertTrue(sdkLocation.isEnabled());
-    CloudSdkManager.forceManagedSdkFeature = false;
   }
 
   @Test
   public void testPerformApply_preferencesSaved() {
-    
+    CloudSdkManager.forceManagedSdkFeature = true;
+    when(preferences.getString(PreferenceConstants.CLOUD_SDK_MANAGEMENT)).thenReturn("CUSTOM");
+    when(preferences.getBoolean(PreferenceConstants.CLOUD_SDK_AUTO_UPDATE)).thenReturn(false);
+    when(preferences.getString(PreferenceConstants.CLOUD_SDK_PATH)).thenReturn("");
+    createPreferenceArea();
+
+    managedSdkRadio.setSelection(true);
+    autoUpdateCheck.setSelection(true);
+    area.performApply();
+
+    verify(preferences).putValue(PreferenceConstants.CLOUD_SDK_MANAGEMENT, "MANAGED");
+    verify(preferences).setValue(PreferenceConstants.CLOUD_SDK_AUTO_UPDATE, true);
   }
 }
