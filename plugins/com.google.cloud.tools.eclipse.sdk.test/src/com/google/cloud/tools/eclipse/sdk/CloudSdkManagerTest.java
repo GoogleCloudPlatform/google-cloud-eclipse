@@ -19,9 +19,15 @@ package com.google.cloud.tools.eclipse.sdk;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.After;
 import org.junit.Test;
 
 public class CloudSdkManagerTest {
+
+  @After
+  public void tearDown() {
+    CloudSdkManager.forceManagedSdkFeature = false;
+  }
 
   @Test
   public void testManagedSdkOption() {
@@ -32,6 +38,5 @@ public class CloudSdkManagerTest {
   public void testManagedSdkOption_featureForced() {
     CloudSdkManager.forceManagedSdkFeature = true;
     assertTrue(CloudSdkManager.managedSdkFeatureEnabled());
-    CloudSdkManager.forceManagedSdkFeature = false;
   }
 }
