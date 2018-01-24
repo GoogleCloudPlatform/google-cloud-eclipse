@@ -31,6 +31,10 @@ Maven for building Eclipse bundles and features.
   2. The [m2e connector for maven-dependency-plugin](https://github.com/ianbrandt/m2e-maven-dependency-plugin)
      should be installed from `http://ianbrandt.github.io/m2e-maven-dependency-plugin/`.
 
+  3. Download and add the [Google Java Format plugin for Eclipse](https://github.com/google/google-java-format/releases/)
+     and place the jar into your Eclipse installation's `dropins/` directory
+     (on MacOS this may be in `Eclipse.app/Contents/Eclipse/dropins/`).
+
 1. Maven 3.5.0 or later.  Although m2eclipse is bundled with its own Maven install,
    Maven is necessary to test command-line builds.
 
@@ -290,6 +294,12 @@ current version found should be used.  Unlike the `.tpd` file,
 the identifiers are not p2 identifiers, and so features do not
 require the `.feature.group` suffix.
 
+
+## Other Miscellaneous Dev Tasks
+
+### Updating IDE settings
+
+See [`eclipse/settings/`](eclipse/settings/README.md) for details.
 
 ### Configuring Maven/Tycho Toolchains for CI Builds
 
