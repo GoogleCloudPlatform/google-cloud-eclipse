@@ -30,67 +30,9 @@
 
   <modules>
     <module>gcp-repo</module>
-    <module>features/com.google.cloud.tools.eclipse.suite.e45.feature</module>
-    <module>features/com.google.cloud.tools.eclipse.3rdparty.feature</module>
-    <module>features/com.google.licenses.apache_v2</module>
-
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.compat</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.compat.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy.ui</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy.ui.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.facets</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.facets.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.libraries</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.libraries.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.libraries.ui</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.libraries.ui.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.localserver</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.localserver.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.newproject</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.newproject.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.standard.java8</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.standard.java8.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.validation</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.validation.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.ui</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.ui.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.bugreport</module>
-    <module>plugins/com.google.cloud.tools.eclipse.bugreport.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.googleapis</module>
-    <module>plugins/com.google.cloud.tools.eclipse.googleapis.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.login</module>
-    <module>plugins/com.google.cloud.tools.eclipse.login.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.preferences</module>
-    <module>plugins/com.google.cloud.tools.eclipse.preferences.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.projectselector</module>
-    <module>plugins/com.google.cloud.tools.eclipse.projectselector.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.sdk</module>
-    <module>plugins/com.google.cloud.tools.eclipse.sdk.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.sdk.ui</module>
-    <module>plugins/com.google.cloud.tools.eclipse.sdk.ui.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.test.dependencies</module>
-    <module>plugins/com.google.cloud.tools.eclipse.test.util</module>
-    <module>plugins/com.google.cloud.tools.eclipse.usagetracker</module>
-    <module>plugins/com.google.cloud.tools.eclipse.usagetracker.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.ui</module>
-    <module>plugins/com.google.cloud.tools.eclipse.ui.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.util</module>
-    <module>plugins/com.google.cloud.tools.eclipse.util.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.swtbot</module>
-    <module>plugins/com.google.cloud.tools.eclipse.welcome</module>
-    <module>plugins/com.google.cloud.tools.eclipse.welcome.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.aeri</module>
-    <module>plugins/com.google.cloud.tools.eclipse.aeri.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.dataflow.core</module>
-    <module>plugins/com.google.cloud.tools.eclipse.dataflow.core.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.dataflow.ui</module>
-    <module>plugins/com.google.cloud.tools.eclipse.dataflow.ui.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.integration.appengine</module>
-
-    <module>third_party/com.google.cloud.tools.eclipse.jdt.launching</module>
-    <module>third_party/com.google.cloud.tools.eclipse.jst.server.core</module>
+    <module>features</module>
+    <module>plugins</module>
+    <module>third_party</module>
   </modules>
 
   <properties>
