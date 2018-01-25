@@ -59,8 +59,7 @@ public class PipelineLaunchConfiguration {
   private Optional<String> userOptionsName = Optional.absent();
 
   /**
-   * Construct a DataflowPipelineLaunchConfiguration from the provided {@link ILaunchConfiguration}
-   * using the provided project version to determine suitable defaults.
+   * Construct a DataflowPipelineLaunchConfiguration from the provided {@link ILaunchConfiguration}.
    */
   public static PipelineLaunchConfiguration fromLaunchConfiguration(MajorVersion majorVersion,
       ILaunchConfiguration launchConfiguration) throws CoreException {

@@ -115,8 +115,6 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
     IProject project = getProject(configuration);
     MajorVersion majorVersion = dependencyManager.getProjectMajorVersion(project);
 
-    PipelineLaunchConfiguration pipelineConfig =
-        PipelineLaunchConfiguration.fromLaunchConfiguration(majorVersion, configuration);
     PipelineOptionsHierarchy hierarchy;
     try {
       hierarchy = optionsRetrieverFactory.forProject(project, majorVersion, progress.newChild(1));
@@ -125,7 +123,8 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
           "Could not retrieve Pipeline Options Hierarchy for project " + project.getName(), e));
     }
 
-    PipelineRunner pipelineRunner = pipelineConfig.getRunner();
+    PipelineLaunchConfiguration pipelineConfig =
+        PipelineLaunchConfiguration.fromLaunchConfiguration(majorVersion, configuration);
 
     DataflowPreferences preferences = ProjectOrWorkspaceDataflowPreferences.forProject(project);
     if (!pipelineConfig.isValid(hierarchy, preferences)) {
@@ -146,6 +145,7 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
     String accountEmail = effectiveArguments.get("accountEmail");
     setLoginCredential(workingCopy, accountEmail);
 
+    PipelineRunner pipelineRunner = pipelineConfig.getRunner();
     AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.DATAFLOW_RUN,
         AnalyticsEvents.DATAFLOW_RUN_RUNNER, pipelineRunner.getRunnerName());
 

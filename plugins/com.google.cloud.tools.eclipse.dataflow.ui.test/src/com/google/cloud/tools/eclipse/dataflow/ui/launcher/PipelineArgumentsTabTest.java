@@ -200,6 +200,7 @@ public class PipelineArgumentsTabTest {
           pipelineArgumentsTab.getErrorMessage());
     }
 
+    @Test
     public void testSuppressingUpdates() {
       IWorkspaceRoot workspaceRoot = mock(IWorkspaceRoot.class);
       when(workspaceRoot.getProject(anyString())).thenReturn(mock(IProject.class));

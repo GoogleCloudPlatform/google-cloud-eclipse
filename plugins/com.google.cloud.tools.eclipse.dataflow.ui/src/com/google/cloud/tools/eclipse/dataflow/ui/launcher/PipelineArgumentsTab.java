@@ -397,17 +397,6 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     }
   }
 
-  private static MajorVersion getMajorVersion(IProject project) {
-    if (project != null && project.isAccessible()) {
-      DataflowDependencyManager dependencyManager = DataflowDependencyManager.create();
-      MajorVersion majorVersion = dependencyManager.getProjectMajorVersion(project);
-       if (majorVersion != null) {
-          return majorVersion;
-       }
-    }
-    return MajorVersion.ONE;
-  }
-
   /** Find the corresponding project or {@code null} if not found. */
   private final IProject findProject(ILaunchConfiguration launchConfiguration) {
     try {
