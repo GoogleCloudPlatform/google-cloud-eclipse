@@ -59,12 +59,12 @@ public class PipelineLaunchConfiguration {
   private Optional<String> userOptionsName = Optional.absent();
 
   /**
-   * Construct a DataflowPipelineLaunchConfiguration from the provided {@link ILaunchConfiguration}.
+   * Construct a DataflowPipelineLaunchConfiguration from the provided {@link ILaunchConfiguration}
+   * using the provided project version to determine suitable defaults.
    */
   public static PipelineLaunchConfiguration fromLaunchConfiguration(MajorVersion majorVersion,
       ILaunchConfiguration launchConfiguration) throws CoreException {
-    PipelineLaunchConfiguration configuration =
-        new PipelineLaunchConfiguration(majorVersion);
+    PipelineLaunchConfiguration configuration = new PipelineLaunchConfiguration(majorVersion);
     configuration.setValuesFromLaunchConfiguration(launchConfiguration);
     return configuration;
   }
@@ -112,7 +112,7 @@ public class PipelineLaunchConfiguration {
   }
 
   public void setArgumentValues(Map<String, String> allRequiredArgs) {
-    this.argumentValues = allRequiredArgs;
+    argumentValues = allRequiredArgs;
   }
 
   public boolean isUseDefaultLaunchOptions() {

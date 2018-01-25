@@ -115,6 +115,8 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
     IProject project = getProject(configuration);
     MajorVersion majorVersion = dependencyManager.getProjectMajorVersion(project);
 
+    PipelineLaunchConfiguration pipelineConfig =
+        PipelineLaunchConfiguration.fromLaunchConfiguration(majorVersion, configuration);
     PipelineOptionsHierarchy hierarchy;
     try {
       hierarchy = optionsRetrieverFactory.forProject(project, majorVersion, progress.newChild(1));
@@ -123,8 +125,6 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
           "Could not retrieve Pipeline Options Hierarchy for project " + project.getName(), e));
     }
 
-    PipelineLaunchConfiguration pipelineConfig =
-        PipelineLaunchConfiguration.fromLaunchConfiguration(majorVersion, configuration);
     PipelineRunner pipelineRunner = pipelineConfig.getRunner();
 
     DataflowPreferences preferences = ProjectOrWorkspaceDataflowPreferences.forProject(project);

@@ -397,12 +397,23 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     }
   }
 
+  private static MajorVersion getMajorVersion(IProject project) {
+    if (project != null && project.isAccessible()) {
+      DataflowDependencyManager dependencyManager = DataflowDependencyManager.create();
+      MajorVersion majorVersion = dependencyManager.getProjectMajorVersion(project);
+       if (majorVersion != null) {
+          return majorVersion;
+       }
+    }
+    return MajorVersion.ONE;
+  }
+
   /** Find the corresponding project or {@code null} if not found. */
   private final IProject findProject(ILaunchConfiguration launchConfiguration) {
     try {
       String eclipseProjectName =
           launchConfiguration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, "");
-      if (eclipseProjectName != null && !eclipseProjectName.isEmpty()) {
+    if (!Strings.isNullOrEmpty(eclipseProjectName)) {
         return workspaceRoot.getProject(eclipseProjectName);
       }
     } catch (CoreException ex) {
@@ -437,12 +448,11 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   /**
    * Synchronously updates the project hierarchy.
    */
-  private void updateHierarchy()
-      throws InvocationTargetException, InterruptedException {
+  private void updateHierarchy() throws InvocationTargetException, InterruptedException {
     // blocking call (regardless of "fork"), returning only after the inner runnable completes
     getLaunchConfigurationDialog().run(true /*fork*/, true /*cancelable*/,
         new IRunnableWithProgress() {
-      @Override
+          @Override
           public void run(IProgressMonitor monitor)
               throws InvocationTargetException, InterruptedException {
             SubMonitor subMonitor = SubMonitor.convert(monitor,
@@ -467,8 +477,8 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
         return pipelineOptionsHierarchyFactory.forProject(project,
             launchConfiguration.getMajorVersion(), monitor);
       } catch (PipelineOptionsRetrievalException e) {
-        DataflowUiPlugin.logWarning("Couldn't retrieve Pipeline Options Hierarchy for project %s", //$NON-NLS-1$
-            project);
+        DataflowUiPlugin.logWarning(
+            "Couldn't retrieve Pipeline Options Hierarchy for project %s", project); //$NON-NLS-1$
         return pipelineOptionsHierarchyFactory.global(monitor);
       }
     }
