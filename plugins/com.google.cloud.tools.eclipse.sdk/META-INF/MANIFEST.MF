@@ -22,4 +22,3 @@ Eclipse-RegisterBuddy: com.google.cloud.tools.appengine
 Service-Component: OSGI-INF/gcloud.xml
 Export-Package: com.google.cloud.tools.eclipse.sdk,
  com.google.cloud.tools.eclipse.sdk.internal;x-friends:="com.google.cloud.tools.eclipse.sdk.ui"
-Bundle-Activator: com.google.cloud.tools.eclipse.sdk.internal.Activator
