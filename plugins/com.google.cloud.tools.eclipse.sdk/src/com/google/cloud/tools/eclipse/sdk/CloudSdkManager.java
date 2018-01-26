@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.sdk;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -25,12 +26,28 @@ public class CloudSdkManager {
   private static final String OPTION_MANAGED_CLOUD_SDK =
       "com.google.cloud.tools.eclipse.sdk/enable.managed.cloud.sdk";
 
-  public static boolean isManaged() {
+  // To be able to write tests for the managed Cloud SDK feature, which is disabled at the moment.
+  @VisibleForTesting
+  public static boolean forceManagedSdkFeature;
+
+  public static boolean isManagedSdkFeatureEnabled() {
+    if (forceManagedSdkFeature) {
+      return true;
+    }
+
     BundleContext context = FrameworkUtil.getBundle(CloudSdkManager.class).getBundleContext();
     DebugOptions debugOptions = context.getService(context.getServiceReference(DebugOptions.class));
     if (debugOptions != null) {
       return debugOptions.getBooleanOption(OPTION_MANAGED_CLOUD_SDK, false);
     }
     return false;
+  }
+
+  /**
+   * Performs a one-time setup of preferences for the Managed Cloud SDK feature if it has never been
+   * set up.
+   */
+  public static void setUpInitialPreferences() {
+    // TODO(chanseok): to be implemented.
   }
 }

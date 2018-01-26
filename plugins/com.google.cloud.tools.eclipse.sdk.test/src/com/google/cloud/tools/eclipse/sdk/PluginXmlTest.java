@@ -16,27 +16,8 @@
 
 package com.google.cloud.tools.eclipse.sdk;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import com.google.cloud.tools.eclipse.test.util.BasePluginXmlTest;
 
-import org.junit.After;
-import org.junit.Test;
+public class PluginXmlTest extends BasePluginXmlTest {
 
-public class CloudSdkManagerTest {
-
-  @After
-  public void tearDown() {
-    CloudSdkManager.forceManagedSdkFeature = false;
-  }
-
-  @Test
-  public void testManagedSdkOption() {
-    assertFalse(CloudSdkManager.isManagedSdkFeatureEnabled());
-  }
-
-  @Test
-  public void testManagedSdkOption_featureForced() {
-    CloudSdkManager.forceManagedSdkFeature = true;
-    assertTrue(CloudSdkManager.isManagedSdkFeatureEnabled());
-  }
 }

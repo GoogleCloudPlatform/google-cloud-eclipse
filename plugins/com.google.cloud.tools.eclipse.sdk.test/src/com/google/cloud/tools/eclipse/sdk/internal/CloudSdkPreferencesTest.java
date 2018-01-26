@@ -14,29 +14,23 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.sdk;
+package com.google.cloud.tools.eclipse.sdk.internal;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
-import org.junit.After;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.junit.Test;
 
-public class CloudSdkManagerTest {
-
-  @After
-  public void tearDown() {
-    CloudSdkManager.forceManagedSdkFeature = false;
-  }
+public class CloudSdkPreferencesTest {
 
   @Test
-  public void testManagedSdkOption() {
-    assertFalse(CloudSdkManager.isManagedSdkFeatureEnabled());
-  }
+  public void testInitializeDefaults() {
+    IPreferenceStore preferences = CloudSdkPreferences.getPreferenceStore();
+    preferences.putValue(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT, "MANUAL");
 
-  @Test
-  public void testManagedSdkOption_featureForced() {
-    CloudSdkManager.forceManagedSdkFeature = true;
-    assertTrue(CloudSdkManager.isManagedSdkFeatureEnabled());
+    new CloudSdkPreferences().initializeDefaultPreferences();
+
+    assertEquals("AUTOMATIC",
+        preferences.getDefaultString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT));
   }
 }

@@ -16,22 +16,36 @@
 
 package com.google.cloud.tools.eclipse.sdk.internal;
 
+import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 /**
- * Constant definitions for plug-in preferences.
+ * Class for Cloud SDK preferences: defining constants, accessing their preference store and node,
+ * initializing default values, etc.
  */
-public final class PreferenceConstants {
+public final class CloudSdkPreferences extends AbstractPreferenceInitializer {
   // host bundle for the preference
   static final String BUNDLEID = "com.google.cloud.tools.eclipse.sdk";
+
+  public static enum CloudSdkManagementOption {
+    AUTOMATIC, MANUAL
+  }
+
+  /**
+   * Preference name for how the Google Cloud SDK is managed. Actual values are the names (strings)
+   * of the {@code enum CloudSdkManagementOption} constants.
+   *
+   * @see CloudSdkManagementOption#name()
+   */
+  public static final String CLOUD_SDK_MANAGEMENT = "cloudSdkManagement";
 
   /**
    * Preference name for the path to the Google Cloud SDK.
    */
-  public static final String CLOUDSDK_PATH = "cloudSdkPath";
+  public static final String CLOUD_SDK_PATH = "cloudSdkPath";
 
   static IPreferenceStore getPreferenceStore() {
     return new ScopedPreferenceStore(InstanceScope.INSTANCE, BUNDLEID);
@@ -39,5 +53,11 @@ public final class PreferenceConstants {
 
   static IEclipsePreferences getPreferenceNode() {
     return InstanceScope.INSTANCE.getNode(BUNDLEID);
+  }
+
+  @Override
+  public void initializeDefaultPreferences() {
+    getPreferenceStore().setDefault(CLOUD_SDK_MANAGEMENT,
+        CloudSdkManagementOption.AUTOMATIC.name());
   }
 }
