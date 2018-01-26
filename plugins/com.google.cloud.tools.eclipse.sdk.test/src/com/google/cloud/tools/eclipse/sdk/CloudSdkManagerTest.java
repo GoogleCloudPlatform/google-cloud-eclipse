@@ -31,12 +31,12 @@ public class CloudSdkManagerTest {
 
   @Test
   public void testManagedSdkOption() {
-    assertFalse(CloudSdkManager.managedSdkFeatureEnabled());
+    assertFalse(CloudSdkManager.isManagedSdkFeatureEnabled());
   }
 
   @Test
   public void testManagedSdkOption_featureForced() {
     CloudSdkManager.forceManagedSdkFeature = true;
-    assertTrue(CloudSdkManager.managedSdkFeatureEnabled());
+    assertTrue(CloudSdkManager.isManagedSdkFeatureEnabled());
   }
 }

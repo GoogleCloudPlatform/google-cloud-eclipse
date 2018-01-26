@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.sdk.internal;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.junit.Test;
@@ -27,12 +26,11 @@ public class PreferencesConstantsTest {
   @Test
   public void testInitializeDefaults() {
     IPreferenceStore preferences = PreferenceConstants.getPreferenceStore();
-    preferences.putValue(PreferenceConstants.CLOUD_SDK_MANAGEMENT, "CUSTOM");
-    preferences.setDefault(PreferenceConstants.CLOUD_SDK_AUTO_UPDATE, false);
+    preferences.putValue(PreferenceConstants.CLOUD_SDK_MANAGEMENT, "MANUAL");
 
     PreferenceConstants.initializeDefaults();
 
-    assertTrue(preferences.getDefaultBoolean(PreferenceConstants.CLOUD_SDK_AUTO_UPDATE));
-    assertEquals("MANAGED", preferences.getDefaultString(PreferenceConstants.CLOUD_SDK_MANAGEMENT));
+    assertEquals("AUTOMATIC",
+        preferences.getDefaultString(PreferenceConstants.CLOUD_SDK_MANAGEMENT));
   }
 }

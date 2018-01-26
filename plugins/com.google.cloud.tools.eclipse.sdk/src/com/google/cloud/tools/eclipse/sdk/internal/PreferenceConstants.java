@@ -28,21 +28,17 @@ public final class PreferenceConstants {
   // host bundle for the preference
   static final String BUNDLEID = "com.google.cloud.tools.eclipse.sdk";
 
-  public static enum CloudSdkManagement {
-    MANAGED, CUSTOM
+  public static enum CloudSdkManagementOption {
+    AUTOMATIC, MANUAL
   }
 
   /**
-   * Preference name for how the Google Cloud SDK is managed.
+   * Preference name for how the Google Cloud SDK is managed. Actual values are the names (strings)
+   * of the {@code enum CloudSdkManagementOption} constants.
    *
-   * @see CloudSdkManagement
+   * @see CloudSdkManagementOption#name()
    */
   public static final String CLOUD_SDK_MANAGEMENT = "cloudSdkManagement";
-
-  /**
-   * Preference name for the auto-update flag (Boolean).
-   */
-  public static final String CLOUD_SDK_AUTO_UPDATE = "cloudSdkAutoUpdate";
 
   /**
    * Preference name for the path to the Google Cloud SDK.
@@ -58,7 +54,7 @@ public final class PreferenceConstants {
   }
 
   static void initializeDefaults() {
-    getPreferenceStore().setDefault(CLOUD_SDK_MANAGEMENT, CloudSdkManagement.MANAGED.name());
-    getPreferenceStore().setDefault(CLOUD_SDK_AUTO_UPDATE, true);
+    getPreferenceStore().setDefault(CLOUD_SDK_MANAGEMENT,
+        CloudSdkManagementOption.AUTOMATIC.name());
   }
 }

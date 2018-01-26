@@ -57,10 +57,7 @@ public class CloudSdkPreferenceAreaTest {
   private CloudSdkPreferenceArea area;
   private Shell shell;
 
-  private Button managedSdkRadio;
-  private Button autoUpdateCheck;
-  private Button updateNow;
-  private Button customSdkRadio;
+  private Button useLocalSdk;
   private Text sdkLocation;
 
   @After
@@ -97,10 +94,7 @@ public class CloudSdkPreferenceAreaTest {
     area.createContents(shell);
     area.load();
 
-    managedSdkRadio = CompositeUtil.findButton(shell, "Managed SDK");
-    autoUpdateCheck = CompositeUtil.findButton(shell, "Update automatically");
-    updateNow = CompositeUtil.findButton(shell, "Update Now");
-    customSdkRadio = CompositeUtil.findButton(shell, "Custom SDK");
+    useLocalSdk = CompositeUtil.findButton(shell, "Use local SDK");
     sdkLocation = CompositeUtil.findControlAfterLabel(shell, Text.class, "&SDK location:");
   }
 
@@ -109,10 +103,7 @@ public class CloudSdkPreferenceAreaTest {
     when(preferences.getString(PreferenceConstants.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
 
-    assertNull(managedSdkRadio);
-    assertNull(autoUpdateCheck);
-    assertNull(updateNow);
-    assertNull(customSdkRadio);
+    assertNull(useLocalSdk);
     assertNotNull(sdkLocation);
     assertTrue(sdkLocation.isEnabled());
   }
@@ -123,58 +114,43 @@ public class CloudSdkPreferenceAreaTest {
     when(preferences.getString(PreferenceConstants.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
 
-    assertNotNull(managedSdkRadio);
-    assertNotNull(autoUpdateCheck);
-    assertNotNull(updateNow);
-    assertNotNull(customSdkRadio);
+    assertNotNull(useLocalSdk);
     assertNotNull(sdkLocation);
   }
 
   @Test
-  public void testControlStates_managedSdk() {
+  public void testControlStates_automaticSdk() {
     CloudSdkManager.forceManagedSdkFeature = true;
-    when(preferences.getString(PreferenceConstants.CLOUD_SDK_MANAGEMENT)).thenReturn("MANAGED");
-    when(preferences.getBoolean(PreferenceConstants.CLOUD_SDK_AUTO_UPDATE)).thenReturn(false);
+    when(preferences.getString(PreferenceConstants.CLOUD_SDK_MANAGEMENT)).thenReturn("AUTOMATIC");
     when(preferences.getString(PreferenceConstants.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
 
-    assertTrue(managedSdkRadio.getSelection());
-    assertTrue(autoUpdateCheck.isEnabled());
-    assertFalse(autoUpdateCheck.getSelection());
-    assertTrue(updateNow.isEnabled());
-    assertFalse(customSdkRadio.getSelection());
+    assertFalse(useLocalSdk.getSelection());
     assertFalse(sdkLocation.isEnabled());
   }
 
   @Test
-  public void testControlStates_customSdk() {
+  public void testControlStates_manualSdk() {
     CloudSdkManager.forceManagedSdkFeature = true;
-    when(preferences.getString(PreferenceConstants.CLOUD_SDK_MANAGEMENT)).thenReturn("CUSTOM");
-    when(preferences.getBoolean(PreferenceConstants.CLOUD_SDK_AUTO_UPDATE)).thenReturn(true);
+    when(preferences.getString(PreferenceConstants.CLOUD_SDK_MANAGEMENT)).thenReturn("MANUAL");
     when(preferences.getString(PreferenceConstants.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
 
-    assertFalse(managedSdkRadio.getSelection());
-    assertFalse(autoUpdateCheck.isEnabled());
-    assertTrue(autoUpdateCheck.getSelection());
-    assertFalse(updateNow.isEnabled());
-    assertTrue(customSdkRadio.getSelection());
+    assertTrue(useLocalSdk.getSelection());
     assertTrue(sdkLocation.isEnabled());
   }
 
   @Test
   public void testPerformApply_preferencesSaved() {
     CloudSdkManager.forceManagedSdkFeature = true;
-    when(preferences.getString(PreferenceConstants.CLOUD_SDK_MANAGEMENT)).thenReturn("CUSTOM");
-    when(preferences.getBoolean(PreferenceConstants.CLOUD_SDK_AUTO_UPDATE)).thenReturn(false);
+    when(preferences.getString(PreferenceConstants.CLOUD_SDK_MANAGEMENT)).thenReturn("AUTOMATIC");
     when(preferences.getString(PreferenceConstants.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
 
-    managedSdkRadio.setSelection(true);
-    autoUpdateCheck.setSelection(true);
+    assertFalse(useLocalSdk.getSelection());
+    useLocalSdk.setSelection(true);
     area.performApply();
 
-    verify(preferences).putValue(PreferenceConstants.CLOUD_SDK_MANAGEMENT, "MANAGED");
-    verify(preferences).setValue(PreferenceConstants.CLOUD_SDK_AUTO_UPDATE, true);
+    verify(preferences).putValue(PreferenceConstants.CLOUD_SDK_MANAGEMENT, "MANUAL");
   }
 }

@@ -30,7 +30,7 @@ public class CloudSdkManager {
   @VisibleForTesting
   public static boolean forceManagedSdkFeature;
 
-  public static boolean managedSdkFeatureEnabled() {
+  public static boolean isManagedSdkFeatureEnabled() {
     if (forceManagedSdkFeature) {
       return true;
     }
