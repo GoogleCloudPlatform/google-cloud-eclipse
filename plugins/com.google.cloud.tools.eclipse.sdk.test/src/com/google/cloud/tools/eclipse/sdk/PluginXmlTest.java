@@ -14,23 +14,10 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.sdk.internal;
+package com.google.cloud.tools.eclipse.sdk;
 
-import static org.junit.Assert.assertEquals;
+import com.google.cloud.tools.eclipse.test.util.BasePluginXmlTest;
 
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.junit.Test;
+public class PluginXmlTest extends BasePluginXmlTest {
 
-public class PreferencesConstantsTest {
-
-  @Test
-  public void testInitializeDefaults() {
-    IPreferenceStore preferences = PreferenceConstants.getPreferenceStore();
-    preferences.putValue(PreferenceConstants.CLOUD_SDK_MANAGEMENT, "MANUAL");
-
-    PreferenceConstants.initializeDefaults();
-
-    assertEquals("AUTOMATIC",
-        preferences.getDefaultString(PreferenceConstants.CLOUD_SDK_MANAGEMENT));
-  }
 }

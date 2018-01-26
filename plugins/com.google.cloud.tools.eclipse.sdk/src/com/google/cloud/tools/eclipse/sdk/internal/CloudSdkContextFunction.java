@@ -50,13 +50,13 @@ public class CloudSdkContextFunction extends ContextFunction {
   /** Cloud SDK location has been changed: trigger any necessary updates. */
   static void sdkPathChanged(String newPath) {
     for (IEclipseContext context : referencedContexts) {
-      context.set(PreferenceConstants.CLOUD_SDK_PATH, newPath);
+      context.set(CloudSdkPreferences.CLOUD_SDK_PATH, newPath);
     }
   }
 
   @Override
   public Object compute(IEclipseContext context, String contextKey) {
-    Object path = context.get(PreferenceConstants.CLOUD_SDK_PATH);
+    Object path = context.get(CloudSdkPreferences.CLOUD_SDK_PATH);
     if (path == null) {
       // record this context as using the preference value
       referencedContexts.add(context);
@@ -87,7 +87,7 @@ public class CloudSdkContextFunction extends ContextFunction {
     } else if (path instanceof String) {
       return Paths.get((String) path);
     } else if (path != null) {
-      logger.warning("Unsupported object for " + PreferenceConstants.CLOUD_SDK_PATH + ": " + path);
+      logger.warning("Unsupported object for " + CloudSdkPreferences.CLOUD_SDK_PATH + ": " + path);
     }
     return null;
   }

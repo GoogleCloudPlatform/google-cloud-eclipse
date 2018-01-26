@@ -23,8 +23,8 @@ import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
 import com.google.cloud.tools.eclipse.preferences.areas.PreferenceArea;
 import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
-import com.google.cloud.tools.eclipse.sdk.internal.PreferenceConstants;
-import com.google.cloud.tools.eclipse.sdk.internal.PreferenceConstants.CloudSdkManagementOption;
+import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
+import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences.CloudSdkManagementOption;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.File;
@@ -76,7 +76,9 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
   public Control createContents(Composite parent) {
     Composite contents = new Composite(parent, SWT.NONE);
     Link instructions = new Link(contents, SWT.WRAP);
-    instructions.setText(Messages.getString("CloudSdkRequired")); //$NON-NLS-1$
+    instructions.setText(CloudSdkManager.isManagedSdkFeatureEnabled()
+        ? Messages.getString("CloudSdkRequiredWithManagedSdk") //$NON-NLS-1$
+        : Messages.getString("CloudSdkRequired")); //$NON-NLS-1$
     instructions.setFont(contents.getFont());
     instructions.addSelectionListener(new SelectionAdapter() {
       @Override
@@ -97,7 +99,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     }
 
     localSdkArea = new Composite(parent, SWT.NONE);
-    sdkLocation = new CloudSdkDirectoryFieldEditor(PreferenceConstants.CLOUD_SDK_PATH,
+    sdkLocation = new CloudSdkDirectoryFieldEditor(CloudSdkPreferences.CLOUD_SDK_PATH,
         Messages.getString("SdkLocation"), localSdkArea); //$NON-NLS-1$
     Path defaultLocation = getDefaultSdkLocation();
     if (defaultLocation != null) {
@@ -125,9 +127,9 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     IPreferenceStore preferenceStore = getPreferenceStore();
     String value;
     if (loadDefault) {
-      value = preferenceStore.getDefaultString(PreferenceConstants.CLOUD_SDK_MANAGEMENT);
+      value = preferenceStore.getDefaultString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT);
     } else {
-      value = preferenceStore.getString(PreferenceConstants.CLOUD_SDK_MANAGEMENT);
+      value = preferenceStore.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT);
     }
 
     boolean manual = CloudSdkManagementOption.MANUAL.name().equals(value);
@@ -166,10 +168,10 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
   public void performApply() {
     if (CloudSdkManager.isManagedSdkFeatureEnabled()) {
       if (useLocalSdk.getSelection()) {
-        getPreferenceStore().putValue(PreferenceConstants.CLOUD_SDK_MANAGEMENT,
+        getPreferenceStore().putValue(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT,
             CloudSdkManagementOption.MANUAL.name());
       } else {
-        getPreferenceStore().putValue(PreferenceConstants.CLOUD_SDK_MANAGEMENT,
+        getPreferenceStore().putValue(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT,
             CloudSdkManagementOption.AUTOMATIC.name());
       }
     }

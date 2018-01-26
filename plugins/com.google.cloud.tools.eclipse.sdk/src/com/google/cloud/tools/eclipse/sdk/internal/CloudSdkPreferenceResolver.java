@@ -29,7 +29,7 @@ public class CloudSdkPreferenceResolver implements CloudSdkResolver {
   private final IPreferenceStore preferences;
 
   public CloudSdkPreferenceResolver() {
-    preferences = PreferenceConstants.getPreferenceStore();
+    preferences = CloudSdkPreferences.getPreferenceStore();
   }
 
   @VisibleForTesting
@@ -39,7 +39,7 @@ public class CloudSdkPreferenceResolver implements CloudSdkResolver {
 
   @Override
   public Path getCloudSdkPath() {
-    String value = preferences.getString(PreferenceConstants.CLOUD_SDK_PATH);
+    String value = preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH);
     if (value != null && !value.isEmpty()) {
       return Paths.get(value);
     }

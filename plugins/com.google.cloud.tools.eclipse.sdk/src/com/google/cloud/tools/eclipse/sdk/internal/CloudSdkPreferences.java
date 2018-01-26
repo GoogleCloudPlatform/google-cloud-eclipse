@@ -16,15 +16,17 @@
 
 package com.google.cloud.tools.eclipse.sdk.internal;
 
+import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 /**
- * Constant definitions for plug-in preferences.
+ * Class for Cloud SDK preferences: defining constants, accessing their preference store and node,
+ * initializing default values, etc.
  */
-public final class PreferenceConstants {
+public final class CloudSdkPreferences extends AbstractPreferenceInitializer {
   // host bundle for the preference
   static final String BUNDLEID = "com.google.cloud.tools.eclipse.sdk";
 
@@ -53,7 +55,8 @@ public final class PreferenceConstants {
     return InstanceScope.INSTANCE.getNode(BUNDLEID);
   }
 
-  static void initializeDefaults() {
+  @Override
+  public void initializeDefaultPreferences() {
     getPreferenceStore().setDefault(CLOUD_SDK_MANAGEMENT,
         CloudSdkManagementOption.AUTOMATIC.name());
   }

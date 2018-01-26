@@ -25,7 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
-import com.google.cloud.tools.eclipse.sdk.internal.PreferenceConstants;
+import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
 import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPreferenceArea;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
@@ -67,7 +67,7 @@ public class CloudSdkPreferenceAreaTest {
 
   @Test
   public void testNonExistentPath() {
-    when(preferences.getString(PreferenceConstants.CLOUD_SDK_PATH)).thenReturn("/non-existent");
+    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("/non-existent");
     createPreferenceArea();
 
     assertFalse(area.getStatus().isOK());
@@ -76,12 +76,12 @@ public class CloudSdkPreferenceAreaTest {
 
   @Test
   public void testInvalidPath() {
-    when(preferences.getString(PreferenceConstants.CLOUD_SDK_PATH))
+    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH))
         .thenReturn(tempFolder.getRoot().getAbsolutePath());
     createPreferenceArea();
     assertEquals(IStatus.WARNING, area.getStatus().getSeverity());
 
-    when(preferences.getString(PreferenceConstants.CLOUD_SDK_PATH)).thenReturn("");
+    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("");
     area.load();
     assertEquals(IStatus.OK, area.getStatus().getSeverity());
   }
@@ -100,7 +100,7 @@ public class CloudSdkPreferenceAreaTest {
 
   @Test
   public void testUi_noSdkManagementFeature() {
-    when(preferences.getString(PreferenceConstants.CLOUD_SDK_PATH)).thenReturn("");
+    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
 
     assertNull(useLocalSdk);
@@ -111,7 +111,7 @@ public class CloudSdkPreferenceAreaTest {
   @Test
   public void testUi_sdkManagementFeature() {
     CloudSdkManager.forceManagedSdkFeature = true;
-    when(preferences.getString(PreferenceConstants.CLOUD_SDK_PATH)).thenReturn("");
+    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
 
     assertNotNull(useLocalSdk);
@@ -121,8 +121,8 @@ public class CloudSdkPreferenceAreaTest {
   @Test
   public void testControlStates_automaticSdk() {
     CloudSdkManager.forceManagedSdkFeature = true;
-    when(preferences.getString(PreferenceConstants.CLOUD_SDK_MANAGEMENT)).thenReturn("AUTOMATIC");
-    when(preferences.getString(PreferenceConstants.CLOUD_SDK_PATH)).thenReturn("");
+    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)).thenReturn("AUTOMATIC");
+    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
 
     assertFalse(useLocalSdk.getSelection());
@@ -132,8 +132,8 @@ public class CloudSdkPreferenceAreaTest {
   @Test
   public void testControlStates_manualSdk() {
     CloudSdkManager.forceManagedSdkFeature = true;
-    when(preferences.getString(PreferenceConstants.CLOUD_SDK_MANAGEMENT)).thenReturn("MANUAL");
-    when(preferences.getString(PreferenceConstants.CLOUD_SDK_PATH)).thenReturn("");
+    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)).thenReturn("MANUAL");
+    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
 
     assertTrue(useLocalSdk.getSelection());
@@ -143,14 +143,14 @@ public class CloudSdkPreferenceAreaTest {
   @Test
   public void testPerformApply_preferencesSaved() {
     CloudSdkManager.forceManagedSdkFeature = true;
-    when(preferences.getString(PreferenceConstants.CLOUD_SDK_MANAGEMENT)).thenReturn("AUTOMATIC");
-    when(preferences.getString(PreferenceConstants.CLOUD_SDK_PATH)).thenReturn("");
+    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)).thenReturn("AUTOMATIC");
+    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
 
     assertFalse(useLocalSdk.getSelection());
     useLocalSdk.setSelection(true);
     area.performApply();
 
-    verify(preferences).putValue(PreferenceConstants.CLOUD_SDK_MANAGEMENT, "MANUAL");
+    verify(preferences).putValue(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT, "MANUAL");
   }
 }
