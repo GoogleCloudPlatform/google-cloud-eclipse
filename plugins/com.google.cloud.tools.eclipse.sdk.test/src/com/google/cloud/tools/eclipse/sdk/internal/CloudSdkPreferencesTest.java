@@ -35,7 +35,18 @@ public class CloudSdkPreferencesTest {
     assertEquals(
         "AUTOMATIC", preferences.getDefaultString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT));
   }
-  
+
+  @Test
+  public void testInitializeDefaults_noChangeIfSet() {
+    IPreferenceStore preferences = preferencesCreator.getPreferenceStore();
+    preferences.setValue(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT, "FOO");
+    new CloudSdkPreferences().initializeDefaultPreferences(preferences);
+
+    assertEquals("FOO", preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT));
+    assertEquals(
+        "AUTOMATIC", preferences.getDefaultString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT));
+  }
+
   @Test
   public void testConfigure_noCloudSdkAvailable() {
     IPreferenceStore preferences = preferencesCreator.getPreferenceStore();
