@@ -66,14 +66,15 @@ public final class CloudSdkPreferences extends AbstractPreferenceInitializer {
 
   @VisibleForTesting
   public void initializeDefaultPreferences(IPreferenceStore preferences) {
-    preferences.setDefault(CLOUD_SDK_MANAGEMENT, CloudSdkManagementOption.AUTOMATIC.name());
-    if (CloudSdkManager.isManagedSdkFeatureEnabled()
-        && preferences.isDefault(CLOUD_SDK_MANAGEMENT)) {
-      // If the CLOUD_SDK_MANAGEMENT preference has not been set, then determine the
-      // appropriate setting. Note that CloudSdkPreferenceResolver only checks for
-      // the Managed Cloud SDK when CLOUD_SDK_MANAGEMENT has been explicitly set
-      // (i.e., this code has been run).
-      configureManagementPreferences(preferences, isCloudSdkAvailable());
+    if (CloudSdkManager.isManagedSdkFeatureEnabled()) {
+      if (!preferences.contains(CLOUD_SDK_MANAGEMENT)) {
+        // If the CLOUD_SDK_MANAGEMENT preference has not been set, then determine the
+        // appropriate setting. Note that CloudSdkPreferenceResolver only checks for
+        // the Managed Cloud SDK when CLOUD_SDK_MANAGEMENT has been explicitly set
+        // (i.e., this code has been run).
+        configureManagementPreferences(preferences, isCloudSdkAvailable());
+      }
+      preferences.setDefault(CLOUD_SDK_MANAGEMENT, CloudSdkManagementOption.AUTOMATIC.name());
     }
   }
 
@@ -82,7 +83,7 @@ public final class CloudSdkPreferences extends AbstractPreferenceInitializer {
   static void configureManagementPreferences(
       IPreferenceStore preferences, boolean cloudSdkAvailable) {
     // has the user previously set the Cloud SDK path? has it been found in a well-known location?
-    if (!preferences.isDefault(CLOUD_SDK_PATH) || cloudSdkAvailable) {
+    if (preferences.contains(CLOUD_SDK_PATH) || cloudSdkAvailable) {
       preferences.setValue(CLOUD_SDK_MANAGEMENT, CloudSdkManagementOption.MANUAL.name());
     } else {
       preferences.setValue(CLOUD_SDK_MANAGEMENT, CloudSdkManagementOption.AUTOMATIC.name());

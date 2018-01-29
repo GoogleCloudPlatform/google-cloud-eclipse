@@ -42,12 +42,4 @@ public class CloudSdkManager {
     }
     return false;
   }
-
-  /**
-   * Performs a one-time setup of preferences for the Managed Cloud SDK feature if it has never been
-   * set up.
-   */
-  public static void setUpInitialPreferences() {
-    // TODO(chanseok): to be implemented.
-  }
 }

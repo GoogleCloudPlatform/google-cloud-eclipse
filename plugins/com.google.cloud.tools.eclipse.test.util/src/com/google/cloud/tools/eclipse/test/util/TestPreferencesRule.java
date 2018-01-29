@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.test.util;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -54,7 +55,7 @@ public class TestPreferencesRule extends ExternalResource {
     try {
       preferences.removeNode();
     } catch (BackingStoreException ex) {
-      logger.log(java.util.logging.Level.WARNING, "Failed clearing preferences: " + storeId, ex);
+      logger.log(Level.WARNING, "Failed clearing preferences: " + storeId, ex);
     }
   }
 }
