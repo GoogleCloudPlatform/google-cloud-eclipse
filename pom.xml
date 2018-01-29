@@ -36,7 +36,7 @@
   </modules>
 
   <properties>
-    <tycho.version>1.0.0</tycho.version>
+    <tycho.version>1.1.0</tycho.version>
     <tycho-extras.version>1.0.0</tycho-extras.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <eclipse.target>mars</eclipse.target>
@@ -694,4 +694,10 @@
       </snapshots>
     </repository>
   </repositories>
+<pluginRepositories>
+<pluginRepository>
+ <id>tycho-staged</id>
+ <url>https://oss.sonatype.org/content/repositories/orgeclipsetycho-1046/</url>
+</pluginRepository>
+</pluginRepositories>
 </project>

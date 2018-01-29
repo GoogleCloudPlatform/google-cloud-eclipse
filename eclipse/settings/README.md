@@ -8,7 +8,7 @@ The settings currently reflect the following choices:
 
   - uses the [Google Java Format plugin for Eclipse](google-java-format),
     which requires Eclipse Oxygen (4.7) or later.
-  - unnecessary declared exceptions on methods are _errors_
+  - unnecessary declared checked exceptions on methods are _errors_
   - switch missing default case are _warnings_
   - resource leaks are _errors_
   - potential resource leaks are _warnings_
@@ -20,7 +20,7 @@ The settings currently reflect the following choices:
 The settings require installing the [Google Java Format plugin for
 Eclipse][google-java-format].  Installing the format plugin requires
 downloading the [latest release][google-java-format-release] (named
-`google-java-format-eclipse-plugin_XXXX.jar`)and placing the jar
+`google-java-format-eclipse-plugin_XXXX.jar`) and placing the jar
 in your Eclipse installation's `dropins/` directory (on MacOS, in
 `Eclipse.app/Content/Eclipse/dropins/`).
 
