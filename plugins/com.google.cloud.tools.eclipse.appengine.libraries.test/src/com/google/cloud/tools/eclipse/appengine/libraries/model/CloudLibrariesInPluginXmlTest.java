@@ -157,14 +157,14 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(objectifyMavenCoordinates.getRepository(), is("central"));
     assertThat(objectifyMavenCoordinates.getGroupId(), is("com.googlecode.objectify"));
     assertThat(objectifyMavenCoordinates.getArtifactId(), is("objectify"));
-    assertThat(objectifyMavenCoordinates.getVersion(), is("5.1.21"));
+    assertThat(objectifyMavenCoordinates.getVersion(), is("5.1.22"));
     assertThat(objectifyMavenCoordinates.getType(), is("jar"));
     assertNull(objectifyMavenCoordinates.getClassifier());
 
     assertNotNull(objectifyLibraryFile.getFilters());
     assertTrue(objectifyLibraryFile.getFilters().isEmpty());
     assertThat(objectifyLibraryFile.getJavadocUri(),
-        is(new URI("https://www.javadoc.io/doc/com.googlecode.objectify/objectify/5.1.21")));
+        is(new URI("https://www.javadoc.io/doc/com.googlecode.objectify/objectify/5.1.22")));
     
     assertNull(guavaLibraryFile.getSourceUri());
     assertTrue("Guava not exported", guavaLibraryFile.isExport());
