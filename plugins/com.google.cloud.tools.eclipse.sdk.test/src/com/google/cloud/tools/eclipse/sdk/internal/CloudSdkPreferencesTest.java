@@ -17,20 +17,52 @@
 package com.google.cloud.tools.eclipse.sdk.internal;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
+import com.google.cloud.tools.eclipse.test.util.TestPreferencesRule;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.junit.Rule;
 import org.junit.Test;
 
 public class CloudSdkPreferencesTest {
+  @Rule public TestPreferencesRule preferencesCreator = new TestPreferencesRule();
 
   @Test
   public void testInitializeDefaults() {
-    IPreferenceStore preferences = CloudSdkPreferences.getPreferenceStore();
+    IPreferenceStore preferences = preferencesCreator.getPreferenceStore();
+    new CloudSdkPreferences().initializeDefaultPreferences(preferences);
+
+    assertEquals(
+        "AUTOMATIC", preferences.getDefaultString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT));
+  }
+  
+  @Test
+  public void testConfigure_noCloudSdkAvailable() {
+    IPreferenceStore preferences = preferencesCreator.getPreferenceStore();
     preferences.putValue(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT, "MANUAL");
 
-    new CloudSdkPreferences().initializeDefaultPreferences();
+    CloudSdkPreferences.configureManagementPreferences(preferences, false /*cloudSdkAvailable*/);
+    assertFalse(preferences.isDefault(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT));
+    assertEquals("AUTOMATIC", preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT));
+  }
 
-    assertEquals("AUTOMATIC",
-        preferences.getDefaultString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT));
+  @Test
+  public void testConfigure_cloudSdkAvailable() {
+    IPreferenceStore preferences = preferencesCreator.getPreferenceStore();
+    preferences.putValue(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT, "MANUAL");
+
+    CloudSdkPreferences.configureManagementPreferences(preferences, true /*cloudSdkAvailable*/);
+    assertFalse(preferences.isDefault(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT));
+    assertEquals("MANUAL", preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT));
+  }
+
+  @Test
+  public void testConfigure_hasCloudSdkPath() {
+    IPreferenceStore preferences = preferencesCreator.getPreferenceStore();
+    preferences.putValue(CloudSdkPreferences.CLOUD_SDK_PATH, "/a/path");
+
+    CloudSdkPreferences.configureManagementPreferences(preferences, false /*cloudSdkAvailable*/);
+    assertFalse(preferences.isDefault(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT));
+    assertEquals("MANUAL", preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT));
   }
 }
