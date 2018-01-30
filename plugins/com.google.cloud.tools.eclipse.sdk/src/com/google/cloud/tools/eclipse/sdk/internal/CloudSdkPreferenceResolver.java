@@ -55,7 +55,7 @@ public class CloudSdkPreferenceResolver implements CloudSdkResolver {
         // TODO: Should check and wait on the installation job, if in progress
         try {
           return ManagedCloudSdk.newManagedSdk().getSdkHome();
-        } catch(UnsupportedOsException ex) {
+        } catch (UnsupportedOsException ex) {
           logger.log(Level.SEVERE, "Google Cloud SDK not available", ex); // $NON-NLS-1$
           return null;
         }

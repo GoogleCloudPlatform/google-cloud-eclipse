@@ -96,7 +96,7 @@ public final class CloudSdkPreferences extends AbstractPreferenceInitializer {
     try {
       new CloudSdk.Builder().build();
       return true;
-    } catch(CloudSdkNotFoundException ex) {
+    } catch (CloudSdkNotFoundException ex) {
       return false;
     }
   }

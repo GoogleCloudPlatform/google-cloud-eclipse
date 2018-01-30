@@ -25,9 +25,7 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.junit.rules.ExternalResource;
 import org.osgi.service.prefs.BackingStoreException;
 
-/**
- * Test utility to create create an empty {@link IEclipsePreferences} or {@link IPreferenceStore}.
- */
+/** Test utility to create an empty {@link IEclipsePreferences} or {@link IPreferenceStore}. */
 public class TestPreferencesRule extends ExternalResource {
   private static final Logger logger = Logger.getLogger(TestPreferencesRule.class.getName());
 
