@@ -20,6 +20,7 @@ import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -65,7 +66,7 @@ public final class CloudSdkPreferences extends AbstractPreferenceInitializer {
   }
 
   @VisibleForTesting
-  public void initializeDefaultPreferences(IPreferenceStore preferences) {
+  void initializeDefaultPreferences(IPreferenceStore preferences) {
     if (CloudSdkManager.isManagedSdkFeatureEnabled()) {
       if (!preferences.contains(CLOUD_SDK_MANAGEMENT)) {
         // If the CLOUD_SDK_MANAGEMENT preference has not been set, then determine the
@@ -83,7 +84,7 @@ public final class CloudSdkPreferences extends AbstractPreferenceInitializer {
   static void configureManagementPreferences(
       IPreferenceStore preferences, boolean cloudSdkAvailable) {
     // has the user previously set the Cloud SDK path? has it been found in a well-known location?
-    if (preferences.contains(CLOUD_SDK_PATH) || cloudSdkAvailable) {
+    if (!Strings.isNullOrEmpty(preferences.getString(CLOUD_SDK_PATH)) || cloudSdkAvailable) {
       preferences.setValue(CLOUD_SDK_MANAGEMENT, CloudSdkManagementOption.MANUAL.name());
     } else {
       preferences.setValue(CLOUD_SDK_MANAGEMENT, CloudSdkManagementOption.AUTOMATIC.name());
