@@ -52,7 +52,7 @@ public class CloudSdkPreferenceResolver implements CloudSdkResolver {
     if (preferences.contains(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)) {
       String managementOption = preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT);
       if (CloudSdkManagementOption.AUTOMATIC.name().equals(managementOption)) {
-        // XXX: Should check and wait on the installation job, if in progress
+        // TODO: Should check and wait on the installation job, if in progress
         try {
           return ManagedCloudSdk.newManagedSdk().getSdkHome();
         } catch(UnsupportedOsException ex) {

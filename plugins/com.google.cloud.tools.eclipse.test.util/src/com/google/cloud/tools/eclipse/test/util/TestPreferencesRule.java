@@ -51,11 +51,11 @@ public class TestPreferencesRule extends ExternalResource {
 
   @Override
   protected void after() {
-    super.after();
     try {
       preferences.removeNode();
     } catch (BackingStoreException ex) {
-      logger.log(Level.WARNING, "Failed clearing preferences: " + storeId, ex);
+      logger.log(Level.FINE, "Failed clearing preferences: " + storeId, ex);
     }
+    super.after();
   }
 }
