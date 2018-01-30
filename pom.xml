@@ -101,6 +101,9 @@
     <maven.compiler.source>1.7</maven.compiler.source>
     <maven.compiler.target>1.7</maven.compiler.target>
 
+    <!-- by default enable GTK3 support -->
+    <swt.gtk3>1</swt.gtk3>
+
     <!-- log surefire tests to stdout -->
     <tycho.showEclipseLog>true</tycho.showEclipseLog>
 
@@ -371,6 +374,9 @@
               - maven.artifact.threads=1 to workaround repository corruption seen in
                 https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2284
             -->
+            <environmentVariables>
+              <SWT_GTK3>${swt.gtk3}</SWT_GTK3>
+            </environmentVariables>
             <argLine>${jacoco.agentArgLine} -Dmaven.artifact.threads=1
               -Dorg.eclipse.swtbot.search.timeout=${org.eclipse.swtbot.search.timeout}
               -Xms40m -Xmx1G -XX:MaxPermSize=512m
@@ -433,6 +439,7 @@
         </property>
       </activation>
       <properties>
+         <swt.gtk3>0</swt.gtk3> <!-- disable GTK3 support for Mars -->
          <jettyMinVersion>9.1</jettyMinVersion>
          <jettyMaxVersion>9.3</jettyMaxVersion>
       </properties>
