@@ -34,6 +34,7 @@
     <module>features/com.google.cloud.tools.eclipse.3rdparty.feature</module>
     <module>features/com.google.licenses.apache_v2</module>
 
+    <module>plugins/com.google.cloud.tools.eclipse.integration.appengine</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.compat</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.compat.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy</module>
@@ -87,8 +88,6 @@
     <module>plugins/com.google.cloud.tools.eclipse.dataflow.core.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.dataflow.ui</module>
     <module>plugins/com.google.cloud.tools.eclipse.dataflow.ui.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.integration.appengine</module>
-
     <module>third_party/com.google.cloud.tools.eclipse.jdt.launching</module>
     <module>third_party/com.google.cloud.tools.eclipse.jst.server.core</module>
   </modules>
