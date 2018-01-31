@@ -113,8 +113,9 @@ public class PollingStatusServiceImpl implements GcpStatusService {
 
   void refreshStatus() {
     try {
-      // Retrieve the first 8k of the incidents log: it's 270k as of 2018-01-30!
-      // But the incidents appear to be sorted from most recent to the oldest.
+      // As of 2018-01-30 the incidents log is 258k! But the incidents appear to be sorted from most
+      // recent to the oldest.  Although fetching with gzip encoding reduces to 36k over the wire,
+      // we can still do better by retrieving only the first 8k.
       URLConnection connection = STATUS_JSON_URI.toURL().openConnection(getProxy(STATUS_JSON_URI));
       connection.addRequestProperty("Range", "bytes=0-8192");
       try (InputStream input = connection.getInputStream()) {

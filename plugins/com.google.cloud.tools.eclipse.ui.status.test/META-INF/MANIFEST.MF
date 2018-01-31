@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Google Cloud Platform Status widget tests
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.ui.status.test
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: Google, Inc.
 Fragment-Host: com.google.cloud.tools.eclipse.ui.status
 Automatic-Module-Name: com.google.cloud.tools.eclipse.ui.status.test

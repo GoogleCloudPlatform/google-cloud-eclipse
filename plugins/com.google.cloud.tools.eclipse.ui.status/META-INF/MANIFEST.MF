@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.ui.status;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: %Bundle-Vendor
 Automatic-Module-Name: com.google.cloud.tools.eclipse.ui.status
 Require-Bundle: org.eclipse.ui
