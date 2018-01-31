@@ -22,6 +22,8 @@ import com.google.common.annotations.VisibleForTesting;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.service.debug.DebugOptions;
@@ -94,12 +96,17 @@ public class CloudSdkManager {
    * @param consoleStream stream to which the install output is written
    */
   public static void installManagedSdk(MessageConsoleStream consoleStream)
-      throws InterruptedException {
+      throws CoreException, InterruptedException {
     if (isManagedSdkFeatureEnabled()) {
       if (CloudSdkPreferences.isAutoManaging()) {
         CloudSdkInstallJob installJob = new CloudSdkInstallJob(consoleStream, useModifyLock);
         installJob.schedule();
         installJob.join();
+
+        IStatus status = installJob.getResult();
+        if (!status.isOK()) {
+          throw new CoreException(status);
+        }
       }
     }
   }

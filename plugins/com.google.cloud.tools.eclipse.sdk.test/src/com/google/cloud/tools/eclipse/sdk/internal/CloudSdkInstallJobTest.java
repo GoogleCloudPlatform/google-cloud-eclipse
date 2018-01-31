@@ -19,13 +19,10 @@ package com.google.cloud.tools.eclipse.sdk.internal;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import org.eclipse.core.runtime.jobs.Job;
@@ -47,8 +44,7 @@ public class CloudSdkInstallJobTest {
   private CloudSdkInstallJob installJob;
 
   @Before
-  public void setUp() throws InterruptedException {
-    when(writeLock.tryLock(anyLong(), any(TimeUnit.class))).thenReturn(true);
+  public void setUp() {
     when(readWriteLock.writeLock()).thenReturn(writeLock);
 
     installJob = new CloudSdkInstallJob(consoleStream, readWriteLock);
