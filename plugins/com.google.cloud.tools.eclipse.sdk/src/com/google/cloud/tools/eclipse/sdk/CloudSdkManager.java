@@ -52,7 +52,8 @@ public class CloudSdkManager {
   }
 
   // readers = using SDK, writers = modifying SDK
-  private static final ReadWriteLock useModifyLock = new ReentrantReadWriteLock();
+  @VisibleForTesting
+  static final ReadWriteLock useModifyLock = new ReentrantReadWriteLock();
 
   /**
    * Prevents potential future SDK auto-install or auto-update functionality to allow safely using
