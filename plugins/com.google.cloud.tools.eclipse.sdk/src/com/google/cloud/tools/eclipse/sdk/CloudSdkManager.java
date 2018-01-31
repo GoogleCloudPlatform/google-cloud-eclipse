@@ -16,9 +16,13 @@
 
 package com.google.cloud.tools.eclipse.sdk;
 
+import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkInstallJob;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.osgi.framework.BundleContext;
@@ -46,42 +50,37 @@ public class CloudSdkManager {
     return false;
   }
 
-  private static Object modifyLock = new Object();
-  private static int suspenderCounts = 0;
-  private static boolean isModifyingSdk = false;
+  // readers = using SDK, writers = modifying SDK
+  private static final ReadWriteLock useModifyLock = new ReentrantReadWriteLock();
 
   /**
-   * Suspends potential SDK auto-install or auto-update temporarily. This is to use the Cloud SDK
-   * safely by preventing modifying the SDK while using the SDK. If an install or update has already
-   * started, blocks callers until the install or update is complete. Callers must call {@code
-   * CloudSdkManager#allowModifyingSdk} eventually to lift the suspension.
-   *
+   * Prevents potential future SDK auto-install or auto-update functionality to allow safely using
+   * the managed Cloud SDK for some period of time. Blocks if an install or update is in progress.
+   * Callers must call {@code CloudSdkManager#allowModifyingSdk} eventually to lift the suspension.
    * Any callers that intend to use {@code CloudSdk} must always call this before staring work, even
    * if the Cloud SDK preferences are configured not to auto-managed the SDK.
    *
+   * <p>Must not be called from the UI thread, because the method can block.
+   *
    * @see CloudSdkManager#allowModifyingSdk
    */
-  public static void suspendModifyingSdk() throws InterruptedException {
-    synchronized (modifyLock) {
-      while (isModifyingSdk) {
-        modifyLock.wait();
-      }
-      suspenderCounts++;
-    }
+  public static void preventModifyingSdk() throws InterruptedException {
+    do {
+      // The join is to improve UI reporting of blocked jobs. Most of the waiting should be here.
+      Job.getJobManager().join(CloudSdkInstallJob.CLOUD_SDK_MODIFY_JOB_FAMILY, null /* no monitor */);
+    } while (!useModifyLock.readLock().tryLock(10, TimeUnit.MILLISECONDS));
+    // We have acquired the read lock; all further install/update should be blocked, while others
+    // can still grab a read lock and use the Cloud SDK.
   }
 
   /**
-   * Allows SDK auto-install or auto-update temporarily suspended by {@code
-   * CloudSdkManager#suspendModifyingSdk}.
+   * Allows future SDK auto-install or auto-update temporarily prevented by {@code
+   * CloudSdkManager#preventModifyingSdk}.
    *
-   * @see CloudSdkManager#suspendModifyingSdk
+   * @see CloudSdkManager#preventModifyingSdk
    */
   public static void allowModifyingSdk() {
-    synchronized (modifyLock) {
-      Preconditions.checkState(suspenderCounts > 0);
-      suspenderCounts--;
-      modifyLock.notifyAll();
-    }
+    useModifyLock.readLock().unlock();
   }
 
   /**
@@ -95,19 +94,9 @@ public class CloudSdkManager {
       throws InterruptedException {
     if (isManagedSdkFeatureEnabled()) {
       if (CloudSdkPreferences.isAutoManaging()) {
-        synchronized (modifyLock) {
-          try {
-            while (isModifyingSdk || suspenderCounts > 0) {
-              modifyLock.wait();
-            }
-            isModifyingSdk = true;
-            // TODO: start installing SDK synchronously if not found.
-            
-          } finally {
-            isModifyingSdk = false;
-            modifyLock.notifyAll();
-          }
-        }
+        CloudSdkInstallJob installJob = new CloudSdkInstallJob(consoleStream, useModifyLock);
+        installJob.schedule();
+        installJob.join();
       }
     }
   }
@@ -115,8 +104,9 @@ public class CloudSdkManager {
   public static void installManagedSdkAsync() {
     if (isManagedSdkFeatureEnabled()) {
       if (CloudSdkPreferences.isAutoManaging()) {
-        // Job installJob = new Job();
-        // installJob.schedule();
+        CloudSdkInstallJob installJob =
+            new CloudSdkInstallJob(null /* no console output */, useModifyLock);
+        installJob.schedule();
       }
     }
   }
@@ -124,17 +114,11 @@ public class CloudSdkManager {
   public static void updateManagedSdkAsync() {
     if (isManagedSdkFeatureEnabled()) {
       if (CloudSdkPreferences.isAutoManaging()) {
-        // Job udpateJob = new Job();
+        // TODO(chanseok): to be implemented
+        // CloudSdkUpdateJob udpateJob =
+        //    new CloudSdkUpdateJob(null /* no console output */, useModifyLock);
         // updateJob.schedule();
       }
     }
-  }
-
-  /**
-   * Performs a one-time setup of preferences for the Managed Cloud SDK feature if it has never been
-   * set up.
-   */
-  public static void setUpInitialPreferences() {
-    // TODO(chanseok): to be implemented.
   }
 }
