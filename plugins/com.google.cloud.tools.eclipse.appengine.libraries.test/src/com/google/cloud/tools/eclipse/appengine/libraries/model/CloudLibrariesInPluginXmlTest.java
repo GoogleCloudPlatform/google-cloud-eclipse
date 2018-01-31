@@ -26,6 +26,8 @@ import static org.junit.Assert.assertTrue;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
@@ -157,14 +159,17 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(objectifyMavenCoordinates.getRepository(), is("central"));
     assertThat(objectifyMavenCoordinates.getGroupId(), is("com.googlecode.objectify"));
     assertThat(objectifyMavenCoordinates.getArtifactId(), is("objectify"));
-    assertThat(objectifyMavenCoordinates.getVersion(), is("5.1.21"));
+    DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(
+        objectifyMavenCoordinates.getVersion());
+    DefaultArtifactVersion expected = new DefaultArtifactVersion("5.1.22");
+    assertTrue(artifactVersion.compareTo(expected) >= 0);
     assertThat(objectifyMavenCoordinates.getType(), is("jar"));
     assertNull(objectifyMavenCoordinates.getClassifier());
 
     assertNotNull(objectifyLibraryFile.getFilters());
     assertTrue(objectifyLibraryFile.getFilters().isEmpty());
-    assertThat(objectifyLibraryFile.getJavadocUri(),
-        is(new URI("https://www.javadoc.io/doc/com.googlecode.objectify/objectify/5.1.21")));
+    assertTrue(objectifyLibraryFile.getJavadocUri().toString().startsWith(
+        "https://www.javadoc.io/doc/com.googlecode.objectify/objectify/"));
     
     assertNull(guavaLibraryFile.getSourceUri());
     assertTrue("Guava not exported", guavaLibraryFile.isExport());
