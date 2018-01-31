@@ -60,31 +60,32 @@ public class ShowGcpStatusHandler extends AbstractHandler implements IElementUpd
     GcpStatusService service = element.getServiceLocator().getService(GcpStatusService.class);
     GcpStatus status = service.getCurrentStatus();
     element.setText("Status: " + status.summary);
-    element.setTooltip(summarizeIncidents(status.active));
     switch (status.severity) {
       case OK:
         element.setIcon(IMG_OK);
+        element.setTooltip(status.summary);
         break;
       case LOW:
         element.setIcon(IMG_LOW);
+        element.setTooltip(summarizeIncidents(status.active));
         break;
       case MEDIUM:
         element.setIcon(IMG_MEDIUM);
+        element.setTooltip(summarizeIncidents(status.active));
         break;
       case HIGH:
         element.setIcon(IMG_HIGH);
+        element.setTooltip(summarizeIncidents(status.active));
         break;
       case ERROR:
       default:
         element.setIcon(IMG_ERROR);
+        element.setTooltip(status.summary); // show error text
         break;
     }
   }
 
   private String summarizeIncidents(Collection<Incident> incidents) {
-    if (incidents == null || incidents.isEmpty()) {
-      return "All services available";
-    }
     List<String> messages = new ArrayList<>();
     for (Incident incident : incidents) {
       messages.add(incident.toString());
