@@ -19,12 +19,16 @@ package com.google.cloud.tools.eclipse.sdk.internal;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
+import org.eclipse.core.runtime.IProgressMonitorWithBlocking;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.junit.After;
@@ -63,6 +67,20 @@ public class CloudSdkInstallJobTest {
   @Test
   public void testMutexRuleSet() {
     assertEquals(CloudSdkInstallJob.MUTEX_RULE, installJob.getRule());
+  }
+
+  @Test
+  public void testMarkBlocked() {
+    IProgressMonitorWithBlocking monitor = mock(IProgressMonitorWithBlocking.class);
+    CloudSdkInstallJob.markBlocked(monitor);
+    verify(monitor).setBlocked(any(IStatus.class));
+  }
+
+  @Test
+  public void testClearBlocked() {
+    IProgressMonitorWithBlocking monitor = mock(IProgressMonitorWithBlocking.class);
+    CloudSdkInstallJob.clearBlocked(monitor);
+    verify(monitor).clearBlocked();
   }
 
   @Test

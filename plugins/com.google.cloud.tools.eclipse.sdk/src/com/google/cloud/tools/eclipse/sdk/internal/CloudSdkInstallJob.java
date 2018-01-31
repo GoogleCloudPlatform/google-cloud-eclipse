@@ -18,9 +18,11 @@ package com.google.cloud.tools.eclipse.sdk.internal;
 
 import com.google.cloud.tools.eclipse.sdk.Messages;
 import com.google.cloud.tools.eclipse.util.jobs.MutexRule;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.concurrent.locks.ReadWriteLock;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IProgressMonitorWithBlocking;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -52,9 +54,12 @@ public class CloudSdkInstallJob extends Job {
   @Override
   protected IStatus run(IProgressMonitor monitor) {
     try {
+      markBlocked(monitor);  // for better UI reporting of blocking while acquiring the lock
       cloudSdkLock.writeLock().lockInterruptibly();
     } catch (InterruptedException e) {
       return Status.CANCEL_STATUS;
+    } finally {
+      clearBlocked(monitor);
     }
 
     try {
@@ -68,6 +73,22 @@ public class CloudSdkInstallJob extends Job {
       return Status.OK_STATUS;
     } finally {
       cloudSdkLock.writeLock().unlock();
+    }
+  }
+
+  @VisibleForTesting
+  static void markBlocked(IProgressMonitor monitor) {
+    if (monitor instanceof IProgressMonitorWithBlocking) {
+      IStatus reason = StatusUtil.info(CloudSdkInstallJob.class,
+          Messages.getString("sdkModificationLocked")); //$NON-NLS-1$
+      ((IProgressMonitorWithBlocking) monitor).setBlocked(reason);
+    }
+  }
+
+  @VisibleForTesting
+  static void clearBlocked(IProgressMonitor monitor) {
+    if (monitor instanceof IProgressMonitorWithBlocking) {
+      ((IProgressMonitorWithBlocking) monitor).clearBlocked();
     }
   }
 }
