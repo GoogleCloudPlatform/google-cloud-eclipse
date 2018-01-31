@@ -33,7 +33,7 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
-import com.google.cloud.tools.eclipse.sdk.MessageConsoleWriterOutputLineListener;
+import com.google.cloud.tools.eclipse.sdk.MessageConsoleWriterListener;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -414,10 +414,8 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
 
   private void initializeDevServer(MessageConsoleStream stdout, MessageConsoleStream stderr,
       Path javaHomePath) {
-    MessageConsoleWriterOutputLineListener stdoutListener =
-        new MessageConsoleWriterOutputLineListener(stdout);
-    MessageConsoleWriterOutputLineListener stderrListener =
-        new MessageConsoleWriterOutputLineListener(stderr);
+    MessageConsoleWriterListener stdoutListener = new MessageConsoleWriterListener(stdout);
+    MessageConsoleWriterListener stderrListener = new MessageConsoleWriterListener(stderr);
 
     // dev_appserver output goes to stderr
     cloudSdk = new CloudSdk.Builder()
