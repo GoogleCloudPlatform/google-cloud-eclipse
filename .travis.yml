@@ -18,8 +18,7 @@ env:
   matrix:
     # ECLIPSE_TARGET is the targeted platform: mars is the default target
     # JAVA_RUNTIME specifies the execution runtime for tests; must match an <id> in .travisci/toolchains.xml
-    # SWT_GTK3=0 to force GTK2 on Mars as its GTK3 support is buggy
-    - JAVA_RUNTIME=JavaSE-1.7 SWT_GTK3=0
+    - JAVA_RUNTIME=JavaSE-1.7
     - JAVA_RUNTIME=JavaSE-1.8 ECLIPSE_TARGET=neon
     - JAVA_RUNTIME=JavaSE-1.8 ECLIPSE_TARGET=oxygen MAVEN_FLAGS=-Pjacoco
   global:
