@@ -20,13 +20,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.eclipse.core.runtime.IProgressMonitorWithBlocking;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
@@ -41,22 +42,22 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class CloudSdkInstallJobTest {
 
-  @Mock private Lock writeLock;
-  @Mock private ReadWriteLock readWriteLock;
   @Mock private MessageConsoleStream consoleStream;
 
+  private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
   private CloudSdkInstallJob installJob;
 
   @Before
   public void setUp() {
-    when(readWriteLock.writeLock()).thenReturn(writeLock);
-
     installJob = new CloudSdkInstallJob(consoleStream, readWriteLock);
   }
 
   @After
   public void tearDown() {
     assertEquals(Job.NONE, installJob.getState());
+
+    assertTrue(readWriteLock.writeLock().tryLock());
+    readWriteLock.writeLock().unlock();
   }
 
   @Test
@@ -92,12 +93,14 @@ public class CloudSdkInstallJobTest {
   }
 
   @Test
-  public void testRun_unlockAfterReturn() throws InterruptedException {
+  public void testRun_unlocksAfterReturn() throws InterruptedException {
     installJob.schedule();
     installJob.join();
 
     assertTrue(installJob.getResult().isOK());
-    verify(writeLock, times(1)).unlock();
+
+    assertTrue(readWriteLock.writeLock().tryLock());
+    readWriteLock.writeLock().unlock();
   }
 
   @Test
@@ -111,5 +114,30 @@ public class CloudSdkInstallJobTest {
 
     installJob.join();
     secondJob.join();
+  }
+
+  @Test
+  public void testRun_blockedUntilWritable() throws InterruptedException {
+    assertTrue(readWriteLock.readLock().tryLock());
+    boolean locked = true;
+
+    try {
+      installJob.schedule();
+      while (installJob.getState() != Job.RUNNING) {
+        Thread.sleep(50);
+      }
+      // Incomplete test, but if it ever fails, something is surely broken.
+      verify(consoleStream, never()).println(anyString());
+
+      readWriteLock.readLock().unlock();
+      locked = false;
+      installJob.join();
+
+      verify(consoleStream, atLeastOnce()).println(anyString());
+    } finally {
+      if (locked) {
+        readWriteLock.readLock().unlock();
+      }
+    }
   }
 }
