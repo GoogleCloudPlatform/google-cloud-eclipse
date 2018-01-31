@@ -16,11 +16,10 @@
 
 package com.google.cloud.tools.eclipse.ui.status;
 
+import com.google.cloud.tools.eclipse.ui.status.Incident.Severity;
 import com.google.cloud.tools.eclipse.util.jobs.Consumer;
-import com.google.cloud.tools.eclipse.util.status.StatusUtil;
-import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Joiner;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.stream.JsonReader;
 import java.io.IOException;
@@ -33,13 +32,15 @@ import java.net.Proxy.Type;
 import java.net.URI;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.Logger;
 import org.eclipse.core.net.proxy.IProxyData;
 import org.eclipse.core.net.proxy.IProxyService;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
-import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.osgi.service.component.annotations.Activate;
@@ -66,10 +67,8 @@ public class PollingStatusServiceImpl implements GcpStatusService {
       new Job("Retrieving Google Cloud Platform status") {
         @Override
         protected IStatus run(IProgressMonitor monitor) {
-          logger.info("Starting GCP status refresh");
           refreshStatus();
           if (active) {
-            logger.info("Still active: rescheduling");
             schedule(pollTime);
           }
           return Status.OK_STATUS;
@@ -82,7 +81,7 @@ public class PollingStatusServiceImpl implements GcpStatusService {
   private ListenerList /*<Consumer<GcpStatusService>>*/ listeners = new ListenerList /*<>*/();
   private Gson gson = new Gson();
 
-  private IStatus currentStatus = Status.OK_STATUS;
+  private GcpStatus currentStatus = GcpStatus.OK_STATUS;
 
   @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL)
   public void setProxyService(IProxyService proxyService) {
@@ -108,21 +107,30 @@ public class PollingStatusServiceImpl implements GcpStatusService {
   }
 
   @Override
-  public IStatus getCurrentStatus() {
+  public GcpStatus getCurrentStatus() {
     return currentStatus;
   }
 
   void refreshStatus() {
     try {
+      // Retrieve the first 8k of the incidents log: it's 270k as of 2018-01-30!
+      // But the incidents appear to be sorted from most recent to the oldest.
       URLConnection connection = STATUS_JSON_URI.toURL().openConnection(getProxy(STATUS_JSON_URI));
-      // the incidents log is 270k as of 2018-01-30!
       connection.addRequestProperty("Range", "bytes=0-8192");
       try (InputStream input = connection.getInputStream()) {
         InputStreamReader streamReader = new InputStreamReader(input, StandardCharsets.UTF_8);
-        currentStatus = processIncidents(gson, streamReader);
+        Collection<Incident> active = extractIncidentsInProgress(gson, streamReader);
+        if (active.isEmpty()) {
+          currentStatus = GcpStatus.OK_STATUS;
+        } else {
+          Severity highestSeverity = Incident.getHighestSeverity(active);
+          Collection<String> affectedServices = Incident.getAffectedServiceNames(active);
+          currentStatus =
+              new GcpStatus(highestSeverity, Joiner.on(", ").join(affectedServices), active);
+        }
       }
     } catch (IOException ex) {
-      currentStatus = StatusUtil.error(this, ex.toString(), ex);
+      currentStatus = new GcpStatus(Severity.ERROR, ex.toString(), null);
     }
     logger.info("current GCP status = " + currentStatus);
     for (Object listener : listeners.getListeners()) {
@@ -132,47 +140,25 @@ public class PollingStatusServiceImpl implements GcpStatusService {
 
   /**
    * Process and accumulate the incidents from the input stream. As the the input stream may be
-   * incomplete (e.g., partial download), we ignore {@link IOException}s that may occur.
+   * incomplete (e.g., partial download), we ignore any JSON exceptions and {@link IOException}s
+   * that may occur.
    */
-  static IStatus processIncidents(Gson gson, Reader reader) {
-    // Process the individual incident elements. These are sorted from most recent to the
-    // earliest. Active incidents no {@code end} element.
-    MultiStatus status =
-        StatusUtil.multi(PollingStatusServiceImpl.class, "Google Cloud Platform status");
+  static Collection<Incident> extractIncidentsInProgress(Gson gson, Reader reader) {
+    // Process the individual incident elements. An active incident has no {@code end} element.
+    List<Incident> incidents = new LinkedList<Incident>();
     try {
       JsonReader jsonReader = new JsonReader(reader);
       jsonReader.beginArray();
       while (jsonReader.hasNext()) {
-        JsonObject incident = gson.fromJson(jsonReader, JsonObject.class);
-        if (!incident.has("end")) {
-          status.merge(toStatus(incident));
+        Incident incident = gson.fromJson(jsonReader, Incident.class);
+        if (incident.end == null) {
+          incidents.add(incident);
         }
       }
     } catch (JsonParseException | IOException ex) {
       // ignore this since we don't request all of the data
     }
-    return StatusUtil.filter(status);
-  }
-
-  /** Encode a Google Cloud Status incident JSON object into a status object. */
-  @VisibleForTesting
-  static IStatus toStatus(JsonObject incident) {
-    int id = incident.get("number").getAsInt();
-    String serviceKey = incident.get("service_key").getAsString();
-    String serviceName = incident.get("service_name").getAsString();
-    String externalDescription = incident.get("external_desc").getAsString();
-    String message = String.format("Incident %d [%s]: %s", id, serviceName, externalDescription);
-
-    String severity = incident.get("severity").getAsString();
-    switch (severity) {
-      case "low":
-        return new Status(IStatus.INFO, serviceKey, id, message, null);
-      case "medium":
-        return new Status(IStatus.WARNING, serviceKey, id, message, null);
-      case "high":
-      default:
-        return new Status(IStatus.ERROR, serviceKey, id, message, null);
-    }
+    return incidents;
   }
 
   private Proxy getProxy(URI uri) {

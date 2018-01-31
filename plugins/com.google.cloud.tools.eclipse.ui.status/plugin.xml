@@ -22,9 +22,9 @@
       <command
             categoryId="com.google.cloud.tools.eclipse.ui.commands"
             defaultHandler="com.google.cloud.tools.eclipse.ui.status.ShowGcpStatusHandler"
-            description="Show the current status of Google Cloud Platform"
+            description="%command.description"
             id="com.google.cloud.tools.eclipse.ui.status.showGcpStatus"
-            name="Show Google Cloud Platform Status">
+            name="%command.name">
       </command>
    </extension>
    <extension

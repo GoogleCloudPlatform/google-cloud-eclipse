@@ -16,17 +16,7 @@
 
 package com.google.cloud.tools.eclipse.ui.status;
 
-import com.google.cloud.tools.eclipse.util.jobs.Consumer;
+import com.google.cloud.tools.eclipse.test.util.BasePluginXmlTest;
 
-/** Represents a service for querying the Google Cloud Platform status. */
-public interface GcpStatusService {
-
-  /** Return the latest status. */
-  GcpStatus getCurrentStatus();
-
-  /** Request notification of any changes. */
-  void addStatusChangeListener(Consumer<GcpStatusService> listener);
-
-  /** Request to be no longer notified of any changes. */
-  void removeStatusChangeListener(Consumer<GcpStatusService> listener);
-}
+/** Ensure this plugin appears to be in good shape. */
+public class PluginXmlTest extends BasePluginXmlTest {}

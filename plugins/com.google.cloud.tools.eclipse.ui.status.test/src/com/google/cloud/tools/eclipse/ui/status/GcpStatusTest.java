@@ -16,17 +16,13 @@
 
 package com.google.cloud.tools.eclipse.ui.status;
 
-import com.google.cloud.tools.eclipse.util.jobs.Consumer;
+import static org.junit.Assert.assertEquals;
 
-/** Represents a service for querying the Google Cloud Platform status. */
-public interface GcpStatusService {
+import org.junit.Test;
 
-  /** Return the latest status. */
-  GcpStatus getCurrentStatus();
-
-  /** Request notification of any changes. */
-  void addStatusChangeListener(Consumer<GcpStatusService> listener);
-
-  /** Request to be no longer notified of any changes. */
-  void removeStatusChangeListener(Consumer<GcpStatusService> listener);
+public class GcpStatusTest {
+  @Test
+  public void testToString() {
+    assertEquals("OK: All services available", GcpStatus.OK_STATUS.toString());
+  }
 }
