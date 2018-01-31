@@ -16,7 +16,9 @@
 
 package com.google.cloud.tools.eclipse.sdk.internal;
 
+import com.google.cloud.tools.eclipse.sdk.Messages;
 import com.google.cloud.tools.eclipse.util.jobs.MutexRule;
+import com.google.common.annotations.VisibleForTesting;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -30,13 +32,14 @@ public class CloudSdkInstallJob extends Job {
   public static final Object CLOUD_SDK_MODIFY_JOB_FAMILY = new Object();
 
   /** Scheduling rule to prevent running {@code CloudSdkInstallJob} concurrently. */
-  private static final MutexRule MUTEX_RULE = new MutexRule();
+  @VisibleForTesting
+  static final MutexRule MUTEX_RULE = new MutexRule();
 
   private final MessageConsoleStream consoleStream;
   private final ReadWriteLock cloudSdkLock;
 
   public CloudSdkInstallJob(MessageConsoleStream consoleStream, ReadWriteLock cloudSdkLock) {
-    super("Installing the Cloud SDK...");
+    super(Messages.getString("InstallJobName")); //$NON-NLS-1$
     this.consoleStream = consoleStream;
     this.cloudSdkLock = cloudSdkLock;
     setRule(MUTEX_RULE);
@@ -51,7 +54,7 @@ public class CloudSdkInstallJob extends Job {
   protected IStatus run(IProgressMonitor monitor) {
     try {
       if (!cloudSdkLock.writeLock().tryLock(10, TimeUnit.MILLISECONDS)) {
-        schedule(10000);  // Try 10 seconds later if the Cloud SDK is being used or modified.
+        schedule(5000);  // Try 5 seconds later if the Cloud SDK is being used or modified.
         return Status.OK_STATUS;
       }
     } catch (InterruptedException e) {
@@ -60,7 +63,9 @@ public class CloudSdkInstallJob extends Job {
 
     try {
       if (consoleStream != null) {
-        consoleStream.println("Installing the Cloud SDK...");
+        consoleStream.println(Messages.getString("InstallStarting")); //$NON-NLS-1$
+
+        // TODO(chanseok): actual install to be implemented.
         consoleStream.println("(to be implemented)");
         consoleStream.println("Done. Now you have the Cloud SDK.");
       }
