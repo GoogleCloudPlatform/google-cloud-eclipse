@@ -22,6 +22,7 @@ import com.google.common.annotations.VisibleForTesting;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.ui.console.MessageConsoleStream;
@@ -66,8 +67,9 @@ public class CloudSdkManager {
    */
   public static void preventModifyingSdk() throws InterruptedException {
     do {
+      IJobManager jobManager = Job.getJobManager();
       // The join is to improve UI reporting of blocked jobs. Most of the waiting should be here.
-      Job.getJobManager().join(CloudSdkInstallJob.CLOUD_SDK_MODIFY_JOB_FAMILY, null /* no monitor */);
+      jobManager.join(CloudSdkInstallJob.CLOUD_SDK_MODIFY_JOB_FAMILY, null /* no monitor */);
     } while (!useModifyLock.readLock().tryLock(10, TimeUnit.MILLISECONDS));
     // We have acquired the read lock; all further install/update should be blocked, while others
     // can still grab a read lock and use the Cloud SDK.

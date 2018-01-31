@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.sdk.internal;
 
 import com.google.cloud.tools.eclipse.util.jobs.MutexRule;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -35,7 +36,7 @@ public class CloudSdkInstallJob extends Job {
   private final ReadWriteLock cloudSdkLock;
 
   public CloudSdkInstallJob(MessageConsoleStream consoleStream, ReadWriteLock cloudSdkLock) {
-    super("Installing Cloud SDK...");
+    super("Installing the Cloud SDK...");
     this.consoleStream = consoleStream;
     this.cloudSdkLock = cloudSdkLock;
     setRule(MUTEX_RULE);
@@ -48,7 +49,15 @@ public class CloudSdkInstallJob extends Job {
 
   @Override
   protected IStatus run(IProgressMonitor monitor) {
-    cloudSdkLock.writeLock().lock();
+    try {
+      if (!cloudSdkLock.writeLock().tryLock(10, TimeUnit.MILLISECONDS)) {
+        schedule(10000);  // Try 10 seconds later if the Cloud SDK is being used or modified.
+        return Status.OK_STATUS;
+      }
+    } catch (InterruptedException e) {
+      return Status.CANCEL_STATUS;
+    }
+
     try {
       if (consoleStream != null) {
         consoleStream.println("Installing the Cloud SDK...");
