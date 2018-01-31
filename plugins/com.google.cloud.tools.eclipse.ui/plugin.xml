@@ -3,6 +3,11 @@
 <plugin>
    <extension
          point="org.eclipse.ui.commands">
+      <category
+            id="com.google.cloud.tools.eclipse.ui.commands"
+            name="Google Cloud Platform">
+      </category>
+         
       <command
             categoryId="org.eclipse.ui.category.window"
             defaultHandler="com.google.cloud.tools.eclipse.ui.util.OpenDropDownMenuHandler"
@@ -17,7 +22,7 @@
            allPopups="false"
            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
         <toolbar
-              id="com.google.cloud.tools.eclipse.appengine.toolbar">
+              id="com.google.cloud.tools.eclipse.ui.toolbar">
            <command
                  commandId="com.google.cloud.tools.eclipse.ui.util.showPopup"
                  icon="icons/obj16/gcp.png"
@@ -26,6 +31,13 @@
                  label="%googleCloudPlatformName"
                  tooltip="%googleCloudPlatformName">
            </command>
+        </toolbar>
+     </menuContribution>
+
+     <menuContribution
+            locationURI="toolbar:org.eclipse.ui.trim.status?after=additions">
+        <toolbar
+               id="com.google.cloud.tools.eclipse.ui.status">
         </toolbar>
      </menuContribution>
      
@@ -70,6 +82,9 @@
         <separator
               name="feedback"
               visible="true">
+        </separator>
+        <separator
+              name="status">
         </separator>
      </menuContribution>
      
