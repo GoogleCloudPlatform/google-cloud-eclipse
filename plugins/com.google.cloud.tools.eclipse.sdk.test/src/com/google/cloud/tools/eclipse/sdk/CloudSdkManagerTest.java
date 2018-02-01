@@ -124,6 +124,7 @@ public class CloudSdkManagerTest {
         @Override
         public IStatus run(IProgressMonitor monitor) {
           try {
+            // Should block until we allow SDK modification below.
             CloudSdkManager.runInstallJob(null, installJob);
             return Status.OK_STATUS;
           } catch (CoreException | InterruptedException e) {
