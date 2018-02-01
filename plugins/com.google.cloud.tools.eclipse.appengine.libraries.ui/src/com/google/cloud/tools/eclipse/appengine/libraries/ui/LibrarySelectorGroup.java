@@ -90,6 +90,12 @@ public class LibrarySelectorGroup implements ISelectionProvider {
       Button libraryButton = new Button(apiGroup, SWT.CHECK);
       libraryButton.setText(getLibraryName(library));
       String toolTip = library.getToolTip();
+      
+      String stage = library.getLaunchStage();
+      if (!"GA".equals(stage )) {
+        toolTip += " (" + stage + ")";
+      }
+      
       if (toolTip != null) {
         libraryButton.setToolTipText(toolTip);
       }
