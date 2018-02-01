@@ -183,11 +183,11 @@ public class CloudSdkManagerTest {
     }
   }
 
-  private class FakeInstallJob extends CloudSdkModifyJob {
+  private static class FakeInstallJob extends CloudSdkModifyJob {
 
     private final IStatus result;
 
-    public FakeInstallJob(IStatus result) {
+    private FakeInstallJob(IStatus result) {
       super("fake job", null, CloudSdkManager.modifyLock);
       this.result = result;
     }
