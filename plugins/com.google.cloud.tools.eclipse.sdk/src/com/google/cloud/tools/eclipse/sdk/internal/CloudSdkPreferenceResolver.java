@@ -48,14 +48,13 @@ public class CloudSdkPreferenceResolver implements CloudSdkResolver {
   public Path getCloudSdkPath() {
     // We only consult the Managed Cloud SDK when it has been explicitly configured, which
     // is done in CloudSdkPreferences.
-    if (preferences.contains(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)) {
-      if (CloudSdkPreferences.isAutoManaging()) {
-        try {
-          return ManagedCloudSdk.newManagedSdk().getSdkHome();
-        } catch (UnsupportedOsException ex) {
-          logger.log(Level.SEVERE, "Google Cloud SDK not available", ex); // $NON-NLS-1$
-          return null;
-        }
+    if (CloudSdkPreferences.isAutoManaging()) {
+      try {
+        // It is assumed that clients do not get and use "CloudSdk" while it is being modified.
+        return ManagedCloudSdk.newManagedSdk().getSdkHome();
+      } catch (UnsupportedOsException ex) {
+        logger.log(Level.SEVERE, "Google Cloud SDK not available", ex); // $NON-NLS-1$
+        return null;
       }
     }
     String value = preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH);

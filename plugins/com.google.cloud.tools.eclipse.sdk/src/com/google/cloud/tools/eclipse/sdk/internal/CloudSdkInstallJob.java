@@ -29,7 +29,7 @@ public class CloudSdkInstallJob extends CloudSdkModifyJob {
   }
 
   @Override
-  protected IStatus installSdk() {
+  protected IStatus modifySdk() {
     // TODO(chanseok): to be implemented: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2753
     return Status.OK_STATUS;
   }

@@ -193,7 +193,7 @@ public class CloudSdkManagerTest {
     }
 
     @Override
-    protected IStatus installSdk() {
+    protected IStatus modifySdk() {
       return result;
     } 
   }

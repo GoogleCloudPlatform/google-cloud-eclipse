@@ -67,13 +67,13 @@ public abstract class CloudSdkModifyJob extends Job {
       if (consoleStream != null) {
         consoleStream.println(Messages.getString("startModifying")); //$NON-NLS-1$
       }
-      return installSdk();
+      return modifySdk();
     } finally {
       cloudSdkLock.writeLock().unlock();
     }
   }
 
-  protected abstract IStatus installSdk();
+  protected abstract IStatus modifySdk();
 
   @VisibleForTesting
   static void markBlocked(IProgressMonitor monitor) {

@@ -26,6 +26,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.eclipse.core.runtime.IProgressMonitorWithBlocking;
@@ -50,7 +51,7 @@ public class CloudSdkModifyJobTest {
 
   @Before
   public void setUp() {
-    installJob = new FakeInstallJob(consoleStream);
+    installJob = new FakeInstallJob(consoleStream, false /* blockOnStart */);
   }
 
   @After
@@ -107,15 +108,22 @@ public class CloudSdkModifyJobTest {
 
   @Test
   public void testRun_mutualExclusion() throws InterruptedException {
-    installJob.schedule();
+    FakeInstallJob job1 = new FakeInstallJob(null, true /* blockOnStart */);
+    FakeInstallJob job2 = new FakeInstallJob(null, true /* blockOnStart */);
 
-    Job secondJob = new FakeInstallJob(null);
-    secondJob.schedule();
+    job1.schedule();
+    while (job1.getState() != Job.RUNNING) {
+      Thread.sleep(50);
+    }
+
+    job2.schedule();
     // Incomplete test, but if it ever fails, something is surely broken.
-    assertNotEquals(Job.RUNNING, secondJob.getState());
+    assertNotEquals(Job.RUNNING, job2.getState());
 
-    installJob.join();
-    secondJob.join();
+    job1.unblock();
+    job2.unblock();
+    job1.join();
+    job2.join();
   }
 
   @Test
@@ -124,6 +132,7 @@ public class CloudSdkModifyJobTest {
     boolean locked = true;
 
     try {
+      FakeInstallJob installJob = new FakeInstallJob(consoleStream, true /* blockOnStart */);
       installJob.schedule();
       while (installJob.getState() != Job.RUNNING) {
         Thread.sleep(50);
@@ -133,6 +142,7 @@ public class CloudSdkModifyJobTest {
 
       readWriteLock.readLock().unlock();
       locked = false;
+      installJob.unblock();
       installJob.join();
 
       verify(consoleStream, atLeastOnce()).println(anyString());
@@ -145,13 +155,28 @@ public class CloudSdkModifyJobTest {
 
   private class FakeInstallJob extends CloudSdkModifyJob {
 
-    public FakeInstallJob(MessageConsoleStream consoleStream) {
+    private final Semaphore blocker = new Semaphore(0);
+    private final boolean blockOnStart;
+
+    private FakeInstallJob(MessageConsoleStream consoleStream, boolean blockOnStart) {
       super("fake job", consoleStream, readWriteLock);
+      this.blockOnStart = blockOnStart;
     }
 
     @Override
-    protected IStatus installSdk() {
+    protected IStatus modifySdk() {
+      try {
+        if (blockOnStart) {
+          blocker.acquire();
+        }
+      } catch (InterruptedException e) {
+        return Status.CANCEL_STATUS;
+      }
       return Status.OK_STATUS;
+    }
+
+    private void unblock() {
+      blocker.release();
     }
   };
 }
