@@ -102,7 +102,11 @@ public class CloudLibraries {
             JsonString language = client.getJsonString("language");
             if (language != null && "java".equals(language.getString())) {
               String toolTip = client.getString("infotip");
+              if (!"GA".equals(library.getLaunchStage())) {
+                toolTip += " (" + library.getLaunchStage() + ")";
+              }
               library.setToolTip(toolTip);
+              library.setLaunchStage(client.getString("launchStage"));
               JsonObject coordinates = client.getJsonObject("mavenCoordinates");
               String groupId = coordinates.getString("groupId");
               String artifactId = coordinates.getString("artifactId");
