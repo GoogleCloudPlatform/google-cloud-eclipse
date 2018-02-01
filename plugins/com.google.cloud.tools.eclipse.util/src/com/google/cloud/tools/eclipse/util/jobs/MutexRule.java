@@ -29,7 +29,7 @@ public class MutexRule implements ISchedulingRule {
     return rule == this;
   }
 
- @Override
+  @Override
   public boolean isConflicting(ISchedulingRule rule) {
     return rule == this;
  }

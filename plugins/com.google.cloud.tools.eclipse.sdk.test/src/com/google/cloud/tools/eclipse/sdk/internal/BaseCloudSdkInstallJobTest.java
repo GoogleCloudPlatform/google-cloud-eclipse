@@ -90,7 +90,7 @@ public class BaseCloudSdkInstallJobTest {
     installJob.schedule();
     installJob.join();
 
-    verify(consoleStream).println("Installing the Cloud SDK... (may take up to several minutes)");
+    verify(consoleStream).println("Installing the Cloud SDK... (may take several minutes)");
   }
 
   @Test
