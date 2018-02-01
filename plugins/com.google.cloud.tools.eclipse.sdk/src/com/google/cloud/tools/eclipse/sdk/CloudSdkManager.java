@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.sdk;
 
+import com.google.cloud.tools.eclipse.sdk.internal.BaseCloudSdkInstallJob;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkInstallJob;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
 import com.google.common.annotations.VisibleForTesting;
@@ -55,7 +56,7 @@ public class CloudSdkManager {
 
   // readers = using SDK, writers = modifying SDK
   @VisibleForTesting
-  static final ReadWriteLock useModifyLock = new ReentrantReadWriteLock();
+  static final ReadWriteLock modifyLock = new ReentrantReadWriteLock();
 
   /**
    * Prevents potential future SDK auto-install or auto-update functionality to allow safely using
@@ -72,8 +73,8 @@ public class CloudSdkManager {
     do {
       IJobManager jobManager = Job.getJobManager();
       // The join is to improve UI reporting of blocked jobs. Most of the waiting should be here.
-      jobManager.join(CloudSdkInstallJob.CLOUD_SDK_MODIFY_JOB_FAMILY, null /* no monitor */);
-    } while (!useModifyLock.readLock().tryLock(10, TimeUnit.MILLISECONDS));
+      jobManager.join(BaseCloudSdkInstallJob.CLOUD_SDK_MODIFY_JOB_FAMILY, null /* no monitor */);
+    } while (!modifyLock.readLock().tryLock(10, TimeUnit.MILLISECONDS));
     // We have acquired the read lock; all further install/update should be blocked, while others
     // can still grab a read lock and use the Cloud SDK.
   }
@@ -85,7 +86,7 @@ public class CloudSdkManager {
    * @see CloudSdkManager#preventModifyingSdk
    */
   public static void allowModifyingSdk() {
-    useModifyLock.readLock().unlock();
+    modifyLock.readLock().unlock();
   }
 
   /**
@@ -99,23 +100,28 @@ public class CloudSdkManager {
       throws CoreException, InterruptedException {
     if (isManagedSdkFeatureEnabled()) {
       if (CloudSdkPreferences.isAutoManaging()) {
-        CloudSdkInstallJob installJob = new CloudSdkInstallJob(consoleStream, useModifyLock);
-        installJob.schedule();
-        installJob.join();
-
-        IStatus status = installJob.getResult();
-        if (!status.isOK()) {
-          throw new CoreException(status);
-        }
+        runInstallJob(consoleStream, new CloudSdkInstallJob(consoleStream, modifyLock));
       }
+    }
+  }
+
+  @VisibleForTesting
+  static void runInstallJob(MessageConsoleStream consoleStream, BaseCloudSdkInstallJob installJob)
+      throws CoreException, InterruptedException {
+    installJob.schedule();
+    installJob.join();
+
+    IStatus status = installJob.getResult();
+    if (!status.isOK()) {
+      throw new CoreException(status);
     }
   }
 
   public static void installManagedSdkAsync() {
     if (isManagedSdkFeatureEnabled()) {
       if (CloudSdkPreferences.isAutoManaging()) {
-        CloudSdkInstallJob installJob =
-            new CloudSdkInstallJob(null /* no console output */, useModifyLock);
+        BaseCloudSdkInstallJob installJob =
+            new CloudSdkInstallJob(null /* no console output */, modifyLock);
         installJob.schedule();
       }
     }
@@ -126,7 +132,7 @@ public class CloudSdkManager {
       if (CloudSdkPreferences.isAutoManaging()) {
         // TODO(chanseok): to be implemented
         // CloudSdkUpdateJob udpateJob =
-        //    new CloudSdkUpdateJob(null /* no console output */, useModifyLock);
+        //    new CloudSdkUpdateJob(null /* no console output */, modifyLock);
         // updateJob.schedule();
       }
     }

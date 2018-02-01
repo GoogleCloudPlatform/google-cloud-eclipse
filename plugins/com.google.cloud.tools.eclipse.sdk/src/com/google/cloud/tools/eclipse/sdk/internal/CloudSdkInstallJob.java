@@ -16,79 +16,21 @@
 
 package com.google.cloud.tools.eclipse.sdk.internal;
 
-import com.google.cloud.tools.eclipse.sdk.Messages;
-import com.google.cloud.tools.eclipse.util.jobs.MutexRule;
-import com.google.cloud.tools.eclipse.util.status.StatusUtil;
-import com.google.common.annotations.VisibleForTesting;
 import java.util.concurrent.locks.ReadWriteLock;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IProgressMonitorWithBlocking;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.console.MessageConsoleStream;
 
-public class CloudSdkInstallJob extends Job {
-
-  public static final Object CLOUD_SDK_MODIFY_JOB_FAMILY = new Object();
-
-  /** Scheduling rule to prevent running {@code CloudSdkInstallJob} concurrently. */
-  @VisibleForTesting
-  static final MutexRule MUTEX_RULE = new MutexRule();
-
-  private final MessageConsoleStream consoleStream;
-  private final ReadWriteLock cloudSdkLock;
+public class CloudSdkInstallJob extends BaseCloudSdkInstallJob {
 
   public CloudSdkInstallJob(MessageConsoleStream consoleStream, ReadWriteLock cloudSdkLock) {
-    super(Messages.getString("InstallJobName")); //$NON-NLS-1$
-    this.consoleStream = consoleStream;
-    this.cloudSdkLock = cloudSdkLock;
-    setRule(MUTEX_RULE);
+    super(consoleStream, cloudSdkLock);
   }
 
   @Override
-  public boolean belongsTo(Object family) {
-    return super.belongsTo(family) || family == CLOUD_SDK_MODIFY_JOB_FAMILY;
+  protected IStatus installSdk() {
+    // TODO(chanseok): to be implemented.
+    return Status.OK_STATUS;
   }
 
-  @Override
-  protected IStatus run(IProgressMonitor monitor) {
-    try {
-      markBlocked(monitor);  // for better UI reporting of blocking while acquiring the lock
-      cloudSdkLock.writeLock().lockInterruptibly();
-    } catch (InterruptedException e) {
-      return Status.CANCEL_STATUS;
-    } finally {
-      clearBlocked(monitor);
-    }
-
-    try {
-      if (consoleStream != null) {
-        consoleStream.println(Messages.getString("InstallStarting")); //$NON-NLS-1$
-
-        // TODO(chanseok): actual install to be implemented.
-        consoleStream.println("(to be implemented)");
-        consoleStream.println("Done. Now you have the Cloud SDK.");
-      }
-      return Status.OK_STATUS;
-    } finally {
-      cloudSdkLock.writeLock().unlock();
-    }
-  }
-
-  @VisibleForTesting
-  static void markBlocked(IProgressMonitor monitor) {
-    if (monitor instanceof IProgressMonitorWithBlocking) {
-      IStatus reason = StatusUtil.info(CloudSdkInstallJob.class,
-          Messages.getString("sdkModificationLocked")); //$NON-NLS-1$
-      ((IProgressMonitorWithBlocking) monitor).setBlocked(reason);
-    }
-  }
-
-  @VisibleForTesting
-  static void clearBlocked(IProgressMonitor monitor) {
-    if (monitor instanceof IProgressMonitorWithBlocking) {
-      ((IProgressMonitorWithBlocking) monitor).clearBlocked();
-    }
-  }
 }

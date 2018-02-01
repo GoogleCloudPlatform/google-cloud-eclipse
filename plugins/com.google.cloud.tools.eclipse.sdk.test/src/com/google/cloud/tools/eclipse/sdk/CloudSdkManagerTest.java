@@ -16,10 +16,15 @@
 
 package com.google.cloud.tools.eclipse.sdk;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import com.google.cloud.tools.eclipse.sdk.internal.BaseCloudSdkInstallJob;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.util.concurrent.locks.Lock;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -32,6 +37,9 @@ public class CloudSdkManagerTest {
   @After
   public void tearDown() {
     CloudSdkManager.forceManagedSdkFeature = false;
+
+    assertTrue(CloudSdkManager.modifyLock.writeLock().tryLock());
+    CloudSdkManager.modifyLock.writeLock().unlock();
   }
 
   @Test
@@ -49,7 +57,7 @@ public class CloudSdkManagerTest {
   public void testPreventModifyingSdk_cannotWrite() throws InterruptedException {
     CloudSdkManager.preventModifyingSdk();
     try {
-      assertFalse(CloudSdkManager.useModifyLock.writeLock().tryLock());
+      assertFalse(CloudSdkManager.modifyLock.writeLock().tryLock());
     } finally {
       CloudSdkManager.allowModifyingSdk();
     }
@@ -59,7 +67,7 @@ public class CloudSdkManagerTest {
   public void testPreventModifyingSdk_canRead() throws InterruptedException {
     CloudSdkManager.preventModifyingSdk();
     try {
-      Lock readLock = CloudSdkManager.useModifyLock.readLock();
+      Lock readLock = CloudSdkManager.modifyLock.readLock();
       assertTrue(readLock.tryLock());
       readLock.unlock();
     } finally {
@@ -72,7 +80,7 @@ public class CloudSdkManagerTest {
     CloudSdkManager.preventModifyingSdk();
     CloudSdkManager.allowModifyingSdk();
 
-    Lock writeLock = CloudSdkManager.useModifyLock.writeLock();
+    Lock writeLock = CloudSdkManager.modifyLock.writeLock();
     assertTrue(writeLock.tryLock());
     writeLock.unlock();
   }
@@ -102,5 +110,91 @@ public class CloudSdkManagerTest {
     } finally {
       CloudSdkManager.allowModifyingSdk();
     }
+  }
+
+  @Test
+  public void testPreventModifyingSdk_blocksRunInstallJob() throws InterruptedException {
+    CloudSdkManager.preventModifyingSdk();
+    boolean prevented = true;
+
+    try {
+      final BaseCloudSdkInstallJob installJob = new FakeInstallJob(Status.OK_STATUS);
+
+      Job concurrentLauncher = new Job("concurrent thread attempting runInstallJob()") {
+        @Override
+        public IStatus run(IProgressMonitor monitor) {
+          try {
+            CloudSdkManager.runInstallJob(null, installJob);
+            return Status.OK_STATUS;
+          } catch (CoreException | InterruptedException e) {
+            return Status.CANCEL_STATUS;
+          }
+        }
+      };
+      concurrentLauncher.schedule();
+
+      while (installJob.getState() != Job.RUNNING) {
+        Thread.sleep(50);
+      }
+      // Incomplete test, but if it ever fails, something is surely broken.
+      assertEquals(Job.RUNNING, concurrentLauncher.getState());
+
+      CloudSdkManager.allowModifyingSdk();
+      prevented = false;
+      concurrentLauncher.join();
+
+      // Incomplete test, but if it ever fails, something is surely broken.
+      assertTrue(installJob.getResult().isOK());
+      assertTrue(concurrentLauncher.getResult().isOK());
+    } finally {
+      if (prevented) {
+        CloudSdkManager.allowModifyingSdk();
+      }
+    }
+  }
+
+  @Test
+  public void testRunInstallJob_blocking() throws CoreException, InterruptedException {
+    BaseCloudSdkInstallJob okJob = new FakeInstallJob(Status.OK_STATUS);
+    CloudSdkManager.runInstallJob(null, okJob);
+    // Incomplete test, but if it ever fails, something is surely broken.
+    assertEquals(Job.NONE, okJob.getState());
+  }
+
+  @Test
+  public void testRunInstallJob_canceled() throws InterruptedException {
+    try {
+      CloudSdkManager.runInstallJob(null, new FakeInstallJob(Status.CANCEL_STATUS));
+      fail();
+    } catch (CoreException e) {
+      assertEquals(Status.CANCEL, e.getStatus().getSeverity());
+    }
+  }
+
+  @Test
+  public void testRunInstallJob_installError() throws InterruptedException {
+    try {
+      IStatus errorResult = StatusUtil.error(this, "awesome install error in unit test");
+      CloudSdkManager.runInstallJob(null, new FakeInstallJob(errorResult));
+      fail();
+    } catch (CoreException e) {
+      assertEquals(Status.ERROR, e.getStatus().getSeverity());
+      assertEquals("awesome install error in unit test", e.getMessage());
+    }
+  }
+
+  private class FakeInstallJob extends BaseCloudSdkInstallJob {
+
+    private final IStatus result;
+
+    public FakeInstallJob(IStatus result) {
+      super(null, CloudSdkManager.modifyLock);
+      this.result = result;
+    }
+
+    @Override
+    protected IStatus installSdk() {
+      return result;
+    } 
   }
 }
