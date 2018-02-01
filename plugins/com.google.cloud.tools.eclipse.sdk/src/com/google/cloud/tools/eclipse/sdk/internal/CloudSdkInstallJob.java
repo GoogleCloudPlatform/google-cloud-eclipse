@@ -17,19 +17,18 @@
 package com.google.cloud.tools.eclipse.sdk.internal;
 
 import com.google.cloud.tools.eclipse.sdk.Messages;
-import java.util.concurrent.locks.ReadWriteLock;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.console.MessageConsoleStream;
 
 public class CloudSdkInstallJob extends CloudSdkModifyJob {
 
-  public CloudSdkInstallJob(MessageConsoleStream consoleStream, ReadWriteLock cloudSdkLock) {
-    super(Messages.getString("installJobName"), consoleStream, cloudSdkLock); //$NON-NLS-1$
+  public CloudSdkInstallJob(MessageConsoleStream consoleStream) {
+    super(Messages.getString("installJobName"), consoleStream); //$NON-NLS-1$
   }
 
   @Override
-  protected IStatus installSdk() {
+  protected IStatus modifySdk() {
     // TODO(chanseok): to be implemented: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2753
     return Status.OK_STATUS;
   }

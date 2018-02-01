@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.sdk.internal;
 
 import static org.junit.Assert.assertTrue;
 
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.eclipse.core.runtime.jobs.Job;
 import org.junit.Test;
 
@@ -26,7 +25,7 @@ public class CloudSdkInstallJobTest {
 
   @Test
   public void testRun() throws InterruptedException {
-    Job job = new CloudSdkInstallJob(null, new ReentrantReadWriteLock());
+    Job job = new CloudSdkInstallJob(null);
     job.schedule();
     job.join();
     assertTrue(job.getResult().isOK());

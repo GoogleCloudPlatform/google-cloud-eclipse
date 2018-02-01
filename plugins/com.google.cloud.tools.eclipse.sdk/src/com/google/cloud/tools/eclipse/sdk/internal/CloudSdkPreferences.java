@@ -66,8 +66,9 @@ public final class CloudSdkPreferences extends AbstractPreferenceInitializer {
 
   @VisibleForTesting
   static boolean isAutoManaging(IPreferenceStore preferences) {
-    return preferences.getString(CLOUD_SDK_MANAGEMENT).equals(
-        CloudSdkManagementOption.AUTOMATIC.name());
+    return preferences.contains(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)
+        && preferences.getString(CLOUD_SDK_MANAGEMENT).equals(
+            CloudSdkManagementOption.AUTOMATIC.name());
   }
 
   @Override

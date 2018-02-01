@@ -20,13 +20,8 @@ import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkInstallJob;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkModifyJob;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
 import com.google.common.annotations.VisibleForTesting;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.jobs.IJobManager;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.osgi.framework.BundleContext;
@@ -54,45 +49,10 @@ public class CloudSdkManager {
     return false;
   }
 
-  // readers = using SDK, writers = modifying SDK
-  @VisibleForTesting
-  static final ReadWriteLock modifyLock = new ReentrantReadWriteLock();
-
-  /**
-   * Prevents potential future SDK auto-install or auto-update functionality to allow safely using
-   * the managed Cloud SDK for some period of time. Blocks if an install or update is in progress.
-   * Callers must call {@code CloudSdkManager#allowModifyingSdk} eventually to lift the suspension.
-   * Any callers that intend to use {@code CloudSdk} must always call this before staring work, even
-   * if the Cloud SDK preferences are configured not to auto-managed the SDK.
-   *
-   * <p>Must not be called from the UI thread, because the method can block.
-   *
-   * @see CloudSdkManager#allowModifyingSdk
-   */
-  public static void preventModifyingSdk() throws InterruptedException {
-    do {
-      IJobManager jobManager = Job.getJobManager();
-      // The join is to improve UI reporting of blocked jobs. Most of the waiting should be here.
-      jobManager.join(CloudSdkModifyJob.CLOUD_SDK_MODIFY_JOB_FAMILY, null /* no monitor */);
-    } while (!modifyLock.readLock().tryLock(10, TimeUnit.MILLISECONDS));
-    // We have acquired the read lock; all further install/update should be blocked, while others
-    // can still grab a read lock and use the Cloud SDK.
-  }
-
-  /**
-   * Allows future SDK auto-install or auto-update temporarily prevented by {@code
-   * CloudSdkManager#preventModifyingSdk}.
-   *
-   * @see CloudSdkManager#preventModifyingSdk
-   */
-  public static void allowModifyingSdk() {
-    modifyLock.readLock().unlock();
-  }
-
   /**
    * Installs the managed Cloud SDK, if the preferences are configured to auto-managed the SDK.
-   * Blocks callers 1) if the managed SDK is being installed or updated concurrently by others; and
-   * 2) until the installation is complete.
+   * Blocks callers 1) if the managed SDK is being installed concurrently by others; and 2) until
+   * the installation is complete.
    *
    * @param consoleStream stream to which the install output is written
    */
@@ -100,7 +60,7 @@ public class CloudSdkManager {
       throws CoreException, InterruptedException {
     if (isManagedSdkFeatureEnabled()) {
       if (CloudSdkPreferences.isAutoManaging()) {
-        runInstallJob(consoleStream, new CloudSdkInstallJob(consoleStream, modifyLock));
+        runInstallJob(consoleStream, new CloudSdkInstallJob(consoleStream));
       }
     }
   }
@@ -121,19 +81,8 @@ public class CloudSdkManager {
     if (isManagedSdkFeatureEnabled()) {
       if (CloudSdkPreferences.isAutoManaging()) {
         CloudSdkModifyJob installJob =
-            new CloudSdkInstallJob(null /* no console output */, modifyLock);
+            new CloudSdkInstallJob(null /* no console output */);
         installJob.schedule();
-      }
-    }
-  }
-
-  public static void updateManagedSdkAsync() {
-    if (isManagedSdkFeatureEnabled()) {
-      if (CloudSdkPreferences.isAutoManaging()) {
-        // TODO(chanseok): to be implemented: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2753
-        // CloudSdkUpdateJob udpateJob =
-        //    new CloudSdkUpdateJob(null /* no console output */, modifyLock);
-        // updateJob.schedule();
       }
     }
   }

@@ -19,16 +19,10 @@ package com.google.cloud.tools.eclipse.sdk.internal;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import org.eclipse.core.runtime.IProgressMonitorWithBlocking;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -72,20 +66,6 @@ public class CloudSdkModifyJobTest {
   }
 
   @Test
-  public void testMarkBlocked() {
-    IProgressMonitorWithBlocking monitor = mock(IProgressMonitorWithBlocking.class);
-    CloudSdkModifyJob.markBlocked(monitor);
-    verify(monitor).setBlocked(any(IStatus.class));
-  }
-
-  @Test
-  public void testClearBlocked() {
-    IProgressMonitorWithBlocking monitor = mock(IProgressMonitorWithBlocking.class);
-    CloudSdkModifyJob.clearBlocked(monitor);
-    verify(monitor).clearBlocked();
-  }
-
-  @Test
   public void testRun_consoleStreamOutput() throws InterruptedException {
     installJob.schedule();
     installJob.join();
@@ -95,62 +75,30 @@ public class CloudSdkModifyJobTest {
   }
 
   @Test
-  public void testRun_unlocksAfterReturn() throws InterruptedException {
-    installJob.schedule();
-    installJob.join();
-
-    assertTrue(installJob.getResult().isOK());
-
-    assertTrue(readWriteLock.writeLock().tryLock());
-    readWriteLock.writeLock().unlock();
-  }
-
-  @Test
   public void testRun_mutualExclusion() throws InterruptedException {
     installJob.schedule();
 
-    Job secondJob = new FakeInstallJob(null);
-    secondJob.schedule();
+    Job job2 = new FakeInstallJob(null);
+    Job job3 = new FakeInstallJob(null);
+    job2.schedule();
+    job3.schedule();
     // Incomplete test, but if it ever fails, something is surely broken.
-    assertNotEquals(Job.RUNNING, secondJob.getState());
+    assertNotEquals(Job.RUNNING, job3.getState());
+    assertNotEquals(Job.RUNNING, job2.getState());
 
     installJob.join();
-    secondJob.join();
-  }
-
-  @Test
-  public void testRun_blockedUntilWritable() throws InterruptedException {
-    assertTrue(readWriteLock.readLock().tryLock());
-    boolean locked = true;
-
-    try {
-      installJob.schedule();
-      while (installJob.getState() != Job.RUNNING) {
-        Thread.sleep(50);
-      }
-      // Incomplete test, but if it ever fails, something is surely broken.
-      verify(consoleStream, never()).println(anyString());
-
-      readWriteLock.readLock().unlock();
-      locked = false;
-      installJob.join();
-
-      verify(consoleStream, atLeastOnce()).println(anyString());
-    } finally {
-      if (locked) {
-        readWriteLock.readLock().unlock();
-      }
-    }
+    job3.join();
+    job2.join();
   }
 
   private class FakeInstallJob extends CloudSdkModifyJob {
 
     public FakeInstallJob(MessageConsoleStream consoleStream) {
-      super("fake job", consoleStream, readWriteLock);
+      super("fake job", consoleStream);
     }
 
     @Override
-    protected IStatus installSdk() {
+    protected IStatus modifySdk() {
       return Status.OK_STATUS;
     }
   };

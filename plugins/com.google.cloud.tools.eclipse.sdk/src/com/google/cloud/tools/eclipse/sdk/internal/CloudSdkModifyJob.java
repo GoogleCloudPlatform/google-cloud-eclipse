@@ -18,13 +18,9 @@ package com.google.cloud.tools.eclipse.sdk.internal;
 
 import com.google.cloud.tools.eclipse.sdk.Messages;
 import com.google.cloud.tools.eclipse.util.jobs.MutexRule;
-import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
-import java.util.concurrent.locks.ReadWriteLock;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IProgressMonitorWithBlocking;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.console.MessageConsoleStream;
 
@@ -37,13 +33,10 @@ public abstract class CloudSdkModifyJob extends Job {
   static final MutexRule MUTEX_RULE = new MutexRule();
 
   private final MessageConsoleStream consoleStream;
-  private final ReadWriteLock cloudSdkLock;
 
-  public CloudSdkModifyJob(String jobName, MessageConsoleStream consoleStream,
-      ReadWriteLock cloudSdkLock) {
+  public CloudSdkModifyJob(String jobName, MessageConsoleStream consoleStream) {
     super(jobName);
     this.consoleStream = consoleStream;
-    this.cloudSdkLock = cloudSdkLock;
     setRule(MUTEX_RULE);
   }
 
@@ -54,40 +47,11 @@ public abstract class CloudSdkModifyJob extends Job {
 
   @Override
   protected IStatus run(IProgressMonitor monitor) {
-    try {
-      markBlocked(monitor);  // for better UI reporting of lock-waiting.
-      cloudSdkLock.writeLock().lockInterruptibly();
-    } catch (InterruptedException e) {
-      return Status.CANCEL_STATUS;
-    } finally {
-      clearBlocked(monitor);
+    if (consoleStream != null) {
+      consoleStream.println(Messages.getString("startModifying")); //$NON-NLS-1$
     }
-
-    try {
-      if (consoleStream != null) {
-        consoleStream.println(Messages.getString("startModifying")); //$NON-NLS-1$
-      }
-      return installSdk();
-    } finally {
-      cloudSdkLock.writeLock().unlock();
-    }
+    return modifySdk();
   }
 
-  protected abstract IStatus installSdk();
-
-  @VisibleForTesting
-  static void markBlocked(IProgressMonitor monitor) {
-    if (monitor instanceof IProgressMonitorWithBlocking) {
-      IStatus reason = StatusUtil.info(CloudSdkModifyJob.class,
-          Messages.getString("sdkModificationLocked")); //$NON-NLS-1$
-      ((IProgressMonitorWithBlocking) monitor).setBlocked(reason);
-    }
-  }
-
-  @VisibleForTesting
-  static void clearBlocked(IProgressMonitor monitor) {
-    if (monitor instanceof IProgressMonitorWithBlocking) {
-      ((IProgressMonitorWithBlocking) monitor).clearBlocked();
-    }
-  }
+  protected abstract IStatus modifySdk();
 }
