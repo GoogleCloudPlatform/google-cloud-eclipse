@@ -21,7 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.cloud.tools.eclipse.sdk.internal.BaseCloudSdkInstallJob;
+import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkModifyJob;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.util.concurrent.locks.Lock;
 import org.eclipse.core.runtime.CoreException;
@@ -118,7 +118,7 @@ public class CloudSdkManagerTest {
     boolean prevented = true;
 
     try {
-      final BaseCloudSdkInstallJob installJob = new FakeInstallJob(Status.OK_STATUS);
+      final CloudSdkModifyJob installJob = new FakeInstallJob(Status.OK_STATUS);
 
       Job concurrentLauncher = new Job("concurrent thread attempting runInstallJob()") {
         @Override
@@ -155,7 +155,7 @@ public class CloudSdkManagerTest {
 
   @Test
   public void testRunInstallJob_blocking() throws CoreException, InterruptedException {
-    BaseCloudSdkInstallJob okJob = new FakeInstallJob(Status.OK_STATUS);
+    CloudSdkModifyJob okJob = new FakeInstallJob(Status.OK_STATUS);
     CloudSdkManager.runInstallJob(null, okJob);
     // Incomplete test, but if it ever fails, something is surely broken.
     assertEquals(Job.NONE, okJob.getState());
@@ -183,12 +183,12 @@ public class CloudSdkManagerTest {
     }
   }
 
-  private class FakeInstallJob extends BaseCloudSdkInstallJob {
+  private class FakeInstallJob extends CloudSdkModifyJob {
 
     private final IStatus result;
 
     public FakeInstallJob(IStatus result) {
-      super(null, CloudSdkManager.modifyLock);
+      super("fake job", null, CloudSdkManager.modifyLock);
       this.result = result;
     }
 

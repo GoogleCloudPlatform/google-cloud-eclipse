@@ -16,8 +16,8 @@
 
 package com.google.cloud.tools.eclipse.sdk;
 
-import com.google.cloud.tools.eclipse.sdk.internal.BaseCloudSdkInstallJob;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkInstallJob;
+import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkModifyJob;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.concurrent.TimeUnit;
@@ -73,7 +73,7 @@ public class CloudSdkManager {
     do {
       IJobManager jobManager = Job.getJobManager();
       // The join is to improve UI reporting of blocked jobs. Most of the waiting should be here.
-      jobManager.join(BaseCloudSdkInstallJob.CLOUD_SDK_MODIFY_JOB_FAMILY, null /* no monitor */);
+      jobManager.join(CloudSdkModifyJob.CLOUD_SDK_MODIFY_JOB_FAMILY, null /* no monitor */);
     } while (!modifyLock.readLock().tryLock(10, TimeUnit.MILLISECONDS));
     // We have acquired the read lock; all further install/update should be blocked, while others
     // can still grab a read lock and use the Cloud SDK.
@@ -106,7 +106,7 @@ public class CloudSdkManager {
   }
 
   @VisibleForTesting
-  static void runInstallJob(MessageConsoleStream consoleStream, BaseCloudSdkInstallJob installJob)
+  static void runInstallJob(MessageConsoleStream consoleStream, CloudSdkModifyJob installJob)
       throws CoreException, InterruptedException {
     installJob.schedule();
     installJob.join();
@@ -120,7 +120,7 @@ public class CloudSdkManager {
   public static void installManagedSdkAsync() {
     if (isManagedSdkFeatureEnabled()) {
       if (CloudSdkPreferences.isAutoManaging()) {
-        BaseCloudSdkInstallJob installJob =
+        CloudSdkModifyJob installJob =
             new CloudSdkInstallJob(null /* no console output */, modifyLock);
         installJob.schedule();
       }
@@ -130,7 +130,7 @@ public class CloudSdkManager {
   public static void updateManagedSdkAsync() {
     if (isManagedSdkFeatureEnabled()) {
       if (CloudSdkPreferences.isAutoManaging()) {
-        // TODO(chanseok): to be implemented
+        // TODO(chanseok): to be implemented: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2753
         // CloudSdkUpdateJob udpateJob =
         //    new CloudSdkUpdateJob(null /* no console output */, modifyLock);
         // updateJob.schedule();

@@ -28,19 +28,20 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.console.MessageConsoleStream;
 
-public abstract class BaseCloudSdkInstallJob extends Job {
+public abstract class CloudSdkModifyJob extends Job {
 
   public static final Object CLOUD_SDK_MODIFY_JOB_FAMILY = new Object();
 
-  /** Scheduling rule to prevent running {@code CloudSdkInstallJob} concurrently. */
+  /** Scheduling rule to prevent running {@code CloudSdkModifyJob} concurrently. */
   @VisibleForTesting
   static final MutexRule MUTEX_RULE = new MutexRule();
 
   private final MessageConsoleStream consoleStream;
   private final ReadWriteLock cloudSdkLock;
 
-  public BaseCloudSdkInstallJob(MessageConsoleStream consoleStream, ReadWriteLock cloudSdkLock) {
-    super(Messages.getString("InstallJobName")); //$NON-NLS-1$
+  public CloudSdkModifyJob(String jobName, MessageConsoleStream consoleStream,
+      ReadWriteLock cloudSdkLock) {
+    super(jobName);
     this.consoleStream = consoleStream;
     this.cloudSdkLock = cloudSdkLock;
     setRule(MUTEX_RULE);
@@ -64,7 +65,7 @@ public abstract class BaseCloudSdkInstallJob extends Job {
 
     try {
       if (consoleStream != null) {
-        consoleStream.println(Messages.getString("InstallStarting")); //$NON-NLS-1$
+        consoleStream.println(Messages.getString("startModifying")); //$NON-NLS-1$
       }
       return installSdk();
     } finally {
@@ -77,7 +78,7 @@ public abstract class BaseCloudSdkInstallJob extends Job {
   @VisibleForTesting
   static void markBlocked(IProgressMonitor monitor) {
     if (monitor instanceof IProgressMonitorWithBlocking) {
-      IStatus reason = StatusUtil.info(BaseCloudSdkInstallJob.class,
+      IStatus reason = StatusUtil.info(CloudSdkModifyJob.class,
           Messages.getString("sdkModificationLocked")); //$NON-NLS-1$
       ((IProgressMonitorWithBlocking) monitor).setBlocked(reason);
     }

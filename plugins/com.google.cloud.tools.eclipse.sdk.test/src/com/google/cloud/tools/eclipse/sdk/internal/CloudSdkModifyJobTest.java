@@ -41,12 +41,12 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class BaseCloudSdkInstallJobTest {
+public class CloudSdkModifyJobTest {
 
   @Mock private MessageConsoleStream consoleStream;
 
   private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-  private BaseCloudSdkInstallJob installJob;
+  private CloudSdkModifyJob installJob;
 
   @Before
   public void setUp() {
@@ -63,25 +63,25 @@ public class BaseCloudSdkInstallJobTest {
 
   @Test
   public void testBelongsTo() {
-    assertTrue(installJob.belongsTo(BaseCloudSdkInstallJob.CLOUD_SDK_MODIFY_JOB_FAMILY));
+    assertTrue(installJob.belongsTo(CloudSdkModifyJob.CLOUD_SDK_MODIFY_JOB_FAMILY));
   }
 
   @Test
   public void testMutexRuleSet() {
-    assertEquals(BaseCloudSdkInstallJob.MUTEX_RULE, installJob.getRule());
+    assertEquals(CloudSdkModifyJob.MUTEX_RULE, installJob.getRule());
   }
 
   @Test
   public void testMarkBlocked() {
     IProgressMonitorWithBlocking monitor = mock(IProgressMonitorWithBlocking.class);
-    BaseCloudSdkInstallJob.markBlocked(monitor);
+    CloudSdkModifyJob.markBlocked(monitor);
     verify(monitor).setBlocked(any(IStatus.class));
   }
 
   @Test
   public void testClearBlocked() {
     IProgressMonitorWithBlocking monitor = mock(IProgressMonitorWithBlocking.class);
-    BaseCloudSdkInstallJob.clearBlocked(monitor);
+    CloudSdkModifyJob.clearBlocked(monitor);
     verify(monitor).clearBlocked();
   }
 
@@ -142,10 +142,10 @@ public class BaseCloudSdkInstallJobTest {
     }
   }
 
-  private class FakeInstallJob extends BaseCloudSdkInstallJob {
+  private class FakeInstallJob extends CloudSdkModifyJob {
 
     public FakeInstallJob(MessageConsoleStream consoleStream) {
-      super(consoleStream, readWriteLock);
+      super("fake job", consoleStream, readWriteLock);
     }
 
     @Override
