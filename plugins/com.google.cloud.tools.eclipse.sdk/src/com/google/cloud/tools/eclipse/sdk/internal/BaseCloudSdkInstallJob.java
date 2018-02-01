@@ -54,7 +54,7 @@ public abstract class BaseCloudSdkInstallJob extends Job {
   @Override
   protected IStatus run(IProgressMonitor monitor) {
     try {
-      markBlocked(monitor);  // for better UI reporting of blocking while acquiring the lock
+      markBlocked(monitor);  // for better UI reporting of lock-waiting.
       cloudSdkLock.writeLock().lockInterruptibly();
     } catch (InterruptedException e) {
       return Status.CANCEL_STATUS;
