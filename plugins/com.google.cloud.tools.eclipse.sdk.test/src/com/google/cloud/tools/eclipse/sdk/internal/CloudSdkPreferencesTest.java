@@ -56,6 +56,11 @@ public class CloudSdkPreferencesTest {
   }
 
   @Test
+  public void testIsAutoManaging_uninitialized() {
+    assertFalse(CloudSdkPreferences.isAutoManaging(preferences));
+  }
+
+  @Test
   public void testIsAutoManaging_automatic() {
     preferences.setValue(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT, "AUTOMATIC");
     assertTrue(CloudSdkPreferences.isAutoManaging(preferences));

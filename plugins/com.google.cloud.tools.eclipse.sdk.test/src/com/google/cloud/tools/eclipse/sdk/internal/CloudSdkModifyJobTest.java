@@ -22,8 +22,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -40,7 +38,6 @@ public class CloudSdkModifyJobTest {
 
   @Mock private MessageConsoleStream consoleStream;
 
-  private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
   private CloudSdkModifyJob installJob;
 
   @Before
@@ -51,9 +48,6 @@ public class CloudSdkModifyJobTest {
   @After
   public void tearDown() {
     assertEquals(Job.NONE, installJob.getState());
-
-    assertTrue(readWriteLock.writeLock().tryLock());
-    readWriteLock.writeLock().unlock();
   }
 
   @Test
@@ -78,11 +72,11 @@ public class CloudSdkModifyJobTest {
   @Test
   public void testRun_mutualExclusion() throws InterruptedException {
     FakeInstallJob job1 = new FakeInstallJob(null, true /* blockOnStart */);
-    FakeInstallJob job2 = new FakeInstallJob(null, true /* blockOnStart */);
+    FakeInstallJob job2 = new FakeInstallJob(null, true);
 
     job1.schedule();
     while (job1.getState() != Job.RUNNING) {
-      Thread.sleep(50);
+      Thread.sleep(10);
     }
 
     job2.schedule();
@@ -111,10 +105,10 @@ public class CloudSdkModifyJobTest {
         if (blockOnStart) {
           blocker.acquire();
         }
+        return Status.OK_STATUS;
       } catch (InterruptedException e) {
         return Status.CANCEL_STATUS;
       }
-      return Status.OK_STATUS;
     }
 
     private void unblock() {
