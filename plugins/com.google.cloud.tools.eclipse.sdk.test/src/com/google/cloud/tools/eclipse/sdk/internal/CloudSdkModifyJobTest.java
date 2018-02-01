@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.eclipse.core.runtime.IStatus;
@@ -44,7 +45,7 @@ public class CloudSdkModifyJobTest {
 
   @Before
   public void setUp() {
-    installJob = new FakeInstallJob(consoleStream);
+    installJob = new FakeInstallJob(consoleStream, false /* blockOnStart */);
   }
 
   @After
@@ -76,30 +77,48 @@ public class CloudSdkModifyJobTest {
 
   @Test
   public void testRun_mutualExclusion() throws InterruptedException {
-    installJob.schedule();
+    FakeInstallJob job1 = new FakeInstallJob(null, true /* blockOnStart */);
+    FakeInstallJob job2 = new FakeInstallJob(null, true /* blockOnStart */);
 
-    Job job2 = new FakeInstallJob(null);
-    Job job3 = new FakeInstallJob(null);
+    job1.schedule();
     job2.schedule();
-    job3.schedule();
+
+    while (job1.getState() != Job.RUNNING) {
+      Thread.sleep(50);
+    }
     // Incomplete test, but if it ever fails, something is surely broken.
-    assertNotEquals(Job.RUNNING, job3.getState());
     assertNotEquals(Job.RUNNING, job2.getState());
 
-    installJob.join();
-    job3.join();
+    job1.unblock();
+    job2.unblock();
+    job1.join();
     job2.join();
   }
 
   private class FakeInstallJob extends CloudSdkModifyJob {
 
-    public FakeInstallJob(MessageConsoleStream consoleStream) {
+    private final Semaphore blocker = new Semaphore(0);
+    private boolean blockOnStart;
+
+    FakeInstallJob(MessageConsoleStream consoleStream, boolean blockOnStart) {
       super("fake job", consoleStream);
+      this.blockOnStart = blockOnStart;
     }
 
     @Override
     protected IStatus modifySdk() {
+      try {
+        if (blockOnStart) {
+          blocker.acquire();
+        }
+      } catch (InterruptedException e) {
+        return Status.CANCEL_STATUS;
+      }
       return Status.OK_STATUS;
+    }
+
+    private void unblock() {
+      blocker.release();
     }
   };
 }
