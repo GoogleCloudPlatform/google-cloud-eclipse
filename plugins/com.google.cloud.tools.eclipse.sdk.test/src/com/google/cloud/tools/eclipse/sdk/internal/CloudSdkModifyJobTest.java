@@ -81,11 +81,11 @@ public class CloudSdkModifyJobTest {
     FakeInstallJob job2 = new FakeInstallJob(null, true /* blockOnStart */);
 
     job1.schedule();
-    job2.schedule();
-
     while (job1.getState() != Job.RUNNING) {
       Thread.sleep(50);
     }
+
+    job2.schedule();
     // Incomplete test, but if it ever fails, something is surely broken.
     assertNotEquals(Job.RUNNING, job2.getState());
 
@@ -98,9 +98,9 @@ public class CloudSdkModifyJobTest {
   private class FakeInstallJob extends CloudSdkModifyJob {
 
     private final Semaphore blocker = new Semaphore(0);
-    private boolean blockOnStart;
+    private final boolean blockOnStart;
 
-    FakeInstallJob(MessageConsoleStream consoleStream, boolean blockOnStart) {
+    private FakeInstallJob(MessageConsoleStream consoleStream, boolean blockOnStart) {
       super("fake job", consoleStream);
       this.blockOnStart = blockOnStart;
     }

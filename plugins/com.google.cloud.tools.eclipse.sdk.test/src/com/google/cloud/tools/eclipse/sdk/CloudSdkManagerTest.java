@@ -82,7 +82,7 @@ public class CloudSdkManagerTest {
 
     private final IStatus result;
 
-    public FakeInstallJob(IStatus result) {
+    private FakeInstallJob(IStatus result) {
       super("fake job", null);
       this.result = result;
     }
