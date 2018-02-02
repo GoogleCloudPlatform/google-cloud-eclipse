@@ -21,9 +21,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkModifyJob;
+import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkInstallJob;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -50,7 +51,7 @@ public class CloudSdkManagerTest {
 
   @Test
   public void testRunInstallJob_blocking() throws CoreException, InterruptedException {
-    CloudSdkModifyJob okJob = new FakeInstallJob(Status.OK_STATUS);
+    CloudSdkInstallJob okJob = new FakeInstallJob(Status.OK_STATUS);
     CloudSdkManager.runInstallJob(null, okJob);
     // Incomplete test, but if it ever fails, something is surely broken.
     assertEquals(Job.NONE, okJob.getState());
@@ -78,17 +79,17 @@ public class CloudSdkManagerTest {
     }
   }
 
-  private static class FakeInstallJob extends CloudSdkModifyJob {
+  private static class FakeInstallJob extends CloudSdkInstallJob {
 
     private final IStatus result;
 
     private FakeInstallJob(IStatus result) {
-      super("fake job", null);
+      super(null);
       this.result = result;
     }
 
     @Override
-    protected IStatus modifySdk() {
+    protected IStatus run(IProgressMonitor monitor) {
       return result;
     } 
   }

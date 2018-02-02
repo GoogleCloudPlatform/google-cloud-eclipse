@@ -17,11 +17,11 @@
 package com.google.cloud.tools.eclipse.sdk;
 
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkInstallJob;
-import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkModifyJob;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
 import com.google.common.annotations.VisibleForTesting;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.osgi.framework.BundleContext;
@@ -66,7 +66,7 @@ public class CloudSdkManager {
   }
 
   @VisibleForTesting
-  static void runInstallJob(MessageConsoleStream consoleStream, CloudSdkModifyJob installJob)
+  static void runInstallJob(MessageConsoleStream consoleStream, CloudSdkInstallJob installJob)
       throws CoreException, InterruptedException {
     installJob.schedule();
     installJob.join();
@@ -80,8 +80,7 @@ public class CloudSdkManager {
   public static void installManagedSdkAsync() {
     if (isManagedSdkFeatureEnabled()) {
       if (CloudSdkPreferences.isAutoManaging()) {
-        CloudSdkModifyJob installJob =
-            new CloudSdkInstallJob(null /* no console output */);
+        Job installJob = new CloudSdkInstallJob(null /* no console output */);
         installJob.schedule();
       }
     }
