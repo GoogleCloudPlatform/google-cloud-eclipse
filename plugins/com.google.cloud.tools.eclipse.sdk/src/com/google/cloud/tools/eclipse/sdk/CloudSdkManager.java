@@ -50,9 +50,9 @@ public class CloudSdkManager {
   }
 
   /**
-   * Installs the managed Cloud SDK, if the preferences are configured to auto-managed the SDK.
-   * Blocks callers 1) if the managed SDK is being installed concurrently by others; and 2) until
-   * the installation is complete.
+   * Installs a Cloud SDK, if the preferences are configured to auto-manage the SDK. Blocks callers
+   * 1) if the managed SDK is being installed concurrently by others; and 2) until the installation
+   * is complete.
    *
    * @param consoleStream stream to which the install output is written
    */
