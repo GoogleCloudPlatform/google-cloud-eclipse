@@ -92,7 +92,7 @@ public class LibrarySelectorGroup implements ISelectionProvider {
       String toolTip = library.getToolTip();
       
       String stage = library.getLaunchStage();
-      if (!"GA".equals(stage )) {
+      if (!"GA".equals(stage)) { //$NON-NLS-1
         toolTip += " (" + stage + ")";
       }
       
