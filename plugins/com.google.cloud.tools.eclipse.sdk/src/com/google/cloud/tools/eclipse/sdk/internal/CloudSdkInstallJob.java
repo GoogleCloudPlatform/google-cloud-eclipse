@@ -31,7 +31,7 @@ public class CloudSdkInstallJob extends Job {
 
   /** Scheduling rule to prevent running {@code CloudSdkInstallJob} concurrently. */
   @VisibleForTesting
-  static final MutexRule MUTEX_RULE = new MutexRule();
+  static final MutexRule MUTEX_RULE = new MutexRule("for " + CloudSdkInstallJob.class);
 
   private final MessageConsoleStream consoleStream;
 

@@ -24,6 +24,12 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
  */
 public class MutexRule implements ISchedulingRule {
 
+  private final String name;
+
+  public MutexRule(String name) {
+    this.name = name;
+  }
+
   @Override
   public boolean contains(ISchedulingRule rule) {
     return rule == this;
@@ -36,6 +42,6 @@ public class MutexRule implements ISchedulingRule {
 
   @Override
   public String toString() {
-    return super.toString() + ": mutex rule for running jobs mutually exclusively";
+    return super.toString() + ": " + name;
   }
 }

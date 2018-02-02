@@ -23,7 +23,7 @@ import org.junit.Test;
 
 public class MutexRuleTest {
 
-  private final MutexRule rule = new MutexRule();
+  private final MutexRule rule = new MutexRule("mutex used in a test");
 
   @Test
   public void testContains_self() {
@@ -32,7 +32,7 @@ public class MutexRuleTest {
 
   @Test
   public void testContains_others() {
-    assertFalse(rule.contains(new MutexRule()));
+    assertFalse(rule.contains(new MutexRule("mutex used in a test")));
   }
 
   @Test
@@ -42,6 +42,6 @@ public class MutexRuleTest {
 
   @Test
   public void testIsConflicting_others() {
-    assertFalse(rule.isConflicting(new MutexRule()));
+    assertFalse(rule.isConflicting(new MutexRule("mutex used in a test")));
   }
 }
