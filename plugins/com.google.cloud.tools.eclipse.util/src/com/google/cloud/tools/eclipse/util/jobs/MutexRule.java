@@ -32,5 +32,10 @@ public class MutexRule implements ISchedulingRule {
   @Override
   public boolean isConflicting(ISchedulingRule rule) {
     return rule == this;
- }
+  }
+
+  @Override
+  public String toString() {
+    return super.toString() + ": mutex rule for running jobs mutually exclusively";
+  }
 }

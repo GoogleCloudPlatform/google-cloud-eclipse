@@ -60,6 +60,8 @@ public class CloudSdkManager {
       throws CoreException, InterruptedException {
     if (isManagedSdkFeatureEnabled()) {
       if (CloudSdkPreferences.isAutoManaging()) {
+        // We don't check if the Cloud SDK installed but always schedule the install job; such check
+        // may pass while the SDK is being installed and in an incomplete state.
         runInstallJob(consoleStream, new CloudSdkInstallJob(consoleStream));
       }
     }
@@ -69,6 +71,7 @@ public class CloudSdkManager {
   static void runInstallJob(MessageConsoleStream consoleStream, CloudSdkInstallJob installJob)
       throws CoreException, InterruptedException {
     installJob.schedule();
+    installJob.setSystem(true);
     installJob.join();
 
     IStatus status = installJob.getResult();
