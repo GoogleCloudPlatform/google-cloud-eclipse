@@ -29,6 +29,7 @@ import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.finders.UIThreadRunnable;
+import org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory;
 import org.eclipse.swtbot.swt.finder.results.VoidResult;
 import org.eclipse.swtbot.swt.finder.waits.ICondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
@@ -95,8 +96,7 @@ public final class SwtBotWorkbenchActions {
           // Find the progress bar in the main shell and wait for it to be removed
           @SuppressWarnings("unchecked")
           Matcher<ProgressBar> matcher =
-              org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory
-                  .allOf(org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType(ProgressBar.class));
+              WidgetMatcherFactory.allOf(WidgetMatcherFactory.widgetOfType(ProgressBar.class));
           List<? extends ProgressBar> bars = bot.widgets(matcher);
           // keep polling until there are no progress bars found
           return bars == null || bars.isEmpty();
