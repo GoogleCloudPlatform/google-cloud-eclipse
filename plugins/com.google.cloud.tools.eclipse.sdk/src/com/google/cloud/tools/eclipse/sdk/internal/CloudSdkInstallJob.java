@@ -29,7 +29,7 @@ public class CloudSdkInstallJob extends Job {
 
   public static final Object CLOUD_SDK_MODIFY_JOB_FAMILY = new Object();
 
-  /** Scheduling rule to prevent running {@code CloudSdkModifyJob} concurrently. */
+  /** Scheduling rule to prevent running {@code CloudSdkInstallJob} concurrently. */
   @VisibleForTesting
   static final MutexRule MUTEX_RULE = new MutexRule();
 
