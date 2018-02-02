@@ -68,10 +68,6 @@ public final class Library {
   public void setName(String name) {
     this.name = name;
   }
-
-  public String getLaunchStage() {
-    return this.stage;
-  }
   
   /**
    * @return minimum Java version required for this library
@@ -90,6 +86,13 @@ public final class Library {
 
   void setToolTip(String toolTip) {
     this.toolTip = toolTip;
+  }
+  
+  /**
+   * @return typically GA, alpha, beta, or deprecated though other values are possible
+   */
+  public String getLaunchStage() {
+    return stage;
   }
   
   void setLaunchStage(String stage) {
