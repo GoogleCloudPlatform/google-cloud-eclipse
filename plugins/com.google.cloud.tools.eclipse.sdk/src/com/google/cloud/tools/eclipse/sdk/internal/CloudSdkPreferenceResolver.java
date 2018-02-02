@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.sdk.internal;
 
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkResolver;
-import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences.CloudSdkManagementOption;
 import com.google.cloud.tools.managedcloudsdk.ManagedCloudSdk;
 import com.google.cloud.tools.managedcloudsdk.UnsupportedOsException;
 import com.google.common.annotations.VisibleForTesting;
@@ -49,16 +48,13 @@ public class CloudSdkPreferenceResolver implements CloudSdkResolver {
   public Path getCloudSdkPath() {
     // We only consult the Managed Cloud SDK when it has been explicitly configured, which
     // is done in CloudSdkPreferences.
-    if (preferences.contains(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)) {
-      String managementOption = preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT);
-      if (CloudSdkManagementOption.AUTOMATIC.name().equals(managementOption)) {
-        // TODO: Should check and wait on the installation job, if in progress
-        try {
-          return ManagedCloudSdk.newManagedSdk().getSdkHome();
-        } catch (UnsupportedOsException ex) {
-          logger.log(Level.SEVERE, "Google Cloud SDK not available", ex); // $NON-NLS-1$
-          return null;
-        }
+    if (CloudSdkPreferences.isAutoManaging()) {
+      try {
+        // It is assumed that clients do not get and use "CloudSdk" while it is being modified.
+        return ManagedCloudSdk.newManagedSdk().getSdkHome();
+      } catch (UnsupportedOsException ex) {
+        logger.log(Level.SEVERE, "Google Cloud SDK not available", ex); // $NON-NLS-1$
+        return null;
       }
     }
     String value = preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH);
