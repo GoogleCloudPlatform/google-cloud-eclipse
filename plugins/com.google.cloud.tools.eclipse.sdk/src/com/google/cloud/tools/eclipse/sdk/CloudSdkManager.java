@@ -70,8 +70,8 @@ public class CloudSdkManager {
   @VisibleForTesting
   static void runInstallJob(MessageConsoleStream consoleStream, CloudSdkInstallJob installJob)
       throws CoreException, InterruptedException {
-    installJob.schedule();
     installJob.setSystem(true);
+    installJob.schedule();
     installJob.join();
 
     IStatus status = installJob.getResult();
