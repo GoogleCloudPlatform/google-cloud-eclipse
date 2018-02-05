@@ -50,6 +50,18 @@ public class LibraryTest {
   public void testConstructor() {
     assertThat(library.getId(), is("a"));
   }
+  
+  @Test
+  public void testStageDefaultsToGA() {
+    assertThat(library.getLaunchStage(), is("GA"));
+  }
+  
+  @Test
+  public void testSetRelease() {
+    library.setLaunchStage("beta");
+    assertThat(library.getLaunchStage(), is("beta"));
+  }
+
 
   @Test
   public void testSetNullName() {

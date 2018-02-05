@@ -44,6 +44,7 @@ public final class Library {
   private List<LibraryFile> transitiveDependencies = null;
   private List<LibraryFile> directDependencies = Collections.emptyList();
   private String group;
+  private String stage = "GA";
   private String javaVersion="1.7";
   private String transport = "http";
 
@@ -85,6 +86,17 @@ public final class Library {
 
   void setToolTip(String toolTip) {
     this.toolTip = toolTip;
+  }
+  
+  /**
+   * @return typically GA, alpha, beta, or deprecated though other values are possible
+   */
+  public String getLaunchStage() {
+    return stage;
+  }
+  
+  void setLaunchStage(String stage) {
+    this.stage = stage;
   }
 
   public URI getSiteUri() {

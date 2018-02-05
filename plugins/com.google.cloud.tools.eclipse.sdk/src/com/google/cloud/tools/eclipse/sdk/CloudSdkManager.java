@@ -16,8 +16,14 @@
 
 package com.google.cloud.tools.eclipse.sdk;
 
+import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkInstallJob;
+import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
 import com.google.common.annotations.VisibleForTesting;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.service.debug.DebugOptions;
+import org.eclipse.ui.console.MessageConsoleStream;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 
@@ -44,10 +50,42 @@ public class CloudSdkManager {
   }
 
   /**
-   * Performs a one-time setup of preferences for the Managed Cloud SDK feature if it has never been
-   * set up.
+   * Installs a Cloud SDK, if the preferences are configured to auto-manage the SDK. Blocks callers
+   * 1) if the managed SDK is being installed concurrently by others; and 2) until the installation
+   * is complete.
+   *
+   * @param consoleStream stream to which the install output is written
    */
-  public static void setUpInitialPreferences() {
-    // TODO(chanseok): to be implemented.
+  public static void installManagedSdk(MessageConsoleStream consoleStream)
+      throws CoreException, InterruptedException {
+    if (isManagedSdkFeatureEnabled()) {
+      if (CloudSdkPreferences.isAutoManaging()) {
+        // We don't check if the Cloud SDK installed but always schedule the install job; such check
+        // may pass while the SDK is being installed and in an incomplete state.
+        runInstallJob(consoleStream, new CloudSdkInstallJob(consoleStream));
+      }
+    }
+  }
+
+  @VisibleForTesting
+  static void runInstallJob(MessageConsoleStream consoleStream, CloudSdkInstallJob installJob)
+      throws CoreException, InterruptedException {
+    installJob.setSystem(true);
+    installJob.schedule();
+    installJob.join();
+
+    IStatus status = installJob.getResult();
+    if (!status.isOK()) {
+      throw new CoreException(status);
+    }
+  }
+
+  public static void installManagedSdkAsync() {
+    if (isManagedSdkFeatureEnabled()) {
+      if (CloudSdkPreferences.isAutoManaging()) {
+        Job installJob = new CloudSdkInstallJob(null /* no console output */);
+        installJob.schedule();
+      }
+    }
   }
 }

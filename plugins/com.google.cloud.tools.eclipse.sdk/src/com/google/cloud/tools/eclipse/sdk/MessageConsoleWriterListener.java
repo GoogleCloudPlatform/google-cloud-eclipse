@@ -17,20 +17,31 @@
 package com.google.cloud.tools.eclipse.sdk;
 
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
+import com.google.cloud.tools.managedcloudsdk.MessageListener;
 import org.eclipse.ui.console.MessageConsoleStream;
 
-public class MessageConsoleWriterOutputLineListener implements ProcessOutputLineListener {
-  private MessageConsoleStream stream;
+public class MessageConsoleWriterListener implements ProcessOutputLineListener, MessageListener {
+  private final MessageConsoleStream stream;
 
-  public MessageConsoleWriterOutputLineListener(MessageConsoleStream stream) {
+  public MessageConsoleWriterListener(MessageConsoleStream stream) {
     this.stream = stream;
   }
 
   @Override
   public void onOutputLine(String line) {
     if (!stream.isClosed()) {
-      // there's still a small chance that the stream will be closed and the error will be logged by the ConsolePlugin
+      // there's still a small chance that the stream will be closed and the error will be logged by
+      // the ConsolePlugin
       stream.println(line);
+    }
+  }
+
+  @Override
+  public void message(String rawString) {
+    if (!stream.isClosed()) {
+      // there's still a small chance that the stream will be closed and the error will be logged by
+      // the ConsolePlugin
+      stream.print(rawString);
     }
   }
 }

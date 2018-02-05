@@ -156,7 +156,7 @@ target platform whenever dependencies are updated.
 
   8. Select your new target platform (instead of Running Platform) in the `Target Platform` preferences.
 
-  9. Click `OK` to load this new target platform.
+  9. Click `Apply and Finish` to load this new target platform.
 
   10. Eclipse will load the target.
 
