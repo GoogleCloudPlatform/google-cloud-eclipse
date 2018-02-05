@@ -26,6 +26,7 @@ import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.appengine.localserver.PreferencesInitializer;
 import com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsole;
 import com.google.cloud.tools.eclipse.appengine.localserver.ui.StaleResourcesStatusHandler;
+import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
@@ -138,6 +139,22 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   }
 
   @Override
+  public boolean preLaunchCheck(
+      ILaunchConfiguration configuration, String mode, IProgressMonitor monitor)
+      throws CoreException {
+    try {
+      // ensure we have a Cloud SDK; no-op if not configured to use managed sdk
+      CloudSdkManager.installManagedSdk(null);
+    } catch (InterruptedException ex) {
+      Thread.interrupted(); // reset flag
+      String detailMessage = Messages.getString("cloudsdk.not.configured"); // $NON-NLS-1$
+      IStatus status = StatusUtil.error(this, detailMessage, ex);
+      throw new CoreException(status);
+    }
+    return super.preLaunchCheck(configuration, mode, monitor);
+  }
+
+  @Override
   public ILaunch getLaunch(ILaunchConfiguration configuration, String mode) throws CoreException {
     IServer server = ServerUtil.getServer(configuration);
     DefaultRunConfiguration runConfig = generateServerRunConfiguration(configuration, server, mode);
@@ -153,6 +170,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     if (!super.finalLaunchCheck(configuration, mode, progress.newChild(20))) {
       return false;
     }
+    validateCloudSdk();
 
     // If we're auto-publishing before launch, check if there may be stale
     // resources not yet published. See
@@ -427,8 +445,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       IProgressMonitor monitor) throws CoreException {
     AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_LOCAL_SERVER,
         AnalyticsEvents.APP_ENGINE_LOCAL_SERVER_MODE, mode);
-
-    validateCloudSdk();
 
     IServer server = ServerUtil.getServer(configuration);
     if (server == null) {
