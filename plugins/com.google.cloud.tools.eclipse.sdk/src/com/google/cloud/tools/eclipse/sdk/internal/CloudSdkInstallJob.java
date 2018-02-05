@@ -48,8 +48,11 @@ public class CloudSdkInstallJob extends Job {
 
   @Override
   protected IStatus run(IProgressMonitor monitor) {
-    // TODO(chanseok): to be implemented: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2753
-    consoleStream.println("to be implemented");
+    // TODO(chanseok): to be implemented:
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2753
+    if (consoleStream != null) {
+      consoleStream.println("to be implemented");
+    }
     return Status.OK_STATUS;
   }
 }
