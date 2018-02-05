@@ -154,17 +154,22 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
         devServer.stop(stopConfig);
       } catch (AppEngineException ex) {
         logger.log(Level.WARNING, "Error terminating server: " + ex.getMessage(), ex); //$NON-NLS-1$
+        terminate();
       }
     } else {
       // we've already given it a chance
-      logger.info("forced stop: destroying associated processes"); //$NON-NLS-1$
-      if (devProcess != null) {
-        devProcess.destroy();
-        devProcess = null;
-      }
-      devServer = null;
-      setServerState(IServer.STATE_STOPPED);
+      terminate();
     }
+  }
+
+  private void terminate() {
+    logger.info("forced stop: destroying associated processes"); //$NON-NLS-1$
+    if (devProcess != null) {
+      devProcess.destroy();
+      devProcess = null;
+    }
+    devServer = null;
+    setServerState(IServer.STATE_STOPPED);
   }
 
 
