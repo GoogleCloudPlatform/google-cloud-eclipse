@@ -25,7 +25,7 @@ import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
 import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardStagingDelegate;
 import com.google.cloud.tools.eclipse.sdk.GcloudStructuredLogErrorMessageCollector;
-import com.google.cloud.tools.eclipse.sdk.MessageConsoleWriterOutputLineListener;
+import com.google.cloud.tools.eclipse.sdk.MessageConsoleWriterListener;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -93,7 +93,7 @@ public class CloudSdkProcessWrapper {
     Preconditions.checkState(cloudSdk == null, "CloudSdk already set up");
 
     CloudSdk.Builder cloudSdkBuilder = getBaseCloudSdkBuilder(stderrOutputStream)
-        .addStdOutLineListener(new MessageConsoleWriterOutputLineListener(stdoutOutputStream));
+        .addStdOutLineListener(new MessageConsoleWriterListener(stdoutOutputStream));
     if (javaHome != null) {
       cloudSdkBuilder.javaHome(javaHome);
     }
@@ -102,7 +102,7 @@ public class CloudSdkProcessWrapper {
 
   private CloudSdk.Builder getBaseCloudSdkBuilder(MessageConsoleStream stdErrStream) {
     return new CloudSdk.Builder()
-        .addStdErrLineListener(new MessageConsoleWriterOutputLineListener(stdErrStream))
+        .addStdErrLineListener(new MessageConsoleWriterListener(stdErrStream))
         .startListener(new StoreProcessObjectListener())
         .exitListener(new ProcessExitRecorder())
         .appCommandMetricsEnvironment(CloudToolsInfo.METRICS_NAME)

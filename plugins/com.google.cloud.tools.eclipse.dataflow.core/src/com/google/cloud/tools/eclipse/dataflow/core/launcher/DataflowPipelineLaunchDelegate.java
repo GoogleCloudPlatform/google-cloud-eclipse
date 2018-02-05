@@ -125,7 +125,6 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
 
     PipelineLaunchConfiguration pipelineConfig =
         PipelineLaunchConfiguration.fromLaunchConfiguration(majorVersion, configuration);
-    PipelineRunner pipelineRunner = pipelineConfig.getRunner();
 
     DataflowPreferences preferences = ProjectOrWorkspaceDataflowPreferences.forProject(project);
     if (!pipelineConfig.isValid(hierarchy, preferences)) {
@@ -146,6 +145,7 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
     String accountEmail = effectiveArguments.get("accountEmail");
     setLoginCredential(workingCopy, accountEmail);
 
+    PipelineRunner pipelineRunner = pipelineConfig.getRunner();
     AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.DATAFLOW_RUN,
         AnalyticsEvents.DATAFLOW_RUN_RUNNER, pipelineRunner.getRunnerName());
 

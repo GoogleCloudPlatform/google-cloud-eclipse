@@ -25,19 +25,20 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MessageConsoleWriterOutputLineListenerTest {
+public class MessageConsoleWriterListenerTest {
   @Mock private MessageConsoleStream mockConsoleStream;
 
-  /**
-   * Tests that {@link MessageConsoleWriterOutputLineListener#onOutputLine(String)} appends the specified
-   * message to the console stream.
-   */
   @Test
   public void testOnOutputLine() {
-    String message = "a message";
-    MessageConsoleWriterOutputLineListener listener = new MessageConsoleWriterOutputLineListener(mockConsoleStream);
-    listener.onOutputLine(message);
-    verify(mockConsoleStream).println(message);
+    MessageConsoleWriterListener listener = new MessageConsoleWriterListener(mockConsoleStream);
+    listener.onOutputLine("a message");
+    verify(mockConsoleStream).println("a message");
   }
 
+  @Test
+  public void testMessage() {
+    MessageConsoleWriterListener listener = new MessageConsoleWriterListener(mockConsoleStream);
+    listener.message("a message");
+    verify(mockConsoleStream).print("a message");
+  }
 }

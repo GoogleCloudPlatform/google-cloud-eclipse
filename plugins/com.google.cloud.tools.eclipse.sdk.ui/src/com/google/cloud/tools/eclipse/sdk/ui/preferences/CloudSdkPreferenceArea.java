@@ -22,8 +22,11 @@ import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
 import com.google.cloud.tools.eclipse.preferences.areas.PreferenceArea;
-import com.google.cloud.tools.eclipse.sdk.internal.PreferenceConstants;
+import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
+import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
+import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences.CloudSdkManagementOption;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
+import com.google.common.annotations.VisibleForTesting;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,14 +34,17 @@ import java.nio.file.Paths;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Link;
@@ -46,9 +52,13 @@ import org.eclipse.ui.PlatformUI;
 
 public class CloudSdkPreferenceArea extends PreferenceArea {
   /** Preference Page ID that hosts this area. */
-  public static final String PAGE_ID = "com.google.cloud.tools.eclipse.preferences.main";
+  public static final String PAGE_ID =
+      "com.google.cloud.tools.eclipse.preferences.main"; //$NON-NLS-1$
 
+  private Button useLocalSdk;
+  private Composite localSdkArea;
   private CloudSdkDirectoryFieldEditor sdkLocation;
+
   private IStatus status = Status.OK_STATUS;
   private IPropertyChangeListener wrappedPropertyChangeListener = new IPropertyChangeListener() {
 
@@ -66,7 +76,9 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
   public Control createContents(Composite parent) {
     Composite contents = new Composite(parent, SWT.NONE);
     Link instructions = new Link(contents, SWT.WRAP);
-    instructions.setText(Messages.getString("CloudSdkRequired"));
+    instructions.setText(CloudSdkManager.isManagedSdkFeatureEnabled()
+        ? Messages.getString("CloudSdkRequiredWithManagedSdk") //$NON-NLS-1$
+        : Messages.getString("CloudSdkRequired")); //$NON-NLS-1$
     instructions.setFont(contents.getFont());
     instructions.addSelectionListener(new SelectionAdapter() {
       @Override
@@ -75,33 +87,76 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       }
     });
 
-    Composite fieldContents = new Composite(parent, SWT.NONE);
-    sdkLocation = new CloudSdkDirectoryFieldEditor(PreferenceConstants.CLOUDSDK_PATH,
-        Messages.getString("SdkLocation"), fieldContents);
+    if (CloudSdkManager.isManagedSdkFeatureEnabled()) {
+      useLocalSdk = new Button(parent, SWT.CHECK);
+      useLocalSdk.setText(Messages.getString("UseLocalSdk")); //$NON-NLS-1$
+      useLocalSdk.addSelectionListener(new SelectionAdapter() {
+        @Override
+        public void widgetSelected(SelectionEvent e) {
+          updateControlEnablement();
+        }
+      });
+    }
+
+    localSdkArea = new Composite(parent, SWT.NONE);
+    sdkLocation = new CloudSdkDirectoryFieldEditor(CloudSdkPreferences.CLOUD_SDK_PATH,
+        Messages.getString("SdkLocation"), localSdkArea); //$NON-NLS-1$
     Path defaultLocation = getDefaultSdkLocation();
     if (defaultLocation != null) {
       sdkLocation.setFilterPath(defaultLocation.toFile());
     }
     sdkLocation.setPreferenceStore(getPreferenceStore());
     sdkLocation.setPropertyChangeListener(wrappedPropertyChangeListener);
-    GridLayoutFactory.fillDefaults().numColumns(sdkLocation.getNumberOfControls())
-        .generateLayout(fieldContents);
 
+    if (CloudSdkManager.isManagedSdkFeatureEnabled()) {
+      GridLayoutFactory.fillDefaults().numColumns(sdkLocation.getNumberOfControls())
+          .extendedMargins(IDialogConstants.LEFT_MARGIN, 0, 0, 0)
+          .generateLayout(localSdkArea);
+    } else {
+      GridLayoutFactory.fillDefaults().numColumns(sdkLocation.getNumberOfControls())
+          .generateLayout(localSdkArea);
+    }
     GridLayoutFactory.fillDefaults().generateLayout(contents);
 
     Dialog.applyDialogFont(contents);
     return contents;
   }
 
+  @VisibleForTesting
+  void loadSdkManagement(boolean loadDefault) {
+    IPreferenceStore preferenceStore = getPreferenceStore();
+    String value;
+    if (loadDefault) {
+      value = preferenceStore.getDefaultString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT);
+    } else {
+      value = preferenceStore.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT);
+    }
+
+    boolean manual = CloudSdkManagementOption.MANUAL.name().equals(value);
+    useLocalSdk.setSelection(manual);
+  }
+
+  private void updateControlEnablement() {
+    boolean manual = useLocalSdk.getSelection();
+    sdkLocation.setEnabled(manual, localSdkArea);
+  }
+
   @Override
   public void load() {
+    if (CloudSdkManager.isManagedSdkFeatureEnabled()) {
+      loadSdkManagement(false /* loadDefault */);
+      updateControlEnablement();
+    }
     sdkLocation.load();
-    fireValueChanged(VALUE, "", "");
+    fireValueChanged(VALUE, "", ""); //$NON-NLS-1$ //$NON-NLS-2$
   }
 
   @Override
   public void loadDefault() {
-    sdkLocation.loadDefault();
+    if (CloudSdkManager.isManagedSdkFeatureEnabled()) {
+      loadSdkManagement(true /* loadDefault */);
+      updateControlEnablement();
+    }
   }
 
   @Override
@@ -111,14 +166,16 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
   @Override
   public void performApply() {
+    if (CloudSdkManager.isManagedSdkFeatureEnabled()) {
+      if (useLocalSdk.getSelection()) {
+        getPreferenceStore().putValue(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT,
+            CloudSdkManagementOption.MANUAL.name());
+      } else {
+        getPreferenceStore().putValue(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT,
+            CloudSdkManagementOption.AUTOMATIC.name());
+      }
+    }
     sdkLocation.store();
-  }
-
-  /**
-   * Sets the new value or {@code null} for the empty string.
-   */
-  public void setStringValue(String value) {
-    sdkLocation.setStringValue(value);
   }
 
   private static Path getDefaultSdkLocation() {
@@ -140,15 +197,15 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       // accept a seemingly invalid location in case the SDK organization
       // has changed and the CloudSdk#validate() code is out of date
       status = new Status(IStatus.WARNING, getClass().getName(),
-          Messages.getString("CloudSdkNotFound", sdk.getSdkPath()));
+          Messages.getString("CloudSdkNotFound", sdk.getSdkPath())); //$NON-NLS-1$
       return false;
     } catch (AppEngineJavaComponentsNotInstalledException ex) {
       status = new Status(IStatus.WARNING, getClass().getName(),
-          Messages.getString("AppEngineJavaComponentsNotInstalled", ex.getMessage()));
+          Messages.getString("AppEngineJavaComponentsNotInstalled", ex.getMessage())); //$NON-NLS-1$
       return false;
     } catch (CloudSdkOutOfDateException ex) {
       status = new Status(IStatus.ERROR, getClass().getName(),
-          Messages.getString("CloudSdkOutOfDate"));
+          Messages.getString("CloudSdkOutOfDate")); //$NON-NLS-1$
         return false;
     }
   }
@@ -188,11 +245,11 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
       Path location = Paths.get(directory);
       if (!Files.exists(location)) {
-        String message = Messages.getString("NoSuchDirectory", location);
+        String message = Messages.getString("NoSuchDirectory", location); //$NON-NLS-1$
         status = new Status(IStatus.ERROR, getClass().getName(), message);
         return false;
       } else if (!Files.isDirectory(location)) {
-        String message = Messages.getString("FileNotDirectory", location);
+        String message = Messages.getString("FileNotDirectory", location); //$NON-NLS-1$
         status = new Status(IStatus.ERROR, getClass().getName(), message);
         return false;
       }

@@ -63,8 +63,7 @@ public class PipelineLaunchConfiguration {
    */
   public static PipelineLaunchConfiguration fromLaunchConfiguration(MajorVersion majorVersion,
       ILaunchConfiguration launchConfiguration) throws CoreException {
-    PipelineLaunchConfiguration configuration =
-        new PipelineLaunchConfiguration(majorVersion);
+    PipelineLaunchConfiguration configuration = new PipelineLaunchConfiguration(majorVersion);
     configuration.setValuesFromLaunchConfiguration(launchConfiguration);
     return configuration;
   }
@@ -112,7 +111,7 @@ public class PipelineLaunchConfiguration {
   }
 
   public void setArgumentValues(Map<String, String> allRequiredArgs) {
-    this.argumentValues = allRequiredArgs;
+    argumentValues = allRequiredArgs;
   }
 
   public boolean isUseDefaultLaunchOptions() {

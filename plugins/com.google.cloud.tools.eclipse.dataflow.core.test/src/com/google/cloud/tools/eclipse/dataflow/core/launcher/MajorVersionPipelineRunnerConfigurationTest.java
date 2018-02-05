@@ -78,7 +78,8 @@ public class MajorVersionPipelineRunnerConfigurationTest {
         mock(ILaunchConfiguration.class, AdditionalAnswers.returnsSecondArg());
     PipelineLaunchConfiguration launchConfiguration =
         PipelineLaunchConfiguration.fromLaunchConfiguration(majorVersion, empty);
-    assertEquals(PipelineLaunchConfiguration.defaultRunner(majorVersion), launchConfiguration.getRunner());
+    assertEquals(PipelineLaunchConfiguration.defaultRunner(majorVersion),
+        launchConfiguration.getRunner());
   }
 
 }

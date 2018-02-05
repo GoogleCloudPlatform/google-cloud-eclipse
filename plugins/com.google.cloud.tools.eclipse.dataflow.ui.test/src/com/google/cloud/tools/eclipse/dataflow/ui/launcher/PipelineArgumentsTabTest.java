@@ -102,7 +102,7 @@ public class PipelineArgumentsTabTest {
 
       project1 = mockProject("project1");
       javaProject1 = mock(IJavaProject.class);
-      when(workspaceRoot.getProject(eq("project1"))).thenReturn(project1);
+      when(workspaceRoot.getProject("project1")).thenReturn(project1);
       when(project1.getAdapter(IJavaElement.class)).thenReturn(javaProject1);
       when(javaProject1.getJavaProject()).thenReturn(javaProject1);
 
@@ -116,7 +116,7 @@ public class PipelineArgumentsTabTest {
       when(project2.getAdapter(IJavaElement.class)).thenReturn(javaProject2);
       when(javaProject2.getJavaProject()).thenReturn(javaProject2);
 
-      when(workspaceRoot.getProject(eq("project2"))).thenReturn(project2);
+      when(workspaceRoot.getProject("project2")).thenReturn(project2);
       configuration2 = mockLaunchConfiguration();
       when(configuration2.getAttribute(eq(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME),
           anyString())).thenReturn("project2");
@@ -248,7 +248,6 @@ public class PipelineArgumentsTabTest {
     when(project.isAccessible()).thenReturn(true);
     when(project.isOpen()).thenReturn(true);
     return project;
-
   }
 
   @RunWith(Parameterized.class)

@@ -122,7 +122,9 @@ public class CloudLibrariesPage extends WizardPage
       librariesSelectors.add(librariesSelector);
     }
     setSelectedLibraries(initialSelection);
-    composite.setLayout(new RowLayout(SWT.HORIZONTAL));
+    RowLayout layout = new RowLayout(SWT.HORIZONTAL);
+    layout.spacing = 12;
+    composite.setLayout(layout);
     setControl(composite);
   }
 

@@ -85,8 +85,8 @@ public class ServiceAccountUtilTest {
   @Test
   public void testCreateServiceAccountKey_destinationShouldBeAbsolute() throws IOException {
     try {
-      ServiceAccountUtil.createAppEngineDefaultServiceAccountKey(apiFactory, credential, "my-project",
-          Paths.get("relative/path/to.json"));
+      ServiceAccountUtil.createAppEngineDefaultServiceAccountKey(apiFactory, credential,
+          "my-project", Paths.get("relative/path/to.json"));
       fail();
     } catch (IllegalArgumentException e) {
       assertEquals("destination not absolute", e.getMessage());

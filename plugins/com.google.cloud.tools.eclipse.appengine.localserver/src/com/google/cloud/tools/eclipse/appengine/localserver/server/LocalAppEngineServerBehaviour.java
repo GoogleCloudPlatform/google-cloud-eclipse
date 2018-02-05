@@ -33,7 +33,7 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
-import com.google.cloud.tools.eclipse.sdk.MessageConsoleWriterOutputLineListener;
+import com.google.cloud.tools.eclipse.sdk.MessageConsoleWriterListener;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -154,17 +154,22 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
         devServer.stop(stopConfig);
       } catch (AppEngineException ex) {
         logger.log(Level.WARNING, "Error terminating server: " + ex.getMessage(), ex); //$NON-NLS-1$
+        terminate();
       }
     } else {
       // we've already given it a chance
-      logger.info("forced stop: destroying associated processes"); //$NON-NLS-1$
-      if (devProcess != null) {
-        devProcess.destroy();
-        devProcess = null;
-      }
-      devServer = null;
-      setServerState(IServer.STATE_STOPPED);
+      terminate();
     }
+  }
+
+  private void terminate() {
+    logger.info("forced stop: destroying associated processes"); //$NON-NLS-1$
+    if (devProcess != null) {
+      devProcess.destroy();
+      devProcess = null;
+    }
+    devServer = null;
+    setServerState(IServer.STATE_STOPPED);
   }
 
 
@@ -414,10 +419,8 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
 
   private void initializeDevServer(MessageConsoleStream stdout, MessageConsoleStream stderr,
       Path javaHomePath) {
-    MessageConsoleWriterOutputLineListener stdoutListener =
-        new MessageConsoleWriterOutputLineListener(stdout);
-    MessageConsoleWriterOutputLineListener stderrListener =
-        new MessageConsoleWriterOutputLineListener(stderr);
+    MessageConsoleWriterListener stdoutListener = new MessageConsoleWriterListener(stdout);
+    MessageConsoleWriterListener stderrListener = new MessageConsoleWriterListener(stderr);
 
     // dev_appserver output goes to stderr
     cloudSdk = new CloudSdk.Builder()
