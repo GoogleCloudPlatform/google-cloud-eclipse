@@ -30,6 +30,7 @@ import com.google.cloud.tools.managedcloudsdk.components.SdkComponent;
 import com.google.cloud.tools.managedcloudsdk.components.SdkComponentInstaller;
 import com.google.cloud.tools.managedcloudsdk.install.SdkInstaller;
 import com.google.cloud.tools.managedcloudsdk.install.SdkInstallerException;
+import com.google.cloud.tools.managedcloudsdk.install.UnknownArchiveTypeException;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.nio.channels.ClosedByInterruptException;
@@ -90,6 +91,8 @@ public class CloudSdkInstallJob extends Job {
       throw new RuntimeException("Cloud Tools for Eclipse supports Windows, Linux, and Mac only.");
     } catch (ManagedSdkVersionMismatchException e) {
       throw new RuntimeException("This is never thrown because we always use LATEST.");
+    } catch (UnknownArchiveTypeException e) {
+      throw new RuntimeException("The next appengine-plugins-core release will remove this.");
     }
   }
 
