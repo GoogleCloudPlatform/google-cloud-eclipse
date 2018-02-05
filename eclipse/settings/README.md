@@ -7,15 +7,18 @@ to use the [Google Style for Java][google-style-java].
 The settings currently reflect the following choices:
 
   - uses the [Google Java Format plugin for Eclipse](google-java-format),
-    which requires Eclipse Oxygen (4.7) or later.
+    which requires developing with Eclipse Oxygen (4.7) or later
   - unnecessary declared checked exceptions on methods are _errors_
   - switch missing default case are _warnings_
   - resource leaks are _errors_
   - potential resource leaks are _warnings_
   - serializable classes without `serialVersionUID` are _ignored_
   - redundant generic type argument are _errors_
+  - disable warnings on non-externalized strings / $NON-NLS-x$ due to
+    https://github.com/google/google-java-format/issues/221
 
-## Updating the Settings
+
+## Updating / Applying the Settings
 
 The settings require installing the [Google Java Format plugin for
 Eclipse][google-java-format].  Installing the format plugin requires
@@ -32,7 +35,7 @@ around the [`eclipse-settings-maven-plugin`][esmp] Maven plugin.
   [google-java-format]: https://github.com/google/google-java-format
   [google-java-format-release]: https://github.com/google/google-java-format/releases
 
-### Step 0: Change the Canonical Settings
+### Step 0: Change the Canonical Settings (OPTIONAL)
 
 To update the settings, change the settings for one project and
 then copy in the changed files from its `.settings/` directory into
