@@ -40,17 +40,22 @@ public class PluginXmlTest extends BasePluginXmlTest {
     assertEquals("com.google.cloud.tools.eclipse.ui.util.showPopup", //$NON-NLS-1$
         configExtension.getAttribute("id")); //$NON-NLS-1$
 
-    // second element is the GCP TOolbar definition
+    // second element is the GCP Toolbar definition
     extension = (Element) extensions.item(1);
     assertEquals("org.eclipse.ui.menus", extension.getAttribute("point")); //$NON-NLS-1$ //$NON-NLS-2$
     NodeList menuContributions = extension.getElementsByTagName("menuContribution"); //$NON-NLS-1$
-    assertEquals(2, menuContributions.getLength());
+    assertEquals(3, menuContributions.getLength());
     Element menuContribution = (Element) menuContributions.item(0);
     // first element is the toolbar definition
     assertEquals("toolbar:org.eclipse.ui.main.toolbar?after=additions", //$NON-NLS-1$
         menuContribution.getAttribute("locationURI")); //$NON-NLS-1$
-    // second contribution is our actual menu definition
+    // second contribution is our trim area definition
     menuContribution = (Element) menuContributions.item(1);
+    assertEquals(
+        "toolbar:org.eclipse.ui.trim.status?after=additions", // $NON-NLS-1$
+        menuContribution.getAttribute("locationURI")); // $NON-NLS-1$
+    // third contribution is our actual menu definition
+    menuContribution = (Element) menuContributions.item(2);
     assertEquals("menu:com.google.cloud.tools.eclipse.ui.actions", //$NON-NLS-1$
         menuContribution.getAttribute("locationURI")); //$NON-NLS-1$
   }
