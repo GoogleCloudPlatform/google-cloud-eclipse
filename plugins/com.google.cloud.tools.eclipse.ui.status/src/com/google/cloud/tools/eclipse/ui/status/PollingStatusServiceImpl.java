@@ -57,7 +57,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  * on-going do not have an "end".
  */
 @Component(name = "polling")
-public class PollingStatusServiceImpl implements GcpStatusService {
+public class PollingStatusServiceImpl implements GcpStatusMonitoringService {
   private static final Logger logger = Logger.getLogger(PollingStatusServiceImpl.class.getName());
 
   private static final URI STATUS_JSON_URI =
@@ -78,7 +78,7 @@ public class PollingStatusServiceImpl implements GcpStatusService {
   private boolean active = false;
   private long pollTime = 3 * 60 * 1000; // poll every 3 minutes
   private IProxyService proxyService;
-  private ListenerList /*<Consumer<GcpStatusService>>*/ listeners = new ListenerList /*<>*/();
+  private ListenerList /*<Consumer<GcpStatusMonitoringService>>*/ listeners = new ListenerList /*<>*/();
   private Gson gson = new Gson();
 
   private GcpStatus currentStatus = GcpStatus.OK_STATUS;
@@ -135,7 +135,7 @@ public class PollingStatusServiceImpl implements GcpStatusService {
     }
     logger.info("current GCP status = " + currentStatus);
     for (Object listener : listeners.getListeners()) {
-      ((Consumer<GcpStatusService>) listener).accept(this);
+      ((Consumer<GcpStatusMonitoringService>) listener).accept(this);
     }
   }
 
@@ -185,12 +185,12 @@ public class PollingStatusServiceImpl implements GcpStatusService {
   }
 
   @Override
-  public void addStatusChangeListener(Consumer<GcpStatusService> listener) {
+  public void addStatusChangeListener(Consumer<GcpStatusMonitoringService> listener) {
     listeners.add(listener);
   }
 
   @Override
-  public void removeStatusChangeListener(Consumer<GcpStatusService> listener) {
+  public void removeStatusChangeListener(Consumer<GcpStatusMonitoringService> listener) {
     listeners.remove(listener);
   }
 }

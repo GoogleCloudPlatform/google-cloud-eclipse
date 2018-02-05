@@ -19,14 +19,14 @@ package com.google.cloud.tools.eclipse.ui.status;
 import com.google.cloud.tools.eclipse.util.jobs.Consumer;
 
 /** Represents a service for querying the Google Cloud Platform status. */
-public interface GcpStatusService {
+public interface GcpStatusMonitoringService {
 
   /** Return the latest status. */
   GcpStatus getCurrentStatus();
 
   /** Request notification of any changes. */
-  void addStatusChangeListener(Consumer<GcpStatusService> listener);
+  void addStatusChangeListener(Consumer<GcpStatusMonitoringService> listener);
 
   /** Request to be no longer notified of any changes. */
-  void removeStatusChangeListener(Consumer<GcpStatusService> listener);
+  void removeStatusChangeListener(Consumer<GcpStatusMonitoringService> listener);
 }
