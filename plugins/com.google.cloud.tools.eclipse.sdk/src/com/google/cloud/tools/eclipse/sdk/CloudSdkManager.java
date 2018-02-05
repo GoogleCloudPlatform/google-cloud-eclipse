@@ -19,8 +19,10 @@ package com.google.cloud.tools.eclipse.sdk;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkInstallJob;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
 import com.google.common.annotations.VisibleForTesting;
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.ui.console.MessageConsoleStream;
@@ -55,28 +57,35 @@ public class CloudSdkManager {
    * is complete.
    *
    * @param consoleStream stream to which the install output is written
+   * @param cancelMonitor the progress monitor that can be used to cancel the installation. No
+   *     progress is reported on this monitor
    */
-  public static void installManagedSdk(MessageConsoleStream consoleStream)
-      throws CoreException, InterruptedException {
+  public static IStatus installManagedSdk(MessageConsoleStream consoleStream,
+      IProgressMonitor cancelMonitor) {
     if (isManagedSdkFeatureEnabled()) {
       if (CloudSdkPreferences.isAutoManaging()) {
         // We don't check if the Cloud SDK installed but always schedule the install job; such check
         // may pass while the SDK is being installed and in an incomplete state.
-        runInstallJob(consoleStream, new CloudSdkInstallJob(consoleStream));
+        return runInstallJob(consoleStream, new CloudSdkInstallJob(consoleStream), cancelMonitor);
       }
     }
+    return Status.OK_STATUS;
   }
 
   @VisibleForTesting
-  static void runInstallJob(MessageConsoleStream consoleStream, CloudSdkInstallJob installJob)
-      throws CoreException, InterruptedException {
+  static IStatus runInstallJob(MessageConsoleStream consoleStream, CloudSdkInstallJob installJob,
+      IProgressMonitor cancelMonitor) {
     installJob.setSystem(true);
     installJob.schedule();
-    installJob.join();
 
-    IStatus status = installJob.getResult();
-    if (!status.isOK()) {
-      throw new CoreException(status);
+    try {
+      while (!installJob.join(100, cancelMonitor)) {
+        // Spin. (Too bad the non-timed "join()" does not accept a cancel monitor.)
+      }
+      return installJob.getResult();
+    } catch (OperationCanceledException | InterruptedException e) {
+      installJob.cancel();
+      return Status.CANCEL_STATUS;
     }
   }
 

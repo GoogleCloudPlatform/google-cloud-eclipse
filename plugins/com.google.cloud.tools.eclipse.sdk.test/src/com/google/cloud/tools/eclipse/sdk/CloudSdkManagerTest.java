@@ -19,19 +19,20 @@ package com.google.cloud.tools.eclipse.sdk;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkInstallJob;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.junit.After;
 import org.junit.Test;
 
 public class CloudSdkManagerTest {
+
+  private final IProgressMonitor monitor = new NullProgressMonitor();
 
   @After
   public void tearDown() {
@@ -50,33 +51,39 @@ public class CloudSdkManagerTest {
   }
 
   @Test
-  public void testRunInstallJob_blocking() throws CoreException, InterruptedException {
+  public void testRunInstallJob_blocking() {
     CloudSdkInstallJob okJob = new FakeInstallJob(Status.OK_STATUS);
-    CloudSdkManager.runInstallJob(null, okJob);
+    CloudSdkManager.runInstallJob(null, okJob, monitor );
     // Incomplete test, but if it ever fails, something is surely broken.
     assertEquals(Job.NONE, okJob.getState());
   }
 
   @Test
-  public void testRunInstallJob_canceled() throws InterruptedException {
+  public void testRunInstallJob_canceled() {
+    IStatus result =
+        CloudSdkManager.runInstallJob(null, new FakeInstallJob(Status.CANCEL_STATUS), monitor);
+    assertEquals(Status.CANCEL, result.getSeverity());
+  }
+
+  @Test
+  public void testRunInstallJob_interrupted() {
     try {
-      CloudSdkManager.runInstallJob(null, new FakeInstallJob(Status.CANCEL_STATUS));
-      fail();
-    } catch (CoreException e) {
-      assertEquals(Status.CANCEL, e.getStatus().getSeverity());
+      Thread.currentThread().interrupt();
+
+      IStatus result =
+          CloudSdkManager.runInstallJob(null, new FakeInstallJob(Status.OK_STATUS), monitor);
+      assertEquals(Status.CANCEL, result.getSeverity());
+    } finally {
+      Thread.currentThread().isInterrupted();  // Clear the interrupted status.
     }
   }
 
   @Test
-  public void testRunInstallJob_installError() throws InterruptedException {
-    try {
-      IStatus errorResult = StatusUtil.error(this, "awesome install error in unit test");
-      CloudSdkManager.runInstallJob(null, new FakeInstallJob(errorResult));
-      fail();
-    } catch (CoreException e) {
-      assertEquals(Status.ERROR, e.getStatus().getSeverity());
-      assertEquals("awesome install error in unit test", e.getMessage());
-    }
+  public void testRunInstallJob_installError() {
+    IStatus result = StatusUtil.error(this, "awesome install error in unit test");
+    CloudSdkManager.runInstallJob(null, new FakeInstallJob(result), monitor);
+    assertEquals(Status.ERROR, result.getSeverity());
+    assertEquals("awesome install error in unit test", result.getMessage());
   }
 
   private static class FakeInstallJob extends CloudSdkInstallJob {

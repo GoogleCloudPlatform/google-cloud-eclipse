@@ -32,6 +32,7 @@ import com.google.cloud.tools.managedcloudsdk.install.SdkInstaller;
 import com.google.cloud.tools.managedcloudsdk.install.SdkInstallerException;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
+import java.nio.channels.ClosedByInterruptException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -48,6 +49,8 @@ public class CloudSdkInstallJob extends Job {
 
   private final MessageConsoleStream consoleStream;
 
+  private Thread jobThread;
+
   public CloudSdkInstallJob(MessageConsoleStream consoleStream) {
     super(Messages.getString("installJobName"));
     this.consoleStream = consoleStream;
@@ -61,8 +64,7 @@ public class CloudSdkInstallJob extends Job {
 
   @Override
   protected IStatus run(IProgressMonitor monitor) {
-    // TODO(chanseok): to be implemented: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2753
-    consoleStream.println("to be implemented");
+    jobThread = getThread();
 
     try {
       ManagedCloudSdk managedSdk = ManagedCloudSdk.newManagedSdk();
@@ -78,7 +80,7 @@ public class CloudSdkInstallJob extends Job {
       }
       return Status.OK_STATUS;
 
-    } catch (InterruptedException e) {
+    } catch (InterruptedException | ClosedByInterruptException e) {
       return Status.CANCEL_STATUS;
     } catch (IOException | ManagedSdkVerificationException | SdkInstallerException |
         CommandExecutionException | CommandExitException e) {
@@ -88,6 +90,15 @@ public class CloudSdkInstallJob extends Job {
       throw new RuntimeException("Cloud Tools for Eclipse supports Windows, Linux, and Mac only.");
     } catch (ManagedSdkVersionMismatchException e) {
       throw new RuntimeException("This is never thrown because we always use LATEST.");
+    }
+  }
+
+  @Override
+  protected void canceling() {
+    if (jobThread != null) {
+      // By the design of the appengine-plugins-core SDK downloader, cancellation support is
+      // implemented through the Java thread interruption facility.
+      jobThread.interrupt();
     }
   }
 }
