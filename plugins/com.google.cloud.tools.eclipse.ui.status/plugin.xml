@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:com.google.cloud.tools.eclipse.ui.actions?after=status">
+         <command
+               commandId="com.google.cloud.tools.eclipse.ui.status.showGcpStatus">
+         </command>
+      </menuContribution>
+      <menuContribution
+            locationURI="toolbar:com.google.cloud.tools.eclipse.ui.status">
+         <command
+               commandId="com.google.cloud.tools.eclipse.ui.status.showGcpStatus">
+         </command>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            categoryId="com.google.cloud.tools.eclipse.ui.commands"
+            defaultHandler="com.google.cloud.tools.eclipse.ui.status.ShowGcpStatusHandler"
+            description="%command.description"
+            id="com.google.cloud.tools.eclipse.ui.status.showGcpStatus"
+            name="%command.name">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup
+            class="com.google.cloud.tools.eclipse.ui.status.WorkbenchStartup">
+      </startup>
+   </extension>
+
+</plugin>

@@ -44,7 +44,7 @@ import org.eclipse.ui.menus.IMenuService;
  * <pre>
  * &lt;extension point=&quot;org.eclipse.ui.menus&quot;&gt;
  *    &lt;menuContribution locationURI=&quot;toolbar:org.eclipse.ui.main.toolbar?after=additions&quot;&gt;
- *       &lt;toolbar id=&quot;com.google.cloud.tools.eclipse.appengine.toolbar&quot;&gt;
+ *       &lt;toolbar id=&quot;com.google.cloud.tools.eclipse.ui.toolbar&quot;&gt;
  *          &lt;command
  *                style=&quot;pulldown&quot;
  *                commandId=&quot;com.google.cloud.tools.eclipse.ui.util.showPopup&quot;
