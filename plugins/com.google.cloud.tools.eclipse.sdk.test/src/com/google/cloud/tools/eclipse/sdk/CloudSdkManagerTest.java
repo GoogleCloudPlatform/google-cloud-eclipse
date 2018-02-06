@@ -19,20 +19,39 @@ package com.google.cloud.tools.eclipse.sdk;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkInstallJob;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import com.google.cloud.tools.managedcloudsdk.ManagedCloudSdk;
+import com.google.cloud.tools.managedcloudsdk.ManagedSdkVerificationException;
+import com.google.cloud.tools.managedcloudsdk.ManagedSdkVersionMismatchException;
+import com.google.cloud.tools.managedcloudsdk.components.SdkComponent;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class CloudSdkManagerTest {
 
+  @Mock private ManagedCloudSdk managedCloudSdk;
+
   private final IProgressMonitor monitor = new NullProgressMonitor();
+
+  @Before
+  public void setUp() throws ManagedSdkVerificationException, ManagedSdkVersionMismatchException {
+    when(managedCloudSdk.isInstalled()).thenReturn(true);
+    when(managedCloudSdk.hasComponent(any(SdkComponent.class))).thenReturn(true);
+  }
 
   @After
   public void tearDown() {
@@ -66,19 +85,6 @@ public class CloudSdkManagerTest {
   }
 
   @Test
-  public void testRunInstallJob_interrupted() {
-    try {
-      Thread.currentThread().interrupt();
-
-      IStatus result =
-          CloudSdkManager.runInstallJob(null, new FakeInstallJob(Status.OK_STATUS), monitor);
-      assertEquals(Status.CANCEL, result.getSeverity());
-    } finally {
-      Thread.currentThread().isInterrupted();  // Clear the interrupted status.
-    }
-  }
-
-  @Test
   public void testRunInstallJob_installError() {
     IStatus result = StatusUtil.error(this, "awesome install error in unit test");
     CloudSdkManager.runInstallJob(null, new FakeInstallJob(result), monitor);
@@ -98,6 +104,6 @@ public class CloudSdkManagerTest {
     @Override
     protected IStatus run(IProgressMonitor monitor) {
       return result;
-    } 
+    }
   }
 }

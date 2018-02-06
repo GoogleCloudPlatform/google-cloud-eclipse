@@ -19,14 +19,16 @@ package com.google.cloud.tools.eclipse.sdk.internal;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 
-import java.util.concurrent.Semaphore;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
+import com.google.cloud.tools.eclipse.sdk.MockedSdkInstallJob;
+import com.google.cloud.tools.managedcloudsdk.ManagedCloudSdk;
+import com.google.cloud.tools.managedcloudsdk.ManagedSdkVerificationException;
+import com.google.cloud.tools.managedcloudsdk.ManagedSdkVersionMismatchException;
+import com.google.cloud.tools.managedcloudsdk.components.SdkComponent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.console.MessageConsoleStream;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,38 +39,30 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class CloudSdkInstallJobTest {
 
   @Mock private MessageConsoleStream consoleStream;
-
-  private CloudSdkInstallJob installJob;
+  @Mock private ManagedCloudSdk managedCloudSdk;
 
   @Before
-  public void setUp() {
-    installJob = new FakeInstallJob(consoleStream, false /* blockOnStart */);
-  }
-
-  @After
-  public void tearDown() {
-    assertEquals(Job.NONE, installJob.getState());
+  public void setUp() throws ManagedSdkVerificationException, ManagedSdkVersionMismatchException {
+    when(managedCloudSdk.isInstalled()).thenReturn(true);
+    when(managedCloudSdk.hasComponent(any(SdkComponent.class))).thenReturn(true);
   }
 
   @Test
   public void testBelongsTo() {
+    Job installJob = new CloudSdkInstallJob(null);
     assertTrue(installJob.belongsTo(CloudSdkInstallJob.CLOUD_SDK_MODIFY_JOB_FAMILY));
   }
 
   @Test
   public void testMutexRuleSet() {
+    Job installJob = new CloudSdkInstallJob(null);
     assertEquals(CloudSdkInstallJob.MUTEX_RULE, installJob.getRule());
   }
 
   @Test
   public void testRun_mutualExclusion() throws InterruptedException {
-    FakeInstallJob job1 = new FakeInstallJob(null, true /* blockOnStart */);
-    FakeInstallJob job2 = new FakeInstallJob(null, true);
-
-    job1.schedule();
-    while (job1.getState() != Job.RUNNING) {
-      Thread.sleep(10);
-    }
+    MockedSdkInstallJob job1 = scheduleBlockingJobAndWaitUntilRunning();
+    MockedSdkInstallJob job2 = new MockedSdkInstallJob(true /* blockBeforeExit */, managedCloudSdk);
 
     job2.schedule();
     // Incomplete test, but if it ever fails, something is surely broken.
@@ -80,30 +74,13 @@ public class CloudSdkInstallJobTest {
     job2.join();
   }
 
-  private class FakeInstallJob extends CloudSdkInstallJob {
+  private MockedSdkInstallJob scheduleBlockingJobAndWaitUntilRunning() throws InterruptedException {
+    MockedSdkInstallJob job = new MockedSdkInstallJob(true /* blockBeforeExit */, managedCloudSdk);
 
-    private final Semaphore blocker = new Semaphore(0);
-    private final boolean blockOnStart;
-
-    private FakeInstallJob(MessageConsoleStream consoleStream, boolean blockOnStart) {
-      super(consoleStream);
-      this.blockOnStart = blockOnStart;
+    job.schedule();
+    while (job.getState() != Job.RUNNING) {
+      Thread.sleep(10);
     }
-
-    @Override
-    protected IStatus run(IProgressMonitor monitor) {
-      try {
-        if (blockOnStart) {
-          blocker.acquire();
-        }
-        return Status.OK_STATUS;
-      } catch (InterruptedException e) {
-        return Status.CANCEL_STATUS;
-      }
-    }
-
-    private void unblock() {
-      blocker.release();
-    }
-  };
+    return job;
+  }
 }

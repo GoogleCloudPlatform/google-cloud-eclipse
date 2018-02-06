@@ -50,8 +50,6 @@ public class CloudSdkInstallJob extends Job {
 
   private final MessageConsoleStream consoleStream;
 
-  private Thread jobThread;
-
   public CloudSdkInstallJob(MessageConsoleStream consoleStream) {
     super(Messages.getString("installJobName"));
     this.consoleStream = consoleStream;
@@ -65,10 +63,12 @@ public class CloudSdkInstallJob extends Job {
 
   @Override
   protected IStatus run(IProgressMonitor monitor) {
-    jobThread = getThread();
+    if (monitor.isCanceled()) {
+      return Status.CANCEL_STATUS;
+    }
 
     try {
-      ManagedCloudSdk managedSdk = ManagedCloudSdk.newManagedSdk();
+      ManagedCloudSdk managedSdk = getManagedCloudSdk();
       if (!managedSdk.isInstalled()) {
         SdkInstaller installer = managedSdk.newInstaller();
         installer.install(new MessageConsoleWriterListener(consoleStream));
@@ -96,11 +96,17 @@ public class CloudSdkInstallJob extends Job {
     }
   }
 
+  @VisibleForTesting
+  protected ManagedCloudSdk getManagedCloudSdk() throws UnsupportedOsException {
+    return ManagedCloudSdk.newManagedSdk();
+  }
+
   @Override
   protected void canceling() {
+    // By the design of the appengine-plugins-core SDK downloader, cancellation support is
+    // implemented through the Java thread interruption facility.
+    Thread jobThread = getThread();
     if (jobThread != null) {
-      // By the design of the appengine-plugins-core SDK downloader, cancellation support is
-      // implemented through the Java thread interruption facility.
       jobThread.interrupt();
     }
   }
