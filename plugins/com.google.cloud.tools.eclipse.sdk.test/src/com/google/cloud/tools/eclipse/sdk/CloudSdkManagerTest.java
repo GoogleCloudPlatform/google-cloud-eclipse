@@ -72,15 +72,15 @@ public class CloudSdkManagerTest {
   @Test
   public void testRunInstallJob_blocking() {
     CloudSdkInstallJob okJob = new FakeInstallJob(Status.OK_STATUS);
-    CloudSdkManager.runInstallJob(null, okJob, monitor );
+    CloudSdkManager.runInstallJob(null, okJob, monitor);
     // Incomplete test, but if it ever fails, something is surely broken.
     assertEquals(Job.NONE, okJob.getState());
   }
 
   @Test
   public void testRunInstallJob_canceled() {
-    IStatus result =
-        CloudSdkManager.runInstallJob(null, new FakeInstallJob(Status.CANCEL_STATUS), monitor);
+    CloudSdkInstallJob cancelJob = new FakeInstallJob(Status.CANCEL_STATUS);
+    IStatus result = CloudSdkManager.runInstallJob(null, cancelJob, monitor);
     assertEquals(Status.CANCEL, result.getSeverity());
   }
 
