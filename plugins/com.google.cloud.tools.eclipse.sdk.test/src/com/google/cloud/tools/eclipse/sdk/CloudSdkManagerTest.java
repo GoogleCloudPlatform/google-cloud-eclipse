@@ -95,13 +95,6 @@ public class CloudSdkManagerTest {
     assertEquals("awesome install error in unit test", result.getMessage());
   }
 
-  @Test
-  public void testRunInstallJob_canceledByMonitor() {
-    when(monitor.isCanceled()).thenReturn(true);
-    IStatus result = CloudSdkManager.runInstallJob(null, new FakeInstallJob(Status.OK_STATUS), monitor);
-    assertEquals(Status.CANCEL, result.getSeverity());
-  }
-
   private static class FakeInstallJob extends CloudSdkInstallJob {
 
     private final IStatus result;
