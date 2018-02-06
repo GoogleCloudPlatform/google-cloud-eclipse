@@ -94,18 +94,14 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       useLocalSdk.addSelectionListener(new SelectionAdapter() {
         @Override
         public void widgetSelected(SelectionEvent e) {
-          updateControlEnablement();
-        }
-      });
-      useLocalSdk.addSelectionListener(new SelectionAdapter() {
-        @Override
-        public void widgetSelected(SelectionEvent e) {
           if (!useLocalSdk.getSelection()) {
             status = Status.OK_STATUS;
           } else {
             sdkLocation.doCheckState();
           }
           fireValueChanged(VALUE, "", "");
+
+          updateControlEnablement();
         }
       });
     }
