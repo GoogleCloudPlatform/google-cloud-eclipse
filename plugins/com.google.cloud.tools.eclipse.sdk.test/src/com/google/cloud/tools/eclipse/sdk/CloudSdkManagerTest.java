@@ -44,8 +44,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class CloudSdkManagerTest {
 
   @Mock private ManagedCloudSdk managedCloudSdk;
-
-  private final IProgressMonitor monitor = new NullProgressMonitor();
+  @Mock private IProgressMonitor monitor;
 
   @Before
   public void setUp() throws ManagedSdkVerificationException, ManagedSdkVersionMismatchException {
@@ -72,24 +71,35 @@ public class CloudSdkManagerTest {
   @Test
   public void testRunInstallJob_blocking() {
     CloudSdkInstallJob okJob = new FakeInstallJob(Status.OK_STATUS);
-    CloudSdkManager.runInstallJob(null, okJob, monitor);
+    IStatus result = CloudSdkManager.runInstallJob(null, okJob, monitor);
     // Incomplete test, but if it ever fails, something is surely broken.
     assertEquals(Job.NONE, okJob.getState());
+    assertTrue(result.isOK());
   }
 
   @Test
   public void testRunInstallJob_canceled() {
     CloudSdkInstallJob cancelJob = new FakeInstallJob(Status.CANCEL_STATUS);
     IStatus result = CloudSdkManager.runInstallJob(null, cancelJob, monitor);
+    assertEquals(Job.NONE, cancelJob.getState());
     assertEquals(Status.CANCEL, result.getSeverity());
   }
 
   @Test
   public void testRunInstallJob_installError() {
-    IStatus result = StatusUtil.error(this, "awesome install error in unit test");
-    CloudSdkManager.runInstallJob(null, new FakeInstallJob(result), monitor);
+    IStatus error = StatusUtil.error(this, "awesome install error in unit test");
+    CloudSdkInstallJob errorJob = new FakeInstallJob(error);
+    IStatus result = CloudSdkManager.runInstallJob(null, errorJob, monitor);
+    assertEquals(Job.NONE, errorJob.getState());
     assertEquals(Status.ERROR, result.getSeverity());
     assertEquals("awesome install error in unit test", result.getMessage());
+  }
+
+  @Test
+  public void testRunInstallJob_canceledByMonitor() {
+    when(monitor.isCanceled()).thenReturn(true);
+    IStatus result = CloudSdkManager.runInstallJob(null, new FakeInstallJob(Status.OK_STATUS), monitor);
+    assertEquals(Status.CANCEL, result.getSeverity());
   }
 
   private static class FakeInstallJob extends CloudSdkInstallJob {

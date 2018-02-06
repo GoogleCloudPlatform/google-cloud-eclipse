@@ -17,16 +17,31 @@
 package com.google.cloud.tools.eclipse.sdk.internal;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.io.IOException;
 
 import com.google.cloud.tools.eclipse.sdk.MockedSdkInstallJob;
 import com.google.cloud.tools.managedcloudsdk.ManagedCloudSdk;
 import com.google.cloud.tools.managedcloudsdk.ManagedSdkVerificationException;
 import com.google.cloud.tools.managedcloudsdk.ManagedSdkVersionMismatchException;
+import com.google.cloud.tools.managedcloudsdk.MessageListener;
+import com.google.cloud.tools.managedcloudsdk.UnsupportedOsException;
+import com.google.cloud.tools.managedcloudsdk.command.CommandExecutionException;
+import com.google.cloud.tools.managedcloudsdk.command.CommandExitException;
 import com.google.cloud.tools.managedcloudsdk.components.SdkComponent;
+import com.google.cloud.tools.managedcloudsdk.components.SdkComponentInstaller;
+import com.google.cloud.tools.managedcloudsdk.install.SdkInstaller;
+import com.google.cloud.tools.managedcloudsdk.install.SdkInstallerException;
+import com.google.cloud.tools.managedcloudsdk.install.UnknownArchiveTypeException;
+
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.junit.Before;
@@ -40,11 +55,16 @@ public class CloudSdkInstallJobTest {
 
   @Mock private MessageConsoleStream consoleStream;
   @Mock private ManagedCloudSdk managedCloudSdk;
+  @Mock private SdkInstaller sdkInstaller;
+  @Mock private SdkComponentInstaller componentInstaller;
 
   @Before
-  public void setUp() throws ManagedSdkVerificationException, ManagedSdkVersionMismatchException {
+  public void setUp() throws ManagedSdkVerificationException, ManagedSdkVersionMismatchException,
+      UnsupportedOsException {
     when(managedCloudSdk.isInstalled()).thenReturn(true);
     when(managedCloudSdk.hasComponent(any(SdkComponent.class))).thenReturn(true);
+    when(managedCloudSdk.newInstaller()).thenReturn(sdkInstaller);
+    when(managedCloudSdk.newComponentInstaller()).thenReturn(componentInstaller);
   }
 
   @Test
@@ -60,6 +80,11 @@ public class CloudSdkInstallJobTest {
   }
 
   @Test
+  public void testGetManagedCloudSdk() throws UnsupportedOsException {
+    assertNotNull(new CloudSdkInstallJob(null).getManagedCloudSdk());
+  }
+
+  @Test
   public void testRun_mutualExclusion() throws InterruptedException {
     MockedSdkInstallJob job1 = scheduleBlockingJobAndWaitUntilRunning();
     MockedSdkInstallJob job2 = new MockedSdkInstallJob(true /* blockBeforeExit */, managedCloudSdk);
@@ -72,6 +97,53 @@ public class CloudSdkInstallJobTest {
     job2.unblock();
     job1.join();
     job2.join();
+  }
+
+  @Test
+  public void testRun_notInstalled() throws ManagedSdkVerificationException, ManagedSdkVersionMismatchException,
+      InterruptedException, UnsupportedOsException, IOException, SdkInstallerException, UnknownArchiveTypeException,
+      CommandExecutionException, CommandExitException {
+    when(managedCloudSdk.isInstalled()).thenReturn(false);
+    when(managedCloudSdk.hasComponent(any(SdkComponent.class))).thenReturn(false);
+
+    MockedSdkInstallJob job = new MockedSdkInstallJob(false /* blockBeforeExit */, managedCloudSdk);
+    job.schedule();
+    job.join();
+
+    verify(managedCloudSdk).newInstaller();
+    verify(managedCloudSdk).newComponentInstaller();
+    verify(sdkInstaller).install(any(MessageListener.class));
+    verify(componentInstaller).installComponent(any(SdkComponent.class), any(MessageListener.class));
+  }
+
+  @Test
+  public void testRun_sdkInstalled_componentNotInstalled() throws ManagedSdkVerificationException,
+      ManagedSdkVersionMismatchException, InterruptedException, UnsupportedOsException, IOException,
+      SdkInstallerException, UnknownArchiveTypeException, CommandExecutionException, CommandExitException {
+    when(managedCloudSdk.isInstalled()).thenReturn(true);
+    when(managedCloudSdk.hasComponent(any(SdkComponent.class))).thenReturn(false);
+
+    MockedSdkInstallJob job = new MockedSdkInstallJob(false /* blockBeforeExit */, managedCloudSdk);
+    job.schedule();
+    job.join();
+
+    verify(managedCloudSdk, never()).newInstaller();
+    verify(managedCloudSdk).newComponentInstaller();
+    verify(componentInstaller).installComponent(any(SdkComponent.class), any(MessageListener.class));
+  }
+
+  @Test
+  public void testRun_alreadyInstalled() throws ManagedSdkVerificationException, ManagedSdkVersionMismatchException,
+      InterruptedException, UnsupportedOsException {
+    when(managedCloudSdk.isInstalled()).thenReturn(true);
+    when(managedCloudSdk.hasComponent(any(SdkComponent.class))).thenReturn(true);
+
+    MockedSdkInstallJob job = new MockedSdkInstallJob(false /* blockBeforeExit */, managedCloudSdk);
+    job.schedule();
+    job.join();
+
+    verify(managedCloudSdk, never()).newInstaller();
+    verify(managedCloudSdk, never()).newComponentInstaller();
   }
 
   private MockedSdkInstallJob scheduleBlockingJobAndWaitUntilRunning() throws InterruptedException {
