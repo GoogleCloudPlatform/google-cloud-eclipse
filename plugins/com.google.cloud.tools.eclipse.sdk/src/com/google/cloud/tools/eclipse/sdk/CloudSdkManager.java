@@ -79,13 +79,13 @@ public class CloudSdkManager {
     installJob.schedule();
 
     try {
-      while (!installJob.join(100, cancelMonitor)) {
-        // Spin. (Unfortunately, the non-timed "join()" does not accept a cancel monitor.)
+      if (!installJob.join(0, cancelMonitor)) {
+        return Status.CANCEL_STATUS;
       }
       return installJob.getResult();
     } catch (OperationCanceledException | InterruptedException e) {
       installJob.cancel();
-      // Could have waited until verifying the job termination, but it seems not worth.
+      // Could wait to verify job termination, but doesn't seem necessary.
       return Status.CANCEL_STATUS;
     }
   }

@@ -86,13 +86,15 @@ public class CloudSdkInstallJob extends Job {
     } catch (IOException | ManagedSdkVerificationException | SdkInstallerException |
         CommandExecutionException | CommandExitException e) {
       return StatusUtil.error(this, "Failed to install the Google Cloud SDK.", e);
-
     } catch (UnsupportedOsException e) {
-      throw new RuntimeException("Cloud Tools for Eclipse supports Windows, Linux, and Mac only.");
+      return StatusUtil.error(
+          this, "Google Cloud SDK installation only supported on Windows, Linux, and MacOS.");
+      
     } catch (ManagedSdkVersionMismatchException e) {
-      throw new RuntimeException("This is never thrown because we always use LATEST.");
+      throw new IllegalStateException("This is never thrown because we always use LATEST.", e);
     } catch (UnknownArchiveTypeException e) {
-      throw new RuntimeException("The next appengine-plugins-core release will remove this.");
+      throw new IllegalStateException(
+          "The next appengine-plugins-core release will remove this.", e);
     }
   }
 
