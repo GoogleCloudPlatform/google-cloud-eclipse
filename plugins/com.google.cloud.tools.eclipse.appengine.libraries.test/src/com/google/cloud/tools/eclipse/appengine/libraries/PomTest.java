@@ -84,7 +84,7 @@ public class PomTest {
   @After
   public void tearDown() throws SAXException, IOException, CoreException {
     Logger logger = Logger.getLogger(ArtifactRetriever.class.getName());
-    logger.setLevel(Level.WARNING);
+    logger.setLevel(null);
   }
   
   @Test

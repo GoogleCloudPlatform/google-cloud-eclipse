@@ -67,7 +67,6 @@ public class LibraryTest {
     assertThat(library.getLaunchStage(), is("beta"));
   }
 
-
   @Test
   public void testSetNullName() {
     library.setName(null);
@@ -124,8 +123,6 @@ public class LibraryTest {
   public void testSetLibraryFiles() {   
     Logger logger = Logger.getLogger(ArtifactRetriever.class.getName());
     Logger logger2 = Logger.getLogger(Library.class.getName());
-    Level level = logger.getLevel();
-    Level level2 = logger2.getLevel();
     
     try {
       logger.setLevel(Level.OFF);
@@ -142,8 +139,8 @@ public class LibraryTest {
       assertThat(actual.getMavenCoordinates().getGroupId(), is("groupId"));
       assertThat(actual.getMavenCoordinates().getArtifactId(), is("artifactId"));
     } finally {
-      logger.setLevel(level);
-      logger2.setLevel(level2);
+      logger.setLevel(null);
+      logger2.setLevel(null);
     }
   }
 
