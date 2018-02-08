@@ -20,6 +20,8 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -29,6 +31,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -36,6 +41,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.hamcrest.Matchers;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -70,6 +76,15 @@ public class PomTest {
     pomFile.create(in, IFile.FORCE, null);
    
     pom = Pom.parse(pomFile);
+    
+    Logger logger = Logger.getLogger(ArtifactRetriever.class.getName());
+    logger.setLevel(Level.OFF);
+  }
+  
+  @After
+  public void tearDown() throws SAXException, IOException, CoreException {
+    Logger logger = Logger.getLogger(ArtifactRetriever.class.getName());
+    logger.setLevel(Level.WARNING);
   }
   
   @Test
