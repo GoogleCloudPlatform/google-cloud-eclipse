@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.sdk.internal;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -25,8 +24,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import java.io.IOException;
 
 import com.google.cloud.tools.eclipse.sdk.MockedSdkInstallJob;
 import com.google.cloud.tools.managedcloudsdk.ManagedCloudSdk;
@@ -41,7 +38,8 @@ import com.google.cloud.tools.managedcloudsdk.components.SdkComponentInstaller;
 import com.google.cloud.tools.managedcloudsdk.install.SdkInstaller;
 import com.google.cloud.tools.managedcloudsdk.install.SdkInstallerException;
 import com.google.cloud.tools.managedcloudsdk.install.UnknownArchiveTypeException;
-
+import java.io.IOException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.junit.Before;
@@ -110,6 +108,7 @@ public class CloudSdkInstallJobTest {
     job.schedule();
     job.join();
 
+    assertTrue(job.getResult().isOK());
     verify(managedCloudSdk).newInstaller();
     verify(managedCloudSdk).newComponentInstaller();
     verify(sdkInstaller).install(any(MessageListener.class));
@@ -117,9 +116,32 @@ public class CloudSdkInstallJobTest {
   }
 
   @Test
-  public void testRun_sdkInstalled_componentNotInstalled() throws ManagedSdkVerificationException,
-      ManagedSdkVersionMismatchException, InterruptedException, UnsupportedOsException, IOException,
-      SdkInstallerException, UnknownArchiveTypeException, CommandExecutionException, CommandExitException {
+  public void testFailureSeverity()
+      throws ManagedSdkVerificationException, ManagedSdkVersionMismatchException,
+          InterruptedException, UnsupportedOsException {
+    when(managedCloudSdk.isInstalled()).thenReturn(false);
+    when(managedCloudSdk.hasComponent(any(SdkComponent.class))).thenReturn(false);
+    UnsupportedOsException osException = new UnsupportedOsException("unsupported");
+    when(managedCloudSdk.newInstaller()).thenThrow(osException);
+
+    MockedSdkInstallJob job = new MockedSdkInstallJob(false /* blockBeforeExit */, managedCloudSdk);
+    job.setFailureSeverity(IStatus.WARNING);
+    job.schedule();
+    job.join();
+
+    IStatus result = job.getResult();
+    assertEquals(IStatus.WARNING, result.getSeverity());
+    assertEquals(
+        "Google Cloud SDK installation only supported on Windows, Linux, and MacOS.",
+        result.getMessage());
+    assertEquals(osException, result.getException());
+  }
+
+  @Test
+  public void testRun_sdkInstalled_componentNotInstalled()
+      throws ManagedSdkVerificationException, ManagedSdkVersionMismatchException,
+          InterruptedException, UnsupportedOsException, CommandExecutionException,
+          CommandExitException {
     when(managedCloudSdk.isInstalled()).thenReturn(true);
     when(managedCloudSdk.hasComponent(any(SdkComponent.class))).thenReturn(false);
 
@@ -127,6 +149,7 @@ public class CloudSdkInstallJobTest {
     job.schedule();
     job.join();
 
+    assertTrue(job.getResult().isOK());
     verify(managedCloudSdk, never()).newInstaller();
     verify(managedCloudSdk).newComponentInstaller();
     verify(componentInstaller).installComponent(any(SdkComponent.class), any(MessageListener.class));
@@ -142,6 +165,7 @@ public class CloudSdkInstallJobTest {
     job.schedule();
     job.join();
 
+    assertTrue(job.getResult().isOK());
     verify(managedCloudSdk, never()).newInstaller();
     verify(managedCloudSdk, never()).newComponentInstaller();
   }

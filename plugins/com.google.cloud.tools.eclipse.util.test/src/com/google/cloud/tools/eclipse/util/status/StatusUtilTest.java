@@ -34,6 +34,35 @@ import org.junit.Test;
 public class StatusUtilTest {
 
   @Test
+  public void testCreate_errorWithClass() {
+    IStatus error = StatusUtil.create(IStatus.ERROR, StatusUtil.class, "test error msg");
+    verifyStatus(error, IStatus.ERROR);
+  }
+
+  @Test
+  public void testCreate_errorWithClassAndException() {
+    Throwable exception = new Exception();
+    IStatus error = StatusUtil.create(IStatus.ERROR, StatusUtil.class, "test error msg", exception);
+    verifyStatus(error, IStatus.ERROR);
+    assertThat(error.getException(), is(sameInstance(exception)));
+  }
+
+  @Test
+  public void testCreate_warnWithClass() {
+    IStatus warn = StatusUtil.create(IStatus.WARNING, StatusUtil.class, "test error msg");
+    verifyStatus(warn, IStatus.WARNING);
+  }
+
+  @Test
+  public void testCreate_warnWithClassAndException() {
+    Throwable exception = new Exception();
+    IStatus warn =
+        StatusUtil.create(IStatus.WARNING, StatusUtil.class, "test error msg", exception);
+    verifyStatus(warn, IStatus.WARNING);
+    assertThat(warn.getException(), is(sameInstance(exception)));
+  }
+
+  @Test
   public void testError_withClass() {
     IStatus error = StatusUtil.error(StatusUtil.class, "test error msg");
     verifyStatus(error, IStatus.ERROR);

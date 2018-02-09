@@ -49,7 +49,11 @@ public class CloudSdkInstallJob extends Job {
   static final MutexRule MUTEX_RULE =
       new MutexRule("for " + CloudSdkInstallJob.class); // $NON-NLS-1$
 
+  /** The console stream for reporting installation output; may be {@code null}. */
   private final MessageConsoleStream consoleStream;
+
+  /** The severity reported on installation failure. */
+  private int failureSeverity = IStatus.ERROR;
 
   public CloudSdkInstallJob(MessageConsoleStream consoleStream) {
     super(Messages.getString("installJobName")); // $NON-NLS-1$
@@ -95,10 +99,11 @@ public class CloudSdkInstallJob extends Job {
       return Status.CANCEL_STATUS;
     } catch (IOException | ManagedSdkVerificationException | SdkInstallerException |
         CommandExecutionException | CommandExitException e) {
-      return StatusUtil.warn(this, Messages.getString("installing.cloud.sdk.failed"), e); //$NON-NLS-1$
+      String message = Messages.getString("installing.cloud.sdk.failed");
+      return StatusUtil.create(failureSeverity, this, message, e); // $NON-NLS-1$
     } catch (UnsupportedOsException e) {
-      return StatusUtil.warn(
-          this, Messages.getString("unsupported.os.installation")); //$NON-NLS-1$
+      String message = Messages.getString("unsupported.os.installation");
+      return StatusUtil.create(failureSeverity, this, message, e); // $NON-NLS-1$
 
     } catch (ManagedSdkVersionMismatchException e) {
       throw new IllegalStateException("This is never thrown because we always use LATEST.", e); //$NON-NLS-1$
@@ -130,5 +135,16 @@ public class CloudSdkInstallJob extends Job {
     if (jobThread != null) {
       jobThread.interrupt();
     }
+  }
+
+  /**
+   * Set the {@link IStatus#getSeverity() severity} of installation failure. This is useful for
+   * situations where the Cloud SDK installation is a step of some other work, and the installation
+   * failure should be surfaced to the user in the context of that work. If reported as {@link
+   * IStatus#ERROR} then the Eclipse UI ProgressManager will report the installation failure
+   * directly.
+   */
+  public void setFailureSeverity(int severity) {
+    failureSeverity = severity;
   }
 }

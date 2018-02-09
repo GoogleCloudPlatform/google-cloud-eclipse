@@ -32,6 +32,16 @@ public class StatusUtil {
 
   private StatusUtil() {}
 
+  /** Create a new {@link IStatus} of the given severity. */
+  public static IStatus create(int severity, Object origin, String message) {
+    return new Status(severity, getBundleId(origin), message);
+  }
+
+  /** Create a new {@link IStatus} of the given severity. */
+  public static IStatus create(int severity, Object origin, String message, Throwable error) {
+    return new Status(severity, getBundleId(origin), message, error);
+  }
+
   public static IStatus error(Object origin, String message) {
     return new Status(IStatus.ERROR, getBundleId(origin), message);
   }

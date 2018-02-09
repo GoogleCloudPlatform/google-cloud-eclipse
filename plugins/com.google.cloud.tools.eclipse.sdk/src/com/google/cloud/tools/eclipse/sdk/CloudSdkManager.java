@@ -57,19 +57,20 @@ public class CloudSdkManager {
    * is complete.
    *
    * @param consoleStream stream to which the install output is written
-   * @param cancelMonitor the progress monitor that can be used to cancel the installation. No
-   *     progress is reported on this monitor
+   * @param monitor the progress monitor that can also be used to cancel the installation
    */
-  public static IStatus installManagedSdk(MessageConsoleStream consoleStream,
-      IProgressMonitor cancelMonitor) {
+  public static IStatus installManagedSdk(
+      MessageConsoleStream consoleStream, IProgressMonitor monitor) {
     if (isManagedSdkFeatureEnabled()) {
       if (CloudSdkPreferences.isAutoManaging()) {
         // We don't check if the Cloud SDK installed but always schedule the install job; such check
         // may pass while the SDK is being installed and in an incomplete state.
         CloudSdkInstallJob installJob = new CloudSdkInstallJob(consoleStream);
-        // Installation failures are communicated as non-ERROR to avoid error dialogs from the
+        // Mark installation failure as non-ERROR to avoid job failure reporting dialogs from the
         // overly helpful Eclipse UI ProgressManager
-        IStatus result = runInstallJob(consoleStream, installJob, cancelMonitor);
+        installJob.setFailureSeverity(IStatus.WARNING);
+
+        IStatus result = runInstallJob(consoleStream, installJob, monitor);
         if (!result.isOK()) {
           // recast result as an IStatus.ERROR
           return new Status(
