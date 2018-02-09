@@ -46,12 +46,13 @@ public class CloudSdkInstallJob extends Job {
 
   /** Scheduling rule to prevent running {@code CloudSdkInstallJob} concurrently. */
   @VisibleForTesting
-  static final MutexRule MUTEX_RULE = new MutexRule("for " + CloudSdkInstallJob.class);
+  static final MutexRule MUTEX_RULE =
+      new MutexRule("for " + CloudSdkInstallJob.class); // $NON-NLS-1$
 
   private final MessageConsoleStream consoleStream;
 
   public CloudSdkInstallJob(MessageConsoleStream consoleStream) {
-    super(Messages.getString("installJobName"));
+    super(Messages.getString("installJobName")); // $NON-NLS-1$
     this.consoleStream = consoleStream;
     setRule(MUTEX_RULE);
   }
@@ -61,40 +62,57 @@ public class CloudSdkInstallJob extends Job {
     return super.belongsTo(family) || family == CLOUD_SDK_MODIFY_JOB_FAMILY;
   }
 
+  /**
+   * Perform the installation and configuration of the managd Cloud SDK. Any errors are returned as
+   * {@link IStatus#WARNING} to avoid the Eclipse UI ProgressManager reporting the error with no
+   * context (e.g., that deployment fails as the Cloud SDK could not be installed).
+   */
   @Override
   protected IStatus run(IProgressMonitor monitor) {
     if (monitor.isCanceled()) {
       return Status.CANCEL_STATUS;
     }
-
+    monitor.beginTask(Messages.getString("configuring.cloud.sdk"), 20); //$NON-NLS-1$
     try {
+      final String consoleSectionHeader = "[%s]"; // $NON-NLS-1$
       ManagedCloudSdk managedSdk = getManagedCloudSdk();
       if (!managedSdk.isInstalled()) {
+        monitor.subTask(Messages.getString("installing.cloud.sdk")); //$NON-NLS-1$
+        consoleStream.println(
+            String.format(
+                consoleSectionHeader, Messages.getString("installing.cloud.sdk"))); // $NON-NLS-1$
         SdkInstaller installer = managedSdk.newInstaller();
         installer.install(new MessageConsoleWriterListener(consoleStream));
       }
+      monitor.worked(10);
 
       if (!managedSdk.hasComponent(SdkComponent.APP_ENGINE_JAVA)) {
+        monitor.subTask(Messages.getString("installing.cloud.sdk.app.engine.java")); //$NON-NLS-1$
+        consoleStream.println(
+            String.format(
+                consoleSectionHeader,
+                Messages.getString("installing.cloud.sdk.app.engine.java"))); // $NON-NLS-1$
         SdkComponentInstaller componentInstaller = managedSdk.newComponentInstaller();
         componentInstaller.installComponent(
             SdkComponent.APP_ENGINE_JAVA, new MessageConsoleWriterListener(consoleStream));
       }
+      monitor.worked(10);
       return Status.OK_STATUS;
 
     } catch (InterruptedException | ClosedByInterruptException e) {
       return Status.CANCEL_STATUS;
     } catch (IOException | ManagedSdkVerificationException | SdkInstallerException |
         CommandExecutionException | CommandExitException e) {
-      return StatusUtil.error(this, "Failed to install the Google Cloud SDK.", e);
+      return StatusUtil.warn(this, Messages.getString("installing.cloud.sdk.failed"), e); //$NON-NLS-1$
     } catch (UnsupportedOsException e) {
-      return StatusUtil.error(
-          this, "Google Cloud SDK installation only supported on Windows, Linux, and MacOS.");
-      
+      return StatusUtil.warn(
+          this, Messages.getString("unsupported.os.installation")); //$NON-NLS-1$
+
     } catch (ManagedSdkVersionMismatchException e) {
-      throw new IllegalStateException("This is never thrown because we always use LATEST.", e);
+      throw new IllegalStateException("This is never thrown because we always use LATEST.", e); //$NON-NLS-1$
     } catch (UnknownArchiveTypeException e) {
       throw new IllegalStateException(
-          "The next appengine-plugins-core release will remove this.", e);
+          "The next appengine-plugins-core release will remove this.", e); //$NON-NLS-1$
     }
   }
 

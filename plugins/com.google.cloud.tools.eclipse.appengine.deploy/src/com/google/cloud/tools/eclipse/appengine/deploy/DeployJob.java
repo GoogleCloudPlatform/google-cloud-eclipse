@@ -86,13 +86,17 @@ public class DeployJob extends WorkspaceJob {
     SubMonitor progress = SubMonitor.convert(monitor, 120);
 
     try {
+      progress.subTask("Checking for Google Cloud SDK");
       IStatus installStatus =
           CloudSdkManager.installManagedSdk(stdoutOutputStream, progress.newChild(20));
       if (installStatus != Status.OK_STATUS) {
-        return installStatus;
+        return StatusUtil.error(
+            this,
+            "Deploy failed: cannot install Google Cloud SDK",
+            new CoreException(installStatus));
       }
 
-      IPath stagingDirectory = workDirectory.append(STAGING_DIRECTORY_NAME);
+      progress.subTask("Saving credential");
       Path credentialFile = workDirectory.append(CREDENTIAL_FILENAME).toFile().toPath();
 
       IStatus saveStatus = saveCredential(credentialFile);
@@ -100,6 +104,8 @@ public class DeployJob extends WorkspaceJob {
         return saveStatus;
       }
 
+      progress.subTask("Staging project files");
+      IPath stagingDirectory = workDirectory.append(STAGING_DIRECTORY_NAME);
       IStatus stagingStatus = stageProject(stagingDirectory, progress.newChild(30));
       if (stagingStatus != Status.OK_STATUS) {
         return stagingStatus;
@@ -107,6 +113,7 @@ public class DeployJob extends WorkspaceJob {
         return Status.CANCEL_STATUS;
       }
 
+      progress.subTask("Deploying staged project");
       IStatus deployStatus = deployProject(credentialFile, stagingDirectory, progress.newChild(70));
       if (deployStatus != Status.OK_STATUS) {
         return deployStatus;

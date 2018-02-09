@@ -66,7 +66,19 @@ public class CloudSdkManager {
       if (CloudSdkPreferences.isAutoManaging()) {
         // We don't check if the Cloud SDK installed but always schedule the install job; such check
         // may pass while the SDK is being installed and in an incomplete state.
-        return runInstallJob(consoleStream, new CloudSdkInstallJob(consoleStream), cancelMonitor);
+        CloudSdkInstallJob installJob = new CloudSdkInstallJob(consoleStream);
+        // Installation failures are communicated as non-ERROR to avoid error dialogs from the
+        // overly helpful Eclipse UI ProgressManager
+        IStatus result = runInstallJob(consoleStream, installJob, cancelMonitor);
+        if (!result.isOK()) {
+          // recast result as an IStatus.ERROR
+          return new Status(
+              IStatus.ERROR,
+              result.getPlugin(),
+              result.getCode(),
+              result.getMessage(),
+              result.getException());
+        }
       }
     }
     return Status.OK_STATUS;
@@ -75,10 +87,10 @@ public class CloudSdkManager {
   @VisibleForTesting
   static IStatus runInstallJob(MessageConsoleStream consoleStream, CloudSdkInstallJob installJob,
       IProgressMonitor cancelMonitor) {
-    installJob.setSystem(true);
     installJob.schedule();
 
     try {
+      Job.getJobManager().join(CloudSdkInstallJob.CLOUD_SDK_MODIFY_JOB_FAMILY, cancelMonitor);
       if (!installJob.join(0, cancelMonitor)) {
         return Status.CANCEL_STATUS;
       }
@@ -94,6 +106,7 @@ public class CloudSdkManager {
     if (isManagedSdkFeatureEnabled()) {
       if (CloudSdkPreferences.isAutoManaging()) {
         Job installJob = new CloudSdkInstallJob(null /* no console output */);
+        installJob.setUser(false);
         installJob.schedule();
       }
     }
