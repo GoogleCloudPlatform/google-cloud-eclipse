@@ -74,24 +74,16 @@ public class CloudSdkInstallJob extends Job {
     }
     monitor.beginTask(Messages.getString("configuring.cloud.sdk"), 20); //$NON-NLS-1$
     try {
-      final String consoleSectionHeader = "[%s]"; // $NON-NLS-1$
       ManagedCloudSdk managedSdk = getManagedCloudSdk();
       if (!managedSdk.isInstalled()) {
-        monitor.subTask(Messages.getString("installing.cloud.sdk")); //$NON-NLS-1$
-        consoleStream.println(
-            String.format(
-                consoleSectionHeader, Messages.getString("installing.cloud.sdk"))); // $NON-NLS-1$
+        subTask(monitor, Messages.getString("installing.cloud.sdk")); // $NON-NLS-1$
         SdkInstaller installer = managedSdk.newInstaller();
         installer.install(new MessageConsoleWriterListener(consoleStream));
       }
       monitor.worked(10);
 
       if (!managedSdk.hasComponent(SdkComponent.APP_ENGINE_JAVA)) {
-        monitor.subTask(Messages.getString("installing.cloud.sdk.app.engine.java")); //$NON-NLS-1$
-        consoleStream.println(
-            String.format(
-                consoleSectionHeader,
-                Messages.getString("installing.cloud.sdk.app.engine.java"))); // $NON-NLS-1$
+        subTask(monitor, Messages.getString("installing.cloud.sdk.app.engine.java")); // $NON-NLS-1$
         SdkComponentInstaller componentInstaller = managedSdk.newComponentInstaller();
         componentInstaller.installComponent(
             SdkComponent.APP_ENGINE_JAVA, new MessageConsoleWriterListener(consoleStream));
@@ -113,6 +105,15 @@ public class CloudSdkInstallJob extends Job {
     } catch (UnknownArchiveTypeException e) {
       throw new IllegalStateException(
           "The next appengine-plugins-core release will remove this.", e); //$NON-NLS-1$
+    }
+  }
+
+  private void subTask(IProgressMonitor monitor, String description) {
+    monitor.subTask(description);
+    if (consoleStream != null) {
+      // make output headers distinguishable on the console
+      String section = String.format("[%s]", description); // $NON-NLS-1$
+      consoleStream.println(section);
     }
   }
 
