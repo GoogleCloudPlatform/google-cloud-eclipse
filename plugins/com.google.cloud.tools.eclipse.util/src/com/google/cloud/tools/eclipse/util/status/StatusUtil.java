@@ -36,8 +36,20 @@ public class StatusUtil {
     return new Status(IStatus.ERROR, getBundleId(origin), message);
   }
 
+  public static IStatus error(Object origin, String message, int code) {
+    return new Status(IStatus.ERROR, getBundleId(origin), code, message, null);
+  }
+
   public static IStatus error(Object origin, String message, Throwable error) {
     return new Status(IStatus.ERROR, getBundleId(origin), message, error);
+  }
+
+  public static IStatus warn(Object origin, String message) {
+    return new Status(IStatus.WARNING, getBundleId(origin), message);
+  }
+
+  public static IStatus warn(Object origin, String message, Throwable error) {
+    return new Status(IStatus.WARNING, getBundleId(origin), message, error);
   }
 
   public static IStatus info(Object origin, String message) {
@@ -118,9 +130,5 @@ public class StatusUtil {
       }
     }
     return newStatus;
-  }
-
-  public static IStatus error(Object origin, String message, int code) {
-    return new Status(IStatus.ERROR, getBundleId(origin), code, message, null);
   }
 }
