@@ -76,6 +76,7 @@ public class PluggableJobTest {
   public void testJobCancelingCancelsFuture() throws InterruptedException, BrokenBarrierException {
     final CyclicBarrier barrier = new CyclicBarrier(2);
     PluggableJob<Object> job = new PluggableJob<>("name", new Callable<Object>() {
+      @Override
       public Object call() {
         try {
           barrier.await(); // job started: should release main thread
@@ -99,6 +100,7 @@ public class PluggableJobTest {
   public void testFutureCancelingCancelsJob() throws InterruptedException, BrokenBarrierException {
     final CyclicBarrier barrier = new CyclicBarrier(2);
     PluggableJob<Object> job = new PluggableJob<>("name", new Callable<Object>() {
+      @Override
       public Object call() {
         try {
           barrier.await(); // job started: should release main thread
