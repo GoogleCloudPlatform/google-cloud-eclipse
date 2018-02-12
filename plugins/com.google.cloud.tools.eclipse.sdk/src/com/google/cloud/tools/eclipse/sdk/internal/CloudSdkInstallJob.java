@@ -56,7 +56,7 @@ public class CloudSdkInstallJob extends Job {
   private int failureSeverity = IStatus.ERROR;
 
   public CloudSdkInstallJob(MessageConsoleStream consoleStream) {
-    super(Messages.getString("installJobName")); // $NON-NLS-1$
+    super(Messages.getString("installing.cloud.sdk")); // $NON-NLS-1$
     this.consoleStream = consoleStream;
     setRule(MUTEX_RULE);
   }
