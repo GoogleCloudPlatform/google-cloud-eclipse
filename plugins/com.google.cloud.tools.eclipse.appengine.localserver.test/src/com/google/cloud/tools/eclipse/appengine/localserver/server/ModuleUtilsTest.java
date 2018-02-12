@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -82,31 +83,32 @@ public class ModuleUtilsTest {
   }
 
   @Test
-  public void testGetServiceId() throws CoreException {
+  public void testGetServiceId() throws CoreException, IOException {
     mockAppEngineWebXml("appengine-web.xml");
     Assert.assertEquals("myServiceId", ModuleUtils.getServiceId(module));
   }
 
   @Test
-  public void testGetServiceId_module() throws CoreException {
+  public void testGetServiceId_module() throws CoreException, IOException {
     mockAppEngineWebXml("appengine-web_module.xml");
     Assert.assertEquals("myServiceId", ModuleUtils.getServiceId(module));
   }
 
   @Test
-  public void testGetServiceId_notPresent() throws CoreException {
+  public void testGetServiceId_notPresent() throws CoreException, IOException {
     mockAppEngineWebXml("appengine-web_noservice.xml");
     Assert.assertEquals("default", ModuleUtils.getServiceId(module));
   }
 
   @Test
-  public void testGetServiceId_malformedXml() throws CoreException {
+  public void testGetServiceId_malformedXml() throws CoreException, IOException {
     mockAppEngineWebXml("appengine-web_malformed.xml");
     Assert.assertEquals("default", ModuleUtils.getServiceId(module));
   }
 
-  private void mockAppEngineWebXml(String testfile) throws CoreException {
-    InputStream in = this.getClass().getResourceAsStream(testfile);
-    Mockito.when(descriptorFile.getContents()).thenReturn(in);
+  private void mockAppEngineWebXml(String testfile) throws CoreException, IOException {
+    try (InputStream in = this.getClass().getResourceAsStream(testfile)) {
+      Mockito.when(descriptorFile.getContents()).thenReturn(in);
+    }
   }
 }
