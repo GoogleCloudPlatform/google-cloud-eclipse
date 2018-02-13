@@ -123,7 +123,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   }
 
   private static IStatus validateCloudSdk(IProgressMonitor monitor) {
-    monitor.subTask("Locating Google Cloud SDK");
     // ensure we have a Cloud SDK; no-op if not configured to use managed sdk
     IStatus status = CloudSdkManager.installManagedSdk(null, monitor);
     if (!status.isOK()) {
