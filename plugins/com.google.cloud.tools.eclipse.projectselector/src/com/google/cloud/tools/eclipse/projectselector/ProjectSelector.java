@@ -175,7 +175,7 @@ public class ProjectSelector extends Composite implements ISelectionProvider {
     }
     ViewerFilter filter = new ViewerFilter() {
       @Override
-      public boolean select(Viewer viewer, Object parentElement, Object element) {
+      public boolean select(Viewer unused, Object parentElement, Object element) {
         String[] searchTerms = searchText.split("\\s");
         return matches(searchTerms, element, projectProperties);
       }

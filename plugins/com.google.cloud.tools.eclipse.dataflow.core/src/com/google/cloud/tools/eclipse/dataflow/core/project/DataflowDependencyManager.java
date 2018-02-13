@@ -162,7 +162,7 @@ public class DataflowDependencyManager {
     return null;
   }
 
-  private VersionRange allVersions() {
+  private static VersionRange allVersions() {
     try {
       return VersionRange.createFromVersionSpec("[1.0.0,)");
     } catch (InvalidVersionSpecificationException e) {

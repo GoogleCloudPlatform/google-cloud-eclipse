@@ -96,7 +96,6 @@ public class WebProjectUtil {
    * 
    * @param project the hosting project
    * @param folderPath the path of the folder within the project's {@code WEB-INF}
-   * @param contents the content for the file
    * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=448544">Eclipse bug 448544</a> for
    *      details of the {@code defaultRootSource} tag
    */
