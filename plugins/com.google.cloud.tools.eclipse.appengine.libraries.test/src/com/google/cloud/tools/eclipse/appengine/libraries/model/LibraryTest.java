@@ -30,12 +30,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.junit.Test;
+
+import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
 
 public class LibraryTest {
   
   private Library library = new Library("a");
-
+  
   @Test(expected = NullPointerException.class)
   public void testConstructorNullArgument() {
     new Library(null);
@@ -61,7 +66,6 @@ public class LibraryTest {
     library.setLaunchStage("beta");
     assertThat(library.getLaunchStage(), is("beta"));
   }
-
 
   @Test
   public void testSetNullName() {
@@ -116,17 +120,28 @@ public class LibraryTest {
   }
 
   @Test
-  public void setLibraryFiles() {
-    MavenCoordinates mavenCoordinates =
-        new MavenCoordinates.Builder().setGroupId("groupId").setArtifactId("artifactId").build();
-    library.setLibraryFiles(Arrays.asList(new LibraryFile(mavenCoordinates)));
-    List<LibraryFile> allDependencies = library.getAllDependencies();
-    assertNotNull(allDependencies);
-    assertThat(allDependencies.size(), is(1));
-    LibraryFile actual = allDependencies.get(0);
-    assertThat(actual.getMavenCoordinates().getRepository(), is("central"));
-    assertThat(actual.getMavenCoordinates().getGroupId(), is("groupId"));
-    assertThat(actual.getMavenCoordinates().getArtifactId(), is("artifactId"));
+  public void testSetLibraryFiles() {   
+    Logger logger = Logger.getLogger(ArtifactRetriever.class.getName());
+    Logger logger2 = Logger.getLogger(Library.class.getName());
+    
+    try {
+      logger.setLevel(Level.OFF);
+      logger2.setLevel(Level.OFF);
+
+      MavenCoordinates mavenCoordinates =
+          new MavenCoordinates.Builder().setGroupId("groupId").setArtifactId("artifactId").build();
+      library.setLibraryFiles(Arrays.asList(new LibraryFile(mavenCoordinates)));
+      List<LibraryFile> allDependencies = library.getAllDependencies();
+      assertNotNull(allDependencies);
+      assertThat(allDependencies.size(), is(1));
+      LibraryFile actual = allDependencies.get(0);
+      assertThat(actual.getMavenCoordinates().getRepository(), is("central"));
+      assertThat(actual.getMavenCoordinates().getGroupId(), is("groupId"));
+      assertThat(actual.getMavenCoordinates().getArtifactId(), is("artifactId"));
+    } finally {
+      logger.setLevel(null);
+      logger2.setLevel(null);
+    }
   }
 
   @Test

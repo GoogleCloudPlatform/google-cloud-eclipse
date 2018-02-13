@@ -91,8 +91,9 @@ public class ToServlet25QuickFixTest {
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
     builderFactory.setNamespaceAware(true);
     DocumentBuilder builder = builderFactory.newDocumentBuilder();
-    InputStream contents = file.getContents();
-    return builder.parse(contents);
+    try (InputStream contents = file.getContents()) {
+      return builder.parse(contents);
+    }
   }
 
 }

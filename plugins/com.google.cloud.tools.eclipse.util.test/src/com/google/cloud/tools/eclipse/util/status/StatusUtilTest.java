@@ -34,26 +34,55 @@ import org.junit.Test;
 public class StatusUtilTest {
 
   @Test
+  public void testCreate_errorWithClass() {
+    IStatus error = StatusUtil.create(IStatus.ERROR, StatusUtil.class, "test error msg");
+    verifyStatus(error, IStatus.ERROR);
+  }
+
+  @Test
+  public void testCreate_errorWithClassAndException() {
+    Throwable exception = new Exception();
+    IStatus error = StatusUtil.create(IStatus.ERROR, StatusUtil.class, "test error msg", exception);
+    verifyStatus(error, IStatus.ERROR);
+    assertThat(error.getException(), is(sameInstance(exception)));
+  }
+
+  @Test
+  public void testCreate_warnWithClass() {
+    IStatus warn = StatusUtil.create(IStatus.WARNING, StatusUtil.class, "test error msg");
+    verifyStatus(warn, IStatus.WARNING);
+  }
+
+  @Test
+  public void testCreate_warnWithClassAndException() {
+    Throwable exception = new Exception();
+    IStatus warn =
+        StatusUtil.create(IStatus.WARNING, StatusUtil.class, "test error msg", exception);
+    verifyStatus(warn, IStatus.WARNING);
+    assertThat(warn.getException(), is(sameInstance(exception)));
+  }
+
+  @Test
   public void testError_withClass() {
     IStatus error = StatusUtil.error(StatusUtil.class, "test error msg");
-    verifyStatus(error);
+    verifyStatus(error, IStatus.ERROR);
   }
   
   @Test
   public void testError_withCode() {
     IStatus error = StatusUtil.error(StatusUtil.class, "test error msg", 356);
-    verifyStatus(error);
+    verifyStatus(error, IStatus.ERROR);
     assertEquals(356, error.getCode());
   }
 
   @Test
-  public void testNullSource() {
+  public void testError_nullSource() {
     IStatus error = StatusUtil.error(null, "test error msg");
-    verifyStatus(error);
+    verifyStatus(error, IStatus.ERROR);
   }
 
   @Test
-  public void testNonOsgiSource() {
+  public void testError_nonOsgiSource() {
     IStatus error = StatusUtil.error("a string from the system classloader", "test error msg");
     assertThat(error.getSeverity(), is(IStatus.ERROR));
     assertThat(error.getMessage(), is("test error msg"));
@@ -64,22 +93,60 @@ public class StatusUtilTest {
   public void testError_withClassAndException() {
     Throwable exception = new Exception();
     IStatus error = StatusUtil.error(StatusUtil.class, "test error msg", exception);
-    verifyStatus(error);
+    verifyStatus(error, IStatus.ERROR);
     assertThat(error.getException(), is(sameInstance(exception)));
   }
 
   @Test
   public void testError_withInstance() {
     IStatus error = StatusUtil.error(new DeleteAllVisitor(), "test error msg");
-    verifyStatus(error);
+    verifyStatus(error, IStatus.ERROR);
   }
 
   @Test
   public void testError_withInstanceAndException() {
     Throwable exception = new Exception();
     IStatus error = StatusUtil.error(new DeleteAllVisitor(), "test error msg", exception);
-    verifyStatus(error);
+    verifyStatus(error, IStatus.ERROR);
     assertThat(error.getException(), is(sameInstance(exception)));
+  }
+
+  @Test
+  public void testWarn_withClass() {
+    IStatus error = StatusUtil.warn(StatusUtil.class, "test error msg");
+    verifyStatus(error, IStatus.WARNING);
+  }
+
+  @Test
+  public void testWarn_withClassAndException() {
+    Throwable exception = new Exception();
+    IStatus error = StatusUtil.warn(StatusUtil.class, "test error msg", exception);
+    verifyStatus(error, IStatus.WARNING);
+    assertThat(error.getException(), is(sameInstance(exception)));
+  }
+
+  @Test
+  public void testWarn_withInstance() {
+    IStatus error = StatusUtil.warn(new DeleteAllVisitor(), "test error msg");
+    verifyStatus(error, IStatus.WARNING);
+  }
+
+  @Test
+  public void testInfo_withClass() {
+    IStatus error = StatusUtil.info(StatusUtil.class, "test error msg");
+    verifyStatus(error, IStatus.INFO);
+  }
+
+  @Test
+  public void testInfo_withInstance() {
+    IStatus error = StatusUtil.info(new DeleteAllVisitor(), "test error msg");
+    verifyStatus(error, IStatus.INFO);
+  }
+
+  private void verifyStatus(IStatus error, int severity) {
+    assertThat(error.getSeverity(), is(severity));
+    assertThat(error.getMessage(), is("test error msg"));
+    assertThat(error.getPlugin(), is("com.google.cloud.tools.eclipse.util"));
   }
 
   @Test
@@ -110,13 +177,7 @@ public class StatusUtilTest {
     IStatus status = StatusUtil.setErrorStatus(this, "test message from StatusUtilTest", ex);
     Assert.assertEquals("test message from StatusUtilTest", status.getMessage());
   }
-
-  private void verifyStatus(IStatus error) {
-    assertThat(error.getSeverity(), is(IStatus.ERROR));
-    assertThat(error.getMessage(), is("test error msg"));
-    assertThat(error.getPlugin(), is("com.google.cloud.tools.eclipse.util"));
-  }
-
+  
   @Test
   public void testMulti_noError() {
     IStatus error = StatusUtil.multi(StatusUtil.class, "test error msg");
@@ -152,7 +213,7 @@ public class StatusUtilTest {
     assertEquals(IStatus.ERROR, result.getSeverity());
     assertThat(result, instanceOf(MultiStatus.class));
     assertEquals(1, ((MultiStatus) result).getChildren().length);
-    verifyStatus(((MultiStatus) result).getChildren()[0]);
+    verifyStatus(((MultiStatus) result).getChildren()[0], IStatus.ERROR);
   }
 
   @Test

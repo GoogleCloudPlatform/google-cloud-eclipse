@@ -19,8 +19,10 @@ package com.google.cloud.tools.eclipse.sdk;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkInstallJob;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
 import com.google.common.annotations.VisibleForTesting;
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.ui.console.MessageConsoleStream;
@@ -55,28 +57,49 @@ public class CloudSdkManager {
    * is complete.
    *
    * @param consoleStream stream to which the install output is written
+   * @param monitor the progress monitor that can also be used to cancel the installation
    */
-  public static void installManagedSdk(MessageConsoleStream consoleStream)
-      throws CoreException, InterruptedException {
+  public static IStatus installManagedSdk(
+      MessageConsoleStream consoleStream, IProgressMonitor monitor) {
     if (isManagedSdkFeatureEnabled()) {
       if (CloudSdkPreferences.isAutoManaging()) {
         // We don't check if the Cloud SDK installed but always schedule the install job; such check
         // may pass while the SDK is being installed and in an incomplete state.
-        runInstallJob(consoleStream, new CloudSdkInstallJob(consoleStream));
+        CloudSdkInstallJob installJob = new CloudSdkInstallJob(consoleStream);
+        // Mark installation failure as non-ERROR to avoid job failure reporting dialogs from the
+        // overly helpful Eclipse UI ProgressManager
+        installJob.setFailureSeverity(IStatus.WARNING);
+
+        IStatus result = runInstallJob(consoleStream, installJob, monitor);
+        if (!result.isOK()) {
+          // recast result as an IStatus.ERROR
+          return new Status(
+              IStatus.ERROR,
+              result.getPlugin(),
+              result.getCode(),
+              result.getMessage(),
+              result.getException());
+        }
       }
     }
+    return Status.OK_STATUS;
   }
 
   @VisibleForTesting
-  static void runInstallJob(MessageConsoleStream consoleStream, CloudSdkInstallJob installJob)
-      throws CoreException, InterruptedException {
-    installJob.setSystem(true);
+  static IStatus runInstallJob(MessageConsoleStream consoleStream, CloudSdkInstallJob installJob,
+      IProgressMonitor cancelMonitor) {
     installJob.schedule();
-    installJob.join();
 
-    IStatus status = installJob.getResult();
-    if (!status.isOK()) {
-      throw new CoreException(status);
+    try {
+      Job.getJobManager().join(CloudSdkInstallJob.CLOUD_SDK_MODIFY_JOB_FAMILY, cancelMonitor);
+      if (!installJob.join(0, cancelMonitor)) {
+        return Status.CANCEL_STATUS;
+      }
+      return installJob.getResult();
+    } catch (OperationCanceledException | InterruptedException e) {
+      installJob.cancel();
+      // Could wait to verify job termination, but doesn't seem necessary.
+      return Status.CANCEL_STATUS;
     }
   }
 
@@ -84,6 +107,7 @@ public class CloudSdkManager {
     if (isManagedSdkFeatureEnabled()) {
       if (CloudSdkPreferences.isAutoManaging()) {
         Job installJob = new CloudSdkInstallJob(null /* no console output */);
+        installJob.setUser(false);
         installJob.schedule();
       }
     }

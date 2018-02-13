@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.deploy;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.login.CredentialHelper;
+import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -82,10 +83,20 @@ public class DeployJob extends WorkspaceJob {
 
   @Override
   public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
-    SubMonitor progress = SubMonitor.convert(monitor, 100);
+    SubMonitor progress = SubMonitor.convert(monitor, 120);
 
     try {
-      IPath stagingDirectory = workDirectory.append(STAGING_DIRECTORY_NAME);
+      progress.subTask("Checking for Google Cloud SDK");
+      IStatus installStatus =
+          CloudSdkManager.installManagedSdk(stdoutOutputStream, progress.newChild(20));
+      if (installStatus != Status.OK_STATUS) {
+        return StatusUtil.error(
+            this,
+            "Deploy failed: cannot install Google Cloud SDK",
+            new CoreException(installStatus));
+      }
+
+      progress.subTask("Saving credential");
       Path credentialFile = workDirectory.append(CREDENTIAL_FILENAME).toFile().toPath();
 
       IStatus saveStatus = saveCredential(credentialFile);
@@ -93,6 +104,8 @@ public class DeployJob extends WorkspaceJob {
         return saveStatus;
       }
 
+      progress.subTask("Staging project files");
+      IPath stagingDirectory = workDirectory.append(STAGING_DIRECTORY_NAME);
       IStatus stagingStatus = stageProject(stagingDirectory, progress.newChild(30));
       if (stagingStatus != Status.OK_STATUS) {
         return stagingStatus;
@@ -100,6 +113,7 @@ public class DeployJob extends WorkspaceJob {
         return Status.CANCEL_STATUS;
       }
 
+      progress.subTask("Deploying staged project");
       IStatus deployStatus = deployProject(credentialFile, stagingDirectory, progress.newChild(70));
       if (deployStatus != Status.OK_STATUS) {
         return deployStatus;

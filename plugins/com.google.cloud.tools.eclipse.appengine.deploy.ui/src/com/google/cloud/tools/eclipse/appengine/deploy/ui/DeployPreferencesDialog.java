@@ -17,10 +17,6 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.cloud.tools.appengine.cloudsdk.AppEngineJavaComponentsNotInstalledException;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
@@ -28,12 +24,8 @@ import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.common.base.Preconditions;
 import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.databinding.dialog.TitleAreaDialogSupport;
 import org.eclipse.jface.databinding.dialog.ValidationMessageProvider;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -141,39 +133,7 @@ public abstract class DeployPreferencesDialog extends TitleAreaDialog {
   @Override
   protected void okPressed() {
     content.savePreferences();
-    IStatus status = validateAppEngineJavaComponents();
-    if (status.equals(Status.OK_STATUS)) {
-      super.okPressed();
-    } else {
-      setReturnCode(Dialog.CANCEL);
-      close();
-      String cloudSdkNotConfigured = Messages.getString("cloudsdk.not.configured");
-      ErrorDialog.openError(getShell(), cloudSdkNotConfigured, cloudSdkNotConfigured, status);
-    }
-  }
-
-  private IStatus validateAppEngineJavaComponents()  {
-    try {
-      CloudSdk cloudSdk = new CloudSdk.Builder().build();
-      cloudSdk.validateCloudSdk();
-      cloudSdk.validateAppEngineJavaComponents();
-      return Status.OK_STATUS;
-    } catch (CloudSdkNotFoundException ex) {
-      String detailMessage = Messages.getString("cloudsdk.not.configured.detail");
-      Status status = new Status(IStatus.ERROR,
-          "com.google.cloud.tools.eclipse.appengine.deploy.ui", detailMessage);
-      return status;
-    } catch (AppEngineJavaComponentsNotInstalledException ex) {
-      String detailMessage = Messages.getString("appengine.java.component.missing");
-      Status status = new Status(IStatus.ERROR,
-          "com.google.cloud.tools.eclipse.appengine.deploy.ui", detailMessage);
-      return status;
-    } catch (CloudSdkOutOfDateException ex) {
-        String detailMessage = Messages.getString("cloudsdk.out.of.date");
-        Status status = new Status(IStatus.ERROR,
-            "com.google.cloud.tools.eclipse.appengine.deploy.ui", detailMessage);
-        return status;
-    }
+    super.okPressed();
   }
 
   @Override

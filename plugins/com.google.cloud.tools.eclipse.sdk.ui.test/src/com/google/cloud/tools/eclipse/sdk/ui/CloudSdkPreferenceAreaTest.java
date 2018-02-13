@@ -34,6 +34,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotCheckBox;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
@@ -76,8 +77,7 @@ public class CloudSdkPreferenceAreaTest {
 
   @Test
   public void testInvalidPath() {
-    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH))
-        .thenReturn(tempFolder.getRoot().getAbsolutePath());
+    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn(tempFolder.getRoot().getAbsolutePath());
     createPreferenceArea();
     assertEquals(IStatus.WARNING, area.getStatus().getSeverity());
 
@@ -152,5 +152,22 @@ public class CloudSdkPreferenceAreaTest {
     area.performApply();
 
     verify(preferences).putValue(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT, "MANUAL");
+  }
+
+  @Test
+  public void testValidationStatus_switchManagementOption() {
+    CloudSdkManager.forceManagedSdkFeature = true;
+    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)).thenReturn("MANUAL");
+    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("/non-existing/directory");
+    createPreferenceArea();
+
+    assertTrue(useLocalSdk.getSelection());
+    assertEquals(IStatus.ERROR, area.getStatus().getSeverity());
+
+    new SWTBotCheckBox(useLocalSdk).click();
+    assertTrue(area.getStatus().isOK());
+
+    new SWTBotCheckBox(useLocalSdk).click();
+    assertEquals(IStatus.ERROR, area.getStatus().getSeverity());
   }
 }

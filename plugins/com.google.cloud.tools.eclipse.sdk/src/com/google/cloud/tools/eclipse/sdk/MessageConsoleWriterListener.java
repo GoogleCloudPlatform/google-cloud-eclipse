@@ -29,7 +29,7 @@ public class MessageConsoleWriterListener implements ProcessOutputLineListener, 
 
   @Override
   public void onOutputLine(String line) {
-    if (!stream.isClosed()) {
+    if (stream != null && !stream.isClosed()) {
       // there's still a small chance that the stream will be closed and the error will be logged by
       // the ConsolePlugin
       stream.println(line);
@@ -38,7 +38,7 @@ public class MessageConsoleWriterListener implements ProcessOutputLineListener, 
 
   @Override
   public void message(String rawString) {
-    if (!stream.isClosed()) {
+    if (stream != null && !stream.isClosed()) {
       // there's still a small chance that the stream will be closed and the error will be logged by
       // the ConsolePlugin
       stream.print(rawString);

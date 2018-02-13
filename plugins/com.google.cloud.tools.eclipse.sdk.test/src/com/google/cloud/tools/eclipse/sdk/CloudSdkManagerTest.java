@@ -19,19 +19,37 @@ package com.google.cloud.tools.eclipse.sdk;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkInstallJob;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
-import org.eclipse.core.runtime.CoreException;
+import com.google.cloud.tools.managedcloudsdk.ManagedCloudSdk;
+import com.google.cloud.tools.managedcloudsdk.ManagedSdkVerificationException;
+import com.google.cloud.tools.managedcloudsdk.ManagedSdkVersionMismatchException;
+import com.google.cloud.tools.managedcloudsdk.components.SdkComponent;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class CloudSdkManagerTest {
+
+  @Mock private ManagedCloudSdk managedCloudSdk;
+  @Mock private IProgressMonitor monitor;
+
+  @Before
+  public void setUp() throws ManagedSdkVerificationException, ManagedSdkVersionMismatchException {
+    when(managedCloudSdk.isInstalled()).thenReturn(true);
+    when(managedCloudSdk.hasComponent(any(SdkComponent.class))).thenReturn(true);
+  }
 
   @After
   public void tearDown() {
@@ -50,33 +68,30 @@ public class CloudSdkManagerTest {
   }
 
   @Test
-  public void testRunInstallJob_blocking() throws CoreException, InterruptedException {
+  public void testRunInstallJob_blocking() {
     CloudSdkInstallJob okJob = new FakeInstallJob(Status.OK_STATUS);
-    CloudSdkManager.runInstallJob(null, okJob);
+    IStatus result = CloudSdkManager.runInstallJob(null, okJob, monitor);
     // Incomplete test, but if it ever fails, something is surely broken.
     assertEquals(Job.NONE, okJob.getState());
+    assertTrue(result.isOK());
   }
 
   @Test
-  public void testRunInstallJob_canceled() throws InterruptedException {
-    try {
-      CloudSdkManager.runInstallJob(null, new FakeInstallJob(Status.CANCEL_STATUS));
-      fail();
-    } catch (CoreException e) {
-      assertEquals(Status.CANCEL, e.getStatus().getSeverity());
-    }
+  public void testRunInstallJob_canceled() {
+    CloudSdkInstallJob cancelJob = new FakeInstallJob(Status.CANCEL_STATUS);
+    IStatus result = CloudSdkManager.runInstallJob(null, cancelJob, monitor);
+    assertEquals(Job.NONE, cancelJob.getState());
+    assertEquals(Status.CANCEL, result.getSeverity());
   }
 
   @Test
-  public void testRunInstallJob_installError() throws InterruptedException {
-    try {
-      IStatus errorResult = StatusUtil.error(this, "awesome install error in unit test");
-      CloudSdkManager.runInstallJob(null, new FakeInstallJob(errorResult));
-      fail();
-    } catch (CoreException e) {
-      assertEquals(Status.ERROR, e.getStatus().getSeverity());
-      assertEquals("awesome install error in unit test", e.getMessage());
-    }
+  public void testRunInstallJob_installError() {
+    IStatus error = StatusUtil.error(this, "awesome install error in unit test");
+    CloudSdkInstallJob errorJob = new FakeInstallJob(error);
+    IStatus result = CloudSdkManager.runInstallJob(null, errorJob, monitor);
+    assertEquals(Job.NONE, errorJob.getState());
+    assertEquals(Status.ERROR, result.getSeverity());
+    assertEquals("awesome install error in unit test", result.getMessage());
   }
 
   private static class FakeInstallJob extends CloudSdkInstallJob {
@@ -91,6 +106,6 @@ public class CloudSdkManagerTest {
     @Override
     protected IStatus run(IProgressMonitor monitor) {
       return result;
-    } 
+    }
   }
 }

@@ -32,12 +32,34 @@ public class StatusUtil {
 
   private StatusUtil() {}
 
+  /** Create a new {@link IStatus} of the given severity. */
+  public static IStatus create(int severity, Object origin, String message) {
+    return new Status(severity, getBundleId(origin), message);
+  }
+
+  /** Create a new {@link IStatus} of the given severity. */
+  public static IStatus create(int severity, Object origin, String message, Throwable error) {
+    return new Status(severity, getBundleId(origin), message, error);
+  }
+
   public static IStatus error(Object origin, String message) {
     return new Status(IStatus.ERROR, getBundleId(origin), message);
   }
 
+  public static IStatus error(Object origin, String message, int code) {
+    return new Status(IStatus.ERROR, getBundleId(origin), code, message, null);
+  }
+
   public static IStatus error(Object origin, String message, Throwable error) {
     return new Status(IStatus.ERROR, getBundleId(origin), message, error);
+  }
+
+  public static IStatus warn(Object origin, String message) {
+    return new Status(IStatus.WARNING, getBundleId(origin), message);
+  }
+
+  public static IStatus warn(Object origin, String message, Throwable error) {
+    return new Status(IStatus.WARNING, getBundleId(origin), message, error);
   }
 
   public static IStatus info(Object origin, String message) {
@@ -118,9 +140,5 @@ public class StatusUtil {
       }
     }
     return newStatus;
-  }
-
-  public static IStatus error(Object origin, String message, int code) {
-    return new Status(IStatus.ERROR, getBundleId(origin), code, message, null);
   }
 }
