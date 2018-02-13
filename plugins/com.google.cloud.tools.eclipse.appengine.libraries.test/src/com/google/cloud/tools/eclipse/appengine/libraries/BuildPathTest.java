@@ -23,7 +23,6 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.util.ArrayList;
 import java.util.List;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -55,9 +54,8 @@ public class BuildPathTest {
 
   @Test
   public void testAddMavenLibraries_emptyList() throws CoreException {
-    IProject project = null;
     List<Library> libraries = new ArrayList<>();
-    BuildPath.addMavenLibraries(project, libraries, monitor);
+    BuildPath.addMavenLibraries(project.getProject(), libraries, monitor);
   }
 
   @Test

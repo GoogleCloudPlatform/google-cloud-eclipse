@@ -143,8 +143,7 @@ public class ServiceAccountUtilTest {
 
   @Test
   public void testCreateServiceAccountKey_createsRequiredDirectories() throws IOException {
-
-    Path keyFile = tempFolder.getRoot().toPath().resolve("non/existing/directory/key.json");
+    keyFile = tempFolder.getRoot().toPath().resolve("non/existing/directory/key.json");
     ServiceAccountUtil.createAppEngineDefaultServiceAccountKey(apiFactory, credential,
         "my-project", keyFile);
 
