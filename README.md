@@ -20,25 +20,16 @@ Maven for building Eclipse bundles and features.
   this somewhere on your file system.
 
 1. The [Eclipse IDE](https://www.eclipse.org/downloads/eclipse-packages/).
-  It's easiest to use the _Eclipse IDE for Java EE Developers_ package. You must use
-  Eclipse 4.7 (Oxygen) or later.  We use _target platforms_ to support building
-  for earlier versions of Eclipse.  You also need the following:
+  It's easiest to use the _Eclipse IDE for Java EE Developers_ package. You can use
+  Eclipse 4.6 (Neon) or 4.7 (Oxygen) as we define a target platform to build and run against.
 
-  1. The [M2Eclipse plugin](http://www.eclipse.org/m2e/) (also called m2e) is
-     required to import the projects into Eclipse.  M2Eclipse is included in
+  1. The [m2eclipse plugin](http://www.eclipse.org/m2e/) (also called m2e) is
+     required to import the projects into Eclipse.  m2eclipse is included in
      [several packages](https://www.eclipse.org/downloads/compare.php?release=neon),
      such as the _Eclipse IDE for Java EE Developers_ package.
 
   2. The [m2e connector for maven-dependency-plugin](https://github.com/ianbrandt/m2e-maven-dependency-plugin)
      should be installed from `http://ianbrandt.github.io/m2e-maven-dependency-plugin/`.
-     This connector should be prompted for by M2Eclipse.  If not, use
-     _Preferences > Maven > Discovery > Open Catalog_ and search
-     for _Dependency_ and install.
-
-  3. The [Google Java Format plugin for Eclipse](https://github.com/google/google-java-format/).
-     Download the [latest version](https://github.com/google/google-java-format/releases/).
-     and place the jar into your Eclipse installation's `dropins/` directory
-     (on MacOS this may be in `Eclipse.app/Contents/Eclipse/dropins/`).
 
 1. Maven 3.5.0 or later.  Although m2eclipse is bundled with its own Maven install,
    Maven is necessary to test command-line builds.
@@ -74,9 +65,7 @@ $ mvn -Declipse.target=neon package
 We normally put production code into a bundle and tests as a fragment hosted
 by that bundle, put under the `plugins/` directory.
 For now we have been committing both the `pom.xml` and Eclipse's
-`.project`, `.classpath`, and `.settings/` files.  We have a master set 
-of project settings in [`eclipse/settings`](eclipse/settings/); see the
-[`README.md`](eclipse/settings/README.md) for more details.
+`.project`, `.classpath`, and `.settings/` files.
 
 Our CI process is configured to run our tests with JaCoCo, which requires
 some additional configuration to add new bundles and fragments
@@ -301,12 +290,6 @@ current version found should be used.  Unlike the `.tpd` file,
 the identifiers are not p2 identifiers, and so features do not
 require the `.feature.group` suffix.
 
-
-## Other Miscellaneous Dev Tasks
-
-### Updating IDE settings
-
-See [`eclipse/settings/`](eclipse/settings/README.md) for details.
 
 ### Configuring Maven/Tycho Toolchains for CI Builds
 

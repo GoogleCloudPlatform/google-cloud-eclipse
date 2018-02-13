@@ -33,7 +33,7 @@ import java.util.Set;
 public class AppEngineJreWhitelist {
 
   private static Set<String> WHITELIST =
-      new HashSet<>(
+      new HashSet<String>(
           Arrays.asList(
               "java.beans.Transient",
               "java.lang.BootstrapMethodError",

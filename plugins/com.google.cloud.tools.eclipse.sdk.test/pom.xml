@@ -3,8 +3,9 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>com.google.cloud.tools.eclipse</groupId>
-    <artifactId>plugins</artifactId>
+    <artifactId>trunk</artifactId>
     <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../../</relativePath>
   </parent>
   <artifactId>com.google.cloud.tools.eclipse.sdk.test</artifactId>
   <version>0.1.0-SNAPSHOT</version>

@@ -5,7 +5,3 @@ target/
 generated-sources/
 .metadata/
 **/.*.swp
-eclipse/.settings
-plugins/.settings
-features/.settings
-third_party/.settings
