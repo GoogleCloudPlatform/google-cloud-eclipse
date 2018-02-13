@@ -97,6 +97,7 @@ import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
+import org.eclipse.ui.statushandlers.StatusManager;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerListener;
@@ -121,37 +122,28 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     return value != null ? value : nullValue;
   }
 
-  private static void validateCloudSdk() throws CoreException  {
+  private static IStatus validateCloudSdk(IProgressMonitor monitor) {
+    monitor.subTask("Locating Google Cloud SDK");
+    // ensure we have a Cloud SDK; no-op if not configured to use managed sdk
+    IStatus status = CloudSdkManager.installManagedSdk(null, monitor);
+    if (!status.isOK()) {
+      return status;
+    }
     try {
       CloudSdk cloudSdk = new CloudSdk.Builder().build();
       cloudSdk.validateCloudSdk();
+      return Status.OK_STATUS;
     } catch (CloudSdkNotFoundException ex) {
-      String detailMessage = Messages.getString("cloudsdk.not.configured"); //$NON-NLS-1$
-      Status status = new Status(IStatus.ERROR,
-          "com.google.cloud.tools.eclipse.appengine.localserver", detailMessage, ex); //$NON-NLS-1$
-      throw new CoreException(status);
+      return StatusUtil.error(
+          LocalAppEngineServerLaunchConfigurationDelegate.class,
+          Messages.getString("cloudsdk.not.configured"), // $NON-NLS-1$
+          ex);
     } catch (CloudSdkOutOfDateException ex) {
-      String detailMessage = Messages.getString("cloudsdk.out.of.date"); //$NON-NLS-1$
-      Status status = new Status(IStatus.ERROR,
-          "com.google.cloud.tools.eclipse.appengine.deploy.ui", detailMessage); //$NON-NLS-1$
-      throw new CoreException(status);
+      return StatusUtil.error(
+          LocalAppEngineServerLaunchConfigurationDelegate.class,
+          Messages.getString("cloudsdk.out.of.date"), // $NON-NLS-1$
+          ex);
     }
-  }
-
-  @Override
-  public boolean preLaunchCheck(
-      ILaunchConfiguration configuration, String mode, IProgressMonitor monitor)
-      throws CoreException {
-    try {
-      // ensure we have a Cloud SDK; no-op if not configured to use managed sdk
-      CloudSdkManager.installManagedSdk(null);
-    } catch (InterruptedException ex) {
-      Thread.interrupted(); // reset flag
-      String detailMessage = Messages.getString("cloudsdk.not.configured"); // $NON-NLS-1$
-      IStatus status = StatusUtil.error(this, detailMessage, ex);
-      throw new CoreException(status);
-    }
-    return super.preLaunchCheck(configuration, mode, monitor);
   }
 
   @Override
@@ -166,11 +158,17 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   @Override
   public boolean finalLaunchCheck(ILaunchConfiguration configuration, String mode,
       IProgressMonitor monitor) throws CoreException {
-    SubMonitor progress = SubMonitor.convert(monitor, 40);
-    if (!super.finalLaunchCheck(configuration, mode, progress.newChild(20))) {
+    SubMonitor progress = SubMonitor.convert(monitor, 50);
+    if (!super.finalLaunchCheck(configuration, mode, progress.newChild(10))) {
       return false;
     }
-    validateCloudSdk();
+    IStatus status = validateCloudSdk(progress.newChild(20));
+    if (!status.isOK()) {
+      // Throwing a CoreException will result in the ILaunch hanging around in
+      // an invalid state
+      StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.LOG);
+      return false;
+    }
 
     // If we're auto-publishing before launch, check if there may be stale
     // resources not yet published. See
@@ -198,7 +196,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
             monitor.setCanceled(true);
             return false;
           }
-          return true;
         }
       }
     }
