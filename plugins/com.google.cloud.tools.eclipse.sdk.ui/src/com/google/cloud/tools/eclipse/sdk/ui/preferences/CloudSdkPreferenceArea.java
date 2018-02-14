@@ -267,8 +267,10 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       }
       boolean valid = validateSdk(location);
       if (valid) {
-        // todo read version file
-        sdkVersionLabel.setText(Messages.getString("SdkVersion", "valid"));
+        String version = new CloudSdk.Builder().build().getVersion().toString();
+        sdkVersionLabel.setText(Messages.getString("SdkVersion", version));
+      } else {
+        sdkVersionLabel.setText(Messages.getString("SdkVersion", "Unset"));
       }
       return valid;
     }
