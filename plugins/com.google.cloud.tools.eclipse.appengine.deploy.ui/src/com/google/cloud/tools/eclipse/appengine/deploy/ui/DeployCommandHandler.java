@@ -115,7 +115,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
     }
   }
 
-  protected static IProject getSelectedProject(ExecutionEvent event)
+  protected IProject getSelectedProject(ExecutionEvent event)
       throws ExecutionException, CoreException {
     IProject project = ProjectFromSelectionHelper.getFirstProject(event);
     if (project == null) {
