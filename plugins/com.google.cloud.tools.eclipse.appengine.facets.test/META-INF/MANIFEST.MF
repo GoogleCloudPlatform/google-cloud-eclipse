@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Fragment-Host: com.google.cloud.tools.eclipse.appengine.facets
-Bundle-Name: App Engine Facet Tests
+Bundle-Name: %pluginName
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.facets.test
 Bundle-Version: 0.1.0.qualifier
-Bundle-Vendor: Google Inc.
+Bundle-Vendor: %providerName
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Localization: plugin
 Comment: .appengine.localserver required for WTP server runtime definitions

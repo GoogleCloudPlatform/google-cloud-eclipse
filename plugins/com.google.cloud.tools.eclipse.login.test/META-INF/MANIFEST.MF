@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Fragment-Host: com.google.cloud.tools.eclipse.login
-Bundle-Name: Tests for GCloud for Eclipse Login Support
+Bundle-Name: %pluginName
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.login.test
-Bundle-Vendor: Google Inc.
+Bundle-Vendor: %providerName
 Bundle-Version: 0.1.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Localization: plugin

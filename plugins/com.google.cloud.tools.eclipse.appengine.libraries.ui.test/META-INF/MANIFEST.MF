@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Fragment-Host: com.google.cloud.tools.eclipse.appengine.libraries.ui
-Bundle-Name: Tests for Cloud Tools For Eclipse App Engine Libraries UI
+Bundle-Name: %pluginName
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.libraries.ui.test;singleton:=true
 Bundle-Version: 0.1.0.qualifier
-Bundle-Vendor: Google Inc.
+Bundle-Vendor: %providerName
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Localization: plugin
 Comment: .appengine.localserver required for WTP server runtime definitions
