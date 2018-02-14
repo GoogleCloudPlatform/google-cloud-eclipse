@@ -124,7 +124,7 @@ public class AppEngineStandardFacetChangeListener implements IFacetedProjectList
    * Remove our {@code appengine-web.xml} builder that monitors for changes to the {@code <runtime>}
    * element.
    */
-  private void removeAppEngineWebBuilder(IProject project) {
+  private static void removeAppEngineWebBuilder(IProject project) {
     try {
       IProjectDescription projectDescription = project.getDescription();
       ICommand[] commands = projectDescription.getBuildSpec();

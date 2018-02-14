@@ -384,7 +384,7 @@ public class DataflowPipelineLaunchDelegateTest {
     assertTrue(expectedArgumentComponents.containsAll(Arrays.asList(argumentComponents)));
   }
 
-  private PipelineOptionsProperty requiredProperty(String name) {
+  private static PipelineOptionsProperty requiredProperty(String name) {
     return new PipelineOptionsProperty(name, false, true, Collections.<String>emptySet(), null);
   }
 

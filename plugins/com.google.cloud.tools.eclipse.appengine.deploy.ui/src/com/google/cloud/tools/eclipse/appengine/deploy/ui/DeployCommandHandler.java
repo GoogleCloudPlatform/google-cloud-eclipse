@@ -115,7 +115,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
     }
   }
 
-  protected IProject getSelectedProject(ExecutionEvent event)
+  protected static IProject getSelectedProject(ExecutionEvent event)
       throws ExecutionException, CoreException {
     IProject project = ProjectFromSelectionHelper.getFirstProject(event);
     if (project == null) {
@@ -128,7 +128,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
     return project;
   }
 
-  private IWorkspace getWorkspace(ExecutionEvent event) {
+  private static IWorkspace getWorkspace(ExecutionEvent event) {
     return ServiceUtils.getService(event, IWorkspace.class);
   }
 

@@ -279,7 +279,7 @@ public class PipelineLaunchConfiguration {
     return missingGroups;
   }
 
-  private Map<String, Set<PipelineOptionsProperty>> getRequiredGroups(
+  private static Map<String, Set<PipelineOptionsProperty>> getRequiredGroups(
       Collection<Set<PipelineOptionsProperty>> requiredPropertySets) {
     Map<String, Set<PipelineOptionsProperty>> requiredGroups = new HashMap<>();
     for (Set<PipelineOptionsProperty> requiredProperties : requiredPropertySets) {
