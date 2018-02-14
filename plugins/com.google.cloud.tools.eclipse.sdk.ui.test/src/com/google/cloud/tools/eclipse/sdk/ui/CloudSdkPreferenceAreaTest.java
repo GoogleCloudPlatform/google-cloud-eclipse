@@ -32,6 +32,7 @@ import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotCheckBox;
@@ -60,6 +61,7 @@ public class CloudSdkPreferenceAreaTest {
 
   private Button useLocalSdk;
   private Text sdkLocation;
+  private Label sdkVersion;
 
   @After
   public void tearDown() {
@@ -73,6 +75,7 @@ public class CloudSdkPreferenceAreaTest {
 
     assertFalse(area.getStatus().isOK());
     assertEquals(IStatus.ERROR, area.getStatus().getSeverity());
+    assertEquals("SDK version: Unset", sdkVersion.getText());
   }
 
   @Test
@@ -96,6 +99,7 @@ public class CloudSdkPreferenceAreaTest {
 
     useLocalSdk = CompositeUtil.findButton(shell, "Use local SDK");
     sdkLocation = CompositeUtil.findControlAfterLabel(shell, Text.class, "&SDK location:");
+    sdkVersion = CompositeUtil.findLabel(shell, "SDK version: Unset");
   }
 
   @Test
@@ -105,6 +109,7 @@ public class CloudSdkPreferenceAreaTest {
 
     assertNull(useLocalSdk);
     assertNotNull(sdkLocation);
+    assertNotNull(sdkVersion);
     assertTrue(sdkLocation.isEnabled());
   }
 
@@ -116,6 +121,7 @@ public class CloudSdkPreferenceAreaTest {
 
     assertNotNull(useLocalSdk);
     assertNotNull(sdkLocation);
+    assertNotNull(sdkVersion);
   }
 
   @Test

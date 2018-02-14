@@ -43,6 +43,15 @@ public class CompositeUtil {
     });
   }
 
+  public static Label findLabel(Composite composite, final String text) {
+    return (Label) findControl(composite, new Predicate<Control>() {
+      @Override
+      public boolean apply(Control control) {
+        return control instanceof Label && ((Label) control).getText().equals(text);
+      }
+    });
+  }  
+  
   public static Control findControl(Composite composite, Predicate<Control> predicate) {
     for (Control control : composite.getChildren()) {
       if (predicate.apply(control)) {
