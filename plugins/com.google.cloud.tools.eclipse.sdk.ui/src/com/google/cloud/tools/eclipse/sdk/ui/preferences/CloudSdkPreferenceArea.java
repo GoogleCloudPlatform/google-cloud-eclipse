@@ -47,6 +47,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.PlatformUI;
 
@@ -58,7 +59,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
   private Button useLocalSdk;
   private Composite localSdkArea;
   private CloudSdkDirectoryFieldEditor sdkLocation;
-
+  private Label sdkVersionLabel;
   private IStatus status = Status.OK_STATUS;
   private IPropertyChangeListener wrappedPropertyChangeListener = new IPropertyChangeListener() {
 
@@ -115,6 +116,10 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     sdkLocation.setPreferenceStore(getPreferenceStore());
     sdkLocation.setPropertyChangeListener(wrappedPropertyChangeListener);
 
+    sdkVersionLabel = new Label(localSdkArea, SWT.LEFT);
+    String sdkVersion = "Unset";
+    sdkVersionLabel.setText(Messages.getString("SdkVersion", sdkVersion));
+    
     if (CloudSdkManager.isManagedSdkFeatureEnabled()) {
       GridLayoutFactory.fillDefaults().numColumns(sdkLocation.getNumberOfControls())
           .extendedMargins(IDialogConstants.LEFT_MARGIN, 0, 0, 0)
@@ -260,7 +265,12 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
         status = new Status(IStatus.ERROR, getClass().getName(), message);
         return false;
       }
-      return validateSdk(location);
+      boolean valid = validateSdk(location);
+      if (valid) {
+        // todo read version file
+        sdkVersionLabel.setText(Messages.getString("SdkVersion", "valid"));
+      }
+      return valid;
     }
   }
 }
