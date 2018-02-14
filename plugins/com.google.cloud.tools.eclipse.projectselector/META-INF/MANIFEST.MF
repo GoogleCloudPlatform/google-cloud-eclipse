@@ -1,12 +1,13 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
+Automatic-Module-Name: com.google.cloud.tools.eclipse.projectselector
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.projectselector;singleton:=true
 Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: %providerName
-Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
+Bundle-Localization: plugin
 Export-Package: com.google.cloud.tools.eclipse.projectselector,
  com.google.cloud.tools.eclipse.projectselector.model
 Import-Package: com.google.api.client.auth.oauth2;version="[1.23.0,1.24.0)",

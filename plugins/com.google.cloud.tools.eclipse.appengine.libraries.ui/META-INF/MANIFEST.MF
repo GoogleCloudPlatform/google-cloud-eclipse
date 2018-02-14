@@ -1,12 +1,13 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
+Automatic-Module-Name: com.google.cloud.tools.eclipse.appengine.libraries.ui
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.libraries.ui;singleton:=true
 Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: %providerName
-Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
+Bundle-Localization: plugin
 Require-Bundle: org.eclipse.equinox.common
 Export-Package: com.google.cloud.tools.eclipse.appengine.libraries.ui
 Import-Package: com.google.cloud.tools.eclipse.appengine.facets,
