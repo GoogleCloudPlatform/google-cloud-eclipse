@@ -118,8 +118,7 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
       String className = (String) data;
       Class<?> clazz = Class.forName(className);
       Constructor<?> constructor = clazz.getConstructor();
-      XmlValidationHelper helper = (XmlValidationHelper) constructor.newInstance(new Object[] {});
-      this.setHelper(helper);
+      this.setHelper((XmlValidationHelper) constructor.newInstance(new Object[] {}));
     } catch (ClassNotFoundException | NoSuchMethodException | SecurityException
         | InstantiationException | IllegalAccessException | IllegalArgumentException
         | InvocationTargetException ex) {

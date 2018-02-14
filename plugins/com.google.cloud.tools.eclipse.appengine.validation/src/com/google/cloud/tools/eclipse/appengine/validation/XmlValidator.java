@@ -102,8 +102,7 @@ public class XmlValidator extends AbstractValidator implements IExecutableExtens
       String className = (String) data;
       Class<?> clazz = Class.forName(className);
       Constructor<?> constructor = clazz.getConstructor();
-      XmlValidationHelper helper = (XmlValidationHelper) constructor.newInstance();
-      setHelper(helper);
+      setHelper((XmlValidationHelper) constructor.newInstance());
     } catch (ClassNotFoundException | NoSuchMethodException | SecurityException
         | InstantiationException | IllegalAccessException | IllegalArgumentException
         | InvocationTargetException ex) {

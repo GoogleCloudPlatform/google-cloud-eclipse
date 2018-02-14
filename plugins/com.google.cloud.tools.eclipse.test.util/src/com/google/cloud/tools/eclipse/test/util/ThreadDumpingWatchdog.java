@@ -212,7 +212,7 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
   /**
    * Dump details on current jobs.
    */
-  private void dumpEclipseJobs(StringBuilder sb, String linePrefix) {
+  private static void dumpEclipseJobs(StringBuilder sb, String linePrefix) {
     Job[] jobs = Job.getJobManager().find(null);
     if (jobs.length == 0) {
       return;
@@ -261,7 +261,7 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
   }
 
 
-  private void dumpJob(StringBuilder sb, String linePrefix, Job job, Thread thread) {
+  private static void dumpJob(StringBuilder sb, String linePrefix, Job job, Thread thread) {
     String status;
     switch (job.getState()) {
       case Job.RUNNING:
@@ -389,7 +389,7 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
   }
 
   @SuppressWarnings("incomplete-switch")
-  private void dumpThreadInfo(StringBuilder sb, String prefix, ThreadInfo tinfo) {
+  private static void dumpThreadInfo(StringBuilder sb, String prefix, ThreadInfo tinfo) {
     sb.append('\n').append(prefix);
     dumpThreadHeader(sb, tinfo);
 
@@ -430,7 +430,7 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
     sb.append("\n").append(prefix);
   }
 
-  private void dumpThreadHeader(StringBuilder sb, ThreadInfo tinfo) {
+  private static void dumpThreadHeader(StringBuilder sb, ThreadInfo tinfo) {
     sb.append('"').append(tinfo.getThreadName()).append("\" [").append(tinfo.getThreadId())
         .append("] ").append(tinfo.getThreadState());
     if (tinfo.getLockName() != null) {

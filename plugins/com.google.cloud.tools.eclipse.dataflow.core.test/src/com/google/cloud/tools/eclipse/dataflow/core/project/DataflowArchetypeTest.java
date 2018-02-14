@@ -30,18 +30,4 @@ public class DataflowArchetypeTest {
       Assert.assertFalse(template.getLabel().isEmpty());
     }
   }
-
-  // The Dataflow wizard assumes the last SDK version in the ordered set is the latest version.
-  @Test
-  public void testTemplateSdkVersions_inIncreasingMajorVersionOrder() {
-    for (DataflowProjectArchetype template : DataflowProjectArchetype.values()) {
-      MajorVersion previousVersion = null;
-      for (MajorVersion majorVersion : template.getSdkVersions()) {
-        if (previousVersion != null) {
-          int compared = previousVersion.getMaxVersion().compareTo(majorVersion.getMaxVersion());
-          Assert.assertTrue(compared < 0);
-        }
-      }
-    }
-  }
 }
