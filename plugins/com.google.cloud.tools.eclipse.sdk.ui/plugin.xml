@@ -10,4 +10,10 @@
             preferences="instance://com.google.cloud.tools.eclipse.sdk">
       </area>
    </extension>
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup
+            class="com.google.cloud.tools.eclipse.sdk.ui.InstallManagedCloudSdkStartup">
+      </startup>
+   </extension>
 </plugin>
