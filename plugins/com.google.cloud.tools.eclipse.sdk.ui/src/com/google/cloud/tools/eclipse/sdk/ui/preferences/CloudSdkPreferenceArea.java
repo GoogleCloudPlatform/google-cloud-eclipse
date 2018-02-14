@@ -259,10 +259,12 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       if (!Files.exists(location)) {
         String message = Messages.getString("NoSuchDirectory", location); //$NON-NLS-1$
         status = new Status(IStatus.ERROR, getClass().getName(), message);
+        sdkVersionLabel.setText(Messages.getString("SdkVersion", "Unset"));
         return false;
       } else if (!Files.isDirectory(location)) {
         String message = Messages.getString("FileNotDirectory", location); //$NON-NLS-1$
         status = new Status(IStatus.ERROR, getClass().getName(), message);
+        sdkVersionLabel.setText(Messages.getString("SdkVersion", "Unset"));
         return false;
       }
       boolean valid = validateSdk(location);
