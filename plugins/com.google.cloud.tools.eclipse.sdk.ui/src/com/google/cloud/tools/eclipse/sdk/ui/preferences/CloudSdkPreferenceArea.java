@@ -26,6 +26,8 @@ import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences.CloudSdkManagementOption;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
+import com.google.cloud.tools.managedcloudsdk.ManagedCloudSdk;
+import com.google.cloud.tools.managedcloudsdk.UnsupportedOsException;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.File;
 import java.nio.file.Files;
@@ -96,9 +98,10 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       useLocalSdk.setText(Messages.getString("UseLocalSdk")); //$NON-NLS-1$
       useLocalSdk.addSelectionListener(new SelectionAdapter() {
         @Override
-        public void widgetSelected(SelectionEvent e) {
+        public void widgetSelected(SelectionEvent event) {
           if (!useLocalSdk.getSelection()) {
             status = Status.OK_STATUS;
+            updateSelectedVersion();
           } else {
             sdkLocation.doCheckState();
           }
@@ -120,6 +123,8 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     sdkLocation.setPreferenceStore(getPreferenceStore());
     sdkLocation.setPropertyChangeListener(wrappedPropertyChangeListener);
     
+    updateSelectedVersion();
+
     if (CloudSdkManager.isManagedSdkFeatureEnabled()) {
       GridLayoutFactory.fillDefaults().numColumns(sdkLocation.getNumberOfControls())
           .extendedMargins(IDialogConstants.LEFT_MARGIN, 0, 0, 0)
@@ -132,6 +137,26 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
     Dialog.applyDialogFont(contents);
     return contents;
+  }
+  
+  private void updateSelectedVersion() {
+    // bug: the sdk has not swapped until we call apply so this returns 
+    // the version of the previously selected non-managed SDK
+    String version = new CloudSdk.Builder().build().getVersion().toString();
+    if (useLocalSdk != null && useLocalSdk.getSelection()) {
+      Path path = Paths.get(useLocalSdk.getText());
+      version = new CloudSdk.Builder().sdkPath(path).build().getVersion().toString();
+    } else {
+      try {
+        Path home = ManagedCloudSdk.newManagedSdk().getSdkHome();
+        version = new CloudSdk.Builder().sdkPath(home).build().getVersion().toString();
+      } catch (UnsupportedOsException ex) {
+        // TODO Auto-generated catch block
+        ex.printStackTrace();
+      }
+    }
+    
+    sdkVersionLabel.setText(Messages.getString("SdkVersion", version));
   }
 
   @VisibleForTesting
@@ -249,6 +274,11 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
     @Override
     protected boolean doCheckState() {
+      if (!useLocalSdk.getSelection()) {
+        // return early if we're not using a local SDK
+        return true;
+      }
+      
       String directory = getStringValue().trim();
       if (directory.isEmpty()) {
         status = Status.OK_STATUS;
@@ -269,6 +299,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       }
       boolean valid = validateSdk(location);
       if (valid) {
+        // todo bug should use new location here; not old SDK
         String version = new CloudSdk.Builder().build().getVersion().toString();
         sdkVersionLabel.setText(Messages.getString("SdkVersion", version));
       } else {
