@@ -152,7 +152,8 @@ public class AppEngineXsltTransformTest {
       }
       InputStream documentStream =
           new ByteArrayInputStream(inputValue.getBytes(StandardCharsets.UTF_8));
-      try (InputStream transformed = Xslt.applyXslt(documentStream, xslPath.openStream())) {
+      try (InputStream xslStream = xslPath.openStream();
+          InputStream transformed = Xslt.applyXslt(documentStream, xslStream)) {
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
         builderFactory.setNamespaceAware(true);
         DocumentBuilder builder = builderFactory.newDocumentBuilder();
