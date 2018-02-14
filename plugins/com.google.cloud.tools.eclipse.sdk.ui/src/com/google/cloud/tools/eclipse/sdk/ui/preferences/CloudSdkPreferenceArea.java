@@ -87,7 +87,10 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
         WorkbenchUtil.openInBrowser(PlatformUI.getWorkbench(), event.text);
       }
     });
-
+    
+    sdkVersionLabel = new Label(parent, SWT.LEFT);
+    sdkVersionLabel.setText(Messages.getString("SdkVersion", "Unset"));
+    
     if (CloudSdkManager.isManagedSdkFeatureEnabled()) {
       useLocalSdk = new Button(parent, SWT.CHECK);
       useLocalSdk.setText(Messages.getString("UseLocalSdk")); //$NON-NLS-1$
@@ -107,6 +110,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     }
 
     localSdkArea = new Composite(parent, SWT.NONE);
+
     sdkLocation = new CloudSdkDirectoryFieldEditor(CloudSdkPreferences.CLOUD_SDK_PATH,
         Messages.getString("SdkLocation"), localSdkArea); //$NON-NLS-1$
     Path defaultLocation = getDefaultSdkLocation();
@@ -115,10 +119,6 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     }
     sdkLocation.setPreferenceStore(getPreferenceStore());
     sdkLocation.setPropertyChangeListener(wrappedPropertyChangeListener);
-
-    sdkVersionLabel = new Label(localSdkArea, SWT.LEFT);
-    String sdkVersion = "Unset";
-    sdkVersionLabel.setText(Messages.getString("SdkVersion", sdkVersion));
     
     if (CloudSdkManager.isManagedSdkFeatureEnabled()) {
       GridLayoutFactory.fillDefaults().numColumns(sdkLocation.getNumberOfControls())
