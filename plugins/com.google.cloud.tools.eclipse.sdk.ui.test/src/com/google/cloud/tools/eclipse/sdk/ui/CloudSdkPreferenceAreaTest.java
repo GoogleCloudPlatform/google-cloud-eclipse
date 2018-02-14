@@ -99,7 +99,7 @@ public class CloudSdkPreferenceAreaTest {
 
     useLocalSdk = CompositeUtil.findButton(shell, "Use local SDK");
     sdkLocation = CompositeUtil.findControlAfterLabel(shell, Text.class, "&SDK location:");
-    sdkVersion = CompositeUtil.findLabel(shell, "SDK version: Unset");
+    sdkVersion = CompositeUtil.findLabel(shell, "SDK version:");
   }
 
   @Test

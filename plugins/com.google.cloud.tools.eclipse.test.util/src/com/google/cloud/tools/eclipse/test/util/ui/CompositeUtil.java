@@ -43,11 +43,11 @@ public class CompositeUtil {
     });
   }
 
-  public static Label findLabel(Composite composite, final String text) {
+  public static Label findLabel(Composite composite, final String prefix) {
     return (Label) findControl(composite, new Predicate<Control>() {
       @Override
       public boolean apply(Control control) {
-        return control instanceof Label && ((Label) control).getText().equals(text);
+        return control instanceof Label && ((Label) control).getText().startsWith(prefix);
       }
     });
   }  

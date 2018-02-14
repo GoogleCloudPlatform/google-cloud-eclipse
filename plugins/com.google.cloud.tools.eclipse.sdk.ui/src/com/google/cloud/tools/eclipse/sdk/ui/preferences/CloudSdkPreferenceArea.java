@@ -274,7 +274,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
     @Override
     protected boolean doCheckState() {
-      if (!useLocalSdk.getSelection()) {
+      if (useLocalSdk != null && !useLocalSdk.getSelection()) {
         // return early if we're not using a local SDK
         return true;
       }
