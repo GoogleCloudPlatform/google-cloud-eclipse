@@ -74,7 +74,7 @@ public class GoogleLoginService implements IGoogleLoginService {
    */
   protected void activate() {
     final IWorkbench workbench = PlatformUI.getWorkbench();
-    LoginServiceLogger logger = new LoginServiceLogger();
+    LoginServiceLogger loginServiceLogger = new LoginServiceLogger();
     IShellProvider shellProvider = new IShellProvider() {
       @Override
       public Shell getShell() {
@@ -84,10 +84,10 @@ public class GoogleLoginService implements IGoogleLoginService {
 
     LoginServiceUi uiFacade = new LoginServiceUi(workbench, shellProvider, workbench.getDisplay());
     OAuthDataStore dataStore =
-        new JavaPreferenceOAuthDataStore(PREFERENCE_PATH_OAUTH_DATA_STORE, logger);
+        new JavaPreferenceOAuthDataStore(PREFERENCE_PATH_OAUTH_DATA_STORE, loginServiceLogger);
     loginState = new GoogleLoginState(
         Constants.getOAuthClientId(), Constants.getOAuthClientSecret(), OAUTH_SCOPES,
-        dataStore, uiFacade, logger);
+        dataStore, uiFacade, loginServiceLogger);
     loginState.setApplicationName(CloudToolsInfo.USER_AGENT);
     accounts = loginState.listAccounts();
   }

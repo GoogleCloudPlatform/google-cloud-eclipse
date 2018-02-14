@@ -85,12 +85,12 @@ public class CloudLibrariesPage extends WizardPage
   }
 
   @Override
-  public void initialize(IJavaProject project, IClasspathEntry[] currentEntries) {
-    this.project = project;
-    isMavenProject = MavenUtils.hasMavenNature(project.getProject());
+  public void initialize(IJavaProject javaProject, IClasspathEntry[] currentEntries) {
+    this.project = javaProject;
+    isMavenProject = MavenUtils.hasMavenNature(javaProject.getProject());
 
     Map<String, String> groups = Maps.newLinkedHashMap();
-    if (AppEngineStandardFacet.getProjectFacetVersion(project.getProject()) != null) {
+    if (AppEngineStandardFacet.getProjectFacetVersion(javaProject.getProject()) != null) {
       groups.put(CloudLibraries.APP_ENGINE_GROUP, Messages.getString("appengine-title")); //$NON-NLS-1$
     }
     groups.put(CloudLibraries.CLIENT_APIS_GROUP, Messages.getString("clientapis-title")); //$NON-NLS-1$

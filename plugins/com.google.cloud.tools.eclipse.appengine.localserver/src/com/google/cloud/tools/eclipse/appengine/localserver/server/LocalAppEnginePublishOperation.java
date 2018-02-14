@@ -51,18 +51,18 @@ public class LocalAppEnginePublishOperation extends BasePublishOperation {
   }
 
   @Override
-  protected void setModulePublishState(IModule[] module, int publishState) {
-    server.setModulePublishState2(module, publishState);
+  protected void setModulePublishState(IModule[] modulePath, int publishState) {
+    server.setModulePublishState2(modulePath, publishState);
   }
 
   @Override
-  protected IModuleResourceDelta[] getPublishedResourceDelta(IModule[] module) {
-    return server.getPublishedResourceDelta(module);
+  protected IModuleResourceDelta[] getPublishedResourceDelta(IModule[] modulePath) {
+    return server.getPublishedResourceDelta(modulePath);
   }
 
   @Override
-  protected IModuleResource[] getResources(IModule[] module) {
-    return server.getResources(module);
+  protected IModuleResource[] getResources(IModule[] modulePath) {
+    return server.getResources(modulePath);
   }
 
   @Override

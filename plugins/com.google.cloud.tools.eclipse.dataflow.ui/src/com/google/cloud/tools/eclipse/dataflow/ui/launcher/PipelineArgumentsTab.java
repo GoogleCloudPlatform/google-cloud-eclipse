@@ -398,10 +398,10 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   }
 
   /** Find the corresponding project or {@code null} if not found. */
-  private final IProject findProject(ILaunchConfiguration launchConfiguration) {
+  private final IProject findProject(ILaunchConfiguration configuration) {
     try {
       String eclipseProjectName =
-          launchConfiguration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, "");
+          configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, "");
     if (!Strings.isNullOrEmpty(eclipseProjectName)) {
         return workspaceRoot.getProject(eclipseProjectName);
       }
@@ -412,19 +412,19 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   }
 
   @VisibleForTesting
-  void updateRunnerButtons(PipelineLaunchConfiguration launchConfiguration) {
-    Preconditions.checkNotNull(launchConfiguration);
-    MajorVersion majorVersion = launchConfiguration.getMajorVersion();
+  void updateRunnerButtons(PipelineLaunchConfiguration configuration) {
+    Preconditions.checkNotNull(configuration);
+    MajorVersion majorVersion = configuration.getMajorVersion();
     populateRunners(majorVersion);
     for (Button button : runnerButtons.values()) {
       button.setSelection(false);
     }
 
-    PipelineRunner runner = launchConfiguration.getRunner();
+    PipelineRunner runner = configuration.getRunner();
     if (!runner.getSupportedVersions().contains(majorVersion)) {
       // updates the selected button since it has an invalid runner
       runner = PipelineLaunchConfiguration.defaultRunner(majorVersion);
-      launchConfiguration.setRunner(runner);
+      configuration.setRunner(runner);
       DataflowUiPlugin.logInfo("Changed pipeline runner to '%s'", runner.getRunnerName());
     }
     Button runnerButton = runnerButtons.get(runner);

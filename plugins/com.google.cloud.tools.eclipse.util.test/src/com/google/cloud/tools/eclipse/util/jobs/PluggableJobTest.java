@@ -261,7 +261,7 @@ public class PluggableJobTest {
     PluggableJob<Object> job = new PluggableJob<>("name", Callables.returning(obj),
         new Predicate<FuturisticJob<?>>() {
           @Override
-          public boolean apply(FuturisticJob<?> job) {
+          public boolean apply(FuturisticJob<?> unused) {
             return isStale[0];
           }
         });

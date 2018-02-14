@@ -83,7 +83,6 @@ public class XsltQuickFixTest {
   @Test
   public void testRun_removeApplicationElement() throws IOException, ParserConfigurationException,
       SAXException, CoreException {
-    IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), IFile.FORCE, null);
 
     IMarker marker = Mockito.mock(IMarker.class);
@@ -124,8 +123,6 @@ public class XsltQuickFixTest {
 
   @Test
   public void testRun_existingEditor() throws CoreException {
-
-    IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), IFile.FORCE, null);
 
     IWorkbench workbench = PlatformUI.getWorkbench();
@@ -151,8 +148,6 @@ public class XsltQuickFixTest {
 
   @Test
   public void testGetCurrentDocument_existingEditor() throws CoreException {
-
-    IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), IFile.FORCE, null);
 
     IWorkbench workbench = PlatformUI.getWorkbench();
@@ -166,10 +161,7 @@ public class XsltQuickFixTest {
 
   @Test
   public void testGetCurrentDocument_noEditor() throws CoreException {
-
-    IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), IFile.FORCE, null);
-
     assertNull(XsltQuickFix.getCurrentDocument(file));
   }
 

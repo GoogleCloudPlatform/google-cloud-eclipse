@@ -24,8 +24,9 @@ env:
   global:
     - CLOUD_SDK_HOME=$HOME/google-cloud-sdk
     - PATH=$CLOUD_SDK_HOME/bin:$PATH
-    # Our maven build typically reports about 512m
-    - MAVEN_OPTS=-Xmx700m
+    # -Xmx700m: Our maven build typically reports about 512m required
+    # -DshowDateTime: show milliseconds since start
+    - MAVEN_OPTS='-Xmx700m -Dorg.slf4j.simpleLogger.showDateTime=true'
     - CLOUDSDK_CORE_DISABLE_USAGE_REPORTING=true
     - DISPLAY=:99.0
     - GCS_BUILD_BUCKET=gs://travis_artifacts

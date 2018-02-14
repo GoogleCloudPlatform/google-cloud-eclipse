@@ -82,8 +82,8 @@ public class CloudLibraries {
     Bundle bundle = FrameworkUtil.getBundle(CloudSdk.class);
     URL url = bundle.getResource("/com/google/cloud/tools/libraries/libraries.json");
     
-    try (InputStream in = url.openStream()) {
-      JsonReader reader = Json.createReader(in); 
+    try (InputStream in = url.openStream();
+        JsonReader reader = Json.createReader(in)) {
       JsonObject[] apis = reader.readArray().toArray(new JsonObject[0]); 
       List<Library> clientApis = new ArrayList<>(apis.length);
       for (JsonObject api : apis) {
