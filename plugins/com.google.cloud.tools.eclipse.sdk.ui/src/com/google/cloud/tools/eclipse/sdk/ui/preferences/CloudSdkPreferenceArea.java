@@ -142,14 +142,15 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
   
   private void updateSelectedVersion() {
     String version = Messages.getString("UnknownVersion"); //$NON-NLS-1$
-    if (useLocalSdk != null && useLocalSdk.getSelection()) {
-      Path path = Paths.get(useLocalSdk.getText());
+    if (!CloudSdkManager.isManagedSdkFeatureEnabled()
+        || (useLocalSdk != null && useLocalSdk.getSelection())) {
+      Path path = Paths.get(sdkLocation.getStringValue());
       try {
         version = new CloudSdk.Builder().sdkPath(path).build().getVersion().toString();
       } catch (CloudSdkVersionFileException ex) {
         version = Messages.getString("NoSdkFound"); //$NON-NLS-1$
       }
-    } else {
+    } else if (CloudSdkManager.isManagedSdkFeatureEnabled()) {
       try {
         Path home = ManagedCloudSdk.newManagedSdk().getSdkHome();
         version = new CloudSdk.Builder().sdkPath(home).build().getVersion().toString();
@@ -307,7 +308,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       boolean valid = validateSdk(location);
       if (valid) {
         try {
-          String version = new CloudSdk.Builder().build().getVersion().toString();
+          String version = new CloudSdk.Builder().sdkPath(location).build().getVersion().toString();
           sdkVersionLabel.setText(Messages.getString("SdkVersion", version)); //$NON-NLS-1$
         } catch (CloudSdkVersionFileException ex) {
           sdkVersionLabel.setText(
