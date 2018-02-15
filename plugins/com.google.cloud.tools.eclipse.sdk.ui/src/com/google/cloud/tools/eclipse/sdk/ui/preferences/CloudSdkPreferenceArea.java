@@ -21,6 +21,7 @@ import com.google.cloud.tools.appengine.cloudsdk.AppEngineJavaComponentsNotInsta
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkVersionFileException;
 import com.google.cloud.tools.eclipse.preferences.areas.PreferenceArea;
 import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
@@ -142,10 +143,14 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
   private void updateSelectedVersion() {
     // bug: the sdk has not swapped until we call apply so this returns 
     // the version of the previously selected non-managed SDK
-    String version = new CloudSdk.Builder().build().getVersion().toString();
+    String version = "Unknown";
     if (useLocalSdk != null && useLocalSdk.getSelection()) {
       Path path = Paths.get(useLocalSdk.getText());
-      version = new CloudSdk.Builder().sdkPath(path).build().getVersion().toString();
+      try {
+        version = new CloudSdk.Builder().sdkPath(path).build().getVersion().toString();
+      } catch (CloudSdkVersionFileException ex) {
+        version = "No SDK found";
+      }
     } else {
       try {
         Path home = ManagedCloudSdk.newManagedSdk().getSdkHome();
