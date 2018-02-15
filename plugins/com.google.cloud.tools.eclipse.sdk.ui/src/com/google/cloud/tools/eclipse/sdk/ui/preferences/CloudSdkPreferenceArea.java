@@ -141,8 +141,6 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
   }
   
   private void updateSelectedVersion() {
-    // bug: the sdk has not swapped until we call apply so this returns 
-    // the version of the previously selected non-managed SDK
     String version = Messages.getString("UnknownVersion"); //$NON-NLS-1$
     if (useLocalSdk != null && useLocalSdk.getSelection()) {
       Path path = Paths.get(useLocalSdk.getText());
