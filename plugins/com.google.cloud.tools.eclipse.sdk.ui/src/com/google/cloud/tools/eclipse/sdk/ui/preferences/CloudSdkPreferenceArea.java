@@ -143,25 +143,25 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
   private void updateSelectedVersion() {
     // bug: the sdk has not swapped until we call apply so this returns 
     // the version of the previously selected non-managed SDK
-    String version = "Unknown";
+    String version = Messages.getString("UnknownVersion"); //$NON-NLS-1$
     if (useLocalSdk != null && useLocalSdk.getSelection()) {
       Path path = Paths.get(useLocalSdk.getText());
       try {
         version = new CloudSdk.Builder().sdkPath(path).build().getVersion().toString();
       } catch (CloudSdkVersionFileException ex) {
-        version = "No SDK found";
+        version = Messages.getString("NoSdkFound"); //$NON-NLS-1$
       }
     } else {
       try {
         Path home = ManagedCloudSdk.newManagedSdk().getSdkHome();
         version = new CloudSdk.Builder().sdkPath(home).build().getVersion().toString();
       } catch (UnsupportedOsException ex) {
-        // TODO Auto-generated catch block
-        ex.printStackTrace();
+        // shouldn't happen but if it does we'll just leave
+        // version set to Unknown;
       }
     }
     
-    sdkVersionLabel.setText(Messages.getString("SdkVersion", version));
+    sdkVersionLabel.setText(Messages.getString("SdkVersion", version)); //$NON-NLS-1$
   }
 
   @VisibleForTesting
