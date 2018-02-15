@@ -155,7 +155,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
         version = new CloudSdk.Builder().sdkPath(home).build().getVersion().toString();
       } catch (UnsupportedOsException ex) {
         // shouldn't happen but if it does we'll just leave
-        // version set to Unknown;
+        // version set to Unknown
       }
     }
     
