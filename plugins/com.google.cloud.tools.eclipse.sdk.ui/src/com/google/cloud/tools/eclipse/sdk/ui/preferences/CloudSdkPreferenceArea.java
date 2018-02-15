@@ -156,6 +156,8 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       } catch (UnsupportedOsException ex) {
         // shouldn't happen but if it does we'll just leave
         // version set to Unknown
+      } catch (CloudSdkVersionFileException ex) {
+        version = Messages.getString("NoSdkFound"); //$NON-NLS-1$
       }
     }
     
@@ -292,21 +294,27 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       if (!Files.exists(location)) {
         String message = Messages.getString("NoSuchDirectory", location); //$NON-NLS-1$
         status = new Status(IStatus.ERROR, getClass().getName(), message);
-        sdkVersionLabel.setText(Messages.getString("SdkVersion", "Unset"));
+        sdkVersionLabel.setText(
+            Messages.getString("SdkVersion", "Unset")); //$NON-NLS-1$
         return false;
       } else if (!Files.isDirectory(location)) {
         String message = Messages.getString("FileNotDirectory", location); //$NON-NLS-1$
         status = new Status(IStatus.ERROR, getClass().getName(), message);
-        sdkVersionLabel.setText(Messages.getString("SdkVersion", "Unset"));
+        sdkVersionLabel.setText(
+            Messages.getString("SdkVersion", "Unset")); //$NON-NLS-1$ $NON-NLS-2$
         return false;
       }
       boolean valid = validateSdk(location);
       if (valid) {
-        // todo bug should use new location here; not old SDK
-        String version = new CloudSdk.Builder().build().getVersion().toString();
-        sdkVersionLabel.setText(Messages.getString("SdkVersion", version));
+        try {
+          String version = new CloudSdk.Builder().build().getVersion().toString();
+          sdkVersionLabel.setText(Messages.getString("SdkVersion", version)); //$NON-NLS-1$
+        } catch (CloudSdkVersionFileException ex) {
+          sdkVersionLabel.setText(
+              Messages.getString("SdkVersion", Messages.getString("NoSdkFound"))); //$NON-NLS-1$ $NON-NLS-2$
+        }
       } else {
-        sdkVersionLabel.setText(Messages.getString("SdkVersion", "Unset"));
+        sdkVersionLabel.setText(Messages.getString("SdkVersion", "Unset")); //$NON-NLS-1$
       }
       return valid;
     }
