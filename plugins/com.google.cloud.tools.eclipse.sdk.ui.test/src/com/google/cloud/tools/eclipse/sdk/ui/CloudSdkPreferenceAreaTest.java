@@ -94,7 +94,7 @@ public class CloudSdkPreferenceAreaTest {
     area.createContents(shell);
     area.load();
 
-    useLocalSdk = CompositeUtil.findButton(shell, "Use local SDK");
+    useLocalSdk = CompositeUtil.findButton(shell, "Choose SDK");
     sdkLocation = CompositeUtil.findControlAfterLabel(shell, Text.class, "&SDK location:");
   }
 
