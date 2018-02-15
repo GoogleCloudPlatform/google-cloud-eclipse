@@ -23,7 +23,7 @@ public class MessagesTest {
 
   @Test
   public void testCloudSdkNotConfigured() {
-    Assert.assertEquals("Choose SDK", Messages.getString("use.local.sdk"));
+    Assert.assertEquals("Choose SDK", Messages.getString("UseLocalSdk"));
   }
 
 }
