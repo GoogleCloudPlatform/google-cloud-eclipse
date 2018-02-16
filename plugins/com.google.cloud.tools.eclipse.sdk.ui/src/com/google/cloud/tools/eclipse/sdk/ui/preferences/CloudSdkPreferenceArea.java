@@ -73,6 +73,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       } else if (event.getProperty() == DirectoryFieldEditor.VALUE) {
         fireValueChanged(VALUE, event.getOldValue(), event.getNewValue());
       }
+      updateSelectedVersion();
     }
   };
 
@@ -103,10 +104,10 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
         public void widgetSelected(SelectionEvent event) {
           if (!useLocalSdk.getSelection()) {
             status = Status.OK_STATUS;
-            updateSelectedVersion();
           } else {
             sdkLocation.doCheckState();
           }
+          updateSelectedVersion();
           fireValueChanged(VALUE, "", "");
 
           updateControlEnablement();
@@ -160,6 +161,10 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
   }
 
   private static String getSdkVersion(Path path) {
+    if (!Files.exists(path) || !Files.isDirectory(path)) {
+      return "Unset";
+    }
+
     try {
       return new CloudSdk.Builder().sdkPath(path).build().getVersion().toString();
     } catch (CloudSdkVersionFileException ex) {
@@ -297,23 +302,13 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       if (!Files.exists(location)) {
         String message = Messages.getString("NoSuchDirectory", location); //$NON-NLS-1$
         status = new Status(IStatus.ERROR, getClass().getName(), message);
-        sdkVersionLabel.setText(
-            Messages.getString("SdkVersion", "Unset")); //$NON-NLS-1$
         return false;
       } else if (!Files.isDirectory(location)) {
         String message = Messages.getString("FileNotDirectory", location); //$NON-NLS-1$
         status = new Status(IStatus.ERROR, getClass().getName(), message);
-        sdkVersionLabel.setText(
-            Messages.getString("SdkVersion", "Unset")); //$NON-NLS-1$ $NON-NLS-2$
         return false;
       }
       boolean valid = validateSdk(location);
-      if (valid) {
-        String version = getSdkVersion(location);
-        sdkVersionLabel.setText(Messages.getString("SdkVersion", version)); //$NON-NLS-1$ 
-      } else {
-        sdkVersionLabel.setText(Messages.getString("SdkVersion", "Unset")); //$NON-NLS-1$
-      }
       return valid;
     }
   }
