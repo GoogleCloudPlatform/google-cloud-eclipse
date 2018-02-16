@@ -1,12 +1,13 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
+Automatic-Module-Name: com.google.cloud.tools.eclipse.appengine.libraries
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.libraries;singleton:=true
 Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: %providerName
-Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
+Bundle-Localization: plugin
 Service-Component: OSGI-INF/com.google.cloud.tools.eclipse.appengine.libraries.repository.M2RepositoryService.xml,
  OSGI-INF/com.google.cloud.tools.eclipse.appengine.libraries.repository.LibraryClasspathContainerResolverService.xml
 Require-Bundle: org.eclipse.equinox.common,

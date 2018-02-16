@@ -1,9 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Cloud Tools for Eclipse Welcome Page Contribution
+Bundle-Name: %pluginName
+Automatic-Module-Name: com.google.cloud.tools.eclipse.welcome
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.welcome;singleton:=true
 Bundle-Version: 0.1.0.qualifier
-Bundle-Vendor: Google Inc.
-Bundle-Localization: plugin
+Bundle-Vendor: %providerName
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
+Bundle-Localization: plugin

@@ -1,11 +1,12 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Google Cloud Platform Status widget tests
+Fragment-Host: com.google.cloud.tools.eclipse.ui.status
+Bundle-Name: %pluginName
+Automatic-Module-Name: com.google.cloud.tools.eclipse.ui.status.test
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.ui.status.test
 Bundle-Version: 0.1.0.qualifier
-Bundle-Vendor: Google, Inc.
-Fragment-Host: com.google.cloud.tools.eclipse.ui.status
-Automatic-Module-Name: com.google.cloud.tools.eclipse.ui.status.test
+Bundle-Vendor: %providerName
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Localization: plugin
 Require-Bundle: com.google.cloud.tools.eclipse.test.dependencies;bundle-version="0.1.0"
 Import-Package: com.google.cloud.tools.eclipse.test.util

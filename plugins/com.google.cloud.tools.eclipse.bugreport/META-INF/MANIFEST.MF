@@ -1,12 +1,13 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Cloud Tools for Eclipse User Bug Reporting
+Bundle-Name: %pluginName
+Automatic-Module-Name: com.google.cloud.tools.eclipse.bugreport
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.bugreport;singleton:=true
 Bundle-Version: 0.1.0.qualifier
-Bundle-Vendor: Google Inc.
-Bundle-Localization: plugin
+Bundle-Vendor: %providerName
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
+Bundle-Localization: plugin
 Import-Package: com.google.cloud.tools.appengine.api;version="0.4.2",
  com.google.cloud.tools.appengine.cloudsdk;version="0.4.2",
  com.google.cloud.tools.appengine.cloudsdk.serialization;version="0.4.2",

@@ -1,12 +1,13 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
+Automatic-Module-Name: com.google.cloud.tools.eclipse.googleapis
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.googleapis;singleton:=true
 Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: %providerName
-Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
+Bundle-Localization: plugin
 Service-Component: OSGI-INF/com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory.xml
 Bundle-Classpath: .,
  lib/google-api-client-1.23.0.jar,

@@ -1,12 +1,15 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: %Bundle-Name
+Bundle-Name: %pluginName
+Automatic-Module-Name: com.google.cloud.tools.eclipse.ui.status
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.ui.status;singleton:=true
 Bundle-Version: 0.1.0.qualifier
-Bundle-Vendor: %Bundle-Vendor
-Automatic-Module-Name: com.google.cloud.tools.eclipse.ui.status
-Require-Bundle: org.eclipse.ui
+Bundle-Vendor: %providerName
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
+Service-Component: OSGI-INF/polling.xml
+Require-Bundle: org.eclipse.ui
 Import-Package: com.google.cloud.tools.eclipse.ui.util,
  com.google.cloud.tools.eclipse.util.jobs,
  com.google.cloud.tools.eclipse.util.status,
@@ -19,6 +22,3 @@ Import-Package: com.google.cloud.tools.eclipse.ui.util,
  org.eclipse.core.runtime;version="3.5.0",
  org.eclipse.core.runtime.jobs,
  org.osgi.service.component.annotations;version="[1.2.0,2.0.0)"
-Service-Component: OSGI-INF/polling.xml
-Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7

@@ -89,9 +89,9 @@ public abstract class DeployPreferencesDialog extends TitleAreaDialog {
 
   @Override
   protected Control createDialogArea(final Composite parent) {
-    Composite dialogArea = (Composite) super.createDialogArea(parent);
+    Composite area = (Composite) super.createDialogArea(parent);
 
-    Composite container = new Composite(dialogArea, SWT.NONE);
+    Composite container = new Composite(area, SWT.NONE);
     content = createDeployPreferencesPanel(container, project, loginService,
         getLayoutChangedHandler(), new ProjectRepository(googleApiFactory));
     GridDataFactory.fillDefaults().grab(true, false).applyTo(content);
@@ -111,7 +111,7 @@ public abstract class DeployPreferencesDialog extends TitleAreaDialog {
             return type;
           }
         });
-    return dialogArea;
+    return area;
   }
 
   protected abstract AppEngineDeployPreferencesPanel createDeployPreferencesPanel(

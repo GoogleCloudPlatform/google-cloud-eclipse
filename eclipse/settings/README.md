@@ -35,6 +35,9 @@ around the [`eclipse-settings-maven-plugin`][esmp] Maven plugin.
   [google-java-format]: https://github.com/google/google-java-format
   [google-java-format-release]: https://github.com/google/google-java-format/releases
 
+*Note:* there is now a helper script in `reapply.sh` to perform Steps 1 and 2.
+It must be run from the repository root.
+
 ### Step 0: Change the Canonical Settings (OPTIONAL)
 
 To update the settings, change the settings for one project and

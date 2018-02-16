@@ -1,11 +1,12 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Tests for UI Support for Google Cloud SDK within the Eclipse IDE
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Bundle-SymbolicName: com.google.cloud.tools.eclipse.sdk.ui.test
-Bundle-Vendor: Google Inc.
-Bundle-Version: 0.1.0.qualifier
 Fragment-Host: com.google.cloud.tools.eclipse.sdk.ui
+Bundle-Name: %pluginName
+Bundle-SymbolicName: com.google.cloud.tools.eclipse.sdk.ui.test
+Bundle-Version: 0.1.0.qualifier
+Bundle-Vendor: %providerName
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Localization: plugin
 Require-Bundle: com.google.cloud.tools.eclipse.test.dependencies
 Import-Package: com.google.cloud.tools.eclipse.test.util,
  com.google.cloud.tools.eclipse.test.util.ui,

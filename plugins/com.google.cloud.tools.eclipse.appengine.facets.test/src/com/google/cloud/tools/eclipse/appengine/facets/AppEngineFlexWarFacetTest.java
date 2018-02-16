@@ -45,7 +45,7 @@ public class AppEngineFlexWarFacetTest {
   @Rule public TestProjectCreator wtpProjectCreator = new TestProjectCreator().withFacetVersions(
       JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
 
-  @Mock private IFacetedProject facetedProject;
+  @Mock private IFacetedProject mockFacetedProject;
 
   @Test
   public void testFlexFacetExists() {
@@ -62,17 +62,17 @@ public class AppEngineFlexWarFacetTest {
   @Test
   public void testHasAppEngineFacet_withFacet() {
     IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexWarFacet.ID);
-    when(facetedProject.hasProjectFacet(projectFacet)).thenReturn(true);
+    when(mockFacetedProject.hasProjectFacet(projectFacet)).thenReturn(true);
 
-    Assert.assertTrue(AppEngineFlexWarFacet.hasFacet(facetedProject));
+    Assert.assertTrue(AppEngineFlexWarFacet.hasFacet(mockFacetedProject));
   }
 
   @Test
   public void testHasAppEngineFacet_withoutFacet() {
     IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexWarFacet.ID);
-    when(facetedProject.hasProjectFacet(projectFacet)).thenReturn(false);
+    when(mockFacetedProject.hasProjectFacet(projectFacet)).thenReturn(false);
 
-    Assert.assertFalse(AppEngineFlexWarFacet.hasFacet(facetedProject));
+    Assert.assertFalse(AppEngineFlexWarFacet.hasFacet(mockFacetedProject));
   }
 
   @Test

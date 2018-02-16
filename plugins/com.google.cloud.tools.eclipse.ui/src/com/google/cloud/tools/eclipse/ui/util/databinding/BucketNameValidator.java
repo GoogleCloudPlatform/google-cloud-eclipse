@@ -65,7 +65,7 @@ public class BucketNameValidator implements IValidator {
     }
   }
 
-  private IStatus allComponentsLengthAreValid(String value) {
+  private static IStatus allComponentsLengthAreValid(String value) {
     String[] components = value.split("\\.");
     for (String component : components) {
       if (component.length() == 0 || component.length() > 63) {

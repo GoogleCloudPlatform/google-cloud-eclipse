@@ -1,11 +1,12 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Tests for Cloud Tools for Eclipse User Bug Reporting
+Fragment-Host: com.google.cloud.tools.eclipse.bugreport
+Bundle-Name: %pluginName
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.bugreport.test
 Bundle-Version: 0.1.0.qualifier
-Bundle-Vendor: Google Inc.
+Bundle-Vendor: %providerName
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Fragment-Host: com.google.cloud.tools.eclipse.bugreport
+Bundle-Localization: plugin
 Require-Bundle: com.google.cloud.tools.eclipse.test.dependencies
 Import-Package: com.google.cloud.tools.appengine.cloudsdk.serialization;version="0.4.2",
  com.google.cloud.tools.eclipse.test.util

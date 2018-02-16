@@ -1,9 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Cloud Tools for Eclipse User Interface for the Cloud SDK
+Bundle-Name: %pluginName
+Automatic-Module-Name: com.google.cloud.tools.eclipse.sdk.ui
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.sdk.ui;singleton:=true
 Bundle-Version: 0.1.0.qualifier
-Bundle-Vendor: Google Inc.
+Bundle-Vendor: %providerName
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
@@ -16,6 +17,7 @@ Require-Bundle: org.eclipse.ui;bundle-version="3.107.0",
  com.google.cloud.tools.eclipse.preferences
 Import-Package: com.google.cloud.tools.eclipse.ui.util,
  com.google.common.annotations;version="[20.0.0,21.0.0)",
+ org.eclipse.core.runtime.jobs,
  org.eclipse.osgi.util;version="1.1.0",
  org.eclipse.ui.console,
  org.osgi.framework;version="1.8.0"

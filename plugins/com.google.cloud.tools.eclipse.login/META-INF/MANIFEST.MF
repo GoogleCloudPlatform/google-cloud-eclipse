@@ -1,12 +1,13 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Cloud Tools for Eclipse Login Support
+Bundle-Name: %pluginName
+Automatic-Module-Name: com.google.cloud.tools.eclipse.login
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.login;singleton:=true
 Bundle-Version: 0.1.0.qualifier
-Bundle-Vendor: Google Inc.
-Bundle-Localization: plugin
+Bundle-Vendor: %providerName
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
+Bundle-Localization: plugin
 Service-Component: OSGI-INF/login.xml
 Require-Bundle: com.google.gson;bundle-version="[2.8.2,3.0)",
  com.google.guava;bundle-version="[20.0.0,21.0.0)",
