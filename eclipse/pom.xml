@@ -16,6 +16,7 @@
   <modules>
     <module>neon</module>
     <module>oxygen</module>
+    <module>photon</module>
     <module>ide-target-platform</module>
   </modules>
 

@@ -20,6 +20,7 @@ env:
     # JAVA_RUNTIME specifies the execution runtime for tests; must match an <id> in .travisci/toolchains.xml
     - JAVA_RUNTIME=JavaSE-1.8 ECLIPSE_TARGET=neon
     - JAVA_RUNTIME=JavaSE-1.8 MAVEN_FLAGS=-Pjacoco
+    - JAVA_RUNTIME=JavaSE-1.8 ECLIPSE_TARGET=photon MAVEN_FLAGS=-Pjacoco
   global:
     - CLOUD_SDK_HOME=$HOME/google-cloud-sdk
     - PATH=$CLOUD_SDK_HOME/bin:$PATH
