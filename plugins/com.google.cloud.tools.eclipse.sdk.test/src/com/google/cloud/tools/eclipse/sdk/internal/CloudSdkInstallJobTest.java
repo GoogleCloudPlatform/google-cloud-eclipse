@@ -39,6 +39,7 @@ import com.google.cloud.tools.managedcloudsdk.install.SdkInstaller;
 import com.google.cloud.tools.managedcloudsdk.install.SdkInstallerException;
 import com.google.cloud.tools.managedcloudsdk.install.UnknownArchiveTypeException;
 import java.io.IOException;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.console.MessageConsoleStream;
@@ -67,19 +68,19 @@ public class CloudSdkInstallJobTest {
 
   @Test
   public void testBelongsTo() {
-    Job installJob = new CloudSdkInstallJob(null);
+    Job installJob = new CloudSdkInstallJob(null, new ReentrantReadWriteLock());
     assertTrue(installJob.belongsTo(CloudSdkInstallJob.CLOUD_SDK_MODIFY_JOB_FAMILY));
   }
 
   @Test
   public void testMutexRuleSet() {
-    Job installJob = new CloudSdkInstallJob(null);
+    Job installJob = new CloudSdkInstallJob(null, new ReentrantReadWriteLock());
     assertEquals(CloudSdkInstallJob.MUTEX_RULE, installJob.getRule());
   }
 
   @Test
   public void testGetManagedCloudSdk() throws UnsupportedOsException {
-    assertNotNull(new CloudSdkInstallJob(null).getManagedCloudSdk());
+    assertNotNull(new CloudSdkInstallJob(null, new ReentrantReadWriteLock()).getManagedCloudSdk());
   }
 
   @Test
@@ -178,5 +179,13 @@ public class CloudSdkInstallJobTest {
       Thread.sleep(10);
     }
     return job;
+  }
+
+  @Test
+  public void testRun() throws InterruptedException {
+    Job job = new CloudSdkInstallJob(null, new ReentrantReadWriteLock());
+    job.schedule();
+    job.join();
+    assertTrue(job.getResult().isOK());
   }
 }

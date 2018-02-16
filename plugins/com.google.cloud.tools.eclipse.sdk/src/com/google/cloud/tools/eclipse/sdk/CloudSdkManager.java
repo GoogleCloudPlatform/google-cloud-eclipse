@@ -17,12 +17,17 @@
 package com.google.cloud.tools.eclipse.sdk;
 
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkInstallJob;
+import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkModifyJob;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
 import com.google.common.annotations.VisibleForTesting;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.ui.console.MessageConsoleStream;
@@ -51,6 +56,55 @@ public class CloudSdkManager {
     return false;
   }
 
+  // readers = using SDK, writers = modifying SDK
+  @VisibleForTesting
+  static final ReadWriteLock modifyLock = new ReentrantReadWriteLock();
+
+  /**
+   * Prevents potential future SDK auto-install or auto-update functionality to allow safely using
+   * the managed Cloud SDK for some period of time. Blocks if an install or update is in progress.
+   * Callers must call {@code CloudSdkManager#allowModifyingSdk} eventually to lift the suspension.
+   * Any callers that intend to use {@code CloudSdk} must always call this before staring work, even
+   * if the Cloud SDK preferences are configured not to auto-managed the SDK.
+   *
+   * <p>Must not be called from the UI thread, because the method can block.
+   *
+   * @see CloudSdkManager#allowModifyingSdk
+   */
+  public static void preventModifyingSdk() throws InterruptedException {
+    do {
+      IJobManager jobManager = Job.getJobManager();
+      // The join is to improve UI reporting of blocked jobs. Most of the waiting should be here.
+      jobManager.join(CloudSdkModifyJob.CLOUD_SDK_MODIFY_JOB_FAMILY, null /* no monitor */);
+    } while (!modifyLock.readLock().tryLock(10, TimeUnit.MILLISECONDS));
+    // We have acquired the read lock; all further install/update should be blocked, while others
+    // can still grab a read lock and use the Cloud SDK.
+  }
+
+  /**
+   * Allows future SDK auto-install or auto-update temporarily prevented by {@code
+   * CloudSdkManager#preventModifyingSdk}.
+   *
+   * @see CloudSdkManager#preventModifyingSdk
+   */
+  public static void allowModifyingSdk() {
+    modifyLock.readLock().unlock();
+  }
+  /**
+   * Triggers the installation of a Cloud SDK, if the preferences are configured to auto-manage the
+   * SDK.
+   */
+  public static void installManagedSdkAsync() {
+    if (isManagedSdkFeatureEnabled()) {
+      if (CloudSdkPreferences.isAutoManaging()) {
+        // Keep installation failure as ERROR so that failures are reported
+        Job installJob = new CloudSdkInstallJob(null /* no console output */, modifyLock);
+        installJob.setUser(false);
+        installJob.schedule();
+      }
+    }
+  }
+
   /**
    * Installs a Cloud SDK, if the preferences are configured to auto-manage the SDK. Blocks callers
    * 1) if the managed SDK is being installed concurrently by others; and 2) until the installation
@@ -65,7 +119,7 @@ public class CloudSdkManager {
       if (CloudSdkPreferences.isAutoManaging()) {
         // We don't check if the Cloud SDK installed but always schedule the install job; such check
         // may pass while the SDK is being installed and in an incomplete state.
-        CloudSdkInstallJob installJob = new CloudSdkInstallJob(consoleStream);
+        CloudSdkInstallJob installJob = new CloudSdkInstallJob(consoleStream, modifyLock);
         // Mark installation failure as non-ERROR to avoid job failure reporting dialogs from the
         // overly helpful Eclipse UI ProgressManager
         installJob.setFailureSeverity(IStatus.WARNING);
@@ -86,7 +140,9 @@ public class CloudSdkManager {
   }
 
   @VisibleForTesting
-  static IStatus runInstallJob(MessageConsoleStream consoleStream, CloudSdkInstallJob installJob,
+  static IStatus runInstallJob(
+      MessageConsoleStream consoleStream,
+      CloudSdkModifyJob installJob,
       IProgressMonitor cancelMonitor) {
     installJob.schedule();
 
@@ -103,12 +159,13 @@ public class CloudSdkManager {
     }
   }
 
-  public static void installManagedSdkAsync() {
+  public static void updateManagedSdkAsync() {
     if (isManagedSdkFeatureEnabled()) {
       if (CloudSdkPreferences.isAutoManaging()) {
-        Job installJob = new CloudSdkInstallJob(null /* no console output */);
-        installJob.setUser(false);
-        installJob.schedule();
+        // TODO(chanseok): to be implemented: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2753
+        // CloudSdkUpdateJob udpateJob =
+        //    new CloudSdkUpdateJob(null /* no console output */, modifyLock);
+        // updateJob.schedule();
       }
     }
   }

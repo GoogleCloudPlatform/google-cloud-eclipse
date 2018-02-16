@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.sdk;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkInstallJob;
 import com.google.cloud.tools.managedcloudsdk.ManagedCloudSdk;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
@@ -29,13 +30,13 @@ public class MockedSdkInstallJob extends CloudSdkInstallJob {
   private final boolean blockBeforeExit;
 
   public MockedSdkInstallJob(boolean blockBeforeExit, ManagedCloudSdk managedCloudSdk) {
-    super(null);
+    super(null, new ReentrantReadWriteLock());
     this.blockBeforeExit = blockBeforeExit;
     this.managedCloudSdk = managedCloudSdk;
   }
 
   @Override
-  protected IStatus run(IProgressMonitor monitor) {
+  protected IStatus modifySdk(IProgressMonitor monitor) {
     IStatus status = super.run(monitor);
     if (blockBeforeExit) {
       blocker.acquireUninterruptibly();

@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.sdk.internal;
 
 import com.google.cloud.tools.eclipse.sdk.MessageConsoleWriterListener;
 import com.google.cloud.tools.eclipse.sdk.Messages;
-import com.google.cloud.tools.eclipse.util.jobs.MutexRule;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.cloud.tools.managedcloudsdk.ManagedCloudSdk;
 import com.google.cloud.tools.managedcloudsdk.ManagedSdkVerificationException;
@@ -31,48 +30,30 @@ import com.google.cloud.tools.managedcloudsdk.components.SdkComponentInstaller;
 import com.google.cloud.tools.managedcloudsdk.install.SdkInstaller;
 import com.google.cloud.tools.managedcloudsdk.install.SdkInstallerException;
 import com.google.cloud.tools.managedcloudsdk.install.UnknownArchiveTypeException;
-import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.nio.channels.ClosedByInterruptException;
+import java.util.concurrent.locks.ReadWriteLock;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.console.MessageConsoleStream;
 
-public class CloudSdkInstallJob extends Job {
+public class CloudSdkInstallJob extends CloudSdkModifyJob {
 
-  public static final Object CLOUD_SDK_MODIFY_JOB_FAMILY = new Object();
-
-  /** Scheduling rule to prevent running {@code CloudSdkInstallJob} concurrently. */
-  @VisibleForTesting
-  static final MutexRule MUTEX_RULE =
-      new MutexRule("for " + CloudSdkInstallJob.class); // $NON-NLS-1$
-
-  /** The console stream for reporting installation output; may be {@code null}. */
-  private final MessageConsoleStream consoleStream;
+  public CloudSdkInstallJob(MessageConsoleStream consoleStream, ReadWriteLock cloudSdkLock) {
+    super(Messages.getString("installJobName"), consoleStream, cloudSdkLock); // $NON-NLS-1$
+  }
 
   /** The severity reported on installation failure. */
   private int failureSeverity = IStatus.ERROR;
 
-  public CloudSdkInstallJob(MessageConsoleStream consoleStream) {
-    super(Messages.getString("installing.cloud.sdk")); // $NON-NLS-1$
-    this.consoleStream = consoleStream;
-    setRule(MUTEX_RULE);
-  }
-
-  @Override
-  public boolean belongsTo(Object family) {
-    return super.belongsTo(family) || family == CLOUD_SDK_MODIFY_JOB_FAMILY;
-  }
-
   /**
-   * Perform the installation and configuration of the managd Cloud SDK. Any errors are returned as
+   * Perform the installation and configuration of the managed Cloud SDK. Any errors are returned as
    * {@link IStatus#WARNING} to avoid the Eclipse UI ProgressManager reporting the error with no
    * context (e.g., that deployment fails as the Cloud SDK could not be installed).
    */
   @Override
-  protected IStatus run(IProgressMonitor monitor) {
+  protected IStatus modifySdk(IProgressMonitor monitor) {
     if (monitor.isCanceled()) {
       return Status.CANCEL_STATUS;
     }
@@ -110,30 +91,6 @@ public class CloudSdkInstallJob extends Job {
     } catch (UnknownArchiveTypeException e) {
       throw new IllegalStateException(
           "The next appengine-plugins-core release will remove this.", e); //$NON-NLS-1$
-    }
-  }
-
-  private void subTask(IProgressMonitor monitor, String description) {
-    monitor.subTask(description);
-    if (consoleStream != null) {
-      // make output headers distinguishable on the console
-      String section = String.format("[%s]", description); // $NON-NLS-1$
-      consoleStream.println(section);
-    }
-  }
-
-  @VisibleForTesting
-  protected ManagedCloudSdk getManagedCloudSdk() throws UnsupportedOsException {
-    return ManagedCloudSdk.newManagedSdk();
-  }
-
-  @Override
-  protected void canceling() {
-    // By the design of the appengine-plugins-core SDK downloader, cancellation support is
-    // implemented through the Java thread interruption facility.
-    Thread jobThread = getThread();
-    if (jobThread != null) {
-      jobThread.interrupt();
     }
   }
 
