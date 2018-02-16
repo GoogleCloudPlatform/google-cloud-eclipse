@@ -32,6 +32,6 @@ call gcloud.cmd components install app-engine-java --quiet
 mvn -V -B --settings kokoro\windows\m2-settings.xml ^
     -N io.takari:maven:wrapper -Dmaven=3.5.0
 mvnw.cmd -V -B --settings kokoro\windows\m2-settings.xml ^
-         --fail-at-end -Ptravis -Declipse.target=oxygen verify
+         --fail-at-end -Ptravis verify
 
 exit /b %ERRORLEVEL%
