@@ -33,12 +33,15 @@ import com.google.cloud.tools.managedcloudsdk.install.UnknownArchiveTypeExceptio
 import java.io.IOException;
 import java.nio.channels.ClosedByInterruptException;
 import java.util.concurrent.locks.ReadWriteLock;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.console.MessageConsoleStream;
 
 public class CloudSdkInstallJob extends CloudSdkModifyJob {
+  private static final Logger logger = Logger.getLogger(CloudSdkInstallJob.class.getName());
 
   public CloudSdkInstallJob(MessageConsoleStream consoleStream, ReadWriteLock cloudSdkLock) {
     super(Messages.getString("installing.cloud.sdk"), consoleStream, cloudSdkLock); // $NON-NLS-1$
@@ -67,6 +70,8 @@ public class CloudSdkInstallJob extends CloudSdkModifyJob {
         subTask(monitor, Messages.getString("installing.cloud.sdk")); // $NON-NLS-1$
         SdkInstaller installer = managedSdk.newInstaller();
         installer.install(new MessageConsoleWriterListener(consoleStream));
+        String version = getVersion(managedSdk.getSdkHome());
+        logger.info("Installed Google Cloud SDK version " + version);
       }
       monitor.worked(10);
 
@@ -75,17 +80,21 @@ public class CloudSdkInstallJob extends CloudSdkModifyJob {
         SdkComponentInstaller componentInstaller = managedSdk.newComponentInstaller();
         componentInstaller.installComponent(
             SdkComponent.APP_ENGINE_JAVA, new MessageConsoleWriterListener(consoleStream));
+        logger.info("Installed Google Cloud SDK component: " + SdkComponent.APP_ENGINE_JAVA.name());
       }
       monitor.worked(10);
+
       return Status.OK_STATUS;
 
     } catch (InterruptedException | ClosedByInterruptException e) {
       return Status.CANCEL_STATUS;
     } catch (IOException | ManagedSdkVerificationException | SdkInstallerException |
         CommandExecutionException | CommandExitException e) {
+      logger.log(Level.WARNING, "Could not install Cloud SDK", e);
       String message = Messages.getString("installing.cloud.sdk.failed");
       return StatusUtil.create(failureSeverity, this, message, e); // $NON-NLS-1$
     } catch (UnsupportedOsException e) {
+      logger.log(Level.WARNING, "Could not install Cloud SDK", e);
       String message = Messages.getString("unsupported.os.installation");
       return StatusUtil.create(failureSeverity, this, message, e); // $NON-NLS-1$
 

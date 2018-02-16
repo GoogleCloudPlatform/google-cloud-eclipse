@@ -22,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -119,6 +120,7 @@ public class CloudSdkUpdateJobTest {
     assertTrue(job.getResult().isOK());
     verify(managedCloudSdk).isInstalled();
     verify(managedCloudSdk).isUpToDate();
+    verify(managedCloudSdk).getSdkHome(); // used to log version
     verify(managedCloudSdk, never()).newUpdater();
     verifyNoMoreInteractions(managedCloudSdk);
   }
@@ -140,6 +142,7 @@ public class CloudSdkUpdateJobTest {
     verify(managedCloudSdk).isUpToDate();
     verify(managedCloudSdk).newUpdater();
     verify(sdkUpdater).update(any(MessageListener.class));
+    verify(managedCloudSdk, times(2)).getSdkHome(); // used to log old and new versions
     verifyNoMoreInteractions(managedCloudSdk);
   }
 
@@ -163,6 +166,7 @@ public class CloudSdkUpdateJobTest {
     verify(managedCloudSdk).isUpToDate();
     verify(managedCloudSdk).newUpdater();
     verify(sdkUpdater).update(any(MessageListener.class));
+    verify(managedCloudSdk).getSdkHome(); // used to obtain old version
     verifyNoMoreInteractions(managedCloudSdk);
   }
 

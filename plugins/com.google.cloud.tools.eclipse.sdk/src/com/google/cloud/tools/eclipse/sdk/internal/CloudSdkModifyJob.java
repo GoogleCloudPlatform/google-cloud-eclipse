@@ -16,12 +16,14 @@
 
 package com.google.cloud.tools.eclipse.sdk.internal;
 
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.sdk.Messages;
 import com.google.cloud.tools.eclipse.util.jobs.MutexRule;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.cloud.tools.managedcloudsdk.ManagedCloudSdk;
 import com.google.cloud.tools.managedcloudsdk.UnsupportedOsException;
 import com.google.common.annotations.VisibleForTesting;
+import java.nio.file.Path;
 import java.util.concurrent.locks.ReadWriteLock;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IProgressMonitorWithBlocking;
@@ -78,6 +80,12 @@ public abstract class CloudSdkModifyJob extends Job {
   }
 
   protected abstract IStatus modifySdk(IProgressMonitor monitor);
+
+  /** Retrieve the version of the Cloud SDK at the provided location. */
+  protected static String getVersion(Path sdkPath) {
+    CloudSdk sdk = new CloudSdk.Builder().sdkPath(sdkPath).build();
+    return sdk.getVersion().toString();
+  }
 
   @VisibleForTesting
   static void markBlocked(IProgressMonitor monitor) {

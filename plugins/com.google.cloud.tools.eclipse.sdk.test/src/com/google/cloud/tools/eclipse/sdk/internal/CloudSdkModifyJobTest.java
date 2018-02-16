@@ -123,9 +123,9 @@ public class CloudSdkModifyJobTest {
     boolean locked = true;
 
     try {
-      FakeModifyJob installJob = new FakeModifyJob(consoleStream, true /* blockOnStart */);
-      installJob.schedule();
-      while (installJob.getState() != Job.RUNNING) {
+      FakeModifyJob job = new FakeModifyJob(consoleStream, true /* blockOnStart */);
+      job.schedule();
+      while (job.getState() != Job.RUNNING) {
         Thread.sleep(50);
       }
       // Incomplete test, but if it ever fails, something is surely broken.
@@ -133,8 +133,8 @@ public class CloudSdkModifyJobTest {
 
       readWriteLock.readLock().unlock();
       locked = false;
-      installJob.unblock();
-      installJob.join();
+      job.unblock();
+      job.join();
     } finally {
       if (locked) {
         readWriteLock.readLock().unlock();

@@ -27,6 +27,7 @@ import com.google.cloud.tools.managedcloudsdk.command.CommandExecutionException;
 import com.google.cloud.tools.managedcloudsdk.command.CommandExitException;
 import com.google.cloud.tools.managedcloudsdk.update.SdkUpdater;
 import java.util.concurrent.locks.ReadWriteLock;
+import java.util.logging.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -34,6 +35,7 @@ import org.eclipse.ui.console.MessageConsoleStream;
 
 /** Updates the Managed Google Cloud SDK, if installed. */
 public class CloudSdkUpdateJob extends CloudSdkModifyJob {
+  private static final Logger logger = Logger.getLogger(CloudSdkUpdateJob.class.getName());
 
   public CloudSdkUpdateJob(MessageConsoleStream consoleStream, ReadWriteLock cloudSdkLock) {
     super(Messages.getString("updating.cloud.sdk"), consoleStream, cloudSdkLock); // $NON-NLS-1$
@@ -56,13 +58,20 @@ public class CloudSdkUpdateJob extends CloudSdkModifyJob {
     try {
       ManagedCloudSdk managedSdk = getManagedCloudSdk();
       if (!managedSdk.isInstalled()) {
+        logger.info("Google Cloud SDK is not installed");
         return StatusUtil.create(
             failureSeverity, this, Messages.getString("cloud.sdk.not.installed"));
       } else if (!managedSdk.isUpToDate()) {
         subTask(monitor, Messages.getString("updating.cloud.sdk")); // $NON-NLS-1$
+        String oldVersion = getVersion(managedSdk.getSdkHome());
         SdkUpdater updater = managedSdk.newUpdater();
         updater.update(new MessageConsoleWriterListener(consoleStream));
         monitor.worked(10);
+        String newVersion = getVersion(managedSdk.getSdkHome());
+        logger.info("Managed Google Cloud SDK updated from " + oldVersion + " to " + newVersion);
+      } else {
+        logger.info(
+            "Managed Google Cloud SDK remains at version " + getVersion(managedSdk.getSdkHome()));
       }
       return Status.OK_STATUS;
 
