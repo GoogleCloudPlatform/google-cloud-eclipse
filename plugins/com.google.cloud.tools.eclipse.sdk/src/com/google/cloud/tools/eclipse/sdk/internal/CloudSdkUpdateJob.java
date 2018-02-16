@@ -27,6 +27,7 @@ import com.google.cloud.tools.managedcloudsdk.command.CommandExecutionException;
 import com.google.cloud.tools.managedcloudsdk.command.CommandExitException;
 import com.google.cloud.tools.managedcloudsdk.update.SdkUpdater;
 import java.util.concurrent.locks.ReadWriteLock;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -78,9 +79,11 @@ public class CloudSdkUpdateJob extends CloudSdkModifyJob {
     } catch (InterruptedException e) {
       return Status.CANCEL_STATUS;
     } catch (ManagedSdkVerificationException | CommandExecutionException | CommandExitException e) {
+      logger.log(Level.WARNING, "Could not update Cloud SDK", e);
       String message = Messages.getString("installing.cloud.sdk.failed");
       return StatusUtil.create(failureSeverity, this, message, e); // $NON-NLS-1$
     } catch (UnsupportedOsException e) {
+      logger.log(Level.WARNING, "Could not update Cloud SDK", e);
       String message = Messages.getString("unsupported.os.installation");
       return StatusUtil.create(failureSeverity, this, message, e); // $NON-NLS-1$
 
