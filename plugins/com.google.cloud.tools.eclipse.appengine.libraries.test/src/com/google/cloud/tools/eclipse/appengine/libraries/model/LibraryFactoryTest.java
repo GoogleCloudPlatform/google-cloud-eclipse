@@ -109,9 +109,8 @@ public class LibraryFactoryTest {
 
   @Test
   public void testCreate_nonLibrary() {
-    IConfigurationElement configuration = Mockito.mock(IConfigurationElement.class);
     try {
-      LibraryFactory.create(configuration);
+      LibraryFactory.create(Mockito.mock(IConfigurationElement.class));
       Assert.fail();
     } catch (LibraryFactoryException ex) {
       Assert.assertNotNull(ex.getMessage());

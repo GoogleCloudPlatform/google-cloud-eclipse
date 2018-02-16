@@ -47,7 +47,7 @@ public class AppEngineFlexJarFacetTest {
   @Rule public TestProjectCreator javaProjectCreator = new TestProjectCreator().withFacetVersions(
       JavaFacet.VERSION_1_7);
 
-  @Mock private IFacetedProject facetedProject;
+  @Mock private IFacetedProject mockFacetedProject;
 
   @Test
   public void testFlexFacetExists() {
@@ -63,17 +63,17 @@ public class AppEngineFlexJarFacetTest {
   @Test
   public void testHasAppEngineFacet_withFacet() {
     IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexJarFacet.ID);
-    when(facetedProject.hasProjectFacet(projectFacet)).thenReturn(true);
+    when(mockFacetedProject.hasProjectFacet(projectFacet)).thenReturn(true);
 
-    Assert.assertTrue(AppEngineFlexJarFacet.hasFacet(facetedProject));
+    Assert.assertTrue(AppEngineFlexJarFacet.hasFacet(mockFacetedProject));
   }
 
   @Test
   public void testHasAppEngineFacet_withoutFacet() {
     IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexJarFacet.ID);
-    when(facetedProject.hasProjectFacet(projectFacet)).thenReturn(false);
+    when(mockFacetedProject.hasProjectFacet(projectFacet)).thenReturn(false);
 
-    Assert.assertFalse(AppEngineFlexJarFacet.hasFacet(facetedProject));
+    Assert.assertFalse(AppEngineFlexJarFacet.hasFacet(mockFacetedProject));
   }
 
   @Test

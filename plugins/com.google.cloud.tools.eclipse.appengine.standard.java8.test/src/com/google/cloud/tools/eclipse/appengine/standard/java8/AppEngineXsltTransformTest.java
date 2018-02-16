@@ -142,8 +142,7 @@ public class AppEngineXsltTransformTest {
     assertNull(getRuntimeValue(transformed));
   }
 
-  private Document transform(String templateFile, String inputValue) {
-    InputStream transformed = null;
+  private static Document transform(String templateFile, String inputValue) {
     try {
       URL xslPath = AppEngineXsltTransformTest.class.getResource(templateFile);
       if (xslPath == null) {
@@ -153,21 +152,16 @@ public class AppEngineXsltTransformTest {
       }
       InputStream documentStream =
           new ByteArrayInputStream(inputValue.getBytes(StandardCharsets.UTF_8));
-      transformed = Xslt.applyXslt(documentStream, xslPath.openStream());
-      DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-      builderFactory.setNamespaceAware(true);
-      DocumentBuilder builder = builderFactory.newDocumentBuilder();
-      return builder.parse(transformed);
+      try (InputStream xslStream = xslPath.openStream();
+          InputStream transformed = Xslt.applyXslt(documentStream, xslStream)) {
+        DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+        builderFactory.setNamespaceAware(true);
+        DocumentBuilder builder = builderFactory.newDocumentBuilder();
+        return builder.parse(transformed);
+      }
     } catch (IOException | TransformerException | ParserConfigurationException | SAXException ex) {
       // these aren't interesting for the test
       throw new RuntimeException(ex);
-    } finally {
-      if (transformed != null) {
-        try {
-          transformed.close();
-        } catch (IOException ex) {
-        } 
-      }
     }
 
   }

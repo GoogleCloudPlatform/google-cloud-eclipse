@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.sdk.ui;
+package com.google.cloud.tools.eclipse.sdk.ui.preferences;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -26,7 +26,6 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
-import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPreferenceArea;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import org.eclipse.core.runtime.IStatus;
@@ -94,7 +93,7 @@ public class CloudSdkPreferenceAreaTest {
     area.createContents(shell);
     area.load();
 
-    useLocalSdk = CompositeUtil.findButton(shell, "Use local SDK");
+    useLocalSdk = CompositeUtil.findButton(shell, "Choose SDK");
     sdkLocation = CompositeUtil.findControlAfterLabel(shell, Text.class, "&SDK location:");
   }
 

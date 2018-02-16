@@ -96,7 +96,7 @@ public class AppEngineStandardFacetChangeListener implements IFacetedProjectList
    * Add our {@code appengine-web.xml} builder that monitors for changes to the {@code <runtime>}
    * element.
    */
-  private void addAppEngineWebBuilder(IProject project) {
+  private static void addAppEngineWebBuilder(IProject project) {
     try {
       IProjectDescription projectDescription = project.getDescription();
       ICommand[] commands = projectDescription.getBuildSpec();
@@ -124,7 +124,7 @@ public class AppEngineStandardFacetChangeListener implements IFacetedProjectList
    * Remove our {@code appengine-web.xml} builder that monitors for changes to the {@code <runtime>}
    * element.
    */
-  private void removeAppEngineWebBuilder(IProject project) {
+  private static void removeAppEngineWebBuilder(IProject project) {
     try {
       IProjectDescription projectDescription = project.getDescription();
       ICommand[] commands = projectDescription.getBuildSpec();
@@ -149,7 +149,7 @@ public class AppEngineStandardFacetChangeListener implements IFacetedProjectList
    * Find the <code>appengine-web.xml</code> file.
    * @return the file or {@code null} if not found
    */
-  private IFile findDescriptor(IFacetedProject project) {
+  private static IFile findDescriptor(IFacetedProject project) {
     IFile descriptor =
         WebProjectUtil.findInWebInf(project.getProject(), new Path("appengine-web.xml"));
     return descriptor;

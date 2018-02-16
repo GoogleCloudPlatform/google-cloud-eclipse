@@ -26,6 +26,7 @@ import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.appengine.localserver.PreferencesInitializer;
 import com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsole;
 import com.google.cloud.tools.eclipse.appengine.localserver.ui.StaleResourcesStatusHandler;
+import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
@@ -96,6 +97,7 @@ import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
+import org.eclipse.ui.statushandlers.StatusManager;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerListener;
@@ -120,20 +122,26 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     return value != null ? value : nullValue;
   }
 
-  private static void validateCloudSdk() throws CoreException  {
+  private static IStatus validateCloudSdk(IProgressMonitor monitor) {
+    // ensure we have a Cloud SDK; no-op if not configured to use managed sdk
+    IStatus status = CloudSdkManager.installManagedSdk(null, monitor);
+    if (!status.isOK()) {
+      return status;
+    }
     try {
       CloudSdk cloudSdk = new CloudSdk.Builder().build();
       cloudSdk.validateCloudSdk();
+      return Status.OK_STATUS;
     } catch (CloudSdkNotFoundException ex) {
-      String detailMessage = Messages.getString("cloudsdk.not.configured"); //$NON-NLS-1$
-      Status status = new Status(IStatus.ERROR,
-          "com.google.cloud.tools.eclipse.appengine.localserver", detailMessage, ex); //$NON-NLS-1$
-      throw new CoreException(status);
+      return StatusUtil.error(
+          LocalAppEngineServerLaunchConfigurationDelegate.class,
+          Messages.getString("cloudsdk.not.configured"), // $NON-NLS-1$
+          ex);
     } catch (CloudSdkOutOfDateException ex) {
-      String detailMessage = Messages.getString("cloudsdk.out.of.date"); //$NON-NLS-1$
-      Status status = new Status(IStatus.ERROR,
-          "com.google.cloud.tools.eclipse.appengine.deploy.ui", detailMessage); //$NON-NLS-1$
-      throw new CoreException(status);
+      return StatusUtil.error(
+          LocalAppEngineServerLaunchConfigurationDelegate.class,
+          Messages.getString("cloudsdk.out.of.date"), // $NON-NLS-1$
+          ex);
     }
   }
 
@@ -149,8 +157,15 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   @Override
   public boolean finalLaunchCheck(ILaunchConfiguration configuration, String mode,
       IProgressMonitor monitor) throws CoreException {
-    SubMonitor progress = SubMonitor.convert(monitor, 40);
-    if (!super.finalLaunchCheck(configuration, mode, progress.newChild(20))) {
+    SubMonitor progress = SubMonitor.convert(monitor, 50);
+    if (!super.finalLaunchCheck(configuration, mode, progress.newChild(10))) {
+      return false;
+    }
+    IStatus status = validateCloudSdk(progress.newChild(20));
+    if (!status.isOK()) {
+      // Throwing a CoreException will result in the ILaunch hanging around in
+      // an invalid state
+      StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.LOG);
       return false;
     }
 
@@ -180,7 +195,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
             monitor.setCanceled(true);
             return false;
           }
-          return true;
         }
       }
     }
@@ -427,8 +441,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       IProgressMonitor monitor) throws CoreException {
     AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_LOCAL_SERVER,
         AnalyticsEvents.APP_ENGINE_LOCAL_SERVER_MODE, mode);
-
-    validateCloudSdk();
 
     IServer server = ServerUtil.getServer(configuration);
     if (server == null) {
