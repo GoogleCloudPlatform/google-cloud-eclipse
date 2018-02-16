@@ -92,7 +92,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       }
     });
     
-    sdkVersionLabel = new Label(parent, SWT.LEFT);
+    sdkVersionLabel = new Label(parent, SWT.LEAD);
     sdkVersionLabel.setFont(contents.getFont());
     sdkVersionLabel.setText(Messages.getString("SdkVersion", "Unset"));
     
