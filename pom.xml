@@ -418,12 +418,12 @@
 
     <profile>
       <id>build-eclipse-oxygen</id>
-      <activation>		
-        <!-- Default target if no eclipse.target specified. -->		
-        <property>		
-          <name>!eclipse.target</name>		
-          <!-- when no longer the default: <name>eclipse.target</name> <value>oxygen</value> -->		
-        </property>		
+      <activation>
+        <!-- Default target if no eclipse.target specified. -->
+        <property>
+          <name>!eclipse.target</name>
+          <!-- when no longer the default: <name>eclipse.target</name> <value>oxygen</value> -->
+        </property>
       </activation>
       <properties>
          <jettyMinVersion>9.3</jettyMinVersion>
