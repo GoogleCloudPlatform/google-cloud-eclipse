@@ -37,7 +37,7 @@ public class MockedSdkInstallJob extends CloudSdkInstallJob {
 
   @Override
   protected IStatus modifySdk(IProgressMonitor monitor) {
-    IStatus status = super.run(monitor);
+    IStatus status = super.modifySdk(monitor);
     if (blockBeforeExit) {
       blocker.acquireUninterruptibly();
     }
