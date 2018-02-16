@@ -30,6 +30,10 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.console.MessageConsoleStream;
 
+/**
+ * A base class for any jobs that seek to modify the managed Google Cloud SDK, ensuring that
+ * modification changes are serialized.
+ */
 public abstract class CloudSdkModifyJob extends Job {
 
   public static final Object CLOUD_SDK_MODIFY_JOB_FAMILY = new Object();
@@ -37,7 +41,7 @@ public abstract class CloudSdkModifyJob extends Job {
   /** Scheduling rule to prevent running {@code CloudSdkModifyJob} concurrently. */
   @VisibleForTesting
   static final MutexRule MUTEX_RULE =
-      new MutexRule("for " + CloudSdkInstallJob.class); // $NON-NLS-1$
+      new MutexRule("for " + CloudSdkModifyJob.class); // $NON-NLS-1$
 
   protected final MessageConsoleStream consoleStream;
   private final ReadWriteLock cloudSdkLock;
@@ -67,9 +71,6 @@ public abstract class CloudSdkModifyJob extends Job {
     }
 
     try {
-      if (consoleStream != null) {
-        consoleStream.println(Messages.getString("startModifying")); //$NON-NLS-1$
-      }
       return modifySdk(monitor);
     } finally {
       cloudSdkLock.writeLock().unlock();
