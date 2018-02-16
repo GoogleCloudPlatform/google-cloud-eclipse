@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.sdk;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkInstallJob;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkModifyJob;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
+import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkUpdateJob;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -90,6 +91,7 @@ public class CloudSdkManager {
   public static void allowModifyingSdk() {
     modifyLock.readLock().unlock();
   }
+
   /**
    * Triggers the installation of a Cloud SDK, if the preferences are configured to auto-manage the
    * SDK.
@@ -139,6 +141,21 @@ public class CloudSdkManager {
     return Status.OK_STATUS;
   }
 
+  /**
+   * Triggers the update of a managed Cloud SDK, if the preferences are configured to auto-manage
+   * the SDK.
+   */
+  public static void updateManagedSdkAsync() {
+    if (isManagedSdkFeatureEnabled()) {
+      if (CloudSdkPreferences.isAutoManaging()) {
+        // Keep installation failure as ERROR so that failures are reported
+        Job updateJob = new CloudSdkUpdateJob(null /* no console output */, modifyLock);
+        updateJob.setUser(false);
+        updateJob.schedule();
+      }
+    }
+  }
+
   @VisibleForTesting
   static IStatus runInstallJob(
       MessageConsoleStream consoleStream,
@@ -156,17 +173,6 @@ public class CloudSdkManager {
       installJob.cancel();
       // Could wait to verify job termination, but doesn't seem necessary.
       return Status.CANCEL_STATUS;
-    }
-  }
-
-  public static void updateManagedSdkAsync() {
-    if (isManagedSdkFeatureEnabled()) {
-      if (CloudSdkPreferences.isAutoManaging()) {
-        // TODO(chanseok): to be implemented: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2753
-        // CloudSdkUpdateJob udpateJob =
-        //    new CloudSdkUpdateJob(null /* no console output */, modifyLock);
-        // updateJob.schedule();
-      }
     }
   }
 }

@@ -21,7 +21,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -52,7 +51,7 @@ public class CloudSdkModifyJobTest {
 
   @Before
   public void setUp() {
-    installJob = new FakeInstallJob(consoleStream, false /* blockOnStart */);
+    installJob = new FakeModifyJob(consoleStream, false /* blockOnStart */);
   }
 
   @After
@@ -88,15 +87,6 @@ public class CloudSdkModifyJobTest {
   }
 
   @Test
-  public void testRun_consoleStreamOutput() throws InterruptedException {
-    installJob.schedule();
-    installJob.join();
-
-    verify(consoleStream).println(
-        "Installing/upgrading the Cloud SDK... (may take several minutes)");
-  }
-
-  @Test
   public void testRun_unlocksAfterReturn() throws InterruptedException {
     installJob.schedule();
     installJob.join();
@@ -109,8 +99,8 @@ public class CloudSdkModifyJobTest {
 
   @Test
   public void testRun_mutualExclusion() throws InterruptedException {
-    FakeInstallJob job1 = new FakeInstallJob(null, true /* blockOnStart */);
-    FakeInstallJob job2 = new FakeInstallJob(null, true /* blockOnStart */);
+    FakeModifyJob job1 = new FakeModifyJob(null, true /* blockOnStart */);
+    FakeModifyJob job2 = new FakeModifyJob(null, true /* blockOnStart */);
 
     job1.schedule();
     while (job1.getState() != Job.RUNNING) {
@@ -133,7 +123,7 @@ public class CloudSdkModifyJobTest {
     boolean locked = true;
 
     try {
-      FakeInstallJob installJob = new FakeInstallJob(consoleStream, true /* blockOnStart */);
+      FakeModifyJob installJob = new FakeModifyJob(consoleStream, true /* blockOnStart */);
       installJob.schedule();
       while (installJob.getState() != Job.RUNNING) {
         Thread.sleep(50);
@@ -145,8 +135,6 @@ public class CloudSdkModifyJobTest {
       locked = false;
       installJob.unblock();
       installJob.join();
-
-      verify(consoleStream, atLeastOnce()).println(anyString());
     } finally {
       if (locked) {
         readWriteLock.readLock().unlock();
@@ -154,12 +142,12 @@ public class CloudSdkModifyJobTest {
     }
   }
 
-  private class FakeInstallJob extends CloudSdkModifyJob {
+  private class FakeModifyJob extends CloudSdkModifyJob {
 
     private final Semaphore blocker = new Semaphore(0);
     private final boolean blockOnStart;
 
-    private FakeInstallJob(MessageConsoleStream consoleStream, boolean blockOnStart) {
+    private FakeModifyJob(MessageConsoleStream consoleStream, boolean blockOnStart) {
       super("fake job", consoleStream, readWriteLock);
       this.blockOnStart = blockOnStart;
     }

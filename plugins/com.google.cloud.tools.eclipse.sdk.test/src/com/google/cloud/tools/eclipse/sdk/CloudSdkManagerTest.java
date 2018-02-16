@@ -73,7 +73,7 @@ public class CloudSdkManagerTest {
 
   @Test
   public void testRunInstallJob_blocking() {
-    CloudSdkModifyJob okJob = new FakeInstallJob(Status.OK_STATUS);
+    CloudSdkModifyJob okJob = new FakeModifyJob(Status.OK_STATUS);
     IStatus result = CloudSdkManager.runInstallJob(null, okJob, monitor);
     // Incomplete test, but if it ever fails, something is surely broken.
     assertEquals(Job.NONE, okJob.getState());
@@ -82,7 +82,7 @@ public class CloudSdkManagerTest {
 
   @Test
   public void testRunInstallJob_canceled() {
-    CloudSdkModifyJob cancelJob = new FakeInstallJob(Status.CANCEL_STATUS);
+    CloudSdkModifyJob cancelJob = new FakeModifyJob(Status.CANCEL_STATUS);
     IStatus result = CloudSdkManager.runInstallJob(null, cancelJob, monitor);
     assertEquals(Job.NONE, cancelJob.getState());
     assertEquals(Status.CANCEL, result.getSeverity());
@@ -91,7 +91,7 @@ public class CloudSdkManagerTest {
   @Test
   public void testRunInstallJob_installError() {
     IStatus error = StatusUtil.error(this, "awesome install error in unit test");
-    CloudSdkModifyJob errorJob = new FakeInstallJob(error);
+    CloudSdkModifyJob errorJob = new FakeModifyJob(error);
     IStatus result = CloudSdkManager.runInstallJob(null, errorJob, monitor);
     assertEquals(Job.NONE, errorJob.getState());
     assertEquals(Status.ERROR, result.getSeverity());
@@ -162,7 +162,7 @@ public class CloudSdkManagerTest {
     boolean prevented = true;
 
     try {
-      final CloudSdkModifyJob installJob = new FakeInstallJob(Status.OK_STATUS);
+      final CloudSdkModifyJob installJob = new FakeModifyJob(Status.OK_STATUS);
 
       Job concurrentLauncher =
           new Job("concurrent thread attempting runInstallJob()") {
@@ -195,11 +195,11 @@ public class CloudSdkManagerTest {
     }
   }
 
-  private static class FakeInstallJob extends CloudSdkModifyJob {
+  private static class FakeModifyJob extends CloudSdkModifyJob {
 
     private final IStatus result;
 
-    private FakeInstallJob(IStatus result) {
+    private FakeModifyJob(IStatus result) {
       super("fake job", null, CloudSdkManager.modifyLock);
       this.result = result;
     }

@@ -82,8 +82,9 @@ public abstract class CloudSdkModifyJob extends Job {
   @VisibleForTesting
   static void markBlocked(IProgressMonitor monitor) {
     if (monitor instanceof IProgressMonitorWithBlocking) {
-      IStatus reason = StatusUtil.info(CloudSdkModifyJob.class,
-          Messages.getString("sdkModificationLocked")); //$NON-NLS-1$
+      IStatus reason =
+          StatusUtil.info(
+              CloudSdkModifyJob.class, Messages.getString("cloud.sdk.in.use")); // $NON-NLS-1$
       ((IProgressMonitorWithBlocking) monitor).setBlocked(reason);
     }
   }

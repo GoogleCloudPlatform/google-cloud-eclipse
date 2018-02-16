@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,23 +25,18 @@ import com.google.cloud.tools.managedcloudsdk.ManagedSdkVersionMismatchException
 import com.google.cloud.tools.managedcloudsdk.UnsupportedOsException;
 import com.google.cloud.tools.managedcloudsdk.command.CommandExecutionException;
 import com.google.cloud.tools.managedcloudsdk.command.CommandExitException;
-import com.google.cloud.tools.managedcloudsdk.components.SdkComponent;
-import com.google.cloud.tools.managedcloudsdk.components.SdkComponentInstaller;
-import com.google.cloud.tools.managedcloudsdk.install.SdkInstaller;
-import com.google.cloud.tools.managedcloudsdk.install.SdkInstallerException;
-import com.google.cloud.tools.managedcloudsdk.install.UnknownArchiveTypeException;
-import java.io.IOException;
-import java.nio.channels.ClosedByInterruptException;
+import com.google.cloud.tools.managedcloudsdk.update.SdkUpdater;
 import java.util.concurrent.locks.ReadWriteLock;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.console.MessageConsoleStream;
 
-public class CloudSdkInstallJob extends CloudSdkModifyJob {
+/** Updates the Managed Google Cloud SDK, if installed. */
+public class CloudSdkUpdateJob extends CloudSdkModifyJob {
 
-  public CloudSdkInstallJob(MessageConsoleStream consoleStream, ReadWriteLock cloudSdkLock) {
-    super(Messages.getString("installing.cloud.sdk"), consoleStream, cloudSdkLock); // $NON-NLS-1$
+  public CloudSdkUpdateJob(MessageConsoleStream consoleStream, ReadWriteLock cloudSdkLock) {
+    super(Messages.getString("updating.cloud.sdk"), consoleStream, cloudSdkLock); // $NON-NLS-1$
   }
 
   /** The severity reported on installation failure. */
@@ -57,32 +52,23 @@ public class CloudSdkInstallJob extends CloudSdkModifyJob {
     if (monitor.isCanceled()) {
       return Status.CANCEL_STATUS;
     }
-    monitor.beginTask(Messages.getString("configuring.cloud.sdk"), 20); //$NON-NLS-1$
-    if (consoleStream != null) {
-      consoleStream.println(Messages.getString("startModifying"));
-    }
+    monitor.beginTask(Messages.getString("configuring.cloud.sdk"), 10); // $NON-NLS-1$
     try {
       ManagedCloudSdk managedSdk = getManagedCloudSdk();
       if (!managedSdk.isInstalled()) {
-        subTask(monitor, Messages.getString("installing.cloud.sdk")); // $NON-NLS-1$
-        SdkInstaller installer = managedSdk.newInstaller();
-        installer.install(new MessageConsoleWriterListener(consoleStream));
+        return StatusUtil.create(
+            failureSeverity, this, Messages.getString("cloud.sdk.not.installed"));
+      } else if (!managedSdk.isUpToDate()) {
+        subTask(monitor, Messages.getString("updating.cloud.sdk")); // $NON-NLS-1$
+        SdkUpdater updater = managedSdk.newUpdater();
+        updater.update(new MessageConsoleWriterListener(consoleStream));
+        monitor.worked(10);
       }
-      monitor.worked(10);
-
-      if (!managedSdk.hasComponent(SdkComponent.APP_ENGINE_JAVA)) {
-        subTask(monitor, Messages.getString("installing.cloud.sdk.app.engine.java")); // $NON-NLS-1$
-        SdkComponentInstaller componentInstaller = managedSdk.newComponentInstaller();
-        componentInstaller.installComponent(
-            SdkComponent.APP_ENGINE_JAVA, new MessageConsoleWriterListener(consoleStream));
-      }
-      monitor.worked(10);
       return Status.OK_STATUS;
 
-    } catch (InterruptedException | ClosedByInterruptException e) {
+    } catch (InterruptedException e) {
       return Status.CANCEL_STATUS;
-    } catch (IOException | ManagedSdkVerificationException | SdkInstallerException |
-        CommandExecutionException | CommandExitException e) {
+    } catch (ManagedSdkVerificationException | CommandExecutionException | CommandExitException e) {
       String message = Messages.getString("installing.cloud.sdk.failed");
       return StatusUtil.create(failureSeverity, this, message, e); // $NON-NLS-1$
     } catch (UnsupportedOsException e) {
@@ -90,10 +76,8 @@ public class CloudSdkInstallJob extends CloudSdkModifyJob {
       return StatusUtil.create(failureSeverity, this, message, e); // $NON-NLS-1$
 
     } catch (ManagedSdkVersionMismatchException e) {
-      throw new IllegalStateException("This is never thrown because we always use LATEST.", e); //$NON-NLS-1$
-    } catch (UnknownArchiveTypeException e) {
       throw new IllegalStateException(
-          "The next appengine-plugins-core release will remove this.", e); //$NON-NLS-1$
+          "This is never thrown because we always use LATEST.", e); // $NON-NLS-1$
     }
   }
 
