@@ -39,10 +39,9 @@
     <tycho.version>1.1.0</tycho.version>
     <tycho-extras.version>1.0.0</tycho-extras.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <eclipse.target>mars</eclipse.target>
-
-    <maven.compiler.source>1.7</maven.compiler.source>
-    <maven.compiler.target>1.7</maven.compiler.target>
+    <eclipse.target>oxygen</eclipse.target>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
 
     <!-- by default enable GTK3 support -->
     <swt.gtk3>1</swt.gtk3>
@@ -384,82 +383,6 @@
     </profile>
 
     <profile>
-      <id>build-eclipse-mars</id>
-      <activation>
-        <!-- Default target if no eclipse.target specified. -->
-        <property>
-          <name>!eclipse.target</name>
-          <!-- when no longer the default: <name>eclipse.target</name> <value>mars</value> -->
-        </property>
-      </activation>
-      <properties>
-         <swt.gtk3>0</swt.gtk3> <!-- disable GTK3 support for Mars -->
-         <jettyMinVersion>9.1</jettyMinVersion>
-         <jettyMaxVersion>9.3</jettyMaxVersion>
-      </properties>
-      <!-- build against a known target platform -->
-      <modules>
-        <module>eclipse/mars</module>
-      </modules>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.eclipse.tycho</groupId>
-            <artifactId>target-platform-configuration</artifactId>
-            <configuration>
-            <target>
-              <artifact>
-                <groupId>com.google.cloud.tools.eclipse</groupId>
-                <artifactId>gcp-eclipse-mars</artifactId>
-                <version>4.5.0-SNAPSHOT</version>
-              </artifact>
-            </target>
-           </configuration>
-          </plugin>
-
-          <!--
-            Ensure we don't have buggy commons-collections nor Java-8 Guava.
-            Must be done here as Oxygen has moved to Guava 21.
-          -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-enforcer-plugin</artifactId>
-            <executions>
-              <execution>
-                <goals><goal>enforce</goal></goals>
-                <configuration>
-                  <rules>
-                    <bannedDependencies>
-                      <excludes>
-                        <exclude>commons-collections:commons-collections:[3.2.1]</exclude>
-                      </excludes>
-                    </bannedDependencies>
-                    <bannedDependencies>
-                      <!--
-                        Ensure our bundles only use Guava 20.0.0.
-                        Tycho identifies p2-resolved bundles are of form:
-                        p2.eclipse-plugin:com.google.guava:jar:20.0.0:system
-                      -->
-                      <searchTransitive>false</searchTransitive>
-                      <excludes>
-                        <exclude>com.google.guava:guava</exclude>
-                        <exclude>*:com.google.guava</exclude>
-                      </excludes>
-                      <includes>
-                        <include>com.google.guava:guava:[20,21)</include>
-                        <include>*:com.google.guava:[20,21)</include>
-                      </includes>
-                    </bannedDependencies>
-                  </rules>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-
-    <profile>
       <id>build-eclipse-neon</id>
       <activation>
         <property>
@@ -496,8 +419,10 @@
     <profile>
       <id>build-eclipse-oxygen</id>
       <activation>
+        <!-- Default target if no eclipse.target specified. -->
         <property>
-          <name>eclipse.target</name> <value>oxygen</value>
+          <name>!eclipse.target</name>
+          <!-- when no longer the default: <name>eclipse.target</name> <value>oxygen</value> -->
         </property>
       </activation>
       <properties>
