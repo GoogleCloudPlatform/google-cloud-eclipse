@@ -170,14 +170,6 @@ public class CloudSdkUpdateJobTest {
     verifyNoMoreInteractions(managedCloudSdk);
   }
 
-  @Test
-  public void testRun() throws InterruptedException {
-    Job job = new CloudSdkUpdateJob(null, new ReentrantReadWriteLock());
-    job.schedule();
-    job.join();
-    assertTrue(job.getResult().isOK());
-  }
-
   private CloudSdkUpdateJob newCloudSdkUpdateJob() {
     return new CloudSdkUpdateJob(consoleStream, new ReentrantReadWriteLock()) {
       @Override
