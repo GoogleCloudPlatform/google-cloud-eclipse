@@ -210,7 +210,7 @@ public class CodeTemplatesTest {
         root.getElementsByTagName("appengine.api.sdk.version").item(0).getTextContent();
     DefaultArtifactVersion sdkArtifactVersion =
         new DefaultArtifactVersion(sdkVersion);
-    DefaultArtifactVersion expectedSdk = new DefaultArtifactVersion("1.9.60");
+    DefaultArtifactVersion expectedSdk = new DefaultArtifactVersion("1.9.62");
     Assert.assertTrue(sdkVersion, sdkArtifactVersion.compareTo(expectedSdk) >= 0);    
   }
 

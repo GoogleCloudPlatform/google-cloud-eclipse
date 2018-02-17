@@ -200,11 +200,15 @@ public class CodeTemplates {
     properties.put("projectVersion", config.getMavenVersion()); //$NON-NLS-1$
     
     String mavenPluginVersion = getCurrentVersion(
-        "com.google.cloud.tools", "appengine-maven-plugin", "1.3.2"); //$NON-NLS-1$ $NON-NLS-2$ $NON-NLS-3$
+        "com.google.cloud.tools", //$NON-NLS-1$
+        "appengine-maven-plugin", //$NON-NLS-1$
+        "1.3.2"); //$NON-NLS-1$
     properties.put("mavenPluginVersion", mavenPluginVersion); //$NON-NLS-1$
 
     String sdkVersion = getCurrentVersion(
-        "com.google.appengine", "appengine-api-1.0-sdk", "1.9.60"); //$NON-NLS-1$ $NON-NLS-2$ $NON-NLS-3$
+        "com.google.appengine", //$NON-NLS-1$
+        "appengine-api-1.0-sdk", //$NON-NLS-1$
+        "1.9.62"); //$NON-NLS-1$
     properties.put("appEngineApiSdkVersion", sdkVersion); //$NON-NLS-1$
     
     if (isStandardProject) {
