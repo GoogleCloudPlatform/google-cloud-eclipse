@@ -39,7 +39,7 @@ public class CloudSdkUpdateJob extends CloudSdkModifyJob {
   private static final Logger logger = Logger.getLogger(CloudSdkUpdateJob.class.getName());
 
   public CloudSdkUpdateJob(MessageConsoleStream consoleStream, ReadWriteLock cloudSdkLock) {
-    super(Messages.getString("updating.cloud.sdk"), consoleStream, cloudSdkLock); // $NON-NLS-1$
+    super(Messages.getString("updating.cloud.sdk"), consoleStream, cloudSdkLock); //$NON-NLS-1$
   }
 
   /** The severity reported on installation failure. */
@@ -55,21 +55,25 @@ public class CloudSdkUpdateJob extends CloudSdkModifyJob {
     if (monitor.isCanceled()) {
       return Status.CANCEL_STATUS;
     }
-    monitor.beginTask(Messages.getString("configuring.cloud.sdk"), 10); // $NON-NLS-1$
+    monitor.beginTask(Messages.getString("configuring.cloud.sdk"), 10); //$NON-NLS-1$
     try {
       ManagedCloudSdk managedSdk = getManagedCloudSdk();
       if (!managedSdk.isInstalled()) {
-        logger.info("Google Cloud SDK is not installed");
+        logger.info("Google Cloud SDK is not installed"); //$NON-NLS-1$
         return StatusUtil.create(
-            failureSeverity, this, Messages.getString("cloud.sdk.not.installed"));
+            failureSeverity, this, Messages.getString("cloud.sdk.not.installed")); //$NON-NLS-1$
       } else if (!managedSdk.isUpToDate()) {
-        subTask(monitor, Messages.getString("updating.cloud.sdk")); // $NON-NLS-1$
+        subTask(monitor, Messages.getString("updating.cloud.sdk")); //$NON-NLS-1$
         String oldVersion = getVersion(managedSdk.getSdkHome());
         SdkUpdater updater = managedSdk.newUpdater();
         updater.update(new MessageConsoleWriterListener(consoleStream));
         monitor.worked(10);
         String newVersion = getVersion(managedSdk.getSdkHome());
-        logger.info("Managed Google Cloud SDK updated from " + oldVersion + " to " + newVersion);
+        logger.info(
+            "Managed Google Cloud SDK updated from " //$NON-NLS-1$
+                + oldVersion
+                + " to " //$NON-NLS-1$
+                + newVersion);
       } else {
         logger.info(
             "Managed Google Cloud SDK remains at version " + getVersion(managedSdk.getSdkHome()));
@@ -79,17 +83,17 @@ public class CloudSdkUpdateJob extends CloudSdkModifyJob {
     } catch (InterruptedException e) {
       return Status.CANCEL_STATUS;
     } catch (ManagedSdkVerificationException | CommandExecutionException | CommandExitException e) {
-      logger.log(Level.WARNING, "Could not update Cloud SDK", e);
-      String message = Messages.getString("installing.cloud.sdk.failed");
-      return StatusUtil.create(failureSeverity, this, message, e); // $NON-NLS-1$
+      logger.log(Level.WARNING, "Could not update Cloud SDK", e); //$NON-NLS-1$
+      String message = Messages.getString("installing.cloud.sdk.failed"); //$NON-NLS-1$
+      return StatusUtil.create(failureSeverity, this, message, e);
     } catch (UnsupportedOsException e) {
-      logger.log(Level.WARNING, "Could not update Cloud SDK", e);
-      String message = Messages.getString("unsupported.os.installation");
-      return StatusUtil.create(failureSeverity, this, message, e); // $NON-NLS-1$
+      logger.log(Level.WARNING, "Could not update Cloud SDK", e); // $NON-NLS-1$
+      String message = Messages.getString("unsupported.os.installation"); //$NON-NLS-1$
+      return StatusUtil.create(failureSeverity, this, message, e);
 
     } catch (ManagedSdkVersionMismatchException e) {
       throw new IllegalStateException(
-          "This is never thrown because we always use LATEST.", e); // $NON-NLS-1$
+          "This is never thrown because we always use LATEST.", e); //$NON-NLS-1$
     }
   }
 
