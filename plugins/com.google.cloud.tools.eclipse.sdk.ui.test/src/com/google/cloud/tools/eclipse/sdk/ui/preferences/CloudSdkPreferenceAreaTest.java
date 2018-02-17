@@ -74,7 +74,7 @@ public class CloudSdkPreferenceAreaTest {
 
     assertFalse(area.getStatus().isOK());
     assertEquals(IStatus.ERROR, area.getStatus().getSeverity());
-    assertEquals("SDK version: Unset", sdkVersion.getText());
+    assertEquals("SDK version: No SDK found", sdkVersion.getText());
   }
 
   @Test
