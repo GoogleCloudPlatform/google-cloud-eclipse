@@ -98,6 +98,7 @@ public class CloudSdkManagerTest {
     assertEquals("awesome install error in unit test", result.getMessage());
   }
 
+  @Test
   public void testPreventModifyingSdk_cannotWrite() throws InterruptedException {
     CloudSdkManager.preventModifyingSdk();
     try {
