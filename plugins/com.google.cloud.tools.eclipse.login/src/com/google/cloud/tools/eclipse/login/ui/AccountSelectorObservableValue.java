@@ -25,7 +25,7 @@ import org.eclipse.jface.databinding.swt.DisplayRealm;
  * changes (i.e., account selection changes in the combo box) can be tracked by value change
  * listeners.
  */
-public class AccountSelectorObservableValue extends AbstractObservableValue {
+public class AccountSelectorObservableValue extends AbstractObservableValue<String> {
 
   private String oldValue;
   private AccountSelector accountSelector;
@@ -50,12 +50,12 @@ public class AccountSelectorObservableValue extends AbstractObservableValue {
   }
 
   @Override
-  protected Object doGetValue() {
+  protected String doGetValue() {
     return accountSelector.getSelectedEmail();
   }
 
   @Override
-  protected void doSetValue(final Object value) {
-    accountSelector.selectAccount((String) value);
+  protected void doSetValue(final String value) {
+    accountSelector.selectAccount(value);
   }
 }
