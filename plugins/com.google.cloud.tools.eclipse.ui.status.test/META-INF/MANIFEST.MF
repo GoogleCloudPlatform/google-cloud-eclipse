@@ -6,7 +6,7 @@ Automatic-Module-Name: com.google.cloud.tools.eclipse.ui.status.test
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.ui.status.test
 Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: %providerName
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Localization: plugin
 Require-Bundle: com.google.cloud.tools.eclipse.test.dependencies;bundle-version="0.1.0"
 Import-Package: com.google.cloud.tools.eclipse.test.util

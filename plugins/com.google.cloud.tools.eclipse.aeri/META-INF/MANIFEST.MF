@@ -5,6 +5,6 @@ Automatic-Module-Name: com.google.cloud.tools.eclipse.aeri
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.aeri;singleton:=true
 Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: %providerName
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin

@@ -6,7 +6,7 @@ Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.deploy;singleton:=
 Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.google.cloud.tools.appengine;bundle-version="0.4.2",
  com.google.gson;bundle-version="[2.8.2,3.0)",

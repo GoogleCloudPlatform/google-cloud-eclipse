@@ -5,7 +5,7 @@ Bundle-Name: %pluginName
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.standard.java8.test
 Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: %providerName
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Localization: plugin
 Import-Package: com.google.cloud.tools.appengine;version="0.4.2",
  com.google.cloud.tools.eclipse.appengine.facets.convert,

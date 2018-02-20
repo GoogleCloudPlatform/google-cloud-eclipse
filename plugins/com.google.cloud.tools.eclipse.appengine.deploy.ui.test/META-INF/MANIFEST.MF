@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Fragment-Host: com.google.cloud.tools.eclipse.appengine.deploy.ui
 Bundle-Name: %pluginName
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.deploy.ui.test
 Bundle-Vendor: %providerName
 Bundle-Version: 0.1.0.qualifier

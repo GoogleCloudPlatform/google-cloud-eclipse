@@ -5,7 +5,7 @@ Automatic-Module-Name: com.google.cloud.tools.eclipse.dataflow.ui
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.dataflow.ui;singleton:=true
 Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: %providerName
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.google.cloud.tools.eclipse.dataflow.ui.DataflowUiPlugin
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
