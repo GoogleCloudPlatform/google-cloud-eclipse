@@ -50,7 +50,6 @@ import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.cloud.tools.login.Account;
-import com.google.common.base.Predicate;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -70,7 +69,6 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.EnvironmentTab;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.junit.After;
@@ -349,12 +347,7 @@ public class GcpLocalRunTabTest {
 
   @Test
   public void testCreateKeyButtonEnablement() {
-    Button createKeyButton = (Button) CompositeUtil.findControl(shell, new Predicate<Control>() {
-      @Override
-      public boolean apply(Control control) {
-        return control instanceof Button && "Create New Key".equals(((Button) control).getText());
-      }
-    });
+    Button createKeyButton = CompositeUtil.findButton(shell, "Create New Key");
     tab.initializeFrom(launchConfig);
 
     assertTrue(projectSelector.getSelection().isEmpty());

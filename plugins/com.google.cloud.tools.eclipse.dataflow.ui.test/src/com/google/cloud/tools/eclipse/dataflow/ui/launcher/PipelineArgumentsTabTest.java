@@ -39,7 +39,6 @@ import com.google.cloud.tools.eclipse.dataflow.core.project.MajorVersion;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -58,7 +57,6 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.junit.Assert;
@@ -305,12 +303,8 @@ public class PipelineArgumentsTabTest {
       Group runnerGroup = CompositeUtil.findControl(composite, Group.class);
       assertEquals("Runner:", runnerGroup.getText());
 
-      return (Button) CompositeUtil.findControl(runnerGroup, new Predicate<Control>() {
-        @Override
-        public boolean apply(Control control) {
-          return control instanceof Button && ((Button) control).getSelection();
-        }
-      });
+      return (Button) CompositeUtil.findControl(runnerGroup,
+          control -> control instanceof Button && ((Button) control).getSelection());
     }
   }
 

@@ -47,6 +47,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -79,11 +80,6 @@ import org.eclipse.wst.server.core.util.SocketUtil;
  */
 public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     implements IModulePublishHelper {
-
-  @VisibleForTesting // and should be replaced by Java8 BiFunction
-  public interface PortChecker {
-    boolean isInUse(InetAddress addr, int port);
-  }
 
   /** Parse the numeric string. Return {@code defaultValue} if non-numeric. */
   private static int parseInt(String numeric, int defaultValue) {
@@ -255,8 +251,8 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   }
 
   @VisibleForTesting
-  void checkPorts(DefaultRunConfiguration devServerRunConfiguration, PortChecker portInUse)
-      throws CoreException {
+  void checkPorts(DefaultRunConfiguration devServerRunConfiguration,
+      BiFunction<InetAddress, Integer, Boolean> portInUse) throws CoreException {
     InetAddress serverHost = InetAddress.getLoopbackAddress();
     if (devServerRunConfiguration.getHost() != null) {
       serverHost = LocalAppEngineServerLaunchConfigurationDelegate
@@ -290,14 +286,14 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
    * @throws CoreException if the port is in use
    */
   @VisibleForTesting
-  static int checkPort(InetAddress addr, int port, PortChecker portInUse)
-      throws CoreException {
+  static int checkPort(InetAddress addr, int port,
+      BiFunction<InetAddress, Integer, Boolean> portInUse) throws CoreException {
     Preconditions.checkNotNull(portInUse);
     if (port < 0 || port > 65535) {
       throw new CoreException(newErrorStatus(Messages.getString("PORT_OUT_OF_RANGE")));
     }
 
-    if (port != 0 && portInUse.isInUse(addr, port)) {
+    if (port != 0 && portInUse.apply(addr, port)) {
       throw new CoreException(
           newErrorStatus(Messages.getString("PORT_IN_USE", String.valueOf(port))));
     }
@@ -349,12 +345,9 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
       Path javaHomePath, MessageConsoleStream outputStream, MessageConsoleStream errorStream)
       throws CoreException {
 
-    PortChecker portInUse = new PortChecker() {
-      @Override
-      public boolean isInUse(InetAddress addr, int port) {
-        Preconditions.checkArgument(port >= 0, "invalid port");
-        return SocketUtil.isPortInUse(addr, port);
-      }
+    BiFunction<InetAddress, Integer, Boolean> portInUse = (addr, port) -> {
+      Preconditions.checkArgument(port >= 0, "invalid port");
+      return SocketUtil.isPortInUse(addr, port);
     };
 
     checkPorts(devServerRunConfiguration, portInUse);

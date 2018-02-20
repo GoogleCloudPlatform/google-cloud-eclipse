@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.test.util.ui;
 
-import com.google.common.base.Predicate;
+import java.util.function.Predicate;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -26,35 +26,22 @@ public class CompositeUtil {
 
   @SuppressWarnings("unchecked")
   public static <T> T findControl(Composite composite, final Class<T> type) {
-    return (T) findControl(composite, new Predicate<Control>() {
-      @Override
-      public boolean apply(Control control) {
-        return type.isInstance(control);
-      }
-    });
+    return (T) findControl(composite, control -> type.isInstance(control));
   }
 
   public static Button findButton(Composite composite, final String text) {
-    return (Button) findControl(composite, new Predicate<Control>() {
-      @Override
-      public boolean apply(Control control) {
-        return control instanceof Button && ((Button) control).getText().equals(text);
-      }
-    });
+    return (Button) findControl(composite,
+        control -> control instanceof Button && ((Button) control).getText().equals(text));
   }
 
   public static Label findLabel(Composite composite, final String prefix) {
-    return (Label) findControl(composite, new Predicate<Control>() {
-      @Override
-      public boolean apply(Control control) {
-        return control instanceof Label && ((Label) control).getText().startsWith(prefix);
-      }
-    });
+    return (Label) findControl(composite,
+        control -> control instanceof Label && ((Label) control).getText().startsWith(prefix));
   }  
   
   public static Control findControl(Composite composite, Predicate<Control> predicate) {
     for (Control control : composite.getChildren()) {
-      if (predicate.apply(control)) {
+      if (predicate.test(control)) {
         return control;
       } else if (control instanceof Composite) {
         Control result = findControl((Composite) control, predicate);
@@ -87,7 +74,7 @@ public class CompositeUtil {
     }
 
     @Override
-    public boolean apply(Control control) {
+    public boolean test(Control control) {
       if (labelSeen) {
         return type.isInstance(control);
       } else {

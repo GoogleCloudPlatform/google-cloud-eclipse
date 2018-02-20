@@ -33,8 +33,7 @@ import com.google.cloud.tools.eclipse.projectselector.ProjectRepositoryException
 import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.AppEngine;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
+import java.util.function.Predicate;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Display;
@@ -75,7 +74,7 @@ public class AppEngineApplicationQueryJobTest {
         projectSelector, EXPECTED_LINK, isLatestQueryJob);
 
     when(projectSelector.isDisposed()).thenReturn(false);
-    when(isLatestQueryJob.apply(queryJob)).thenReturn(true);
+    when(isLatestQueryJob.test(queryJob)).thenReturn(true);
 
     when(projectSelector.getSelection()).thenReturn(projectSelection);
   }
@@ -96,7 +95,7 @@ public class AppEngineApplicationQueryJobTest {
     queryJob.join();
 
     verify(projectRepository).getAppEngineApplication(credential, "projectId");
-    verify(isLatestQueryJob).apply(queryJob);
+    verify(isLatestQueryJob).test(queryJob);
     verify(projectSelector).isDisposed();
     verify(projectSelection).isEmpty();
     verify(projectSelector).setStatusLink(EXPECTED_MESSAGE_WHEN_NO_APPLICATION, EXPECTED_LINK);
@@ -114,7 +113,7 @@ public class AppEngineApplicationQueryJobTest {
     queryJob.schedule();
     queryJob.join();
 
-    verify(isLatestQueryJob).apply(queryJob);
+    verify(isLatestQueryJob).test(queryJob);
     verify(projectSelector).isDisposed();
     verify(projectSelector).setStatusLink(
         "This account does not have permission for the App Engine application in project projectId.", null);
@@ -131,7 +130,7 @@ public class AppEngineApplicationQueryJobTest {
     queryJob.schedule();
     queryJob.join();
 
-    verify(isLatestQueryJob, never()).apply(queryJob);
+    verify(isLatestQueryJob, never()).test(queryJob);
     verify(projectSelector, never()).isDisposed();
     verify(projectSelector, never()).setStatusLink(anyString(), anyString());
 
@@ -146,7 +145,7 @@ public class AppEngineApplicationQueryJobTest {
     queryJob.schedule();
     queryJob.join();
 
-    verify(isLatestQueryJob).apply(queryJob);
+    verify(isLatestQueryJob).test(queryJob);
     verify(projectSelector).isDisposed();
     verify(projectSelector).setStatusLink(EXPECTED_MESSAGE_WHEN_EXCEPTION, null);
 
@@ -169,14 +168,14 @@ public class AppEngineApplicationQueryJobTest {
   @Test
   public void testRun_abandonIfNotLatestJob()
       throws InterruptedException, ProjectRepositoryException {
-    when(isLatestQueryJob.apply(queryJob)).thenReturn(false);
+    when(isLatestQueryJob.test(queryJob)).thenReturn(false);
     when(projectRepository.getAppEngineApplication(credential, "projectId"))
         .thenReturn(AppEngine.NO_APPENGINE_APPLICATION);
 
     queryJob.schedule();
     queryJob.join();
 
-    verify(isLatestQueryJob).apply(queryJob);
+    verify(isLatestQueryJob).test(queryJob);
     verify(projectSelector, never()).setStatusLink(anyString(), anyString());
   }
 
@@ -190,7 +189,7 @@ public class AppEngineApplicationQueryJobTest {
     queryJob.schedule();
     queryJob.join();
 
-    verify(isLatestQueryJob).apply(queryJob);
+    verify(isLatestQueryJob).test(queryJob);
     verify(projectSelector, never()).setStatusLink(anyString(), anyString());
   }
 
@@ -208,7 +207,7 @@ public class AppEngineApplicationQueryJobTest {
         .thenThrow(new ProjectRepositoryException("testException"));
 
     // This second job is stale, i.e., it was fired, but user has selected another credential.
-    Predicate<Job> notLatest = Predicates.alwaysFalse();
+    Predicate<Job> notLatest = job -> false;
     Job staleJob = new AppEngineApplicationQueryJob(staleProject, staleCredential,
         projectRepository2, projectSelector, EXPECTED_LINK, notLatest);
 
