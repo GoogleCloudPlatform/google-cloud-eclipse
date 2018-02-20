@@ -31,7 +31,6 @@ import java.util.logging.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.program.Program;
@@ -74,14 +73,10 @@ public class LoginServiceUi implements UiFacade {
   @Override
   public void notifyStatusIndicator() {
     // Update and refresh the menu, toolbar button, and tooltip.
-    display.asyncExec(new Runnable() {
-      @Override
-      public void run() {
+    display.asyncExec(() ->
         serviceLocator.getService(ICommandService.class).refreshElements(
             "com.google.cloud.tools.eclipse.login.commands.loginCommand", //$NON-NLS-1$
-            null);
-      }
-    });
+            null));
   }
 
   @Override
@@ -132,20 +127,16 @@ public class LoginServiceUi implements UiFacade {
       };
 
       final String[] codeHolder = new String[1];
-      dialog.run(true /* fork */, true /* cancelable */, new IRunnableWithProgress() {
-        @Override
-        public void run(IProgressMonitor monitor)
-            throws InvocationTargetException, InterruptedException {
-          AnalyticsPingManager.getInstance().sendPingOnShell(dialog.getShell(),
-              AnalyticsEvents.LOGIN_START);
+      dialog.run(true /* fork */, true /* cancelable */, monitor -> {
+        AnalyticsPingManager.getInstance().sendPingOnShell(dialog.getShell(),
+            AnalyticsEvents.LOGIN_START);
 
-          monitor.beginTask(Messages.getString("LOGIN_PROGRESS_DIALOG_MESSAGE"),
-              IProgressMonitor.UNKNOWN);
-          try {
-            codeHolder[0] = codeReceiver.waitForCode();
-          } catch (IOException ioe) {
-            throw new InvocationTargetException(ioe);
-          }
+        monitor.beginTask(Messages.getString("LOGIN_PROGRESS_DIALOG_MESSAGE"),
+            IProgressMonitor.UNKNOWN);
+        try {
+          codeHolder[0] = codeReceiver.waitForCode();
+        } catch (IOException ioe) {
+          throw new InvocationTargetException(ioe);
         }
       });
 

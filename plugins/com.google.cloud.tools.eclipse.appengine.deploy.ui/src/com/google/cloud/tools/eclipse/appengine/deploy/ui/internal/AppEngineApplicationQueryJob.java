@@ -56,7 +56,7 @@ public class AppEngineApplicationQueryJob extends Job {
     this.projectRepository = projectRepository;
     this.projectSelector = projectSelector;
     this.createAppLink = createAppLink;
-    this.isLatestAppQueryJob = isLatestQueryJob;
+    isLatestAppQueryJob = isLatestQueryJob;
     display = projectSelector.getDisplay();
   }
 
@@ -89,15 +89,12 @@ public class AppEngineApplicationQueryJob extends Job {
     final Job thisJob = this;
 
     // The selector may have been disposed (i.e., dialog closed); check it in the UI thread.
-    display.syncExec(new Runnable() {
-      @Override
-      public void run() {
-        if (!projectSelector.isDisposed()
-            && isLatestAppQueryJob.test(thisJob) /* intentionally checking in UI context */
-            // Covers the case where user switches accounts.
-            && !projectSelector.getSelection().isEmpty()) {
-          projectSelector.setStatusLink(statusMessage, statusTooltip);
-        }
+    display.syncExec(() -> {
+      if (!projectSelector.isDisposed()
+          && isLatestAppQueryJob.test(thisJob) /* intentionally checking in UI context */
+          // Covers the case where user switches accounts.
+          && !projectSelector.getSelection().isEmpty()) {
+        projectSelector.setStatusLink(statusMessage, statusTooltip);
       }
     });
   }
