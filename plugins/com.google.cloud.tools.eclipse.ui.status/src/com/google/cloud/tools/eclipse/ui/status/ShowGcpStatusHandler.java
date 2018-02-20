@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -34,8 +33,6 @@ import org.eclipse.ui.menus.UIElement;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 public class ShowGcpStatusHandler extends AbstractHandler implements IElementUpdater {
-  private static final Logger logger = Logger.getLogger(ShowGcpStatusHandler.class.getName());
-
   private static final String STATUS_URL = "https://status.cloud.google.com";
 
   private static final String BUNDLE_ID = "com.google.cloud.tools.eclipse.ui.status";
@@ -61,7 +58,7 @@ public class ShowGcpStatusHandler extends AbstractHandler implements IElementUpd
   }
 
   @Override
-  public void updateElement(UIElement element, Map parameters) {
+  public void updateElement(UIElement element, @SuppressWarnings("rawtypes") Map parameters) {
     GcpStatusMonitoringService service = element.getServiceLocator().getService(GcpStatusMonitoringService.class);
     GcpStatus status = service.getCurrentStatus();
     element.setText("Status: " + status.summary);

@@ -56,7 +56,7 @@ public class Incident {
 
   /** Return list of unique service names. */
   public static Collection<String> getAffectedServiceNames(Collection<Incident> incidents) {
-    Set<String> serviceNames = new HashSet<String>();
+    Set<String> serviceNames = new HashSet<>();
     for (Incident incident : incidents) {
       serviceNames.add(incident.serviceName);
     }
@@ -82,6 +82,7 @@ public class Incident {
   public Date begin;
   public Date end;
 
+  @Override
   public String toString() {
     return String.format("Incident %d [%s, %s]: %s", id, severity, serviceName, description);
   }

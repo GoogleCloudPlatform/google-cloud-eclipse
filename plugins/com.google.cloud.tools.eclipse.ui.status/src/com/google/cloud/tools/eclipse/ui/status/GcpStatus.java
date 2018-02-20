@@ -34,6 +34,7 @@ public class GcpStatus {
     this.active = active;
   }
 
+  @Override
   public String toString() {
     return severity + ": " + summary;
   }

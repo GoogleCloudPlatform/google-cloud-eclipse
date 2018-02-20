@@ -78,7 +78,7 @@ public class PollingStatusServiceImpl implements GcpStatusMonitoringService {
   private boolean active = false;
   private long pollTime = 3 * 60 * 1000; // poll every 3 minutes
   private IProxyService proxyService;
-  private ListenerList /*<Consumer<GcpStatusMonitoringService>>*/ listeners = new ListenerList /*<>*/();
+  private ListenerList<Consumer<GcpStatusMonitoringService>> listeners = new ListenerList<>();
   private Gson gson = new Gson();
 
   private GcpStatus currentStatus = GcpStatus.OK_STATUS;
@@ -88,9 +88,9 @@ public class PollingStatusServiceImpl implements GcpStatusMonitoringService {
     this.proxyService = proxyService;
   }
 
-  public void unsetProxyService(IProxyService proxyService) {
-    if (this.proxyService == proxyService) {
-      this.proxyService = null;
+  public void unsetProxyService(IProxyService service) {
+    if (proxyService == service) {
+      proxyService = null;
     }
   }
 
@@ -120,22 +120,22 @@ public class PollingStatusServiceImpl implements GcpStatusMonitoringService {
       connection.addRequestProperty("Range", "bytes=0-8192");
       try (InputStream input = connection.getInputStream()) {
         InputStreamReader streamReader = new InputStreamReader(input, StandardCharsets.UTF_8);
-        Collection<Incident> active = extractIncidentsInProgress(gson, streamReader);
-        if (active.isEmpty()) {
+        Collection<Incident> activeIncidents = extractIncidentsInProgress(gson, streamReader);
+        if (activeIncidents.isEmpty()) {
           currentStatus = GcpStatus.OK_STATUS;
         } else {
-          Severity highestSeverity = Incident.getHighestSeverity(active);
-          Collection<String> affectedServices = Incident.getAffectedServiceNames(active);
+          Severity highestSeverity = Incident.getHighestSeverity(activeIncidents);
+          Collection<String> affectedServices = Incident.getAffectedServiceNames(activeIncidents);
           currentStatus =
-              new GcpStatus(highestSeverity, Joiner.on(", ").join(affectedServices), active);
+              new GcpStatus(highestSeverity, Joiner.on(", ").join(affectedServices), activeIncidents);
         }
       }
     } catch (IOException ex) {
       currentStatus = new GcpStatus(Severity.ERROR, ex.toString(), null);
     }
     logger.info("current GCP status = " + currentStatus);
-    for (Object listener : listeners.getListeners()) {
-      ((Consumer<GcpStatusMonitoringService>) listener).accept(this);
+    for (Consumer<GcpStatusMonitoringService> listener : listeners) {
+      listener.accept(this);
     }
   }
 
@@ -146,7 +146,7 @@ public class PollingStatusServiceImpl implements GcpStatusMonitoringService {
    */
   static Collection<Incident> extractIncidentsInProgress(Gson gson, Reader reader) {
     // Process the individual incident elements. An active incident has no {@code end} element.
-    List<Incident> incidents = new LinkedList<Incident>();
+    List<Incident> incidents = new LinkedList<>();
     try {
       JsonReader jsonReader = new JsonReader(reader);
       jsonReader.beginArray();
