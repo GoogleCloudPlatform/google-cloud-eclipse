@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.ui.status;
 
-import com.google.cloud.tools.eclipse.util.jobs.Consumer;
 import org.eclipse.ui.IStartup;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
@@ -30,14 +29,11 @@ public class WorkbenchStartup implements IStartup {
     GcpStatusMonitoringService service = workbench.getService(GcpStatusMonitoringService.class);
     if (service != null) {
       service.addStatusChangeListener(
-          new Consumer<GcpStatusMonitoringService>() {
-            @Override
-            public void accept(final GcpStatusMonitoringService result) {
-              ICommandService commandService = workbench.getService(ICommandService.class);
-              if (commandService != null) {
-                commandService.refreshElements(
-                    "com.google.cloud.tools.eclipse.ui.status.showGcpStatus", null);
-              }
+          result -> {
+            ICommandService commandService = workbench.getService(ICommandService.class);
+            if (commandService != null) {
+              commandService.refreshElements(
+                  "com.google.cloud.tools.eclipse.ui.status.showGcpStatus", null);
             }
           });
     }

@@ -20,7 +20,6 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.ui.util.DisplayExecutor;
-import com.google.cloud.tools.eclipse.util.jobs.Consumer;
 import com.google.cloud.tools.eclipse.util.jobs.FuturisticJob;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -133,20 +132,16 @@ public class MiniSelector implements ISelectionProvider {
     }
 
     fetchProjectsJob = new FetchProjectsJob();
-    fetchProjectsJob.onSuccess(displayExecutor, new Consumer<GcpProject[]>() {
-      @Override
-      public void accept(GcpProject[] projects) {
-        comboViewer.setInput(projects);
-        setProject(toBeSelectedProjectId);
-      }
-    });
+    fetchProjectsJob.onSuccess(
+        displayExecutor,
+        projects -> {
+          comboViewer.setInput(projects);
+          setProject(toBeSelectedProjectId);
+        });
     // maybe this should be shown to the user?
-    fetchProjectsJob.onError(MoreExecutors.directExecutor(), new Consumer<Exception>() {
-      @Override
-      public void accept(Exception ex) {
-        logger.log(Level.SEVERE, "Unable to fetch project list", ex);
-      }
-    });
+    fetchProjectsJob.onError(
+        MoreExecutors.directExecutor(),
+        ex -> logger.log(Level.SEVERE, "Unable to fetch project list", ex));
     fetchProjectsJob.schedule();
   }
 

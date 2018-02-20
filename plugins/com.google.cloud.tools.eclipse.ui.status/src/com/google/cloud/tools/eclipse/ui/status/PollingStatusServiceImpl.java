@@ -17,7 +17,7 @@
 package com.google.cloud.tools.eclipse.ui.status;
 
 import com.google.cloud.tools.eclipse.ui.status.Incident.Severity;
-import com.google.cloud.tools.eclipse.util.jobs.Consumer;
+import java.util.function.Consumer;
 import com.google.common.base.Joiner;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;

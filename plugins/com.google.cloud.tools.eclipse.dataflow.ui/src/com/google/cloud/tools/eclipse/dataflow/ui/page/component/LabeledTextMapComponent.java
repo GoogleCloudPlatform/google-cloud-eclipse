@@ -16,8 +16,13 @@
 
 package com.google.cloud.tools.eclipse.dataflow.ui.page.component;
 
-import com.google.common.base.Optional;
-
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
@@ -28,13 +33,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * A collection that maps Labels to user-editable texts. The labels are all of equal width and
@@ -115,9 +113,9 @@ public class LabeledTextMapComponent {
       newText.addModifyListener(listener);
     }
 
-    newLabel.setToolTipText(tooltip.or(""));
-    newSeparator.setToolTipText(tooltip.or(""));
-    newText.setToolTipText(tooltip.or(""));
+    newLabel.setToolTipText(tooltip.orElse(""));
+    newSeparator.setToolTipText(tooltip.orElse(""));
+    newText.setToolTipText(tooltip.orElse(""));
 
     texts.put(label, newText);
   }

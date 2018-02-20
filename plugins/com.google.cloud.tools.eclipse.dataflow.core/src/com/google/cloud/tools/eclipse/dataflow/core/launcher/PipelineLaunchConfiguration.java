@@ -26,7 +26,6 @@ import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferen
 import com.google.cloud.tools.eclipse.dataflow.core.project.MajorVersion;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
@@ -36,6 +35,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -56,7 +56,7 @@ public class PipelineLaunchConfiguration {
   private PipelineRunner runner;
   private boolean useDefaultLaunchOptions = true;
   private Map<String, String> argumentValues = Collections.<String, String>emptyMap();
-  private Optional<String> userOptionsName = Optional.absent();
+  private Optional<String> userOptionsName = Optional.empty();
 
   /**
    * Construct a DataflowPipelineLaunchConfiguration from the provided {@link ILaunchConfiguration}.
@@ -99,11 +99,11 @@ public class PipelineLaunchConfiguration {
   }
 
   public String getUserOptionsName() {
-    return userOptionsName.orNull();
+    return userOptionsName.orElse(null);
   }
 
   public void setUserOptionsName(String userOptionsName) {
-    this.userOptionsName = Optional.fromNullable(userOptionsName);
+    this.userOptionsName = Optional.ofNullable(userOptionsName);
   }
 
   public Map<String, String> getArgumentValues() {
@@ -188,7 +188,7 @@ public class PipelineLaunchConfiguration {
     configuration.setAttribute(
         PipelineConfigurationAttr.ALL_ARGUMENT_VALUES.toString(), argumentValues);
     configuration.setAttribute(
-        PipelineConfigurationAttr.USER_OPTIONS_NAME.toString(), userOptionsName.orNull());
+        PipelineConfigurationAttr.USER_OPTIONS_NAME.toString(), userOptionsName.orElse(null));
   }
 
   /**

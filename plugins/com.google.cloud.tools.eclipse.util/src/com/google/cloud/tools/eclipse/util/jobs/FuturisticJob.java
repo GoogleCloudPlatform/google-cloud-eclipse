@@ -16,13 +16,14 @@
 
 package com.google.cloud.tools.eclipse.util.jobs;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -125,12 +126,7 @@ public abstract class FuturisticJob<T> extends Job {
    * executor.
    */
   public void onSuccess(Executor executor, final Runnable runnable) {
-    onSuccess(executor, new Consumer<T>() {
-      @Override
-      public void accept(T result) {
-        runnable.run();
-      }
-    });
+    onSuccess(executor, result -> runnable.run());
   }
 
   /**
@@ -195,7 +191,7 @@ public abstract class FuturisticJob<T> extends Job {
         // ignored and fallthrough
       }
     }
-    return Optional.absent();
+    return Optional.empty();
   }
 
   /**
@@ -210,7 +206,7 @@ public abstract class FuturisticJob<T> extends Job {
         // ignored and fallthrough
       }
     }
-    return Optional.absent();
+    return Optional.empty();
   }
 
   /**
@@ -228,7 +224,7 @@ public abstract class FuturisticJob<T> extends Job {
         // ignored and fallthrough
       }
     }
-    return Optional.absent();
+    return Optional.empty();
   }
 
   /**

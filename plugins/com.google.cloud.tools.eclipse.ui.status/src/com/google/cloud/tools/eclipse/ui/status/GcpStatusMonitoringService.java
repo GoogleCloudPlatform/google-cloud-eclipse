@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.ui.status;
 
-import com.google.cloud.tools.eclipse.util.jobs.Consumer;
+import java.util.function.Consumer;
 
 /** Represents a service for querying the Google Cloud Platform status. */
 public interface GcpStatusMonitoringService {

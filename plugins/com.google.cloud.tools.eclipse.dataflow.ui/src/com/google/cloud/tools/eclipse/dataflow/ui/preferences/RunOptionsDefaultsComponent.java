@@ -38,15 +38,14 @@ import com.google.cloud.tools.eclipse.projectselector.MiniSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.ui.util.DisplayExecutor;
 import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
-import com.google.cloud.tools.eclipse.util.jobs.Consumer;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableSortedSet;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.SortedSet;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -311,7 +310,7 @@ public class RunOptionsDefaultsComponent {
     Optional<Object> verificationResult =
         verifyStagingLocationJob != null && verifyStagingLocationJob.isCurrent()
             ? verifyStagingLocationJob.getComputation()
-            : Optional.absent();
+            : Optional.empty();
     if (!verificationResult.isPresent()) {
       messageTarget.setInfo("Verifying staging location...");
       createButton.setEnabled(false);
@@ -471,18 +470,19 @@ public class RunOptionsDefaultsComponent {
     if (project != null && credential != null) {
       fetchStagingLocationsJob =
           new FetchStagingLocationsJob(getGcsClient(), selectedEmail, project.getId());
-      fetchStagingLocationsJob.onSuccess(displayExecutor, new Consumer<SortedSet<String>>() {
-        @Override
-        public void accept(SortedSet<String> stagingLocations) {
-          updateStagingLocations(stagingLocations);
-          validate(); // reports message back to UI
-        }});
-      fetchStagingLocationsJob.onError(displayExecutor, new Consumer<Exception>() {
-        @Override
-        public void accept(Exception exception) {
-          DataflowUiPlugin.logError(exception, "Exception while retrieving staging locations"); //$NON-NLS-1$
-          validate();
-        }});
+      fetchStagingLocationsJob.onSuccess(
+          displayExecutor,
+          stagingLocations -> {
+            updateStagingLocations(stagingLocations);
+            validate(); // reports message back to UI
+          });
+      fetchStagingLocationsJob.onError(
+          displayExecutor,
+          exception -> {
+            DataflowUiPlugin.logError(
+                exception, "Exception while retrieving staging locations"); // $NON-NLS-1$
+            validate();
+          });
       fetchStagingLocationsJob.schedule(scheduleDelay);
     }
   }
