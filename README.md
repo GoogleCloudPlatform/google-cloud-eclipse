@@ -116,7 +116,7 @@ target platform whenever dependencies are updated.
 ### Steps to import into the Eclipse IDE
 
 
-1. Setup JDK 8 in Eclipse
+1. Setup JDK 8 in Eclipse (this may already be set up by Eclipse's JRE/JDK auto-discovery)
 
   1. Select `Window/Preferences` (on Mac `Eclipse/Preferences`).
 
@@ -124,7 +124,7 @@ target platform whenever dependencies are updated.
 
   1. Select Standard VM and click `Next`.
 
-  1. Select the folder that contains the JDK 7 installation by clicking
+  1. Select the folder that contains the JDK 8 installation by clicking
      `Directory`.
 
   1. Click `Finish`.
