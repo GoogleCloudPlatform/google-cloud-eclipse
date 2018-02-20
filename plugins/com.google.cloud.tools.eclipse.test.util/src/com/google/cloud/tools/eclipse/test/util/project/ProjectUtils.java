@@ -23,7 +23,6 @@ import com.google.cloud.tools.eclipse.test.util.ArrayAssertions;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.ZipUtil;
 import com.google.cloud.tools.eclipse.test.util.reflection.ReflectionUtil;
-import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Stopwatch;
 import java.io.File;
@@ -390,12 +389,7 @@ public class ProjectUtils {
       }
     } while (elapsed.elapsed(TimeUnit.SECONDS) < 300 && markers.length > 0);
 
-    ArrayAssertions.assertIsEmpty(markers, new Function<IMarker, String>() {
-      @Override
-      public String apply(IMarker marker) {
-        return ProjectUtils.formatProblem(marker);
-      }
-    });
+    ArrayAssertions.assertIsEmpty(markers, ProjectUtils::formatProblem);
     return markers;
   }
 
