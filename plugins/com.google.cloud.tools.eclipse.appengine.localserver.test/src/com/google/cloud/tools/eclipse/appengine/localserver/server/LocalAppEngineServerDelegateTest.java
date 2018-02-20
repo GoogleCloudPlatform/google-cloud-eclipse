@@ -111,7 +111,7 @@ public class LocalAppEngineServerDelegateTest {
   @Test
   public void testCheckConflictingId_defaultServiceIds() throws CoreException {
     delegate = getDelegateWithServer();
-    delegate.serviceIdFunction = Functionsmodule -> "default";
+    delegate.serviceIdFunction = module -> "default";
 
     Assert.assertEquals(Status.ERROR, delegate.checkConflictingServiceIds(new IModule[] {module1},
         new IModule[] {module2}, null).getSeverity());
