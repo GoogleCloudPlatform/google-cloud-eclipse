@@ -23,12 +23,9 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import com.google.common.util.concurrent.Callables;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutionException;
 import org.eclipse.core.runtime.IStatus;
@@ -75,16 +72,13 @@ public class PluggableJobTest {
   @Test
   public void testJobCancelingCancelsFuture() throws InterruptedException, BrokenBarrierException {
     final CyclicBarrier barrier = new CyclicBarrier(2);
-    PluggableJob<Object> job = new PluggableJob<>("name", new Callable<Object>() {
-      @Override
-      public Object call() {
-        try {
-          barrier.await(); // job started: should release main thread
-          barrier.await(); // wait for job cancel
-        } catch (InterruptedException | BrokenBarrierException ex) {
-        }
-        return barrier;
+    PluggableJob<Object> job = new PluggableJob<>("name", () -> {
+      try {
+        barrier.await(); // job started: should release main thread
+        barrier.await(); // wait for job cancel
+      } catch (InterruptedException | BrokenBarrierException ex) {
       }
+      return barrier;
     });
     job.schedule();
     barrier.await();
@@ -99,16 +93,13 @@ public class PluggableJobTest {
   @Test
   public void testFutureCancelingCancelsJob() throws InterruptedException, BrokenBarrierException {
     final CyclicBarrier barrier = new CyclicBarrier(2);
-    PluggableJob<Object> job = new PluggableJob<>("name", new Callable<Object>() {
-      @Override
-      public Object call() {
-        try {
-          barrier.await(); // job started: should release main thread
-          barrier.await(); // wait for future cancel
-        } catch (InterruptedException | BrokenBarrierException ex) {
-        }
-        return barrier;
+    PluggableJob<Object> job = new PluggableJob<>("name", () -> {
+      try {
+        barrier.await(); // job started: should release main thread
+        barrier.await(); // wait for future cancel
+      } catch (InterruptedException | BrokenBarrierException ex) {
       }
+      return barrier;
     });
     job.schedule();
     barrier.await(); // wait until job started
@@ -123,8 +114,7 @@ public class PluggableJobTest {
   @Test
   public void testStaleCancelsFuture() throws InterruptedException {
     Object obj = new Object();
-    PluggableJob<Object> job =
-        new PluggableJob<>("name", Callables.returning(obj), Predicates.alwaysTrue());
+    PluggableJob<Object> job = new PluggableJob<>("name", Callables.returning(obj), unused -> true);
     job.schedule();
     job.join();
     assertEquals("Should be CANCEL", IStatus.CANCEL, job.getResult().getSeverity());
@@ -135,15 +125,12 @@ public class PluggableJobTest {
   public void testStaleFiresFutureListener() throws InterruptedException {
     Object obj = new Object();
     final PluggableJob<Object> job =
-        new PluggableJob<>("name", Callables.returning(obj), Predicates.alwaysTrue());
+        new PluggableJob<>("name", Callables.returning(obj), unused -> true);
     assertFalse(job.getFuture().isDone());
     final boolean[] listenerRun = new boolean[] {false};
-    job.getFuture().addListener(new Runnable() {
-      @Override
-      public void run() {
-        listenerRun[0] = true;
-        assertTrue(job.getFuture().isCancelled());
-      }
+    job.getFuture().addListener(() -> {
+      listenerRun[0] = true;
+      assertTrue(job.getFuture().isCancelled());
     }, MoreExecutors.directExecutor());
     assertFalse(listenerRun[0]);
     job.schedule();
@@ -169,12 +156,7 @@ public class PluggableJobTest {
   @Test
   public void testCompleteness_error() throws InterruptedException {
     final Exception exception = new Exception("test");
-    PluggableJob<Object> job = new PluggableJob<>("name", new Callable<Object>() {
-      @Override
-      public Object call() throws Exception {
-        throw exception;
-      }
-    });
+    PluggableJob<Object> job = new PluggableJob<>("name", () -> { throw exception; });
     assertFalse(job.isComputationComplete());
     job.schedule();
     job.join();
@@ -190,12 +172,7 @@ public class PluggableJobTest {
     Object obj = new Object();
     PluggableJob<Object> job = new PluggableJob<>("name", Callables.returning(obj));
     final boolean[] listenerRun = new boolean[] {false};
-    job.onSuccess(MoreExecutors.directExecutor(), new Runnable() {
-      @Override
-      public void run() {
-        listenerRun[0] = true;
-      }
-    });
+    job.onSuccess(MoreExecutors.directExecutor(), () -> { listenerRun[0] = true; });
     assertFalse(listenerRun[0]);
     job.schedule();
     job.join();
@@ -207,14 +184,9 @@ public class PluggableJobTest {
   public void testOnSuccess_abandon() throws InterruptedException {
     Object obj = new Object();
     PluggableJob<Object> job =
-        new PluggableJob<>("name", Callables.returning(obj), Predicates.alwaysTrue());
+        new PluggableJob<>("name", Callables.returning(obj), unused -> true);
     final boolean[] listenerRun = new boolean[] {false};
-    job.onSuccess(MoreExecutors.directExecutor(), new Runnable() {
-      @Override
-      public void run() {
-        listenerRun[0] = true;
-      }
-    });
+    job.onSuccess(MoreExecutors.directExecutor(), () -> { listenerRun[0] = true; });
     assertFalse(listenerRun[0]);
     job.schedule(); // should be stale and cancelled
     job.join();
@@ -223,19 +195,9 @@ public class PluggableJobTest {
 
   @Test
   public void testOnError() throws InterruptedException {
-    PluggableJob<Object> job = new PluggableJob<>("name", new Callable<Object>() {
-      @Override
-      public Object call() throws Exception {
-        throw new Exception("test");
-      }
-    });
+    PluggableJob<Object> job = new PluggableJob<>("name", () -> { throw new Exception("test"); });
     final boolean[] listenerRun = new boolean[] {false};
-    job.onError(MoreExecutors.directExecutor(), new Consumer<Exception>() {
-      @Override
-      public void accept(Exception result) {
-        listenerRun[0] = true;
-      }
-    });
+    job.onError(MoreExecutors.directExecutor(), result -> listenerRun[0] = true);
     assertFalse(listenerRun[0]);
     job.schedule();
     job.join();
@@ -259,12 +221,7 @@ public class PluggableJobTest {
     Object obj = new Object();
     final boolean[] isStale = new boolean[] { false };
     PluggableJob<Object> job = new PluggableJob<>("name", Callables.returning(obj),
-        new Predicate<FuturisticJob<?>>() {
-          @Override
-          public boolean apply(FuturisticJob<?> unused) {
-            return isStale[0];
-          }
-        });
+        unused -> isStale[0]);
     assertTrue(job.isCurrent());
     job.schedule(); // should self-cancel
     job.join();

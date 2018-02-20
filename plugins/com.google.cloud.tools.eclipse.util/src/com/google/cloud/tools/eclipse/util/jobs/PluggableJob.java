@@ -17,9 +17,8 @@
 package com.google.cloud.tools.eclipse.util.jobs;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import java.util.concurrent.Callable;
+import java.util.function.Predicate;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
@@ -45,7 +44,7 @@ public class PluggableJob<T> extends FuturisticJob<T> {
    * @param computeTask the actual runnable to compute a result; never {@code null}
    */
   public PluggableJob(String name, Callable<? extends T> computeTask) {
-    this(name, computeTask, Predicates.alwaysFalse());
+    this(name, computeTask, job -> false);
   }
 
   /**
@@ -72,9 +71,7 @@ public class PluggableJob<T> extends FuturisticJob<T> {
 
   @Override
   protected boolean isStale() {
-    return stalenessCheck.apply(this);
+    return stalenessCheck.test(this);
   }
-
-
 
 }
