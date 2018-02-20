@@ -24,31 +24,12 @@
     <artifactId>plugins</artifactId>
     <version>0.1.0-SNAPSHOT</version>
   </parent>
-  <version>0.1.0-SNAPSHOT</version>
 
   <artifactId>com.google.cloud.tools.eclipse.dataflow.core.test</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
   <packaging>eclipse-test-plugin</packaging>
 
   <build>
     <sourceDirectory>src/test/java</sourceDirectory>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>tycho-surefire-plugin</artifactId>
-      </plugin>
-    </plugins>
   </build>
-
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
 </project>
