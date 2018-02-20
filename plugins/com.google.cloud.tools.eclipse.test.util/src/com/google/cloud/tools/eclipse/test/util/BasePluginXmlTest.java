@@ -188,7 +188,7 @@ public abstract class BasePluginXmlTest {
   @Test
   public final void testBundleExecutionEnvironment() throws IOException {
     Attributes manifest = getManifestAttributes();
-    assertEquals("JavaSE-1.7", manifest.getValue("Bundle-RequiredExecutionEnvironment"));
+    assertEquals("JavaSE-1.8", manifest.getValue("Bundle-RequiredExecutionEnvironment"));
   }
 
   @Test

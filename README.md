@@ -43,7 +43,7 @@ Maven for building Eclipse bundles and features.
 1. Maven 3.5.0 or later.  Although m2eclipse is bundled with its own Maven install,
    Maven is necessary to test command-line builds.
 
-1. JDK 7
+1. JDK 8
 
 1. git (optional: you can use EGit from within Eclipse instead)
 
@@ -53,7 +53,7 @@ Maven for building Eclipse bundles and features.
 
 ## Configuring Maven/Tycho Builds
 
-The plugin is built using Maven/Tycho and targeted to Java 7.
+The plugin is built using Maven/Tycho and targeted to Java 8.
 
 The tests need to find the Google Cloud SDK.  You can either:
 
@@ -116,7 +116,7 @@ target platform whenever dependencies are updated.
 ### Steps to import into the Eclipse IDE
 
 
-1. Setup JDK 7 in Eclipse
+1. Setup JDK 8 in Eclipse
 
   1. Select `Window/Preferences` (on Mac `Eclipse/Preferences`).
 
@@ -131,12 +131,12 @@ target platform whenever dependencies are updated.
 
   1. Select `Java/Installed JREs/Execution Environments` page.
 
-  1. Click on `JavaSE-1.7` in the list on the left under `Execution
+  1. Click on `JavaSE-1.8` in the list on the left under `Execution
      Environments:`.
 
   1. The JDK just added should show up in the list on the right along with other
-     installed JDKs/JREs. Set the checkbox next the the JDK 7 added in the
-     previous steps to mark it as compatible with the `JavaSE-1.7` execution
+     installed JDKs/JREs. Set the checkbox next the the JDK 8 added in the
+     previous steps to mark it as compatible with the `JavaSE-1.8` execution
      environment.
 
   1. Click `OK`.
@@ -325,7 +325,7 @@ require configuring [Maven's toolchains](https://maven.apache.org/guides/mini/gu
 to point to appropriate JRE installations.  Tycho further requires
 that a toolchain defines an `id` for the specified _Execution
 Environment_ identifier.  For example, a `~/.m2/toolchains.xml` to
-configure Maven for a Java 7 toolchain on a Mac might be:
+configure Maven for a Java 8 toolchain on a Mac might be:
 
 ```
 <?xml version="1.0"?>
@@ -333,12 +333,12 @@ configure Maven for a Java 7 toolchain on a Mac might be:
   <toolchain>
     <type>jdk</type>
     <provides>
-      <id>JavaSE-1.7</id> <!-- the Execution Environment -->
-      <version>1.7</version>
+      <id>JavaSE-1.8</id> <!-- the Execution Environment -->
+      <version>1.8</version>
       <vendor>oracle</vendor>
     </provides>
     <configuration>
-      <jdkHome>/Library/Java/JavaVirtualMachines/jdk1.7.0_79.jdk/Contents/Home/jre</jdkHome>
+      <jdkHome>/Library/Java/JavaVirtualMachines/jdk1.8.0_155.jdk/Contents/Home/jre</jdkHome>
     </configuration>
   </toolchain>
 </toolchains>

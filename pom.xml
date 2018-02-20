@@ -464,14 +464,14 @@
     </profile>
 
     <!--
-      The following profiles work to prevent Java 8'isms (or Java 9!)
+      The following profiles work to prevent Java 9'isms
       using Maven and Tycho's support for toolchains.
     -->
     <profile>
        <!-- 
           We can only use tycho-compiler-plugin's `useJDK=BREE`
           mode when we're building with our minimum supported Java
-          runtime environment (currently JavaSE-1.7).  `BREE` mode
+          runtime environment (currently JavaSE-1.9).  `BREE` mode
           builds each bundle against a JDK that matches its
           Bundle-RequiredExecutionEnvironment, but results in
           compile-time resolving errors on Eclipse 4.6/Neon
@@ -479,7 +479,7 @@
       -->
       <id>building-with-minimum-java-runtime-</id>
       <activation>
-        <property><name>toolchain.java.runtime</name><value>JavaSE-1.7</value></property>
+        <property><name>toolchain.java.runtime</name><value>JavaSE-1.9</value></property>
       </activation>
       <properties>
          <tycho.toolchains>BREE</tycho.toolchains>
@@ -489,7 +489,7 @@
       <!--
           We use tycho-surefire-plugin's default `useJDK=SYSTEM`
           mode to run tests using the configured Maven toolchain.  So
-          specifying toolchain.java.runtime=JavaSE-1.7 will lead to test
+          specifying toolchain.java.runtime=JavaSE-1.9 will lead to test
           failures should we attempt to load bundles with BREE=JavaSE-1.8
           or that contains Java 8 code.  Same applies with Java 9.
       -->
