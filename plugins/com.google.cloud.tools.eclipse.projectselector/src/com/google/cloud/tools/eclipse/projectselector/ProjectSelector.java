@@ -50,7 +50,7 @@ import org.eclipse.swt.widgets.Link;
 public class ProjectSelector extends Composite implements ISelectionProvider {
 
   private final TableViewer viewer;
-  private final WritableList/* <GcpProject> */ input; // Generics supported only in Neon+
+  private final WritableList<GcpProject> input;
   private Link statusLink;
   private IBeanValueProperty[] projectProperties;
 

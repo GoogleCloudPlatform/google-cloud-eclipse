@@ -633,7 +633,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     @Override
     protected IStatus validate() {
       // access accountSelectorObservableValue so MultiValidator records the access
-      String selectedEmail = (String) accountSelectorObservableValue.getValue();
+      String selectedEmail = accountSelectorObservableValue.getValue();
       if (requireValues && Strings.isNullOrEmpty(selectedEmail)) {
         if (accountSelector.isSignedIn()) {
           return ValidationStatus.error(Messages.getString("error.account.missing.signedin"));
