@@ -56,7 +56,7 @@ public class AppEngineApplicationQueryJob extends Job {
     this.projectRepository = projectRepository;
     this.projectSelector = projectSelector;
     this.createAppLink = createAppLink;
-    isLatestAppQueryJob = isLatestQueryJob;
+    this.isLatestAppQueryJob = isLatestQueryJob;
     display = projectSelector.getDisplay();
   }
 

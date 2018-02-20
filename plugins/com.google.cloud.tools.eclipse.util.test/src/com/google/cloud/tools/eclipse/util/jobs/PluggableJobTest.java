@@ -172,7 +172,7 @@ public class PluggableJobTest {
     Object obj = new Object();
     PluggableJob<Object> job = new PluggableJob<>("name", Callables.returning(obj));
     final boolean[] listenerRun = new boolean[] {false};
-    job.onSuccess(MoreExecutors.directExecutor(), () -> { listenerRun[0] = true; });
+    job.onSuccess(MoreExecutors.directExecutor(), () -> listenerRun[0] = true);
     assertFalse(listenerRun[0]);
     job.schedule();
     job.join();
@@ -186,7 +186,7 @@ public class PluggableJobTest {
     PluggableJob<Object> job =
         new PluggableJob<>("name", Callables.returning(obj), unused -> true);
     final boolean[] listenerRun = new boolean[] {false};
-    job.onSuccess(MoreExecutors.directExecutor(), () -> { listenerRun[0] = true; });
+    job.onSuccess(MoreExecutors.directExecutor(), () -> listenerRun[0] = true);
     assertFalse(listenerRun[0]);
     job.schedule(); // should be stale and cancelled
     job.join();
