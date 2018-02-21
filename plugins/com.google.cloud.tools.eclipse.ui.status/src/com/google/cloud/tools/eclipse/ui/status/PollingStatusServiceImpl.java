@@ -140,7 +140,7 @@ public class PollingStatusServiceImpl implements GcpStatusMonitoringService {
   }
 
   /**
-   * Process and accumulate the incidents from the input stream. As the the input stream may be
+   * Process and accumulate the incidents from the input stream. As the input stream may be
    * incomplete (e.g., partial download), we ignore any JSON exceptions and {@link IOException}s
    * that may occur.
    */
