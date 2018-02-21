@@ -18,12 +18,14 @@ package com.google.cloud.tools.eclipse.swtbot;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotStyledText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTable;
+import org.hamcrest.Matcher;
 
 /**
  * Provides helper methods to aid in SWTBot testing.
@@ -166,4 +168,21 @@ public class SwtBotTestingUtilities {
     });
   }
 
+  /** Wait until the view's content description matches. */
+  public static void waitUntilViewContentDescription(
+      SWTBot bot, SWTBotView consoleView, Matcher<String> matcher) {
+    bot.waitUntil(
+        new DefaultCondition() {
+
+          @Override
+          public boolean test() throws Exception {
+            return matcher.matches(consoleView.getViewReference().getContentDescription());
+          }
+
+          @Override
+          public String getFailureMessage() {
+            return matcher.toString();
+          }
+        });
+  }
 }

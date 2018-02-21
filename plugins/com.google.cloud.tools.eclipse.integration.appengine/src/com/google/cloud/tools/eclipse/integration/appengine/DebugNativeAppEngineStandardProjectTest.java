@@ -120,9 +120,8 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
 
     SWTBotView consoleView = bot.viewById("org.eclipse.ui.console.ConsoleView"); // IConsoleConstants.ID_CONSOLE_VIEW
     consoleView.show();
-    assertThat("App Engine console not active",
-        consoleView.getViewReference().getContentDescription(),
-        Matchers.containsString("App Engine Standard at localhost"));
+    SwtBotTestingUtilities.waitUntilViewContentDescription(
+        bot, consoleView, Matchers.containsString("App Engine Standard at localhost"));
     final SWTBotStyledText consoleContents =
         new SWTBotStyledText(bot.widget(widgetOfType(StyledText.class), consoleView.getWidget()));
     SwtBotTestingUtilities.waitUntilStyledTextContains(bot,
