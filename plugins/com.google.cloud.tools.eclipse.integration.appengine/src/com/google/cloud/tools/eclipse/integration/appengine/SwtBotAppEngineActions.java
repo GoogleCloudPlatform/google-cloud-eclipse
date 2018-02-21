@@ -29,7 +29,6 @@ import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.eclipse.swtbot.swt.finder.widgets.TimeoutException;
 import org.eclipse.wst.common.project.facet.core.FacetedProjectFramework;
 import org.junit.Assert;
@@ -78,9 +77,8 @@ public class SwtBotAppEngineActions {
     SWTBotShell shell = bot.shell("New Project");
     shell.activate();
 
-    SwtBotTreeUtilities.waitUntilTreeHasItems(bot, bot.tree());
-    bot.tree().expandNode("Google Cloud Platform")
-        .select("Google App Engine Standard Java Project");
+    SwtBotTreeUtilities.select(
+        bot, bot.tree(), "Google Cloud Platform", "Google App Engine Standard Java Project");
     bot.button("Next >").click();
 
     if (extraBotActions != null) {
@@ -161,35 +159,17 @@ public class SwtBotAppEngineActions {
     return project;
   }
 
-  private static void openImportProjectsWizard(SWTWorkbenchBot bot,
-      String wizardCategory, String importWizardName) {
-    for (int tries = 1; true; tries++) {
-      SWTBotShell shell = null;
-      try {
-        bot.menu("File").menu("Import...").click();
-        shell = bot.shell("Import");
-        shell.activate();
-
-        SwtBotTreeUtilities.waitUntilTreeHasItems(bot, bot.tree());
-        SWTBotTreeItem treeItem = bot.tree().expandNode(wizardCategory);
-        SwtBotTreeUtilities.waitUntilTreeItemHasChild(bot, treeItem, importWizardName);
-        treeItem.select(importWizardName);
-        break;
-      } catch (TimeoutException e) {
-        if (tries == 2) {
-          throw e;
-        } else if (shell != null) {
-          shell.close();
-        }
-      }
-    }
+  private static void openImportProjectsWizard(
+      SWTWorkbenchBot bot, String wizardCategory, String importWizardName) {
+    bot.menu("File").menu("Import...").click();
+    SWTBotShell shell = bot.shell("Import");
+    shell.activate();
+    SwtBotTreeUtilities.select(bot, bot.tree(), wizardCategory, importWizardName);
   }
 
-  /**
-   * Import a Maven project from a zip file
-   */
-  public static IProject importMavenProject(SWTWorkbenchBot bot, String projectName,
-      File extractedLocation) {
+  /** Import a Maven project from a zip file. */
+  public static IProject importMavenProject(
+      SWTWorkbenchBot bot, String projectName, File extractedLocation) {
 
     openImportProjectsWizard(bot, "Maven", "Existing Maven Projects");
     bot.button("Next >").click();

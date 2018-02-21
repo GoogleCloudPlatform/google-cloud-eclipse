@@ -21,6 +21,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
+import com.google.cloud.tools.eclipse.swtbot.SwtBotTreeUtilities;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.core.runtime.CoreException;
@@ -46,7 +47,7 @@ public class DeployPropertyPageTest extends BaseProjectTest {
     assertTrue(AppEngineStandardFacet.hasFacet(facetedProject));
 
     SwtBotProjectActions.openProjectProperties(bot, projectName);
-    bot.tree().expandNode("Google Cloud Platform").select("App Engine Deployment");
+    SwtBotTreeUtilities.select(bot, bot.tree(), "Google Cloud Platform", "App Engine Deployment");
     bot.text("No projects found");
   }
 

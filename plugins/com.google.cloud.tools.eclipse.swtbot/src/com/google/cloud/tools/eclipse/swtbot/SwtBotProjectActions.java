@@ -81,7 +81,7 @@ public final class SwtBotProjectActions {
     SWTBotShell shell = bot.shell("New Project");
     shell.activate();
 
-    bot.tree().expandNode("Maven").select("Maven Project");
+    SwtBotTreeUtilities.select(bot, bot.tree(), "Maven", "Maven Project");
     bot.button("Next >").click();
 
     // we want to specify an archetype
