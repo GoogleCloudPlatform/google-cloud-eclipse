@@ -18,11 +18,8 @@ package com.google.cloud.tools.eclipse.swtbot;
 
 import com.google.common.base.Preconditions;
 import java.util.Arrays;
-import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
-import org.eclipse.swtbot.swt.finder.finders.UIThreadRunnable;
-import org.eclipse.swtbot.swt.finder.results.Result;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
@@ -34,53 +31,6 @@ import org.eclipse.swtbot.swt.finder.widgets.TimeoutException;
  */
 public class SwtBotTreeUtilities {
 
-  private static class TreeCollapsedCondition extends DefaultCondition {
-    private final TreeItem tree;
-
-    private TreeCollapsedCondition(TreeItem tree) {
-      this.tree = tree;
-    }
-
-    @Override
-    public String getFailureMessage() {
-      return "Could not collapse the tree of " + tree.getText();
-    }
-
-    @Override
-    public boolean test() throws Exception {
-      return !isTreeExpanded(tree);
-    }
-  }
-
-  private static class TreeExpandedCondition extends DefaultCondition {
-    private final TreeItem tree;
-
-    private TreeExpandedCondition(TreeItem tree) {
-      this.tree = tree;
-    }
-
-    @Override
-    public String getFailureMessage() {
-      return "Could not expand the tree of " + tree.getText();
-    }
-
-    @Override
-    public boolean test() throws Exception {
-      return isTreeExpanded(tree);
-    }
-  }
-
-  /**
-   * Helper method to check whether a given tree is expanded which can be called from any thread.
-   */
-  private static boolean isTreeExpanded(final TreeItem tree) {
-    return UIThreadRunnable.syncExec(new Result<Boolean>() {
-      @Override
-      public Boolean run() {
-        return tree.getExpanded();
-      }
-    });
-  }
   /**
    * Wait until the given tree has items, and return the first item.
    * 
