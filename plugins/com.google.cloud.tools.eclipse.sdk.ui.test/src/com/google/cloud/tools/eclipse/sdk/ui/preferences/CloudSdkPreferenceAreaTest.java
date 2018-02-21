@@ -26,8 +26,10 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
+import com.google.cloud.tools.eclipse.test.util.MockSdkGenerator;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
+import java.nio.file.Path;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.widgets.Button;
@@ -58,7 +60,7 @@ public class CloudSdkPreferenceAreaTest {
   private CloudSdkPreferenceArea area;
   private Shell shell;
 
-  private Button useLocalSdk;
+  private Button chooseSdk;
   private Text sdkLocation;
   private Label sdkVersion;
 
@@ -78,14 +80,31 @@ public class CloudSdkPreferenceAreaTest {
   }
 
   @Test
+  public void testVersion() throws Exception {
+    CloudSdkManager.forceManagedSdkFeature = true;
+
+    Path mockSdk = MockSdkGenerator.createMockSdk();
+    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn(mockSdk.toString());
+    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)).thenReturn("MANUAL");
+
+    createPreferenceArea();
+    assertEquals("SDK version: 184.0.0", sdkVersion.getText());
+
+    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)).thenReturn("AUTOMATIC");
+    area.load();
+    assertEquals("SDK version: No SDK found", sdkVersion.getText());
+  }
+
+  @Test
   public void testInvalidPath() {
-    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn(tempFolder.getRoot().getAbsolutePath());
+    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH))
+        .thenReturn(tempFolder.getRoot().getAbsolutePath());
     createPreferenceArea();
     assertEquals(IStatus.WARNING, area.getStatus().getSeverity());
 
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("");
     area.load();
-    assertEquals(IStatus.OK, area.getStatus().getSeverity());
+    assertTrue(area.getStatus().isOK());
   }
 
   // TODO(chanseok): can become "@Before setUp()" once we remove the managed SDK debug feature flag.
@@ -96,7 +115,7 @@ public class CloudSdkPreferenceAreaTest {
     area.createContents(shell);
     area.load();
 
-    useLocalSdk = CompositeUtil.findButton(shell, "Choose SDK");
+    chooseSdk = CompositeUtil.findButton(shell, "Choose SDK");
     sdkLocation = CompositeUtil.findControlAfterLabel(shell, Text.class, "&SDK location:");
     sdkVersion = CompositeUtil.findLabel(shell, "SDK version:");
   }
@@ -106,7 +125,7 @@ public class CloudSdkPreferenceAreaTest {
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
 
-    assertNull(useLocalSdk);
+    assertNull(chooseSdk);
     assertNotNull(sdkLocation);
     assertNotNull(sdkVersion);
     assertTrue(sdkLocation.isEnabled());
@@ -118,7 +137,7 @@ public class CloudSdkPreferenceAreaTest {
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
 
-    assertNotNull(useLocalSdk);
+    assertNotNull(chooseSdk);
     assertNotNull(sdkLocation);
     assertNotNull(sdkVersion);
   }
@@ -130,7 +149,7 @@ public class CloudSdkPreferenceAreaTest {
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
 
-    assertFalse(useLocalSdk.getSelection());
+    assertFalse(chooseSdk.getSelection());
     assertFalse(sdkLocation.isEnabled());
   }
 
@@ -141,7 +160,7 @@ public class CloudSdkPreferenceAreaTest {
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
 
-    assertTrue(useLocalSdk.getSelection());
+    assertTrue(chooseSdk.getSelection());
     assertTrue(sdkLocation.isEnabled());
   }
 
@@ -152,8 +171,8 @@ public class CloudSdkPreferenceAreaTest {
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
 
-    assertFalse(useLocalSdk.getSelection());
-    useLocalSdk.setSelection(true);
+    assertFalse(chooseSdk.getSelection());
+    chooseSdk.setSelection(true);
     area.performApply();
 
     verify(preferences).putValue(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT, "MANUAL");
@@ -163,16 +182,17 @@ public class CloudSdkPreferenceAreaTest {
   public void testValidationStatus_switchManagementOption() {
     CloudSdkManager.forceManagedSdkFeature = true;
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)).thenReturn("MANUAL");
-    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("/non-existing/directory");
+    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH))
+        .thenReturn("/non-existing/directory");
     createPreferenceArea();
 
-    assertTrue(useLocalSdk.getSelection());
+    assertTrue(chooseSdk.getSelection());
     assertEquals(IStatus.ERROR, area.getStatus().getSeverity());
 
-    new SWTBotCheckBox(useLocalSdk).click();
+    new SWTBotCheckBox(chooseSdk).click();
     assertTrue(area.getStatus().isOK());
 
-    new SWTBotCheckBox(useLocalSdk).click();
+    new SWTBotCheckBox(chooseSdk).click();
     assertEquals(IStatus.ERROR, area.getStatus().getSeverity());
   }
 }

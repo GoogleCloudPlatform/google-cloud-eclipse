@@ -40,7 +40,7 @@ public class Incident {
     
     /** An error occurred when retrieving GCP status. */
     ERROR,
-  };
+  }
 
   /** Return the highest severity of the given incidents. */
   @VisibleForTesting

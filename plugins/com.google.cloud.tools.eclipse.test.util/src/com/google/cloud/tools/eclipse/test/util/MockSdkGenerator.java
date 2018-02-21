@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.sdk.internal;
+package com.google.cloud.tools.eclipse.test.util;
 
 import static org.junit.Assert.assertTrue;
 
