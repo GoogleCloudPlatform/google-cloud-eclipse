@@ -271,7 +271,7 @@ The process is:
        `org.eclipse.core.runtime`).
        Features are specified using their Feature ID suffixed with `.feature.group`
        (e.g., `org.eclipse.rcp.feature.group`).
-  4. Right-click in the editor and choose _Create Target Definition File_
+  4. Select the file in the Package Explorer, right-click, and choose _Create Target Definition File_
      to update the corresponding .target file.
 
 Both the `.tpd` and `.target` files should be committed.
