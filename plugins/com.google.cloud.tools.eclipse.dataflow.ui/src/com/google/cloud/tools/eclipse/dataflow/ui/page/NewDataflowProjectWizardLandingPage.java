@@ -223,7 +223,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     // When the Browse button is pressed, open a directory selection dialogue
     locationBrowse.addSelectionListener(folderSelectionListener(getShell()));
 
-    // Updating the group ID updates the the default package name
+    // Updating the group ID updates the default package name
     ModifyListener propagateGroupIdToPackageListener = propagateGroupIdToPackageListener();
     groupIdInput.addModifyListener(propagateGroupIdToPackageListener);
     packageInput.addFocusListener(

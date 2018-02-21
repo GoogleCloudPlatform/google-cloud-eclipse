@@ -125,7 +125,7 @@ public class SwtBotAppEngineActions {
   }
 
   /**
-   * Use the the Eclipse general import project wizard to import an existing project from a
+   * Use the Eclipse general import project wizard to import an existing project from a
    * location.
    */
   public static IProject importNativeProject(SWTWorkbenchBot bot, String projectName,

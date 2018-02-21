@@ -135,7 +135,7 @@ target platform whenever dependencies are updated.
      Environments:`.
 
   1. The JDK just added should show up in the list on the right along with other
-     installed JDKs/JREs. Set the checkbox next the the JDK 8 added in the
+     installed JDKs/JREs. Set the checkbox next to the JDK 8 added in the
      previous steps to mark it as compatible with the `JavaSE-1.8` execution
      environment.
 
