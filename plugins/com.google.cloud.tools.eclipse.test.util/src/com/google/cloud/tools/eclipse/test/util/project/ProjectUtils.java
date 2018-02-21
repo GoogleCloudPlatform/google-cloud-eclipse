@@ -360,6 +360,8 @@ public class ProjectUtils {
         case "org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob":
           jobs.add(job);
           break;
+        default:
+          break;
       }
     }
     return jobs;

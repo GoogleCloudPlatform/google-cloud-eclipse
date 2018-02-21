@@ -61,6 +61,8 @@ public class Activator implements BundleActivator {
         case IJavaElement.JAVA_MODEL:
           visitChildren(delta);
           break;
+        default:
+          break;
       }
     }
 
