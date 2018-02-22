@@ -61,5 +61,6 @@ location "http://download.eclipse.org/linuxtools/update-docker" {
 }
 
 location "http://dadacoalition.org/yedit/" {
-  org.dadacoalition.yedit.feature.feature.group
+    org.dadacoalition.yedit.feature.feature.group
 }
+

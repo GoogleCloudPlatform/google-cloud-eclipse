@@ -56,8 +56,9 @@ location "http://download.eclipse.org/tools/orbit/downloads/latest-R/" {
     ch.qos.logback.slf4j
 }
 
-location "http://download.eclipse.org/linuxtools/update-docker" {
-	  org.eclipse.linuxtools.docker.feature.feature.group
+// Pick up Neon-compatible 2.3.0
+location "http://download.eclipse.org/linuxtools/update-docker-neon3respinb" {
+    org.eclipse.linuxtools.docker.feature.feature.group
 }
 
 location "http://dadacoalition.org/yedit/" {
