@@ -106,9 +106,13 @@ public final class CloudSdkPreferences extends AbstractPreferenceInitializer {
     } else {
       preferences.setValue(CLOUD_SDK_MANAGEMENT, CloudSdkManagementOption.AUTOMATIC.name());
     }
+    flushPreferences(getPreferenceNode());
+  }
 
+  @VisibleForTesting
+  static void flushPreferences(IEclipsePreferences preferenceNode) {
     try {
-      getPreferenceNode().flush();
+      preferenceNode.flush();
     } catch (BackingStoreException ex) {
       logger.log(Level.WARNING, "could not save preferences", ex);
     }

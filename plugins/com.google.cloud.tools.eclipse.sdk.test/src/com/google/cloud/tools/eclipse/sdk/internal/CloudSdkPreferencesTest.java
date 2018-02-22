@@ -19,14 +19,18 @@ package com.google.cloud.tools.eclipse.sdk.internal;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
 import com.google.cloud.tools.eclipse.test.util.TestPreferencesRule;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.osgi.service.prefs.BackingStoreException;
 
 public class CloudSdkPreferencesTest {
   @Rule public TestPreferencesRule preferencesCreator = new TestPreferencesRule();
@@ -103,5 +107,12 @@ public class CloudSdkPreferencesTest {
     CloudSdkPreferences.configureManagementPreferences(preferences, false /*cloudSdkAvailable*/);
     assertFalse(preferences.isDefault(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT));
     assertEquals("MANUAL", preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT));
+  }
+
+  @Test
+  public void testFlushPreferences() throws BackingStoreException {
+    IEclipsePreferences preferencesNode = mock(IEclipsePreferences.class);
+    CloudSdkPreferences.flushPreferences(preferencesNode);
+    verify(preferencesNode).flush();
   }
 }
