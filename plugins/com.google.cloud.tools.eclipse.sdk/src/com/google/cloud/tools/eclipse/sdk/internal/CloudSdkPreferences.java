@@ -21,17 +21,23 @@ import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
+import org.osgi.service.prefs.BackingStoreException;
 
 /**
  * Class for Cloud SDK preferences: defining constants, accessing their preference store and node,
  * initializing default values, etc.
  */
 public final class CloudSdkPreferences extends AbstractPreferenceInitializer {
+
+  private static final Logger logger = Logger.getLogger(CloudSdkPreferences.class.getName());
+
   // host bundle for the preference
   static final String BUNDLEID = "com.google.cloud.tools.eclipse.sdk";
 
@@ -99,6 +105,12 @@ public final class CloudSdkPreferences extends AbstractPreferenceInitializer {
       preferences.setValue(CLOUD_SDK_MANAGEMENT, CloudSdkManagementOption.MANUAL.name());
     } else {
       preferences.setValue(CLOUD_SDK_MANAGEMENT, CloudSdkManagementOption.AUTOMATIC.name());
+    }
+
+    try {
+      getPreferenceNode().flush();
+    } catch (BackingStoreException ex) {
+      logger.log(Level.WARNING, "could not save preferences", ex);
     }
   }
 
