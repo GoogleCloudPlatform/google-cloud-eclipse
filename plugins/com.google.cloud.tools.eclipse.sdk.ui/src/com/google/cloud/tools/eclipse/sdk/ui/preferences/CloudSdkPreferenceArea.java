@@ -60,6 +60,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       "com.google.cloud.tools.eclipse.preferences.main"; //$NON-NLS-1$
 
   private Button chooseSdk;
+  private Button updateSdk;
   private Composite chooseSdkArea;
   private CloudSdkDirectoryFieldEditor sdkLocation;
   private Label sdkVersionLabel;
@@ -82,7 +83,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     Composite contents = new Composite(parent, SWT.NONE);
     Link instructions = new Link(contents, SWT.WRAP);
     instructions.setText(
-        CloudSdkManager.getDefault().getDefault().isManagedSdkFeatureEnabled()
+        CloudSdkManager.getDefault().isManagedSdkFeatureEnabled()
             ? Messages.getString("CloudSdkRequiredWithManagedSdk") // $NON-NLS-1$
             : Messages.getString("CloudSdkRequired")); // $NON-NLS-1$
     instructions.setFont(contents.getFont());

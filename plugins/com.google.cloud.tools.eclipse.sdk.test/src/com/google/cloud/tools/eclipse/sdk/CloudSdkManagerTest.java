@@ -44,7 +44,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class CloudSdkManagerTest {
 
   @Mock private ManagedCloudSdk managedCloudSdk;
-  @Mock private IProgressMonitor monitor;
   private CloudSdkManager fixture = new CloudSdkManager();
 
   @Before
@@ -74,7 +73,7 @@ public class CloudSdkManagerTest {
   @Test
   public void testRunInstallJob_blocking() {
     CloudSdkModifyJob okJob = new FakeModifyJob(Status.OK_STATUS);
-    IStatus result = CloudSdkManager.runInstallJob(null, okJob, monitor);
+    IStatus result = CloudSdkManager.runInstallJob(null, okJob, null);
     // Incomplete test, but if it ever fails, something is surely broken.
     assertEquals(Job.NONE, okJob.getState());
     assertTrue(result.isOK());
@@ -83,7 +82,7 @@ public class CloudSdkManagerTest {
   @Test
   public void testRunInstallJob_canceled() {
     CloudSdkModifyJob cancelJob = new FakeModifyJob(Status.CANCEL_STATUS);
-    IStatus result = CloudSdkManager.runInstallJob(null, cancelJob, monitor);
+    IStatus result = CloudSdkManager.runInstallJob(null, cancelJob, null);
     assertEquals(Job.NONE, cancelJob.getState());
     assertEquals(Status.CANCEL, result.getSeverity());
   }
@@ -92,7 +91,7 @@ public class CloudSdkManagerTest {
   public void testRunInstallJob_installError() {
     IStatus error = StatusUtil.error(this, "awesome install error in unit test");
     CloudSdkModifyJob errorJob = new FakeModifyJob(error);
-    IStatus result = CloudSdkManager.runInstallJob(null, errorJob, monitor);
+    IStatus result = CloudSdkManager.runInstallJob(null, errorJob, null);
     assertEquals(Job.NONE, errorJob.getState());
     assertEquals(Status.ERROR, result.getSeverity());
     assertEquals("awesome install error in unit test", result.getMessage());
@@ -171,7 +170,7 @@ public class CloudSdkManagerTest {
             @Override
             public IStatus run(IProgressMonitor monitor) {
               // Should block until we allow SDK modification below.
-              fixture.runInstallJob(null, installJob, monitor);
+              CloudSdkManager.runInstallJob(null, installJob, monitor);
               return Status.OK_STATUS;
             }
           };
