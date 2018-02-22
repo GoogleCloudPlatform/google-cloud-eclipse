@@ -21,7 +21,7 @@ Import-Package: com.google.cloud.tools.eclipse.util.jobs,
  org.eclipse.ui.console,
  org.eclipse.ui.preferences,
  org.osgi.framework;version="[1.8.0,2.0.0)",
- org.osgi.service.prefs;version="1.1.1"
+ org.osgi.service.prefs
 Eclipse-RegisterBuddy: com.google.cloud.tools.appengine
 Export-Package: com.google.cloud.tools.eclipse.sdk,
  com.google.cloud.tools.eclipse.sdk.internal;x-friends:="com.google.cloud.tools.eclipse.sdk.ui"
