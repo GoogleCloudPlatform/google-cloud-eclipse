@@ -296,8 +296,8 @@ public class FacetUtil {
 
 
   /**
-   * Return the highest {@link IFacetProjectVersion version of a facet} that is supported with the
-   * other installed {@link IFacetProjectVersion facet versions} on a project other than those
+   * Return the highest {@link IProjectFacetVersion version of a facet} that is supported with the
+   * other installed {@link IProjectFacetVersion facet versions} on a project other than those
    * specified to be ignored. Somewhat like
    * {@link IFacetedProjectWorkingCopy#getHighestAvailableVersion(IProjectFacet)} when all installed
    * facet versions are treated as fixed.
@@ -322,8 +322,8 @@ public class FacetUtil {
   }
 
   /**
-   * Return the highest {@link IFacetProjectVersion version of a facet} that is supported with the
-   * other installed {@link IFacetProjectVersion facet versions} on a project. Somewhat like
+   * Return the highest {@link IProjectFacetVersion version of a facet} that is supported with the
+   * other installed {@link IProjectFacetVersion facet versions} on a project. Somewhat like
    * {@link IFacetedProjectWorkingCopy#getHighestAvailableVersion(IProjectFacet)} when all installed
    * facet versions are treated as fixed.
    */
