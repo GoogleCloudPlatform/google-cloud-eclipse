@@ -25,7 +25,7 @@
          optional="true"/>
 
    <includes
-         id="org.eclipse.linuxtools.docker"
+         id="org.eclipse.linuxtools.docker.feature"
          version="0.0.0"
          name="Docker Tools"
          optional="true"/>
