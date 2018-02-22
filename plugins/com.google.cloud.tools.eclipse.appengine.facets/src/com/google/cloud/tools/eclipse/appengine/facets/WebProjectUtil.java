@@ -73,8 +73,8 @@ public class WebProjectUtil {
    * @param filePath the path of the file within the project's {@code WEB-INF}
    * @param contents the content for the file
    * @see #findInWebInf(IProject, IPath)
-   * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=448544">Eclipse bug 448544</a> for
-   *      details of the {@code defaultRootSource} tag
+   * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=448544">Eclipse bug 448544</a>
+   *       for details of the {@code defaultRootSource} tag
    */
   public static IFile createFileInWebInf(IProject project, IPath filePath, InputStream contents,
       IProgressMonitor monitor) throws CoreException {
@@ -96,8 +96,8 @@ public class WebProjectUtil {
    * 
    * @param project the hosting project
    * @param folderPath the path of the folder within the project's {@code WEB-INF}
-   * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=448544">Eclipse bug 448544</a> for
-   *      details of the {@code defaultRootSource} tag
+   * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=448544">Eclipse bug 448544</a>
+   *       for details of the {@code defaultRootSource} tag
    */
   public static IFolder createFolderInWebInf(IProject project, Path folderPath,
       IProgressMonitor monitor) throws CoreException {
