@@ -41,10 +41,21 @@ public class CloudSdkManager {
       "com.google.cloud.tools.eclipse.sdk/enable.managed.cloud.sdk";
 
   // To be able to write tests for the managed Cloud SDK feature, which is disabled at the moment.
-  @VisibleForTesting
-  public static boolean forceManagedSdkFeature;
+  @VisibleForTesting public static boolean forceManagedSdkFeature;
 
-  public static boolean isManagedSdkFeatureEnabled() {
+  @VisibleForTesting public static CloudSdkManager singleton;
+
+  public static synchronized CloudSdkManager getDefault() {
+    if (singleton == null) {
+      singleton = new CloudSdkManager();
+    }
+    return singleton;
+  }
+
+  // readers = using SDK, writers = modifying SDK
+  @VisibleForTesting final ReadWriteLock modifyLock = new ReentrantReadWriteLock();
+
+  public boolean isManagedSdkFeatureEnabled() {
     if (forceManagedSdkFeature) {
       return true;
     }
@@ -57,10 +68,6 @@ public class CloudSdkManager {
     return false;
   }
 
-  // readers = using SDK, writers = modifying SDK
-  @VisibleForTesting
-  static final ReadWriteLock modifyLock = new ReentrantReadWriteLock();
-
   /**
    * Prevents potential future SDK auto-install or auto-update functionality to allow safely using
    * the managed Cloud SDK for some period of time. Blocks if an install or update is in progress.
@@ -72,7 +79,7 @@ public class CloudSdkManager {
    *
    * @see CloudSdkManager#allowModifyingSdk
    */
-  public static void preventModifyingSdk() throws InterruptedException {
+  public void preventModifyingSdk() throws InterruptedException {
     do {
       IJobManager jobManager = Job.getJobManager();
       // The join is to improve UI reporting of blocked jobs. Most of the waiting should be here.
@@ -88,7 +95,7 @@ public class CloudSdkManager {
    *
    * @see CloudSdkManager#preventModifyingSdk
    */
-  public static void allowModifyingSdk() {
+  public void allowModifyingSdk() {
     modifyLock.readLock().unlock();
   }
 
@@ -96,7 +103,7 @@ public class CloudSdkManager {
    * Triggers the installation of a Cloud SDK, if the preferences are configured to auto-manage the
    * SDK.
    */
-  public static void installManagedSdkAsync() {
+  public void installManagedSdkAsync() {
     if (isManagedSdkFeatureEnabled()) {
       if (CloudSdkPreferences.isAutoManaging()) {
         // Keep installation failure as ERROR so that failures are reported
@@ -115,8 +122,7 @@ public class CloudSdkManager {
    * @param consoleStream stream to which the install output is written
    * @param monitor the progress monitor that can also be used to cancel the installation
    */
-  public static IStatus installManagedSdk(
-      MessageConsoleStream consoleStream, IProgressMonitor monitor) {
+  public IStatus installManagedSdk(MessageConsoleStream consoleStream, IProgressMonitor monitor) {
     if (isManagedSdkFeatureEnabled()) {
       if (CloudSdkPreferences.isAutoManaging()) {
         // We don't check if the Cloud SDK installed but always schedule the install job; such check
@@ -145,7 +151,7 @@ public class CloudSdkManager {
    * Triggers the update of a managed Cloud SDK, if the preferences are configured to auto-manage
    * the SDK.
    */
-  public static void updateManagedSdkAsync() {
+  public void updateManagedSdkAsync() {
     if (isManagedSdkFeatureEnabled()) {
       if (CloudSdkPreferences.isAutoManaging()) {
         // Keep installation failure as ERROR so that failures are reported

@@ -10,7 +10,7 @@ import org.eclipse.core.commands.ExecutionException;
 public class UpdateManagedCloudSdkHandler extends AbstractHandler {
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
-    CloudSdkManager.updateManagedSdkAsync();
+    CloudSdkManager.getDefault().updateManagedSdkAsync();
     return null;
   }
 }

@@ -45,6 +45,7 @@ public class CloudSdkManagerTest {
 
   @Mock private ManagedCloudSdk managedCloudSdk;
   @Mock private IProgressMonitor monitor;
+  private CloudSdkManager fixture = new CloudSdkManager();
 
   @Before
   public void setUp() throws ManagedSdkVerificationException, ManagedSdkVersionMismatchException {
@@ -54,21 +55,20 @@ public class CloudSdkManagerTest {
 
   @After
   public void tearDown() {
+    assertTrue("write lock not available", fixture.modifyLock.writeLock().tryLock());
+    CloudSdkManager.singleton = null;
     CloudSdkManager.forceManagedSdkFeature = false;
-
-    assertTrue(CloudSdkManager.modifyLock.writeLock().tryLock());
-    CloudSdkManager.modifyLock.writeLock().unlock();
   }
 
   @Test
   public void testManagedSdkOption() {
-    assertFalse(CloudSdkManager.isManagedSdkFeatureEnabled());
+    assertFalse(fixture.isManagedSdkFeatureEnabled());
   }
 
   @Test
   public void testManagedSdkOption_featureForced() {
     CloudSdkManager.forceManagedSdkFeature = true;
-    assertTrue(CloudSdkManager.isManagedSdkFeatureEnabled());
+    assertTrue(fixture.isManagedSdkFeatureEnabled());
   }
 
   @Test
@@ -100,66 +100,67 @@ public class CloudSdkManagerTest {
 
   @Test
   public void testPreventModifyingSdk_cannotWrite() throws InterruptedException {
-    CloudSdkManager.preventModifyingSdk();
+    fixture.preventModifyingSdk();
     try {
-      assertFalse(CloudSdkManager.modifyLock.writeLock().tryLock());
+      assertFalse(fixture.modifyLock.writeLock().tryLock());
     } finally {
-      CloudSdkManager.allowModifyingSdk();
+      fixture.allowModifyingSdk();
     }
   }
 
   @Test
   public void testPreventModifyingSdk_canRead() throws InterruptedException {
-    CloudSdkManager.preventModifyingSdk();
+    fixture.preventModifyingSdk();
     try {
-      Lock readLock = CloudSdkManager.modifyLock.readLock();
+      Lock readLock = fixture.modifyLock.readLock();
       assertTrue(readLock.tryLock());
       readLock.unlock();
     } finally {
-      CloudSdkManager.allowModifyingSdk();
+      fixture.allowModifyingSdk();
     }
   }
 
   @Test
   public void testAllowModifyingSdk_allowsWrite() throws InterruptedException {
-    CloudSdkManager.preventModifyingSdk();
-    CloudSdkManager.allowModifyingSdk();
+    fixture.preventModifyingSdk();
+    fixture.allowModifyingSdk();
 
-    Lock writeLock = CloudSdkManager.modifyLock.writeLock();
+    Lock writeLock = fixture.modifyLock.writeLock();
     assertTrue(writeLock.tryLock());
     writeLock.unlock();
   }
 
   @Test
   public void testPreventModifyingSdk_doesNotBlockSimultaneousCalls() throws InterruptedException {
-    CloudSdkManager.preventModifyingSdk();
+    fixture.preventModifyingSdk();
 
     try {
-      Job job = new Job("another caller") {
-        @Override
-        public IStatus run(IProgressMonitor monitor) {
-          try {
-            CloudSdkManager.preventModifyingSdk();
-            return Status.OK_STATUS;
-          } catch (InterruptedException e) {
-            return Status.CANCEL_STATUS;
-          } finally {
-            CloudSdkManager.allowModifyingSdk();
-          }
-        }
-      };
+      Job job =
+          new Job("another caller") {
+            @Override
+            public IStatus run(IProgressMonitor monitor) {
+              try {
+                fixture.preventModifyingSdk();
+                return Status.OK_STATUS;
+              } catch (InterruptedException e) {
+                return Status.CANCEL_STATUS;
+              } finally {
+                fixture.allowModifyingSdk();
+              }
+            }
+          };
       job.schedule();
       job.join();
 
       assertTrue(job.getResult().isOK());
     } finally {
-      CloudSdkManager.allowModifyingSdk();
+      fixture.allowModifyingSdk();
     }
   }
 
   @Test
   public void testPreventModifyingSdk_blocksRunInstallJob() throws InterruptedException {
-    CloudSdkManager.preventModifyingSdk();
+    fixture.preventModifyingSdk();
     boolean prevented = true;
 
     try {
@@ -170,7 +171,7 @@ public class CloudSdkManagerTest {
             @Override
             public IStatus run(IProgressMonitor monitor) {
               // Should block until we allow SDK modification below.
-              CloudSdkManager.runInstallJob(null, installJob, monitor);
+              fixture.runInstallJob(null, installJob, monitor);
               return Status.OK_STATUS;
             }
           };
@@ -182,7 +183,7 @@ public class CloudSdkManagerTest {
       // Incomplete test, but if it ever fails, something is surely broken.
       assertEquals(Job.RUNNING, concurrentLauncher.getState());
 
-      CloudSdkManager.allowModifyingSdk();
+      fixture.allowModifyingSdk();
       prevented = false;
       concurrentLauncher.join();
 
@@ -191,17 +192,17 @@ public class CloudSdkManagerTest {
       assertTrue(concurrentLauncher.getResult().isOK());
     } finally {
       if (prevented) {
-        CloudSdkManager.allowModifyingSdk();
+        fixture.allowModifyingSdk();
       }
     }
   }
 
-  private static class FakeModifyJob extends CloudSdkModifyJob {
+  private class FakeModifyJob extends CloudSdkModifyJob {
 
     private final IStatus result;
 
     private FakeModifyJob(IStatus result) {
-      super("fake job", null, CloudSdkManager.modifyLock);
+      super("fake job", null, fixture.modifyLock);
       this.result = result;
     }
 

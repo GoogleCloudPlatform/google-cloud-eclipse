@@ -41,7 +41,7 @@ public class InstallManagedCloudSdkStartup implements IStartup {
         new WorkbenchJob("Check Google Cloud SDK") {
           @Override
           public IStatus runInUIThread(IProgressMonitor monitor) {
-            CloudSdkManager.installManagedSdkAsync();
+            CloudSdkManager.getDefault().installManagedSdkAsync();
             return Status.OK_STATUS;
           }
         };

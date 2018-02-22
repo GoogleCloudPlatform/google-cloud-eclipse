@@ -21,7 +21,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
@@ -67,6 +72,7 @@ public class CloudSdkPreferenceAreaTest {
   @After
   public void tearDown() {
     CloudSdkManager.forceManagedSdkFeature = false;
+    CloudSdkManager.singleton = null;
   }
 
   @Test
@@ -194,5 +200,26 @@ public class CloudSdkPreferenceAreaTest {
 
     new SWTBotCheckBox(chooseSdk).click();
     assertEquals(IStatus.ERROR, area.getStatus().getSeverity());
+  }
+
+  @Test
+  public void testApply_automatic() {
+    CloudSdkManager mockManager = mock(CloudSdkManager.class);
+    doNothing().when(mockManager).installManagedSdkAsync();
+    doReturn(true).when(mockManager).isManagedSdkFeatureEnabled();
+    CloudSdkManager.singleton = mockManager;
+
+    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)).thenReturn("MANUAL");
+    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH))
+        .thenReturn("/non-existing/directory");
+
+    createPreferenceArea();
+    new SWTBotCheckBox(chooseSdk).click();
+    assertTrue(area.getStatus().isOK());
+
+    area.performApply();
+    verify(mockManager).installManagedSdkAsync();
+    verify(mockManager, atLeastOnce()).isManagedSdkFeatureEnabled();
+    verifyNoMoreInteractions(mockManager);
   }
 }

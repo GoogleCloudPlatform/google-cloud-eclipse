@@ -124,7 +124,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
   private static IStatus validateCloudSdk(IProgressMonitor monitor) {
     // ensure we have a Cloud SDK; no-op if not configured to use managed sdk
-    IStatus status = CloudSdkManager.installManagedSdk(null, monitor);
+    IStatus status = CloudSdkManager.getDefault().installManagedSdk(null, monitor);
     if (!status.isOK()) {
       return status;
     }
