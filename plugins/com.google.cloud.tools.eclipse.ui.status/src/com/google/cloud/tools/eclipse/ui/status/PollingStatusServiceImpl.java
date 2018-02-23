@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.ui.status;
 
 import com.google.cloud.tools.eclipse.ui.status.Incident.Severity;
-import java.util.function.Consumer;
 import com.google.common.base.Joiner;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
@@ -35,6 +34,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 import org.eclipse.core.net.proxy.IProxyData;
 import org.eclipse.core.net.proxy.IProxyService;
@@ -58,22 +58,29 @@ import org.osgi.service.component.annotations.ReferencePolicy;
  */
 @Component(name = "polling")
 public class PollingStatusServiceImpl implements GcpStatusMonitoringService {
+  /** Simple recurring job to refresh the status. */
+  private class PollJob extends Job {
+    public PollJob() {
+      super(Messages.getString("poll.job.name")); //$NON-NLS-1$
+      setSystem(true);
+    }
+
+    @Override
+    protected IStatus run(IProgressMonitor monitor) {
+      refreshStatus();
+      if (active) {
+        schedule(pollTime);
+      }
+      return Status.OK_STATUS;
+    }
+  };
+
   private static final Logger logger = Logger.getLogger(PollingStatusServiceImpl.class.getName());
 
   private static final URI STATUS_JSON_URI =
-      URI.create("https://status.cloud.google.com/incidents.json");
+      URI.create("https://status.cloud.google.com/incidents.json"); //$NON-NLS-1$
 
-  private Job pollingJob =
-      new Job("Retrieving Google Cloud Platform status") {
-        @Override
-        protected IStatus run(IProgressMonitor monitor) {
-          refreshStatus();
-          if (active) {
-            schedule(pollTime);
-          }
-          return Status.OK_STATUS;
-        }
-      };
+  private Job pollingJob = new PollJob();
 
   private boolean active = false;
   private long pollTime = 3 * 60 * 1000; // poll every 3 minutes
@@ -117,7 +124,7 @@ public class PollingStatusServiceImpl implements GcpStatusMonitoringService {
       // recent to the oldest.  Although fetching with gzip encoding reduces to 36k over the wire,
       // we can still do better by retrieving only the first 8k.
       URLConnection connection = STATUS_JSON_URI.toURL().openConnection(getProxy(STATUS_JSON_URI));
-      connection.addRequestProperty("Range", "bytes=0-8192");
+      connection.addRequestProperty("Range", "bytes=0-8192"); //$NON-NLS-1$ //$NON-NLS-2$
       try (InputStream input = connection.getInputStream()) {
         InputStreamReader streamReader = new InputStreamReader(input, StandardCharsets.UTF_8);
         Collection<Incident> activeIncidents = extractIncidentsInProgress(gson, streamReader);
@@ -127,13 +134,13 @@ public class PollingStatusServiceImpl implements GcpStatusMonitoringService {
           Severity highestSeverity = Incident.getHighestSeverity(activeIncidents);
           Collection<String> affectedServices = Incident.getAffectedServiceNames(activeIncidents);
           currentStatus =
-              new GcpStatus(highestSeverity, Joiner.on(", ").join(affectedServices), activeIncidents);
+              new GcpStatus(highestSeverity, Joiner.on(", ").join(affectedServices), activeIncidents); //$NON-NLS-1$
         }
       }
     } catch (IOException ex) {
       currentStatus = new GcpStatus(Severity.ERROR, ex.toString(), null);
     }
-    logger.info("current GCP status = " + currentStatus);
+    logger.info("current GCP status = " + currentStatus); //$NON-NLS-1$
     for (Consumer<GcpStatusMonitoringService> listener : listeners) {
       listener.accept(this);
     }
@@ -177,7 +184,7 @@ public class PollingStatusServiceImpl implements GcpStatusMonitoringService {
           return new Proxy(
               Type.SOCKS, new InetSocketAddress(proxyData.getHost(), proxyData.getPort()));
         default:
-          logger.warning("Unknown proxy-data type: " + proxyData.getType());
+          logger.warning("Unknown proxy-data type: " + proxyData.getType()); //$NON-NLS-1$
           break;
       }
     }
