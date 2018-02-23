@@ -40,7 +40,6 @@ public class CloudSdkManagerTest {
   @After
   public void tearDown() {
     assertTrue("write lock not available", modifyLock.writeLock().tryLock());
-    CloudSdkManager.instance = null;
     CloudSdkManager.forceManagedSdkFeature = false;
   }
 

@@ -44,7 +44,7 @@ public class CloudSdkManager {
   // This will go away once we permanently enable the feature.
   @VisibleForTesting static boolean forceManagedSdkFeature;
 
-  @VisibleForTesting public static CloudSdkManager instance;
+  private static CloudSdkManager instance;
 
   // readers = using SDK, writers = modifying SDK
   private final ReadWriteLock modifyLock;
