@@ -72,7 +72,7 @@ public class CloudSdkPreferenceAreaTest {
   @After
   public void tearDown() {
     CloudSdkManager.forceManagedSdkFeature = false;
-    CloudSdkManager.singleton = null;
+    CloudSdkManager.instance = null;
   }
 
   @Test
@@ -207,7 +207,7 @@ public class CloudSdkPreferenceAreaTest {
     CloudSdkManager mockManager = mock(CloudSdkManager.class);
     doNothing().when(mockManager).installManagedSdkAsync();
     doReturn(true).when(mockManager).isManagedSdkFeatureEnabled();
-    CloudSdkManager.singleton = mockManager;
+    CloudSdkManager.instance = mockManager;
 
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)).thenReturn("MANUAL");
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH))

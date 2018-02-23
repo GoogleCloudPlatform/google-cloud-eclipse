@@ -84,7 +84,7 @@ public final class CloudSdkPreferences extends AbstractPreferenceInitializer {
 
   @VisibleForTesting
   static void initializeDefaultPreferences(IPreferenceStore preferences) {
-    if (CloudSdkManager.getDefault().isManagedSdkFeatureEnabled()) {
+    if (CloudSdkManager.getInstance().isManagedSdkFeatureEnabled()) {
       if (!preferences.contains(CLOUD_SDK_MANAGEMENT)) {
         // If the CLOUD_SDK_MANAGEMENT preference has not been set, then determine the
         // appropriate setting. Note that CloudSdkPreferenceResolver only checks for

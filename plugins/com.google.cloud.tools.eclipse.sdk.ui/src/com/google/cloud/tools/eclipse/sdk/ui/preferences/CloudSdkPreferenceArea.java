@@ -60,7 +60,6 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       "com.google.cloud.tools.eclipse.preferences.main"; //$NON-NLS-1$
 
   private Button chooseSdk;
-  private Button updateSdk;
   private Composite chooseSdkArea;
   private CloudSdkDirectoryFieldEditor sdkLocation;
   private Label sdkVersionLabel;
@@ -83,7 +82,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     Composite contents = new Composite(parent, SWT.NONE);
     Link instructions = new Link(contents, SWT.WRAP);
     instructions.setText(
-        CloudSdkManager.getDefault().isManagedSdkFeatureEnabled()
+        CloudSdkManager.getInstance().isManagedSdkFeatureEnabled()
             ? Messages.getString("CloudSdkRequiredWithManagedSdk") // $NON-NLS-1$
             : Messages.getString("CloudSdkRequired")); // $NON-NLS-1$
     instructions.setFont(contents.getFont());
@@ -98,7 +97,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     sdkVersionLabel.setFont(contents.getFont());
     sdkVersionLabel.setText(Messages.getString("SdkVersion", "Unset")); //$NON-NLS-1$ //$NON-NLS-2$
 
-    if (CloudSdkManager.getDefault().isManagedSdkFeatureEnabled()) {
+    if (CloudSdkManager.getInstance().isManagedSdkFeatureEnabled()) {
       chooseSdk = new Button(parent, SWT.CHECK);
       chooseSdk.setText(Messages.getString("UseLocalSdk")); //$NON-NLS-1$
       chooseSdk.addSelectionListener(new SelectionAdapter() {
@@ -128,7 +127,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     sdkLocation.setPreferenceStore(getPreferenceStore());
     sdkLocation.setPropertyChangeListener(wrappedPropertyChangeListener);
 
-    if (CloudSdkManager.getDefault().isManagedSdkFeatureEnabled()) {
+    if (CloudSdkManager.getInstance().isManagedSdkFeatureEnabled()) {
       GridLayoutFactory.fillDefaults().numColumns(sdkLocation.getNumberOfControls())
           .extendedMargins(IDialogConstants.LEFT_MARGIN, 0, 0, 0)
           .generateLayout(chooseSdkArea);
@@ -144,10 +143,10 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
   
   private void updateSelectedVersion() {
     String version = Messages.getString("UnknownVersion"); //$NON-NLS-1$
-    if (!CloudSdkManager.getDefault().isManagedSdkFeatureEnabled() || chooseSdk.getSelection()) {
+    if (!CloudSdkManager.getInstance().isManagedSdkFeatureEnabled() || chooseSdk.getSelection()) {
       Path path = Paths.get(sdkLocation.getStringValue());
       version = getSdkVersion(path);
-    } else if (CloudSdkManager.getDefault().isManagedSdkFeatureEnabled()) {
+    } else if (CloudSdkManager.getInstance().isManagedSdkFeatureEnabled()) {
       try {
         Path home = ManagedCloudSdk.newManagedSdk().getSdkHome();
         version = getSdkVersion(home);
@@ -193,7 +192,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
   @Override
   public void load() {
-    if (CloudSdkManager.getDefault().isManagedSdkFeatureEnabled()) {
+    if (CloudSdkManager.getInstance().isManagedSdkFeatureEnabled()) {
       loadSdkManagement(false /* loadDefault */);
       updateControlEnablement();
     }
@@ -204,7 +203,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
   @Override
   public void loadDefault() {
-    if (CloudSdkManager.getDefault().isManagedSdkFeatureEnabled()) {
+    if (CloudSdkManager.getInstance().isManagedSdkFeatureEnabled()) {
       loadSdkManagement(true /* loadDefault */);
       updateControlEnablement();
     }
@@ -218,14 +217,14 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
   @Override
   public void performApply() {
-    if (CloudSdkManager.getDefault().isManagedSdkFeatureEnabled()) {
+    if (CloudSdkManager.getInstance().isManagedSdkFeatureEnabled()) {
       if (chooseSdk.getSelection()) {
         getPreferenceStore().putValue(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT,
             CloudSdkManagementOption.MANUAL.name());
       } else {
         getPreferenceStore().putValue(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT,
             CloudSdkManagementOption.AUTOMATIC.name());
-        CloudSdkManager.getDefault().installManagedSdkAsync();
+        CloudSdkManager.getInstance().installManagedSdkAsync();
       }
     }
     sdkLocation.store();
@@ -290,7 +289,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
     @Override
     protected boolean doCheckState() {
-      if (CloudSdkManager.getDefault().isManagedSdkFeatureEnabled() && !chooseSdk.getSelection()) {
+      if (CloudSdkManager.getInstance().isManagedSdkFeatureEnabled() && !chooseSdk.getSelection()) {
         // return early if we're not using a local SDK
         return true;
       }

@@ -44,7 +44,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class CloudSdkManagerTest {
 
   @Mock private ManagedCloudSdk managedCloudSdk;
-  private CloudSdkManager fixture = new CloudSdkManager();
+  private final CloudSdkManager fixture = new CloudSdkManager();
 
   @Before
   public void setUp() throws ManagedSdkVerificationException, ManagedSdkVersionMismatchException {
@@ -55,7 +55,7 @@ public class CloudSdkManagerTest {
   @After
   public void tearDown() {
     assertTrue("write lock not available", fixture.modifyLock.writeLock().tryLock());
-    CloudSdkManager.singleton = null;
+    CloudSdkManager.instance = null;
     CloudSdkManager.forceManagedSdkFeature = false;
   }
 

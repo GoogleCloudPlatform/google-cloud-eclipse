@@ -43,14 +43,17 @@ public class CloudSdkManager {
   // To be able to write tests for the managed Cloud SDK feature, which is disabled at the moment.
   @VisibleForTesting public static boolean forceManagedSdkFeature;
 
-  @VisibleForTesting public static CloudSdkManager singleton;
+  @VisibleForTesting public static CloudSdkManager instance;
 
-  public static synchronized CloudSdkManager getDefault() {
-    if (singleton == null) {
-      singleton = new CloudSdkManager();
+  public static synchronized CloudSdkManager getInstance() {
+    if (instance == null) {
+      instance = new CloudSdkManager();
     }
-    return singleton;
+    return instance;
   }
+
+  @VisibleForTesting
+  CloudSdkManager() {}
 
   // readers = using SDK, writers = modifying SDK
   @VisibleForTesting final ReadWriteLock modifyLock = new ReentrantReadWriteLock();

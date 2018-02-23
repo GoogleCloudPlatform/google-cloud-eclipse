@@ -88,7 +88,7 @@ public class DeployJob extends WorkspaceJob {
     try {
       progress.subTask("Checking for Google Cloud SDK");
       IStatus installStatus =
-          CloudSdkManager.getDefault().installManagedSdk(stdoutOutputStream, progress.newChild(20));
+          CloudSdkManager.getInstance().installManagedSdk(stdoutOutputStream, progress.newChild(20));
       if (installStatus != Status.OK_STATUS) {
         return StatusUtil.error(
             this,
