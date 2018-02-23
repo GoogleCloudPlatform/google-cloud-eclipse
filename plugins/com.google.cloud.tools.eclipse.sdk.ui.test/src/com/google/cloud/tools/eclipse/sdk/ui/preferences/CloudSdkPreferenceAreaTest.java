@@ -23,9 +23,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -43,7 +41,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotCheckBox;
-import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -60,8 +57,8 @@ public class CloudSdkPreferenceAreaTest {
   @Rule public ShellTestResource shellResource = new ShellTestResource();
   @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
-  @Mock
-  private IPreferenceStore preferences;
+  @Mock private IPreferenceStore preferences;
+  @Mock private CloudSdkManager cloudSdkManager;
 
   private CloudSdkPreferenceArea area;
   private Shell shell;
@@ -69,12 +66,6 @@ public class CloudSdkPreferenceAreaTest {
   private Button chooseSdk;
   private Text sdkLocation;
   private Label sdkVersion;
-
-  @After
-  public void tearDown() {
-    CloudSdkManager.forceManagedSdkFeature = false;
-    CloudSdkManager.instance = null;
-  }
 
   @Test
   public void testNonExistentPath() {
@@ -88,7 +79,7 @@ public class CloudSdkPreferenceAreaTest {
 
   @Test
   public void testVersion() throws Exception {
-    CloudSdkManager.forceManagedSdkFeature = true;
+    when(cloudSdkManager.isManagedSdkFeatureEnabled()).thenReturn(true);
 
     Path mockSdk = MockSdkGenerator.createMockSdk("1.23.4");
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn(mockSdk.toString());
@@ -117,7 +108,7 @@ public class CloudSdkPreferenceAreaTest {
   // TODO(chanseok): can become "@Before setUp()" once we remove the managed SDK debug feature flag.
   private void createPreferenceArea() {
     shell = shellResource.getShell();
-    area = new CloudSdkPreferenceArea();
+    area = new CloudSdkPreferenceArea(cloudSdkManager);
     area.setPreferenceStore(preferences);
     area.createContents(shell);
     area.load();
@@ -140,7 +131,7 @@ public class CloudSdkPreferenceAreaTest {
 
   @Test
   public void testUi_sdkManagementFeature() {
-    CloudSdkManager.forceManagedSdkFeature = true;
+    when(cloudSdkManager.isManagedSdkFeatureEnabled()).thenReturn(true);
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
 
@@ -151,7 +142,7 @@ public class CloudSdkPreferenceAreaTest {
 
   @Test
   public void testControlStates_automaticSdk() {
-    CloudSdkManager.forceManagedSdkFeature = true;
+    when(cloudSdkManager.isManagedSdkFeatureEnabled()).thenReturn(true);
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)).thenReturn("AUTOMATIC");
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
@@ -162,7 +153,7 @@ public class CloudSdkPreferenceAreaTest {
 
   @Test
   public void testControlStates_manualSdk() {
-    CloudSdkManager.forceManagedSdkFeature = true;
+    when(cloudSdkManager.isManagedSdkFeatureEnabled()).thenReturn(true);
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)).thenReturn("MANUAL");
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
@@ -173,7 +164,7 @@ public class CloudSdkPreferenceAreaTest {
 
   @Test
   public void testPerformApply_preferencesSaved() {
-    CloudSdkManager.forceManagedSdkFeature = true;
+    when(cloudSdkManager.isManagedSdkFeatureEnabled()).thenReturn(true);
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)).thenReturn("AUTOMATIC");
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
@@ -187,7 +178,7 @@ public class CloudSdkPreferenceAreaTest {
 
   @Test
   public void testValidationStatus_switchManagementOption() {
-    CloudSdkManager.forceManagedSdkFeature = true;
+    when(cloudSdkManager.isManagedSdkFeatureEnabled()).thenReturn(true);
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)).thenReturn("MANUAL");
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH))
         .thenReturn("/non-existing/directory");
@@ -205,10 +196,7 @@ public class CloudSdkPreferenceAreaTest {
 
   @Test
   public void testApply_automatic() {
-    CloudSdkManager mockManager = mock(CloudSdkManager.class);
-    doNothing().when(mockManager).installManagedSdkAsync();
-    doReturn(true).when(mockManager).isManagedSdkFeatureEnabled();
-    CloudSdkManager.instance = mockManager;
+    doReturn(true).when(cloudSdkManager).isManagedSdkFeatureEnabled();
 
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)).thenReturn("MANUAL");
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH))
@@ -219,8 +207,8 @@ public class CloudSdkPreferenceAreaTest {
     assertTrue(area.getStatus().isOK());
 
     area.performApply();
-    verify(mockManager).installManagedSdkAsync();
-    verify(mockManager, atLeastOnce()).isManagedSdkFeatureEnabled();
-    verifyNoMoreInteractions(mockManager);
+    verify(cloudSdkManager).installManagedSdkAsync();
+    verify(cloudSdkManager, atLeastOnce()).isManagedSdkFeatureEnabled();
+    verifyNoMoreInteractions(cloudSdkManager);
   }
 }
