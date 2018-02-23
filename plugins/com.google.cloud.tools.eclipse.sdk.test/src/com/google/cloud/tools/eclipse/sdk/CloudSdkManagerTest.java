@@ -25,6 +25,7 @@ import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Supplier;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -35,22 +36,21 @@ import org.junit.Test;
 public class CloudSdkManagerTest {
 
   private final ReadWriteLock modifyLock = new ReentrantReadWriteLock();
-  private final CloudSdkManager fixture = new CloudSdkManager(modifyLock);
+  private final Supplier<Boolean> alwaysEnabled = () -> true;
+  private final CloudSdkManager fixture = new CloudSdkManager(modifyLock, alwaysEnabled);
 
   @After
   public void tearDown() {
     assertTrue("write lock not available", modifyLock.writeLock().tryLock());
-    CloudSdkManager.forceManagedSdkFeature = false;
   }
 
   @Test
   public void testManagedSdkOption() {
-    assertFalse(fixture.isManagedSdkFeatureEnabled());
+    assertFalse(CloudSdkManager.getInstance().isManagedSdkFeatureEnabled());
   }
 
   @Test
   public void testManagedSdkOption_featureForced() {
-    CloudSdkManager.forceManagedSdkFeature = true;
     assertTrue(fixture.isManagedSdkFeatureEnabled());
   }
 
