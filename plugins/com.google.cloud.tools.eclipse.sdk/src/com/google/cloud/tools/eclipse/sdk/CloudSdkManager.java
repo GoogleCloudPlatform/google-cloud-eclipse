@@ -41,22 +41,25 @@ public class CloudSdkManager {
       "com.google.cloud.tools.eclipse.sdk/enable.managed.cloud.sdk";
 
   // To be able to write tests for the managed Cloud SDK feature, which is disabled at the moment.
+  // This will go away once we permanently enable the feature.
   @VisibleForTesting public static boolean forceManagedSdkFeature;
 
   @VisibleForTesting public static CloudSdkManager instance;
 
+  // readers = using SDK, writers = modifying SDK
+  private final ReadWriteLock modifyLock;
+
   public static synchronized CloudSdkManager getInstance() {
     if (instance == null) {
-      instance = new CloudSdkManager();
+      instance = new CloudSdkManager(new ReentrantReadWriteLock());
     }
     return instance;
   }
 
   @VisibleForTesting
-  CloudSdkManager() {}
-
-  // readers = using SDK, writers = modifying SDK
-  @VisibleForTesting final ReadWriteLock modifyLock = new ReentrantReadWriteLock();
+  CloudSdkManager(ReadWriteLock modifyLock) {
+    this.modifyLock = modifyLock;
+  }
 
   public boolean isManagedSdkFeatureEnabled() {
     if (forceManagedSdkFeature) {

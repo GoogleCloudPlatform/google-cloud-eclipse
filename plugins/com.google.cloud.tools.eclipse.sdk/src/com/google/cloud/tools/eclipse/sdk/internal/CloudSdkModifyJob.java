@@ -48,6 +48,9 @@ public abstract class CloudSdkModifyJob extends Job {
   protected final MessageConsoleStream consoleStream;
   private final ReadWriteLock cloudSdkLock;
 
+  /** The severity reported on installation failure. */
+  protected int failureSeverity = IStatus.ERROR;
+
   public CloudSdkModifyJob(String jobName, MessageConsoleStream consoleStream,
       ReadWriteLock cloudSdkLock) {
     super(jobName);
@@ -63,6 +66,10 @@ public abstract class CloudSdkModifyJob extends Job {
 
   @Override
   protected final IStatus run(IProgressMonitor monitor) {
+    if (monitor.isCanceled()) {
+      return Status.CANCEL_STATUS;
+    }
+
     try {
       markBlocked(monitor);  // for better UI reporting of lock-waiting.
       cloudSdkLock.writeLock().lockInterruptibly();
@@ -73,6 +80,9 @@ public abstract class CloudSdkModifyJob extends Job {
     }
 
     try {
+      if (consoleStream != null) {
+        consoleStream.println(Messages.getString("startModifying"));
+      }
       return modifySdk(monitor);
     } finally {
       cloudSdkLock.writeLock().unlock();
@@ -126,5 +136,16 @@ public abstract class CloudSdkModifyJob extends Job {
     if (jobThread != null) {
       jobThread.interrupt();
     }
+  }
+
+  /**
+   * Set the {@link IStatus#getSeverity() severity} of modification failure. This is useful for
+   * situations where the Cloud SDK modification is a step of some other work, and the modification
+   * failure should be surfaced to the user in the context of that work. If reported as {@link
+   * IStatus#ERROR} then the Eclipse UI ProgressManager will report the modification failure
+   * directly.
+   */
+  public void setFailureSeverity(int severity) {
+    failureSeverity = severity;
   }
 }

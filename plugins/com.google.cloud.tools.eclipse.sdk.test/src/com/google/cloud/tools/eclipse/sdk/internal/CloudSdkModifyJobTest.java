@@ -17,12 +17,11 @@
 package com.google.cloud.tools.eclipse.sdk.internal;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import java.util.concurrent.Semaphore;
@@ -33,25 +32,18 @@ import org.eclipse.core.runtime.IProgressMonitorWithBlocking;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.ui.console.MessageConsoleStream;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
-@RunWith(MockitoJUnitRunner.class)
 public class CloudSdkModifyJobTest {
-
-  @Mock private MessageConsoleStream consoleStream;
 
   private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
   private CloudSdkModifyJob installJob;
 
   @Before
   public void setUp() {
-    installJob = new FakeModifyJob(consoleStream, false /* blockOnStart */);
+    installJob = new FakeModifyJob(false /* blockOnStart */);
   }
 
   @After
@@ -99,8 +91,8 @@ public class CloudSdkModifyJobTest {
 
   @Test
   public void testRun_mutualExclusion() throws InterruptedException {
-    FakeModifyJob job1 = new FakeModifyJob(null, true /* blockOnStart */);
-    FakeModifyJob job2 = new FakeModifyJob(null, true /* blockOnStart */);
+    FakeModifyJob job1 = new FakeModifyJob(true /* blockOnStart */);
+    FakeModifyJob job2 = new FakeModifyJob(true /* blockOnStart */);
 
     job1.schedule();
     while (job1.getState() != Job.RUNNING) {
@@ -123,13 +115,13 @@ public class CloudSdkModifyJobTest {
     boolean locked = true;
 
     try {
-      FakeModifyJob job = new FakeModifyJob(consoleStream, true /* blockOnStart */);
+      FakeModifyJob job = new FakeModifyJob(true /* blockOnStart */);
       job.schedule();
       while (job.getState() != Job.RUNNING) {
         Thread.sleep(50);
       }
       // Incomplete test, but if it ever fails, something is surely broken.
-      verify(consoleStream, never()).println(anyString());
+      assertFalse(job.modified);
 
       readWriteLock.readLock().unlock();
       locked = false;
@@ -146,14 +138,16 @@ public class CloudSdkModifyJobTest {
 
     private final Semaphore blocker = new Semaphore(0);
     private final boolean blockOnStart;
+    private boolean modified;
 
-    private FakeModifyJob(MessageConsoleStream consoleStream, boolean blockOnStart) {
-      super("fake job", consoleStream, readWriteLock);
+    private FakeModifyJob(boolean blockOnStart) {
+      super("fake job", null, readWriteLock);
       this.blockOnStart = blockOnStart;
     }
 
     @Override
     protected IStatus modifySdk(IProgressMonitor monitor) {
+      modified = true;
       try {
         if (blockOnStart) {
           blocker.acquire();

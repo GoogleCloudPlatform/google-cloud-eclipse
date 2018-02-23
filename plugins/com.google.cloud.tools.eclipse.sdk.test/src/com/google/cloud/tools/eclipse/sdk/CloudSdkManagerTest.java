@@ -19,42 +19,27 @@ package com.google.cloud.tools.eclipse.sdk;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkModifyJob;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
-import com.google.cloud.tools.managedcloudsdk.ManagedCloudSdk;
-import com.google.cloud.tools.managedcloudsdk.ManagedSdkVerificationException;
-import com.google.cloud.tools.managedcloudsdk.ManagedSdkVersionMismatchException;
-import com.google.cloud.tools.managedcloudsdk.components.SdkComponent;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
-@RunWith(MockitoJUnitRunner.class)
 public class CloudSdkManagerTest {
 
-  @Mock private ManagedCloudSdk managedCloudSdk;
-  private final CloudSdkManager fixture = new CloudSdkManager();
-
-  @Before
-  public void setUp() throws ManagedSdkVerificationException, ManagedSdkVersionMismatchException {
-    when(managedCloudSdk.isInstalled()).thenReturn(true);
-    when(managedCloudSdk.hasComponent(any(SdkComponent.class))).thenReturn(true);
-  }
+  private final ReadWriteLock modifyLock = new ReentrantReadWriteLock();
+  private final CloudSdkManager fixture = new CloudSdkManager(modifyLock);
 
   @After
   public void tearDown() {
-    assertTrue("write lock not available", fixture.modifyLock.writeLock().tryLock());
+    assertTrue("write lock not available", modifyLock.writeLock().tryLock());
     CloudSdkManager.instance = null;
     CloudSdkManager.forceManagedSdkFeature = false;
   }
@@ -101,7 +86,7 @@ public class CloudSdkManagerTest {
   public void testPreventModifyingSdk_cannotWrite() throws InterruptedException {
     fixture.preventModifyingSdk();
     try {
-      assertFalse(fixture.modifyLock.writeLock().tryLock());
+      assertFalse(modifyLock.writeLock().tryLock());
     } finally {
       fixture.allowModifyingSdk();
     }
@@ -111,7 +96,7 @@ public class CloudSdkManagerTest {
   public void testPreventModifyingSdk_canRead() throws InterruptedException {
     fixture.preventModifyingSdk();
     try {
-      Lock readLock = fixture.modifyLock.readLock();
+      Lock readLock = modifyLock.readLock();
       assertTrue(readLock.tryLock());
       readLock.unlock();
     } finally {
@@ -124,7 +109,7 @@ public class CloudSdkManagerTest {
     fixture.preventModifyingSdk();
     fixture.allowModifyingSdk();
 
-    Lock writeLock = fixture.modifyLock.writeLock();
+    Lock writeLock = modifyLock.writeLock();
     assertTrue(writeLock.tryLock());
     writeLock.unlock();
   }
@@ -201,7 +186,7 @@ public class CloudSdkManagerTest {
     private final IStatus result;
 
     private FakeModifyJob(IStatus result) {
-      super("fake job", null, fixture.modifyLock);
+      super("fake job", null, modifyLock);
       this.result = result;
     }
 

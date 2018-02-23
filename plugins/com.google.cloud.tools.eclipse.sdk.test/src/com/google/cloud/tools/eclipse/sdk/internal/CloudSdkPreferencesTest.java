@@ -35,20 +35,18 @@ import org.osgi.service.prefs.BackingStoreException;
 public class CloudSdkPreferencesTest {
   @Rule public TestPreferencesRule preferencesCreator = new TestPreferencesRule();
 
-  private boolean forceManagedSdkFeature;
   private IPreferenceStore preferences;
 
   @Before
   public void setUp() {
     preferences = preferencesCreator.getPreferenceStore();
 
-    forceManagedSdkFeature = CloudSdkManager.forceManagedSdkFeature;
     CloudSdkManager.forceManagedSdkFeature = true;
   }
 
   @After
   public void tearDown() {
-    CloudSdkManager.forceManagedSdkFeature = forceManagedSdkFeature;
+    CloudSdkManager.forceManagedSdkFeature = false;
   }
 
   @Test
