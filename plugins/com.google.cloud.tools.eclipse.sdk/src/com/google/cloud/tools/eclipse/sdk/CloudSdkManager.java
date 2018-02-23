@@ -42,7 +42,7 @@ public class CloudSdkManager {
 
   // To be able to write tests for the managed Cloud SDK feature, which is disabled at the moment.
   // This will go away once we permanently enable the feature.
-  @VisibleForTesting public static boolean forceManagedSdkFeature;
+  @VisibleForTesting static boolean forceManagedSdkFeature;
 
   @VisibleForTesting public static CloudSdkManager instance;
 

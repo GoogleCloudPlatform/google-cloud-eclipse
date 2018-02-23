@@ -22,11 +22,9 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
 import com.google.cloud.tools.eclipse.test.util.TestPreferencesRule;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -40,13 +38,6 @@ public class CloudSdkPreferencesTest {
   @Before
   public void setUp() {
     preferences = preferencesCreator.getPreferenceStore();
-
-    CloudSdkManager.forceManagedSdkFeature = true;
-  }
-
-  @After
-  public void tearDown() {
-    CloudSdkManager.forceManagedSdkFeature = false;
   }
 
   @Test
