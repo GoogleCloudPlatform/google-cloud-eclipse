@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -47,6 +48,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -60,6 +62,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       "com.google.cloud.tools.eclipse.preferences.main"; //$NON-NLS-1$
 
   private Button chooseSdk;
+  private Button updateSdk;
   private Composite chooseSdkArea;
   private CloudSdkDirectoryFieldEditor sdkLocation;
   private Label sdkVersionLabel;
@@ -92,10 +95,18 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
         WorkbenchUtil.openInBrowser(PlatformUI.getWorkbench(), event.text);
       }
     });
-    
-    sdkVersionLabel = new Label(parent, SWT.LEAD);
+
+    Composite versionArea = new Composite(parent, SWT.NONE);
+    sdkVersionLabel = new Label(versionArea, SWT.LEAD);
     sdkVersionLabel.setFont(contents.getFont());
     sdkVersionLabel.setText(Messages.getString("SdkVersion", "Unset")); //$NON-NLS-1$ //$NON-NLS-2$
+    updateSdk = new Button(versionArea, SWT.FLAT);
+    updateSdk.setText(Messages.getString("UpdateSdk"));
+    updateSdk.addSelectionListener(
+        SelectionListener.widgetSelectedAdapter(e -> updateManagedSdk()));
+    updateSdk.setVisible(CloudSdkManager.getInstance().isManagedSdkFeatureEnabled());
+    GridDataFactory.defaultsFor(sdkVersionLabel).grab(true, false).applyTo(sdkVersionLabel);
+    GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(versionArea);
 
     if (CloudSdkManager.getInstance().isManagedSdkFeatureEnabled()) {
       chooseSdk = new Button(parent, SWT.CHECK);
@@ -140,8 +151,14 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     Dialog.applyDialogFont(contents);
     return contents;
   }
-  
+
+  private void updateManagedSdk() {
+    CloudSdkManager.getInstance().updateManagedSdkAsync();
+    // would be nice if we could updateSelectedVersion() when finished
+  }
+
   private void updateSelectedVersion() {
+    boolean isManaged = false;
     String version = Messages.getString("UnknownVersion"); //$NON-NLS-1$
     if (!CloudSdkManager.getInstance().isManagedSdkFeatureEnabled() || chooseSdk.getSelection()) {
       Path path = Paths.get(sdkLocation.getStringValue());
@@ -150,12 +167,13 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       try {
         Path home = ManagedCloudSdk.newManagedSdk().getSdkHome();
         version = getSdkVersion(home);
+        isManaged = true;
       } catch (UnsupportedOsException ex) {
         // shouldn't happen but if it does we'll just leave
         // version set to Unknown
       }
     }
-    
+    updateSdk.setEnabled(isManaged);
     sdkVersionLabel.setText(Messages.getString("SdkVersion", version)); //$NON-NLS-1$
   }
 
