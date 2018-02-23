@@ -79,7 +79,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
   private final CloudSdkManager cloudSdkManager;
 
-  protected CloudSdkPreferenceArea() {
+  public CloudSdkPreferenceArea() {
     this(CloudSdkManager.getInstance());
   }
 
