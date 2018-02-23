@@ -121,7 +121,7 @@ public class CloudSdkModifyJobTest {
         Thread.sleep(50);
       }
       // Incomplete test, but if it ever fails, something is surely broken.
-      assertFalse(job.modified);
+      assertFalse(job.modifiedSdk);
 
       readWriteLock.readLock().unlock();
       locked = false;
@@ -138,7 +138,7 @@ public class CloudSdkModifyJobTest {
 
     private final Semaphore blocker = new Semaphore(0);
     private final boolean blockOnStart;
-    private boolean modified;
+    private boolean modifiedSdk;
 
     private FakeModifyJob(boolean blockOnStart) {
       super("fake job", null, readWriteLock);
@@ -147,7 +147,7 @@ public class CloudSdkModifyJobTest {
 
     @Override
     protected IStatus modifySdk(IProgressMonitor monitor) {
-      modified = true;
+      modifiedSdk = true;
       try {
         if (blockOnStart) {
           blocker.acquire();
