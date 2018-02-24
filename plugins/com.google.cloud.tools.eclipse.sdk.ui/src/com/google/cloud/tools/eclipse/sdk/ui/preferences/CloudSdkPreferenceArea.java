@@ -100,10 +100,10 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     sdkVersionLabel = new Label(versionArea, SWT.LEAD);
     sdkVersionLabel.setFont(contents.getFont());
     sdkVersionLabel.setText(Messages.getString("SdkVersion", "Unset")); //$NON-NLS-1$ //$NON-NLS-2$
-    updateSdk = new Button(versionArea, SWT.FLAT);
+    updateSdk = new Button(versionArea, SWT.PUSH);
     updateSdk.setText(Messages.getString("UpdateSdk"));
     updateSdk.addSelectionListener(
-        SelectionListener.widgetSelectedAdapter(e -> updateManagedSdk()));
+        SelectionListener.widgetSelectedAdapter(event -> updateManagedSdk()));
     updateSdk.setVisible(CloudSdkManager.getInstance().isManagedSdkFeatureEnabled());
     GridDataFactory.defaultsFor(sdkVersionLabel).grab(true, false).applyTo(sdkVersionLabel);
     GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(versionArea);
@@ -158,7 +158,6 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
   }
 
   private void updateSelectedVersion() {
-    boolean isManaged = false;
     String version = Messages.getString("UnknownVersion"); //$NON-NLS-1$
     if (!CloudSdkManager.getInstance().isManagedSdkFeatureEnabled() || chooseSdk.getSelection()) {
       Path path = Paths.get(sdkLocation.getStringValue());
@@ -167,13 +166,11 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       try {
         Path home = ManagedCloudSdk.newManagedSdk().getSdkHome();
         version = getSdkVersion(home);
-        isManaged = true;
       } catch (UnsupportedOsException ex) {
         // shouldn't happen but if it does we'll just leave
         // version set to Unknown
       }
     }
-    updateSdk.setEnabled(isManaged);
     sdkVersionLabel.setText(Messages.getString("SdkVersion", version)); //$NON-NLS-1$
   }
 
@@ -206,6 +203,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
   private void updateControlEnablement() {
     boolean manual = chooseSdk.getSelection();
     sdkLocation.setEnabled(manual, chooseSdkArea);
+    updateSdk.setEnabled(!manual);
   }
 
   @Override
