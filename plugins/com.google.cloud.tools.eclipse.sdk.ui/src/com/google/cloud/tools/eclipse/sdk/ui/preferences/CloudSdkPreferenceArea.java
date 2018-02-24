@@ -48,7 +48,6 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -103,7 +102,12 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     updateSdk = new Button(versionArea, SWT.PUSH);
     updateSdk.setText(Messages.getString("UpdateSdk"));
     updateSdk.addSelectionListener(
-        SelectionListener.widgetSelectedAdapter(event -> updateManagedSdk()));
+        new SelectionAdapter() {
+          @Override
+          public void widgetSelected(SelectionEvent event) {
+            updateManagedSdk();
+          }
+        });
     updateSdk.setVisible(CloudSdkManager.getInstance().isManagedSdkFeatureEnabled());
     GridDataFactory.defaultsFor(sdkVersionLabel).grab(true, false).applyTo(sdkVersionLabel);
     GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(versionArea);
