@@ -56,7 +56,7 @@ public class ShowGcpStatusHandler extends AbstractHandler implements IElementUpd
     WorkbenchUtil.openInBrowser(
         PlatformUI.getWorkbench(),
         STATUS_URL,
-        "com.google.cloud.status" /* browser id */,
+        "com.google.cloud.status" /* browser id */, //$NON-NLS-1$
         null /* title */,
         null /* tooltip */);
     return null;
