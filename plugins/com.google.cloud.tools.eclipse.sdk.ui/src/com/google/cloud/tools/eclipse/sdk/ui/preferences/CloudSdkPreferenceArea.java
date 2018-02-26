@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -60,6 +61,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       "com.google.cloud.tools.eclipse.preferences.main"; //$NON-NLS-1$
 
   private Button chooseSdk;
+  private Button updateSdk;
   private Composite chooseSdkArea;
   private CloudSdkDirectoryFieldEditor sdkLocation;
   private Label sdkVersionLabel;
@@ -103,10 +105,23 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
         WorkbenchUtil.openInBrowser(PlatformUI.getWorkbench(), event.text);
       }
     });
-    
-    sdkVersionLabel = new Label(parent, SWT.LEAD);
+
+    Composite versionArea = new Composite(parent, SWT.NONE);
+    sdkVersionLabel = new Label(versionArea, SWT.LEAD);
     sdkVersionLabel.setFont(contents.getFont());
     sdkVersionLabel.setText(Messages.getString("SdkVersion", "Unset")); //$NON-NLS-1$ //$NON-NLS-2$
+    updateSdk = new Button(versionArea, SWT.PUSH);
+    updateSdk.setText(Messages.getString("UpdateSdk"));
+    updateSdk.addSelectionListener(
+        new SelectionAdapter() {
+          @Override
+          public void widgetSelected(SelectionEvent event) {
+            updateManagedSdk();
+          }
+        });
+    updateSdk.setVisible(cloudSdkManager.isManagedSdkFeatureEnabled());
+    GridDataFactory.defaultsFor(sdkVersionLabel).grab(true, false).applyTo(sdkVersionLabel);
+    GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(versionArea);
 
     if (cloudSdkManager.isManagedSdkFeatureEnabled()) {
       chooseSdk = new Button(parent, SWT.CHECK);
@@ -151,7 +166,12 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     Dialog.applyDialogFont(contents);
     return contents;
   }
-  
+
+  private void updateManagedSdk() {
+    cloudSdkManager.updateManagedSdkAsync();
+    // would be nice if we could updateSelectedVersion() when finished
+  }
+
   private void updateSelectedVersion() {
     String version = Messages.getString("UnknownVersion"); //$NON-NLS-1$
     if (!cloudSdkManager.isManagedSdkFeatureEnabled() || chooseSdk.getSelection()) {
@@ -166,7 +186,6 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
         // version set to Unknown
       }
     }
-    
     sdkVersionLabel.setText(Messages.getString("SdkVersion", version)); //$NON-NLS-1$
   }
 
@@ -199,6 +218,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
   private void updateControlEnablement() {
     boolean manual = chooseSdk.getSelection();
     sdkLocation.setEnabled(manual, chooseSdkArea);
+    updateSdk.setEnabled(!manual);
   }
 
   @Override

@@ -24,6 +24,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -36,6 +37,7 @@ import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import java.nio.file.Path;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
@@ -45,6 +47,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+import org.mockito.AdditionalAnswers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -57,8 +60,11 @@ public class CloudSdkPreferenceAreaTest {
   @Rule public ShellTestResource shellResource = new ShellTestResource();
   @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
-  @Mock private IPreferenceStore preferences;
   @Mock private CloudSdkManager cloudSdkManager;
+
+  // delegate to get default-defaults
+  private IPreferenceStore preferences =
+      mock(IPreferenceStore.class, AdditionalAnswers.delegatesTo(new PreferenceStore()));
 
   private CloudSdkPreferenceArea area;
   private Shell shell;
@@ -66,6 +72,7 @@ public class CloudSdkPreferenceAreaTest {
   private Button chooseSdk;
   private Text sdkLocation;
   private Label sdkVersion;
+  private Button updateSdkButton;
 
   @Test
   public void testNonExistentPath() {
@@ -116,6 +123,7 @@ public class CloudSdkPreferenceAreaTest {
     chooseSdk = CompositeUtil.findButton(shell, "Choose SDK");
     sdkLocation = CompositeUtil.findControlAfterLabel(shell, Text.class, "&SDK location:");
     sdkVersion = CompositeUtil.findLabel(shell, "SDK version:");
+    updateSdkButton = CompositeUtil.findButton(shell, "Update");
   }
 
   @Test
@@ -125,8 +133,8 @@ public class CloudSdkPreferenceAreaTest {
 
     assertNull(chooseSdk);
     assertNotNull(sdkLocation);
-    assertNotNull(sdkVersion);
     assertTrue(sdkLocation.isEnabled());
+    assertNotNull(sdkVersion);
   }
 
   @Test
@@ -210,5 +218,36 @@ public class CloudSdkPreferenceAreaTest {
     verify(cloudSdkManager).installManagedSdkAsync();
     verify(cloudSdkManager, atLeastOnce()).isManagedSdkFeatureEnabled();
     verifyNoMoreInteractions(cloudSdkManager);
+  }
+
+  @Test
+  public void testUpdateSdk_notVisible() {
+    createPreferenceArea();
+    assertNotNull(updateSdkButton);
+    assertFalse(updateSdkButton.getVisible()); // isVisible checks parent
+  }
+
+  @Test
+  public void testUpdateSdk_manualSdkDisabled() {
+    doReturn(true).when(cloudSdkManager).isManagedSdkFeatureEnabled();
+
+    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)).thenReturn("MANUAL");
+    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("/non-existent");
+
+    createPreferenceArea();
+    assertNotNull(updateSdkButton);
+    assertTrue(updateSdkButton.getVisible()); // isVisible checks parent
+    assertFalse(updateSdkButton.isEnabled());
+  }
+
+  @Test
+  public void testUpdateSdk_autoSdkEnabled() {
+    doReturn(true).when(cloudSdkManager).isManagedSdkFeatureEnabled();
+
+    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)).thenReturn("AUTOMATIC");
+
+    createPreferenceArea();
+    assertTrue(updateSdkButton.getVisible()); // isVisible checks parent
+    assertTrue(updateSdkButton.isEnabled());
   }
 }
