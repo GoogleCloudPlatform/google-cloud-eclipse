@@ -29,7 +29,6 @@ import com.google.cloud.tools.managedcloudsdk.components.SdkComponent;
 import com.google.cloud.tools.managedcloudsdk.components.SdkComponentInstaller;
 import com.google.cloud.tools.managedcloudsdk.install.SdkInstaller;
 import com.google.cloud.tools.managedcloudsdk.install.SdkInstallerException;
-import com.google.cloud.tools.managedcloudsdk.install.UnknownArchiveTypeException;
 import java.io.IOException;
 import java.nio.channels.ClosedByInterruptException;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -38,6 +37,7 @@ import java.util.logging.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.ui.console.MessageConsoleStream;
 
 public class CloudSdkInstallJob extends CloudSdkModifyJob {
@@ -57,32 +57,35 @@ public class CloudSdkInstallJob extends CloudSdkModifyJob {
    */
   @Override
   protected IStatus modifySdk(IProgressMonitor monitor) {
-    if (monitor.isCanceled()) {
+    SubMonitor progress =
+        SubMonitor.convert(monitor, Messages.getString("configuring.cloud.sdk"), 20); // $NON-NLS-1$
+    if (progress.isCanceled()) {
       return Status.CANCEL_STATUS;
     }
-    monitor.beginTask(Messages.getString("configuring.cloud.sdk"), 20); //$NON-NLS-1$
     if (consoleStream != null) {
       consoleStream.println(Messages.getString("startModifying"));
     }
     try {
       ManagedCloudSdk managedSdk = getManagedCloudSdk();
       if (!managedSdk.isInstalled()) {
-        subTask(monitor, Messages.getString("installing.cloud.sdk")); // $NON-NLS-1$
+        subTask(progress, Messages.getString("installing.cloud.sdk")); // $NON-NLS-1$
         SdkInstaller installer = managedSdk.newInstaller();
-        installer.install(new MessageConsoleWriterListener(consoleStream));
+        installer.install(
+            new ProgressWrapper(progress.split(10)),
+            new MessageConsoleWriterListener(consoleStream));
         String version = getVersion(managedSdk.getSdkHome());
         logger.info("Installed Google Cloud SDK version " + version);
       }
-      monitor.worked(10);
 
       if (!managedSdk.hasComponent(SdkComponent.APP_ENGINE_JAVA)) {
-        subTask(monitor, Messages.getString("installing.cloud.sdk.app.engine.java")); // $NON-NLS-1$
+        subTask(
+            progress, Messages.getString("installing.cloud.sdk.app.engine.java")); // $NON-NLS-1$
         SdkComponentInstaller componentInstaller = managedSdk.newComponentInstaller();
         componentInstaller.installComponent(
             SdkComponent.APP_ENGINE_JAVA, new MessageConsoleWriterListener(consoleStream));
         logger.info("Installed Google Cloud SDK component: " + SdkComponent.APP_ENGINE_JAVA.name());
       }
-      monitor.worked(10);
+      progress.worked(10);
 
       return Status.OK_STATUS;
 
@@ -100,9 +103,6 @@ public class CloudSdkInstallJob extends CloudSdkModifyJob {
 
     } catch (ManagedSdkVersionMismatchException e) {
       throw new IllegalStateException("This is never thrown because we always use LATEST.", e); //$NON-NLS-1$
-    } catch (UnknownArchiveTypeException e) {
-      throw new IllegalStateException(
-          "The next appengine-plugins-core release will remove this.", e); //$NON-NLS-1$
     }
   }
 

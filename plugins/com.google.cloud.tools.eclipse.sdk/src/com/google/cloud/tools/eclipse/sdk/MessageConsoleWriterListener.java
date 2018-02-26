@@ -17,10 +17,10 @@
 package com.google.cloud.tools.eclipse.sdk;
 
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
-import com.google.cloud.tools.managedcloudsdk.MessageListener;
+import com.google.cloud.tools.managedcloudsdk.ConsoleListener;
 import org.eclipse.ui.console.MessageConsoleStream;
 
-public class MessageConsoleWriterListener implements ProcessOutputLineListener, MessageListener {
+public class MessageConsoleWriterListener implements ProcessOutputLineListener, ConsoleListener {
   private final MessageConsoleStream stream;
 
   public MessageConsoleWriterListener(MessageConsoleStream stream) {
@@ -37,7 +37,7 @@ public class MessageConsoleWriterListener implements ProcessOutputLineListener, 
   }
 
   @Override
-  public void message(String rawString) {
+  public void console(String rawString) {
     if (stream != null && !stream.isClosed()) {
       // there's still a small chance that the stream will be closed and the error will be logged by
       // the ConsolePlugin

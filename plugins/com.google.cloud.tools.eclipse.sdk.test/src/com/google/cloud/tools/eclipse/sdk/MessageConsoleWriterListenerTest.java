@@ -38,7 +38,7 @@ public class MessageConsoleWriterListenerTest {
   @Test
   public void testMessage() {
     MessageConsoleWriterListener listener = new MessageConsoleWriterListener(mockConsoleStream);
-    listener.message("a message");
+    listener.console("a message");
     verify(mockConsoleStream).print("a message");
   }
 }

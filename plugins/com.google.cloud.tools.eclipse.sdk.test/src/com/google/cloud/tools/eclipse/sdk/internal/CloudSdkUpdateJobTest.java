@@ -27,10 +27,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import com.google.cloud.tools.managedcloudsdk.ConsoleListener;
 import com.google.cloud.tools.managedcloudsdk.ManagedCloudSdk;
 import com.google.cloud.tools.managedcloudsdk.ManagedSdkVerificationException;
 import com.google.cloud.tools.managedcloudsdk.ManagedSdkVersionMismatchException;
-import com.google.cloud.tools.managedcloudsdk.MessageListener;
 import com.google.cloud.tools.managedcloudsdk.UnsupportedOsException;
 import com.google.cloud.tools.managedcloudsdk.command.CommandExecutionException;
 import com.google.cloud.tools.managedcloudsdk.command.CommandExitException;
@@ -141,7 +141,7 @@ public class CloudSdkUpdateJobTest {
     verify(managedCloudSdk).isInstalled();
     verify(managedCloudSdk).isUpToDate();
     verify(managedCloudSdk).newUpdater();
-    verify(sdkUpdater).update(any(MessageListener.class));
+    verify(sdkUpdater).update(any(ConsoleListener.class));
     verify(managedCloudSdk, times(2)).getSdkHome(); // used to log old and new versions
     verifyNoMoreInteractions(managedCloudSdk);
   }
@@ -154,7 +154,7 @@ public class CloudSdkUpdateJobTest {
     when(managedCloudSdk.isUpToDate()).thenReturn(false);
     when(managedCloudSdk.newUpdater()).thenReturn(sdkUpdater);
     CommandExecutionException exception = new CommandExecutionException(new RuntimeException());
-    doThrow(exception).when(sdkUpdater).update(any(MessageListener.class));
+    doThrow(exception).when(sdkUpdater).update(any(ConsoleListener.class));
 
     CloudSdkUpdateJob job = newCloudSdkUpdateJob();
     job.schedule();
@@ -165,7 +165,7 @@ public class CloudSdkUpdateJobTest {
     verify(managedCloudSdk).isInstalled();
     verify(managedCloudSdk).isUpToDate();
     verify(managedCloudSdk).newUpdater();
-    verify(sdkUpdater).update(any(MessageListener.class));
+    verify(sdkUpdater).update(any(ConsoleListener.class));
     verify(managedCloudSdk).getSdkHome(); // used to obtain old version
     verifyNoMoreInteractions(managedCloudSdk);
   }
