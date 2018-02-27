@@ -46,7 +46,7 @@ public class CloudSdkManagerTest {
 
   @Test
   public void testManagedSdkOption() {
-    assertFalse(CloudSdkManager.getInstance().isManagedSdkFeatureEnabled());
+    assertTrue(CloudSdkManager.getInstance().isManagedSdkFeatureEnabled());
   }
 
   @Test

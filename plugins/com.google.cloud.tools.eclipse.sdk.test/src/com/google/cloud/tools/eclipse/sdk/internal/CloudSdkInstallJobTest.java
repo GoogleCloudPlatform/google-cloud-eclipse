@@ -24,10 +24,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.cloud.tools.managedcloudsdk.ConsoleListener;
 import com.google.cloud.tools.managedcloudsdk.ManagedCloudSdk;
 import com.google.cloud.tools.managedcloudsdk.ManagedSdkVerificationException;
 import com.google.cloud.tools.managedcloudsdk.ManagedSdkVersionMismatchException;
-import com.google.cloud.tools.managedcloudsdk.MessageListener;
+import com.google.cloud.tools.managedcloudsdk.ProgressListener;
 import com.google.cloud.tools.managedcloudsdk.UnsupportedOsException;
 import com.google.cloud.tools.managedcloudsdk.command.CommandExecutionException;
 import com.google.cloud.tools.managedcloudsdk.command.CommandExitException;
@@ -35,7 +36,6 @@ import com.google.cloud.tools.managedcloudsdk.components.SdkComponent;
 import com.google.cloud.tools.managedcloudsdk.components.SdkComponentInstaller;
 import com.google.cloud.tools.managedcloudsdk.install.SdkInstaller;
 import com.google.cloud.tools.managedcloudsdk.install.SdkInstallerException;
-import com.google.cloud.tools.managedcloudsdk.install.UnknownArchiveTypeException;
 import java.io.IOException;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.eclipse.core.runtime.IStatus;
@@ -56,8 +56,7 @@ public class CloudSdkInstallJobTest {
   @Mock private SdkComponentInstaller componentInstaller;
 
   @Before
-  public void setUp() throws ManagedSdkVerificationException, ManagedSdkVersionMismatchException,
-      UnsupportedOsException {
+  public void setUp() throws ManagedSdkVerificationException, ManagedSdkVersionMismatchException {
     when(managedCloudSdk.isInstalled()).thenReturn(true);
     when(managedCloudSdk.hasComponent(any(SdkComponent.class))).thenReturn(true);
     when(managedCloudSdk.newInstaller()).thenReturn(sdkInstaller);
@@ -97,9 +96,10 @@ public class CloudSdkInstallJobTest {
   }
 
   @Test
-  public void testRun_notInstalled() throws ManagedSdkVerificationException, ManagedSdkVersionMismatchException,
-      InterruptedException, UnsupportedOsException, IOException, SdkInstallerException, UnknownArchiveTypeException,
-      CommandExecutionException, CommandExitException {
+  public void testRun_notInstalled()
+      throws ManagedSdkVerificationException, ManagedSdkVersionMismatchException,
+          InterruptedException, IOException, SdkInstallerException, CommandExecutionException,
+          CommandExitException {
     when(managedCloudSdk.isInstalled()).thenReturn(false);
     when(managedCloudSdk.hasComponent(any(SdkComponent.class))).thenReturn(false);
 
@@ -110,18 +110,22 @@ public class CloudSdkInstallJobTest {
     assertTrue(job.getResult().isOK());
     verify(managedCloudSdk).newInstaller();
     verify(managedCloudSdk).newComponentInstaller();
-    verify(sdkInstaller).install(any(MessageListener.class));
-    verify(componentInstaller).installComponent(any(SdkComponent.class), any(MessageListener.class));
+    verify(sdkInstaller).install(any(ProgressListener.class), any(ConsoleListener.class));
+    verify(componentInstaller)
+        .installComponent(any(SdkComponent.class), any(ConsoleListener.class));
   }
 
   @Test
   public void testFailureSeverity()
       throws ManagedSdkVerificationException, ManagedSdkVersionMismatchException,
-          InterruptedException, UnsupportedOsException {
+          InterruptedException, IOException, SdkInstallerException, CommandExecutionException,
+          CommandExitException {
     when(managedCloudSdk.isInstalled()).thenReturn(false);
     when(managedCloudSdk.hasComponent(any(SdkComponent.class))).thenReturn(false);
-    UnsupportedOsException osException = new UnsupportedOsException("unsupported");
-    when(managedCloudSdk.newInstaller()).thenThrow(osException);
+    SdkInstallerException installerException = new SdkInstallerException("unsupported");
+    when(managedCloudSdk.newInstaller()).thenReturn(sdkInstaller);
+    when(sdkInstaller.install(any(ProgressWrapper.class), any(ConsoleListener.class)))
+        .thenThrow(installerException);
 
     CloudSdkInstallJob job = newCloudSdkInstallJob();
     job.setFailureSeverity(IStatus.WARNING);
@@ -130,17 +134,14 @@ public class CloudSdkInstallJobTest {
 
     IStatus result = job.getResult();
     assertEquals(IStatus.WARNING, result.getSeverity());
-    assertEquals(
-        "Google Cloud SDK installation only supported on Windows, Linux, and MacOS.",
-        result.getMessage());
-    assertEquals(osException, result.getException());
+    assertEquals("Failed to install the Google Cloud SDK.", result.getMessage());
+    assertEquals(installerException, result.getException());
   }
 
   @Test
   public void testRun_sdkInstalled_componentNotInstalled()
       throws ManagedSdkVerificationException, ManagedSdkVersionMismatchException,
-          InterruptedException, UnsupportedOsException, CommandExecutionException,
-          CommandExitException {
+          InterruptedException, CommandExecutionException, CommandExitException {
     when(managedCloudSdk.isInstalled()).thenReturn(true);
     when(managedCloudSdk.hasComponent(any(SdkComponent.class))).thenReturn(false);
 
@@ -151,12 +152,14 @@ public class CloudSdkInstallJobTest {
     assertTrue(job.getResult().isOK());
     verify(managedCloudSdk, never()).newInstaller();
     verify(managedCloudSdk).newComponentInstaller();
-    verify(componentInstaller).installComponent(any(SdkComponent.class), any(MessageListener.class));
+    verify(componentInstaller)
+        .installComponent(any(SdkComponent.class), any(ConsoleListener.class));
   }
 
   @Test
-  public void testRun_alreadyInstalled() throws ManagedSdkVerificationException, ManagedSdkVersionMismatchException,
-      InterruptedException, UnsupportedOsException {
+  public void testRun_alreadyInstalled()
+      throws ManagedSdkVerificationException, ManagedSdkVersionMismatchException,
+          InterruptedException {
     when(managedCloudSdk.isInstalled()).thenReturn(true);
     when(managedCloudSdk.hasComponent(any(SdkComponent.class))).thenReturn(true);
 

@@ -95,7 +95,7 @@
       <!-- bundle: com.google.cloud.tools.appengine -->
       <groupId>com.google.cloud.tools</groupId>
       <artifactId>appengine-plugins-core</artifactId>
-      <version>0.4.2</version>
+      <version>0.4.4</version>
     </dependency>
     <dependency>
       <!--
@@ -627,9 +627,5 @@
     </repository>
   </repositories>
 <pluginRepositories>
-<pluginRepository>
- <id>tycho-staged</id>
- <url>https://oss.sonatype.org/content/repositories/orgeclipsetycho-1046/</url>
-</pluginRepository>
 </pluginRepositories>
 </project>

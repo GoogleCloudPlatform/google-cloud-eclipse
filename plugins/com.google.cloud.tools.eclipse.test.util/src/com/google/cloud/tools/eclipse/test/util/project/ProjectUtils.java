@@ -149,19 +149,36 @@ public class ProjectUtils {
     return projects;
   }
 
-  public static void waitUntilNoBuildErrors() throws CoreException {
+  /**
+   * Waits until no error markers are found in the workspace. Returns true unless it times out
+   * after 300 seconds. Returns false if it times out.
+   * 
+   * This method does not wait for pending build and validation jobs, so it is usually required to
+   * call methods such as {@link #waitForProjects} beforehand.
+   */
+  public static boolean waitUntilNoBuildErrors() throws CoreException {
     IProject[] projects = getWorkspace().getRoot().getProjects();
-    waitUntilNoBuildErrors(projects);
+    return waitUntilNoBuildErrors(projects);
   }
 
-  public static void waitUntilNoBuildErrors(IProject... projects) throws CoreException {
+  /**
+   * Waits until no error markers are found for the projects. Returns true unless it times out after
+   * 300 seconds. Returns false if it times out.
+   * 
+   * This method does not wait for pending build and validation jobs, so it is usually required to
+   * call methods such as {@link #waitForProjects} beforehand.
+   */
+  public static boolean waitUntilNoBuildErrors(IProject... projects) throws CoreException {
     try {
       Stopwatch elapsed = Stopwatch.createStarted();
       while (true) {
         Set<String> errors = getAllBuildErrors(projects);
-        if (errors.isEmpty() || elapsed.elapsed(TimeUnit.SECONDS) > 300) {
-          return;
+        if (errors.isEmpty()) {
+          return true;
+        } else if (elapsed.elapsed(TimeUnit.SECONDS) > 300) {
+          return false;
         }
+
         if (Display.getCurrent() != null) {
           while (Display.getCurrent().readAndDispatch());
         }
@@ -169,6 +186,7 @@ public class ProjectUtils {
       }
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
+      return false;
     }
   }
 
