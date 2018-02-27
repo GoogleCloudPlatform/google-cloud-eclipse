@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde?>
 <!-- generated with https://github.com/mbarbero/fr.obeo.releng.targetplatform -->
-<target name="GCP for Eclipse Oxygen" sequenceNumber="1519744361">
+<target name="GCP for Eclipse Oxygen" sequenceNumber="1519746463">
   <locations>
-    <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
-      <unit id="org.eclipse.license.feature.group" version="2.0.0.v20180130-0820"/>
-      <repository location="http://download.eclipse.org/cbi/updates/license/"/>
-    </location>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
       <unit id="org.eclipse.sdk.feature.group" version="4.7.2.v20171130-0906"/>
       <unit id="org.eclipse.jdt.feature.group" version="3.13.2.v20171130-0906"/>

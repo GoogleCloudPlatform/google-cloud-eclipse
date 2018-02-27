@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature id="org.eclipse.license" version="0.0.0"/>
    <feature id="org.eclipse.sdk" version="0.0.0"/>
    <feature id="org.eclipse.jdt" version="0.0.0"/>
    <feature id="org.eclipse.m2e.feature" version="0.0.0"/>

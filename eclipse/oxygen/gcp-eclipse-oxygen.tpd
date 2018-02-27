@@ -11,10 +11,6 @@
  */
 target "GCP for Eclipse Oxygen" with source requirements
 
-location "http://download.eclipse.org/cbi/updates/license/" {
-    org.eclipse.license.feature.group
-}
-
 location "http://download.eclipse.org/releases/oxygen/" {
 	org.eclipse.sdk.feature.group
 	org.eclipse.jdt.feature.group
