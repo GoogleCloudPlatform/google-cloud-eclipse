@@ -149,11 +149,25 @@ public class ProjectUtils {
     return projects;
   }
 
+  /**
+   * Waits until no error markers are found in the workspace. Returns true unless it times out
+   * after 300 seconds. Returns false if it times out.
+   * 
+   * This method does not wait for pending build and validation jobs, so it is usually required to
+   * call methods such as {@link #waitForProjects} beforehand.
+   */
   public static boolean waitUntilNoBuildErrors() throws CoreException {
     IProject[] projects = getWorkspace().getRoot().getProjects();
     return waitUntilNoBuildErrors(projects);
   }
 
+  /**
+   * Waits until no error markers are found for the projects. Returns true unless it times out after
+   * 300 seconds. Returns false if it times out.
+   * 
+   * This method does not wait for pending build and validation jobs, so it is usually required to
+   * call methods such as {@link #waitForProjects} beforehand.
+   */
   public static boolean waitUntilNoBuildErrors(IProject... projects) throws CoreException {
     try {
       Stopwatch elapsed = Stopwatch.createStarted();
