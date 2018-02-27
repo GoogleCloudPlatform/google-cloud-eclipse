@@ -154,8 +154,7 @@ public class PollingStatusServiceImpl implements GcpStatusMonitoringService {
   static Collection<Incident> extractIncidentsInProgress(Gson gson, Reader reader) {
     // Process the individual incident elements. An active incident has no {@code end} element.
     List<Incident> incidents = new LinkedList<>();
-    try {
-      JsonReader jsonReader = new JsonReader(reader);
+    try (JsonReader jsonReader = new JsonReader(reader)) {
       jsonReader.beginArray();
       while (jsonReader.hasNext()) {
         Incident incident = gson.fromJson(jsonReader, Incident.class);

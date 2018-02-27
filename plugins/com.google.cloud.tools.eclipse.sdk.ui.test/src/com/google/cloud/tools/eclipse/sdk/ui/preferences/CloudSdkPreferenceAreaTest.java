@@ -20,7 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
@@ -80,6 +79,7 @@ public class CloudSdkPreferenceAreaTest {
 
   @Test
   public void testNonExistentPath() {
+    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)).thenReturn("MANUAL");
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("/non-existent");
     createPreferenceArea();
 
@@ -106,6 +106,7 @@ public class CloudSdkPreferenceAreaTest {
 
   @Test
   public void testInvalidPath() {
+    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)).thenReturn("MANUAL");
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH))
         .thenReturn(tempFolder.getRoot().getAbsolutePath());
     createPreferenceArea();
@@ -134,9 +135,9 @@ public class CloudSdkPreferenceAreaTest {
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
 
-    assertNull(chooseSdk);
+    assertNotNull(chooseSdk);
     assertNotNull(sdkLocation);
-    assertTrue(sdkLocation.isEnabled());
+    assertFalse(sdkLocation.isEnabled());
     assertNotNull(sdkVersion);
   }
 
