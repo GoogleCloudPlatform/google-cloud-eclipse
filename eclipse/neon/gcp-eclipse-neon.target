@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde?>
 <!-- generated with https://github.com/mbarbero/fr.obeo.releng.targetplatform -->
-<target name="GCP for Eclipse Neon" sequenceNumber="1519318723">
+<target name="GCP for Eclipse Neon" sequenceNumber="1519744381">
   <locations>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
-      <unit id="org.eclipse.license.feature.group" version="1.0.1.v20140414-1359"/>
+      <unit id="org.eclipse.license.feature.group" version="2.0.0.v20180130-0820"/>
       <repository location="http://download.eclipse.org/cbi/updates/license/"/>
     </location>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
@@ -44,6 +44,10 @@
       <unit id="org.slf4j.apis.log4j" version="1.7.10.v20160208-0839"/>
       <unit id="ch.qos.logback.slf4j" version="1.1.2.v20160301-0943"/>
       <repository location="http://download.eclipse.org/tools/orbit/downloads/latest-R/"/>
+    </location>
+    <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
+      <unit id="eu.openanalytics.editor.docker.feature.group" version="1.0.0.201506222127"/>
+      <repository location="http://docker-editor.openanalytics.eu/update/"/>
     </location>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
       <unit id="org.eclipse.linuxtools.docker.feature.feature.group" version="2.3.0.201704251823"/>

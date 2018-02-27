@@ -56,6 +56,10 @@ location "http://download.eclipse.org/tools/orbit/downloads/latest-R/" {
     ch.qos.logback.slf4j
 }
 
+location "http://docker-editor.openanalytics.eu/update/" {
+    eu.openanalytics.editor.docker.feature.group
+}
+
 // Pick up Neon-compatible 2.3.0
 location "http://download.eclipse.org/linuxtools/update-docker-neon3respinb" {
     org.eclipse.linuxtools.docker.feature.feature.group

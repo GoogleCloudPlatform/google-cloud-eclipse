@@ -79,26 +79,26 @@ units.2.provides.1.namespace=org.eclipse.equinox.p2.iu
 units.2.provides.1.name=com.google.cloud.tools.eclipse.categories.yedit.definition
 units.2.provides.1.version=1.0.0
 
-# Define the Docker Tools category IU
+# Define the Dockerfile Editor category IU
 units.3.id=com.google.cloud.tools.eclipse.categories.docker
 units.3.version=0.0.0
 units.3.properties.1.name=org.eclipse.equinox.p2.type.category
 units.3.properties.1.value=true
 units.3.properties.2.name=org.eclipse.equinox.p2.name
-units.3.properties.2.value=Docker Tools
+units.3.properties.2.value=Docker Editor
 units.3.properties.3.name=org.eclipse.equinox.p2.provider
-units.3.properties.3.value=Linux Tools Project
+units.3.properties.3.value=OpenAnalytics
 units.3.properties.4.name=org.eclipse.equinox.p2.contact
-units.3.properties.4.value=http://wiki.eclipse.org/Linux_Tools_Project/Docker_Tooling
+units.3.properties.4.value=https://github.com/openanalytics/docker-editor/
 units.3.properties.5.name=org.eclipse.equinox.p2.doc.url
-units.3.properties.5.value=https://wiki.eclipse.org/Linux_Tools_Project/Docker_Tooling/User_Guide
+units.3.properties.5.value=https://github.com/openanalytics/docker-editor/wiki/Getting-Started-with-Dockerfile-Editor
 units.3.properties.6.name=org.eclipse.equinox.p2.description
-units.3.properties.6.value=Supports Docker in Eclipse.
+units.3.properties.6.value=Supports editing Dockerfiles in Eclipse.
 units.3.licenses.0=\
-Docker Tools are made available under the Eclipse Public License
+Docker Editor is made available under the Eclipse Public License
 units.3.licenses.0.location=https://www.eclipse.org/legal/epl-v10.html
 units.3.requires.1.namespace=org.eclipse.equinox.p2.iu
-units.3.requires.1.name=org.eclipse.linuxtools.docker.feature.feature.group
+units.3.requires.1.name=eu.openanalytics.editor.docker.feature.group
 units.3.requires.1.greedy=true
 units.3.provides.1.namespace=org.eclipse.equinox.p2.iu
 units.3.provides.1.name=com.google.cloud.tools.eclipse.categories.docker.definition
