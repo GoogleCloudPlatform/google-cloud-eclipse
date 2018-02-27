@@ -71,7 +71,7 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
     IProject project = getProject(helper);
     try {
       IFacetedProject facetedProject = ProjectFacetsManager.create(project);
-      if (AppEngineStandardFacet.hasFacet(facetedProject)) {
+      if (facetedProject != null && AppEngineStandardFacet.hasFacet(facetedProject)) {
         String encoding = getDocumentEncoding(document);
         byte[] bytes = document.get().getBytes(encoding);
         IFile source = getFile(helper);
@@ -118,7 +118,7 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
       String className = (String) data;
       Class<?> clazz = Class.forName(className);
       Constructor<?> constructor = clazz.getConstructor();
-      this.setHelper((XmlValidationHelper) constructor.newInstance(new Object[] {}));
+      setHelper((XmlValidationHelper) constructor.newInstance(new Object[] {}));
     } catch (ClassNotFoundException | NoSuchMethodException | SecurityException
         | InstantiationException | IllegalAccessException | IllegalArgumentException
         | InvocationTargetException ex) {

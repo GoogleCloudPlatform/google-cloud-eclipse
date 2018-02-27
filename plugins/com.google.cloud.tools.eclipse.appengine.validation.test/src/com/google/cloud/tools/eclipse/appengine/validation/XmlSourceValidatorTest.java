@@ -18,25 +18,32 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.sse.ui.internal.reconcile.validator.IncrementalHelper;
 import org.eclipse.wst.sse.ui.internal.reconcile.validator.IncrementalReporter;
 import org.eclipse.wst.validation.internal.core.ValidationException;
 import org.eclipse.wst.validation.internal.provisional.core.IMessage;
+import org.eclipse.wst.validation.internal.provisional.core.IValidationContext;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -173,4 +180,29 @@ public class XmlSourceValidatorTest {
     assertEquals(project, testProject);
   }
 
+  @Test
+  public void testNoNullPointerExceptionOnNonFacetedProject()
+      throws CoreException, ValidationException {
+    IProjectDescription projectDescription =
+        ResourcesPlugin.getWorkspace().newProjectDescription("non-faceted-project");
+    IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("non-faceted-project");
+    project.create(projectDescription, null);
+    try {
+      project.open(null);
+      assertNull(ProjectFacetsManager.create(project));
+
+      project.getFolder("folder").create(true, true, null);
+      project.getFile("folder/file.ext").create(new ByteArrayInputStream(new byte[0]), true, null);
+      assertTrue(project.getFile("folder/file.ext").exists());
+
+      IValidationContext validationContext = mock(IValidationContext.class);
+      when(validationContext.getURIs()).thenReturn(
+          new String[] {"non-faceted-project/folder/file.ext"});
+
+      new XmlSourceValidator().validate(validationContext, reporter);
+      // Should not throw NPE and exit normally.
+    } finally {
+      project.delete(true, null);
+    }
+  }
 }
