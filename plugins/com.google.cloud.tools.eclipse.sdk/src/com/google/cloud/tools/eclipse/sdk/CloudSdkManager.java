@@ -66,9 +66,9 @@ public class CloudSdkManager {
     BundleContext context = FrameworkUtil.getBundle(CloudSdkManager.class).getBundleContext();
     DebugOptions debugOptions = context.getService(context.getServiceReference(DebugOptions.class));
     if (debugOptions != null) {
-      return debugOptions.getBooleanOption(OPTION_MANAGED_CLOUD_SDK, false);
+      return debugOptions.getBooleanOption(OPTION_MANAGED_CLOUD_SDK, true);
     }
-    return false;
+    return true;
   }
 
   /**

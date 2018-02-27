@@ -36,14 +36,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ProgressWrapperTest {
   @Mock IProgressMonitor monitor;
-  private ProgressWrapper wrapper;
 
   @Test
   public void testLifecycle() {
     // SubMonitor may issue calls with slightly different numbers and in different orders.
     ArgumentCaptor<Integer> totalWorkCaptor = ArgumentCaptor.forClass(Integer.class);
 
-    wrapper = new ProgressWrapper(monitor);
+    ProgressWrapper wrapper = new ProgressWrapper(monitor);
     wrapper.start("message", 100);
     wrapper.update("update");
     wrapper.update(100);
@@ -59,7 +58,7 @@ public class ProgressWrapperTest {
 
   @Test
   public void testNewChild() {
-    wrapper = new ProgressWrapper(monitor);
+    ProgressWrapper wrapper = new ProgressWrapper(monitor);
     wrapper.start("testNewChild", 100);
     assertThat(wrapper.newChild(10), instanceOf(ProgressListener.class));
   }

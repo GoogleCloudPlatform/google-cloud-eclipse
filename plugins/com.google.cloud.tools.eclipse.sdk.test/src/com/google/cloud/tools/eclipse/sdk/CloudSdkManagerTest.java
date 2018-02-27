@@ -61,7 +61,7 @@ public class CloudSdkManagerTest {
 
   @Test
   public void testManagedSdkOption() {
-    assertFalse(fixture.isManagedSdkFeatureEnabled());
+    assertTrue(fixture.isManagedSdkFeatureEnabled());
   }
 
   @Test
