@@ -18,8 +18,8 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
-import com.google.cloud.tools.eclipse.appengine.standard.java8.AppEngineStandardFacetChangeListener;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.io.ByteArrayInputStream;
@@ -37,8 +37,7 @@ import org.junit.Test;
 public class AppEngineWebXmlValidationTest {
 
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacetVersions(
-      JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31,
-      AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8);
+      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
 
   @Test
   public void testStagingElementsInAppEngineWebXml() throws CoreException {
