@@ -149,19 +149,22 @@ public class ProjectUtils {
     return projects;
   }
 
-  public static void waitUntilNoBuildErrors() throws CoreException {
+  public static boolean waitUntilNoBuildErrors() throws CoreException {
     IProject[] projects = getWorkspace().getRoot().getProjects();
-    waitUntilNoBuildErrors(projects);
+    return waitUntilNoBuildErrors(projects);
   }
 
-  public static void waitUntilNoBuildErrors(IProject... projects) throws CoreException {
+  public static boolean waitUntilNoBuildErrors(IProject... projects) throws CoreException {
     try {
       Stopwatch elapsed = Stopwatch.createStarted();
       while (true) {
         Set<String> errors = getAllBuildErrors(projects);
-        if (errors.isEmpty() || elapsed.elapsed(TimeUnit.SECONDS) > 300) {
-          return;
+        if (errors.isEmpty()) {
+          return true;
+        } else if (elapsed.elapsed(TimeUnit.SECONDS) > 300) {
+          return false;
         }
+
         if (Display.getCurrent() != null) {
           while (Display.getCurrent().readAndDispatch());
         }
@@ -169,6 +172,7 @@ public class ProjectUtils {
       }
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
+      return false;
     }
   }
 

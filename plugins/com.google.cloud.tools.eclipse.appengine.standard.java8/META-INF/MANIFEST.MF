@@ -23,3 +23,4 @@ Import-Package: com.google.cloud.tools.appengine;version="0.4.4",
  org.eclipse.jst.j2ee.web.project.facet,
  org.eclipse.m2e.core.project.configurator,
  org.eclipse.wst.common.frameworks.datamodel
+Export-Package: com.google.cloud.tools.eclipse.appengine.standard.java8
