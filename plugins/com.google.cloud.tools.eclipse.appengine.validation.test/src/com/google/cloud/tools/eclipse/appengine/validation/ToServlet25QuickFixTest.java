@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
 
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.xml.parsers.DocumentBuilder;
@@ -34,8 +35,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
-
 /**
  * Must be run as a plugin test.
  */
@@ -43,7 +42,7 @@ public class ToServlet25QuickFixTest {
     
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
 
-  private ToServlet25QuickFix fix = new ToServlet25QuickFix();
+  private final ToServlet25QuickFix fix = new ToServlet25QuickFix();
 
   @Test 
   public void testGetLabel() {
@@ -62,7 +61,6 @@ public class ToServlet25QuickFixTest {
         .getElementsByTagNameNS("http://java.sun.com/xml/ns/javaee", "foo").item(0);
     assertEquals("foo", element.getTagName());
   }
-  
   
   @Test
   public void testConvertServlet_sunNamespace() throws IOException, ParserConfigurationException,

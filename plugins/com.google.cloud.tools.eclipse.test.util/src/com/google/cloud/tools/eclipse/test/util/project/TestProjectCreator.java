@@ -50,7 +50,6 @@ import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
-import org.eclipse.wst.common.project.facet.core.internal.FacetedProjectNature;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.ServerUtil;
 import org.junit.rules.ExternalResource;
@@ -59,7 +58,6 @@ import org.junit.rules.ExternalResource;
  * Utility class to create and configure a Faceted Project. Installs a Java 1.7 facet if no facets
  * are specified with {@link #withFacetVersions}.
  */
-@SuppressWarnings("restriction") // For FacetedProjectNature
 public final class TestProjectCreator extends ExternalResource {
   private static final Logger logger = Logger.getLogger(TestProjectCreator.class.getName());
 
@@ -93,7 +91,8 @@ public final class TestProjectCreator extends ExternalResource {
   protected void after() {
     if (project != null) {
       try {
-        if (getFacetedProject().hasProjectFacet(WebFacetUtils.WEB_FACET)) {
+        IFacetedProject facetedProject = getFacetedProject();
+        if (facetedProject != null && facetedProject.hasProjectFacet(WebFacetUtils.WEB_FACET)) {
           // Wait for the WTP validation job as it runs without the workspace protection lock
           ProjectUtils.waitForProjects(project);
         }
@@ -146,8 +145,6 @@ public final class TestProjectCreator extends ExternalResource {
   private void createProject(String projectName) throws CoreException {
     IProjectDescription newProjectDescription =
         ResourcesPlugin.getWorkspace().newProjectDescription(projectName);
-    newProjectDescription.setNatureIds(
-        new String[] {FacetedProjectNature.NATURE_ID});
     project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
     project.create(newProjectDescription, null);
     project.open(null);
@@ -172,7 +169,7 @@ public final class TestProjectCreator extends ExternalResource {
       return;
     }
 
-    IFacetedProject facetedProject = ProjectFacetsManager.create(getProject());
+    IFacetedProject facetedProject = ProjectFacetsManager.create(getProject(), true, null);
 
     FacetUtil facetUtil = new FacetUtil(facetedProject);
     for (IProjectFacetVersion projectFacetVersion : projectFacetVersions) {

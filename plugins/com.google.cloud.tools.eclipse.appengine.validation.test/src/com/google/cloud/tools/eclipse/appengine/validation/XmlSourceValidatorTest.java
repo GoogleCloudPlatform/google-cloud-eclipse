@@ -31,8 +31,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.text.IDocument;
@@ -57,6 +55,8 @@ public class XmlSourceValidatorTest {
       + "</appengine-web-app>";
 
   private final IncrementalReporter reporter = new IncrementalReporter(null);
+
+  @Rule public TestProjectCreator nonFacetedProject = new TestProjectCreator();
 
   @Rule public TestProjectCreator dynamicWebProject =
       new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
@@ -183,26 +183,18 @@ public class XmlSourceValidatorTest {
   @Test
   public void testNoNullPointerExceptionOnNonFacetedProject()
       throws CoreException, ValidationException {
-    IProjectDescription projectDescription =
-        ResourcesPlugin.getWorkspace().newProjectDescription("non-faceted-project");
-    IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("non-faceted-project");
-    project.create(projectDescription, null);
-    try {
-      project.open(null);
-      assertNull(ProjectFacetsManager.create(project));
+    IProject project = nonFacetedProject.getProject();
+    assertNull("project should have not been faceted", ProjectFacetsManager.create(project));
 
-      project.getFolder("folder").create(true, true, null);
-      project.getFile("folder/file.ext").create(new ByteArrayInputStream(new byte[0]), true, null);
-      assertTrue(project.getFile("folder/file.ext").exists());
+    project.getFolder("folder").create(true, true, null);
+    project.getFile("folder/file.ext").create(new ByteArrayInputStream(new byte[0]), true, null);
+    assertTrue(project.getFile("folder/file.ext").exists());
 
-      IValidationContext validationContext = mock(IValidationContext.class);
-      when(validationContext.getURIs()).thenReturn(
-          new String[] {"non-faceted-project/folder/file.ext"});
+    IValidationContext validationContext = mock(IValidationContext.class);
+    when(validationContext.getURIs()).thenReturn(
+        new String[] {project.getName() + "/folder/file.ext"});
 
-      new XmlSourceValidator().validate(validationContext, reporter);
-      // Should not throw NPE and exit normally.
-    } finally {
-      project.delete(true, null);
-    }
+    new XmlSourceValidator().validate(validationContext, reporter);
+    // Should not throw NPE and exit normally.
   }
 }

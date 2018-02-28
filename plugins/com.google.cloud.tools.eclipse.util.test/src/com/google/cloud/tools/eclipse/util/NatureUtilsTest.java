@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.util;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -63,10 +63,9 @@ public class NatureUtilsTest {
 
   @Test
   public void testRemoveNature_nonExistingNature() throws CoreException {
-    // By default, project has faceted project nature.
-    assertArrayEquals(new String[] {FACETED_NATURE_ID}, project.getDescription().getNatureIds());
+    assertEquals(0, project.getDescription().getNatureIds().length);
 
     NatureUtils.removeNature(project, JavaCore.NATURE_ID, monitor);
-    assertArrayEquals(new String[] {FACETED_NATURE_ID}, project.getDescription().getNatureIds());
+    assertEquals(0, project.getDescription().getNatureIds().length);
   }
 }
