@@ -43,9 +43,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class AppEngineFlexJarFacetTest {
 
-  @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacetVersions();
-  @Rule public TestProjectCreator javaProjectCreator = new TestProjectCreator().withFacetVersions(
-      JavaFacet.VERSION_1_7);
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
+  @Rule public TestProjectCreator javaProjectCreator = new TestProjectCreator()
+      .withFacetVersions(JavaFacet.VERSION_1_7);
 
   @Mock private IFacetedProject mockFacetedProject;
 
@@ -114,7 +114,7 @@ public class AppEngineFlexJarFacetTest {
   public void testInstallAppEngineFacet_installDependentFacets() throws CoreException {
     IProject project = projectCreator.getProject();
 
-    IFacetedProject facetedProject = ProjectFacetsManager.create(project);
+    IFacetedProject facetedProject = ProjectFacetsManager.create(project, true, null);
     AppEngineFlexJarFacet.installAppEngineFacet(facetedProject,
         true /* installDependentFacets */, new NullProgressMonitor());
     Assert.assertTrue(AppEngineFlexJarFacet.hasFacet(facetedProject));
@@ -126,7 +126,7 @@ public class AppEngineFlexJarFacetTest {
   public void testInstallAppEngineFacet_noDependentFacets() throws CoreException {
     IProject project = projectCreator.getProject();
 
-    IFacetedProject facetedProject = ProjectFacetsManager.create(project);
+    IFacetedProject facetedProject = ProjectFacetsManager.create(project, true, null);
     try {
       AppEngineFlexJarFacet.installAppEngineFacet(facetedProject,
           false /* installDependentFacets */, new NullProgressMonitor());
