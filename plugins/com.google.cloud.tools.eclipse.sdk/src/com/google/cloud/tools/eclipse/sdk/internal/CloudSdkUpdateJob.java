@@ -22,6 +22,7 @@ import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.cloud.tools.managedcloudsdk.ManagedCloudSdk;
 import com.google.cloud.tools.managedcloudsdk.ManagedSdkVerificationException;
 import com.google.cloud.tools.managedcloudsdk.ManagedSdkVersionMismatchException;
+import com.google.cloud.tools.managedcloudsdk.ProgressListener;
 import com.google.cloud.tools.managedcloudsdk.UnsupportedOsException;
 import com.google.cloud.tools.managedcloudsdk.command.CommandExecutionException;
 import com.google.cloud.tools.managedcloudsdk.command.CommandExitException;
@@ -55,6 +56,9 @@ public class CloudSdkUpdateJob extends CloudSdkModifyJob {
     if (monitor.isCanceled()) {
       return Status.CANCEL_STATUS;
     }
+    
+    // todo should we convert to a submonitor here?
+    
     monitor.beginTask(Messages.getString("configuring.cloud.sdk"), 10); //$NON-NLS-1$
     try {
       ManagedCloudSdk managedSdk = getManagedCloudSdk();
@@ -66,7 +70,8 @@ public class CloudSdkUpdateJob extends CloudSdkModifyJob {
         subTask(monitor, Messages.getString("updating.cloud.sdk")); //$NON-NLS-1$
         String oldVersion = getVersion(managedSdk.getSdkHome());
         SdkUpdater updater = managedSdk.newUpdater();
-        updater.update(null, new MessageConsoleWriterListener(consoleStream));
+        updater.update(
+            new ProgressWrapper(monitor), new MessageConsoleWriterListener(consoleStream));
         monitor.worked(10);
         String newVersion = getVersion(managedSdk.getSdkHome());
         logger.info(
