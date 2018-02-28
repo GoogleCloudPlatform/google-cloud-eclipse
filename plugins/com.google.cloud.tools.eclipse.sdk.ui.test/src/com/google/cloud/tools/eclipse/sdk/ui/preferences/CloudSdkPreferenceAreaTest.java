@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
@@ -129,12 +130,13 @@ public class CloudSdkPreferenceAreaTest {
 
   @Test
   public void testUi_noSdkManagementFeature() {
+    when(cloudSdkManager.isManagedSdkFeatureEnabled()).thenReturn(false);
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
 
-    assertNotNull(chooseSdk);
+    assertNull(chooseSdk);
     assertNotNull(sdkLocation);
-    assertFalse(sdkLocation.isEnabled());
+    assertTrue(sdkLocation.isEnabled());
     assertNotNull(sdkVersion);
   }
 
