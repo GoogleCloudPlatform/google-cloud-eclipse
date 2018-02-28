@@ -22,7 +22,6 @@ import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.cloud.tools.managedcloudsdk.ManagedCloudSdk;
 import com.google.cloud.tools.managedcloudsdk.ManagedSdkVerificationException;
 import com.google.cloud.tools.managedcloudsdk.ManagedSdkVersionMismatchException;
-import com.google.cloud.tools.managedcloudsdk.ProgressListener;
 import com.google.cloud.tools.managedcloudsdk.UnsupportedOsException;
 import com.google.cloud.tools.managedcloudsdk.command.CommandExecutionException;
 import com.google.cloud.tools.managedcloudsdk.command.CommandExitException;
