@@ -112,7 +112,8 @@ public class CloudSdkInstallJobTest {
     verify(managedCloudSdk).newComponentInstaller();
     verify(sdkInstaller).install(any(ProgressListener.class), any(ConsoleListener.class));
     verify(componentInstaller)
-        .installComponent(any(SdkComponent.class), any(ConsoleListener.class));
+        .installComponent(
+            any(SdkComponent.class), any(ProgressListener.class), any(ConsoleListener.class));
   }
 
   @Test
@@ -153,7 +154,8 @@ public class CloudSdkInstallJobTest {
     verify(managedCloudSdk, never()).newInstaller();
     verify(managedCloudSdk).newComponentInstaller();
     verify(componentInstaller)
-        .installComponent(any(SdkComponent.class), any(ConsoleListener.class));
+        .installComponent(
+            any(SdkComponent.class), any(ProgressListener.class), any(ConsoleListener.class));
   }
 
   @Test

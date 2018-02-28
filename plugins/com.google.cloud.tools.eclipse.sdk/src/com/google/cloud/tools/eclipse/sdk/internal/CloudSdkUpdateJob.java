@@ -66,7 +66,7 @@ public class CloudSdkUpdateJob extends CloudSdkModifyJob {
         subTask(monitor, Messages.getString("updating.cloud.sdk")); //$NON-NLS-1$
         String oldVersion = getVersion(managedSdk.getSdkHome());
         SdkUpdater updater = managedSdk.newUpdater();
-        updater.update(new MessageConsoleWriterListener(consoleStream));
+        updater.update(null, new MessageConsoleWriterListener(consoleStream));
         monitor.worked(10);
         String newVersion = getVersion(managedSdk.getSdkHome());
         logger.info(
