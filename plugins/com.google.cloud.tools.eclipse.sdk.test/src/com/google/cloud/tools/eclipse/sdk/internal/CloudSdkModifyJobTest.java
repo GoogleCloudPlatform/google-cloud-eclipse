@@ -99,8 +99,8 @@ public class CloudSdkModifyJobTest {
 
   @Test
   public void testRun_mutualExclusion() throws InterruptedException {
-    FakeModifyJob job1 = new FakeModifyJob(null, true /* blockOnStart */);
-    FakeModifyJob job2 = new FakeModifyJob(null, true /* blockOnStart */);
+    FakeModifyJob job1 = new FakeModifyJob(consoleStream, true /* blockOnStart */);
+    FakeModifyJob job2 = new FakeModifyJob(consoleStream, true /* blockOnStart */);
 
     job1.schedule();
     while (job1.getState() != Job.RUNNING) {
