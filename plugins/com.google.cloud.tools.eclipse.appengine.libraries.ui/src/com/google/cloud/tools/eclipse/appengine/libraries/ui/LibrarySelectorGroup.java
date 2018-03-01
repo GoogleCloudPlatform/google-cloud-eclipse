@@ -101,7 +101,7 @@ public class LibrarySelectorGroup implements ISelectionProvider {
       libraryButton.addSelectionListener(new ManualSelectionTracker());
       libraryButtons.put(library, libraryButton);
     }
-    GridLayoutFactory.fillDefaults().generateLayout(apiGroup);
+    GridLayoutFactory.swtDefaults().generateLayout(apiGroup);
   }
 
   /**
