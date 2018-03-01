@@ -188,7 +188,8 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
           }
         });
 
-    final IObservableValue accountEmailModel = PojoProperties.value("accountEmail").observe(model);
+    final IObservableValue<String> accountEmailModel =
+        PojoProperties.value("accountEmail").observe(model);
 
     Binding binding = bindingContext.bindValue(accountSelectorObservableValue, accountEmailModel,
         new UpdateValueStrategy(), modelToTarget);
@@ -213,7 +214,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
 
     IViewerObservableValue projectList =
         ViewerProperties.singleSelection().observe(projectSelector.getViewer());
-    IObservableValue projectIdModel = PojoProperties.value("projectId").observe(model);
+    IObservableValue<String> projectIdModel = PojoProperties.value("projectId").observe(model);
 
     UpdateValueStrategy gcpProjectToProjectId =
         new UpdateValueStrategy().setConverter(new GcpProjectToProjectIdConverter());
@@ -289,7 +290,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     bindingContext.bindValue(masterValue, masterModel);
 
     // Intermediary model necessary for "Restore Defaults" to work.
-    final IObservableValue currentDependantChoice = new WritableValue();
+    final IObservableValue<Boolean> currentDependantChoice = new WritableValue<>();
     bindingContext.bindValue(currentDependantChoice, dependantModel);
 
     // One-way update: button selection <-- latest user choice
@@ -298,7 +299,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
       @Override
       protected Boolean calculate() {
         boolean controlEnabled = (boolean) dependantEnablement.getValue();
-        boolean currentValue = (boolean) currentDependantChoice.getValue();
+        boolean currentValue = currentDependantChoice.getValue();
         if (!controlEnabled) {
           return Boolean.FALSE;  // Force unchecking the stop previous button if it is disabled.
         }
@@ -313,7 +314,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
       protected Boolean calculate() {
         boolean controlEnabled = (boolean) dependantEnablement.getValue();
         boolean controlValue = (boolean) dependantValue.getValue();
-        boolean currentValue = (boolean) currentDependantChoice.getValue();
+        boolean currentValue = currentDependantChoice.getValue();
         if (controlEnabled) {
           return controlValue;  // Remember the button state as the latest choice if it is enabled.
         }

@@ -24,22 +24,22 @@ public class SharedImagesTest {
 
   @Test
   public void testCreateCloudSdkImage() {
-    assertNotNull(SharedImages.CLOUDSDK_IMAGE_DESCRIPTOR.getImageData());
+    assertNotNull(SharedImages.CLOUDSDK_IMAGE_DESCRIPTOR.getImageData(100 /* zoom */));
   }
 
   @Test
   public void testCreateGcpImage() {
-    assertNotNull(SharedImages.GCP_IMAGE_DESCRIPTOR.getImageData());
+    assertNotNull(SharedImages.GCP_IMAGE_DESCRIPTOR.getImageData(100 /* zoom */));
   }
 
   @Test
   public void testCreateGcpWizardImage() {
-    assertNotNull(SharedImages.GCP_WIZARD_IMAGE_DESCRIPTOR.getImageData());
+    assertNotNull(SharedImages.GCP_WIZARD_IMAGE_DESCRIPTOR.getImageData(100 /* zoom */));
   }
 
   @Test
   public void testCreateRefreshIcon() {
-    assertNotNull(SharedImages.REFRESH_IMAGE_DESCRIPTOR.getImageData());
+    assertNotNull(SharedImages.REFRESH_IMAGE_DESCRIPTOR.getImageData(100 /* zoom */));
   }
 
 }
