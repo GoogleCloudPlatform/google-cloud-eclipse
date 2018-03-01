@@ -11,10 +11,6 @@
  */
 target "GCP for Eclipse Oxygen" with source requirements
 
-location "http://download.eclipse.org/cbi/updates/license/" {
-    org.eclipse.license.feature.group
-}
-
 location "http://download.eclipse.org/releases/oxygen/" {
 	org.eclipse.sdk.feature.group
 	org.eclipse.jdt.feature.group
@@ -54,6 +50,10 @@ location "http://download.eclipse.org/tools/orbit/downloads/latest-R/" {
     org.slf4j.apis.jcl
     org.slf4j.apis.log4j
     ch.qos.logback.slf4j
+}
+
+location "http://docker-editor.openanalytics.eu/update/" {
+    eu.openanalytics.editor.docker.feature.group
 }
 
 location "http://download.eclipse.org/linuxtools/update-docker" {

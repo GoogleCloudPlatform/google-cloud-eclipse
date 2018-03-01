@@ -58,7 +58,7 @@ public class CloudSdkInstallJob extends CloudSdkModifyJob {
   @Override
   protected IStatus modifySdk(IProgressMonitor monitor) {
     SubMonitor progress =
-        SubMonitor.convert(monitor, Messages.getString("configuring.cloud.sdk"), 20); // $NON-NLS-1$
+        SubMonitor.convert(monitor, Messages.getString("configuring.cloud.sdk"), 30); // $NON-NLS-1$
     if (progress.isCanceled()) {
       return Status.CANCEL_STATUS;
     }
@@ -82,7 +82,9 @@ public class CloudSdkInstallJob extends CloudSdkModifyJob {
             progress, Messages.getString("installing.cloud.sdk.app.engine.java")); // $NON-NLS-1$
         SdkComponentInstaller componentInstaller = managedSdk.newComponentInstaller();
         componentInstaller.installComponent(
-            SdkComponent.APP_ENGINE_JAVA, new MessageConsoleWriterListener(consoleStream));
+            SdkComponent.APP_ENGINE_JAVA,
+            new ProgressWrapper(progress.split(10)),
+            new MessageConsoleWriterListener(consoleStream));
         logger.info("Installed Google Cloud SDK component: " + SdkComponent.APP_ENGINE_JAVA.name());
       }
       progress.worked(10);
