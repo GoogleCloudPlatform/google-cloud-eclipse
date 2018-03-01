@@ -50,11 +50,11 @@ public class XmlValidatorTest {
   private IFile resource;
 
   @Rule public TestProjectCreator appEngineStandardProjectCreator =
-      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25,
+      new TestProjectCreator().withFacets(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25,
           AppEngineStandardFacet.JRE7);
 
   @Rule public TestProjectCreator dynamicWebProjectCreator =
-      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
+      new TestProjectCreator().withFacets(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
 
   @Before
   public void setUp() throws CoreException {

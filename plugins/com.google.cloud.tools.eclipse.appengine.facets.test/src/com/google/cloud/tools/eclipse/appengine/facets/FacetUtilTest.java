@@ -59,7 +59,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class FacetUtilTest {
   @Mock private IFacetedProject mockFacetedProject;
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
-  @Rule public TestProjectCreator javaProjectCreator = new TestProjectCreator().withFacetVersions(
+  @Rule public TestProjectCreator javaProjectCreator = new TestProjectCreator().withFacets(
       JavaFacet.VERSION_1_7);
 
   @Test

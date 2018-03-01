@@ -34,7 +34,7 @@ import org.junit.Test;
 
 public class FlexWarStagingDelegateTest {
 
-  @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacetVersions(
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacets(
       JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineFlexWarFacet.FACET_VERSION);
 
   private IProject project;

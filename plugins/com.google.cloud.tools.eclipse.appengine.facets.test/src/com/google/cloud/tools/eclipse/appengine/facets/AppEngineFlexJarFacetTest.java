@@ -45,7 +45,7 @@ public class AppEngineFlexJarFacetTest {
 
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
   @Rule public TestProjectCreator javaProjectCreator = new TestProjectCreator()
-      .withFacetVersions(JavaFacet.VERSION_1_7);
+      .withFacets(JavaFacet.VERSION_1_7);
 
   @Mock private IFacetedProject mockFacetedProject;
 

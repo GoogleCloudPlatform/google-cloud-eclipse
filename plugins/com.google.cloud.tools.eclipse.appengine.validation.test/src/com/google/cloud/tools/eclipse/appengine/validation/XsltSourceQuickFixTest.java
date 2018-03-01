@@ -58,7 +58,7 @@ public class XsltSourceQuickFixTest {
   public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
   @Rule
-  public TestProjectCreator appEngineStandardProject = new TestProjectCreator().withFacetVersions(
+  public TestProjectCreator appEngineStandardProject = new TestProjectCreator().withFacets(
       JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
 
   @Test

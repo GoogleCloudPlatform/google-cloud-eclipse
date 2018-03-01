@@ -54,7 +54,7 @@ public class FlexDeployPreferencesPanelTest {
   @Mock private Runnable layoutHandler;
 
   @Rule public ShellTestResource shellResource = new ShellTestResource();
-  @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacetVersions(
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacets(
       JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31, AppEngineFlexWarFacet.FACET_VERSION);
 
   private IProject project;

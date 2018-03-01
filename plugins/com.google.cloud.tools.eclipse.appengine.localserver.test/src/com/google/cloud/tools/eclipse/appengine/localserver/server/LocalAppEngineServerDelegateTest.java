@@ -63,10 +63,10 @@ public class LocalAppEngineServerDelegateTest {
   @Mock private IWebModule webModule2;
   @Mock private IModule module3;
   @Rule public TestProjectCreator dynamicWebProject =
-      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
+      new TestProjectCreator().withFacets(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
   @Rule
   public TestProjectCreator appEngineStandardProject =
-      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25,
+      new TestProjectCreator().withFacets(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25,
           AppEngineStandardFacet.JRE7);
 
   @Before

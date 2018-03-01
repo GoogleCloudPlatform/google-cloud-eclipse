@@ -62,7 +62,7 @@ public class ConversionTests {
   public void bare_Java7_Web25()
       throws CoreException, IOException, InterruptedException, SAXException {
     IFacetedProject project = projectCreator
-        .withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25).getFacetedProject();
+        .withFacets(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25).getFacetedProject();
 
     Job conversionJob = new AppEngineStandardProjectConvertJob(project);
     conversionJob.schedule();
@@ -79,7 +79,7 @@ public class ConversionTests {
   public void bare_Java7_Web31()
       throws CoreException, IOException, InterruptedException, SAXException {
     IFacetedProject project = projectCreator
-        .withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_31).getFacetedProject();
+        .withFacets(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_31).getFacetedProject();
     Job conversionJob = new AppEngineStandardProjectConvertJob(project);
     conversionJob.schedule();
     conversionJob.join();
@@ -95,7 +95,7 @@ public class ConversionTests {
   public void bare_Java8_Web25()
       throws CoreException, IOException, InterruptedException, SAXException {
     IFacetedProject project = projectCreator
-        .withFacetVersions(JavaFacet.VERSION_1_8, WebFacetUtils.WEB_25).getFacetedProject();
+        .withFacets(JavaFacet.VERSION_1_8, WebFacetUtils.WEB_25).getFacetedProject();
     Job conversionJob = new AppEngineStandardProjectConvertJob(project);
     conversionJob.schedule();
     conversionJob.join();
@@ -111,7 +111,7 @@ public class ConversionTests {
   public void bare_Java8_Web31()
       throws CoreException, IOException, InterruptedException, SAXException {
     IFacetedProject project = projectCreator
-        .withFacetVersions(JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31).getFacetedProject();
+        .withFacets(JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31).getFacetedProject();
     Job conversionJob = new AppEngineStandardProjectConvertJob(project);
     conversionJob.schedule();
     conversionJob.join();
@@ -143,7 +143,7 @@ public class ConversionTests {
   public void appEngineWebWithNoRuntime_Java7()
       throws CoreException, IOException, InterruptedException, SAXException {
     IFacetedProject project =
-        projectCreator.withFacetVersions(JavaFacet.VERSION_1_7).getFacetedProject();
+        projectCreator.withFacets(JavaFacet.VERSION_1_7).getFacetedProject();
     createAppEngineWebWithNoRuntime(project);
 
     Job conversionJob = new AppEngineStandardProjectConvertJob(project);
@@ -160,7 +160,7 @@ public class ConversionTests {
   public void appEngineWebWithNoRuntime_Java7_Web25()
       throws CoreException, IOException, InterruptedException, SAXException {
     IFacetedProject project = projectCreator
-        .withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25).getFacetedProject();
+        .withFacets(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25).getFacetedProject();
     createAppEngineWebWithNoRuntime(project);
 
     Job conversionJob = new AppEngineStandardProjectConvertJob(project);
@@ -177,7 +177,7 @@ public class ConversionTests {
   public void appEngineWebWithNoRuntime_Java7_Web31()
       throws CoreException, IOException, InterruptedException, SAXException {
     IFacetedProject project = projectCreator
-        .withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_31).getFacetedProject();
+        .withFacets(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_31).getFacetedProject();
     createAppEngineWebWithNoRuntime(project);
 
     Job conversionJob = new AppEngineStandardProjectConvertJob(project);
@@ -194,7 +194,7 @@ public class ConversionTests {
   public void appEngineWebWithNoRuntime_Java8()
       throws CoreException, IOException, InterruptedException, SAXException {
     IFacetedProject project =
-        projectCreator.withFacetVersions(JavaFacet.VERSION_1_8).getFacetedProject();
+        projectCreator.withFacets(JavaFacet.VERSION_1_8).getFacetedProject();
     createAppEngineWebWithNoRuntime(project);
 
     Job conversionJob = new AppEngineStandardProjectConvertJob(project);
@@ -211,7 +211,7 @@ public class ConversionTests {
   public void appEngineWebWithNoRuntime_Java8_Web25()
       throws CoreException, IOException, InterruptedException, SAXException {
     IFacetedProject project = projectCreator
-        .withFacetVersions(JavaFacet.VERSION_1_8, WebFacetUtils.WEB_25).getFacetedProject();
+        .withFacets(JavaFacet.VERSION_1_8, WebFacetUtils.WEB_25).getFacetedProject();
     createAppEngineWebWithNoRuntime(project);
 
     Job conversionJob = new AppEngineStandardProjectConvertJob(project);
@@ -228,7 +228,7 @@ public class ConversionTests {
   public void appEngineWebWithNoRuntime_Java8_Web31()
       throws CoreException, IOException, InterruptedException, SAXException {
     IFacetedProject project = projectCreator
-        .withFacetVersions(JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31).getFacetedProject();
+        .withFacets(JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31).getFacetedProject();
     createAppEngineWebWithNoRuntime(project);
 
     Job conversionJob = new AppEngineStandardProjectConvertJob(project);
@@ -261,7 +261,7 @@ public class ConversionTests {
   public void appEngineWebWithJava8Runtime_Java7()
       throws CoreException, IOException, InterruptedException, SAXException {
     IFacetedProject project =
-        projectCreator.withFacetVersions(JavaFacet.VERSION_1_7).getFacetedProject();
+        projectCreator.withFacets(JavaFacet.VERSION_1_7).getFacetedProject();
     createAppEngineWebWithJava8Runtime(project);
 
     Job conversionJob = new AppEngineStandardProjectConvertJob(project);
@@ -278,7 +278,7 @@ public class ConversionTests {
   public void appEngineWebWithJava8Runtime_Java7_Web25()
       throws CoreException, IOException, InterruptedException, SAXException {
     IFacetedProject project = projectCreator
-        .withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25).getFacetedProject();
+        .withFacets(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25).getFacetedProject();
     createAppEngineWebWithJava8Runtime(project);
 
     Job conversionJob = new AppEngineStandardProjectConvertJob(project);
@@ -295,7 +295,7 @@ public class ConversionTests {
   public void appEngineWebWithJava8Runtime_Java7_Web31()
       throws CoreException, IOException, InterruptedException, SAXException {
     IFacetedProject project = projectCreator
-        .withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_31).getFacetedProject();
+        .withFacets(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_31).getFacetedProject();
     createAppEngineWebWithJava8Runtime(project);
 
     Job conversionJob = new AppEngineStandardProjectConvertJob(project);
@@ -312,7 +312,7 @@ public class ConversionTests {
   public void appEngineWebWithJava8Runtime_Java8()
       throws CoreException, IOException, InterruptedException, SAXException {
     IFacetedProject project =
-        projectCreator.withFacetVersions(JavaFacet.VERSION_1_8).getFacetedProject();
+        projectCreator.withFacets(JavaFacet.VERSION_1_8).getFacetedProject();
     createAppEngineWebWithJava8Runtime(project);
 
     Job conversionJob = new AppEngineStandardProjectConvertJob(project);
@@ -329,7 +329,7 @@ public class ConversionTests {
   public void appEngineWebWithJava8Runtime_Java8_Web25()
       throws CoreException, IOException, InterruptedException, SAXException {
     IFacetedProject project = projectCreator
-        .withFacetVersions(JavaFacet.VERSION_1_8, WebFacetUtils.WEB_25).getFacetedProject();
+        .withFacets(JavaFacet.VERSION_1_8, WebFacetUtils.WEB_25).getFacetedProject();
     createAppEngineWebWithJava8Runtime(project);
 
     Job conversionJob = new AppEngineStandardProjectConvertJob(project);
@@ -346,7 +346,7 @@ public class ConversionTests {
   public void appEngineWebWithJava8Runtime_Java8_Web31()
       throws CoreException, IOException, InterruptedException, SAXException {
     IFacetedProject project = projectCreator
-        .withFacetVersions(JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31).getFacetedProject();
+        .withFacets(JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31).getFacetedProject();
     createAppEngineWebWithJava8Runtime(project);
 
     Job conversionJob = new AppEngineStandardProjectConvertJob(project);

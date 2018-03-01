@@ -48,14 +48,13 @@ import org.osgi.service.prefs.BackingStoreException;
 public class FlexDeployCommandHandlerTest {
 
   @Rule public TestProjectCreator javaProjectCreator = new TestProjectCreator()
-      .withFacetVersions(JavaFacet.VERSION_1_8);
+      .withFacets(JavaFacet.VERSION_1_8);
 
   @Rule public TestProjectCreator flexJarProjectCreator = new TestProjectCreator()
-      .withFacetVersions(JavaFacet.VERSION_1_8, AppEngineFlexJarFacet.FACET_VERSION);
+      .withFacets(JavaFacet.VERSION_1_8, AppEngineFlexJarFacet.FACET_VERSION);
 
   @Rule public TestProjectCreator flexWarProjectCreator = new TestProjectCreator()
-      .withFacetVersions(
-          JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31, AppEngineFlexWarFacet.FACET_VERSION);
+      .withFacets(JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31, AppEngineFlexWarFacet.FACET_VERSION);
 
   @Test
   public void testGetStagingDelegate_exceptionIfAppYamlDoesNotExist() {

@@ -45,7 +45,7 @@ public class AppEngineStandardProjectConvertJobTest {
 
   @Rule
   public final TestProjectCreator projectCreator =
-      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7);
+      new TestProjectCreator().withFacets(JavaFacet.VERSION_1_7);
 
   @Test
   public void testAppEngineFacetAdded() throws CoreException, InterruptedException {

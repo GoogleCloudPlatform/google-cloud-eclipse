@@ -228,7 +228,7 @@ public class WebProjectUtilTest {
   public void testFindWebInfFile_dynamicWebProject() {
     // WTP's Dynamic Web Project should create a web.xml
     IProject project = testProjectCreator
-        .withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25).getProject();
+        .withFacets(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25).getProject();
 
     IFile webXml = WebProjectUtil.findInWebInf(project, new Path("web.xml"));
     assertNotNull(webXml);
@@ -238,7 +238,7 @@ public class WebProjectUtilTest {
   @Test
   public void testCreateWebInfFile_dynamicWebProject() throws CoreException, IOException {
     IProject project = testProjectCreator
-        .withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25).getProject();
+        .withFacets(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25).getProject();
     IFile webXml = WebProjectUtil.findInWebInf(project, new Path("web.xml"));
     assertNotNull(webXml);
     assertTrue(webXml.exists());
@@ -257,7 +257,7 @@ public class WebProjectUtilTest {
   @Test
   public void testCreateWebInfFolder_dynamicWebProject() throws CoreException {
     IProject project = testProjectCreator
-        .withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25).getProject();
+        .withFacets(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25).getProject();
     IFile webXml = WebProjectUtil.findInWebInf(project, new Path("web.xml"));
     assertNotNull(webXml);
     assertTrue(webXml.exists());

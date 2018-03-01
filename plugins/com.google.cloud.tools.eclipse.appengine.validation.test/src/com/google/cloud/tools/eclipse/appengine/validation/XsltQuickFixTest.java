@@ -65,7 +65,7 @@ public class XsltQuickFixTest {
   private IFile file;
 
   @Rule public TestProjectCreator projectCreator =
-      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
+      new TestProjectCreator().withFacets(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
 
   @Before
   public void setup() {

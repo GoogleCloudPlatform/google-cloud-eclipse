@@ -48,11 +48,11 @@ import org.xml.sax.SAXException;
 public class AppEngineStandardFacetVersionChangeTests {
   @Rule
   public TestProjectCreator jre7Project = new TestProjectCreator()
-      .withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
+      .withFacets(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
 
   @Rule
   public TestProjectCreator jre8Project = new TestProjectCreator()
-      .withFacetVersions(JavaFacet.VERSION_1_8, WebFacetUtils.WEB_25,
+      .withFacets(JavaFacet.VERSION_1_8, WebFacetUtils.WEB_25,
           AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8);
 
   @Test

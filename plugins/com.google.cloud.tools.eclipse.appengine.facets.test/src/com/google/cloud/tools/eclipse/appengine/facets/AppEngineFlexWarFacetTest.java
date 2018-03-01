@@ -42,7 +42,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class AppEngineFlexWarFacetTest {
 
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
-  @Rule public TestProjectCreator wtpProjectCreator = new TestProjectCreator().withFacetVersions(
+  @Rule public TestProjectCreator wtpProjectCreator = new TestProjectCreator().withFacets(
       JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
 
   @Mock private IFacetedProject mockFacetedProject;
