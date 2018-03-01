@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.sdk.internal;
 
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.sdk.Messages;
+import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
 import com.google.cloud.tools.eclipse.util.jobs.MutexRule;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.cloud.tools.managedcloudsdk.ManagedCloudSdk;
@@ -30,7 +31,12 @@ import org.eclipse.core.runtime.IProgressMonitorWithBlocking;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.action.Action;
+import org.eclipse.ui.console.ConsolePlugin;
+import org.eclipse.ui.console.IConsoleManager;
+import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
+import org.eclipse.ui.progress.IProgressConstants;
 
 /**
  * A base class for any jobs that seek to modify the managed Google Cloud SDK, ensuring that
@@ -51,9 +57,25 @@ public abstract class CloudSdkModifyJob extends Job {
   public CloudSdkModifyJob(String jobName, MessageConsoleStream consoleStream,
       ReadWriteLock cloudSdkLock) {
     super(jobName);
-    this.consoleStream = consoleStream;
+    this.consoleStream = consoleStream != null ? consoleStream : createNewMessageConsole();
     this.cloudSdkLock = cloudSdkLock;
     setRule(MUTEX_RULE);
+  }
+
+  private MessageConsoleStream createNewMessageConsole() {
+    final MessageConsole console = MessageConsoleUtilities.findOrCreateConsole(
+        Messages.getString("configuring.cloud.sdk"), // $NON-NLS-1$
+        name -> new MessageConsole(name, null));
+
+    setProperty(IProgressConstants.ACTION_PROPERTY, new Action(null) {
+      @Override
+      public void run() {
+        IConsoleManager consoleManager = ConsolePlugin.getDefault().getConsoleManager();
+        consoleManager.showConsoleView(console);
+      }
+    });
+
+    return console.newMessageStream();
   }
 
   @Override
@@ -106,11 +128,9 @@ public abstract class CloudSdkModifyJob extends Job {
 
   protected void subTask(IProgressMonitor monitor, String description) {
     monitor.subTask(description);
-    if (consoleStream != null) {
-      // make output headers distinguishable on the console
-      String section = String.format("[%s]", description); // $NON-NLS-1$
-      consoleStream.println(section);
-    }
+    // make output headers distinguishable on the console
+    String section = String.format("[%s]", description); // $NON-NLS-1$
+    consoleStream.println(section);
   }
 
   @VisibleForTesting
