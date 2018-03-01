@@ -181,8 +181,7 @@ public class XmlSourceValidatorTest {
   }
 
   @Test
-  public void testNoNullPointerExceptionOnNonFacetedProject()
-      throws CoreException, ValidationException {
+  public void testNoErrorOnNonFacetedProject() throws CoreException, ValidationException {
     IProject project = nonFacetedProject.getProject();
     assertNull("project should have not been faceted", ProjectFacetsManager.create(project));
 

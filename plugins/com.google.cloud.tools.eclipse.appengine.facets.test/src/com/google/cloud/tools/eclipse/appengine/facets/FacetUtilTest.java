@@ -44,7 +44,6 @@ import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IFacetedProjectWorkingCopy;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
-import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -58,7 +57,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class FacetUtilTest {
   @Mock private IFacetedProject mockFacetedProject;
-  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacets();
   @Rule public TestProjectCreator javaProjectCreator = new TestProjectCreator().withFacets(
       JavaFacet.VERSION_1_7);
 
@@ -68,7 +67,7 @@ public class FacetUtilTest {
       new FacetUtil(null);
       fail();
     } catch (NullPointerException ex) {
-      assertEquals("project not faceted", ex.getMessage());
+      assertEquals("facetedProject is null", ex.getMessage());
     }
   }
 
@@ -197,7 +196,6 @@ public class FacetUtilTest {
 
   @Test
   public void testInstall() throws CoreException {
-    ProjectFacetsManager.create(projectCreator.getProject(), true, null);
     IFacetedProject facetedProject = projectCreator.getFacetedProject();
     new FacetUtil(facetedProject).addJavaFacetToBatch(JavaFacet.VERSION_1_7).install(null);
 
@@ -300,8 +298,7 @@ public class FacetUtilTest {
   }
 
   @Test
-  public void testHighestSatisfyingFacet() throws CoreException {
-    ProjectFacetsManager.create(projectCreator.getProject(), true, null);
+  public void testHighestSatisfyingFacet() {
     IFacetedProjectWorkingCopy testProject = projectCreator.getFacetedProject().createWorkingCopy();
     testProject.addProjectFacet(AppEngineStandardFacet.JRE7);
     IProjectFacetVersion highestSatisfyingVersion =
@@ -310,8 +307,7 @@ public class FacetUtilTest {
   }
 
   @Test
-  public void testConflictsWith() throws CoreException {
-    ProjectFacetsManager.create(projectCreator.getProject(), true, null);
+  public void testConflictsWith() {
     IFacetedProjectWorkingCopy testProject = projectCreator.getFacetedProject().createWorkingCopy();
     testProject.addProjectFacet(AppEngineStandardFacet.JRE7);
     assertFalse(FacetUtil.conflictsWith(testProject, WebFacetUtils.WEB_25));

@@ -63,9 +63,12 @@ public final class TestProjectCreator extends ExternalResource {
 
   private IProject project;
   private IJavaProject javaProject;
+  private IFacetedProject facetedProject;
+
   private String containerPath;
   private String appEngineServiceId;
-  private List<IProjectFacetVersion> projectFacetVersions = new ArrayList<>();
+  private final List<IProjectFacetVersion> projectFacetVersions = new ArrayList<>();
+  private boolean makeFaceted;
 
   public TestProjectCreator withClasspathContainerPath(String containerPath) {
     this.containerPath = containerPath;
@@ -73,11 +76,13 @@ public final class TestProjectCreator extends ExternalResource {
   }
 
   public TestProjectCreator withFacets(IProjectFacetVersion... projectFacetVersions) {
+    makeFaceted = true;
     Collections.addAll(this.projectFacetVersions, projectFacetVersions);
     return this;
   }
 
   public TestProjectCreator withFacets(List<IProjectFacetVersion> projectFacetVersions) {
+    makeFaceted = true;
     this.projectFacetVersions.addAll(projectFacetVersions);
     return this;
   }
@@ -91,7 +96,6 @@ public final class TestProjectCreator extends ExternalResource {
   protected void after() {
     if (project != null) {
       try {
-        IFacetedProject facetedProject = getFacetedProject();
         if (facetedProject != null && facetedProject.hasProjectFacet(WebFacetUtils.WEB_FACET)) {
           // Wait for the WTP validation job as it runs without the workspace protection lock
           ProjectUtils.waitForProjects(project);
@@ -118,6 +122,7 @@ public final class TestProjectCreator extends ExternalResource {
 
   public IJavaProject getJavaProject() {
     createProjectIfNecessary();
+    Preconditions.checkState(javaProject != null);
     return javaProject;
   }
 
@@ -126,11 +131,11 @@ public final class TestProjectCreator extends ExternalResource {
     return project;
   }
 
-  public IFacetedProject getFacetedProject() throws CoreException {
-    IFacetedProject facetedProject = ProjectFacetsManager.create(getProject());
+  public IFacetedProject getFacetedProject() {
+    createProjectIfNecessary();
+    Preconditions.checkState(facetedProject != null);
     return facetedProject;
   }
-
 
   private void createProjectIfNecessary() {
     if (project == null) {
@@ -165,11 +170,12 @@ public final class TestProjectCreator extends ExternalResource {
   }
 
   private void addFacets() throws CoreException {
+    if (makeFaceted) {
+      facetedProject = ProjectFacetsManager.create(getProject(), true, null);
+    }
     if (projectFacetVersions.isEmpty()) {
       return;
     }
-
-    IFacetedProject facetedProject = ProjectFacetsManager.create(getProject(), true, null);
 
     FacetUtil facetUtil = new FacetUtil(facetedProject);
     for (IProjectFacetVersion projectFacetVersion : projectFacetVersions) {

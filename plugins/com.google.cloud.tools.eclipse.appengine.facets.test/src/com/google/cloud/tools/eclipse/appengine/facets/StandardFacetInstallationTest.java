@@ -51,7 +51,7 @@ public class StandardFacetInstallationTest {
 
   private List<IProject> projects;
 
-  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacets();
 
   @After
   public void tearDown() throws CoreException {
@@ -94,7 +94,7 @@ public class StandardFacetInstallationTest {
     IProject project = projectCreator.getProject();
     assertFalse(project.getFile("src/main/webapp/WEB-INF/web.xml").exists());
 
-    IFacetedProject facetedProject = ProjectFacetsManager.create(project, true, null);
+    IFacetedProject facetedProject = projectCreator.getFacetedProject();
     AppEngineStandardFacet.installAppEngineFacet(facetedProject, true, null);
     ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
 
@@ -112,7 +112,7 @@ public class StandardFacetInstallationTest {
     webXml.create(new ByteArrayInputStream(new byte[0]), true, null);
     assertEmptyFile(webXml);
 
-    IFacetedProject facetedProject = ProjectFacetsManager.create(project, true, null);
+    IFacetedProject facetedProject = projectCreator.getFacetedProject();
     AppEngineStandardFacet.installAppEngineFacet(facetedProject, true, null);
     ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
 

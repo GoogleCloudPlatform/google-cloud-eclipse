@@ -43,7 +43,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class AppEngineFlexJarFacetTest {
 
-  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacets();
   @Rule public TestProjectCreator javaProjectCreator = new TestProjectCreator()
       .withFacets(JavaFacet.VERSION_1_7);
 
@@ -113,8 +113,8 @@ public class AppEngineFlexJarFacetTest {
   @Test
   public void testInstallAppEngineFacet_installDependentFacets() throws CoreException {
     IProject project = projectCreator.getProject();
+    IFacetedProject facetedProject = projectCreator.getFacetedProject();
 
-    IFacetedProject facetedProject = ProjectFacetsManager.create(project, true, null);
     AppEngineFlexJarFacet.installAppEngineFacet(facetedProject,
         true /* installDependentFacets */, new NullProgressMonitor());
     Assert.assertTrue(AppEngineFlexJarFacet.hasFacet(facetedProject));
@@ -123,10 +123,8 @@ public class AppEngineFlexJarFacetTest {
   }
 
   @Test
-  public void testInstallAppEngineFacet_noDependentFacets() throws CoreException {
-    IProject project = projectCreator.getProject();
-
-    IFacetedProject facetedProject = ProjectFacetsManager.create(project, true, null);
+  public void testInstallAppEngineFacet_noDependentFacets() {
+    IFacetedProject facetedProject = projectCreator.getFacetedProject();
     try {
       AppEngineFlexJarFacet.installAppEngineFacet(facetedProject,
           false /* installDependentFacets */, new NullProgressMonitor());
@@ -139,8 +137,8 @@ public class AppEngineFlexJarFacetTest {
   @Test
   public void testInstallAppEngineFacet_onJavaProject() throws CoreException {
     IProject project = javaProjectCreator.getProject();
+    IFacetedProject facetedProject = javaProjectCreator.getFacetedProject();
 
-    IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     AppEngineFlexJarFacet.installAppEngineFacet(facetedProject,
         false /* installDependentFacets */, new NullProgressMonitor());
     Assert.assertTrue(AppEngineFlexJarFacet.hasFacet(facetedProject));
