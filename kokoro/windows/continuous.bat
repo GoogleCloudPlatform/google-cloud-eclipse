@@ -11,8 +11,8 @@ popd
 
 cd github\google-cloud-eclipse
 
-rem Pre-download all dependency JARs that test projects from the integration
-rem test require to avoid the concurrent download issue:
+rem Pre-download all dependency JARs of the test projects from the integration
+rem test. A workaround to avoid the concurrent download issue:
 rem https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2284
 pushd plugins\com.google.cloud.tools.eclipse.integration.appengine\test-projects
 mkdir tmp-unzip-area
