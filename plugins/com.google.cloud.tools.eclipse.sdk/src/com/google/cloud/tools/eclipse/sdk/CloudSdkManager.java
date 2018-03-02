@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Supplier;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -40,29 +41,32 @@ public class CloudSdkManager {
   private static final String OPTION_MANAGED_CLOUD_SDK =
       "com.google.cloud.tools.eclipse.sdk/enable.managed.cloud.sdk";
 
-  // To be able to write tests for the managed Cloud SDK feature, which is disabled at the moment.
-  @VisibleForTesting public static boolean forceManagedSdkFeature;
+  private static CloudSdkManager instance;
 
-  @VisibleForTesting public static CloudSdkManager instance;
+  // readers = using SDK, writers = modifying SDK
+  private final ReadWriteLock modifyLock;
+
+  private final Supplier<Boolean> managedSdkFeatureTester;
 
   public static synchronized CloudSdkManager getInstance() {
     if (instance == null) {
-      instance = new CloudSdkManager();
+      instance = new CloudSdkManager(
+          new ReentrantReadWriteLock(), CloudSdkManager::getManagedCloudSdkDebugOption);
     }
     return instance;
   }
 
   @VisibleForTesting
-  CloudSdkManager() {}
-
-  // readers = using SDK, writers = modifying SDK
-  @VisibleForTesting final ReadWriteLock modifyLock = new ReentrantReadWriteLock();
+  CloudSdkManager(ReadWriteLock modifyLock, Supplier<Boolean> managedSdkFeatureTester) {
+    this.modifyLock = modifyLock;
+    this.managedSdkFeatureTester = managedSdkFeatureTester;
+  }
 
   public boolean isManagedSdkFeatureEnabled() {
-    if (forceManagedSdkFeature) {
-      return true;
-    }
+    return managedSdkFeatureTester.get();
+  }
 
+  private static boolean getManagedCloudSdkDebugOption() {
     BundleContext context = FrameworkUtil.getBundle(CloudSdkManager.class).getBundleContext();
     DebugOptions debugOptions = context.getService(context.getServiceReference(DebugOptions.class));
     if (debugOptions != null) {

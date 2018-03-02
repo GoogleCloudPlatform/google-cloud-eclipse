@@ -47,9 +47,6 @@ public class CloudSdkInstallJob extends CloudSdkModifyJob {
     super(Messages.getString("installing.cloud.sdk"), consoleStream, cloudSdkLock); // $NON-NLS-1$
   }
 
-  /** The severity reported on installation failure. */
-  private int failureSeverity = IStatus.ERROR;
-
   /**
    * Perform the installation and configuration of the managed Cloud SDK. Any errors are returned as
    * {@link IStatus#WARNING} to avoid the Eclipse UI ProgressManager reporting the error with no
@@ -105,16 +102,5 @@ public class CloudSdkInstallJob extends CloudSdkModifyJob {
     } catch (ManagedSdkVersionMismatchException e) {
       throw new IllegalStateException("This is never thrown because we always use LATEST.", e); //$NON-NLS-1$
     }
-  }
-
-  /**
-   * Set the {@link IStatus#getSeverity() severity} of installation failure. This is useful for
-   * situations where the Cloud SDK installation is a step of some other work, and the installation
-   * failure should be surfaced to the user in the context of that work. If reported as {@link
-   * IStatus#ERROR} then the Eclipse UI ProgressManager will report the installation failure
-   * directly.
-   */
-  public void setFailureSeverity(int severity) {
-    failureSeverity = severity;
   }
 }
