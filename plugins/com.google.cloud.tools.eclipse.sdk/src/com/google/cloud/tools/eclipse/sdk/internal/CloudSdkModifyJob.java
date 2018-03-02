@@ -46,7 +46,7 @@ public abstract class CloudSdkModifyJob extends Job {
 
   public static final Object CLOUD_SDK_MODIFY_JOB_FAMILY = new Object();
 
-  /** Scheduling rule to prevent running {@code CloudSdkModifyJob} concurrently. */
+  /** Scheduling rule to prevent running {@link CloudSdkModifyJob} concurrently. */
   @VisibleForTesting
   static final MutexRule MUTEX_RULE =
       new MutexRule("for " + CloudSdkModifyJob.class); // $NON-NLS-1$
@@ -102,9 +102,6 @@ public abstract class CloudSdkModifyJob extends Job {
     }
 
     try {
-      if (consoleStream != null) {
-        consoleStream.println(Messages.getString("startModifying"));
-      }
       return modifySdk(monitor);
     } finally {
       cloudSdkLock.writeLock().unlock();
