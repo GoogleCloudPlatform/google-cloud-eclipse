@@ -126,7 +126,7 @@ public class StatusUtilTest {
 
   @Test
   public void testWarn_withInstance() {
-    IStatus error = StatusUtil.warn("an object", "test error msg");
+    IStatus error = StatusUtil.warn(this, "test error msg");
     verifyStatus(error, IStatus.WARNING);
   }
 
@@ -138,7 +138,7 @@ public class StatusUtilTest {
 
   @Test
   public void testInfo_withInstance() {
-    IStatus error = StatusUtil.info("an object", "test error msg");
+    IStatus error = StatusUtil.info(this, "test error msg");
     verifyStatus(error, IStatus.INFO);
   }
 

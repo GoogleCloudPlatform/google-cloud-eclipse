@@ -65,7 +65,7 @@ public class CleanupOldDeploysJob extends Job {
 
   private void deleteDirectories(List<File> directories) throws IOException {
     for (int i = RECENT_DIRECTORIES_TO_KEEP; i < directories.size(); i++) {
-      MoreFiles.deleteDirectoryContents(directories.get(i).toPath());
+      MoreFiles.deleteRecursively(directories.get(i).toPath());
     }
   }
 
