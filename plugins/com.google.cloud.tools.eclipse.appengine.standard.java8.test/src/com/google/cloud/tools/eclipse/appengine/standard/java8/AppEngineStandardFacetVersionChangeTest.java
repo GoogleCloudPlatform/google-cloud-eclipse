@@ -46,7 +46,7 @@ import org.xml.sax.SAXException;
  * Tests that changing the App Engine Standard Facet results in appropriate {@code <runtime>}
  * changes in the {@code appengine-web.xml}.
  */
-public class AppEngineStandardFacetVersionChangeTests {
+public class AppEngineStandardFacetVersionChangeTest {
   @Rule
   public TestProjectCreator jre7Project = new TestProjectCreator()
       .withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
