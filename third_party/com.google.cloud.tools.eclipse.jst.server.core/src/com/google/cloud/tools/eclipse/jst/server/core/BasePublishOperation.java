@@ -99,12 +99,10 @@ public abstract class BasePublishOperation extends PublishOperation {
    */
   protected abstract boolean isServeModulesWithoutPublish();
 
-  @Override
   public int getOrder() {
     return 0;
   }
 
-  @Override
   public int getKind() {
     return REQUIRED;
   }
@@ -112,7 +110,7 @@ public abstract class BasePublishOperation extends PublishOperation {
   /**
    * Initializes this instance.
    */
-  protected void initialize() {
+  protected void initialize() throws CoreException {
     IPath base = getRuntimeBaseDirectory();
     if (base != null) {
       helper = new PublishHelper(base.append("temp").toFile());
@@ -124,11 +122,10 @@ public abstract class BasePublishOperation extends PublishOperation {
   }
 
 
-  @Override
   public void execute(IProgressMonitor monitor, IAdaptable info) throws CoreException {
     initialize();
 
-    List<IStatus> statuses = new ArrayList<>();
+    List<IStatus> statuses = new ArrayList<IStatus>();
     // If parent web module
     if (module.length == 1) {
       publishDir(module[0], statuses, monitor);
@@ -160,7 +157,8 @@ public abstract class BasePublishOperation extends PublishOperation {
     setModulePublishState(module, IServer.PUBLISH_STATE_NONE);
   }
 
-  protected void publishDir(IModule module2, List<IStatus> statuses, IProgressMonitor monitor) {
+  protected void publishDir(IModule module2, List<IStatus> statuses, IProgressMonitor monitor)
+      throws CoreException {
     IPath path = getModuleDeployDirectory(module2);
 
     // Remove if requested or if previously published and are now serving without publishing
@@ -195,7 +193,7 @@ public abstract class BasePublishOperation extends PublishOperation {
   }
 
   protected void publishJar(String jarURI, Properties properties, List<IStatus> statuses,
-      IProgressMonitor monitor) {
+      IProgressMonitor monitor) throws CoreException {
     IPath path = getModuleDeployDirectory(module[0]);
     boolean moving = false;
     // Get URI used for previous publish, if known
