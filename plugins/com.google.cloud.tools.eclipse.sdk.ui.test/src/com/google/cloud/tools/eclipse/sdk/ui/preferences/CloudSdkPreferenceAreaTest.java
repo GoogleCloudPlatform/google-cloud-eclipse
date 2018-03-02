@@ -83,6 +83,8 @@ public class CloudSdkPreferenceAreaTest {
     assertFalse(area.getStatus().isOK());
     assertEquals(IStatus.ERROR, area.getStatus().getSeverity());
     assertEquals("SDK version: No SDK found", sdkVersion.getText());
+    // in manual, we always have a location so tooltip should be set
+    assertEquals("/non-existent", sdkVersion.getToolTipText());
   }
 
   @Test
@@ -95,10 +97,13 @@ public class CloudSdkPreferenceAreaTest {
 
     createPreferenceArea();
     assertEquals("SDK version: 1.23.4", sdkVersion.getText());
+    assertEquals(mockSdk.toString(), sdkVersion.getToolTipText());
 
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)).thenReturn("AUTOMATIC");
     area.load();
     assertNotEquals("SDK version: 1.23.4", sdkVersion.getText());
+    // should be a different location
+    assertNotEquals(mockSdk.toString(), sdkVersion.getToolTipText());
   }
 
   @Test

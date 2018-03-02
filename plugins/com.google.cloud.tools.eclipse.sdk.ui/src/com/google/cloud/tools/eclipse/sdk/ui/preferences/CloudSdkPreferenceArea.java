@@ -30,7 +30,6 @@ import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.cloud.tools.managedcloudsdk.ManagedCloudSdk;
 import com.google.cloud.tools.managedcloudsdk.UnsupportedOsException;
 import com.google.common.annotations.VisibleForTesting;
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -174,19 +173,23 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
   private void updateSelectedVersion() {
     String version = Messages.getString("UnknownVersion"); //$NON-NLS-1$
+    String location = null;
     if (!cloudSdkManager.isManagedSdkFeatureEnabled() || chooseSdk.getSelection()) {
-      Path path = Paths.get(sdkLocation.getStringValue());
+      location = sdkLocation.getStringValue();
+      Path path = Paths.get(location);
       version = getSdkVersion(path);
     } else if (cloudSdkManager.isManagedSdkFeatureEnabled()) {
       try {
         Path home = ManagedCloudSdk.newManagedSdk().getSdkHome();
         version = getSdkVersion(home);
+        location = home.toString();
       } catch (UnsupportedOsException ex) {
         // shouldn't happen but if it does we'll just leave
         // version set to Unknown
       }
     }
     sdkVersionLabel.setText(Messages.getString("SdkVersion", version)); //$NON-NLS-1$
+    sdkVersionLabel.setToolTipText(location);
   }
 
   private static String getSdkVersion(Path path) {
@@ -308,14 +311,6 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       setEmptyStringAllowed(true);
       setValidateStrategy(VALIDATE_ON_KEY_STROKE);
       createControl(parent);
-    }
-
-    @Override
-    public void setFilterPath(File path) {
-      super.setFilterPath(path);
-      if (path != null) {
-        getTextControl().setMessage(path.getAbsolutePath().toString());
-      }
     }
 
     @Override
