@@ -29,6 +29,7 @@ import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.server.core.IRuntimeType;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,6 +66,9 @@ public class AppEngineStandardFacetTest {
 
   @Test
   public void testDefaultFacetVersion() {
+    Assume.assumeTrue(
+        "Only valid if .standard.java8 not available",
+        AppEngineStandardFacet.FACET.getVersion("JRE8") == null);
     Assert.assertEquals(AppEngineStandardFacet.JRE7,
         AppEngineStandardFacet.FACET.getDefaultVersion());
   }
