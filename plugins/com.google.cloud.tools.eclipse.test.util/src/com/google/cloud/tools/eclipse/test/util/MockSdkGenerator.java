@@ -57,7 +57,7 @@ public class MockSdkGenerator {
 
   /** Delete a created mock SDK. */
   public static void deleteMockSdk(Path mockSdk) throws IOException {
-    MoreFiles.deleteDirectoryContents(mockSdk);
+    MoreFiles.deleteRecursively(mockSdk);
   }
 
   private static void createEmptyFile(Path path) throws Exception {
