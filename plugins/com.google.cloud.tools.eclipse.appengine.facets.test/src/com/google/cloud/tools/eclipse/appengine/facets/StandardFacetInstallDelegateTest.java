@@ -16,10 +16,14 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets;
 
+import static org.junit.Assert.assertNull;
+
+import com.google.cloud.tools.appengine.AppEngineDescriptor;
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -30,13 +34,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
-
-import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
-import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 
 public class StandardFacetInstallDelegateTest {
 
@@ -53,14 +51,14 @@ public class StandardFacetInstallDelegateTest {
   
   @Test
   public void testCreateConfigFiles() throws CoreException, IOException, SAXException {
-    delegate.createConfigFiles(project, monitor);
-    
+    delegate.createConfigFiles(project, AppEngineStandardFacet.JRE7, monitor);
+
     IFile appengineWebXml = project.getFile("src/main/webapp/WEB-INF/appengine-web.xml");
     Assert.assertTrue(appengineWebXml.exists());
     
     try (InputStream in = appengineWebXml.getContents(true)) {
-      XMLReader parser = XMLReaderFactory.createXMLReader();
-      parser.parse(new InputSource(in));       
+      AppEngineDescriptor descriptor = AppEngineDescriptor.parse(in);
+      assertNull(descriptor.getRuntime());
     }
   }
   
@@ -74,9 +72,9 @@ public class StandardFacetInstallDelegateTest {
     appengineWebXml.create(new ByteArrayInputStream(new byte[0]), true, monitor);
 
     Assert.assertTrue(appengineWebXml.exists());
-    
-    delegate.createConfigFiles(project, monitor);
-    
+
+    delegate.createConfigFiles(project, AppEngineStandardFacet.JRE7, monitor);
+
     // Make sure createConfigFiles did not write any data into appengine-web.xml
     try (InputStream in = appengineWebXml.getContents(true)) {
       Assert.assertEquals("appengine-web.xml is not empty", -1, in.read());       
