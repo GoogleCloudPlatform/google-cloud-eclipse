@@ -24,7 +24,6 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.tools.eclipse.util.io.DeleteAllVisitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
@@ -99,14 +98,14 @@ public class StatusUtilTest {
 
   @Test
   public void testError_withInstance() {
-    IStatus error = StatusUtil.error(new DeleteAllVisitor(), "test error msg");
+    IStatus error = StatusUtil.error("an object", "test error msg");
     verifyStatus(error, IStatus.ERROR);
   }
 
   @Test
   public void testError_withInstanceAndException() {
     Throwable exception = new Exception();
-    IStatus error = StatusUtil.error(new DeleteAllVisitor(), "test error msg", exception);
+    IStatus error = StatusUtil.error("an object", "test error msg", exception);
     verifyStatus(error, IStatus.ERROR);
     assertThat(error.getException(), is(sameInstance(exception)));
   }
@@ -127,7 +126,7 @@ public class StatusUtilTest {
 
   @Test
   public void testWarn_withInstance() {
-    IStatus error = StatusUtil.warn(new DeleteAllVisitor(), "test error msg");
+    IStatus error = StatusUtil.warn("an object", "test error msg");
     verifyStatus(error, IStatus.WARNING);
   }
 
@@ -139,7 +138,7 @@ public class StatusUtilTest {
 
   @Test
   public void testInfo_withInstance() {
-    IStatus error = StatusUtil.info(new DeleteAllVisitor(), "test error msg");
+    IStatus error = StatusUtil.info("an object", "test error msg");
     verifyStatus(error, IStatus.INFO);
   }
 

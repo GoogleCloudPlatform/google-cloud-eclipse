@@ -16,11 +16,10 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
-import com.google.cloud.tools.eclipse.util.io.DeleteAllVisitor;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import com.google.common.io.MoreFiles;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -65,8 +64,8 @@ public class CleanupOldDeploysJob extends Job {
   }
 
   private void deleteDirectories(List<File> directories) throws IOException {
-    for (int i = RECENT_DIRECTORIES_TO_KEEP; i < directories.size(); ++i) {
-      Files.walkFileTree(directories.get(i).toPath(), new DeleteAllVisitor());
+    for (int i = RECENT_DIRECTORIES_TO_KEEP; i < directories.size(); i++) {
+      MoreFiles.deleteDirectoryContents(directories.get(i).toPath());
     }
   }
 
