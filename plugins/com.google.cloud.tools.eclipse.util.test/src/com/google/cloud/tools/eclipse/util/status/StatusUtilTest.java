@@ -98,14 +98,14 @@ public class StatusUtilTest {
 
   @Test
   public void testError_withInstance() {
-    IStatus error = StatusUtil.error("an object", "test error msg");
+    IStatus error = StatusUtil.error(this, "test error msg");
     verifyStatus(error, IStatus.ERROR);
   }
 
   @Test
   public void testError_withInstanceAndException() {
     Throwable exception = new Exception();
-    IStatus error = StatusUtil.error("an object", "test error msg", exception);
+    IStatus error = StatusUtil.error(this, "test error msg", exception);
     verifyStatus(error, IStatus.ERROR);
     assertThat(error.getException(), is(sameInstance(exception)));
   }
