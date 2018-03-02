@@ -128,7 +128,7 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
         | IllegalAccessException
         | IllegalArgumentException ex) {
       logger.log(Level.SEVERE, ex.getMessage());
-      throw new CoreException(StatusUtil.error(this, "Unable to instantate helper", ex));
+      throw new CoreException(StatusUtil.error(this, "Unable to instantiate helper", ex));
     }
   }
 
