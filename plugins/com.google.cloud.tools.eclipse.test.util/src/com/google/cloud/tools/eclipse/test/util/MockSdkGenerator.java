@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.test.util;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.io.MoreFiles;
+import com.google.common.io.RecursiveDeleteOption;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -57,7 +58,7 @@ public class MockSdkGenerator {
 
   /** Delete a created mock SDK. */
   public static void deleteMockSdk(Path mockSdk) throws IOException {
-    MoreFiles.deleteRecursively(mockSdk);
+    MoreFiles.deleteRecursively(mockSdk, RecursiveDeleteOption.ALLOW_INSECURE);
   }
 
   private static void createEmptyFile(Path path) throws Exception {

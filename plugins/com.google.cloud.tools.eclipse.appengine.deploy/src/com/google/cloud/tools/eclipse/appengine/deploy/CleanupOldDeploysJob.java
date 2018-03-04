@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.deploy;
 
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.io.MoreFiles;
+import com.google.common.io.RecursiveDeleteOption;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -65,7 +66,8 @@ public class CleanupOldDeploysJob extends Job {
 
   private void deleteDirectories(List<File> directories) throws IOException {
     for (int i = RECENT_DIRECTORIES_TO_KEEP; i < directories.size(); i++) {
-      MoreFiles.deleteRecursively(directories.get(i).toPath());
+      MoreFiles.deleteRecursively(directories.get(i).toPath(),
+          RecursiveDeleteOption.ALLOW_INSECURE);
     }
   }
 
