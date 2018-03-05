@@ -20,8 +20,6 @@ import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Level;
@@ -53,7 +51,8 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 /**
- * Contains the logic for source validation and message creation.
+ * Contains the logic for source validation and message creation. The actual validation logic is
+ * delegated to an {@link XmlValidationHelper}.
  */
 public class XmlSourceValidator implements ISourceValidator, IValidator, IExecutableExtension {
 
@@ -112,17 +111,24 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
   public void setInitializationData(IConfigurationElement config, String propertyName, Object data)
       throws CoreException {
     try {
-      if (data == null || !(data instanceof String)) {
+      if (!(data instanceof String)) {
         throw new CoreException(StatusUtil.error(getClass(), "Data must be a class name"));
       }
       String className = (String) data;
+      // We delegate the validation to a helper class that is specified in this extension's data
+      // string. As such we can't use createExecutableExtension() and must instead resolve and
+      // instantiate the helper directly.  As our validation helpers are all defined in this
+      // bundle we can just use Class#forName(), though a general solution would require resolving
+      // the class-name using the extension's defining bundle.
       Class<?> clazz = Class.forName(className);
-      Constructor<?> constructor = clazz.getConstructor();
-      this.setHelper((XmlValidationHelper) constructor.newInstance(new Object[] {}));
-    } catch (ClassNotFoundException | NoSuchMethodException | SecurityException
-        | InstantiationException | IllegalAccessException | IllegalArgumentException
-        | InvocationTargetException ex) {
+      this.setHelper((XmlValidationHelper) clazz.newInstance());
+    } catch (ClassNotFoundException
+        | SecurityException
+        | InstantiationException
+        | IllegalAccessException
+        | IllegalArgumentException ex) {
       logger.log(Level.SEVERE, ex.getMessage());
+      throw new CoreException(StatusUtil.error(this, "Unable to instantiate helper", ex));
     }
   }
 
