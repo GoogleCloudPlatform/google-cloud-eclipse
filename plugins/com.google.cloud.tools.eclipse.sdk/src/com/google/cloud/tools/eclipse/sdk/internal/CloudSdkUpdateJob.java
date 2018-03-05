@@ -25,7 +25,7 @@ import com.google.cloud.tools.managedcloudsdk.ManagedSdkVersionMismatchException
 import com.google.cloud.tools.managedcloudsdk.UnsupportedOsException;
 import com.google.cloud.tools.managedcloudsdk.command.CommandExecutionException;
 import com.google.cloud.tools.managedcloudsdk.command.CommandExitException;
-import com.google.cloud.tools.managedcloudsdk.update.SdkUpdater;
+import com.google.cloud.tools.managedcloudsdk.components.SdkUpdater;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
