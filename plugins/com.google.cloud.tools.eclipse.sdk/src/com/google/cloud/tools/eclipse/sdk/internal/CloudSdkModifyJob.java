@@ -64,9 +64,9 @@ public abstract class CloudSdkModifyJob extends Job {
 
   @VisibleForTesting
   MessageConsoleStream createNewMessageConsole() {
-    final MessageConsole console = MessageConsoleUtilities.findOrCreateConsole(
+    MessageConsole console = MessageConsoleUtilities.findOrCreateConsole(
         Messages.getString("configuring.cloud.sdk"), // $NON-NLS-1$
-        name -> new MessageConsole(name, null));
+        name -> new MessageConsole(name, null /* imageDescriptor */));
 
     setProperty(IProgressConstants.ACTION_PROPERTY, new ShowConsoleViewAction(console));
 
@@ -128,7 +128,7 @@ public abstract class CloudSdkModifyJob extends Job {
   protected void subTask(IProgressMonitor monitor, String description) {
     monitor.subTask(description);
     // make output headers distinguishable on the console
-    String section = String.format("[%s]", description); // $NON-NLS-1$
+    String section = "[" + description + "]"; // $NON-NLS-1$ // $NON-NLS-2$
     consoleStream.println(section);
   }
 
