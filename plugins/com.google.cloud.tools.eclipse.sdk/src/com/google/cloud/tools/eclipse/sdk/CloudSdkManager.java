@@ -162,7 +162,7 @@ public class CloudSdkManager {
     if (isManagedSdkFeatureEnabled()) {
       if (CloudSdkPreferences.isAutoManaging()) {
         // Keep installation failure as ERROR so that failures are reported
-        Job updateJob = new CloudSdkUpdateJob(null /* no console output */, modifyLock);
+        Job updateJob = new CloudSdkUpdateJob(null /* create new message console */, modifyLock);
         updateJob.setUser(false);
         updateJob.schedule();
       }

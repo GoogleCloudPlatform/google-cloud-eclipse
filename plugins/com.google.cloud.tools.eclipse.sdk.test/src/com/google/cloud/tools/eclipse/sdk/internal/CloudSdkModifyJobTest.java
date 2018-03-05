@@ -19,6 +19,8 @@ package com.google.cloud.tools.eclipse.sdk.internal;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -32,35 +34,37 @@ import org.eclipse.core.runtime.IProgressMonitorWithBlocking;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.ui.console.ConsolePlugin;
+import org.eclipse.ui.console.IConsole;
+import org.eclipse.ui.console.MessageConsoleStream;
+import org.eclipse.ui.progress.IProgressConstants;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 public class CloudSdkModifyJobTest {
 
   private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-  private CloudSdkModifyJob installJob;
-
-  @Before
-  public void setUp() {
-    installJob = new FakeModifyJob(false /* blockOnStart */);
-  }
 
   @After
   public void tearDown() {
-    assertEquals(Job.NONE, installJob.getState());
-
     assertTrue(readWriteLock.writeLock().tryLock());
     readWriteLock.writeLock().unlock();
+
+    IConsole console = findAutoCreatedConsole();
+    if (console != null) {
+      ConsolePlugin.getDefault().getConsoleManager().removeConsoles(new IConsole[] {console});
+    }
   }
 
   @Test
   public void testBelongsTo() {
+    Job installJob = new FakeModifyJob(false /* blockOnStart */);
     assertTrue(installJob.belongsTo(CloudSdkModifyJob.CLOUD_SDK_MODIFY_JOB_FAMILY));
   }
 
   @Test
   public void testMutexRuleSet() {
+    Job installJob = new FakeModifyJob(false /* blockOnStart */);
     assertEquals(CloudSdkModifyJob.MUTEX_RULE, installJob.getRule());
   }
 
@@ -79,7 +83,46 @@ public class CloudSdkModifyJobTest {
   }
 
   @Test
+  public void testConsoleNotCreatedIfGiven() {
+    new FakeModifyJob(mock(MessageConsoleStream.class));
+    assertNull(findAutoCreatedConsole());
+  }
+
+  @Test
+  public void testConsoleCreatedIfNotGiven() {
+    assertNull(findAutoCreatedConsole());
+
+    new FakeModifyJob(null /* no console stream given */);
+    assertNotNull(findAutoCreatedConsole());
+  }
+
+  private static IConsole findAutoCreatedConsole() {
+    IConsole[] consoles = ConsolePlugin.getDefault().getConsoleManager().getConsoles();
+    for (IConsole console : consoles) {
+      if ("Configuring Google Cloud SDK".equals(console.getName())) {
+        return console;
+      }
+    }
+    return null;
+  }
+
+  @Test
+  public void testNoActionPropertyIfConsoleGiven() {
+    Job job = new FakeModifyJob(mock(MessageConsoleStream.class));
+    Object actionProperty = job.getProperty(IProgressConstants.ACTION_PROPERTY);
+    assertNull(actionProperty);
+  }
+
+  @Test
+  public void testShowConsoleActionPropertyIfConsoleCreated() {
+    Job job = new FakeModifyJob(null /* no console stream given */);
+    Object actionProperty = job.getProperty(IProgressConstants.ACTION_PROPERTY);
+    assertTrue(actionProperty instanceof ShowConsoleViewAction);
+  }
+
+  @Test
   public void testRun_unlocksAfterReturn() throws InterruptedException {
+    Job installJob = new FakeModifyJob(false /* blockOnStart */);
     installJob.schedule();
     installJob.join();
 
@@ -141,8 +184,13 @@ public class CloudSdkModifyJobTest {
     private boolean modifiedSdk;
 
     private FakeModifyJob(boolean blockOnStart) {
-      super("fake job", null, readWriteLock);
+      super("fake job", mock(MessageConsoleStream.class), readWriteLock);
       this.blockOnStart = blockOnStart;
+    }
+
+    private FakeModifyJob(MessageConsoleStream consoleStream) {
+      super("fake job", consoleStream, readWriteLock);
+      blockOnStart = false;
     }
 
     @Override

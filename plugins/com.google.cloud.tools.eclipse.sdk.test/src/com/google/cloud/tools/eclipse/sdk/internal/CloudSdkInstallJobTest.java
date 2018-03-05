@@ -65,19 +65,21 @@ public class CloudSdkInstallJobTest {
 
   @Test
   public void testBelongsTo() {
-    Job installJob = new CloudSdkInstallJob(null, new ReentrantReadWriteLock());
+    Job installJob = newCloudSdkInstallJob();
     assertTrue(installJob.belongsTo(CloudSdkInstallJob.CLOUD_SDK_MODIFY_JOB_FAMILY));
   }
 
   @Test
   public void testMutexRuleSet() {
-    Job installJob = new CloudSdkInstallJob(null, new ReentrantReadWriteLock());
+    Job installJob = newCloudSdkInstallJob();
     assertEquals(CloudSdkInstallJob.MUTEX_RULE, installJob.getRule());
   }
 
   @Test
   public void testGetManagedCloudSdk() throws UnsupportedOsException {
-    assertNotNull(new CloudSdkInstallJob(null, new ReentrantReadWriteLock()).getManagedCloudSdk());
+    // Don't use "newCloudSdkInstallJob()", as it overrides "getManagedCloudSdk()".
+    assertNotNull(new CloudSdkInstallJob(consoleStream, new ReentrantReadWriteLock())
+        .getManagedCloudSdk());
   }
 
   @Test
@@ -91,8 +93,7 @@ public class CloudSdkInstallJobTest {
     job.schedule();
     job.join();
 
-    verify(consoleStream)
-        .println("Installing/upgrading the Cloud SDK... (may take several minutes)");
+    verify(consoleStream).println("[Installing Google Cloud SDK]");
   }
 
   @Test

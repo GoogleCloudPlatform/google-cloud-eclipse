@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.sdk;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkModifyJob;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
@@ -30,6 +31,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.ui.console.MessageConsoleStream;
 import org.junit.After;
 import org.junit.Test;
 
@@ -185,7 +187,7 @@ public class CloudSdkManagerTest {
     private final IStatus result;
 
     private FakeModifyJob(IStatus result) {
-      super("fake job", null, modifyLock);
+      super("fake job", mock(MessageConsoleStream.class), modifyLock);
       this.result = result;
     }
 
