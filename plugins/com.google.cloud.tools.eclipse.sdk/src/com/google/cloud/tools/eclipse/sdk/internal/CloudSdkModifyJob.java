@@ -64,9 +64,9 @@ public abstract class CloudSdkModifyJob extends Job {
 
   @VisibleForTesting
   MessageConsoleStream createNewMessageConsole() {
-    MessageConsole console = MessageConsoleUtilities.findOrCreateConsole(
+    MessageConsole console = MessageConsoleUtilities.getMessageConsole(
         Messages.getString("configuring.cloud.sdk"), // $NON-NLS-1$
-        name -> new MessageConsole(name, null /* imageDescriptor */));
+        null /* imageDescriptor */);
 
     setProperty(IProgressConstants.ACTION_PROPERTY, new ShowConsoleViewAction(console));
 
