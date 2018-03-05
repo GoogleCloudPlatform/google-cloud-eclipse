@@ -79,21 +79,21 @@ public final class CloudSdkPreferences extends AbstractPreferenceInitializer {
 
   @Override
   public void initializeDefaultPreferences() {
-    initializeDefaultPreferences(getPreferenceStore());
+    if (CloudSdkManager.getInstance().isManagedSdkFeatureEnabled()) {
+      initializeDefaultPreferences(getPreferenceStore());
+    }
   }
 
   @VisibleForTesting
   static void initializeDefaultPreferences(IPreferenceStore preferences) {
-    if (CloudSdkManager.getInstance().isManagedSdkFeatureEnabled()) {
-      if (!preferences.contains(CLOUD_SDK_MANAGEMENT)) {
-        // If the CLOUD_SDK_MANAGEMENT preference has not been set, then determine the
-        // appropriate setting. Note that CloudSdkPreferenceResolver only checks for
-        // the Managed Cloud SDK when CLOUD_SDK_MANAGEMENT has been explicitly set
-        // (i.e., this code has been run).
-        configureManagementPreferences(preferences, isCloudSdkAvailable());
-      }
-      preferences.setDefault(CLOUD_SDK_MANAGEMENT, CloudSdkManagementOption.AUTOMATIC.name());
+    if (!preferences.contains(CLOUD_SDK_MANAGEMENT)) {
+      // If the CLOUD_SDK_MANAGEMENT preference has not been set, then determine the
+      // appropriate setting. Note that CloudSdkPreferenceResolver only checks for
+      // the Managed Cloud SDK when CLOUD_SDK_MANAGEMENT has been explicitly set
+      // (i.e., this code has been run).
+      configureManagementPreferences(preferences, isCloudSdkAvailable());
     }
+    preferences.setDefault(CLOUD_SDK_MANAGEMENT, CloudSdkManagementOption.AUTOMATIC.name());
   }
 
   /** Configure the managed SDK settings given current settings. */

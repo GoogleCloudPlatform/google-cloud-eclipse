@@ -147,10 +147,6 @@ public class ProjectSelector extends Composite implements ISelectionProvider {
     return viewer;
   }
 
-  /**
-   * @return the projects
-   */
-  @SuppressWarnings("unchecked")
   public List<GcpProject> getProjects() {
     return ImmutableList.copyOf(input);
   }

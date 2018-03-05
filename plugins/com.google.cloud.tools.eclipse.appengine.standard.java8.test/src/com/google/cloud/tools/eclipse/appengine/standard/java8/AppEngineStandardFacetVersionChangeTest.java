@@ -25,6 +25,7 @@ import static org.junit.Assert.fail;
 import com.google.cloud.tools.appengine.AppEngineDescriptor;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
+import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,7 +46,7 @@ import org.xml.sax.SAXException;
  * Tests that changing the App Engine Standard Facet results in appropriate {@code <runtime>}
  * changes in the {@code appengine-web.xml}.
  */
-public class AppEngineStandardFacetVersionChangeTests {
+public class AppEngineStandardFacetVersionChangeTest {
   @Rule
   public TestProjectCreator jre7Project = new TestProjectCreator()
       .withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
@@ -96,7 +97,10 @@ public class AppEngineStandardFacetVersionChangeTests {
     }
   }
 
-  /** Changing AppEngine Standard JRE8 to JRE7+Java7 facet should succeed. */
+  /**
+   * Changing AppEngine Standard JRE8 to JRE7+Java7 facet should be reverted: we only accept changes
+   * via the appengine-web.xml.
+   */
   @Test
   public void testChange_AESJ8_AESJ7andJava7() throws CoreException, IOException, SAXException {
     IFacetedProject project = jre8Project.getFacetedProject();
@@ -107,7 +111,13 @@ public class AppEngineStandardFacetVersionChangeTests {
     actions.add(new Action(Action.Type.VERSION_CHANGE, JavaFacet.VERSION_1_7, null));
     project.modify(actions, null);
 
-    assertDescriptorRuntimeIsJre7(project);
+    // the autobuilder should revert the change
+    ProjectUtils.waitForProjects(project.getProject());
+    assertEquals(
+        AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8,
+        project.getProjectFacetVersion(AppEngineStandardFacet.FACET));
+    assertEquals(JavaFacet.VERSION_1_8, project.getProjectFacetVersion(JavaFacet.FACET));
+    assertDescriptorRuntimeIsJre8(project);
   }
 
   private static AppEngineDescriptor parseDescriptor(IFacetedProject project)
