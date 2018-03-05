@@ -57,10 +57,6 @@ public class CloudSdkInstallJob extends CloudSdkModifyJob {
     SubMonitor progress =
         SubMonitor.convert(monitor, Messages.getString("configuring.cloud.sdk"), 30); // $NON-NLS-1$
 
-    if (progress.isCanceled()) {
-      return Status.CANCEL_STATUS;
-    }
-
     try {
       ManagedCloudSdk managedSdk = getManagedCloudSdk();
       if (!managedSdk.isInstalled()) {
