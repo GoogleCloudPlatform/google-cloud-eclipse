@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.ui.util;
 
 import com.google.common.annotations.VisibleForTesting;
+import java.util.function.Supplier;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
@@ -28,16 +29,9 @@ import org.eclipse.ui.console.MessageConsole;
  */
 public class MessageConsoleUtilities {
 
-  private final IConsoleManager consoleManager;
-
-  public MessageConsoleUtilities() {
-    this(ConsolePlugin.getDefault().getConsoleManager());
-  }
-
   @VisibleForTesting
-  MessageConsoleUtilities(IConsoleManager consoleManager) {
-    this.consoleManager = consoleManager;
-  }
+  static Supplier<IConsoleManager> consoleManagerSupplier =
+      () -> ConsolePlugin.getDefault().getConsoleManager();
 
   /**
    * Returns a {@link MessageConsole} with the given <code>consoleName</code>. If no console by that
@@ -48,7 +42,7 @@ public class MessageConsoleUtilities {
    * @param imageDescriptor image descriptor to use
    * @return {@link MessageConsole} with the given <code>consoleName</code>
    */
-  public MessageConsole getMessageConsole(String consoleName,
+  public static MessageConsole getMessageConsole(String consoleName,
       ImageDescriptor imageDescriptor) {
     return getMessageConsole(consoleName, imageDescriptor, false);
   }
@@ -62,20 +56,21 @@ public class MessageConsoleUtilities {
    * @param show if true the console will be brought to the front
    * @return {@link MessageConsole} with the given <code>consoleName</code>
    */
-  public MessageConsole getMessageConsole(String consoleName,
+  public static MessageConsole getMessageConsole(String consoleName,
       ImageDescriptor imageDescriptor, boolean show) {
     MessageConsole messageConsole = findOrCreateConsole(
         consoleName,
         unused -> new MessageConsole(consoleName, imageDescriptor));
 
     if (show) {
-      consoleManager.showConsoleView(messageConsole);
+      consoleManagerSupplier.get().showConsoleView(messageConsole);
     }
     return messageConsole;
   }
 
-  public <C extends MessageConsole> C findOrCreateConsole(String name, ConsoleFactory<C> factory) {
-    IConsole[] consoles = consoleManager.getConsoles();
+  public static <C extends MessageConsole> C findOrCreateConsole(
+      String name, ConsoleFactory<C> factory) {
+    IConsole[] consoles = consoleManagerSupplier.get().getConsoles();
     for (IConsole console : consoles) {
       if (name.equals(console.getName())) {
         @SuppressWarnings("unchecked")
@@ -87,9 +82,9 @@ public class MessageConsoleUtilities {
     return createConsole(name, factory);
   }
 
-  public <C extends MessageConsole> C createConsole(String name, ConsoleFactory<C> factory) {
+  public static <C extends MessageConsole> C createConsole(String name, ConsoleFactory<C> factory) {
     C console = factory.createConsole(name);
-    consoleManager.addConsoles(new IConsole[]{console});
+    consoleManagerSupplier.get().addConsoles(new IConsole[]{console});
     return console;
   }
 

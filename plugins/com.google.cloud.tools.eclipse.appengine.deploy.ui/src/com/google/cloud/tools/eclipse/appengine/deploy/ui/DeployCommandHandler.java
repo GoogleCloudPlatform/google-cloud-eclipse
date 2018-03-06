@@ -154,9 +154,9 @@ public abstract class DeployCommandHandler extends AbstractHandler {
     IPath workDirectory = createWorkDirectory();
     DeployPreferences deployPreferences = getDeployPreferences(project);
 
-    String consoleName = getConsoleName(deployPreferences.getProjectId());
     DeployConsole messageConsole =
-        new MessageConsoleUtilities().createConsole(consoleName, new DeployConsole.Factory());
+        MessageConsoleUtilities.createConsole(getConsoleName(deployPreferences.getProjectId()),
+                                              new DeployConsole.Factory());
     IConsoleManager consoleManager = ConsolePlugin.getDefault().getConsoleManager();
     consoleManager.showConsoleView(messageConsole);
     ConsoleColorProvider colorProvider = new ConsoleColorProvider();

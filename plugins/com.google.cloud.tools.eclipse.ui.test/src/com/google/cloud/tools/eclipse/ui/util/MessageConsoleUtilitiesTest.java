@@ -38,51 +38,49 @@ public class MessageConsoleUtilitiesTest {
   @Mock private IConsoleManager consoleManager;
   @Mock private MessageConsole existingConsole;
 
-  private MessageConsoleUtilities consoleUtilities;
-
   @Before
   public void setUp() {
-    consoleUtilities = new MessageConsoleUtilities(consoleManager);
+    MessageConsoleUtilities.consoleManagerSupplier = () -> consoleManager;
     when(existingConsole.getName()).thenReturn("existing console");
     when(consoleManager.getConsoles()).thenReturn(new IConsole[] {existingConsole});
   }
 
   @Test
   public void testGetMessageConsole_newConsole() {
-    IConsole created = consoleUtilities.getMessageConsole("new console", null);
+    IConsole created = MessageConsoleUtilities.getMessageConsole("new console", null);
     verify(consoleManager).addConsoles(new IConsole[] {created});
   }
 
   @Test
   public void testGetMessageConsole_existingConsole() {
-    IConsole returned = consoleUtilities.getMessageConsole("existing console", null);
+    IConsole returned = MessageConsoleUtilities.getMessageConsole("existing console", null);
     assertEquals(returned, existingConsole);
     verify(consoleManager, never()).addConsoles(any(IConsole[].class));
   }
 
   @Test
   public void testGetMessageConsole_doNotClear() {
-    MessageConsole returned = consoleUtilities.getMessageConsole("existing console", null);
+    MessageConsole returned = MessageConsoleUtilities.getMessageConsole("existing console", null);
     assertEquals(returned, existingConsole);
     verify(returned, never()).clearConsole();
   }
 
   @Test
   public void testGetMessageConsole_doNotShow() {
-    consoleUtilities.getMessageConsole("new console", null);
+    MessageConsoleUtilities.getMessageConsole("new console", null);
     verify(consoleManager, never()).showConsoleView(any(IConsole.class));
   }
 
   @Test
   public void testGetMessageConsole_show() {
-    consoleUtilities.getMessageConsole("new console", null, true);
+    MessageConsoleUtilities.getMessageConsole("new console", null, true);
     verify(consoleManager).showConsoleView(any(IConsole.class));
   }
 
   @Test
   public void testCreateConsole() {
     MessageConsole newConsole = mock(MessageConsole.class);
-    IConsole created = consoleUtilities.createConsole("new console", unused -> newConsole);
+    IConsole created = MessageConsoleUtilities.createConsole("new console", unused -> newConsole);
     assertEquals(created, newConsole);
     verify(consoleManager).addConsoles(new IConsole[] {created});
   }
@@ -90,14 +88,15 @@ public class MessageConsoleUtilitiesTest {
   @Test
   public void testFindOrCreateConsole_newConsole() {
     MessageConsole newConsole = mock(MessageConsole.class);
-    IConsole created = consoleUtilities.findOrCreateConsole("new console", unused -> newConsole);
+    IConsole created = MessageConsoleUtilities.findOrCreateConsole(
+        "new console", unused -> newConsole);
     assertEquals(created, newConsole);
     verify(consoleManager).addConsoles(new IConsole[] {created});
   }
 
   @Test
   public void testCreateConsole_existingConsole() {
-    IConsole returned = consoleUtilities.findOrCreateConsole(
+    IConsole returned = MessageConsoleUtilities.findOrCreateConsole(
         "existing console", unused -> null);
     assertEquals(returned, existingConsole);
     verify(consoleManager, never()).addConsoles(any(IConsole[].class));

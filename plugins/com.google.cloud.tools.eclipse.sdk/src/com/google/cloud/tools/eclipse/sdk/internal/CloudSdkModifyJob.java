@@ -64,7 +64,7 @@ public abstract class CloudSdkModifyJob extends Job {
 
   @VisibleForTesting
   MessageConsoleStream createNewMessageConsole() {
-    MessageConsole console = new MessageConsoleUtilities().getMessageConsole(
+    MessageConsole console = MessageConsoleUtilities.getMessageConsole(
         Messages.getString("configuring.cloud.sdk"), // $NON-NLS-1$
         null /* imageDescriptor */);
 
