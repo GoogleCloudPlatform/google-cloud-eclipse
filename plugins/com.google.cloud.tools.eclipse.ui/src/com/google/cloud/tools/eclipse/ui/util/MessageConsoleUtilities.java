@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.ui.util;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
@@ -27,50 +28,45 @@ import org.eclipse.ui.console.MessageConsole;
  */
 public class MessageConsoleUtilities {
 
+  private final IConsoleManager consoleManager;
+
+  public MessageConsoleUtilities() {
+    this(ConsolePlugin.getDefault().getConsoleManager());
+  }
+
+  @VisibleForTesting
+  MessageConsoleUtilities(IConsoleManager consoleManager) {
+    this.consoleManager = consoleManager;
+  }
+
   /**
-   * Returns a {@link MessageConsole} with the given
-   * <code>consoleName</code>. If no console by that name exists then one is
-   * created. The returned console is cleared; callers of this method can decide
-   * when to activate it. The console will not be brought to the front.
+   * Returns a {@link MessageConsole} with the given <code>consoleName</code>. If no console by that
+   * name exists then one is created. Callers of this method can decide when to activate it. The
+   * console will not be brought to the front.
    *
    * @param consoleName name of the console
    * @param imageDescriptor image descriptor to use
    * @return {@link MessageConsole} with the given <code>consoleName</code>
    */
-  public static MessageConsole getMessageConsole(String consoleName,
+  public MessageConsole getMessageConsole(String consoleName,
       ImageDescriptor imageDescriptor) {
     return getMessageConsole(consoleName, imageDescriptor, false);
   }
 
   /**
-   * Returns a {@link MessageConsole} with the given
-   * <code>consoleName</code>. If no console by that name exists then one is
-   * created. The returned console is cleared; callers of this method can decide
-   * when to activate it.
+   * Returns a {@link MessageConsole} with the given <code>consoleName</code>. If no console by that
+   * name exists then one is created. Callers of this method can decide when to activate it.
    *
    * @param consoleName name of the console
    * @param imageDescriptor image descriptor to use
    * @param show if true the console will be brought to the front
    * @return {@link MessageConsole} with the given <code>consoleName</code>
    */
-  public static MessageConsole getMessageConsole(String consoleName,
+  public MessageConsole getMessageConsole(String consoleName,
       ImageDescriptor imageDescriptor, boolean show) {
-    MessageConsole messageConsole = null;
-    IConsoleManager consoleManager = ConsolePlugin.getDefault().getConsoleManager();
-    for (IConsole console : consoleManager.getConsoles()) {
-      if (console.getName().equals(consoleName)
-          && console instanceof MessageConsole) {
-        messageConsole = (MessageConsole) console;
-        break;
-      }
-    }
-
-    if (messageConsole == null) {
-      messageConsole = new MessageConsole(consoleName, imageDescriptor);
-      consoleManager.addConsoles(new IConsole[] {messageConsole});
-    } else {
-      messageConsole.clearConsole();
-    }
+    MessageConsole messageConsole = findOrCreateConsole(
+        consoleName,
+        unused -> new MessageConsole(consoleName, imageDescriptor));
 
     if (show) {
       consoleManager.showConsoleView(messageConsole);
@@ -78,10 +74,8 @@ public class MessageConsoleUtilities {
     return messageConsole;
   }
 
-  public static <C extends MessageConsole> C findOrCreateConsole(String name, ConsoleFactory<C> factory) {
-    ConsolePlugin plugin = ConsolePlugin.getDefault();
-    IConsoleManager manager = plugin.getConsoleManager();
-    IConsole[] consoles = manager.getConsoles();
+  public <C extends MessageConsole> C findOrCreateConsole(String name, ConsoleFactory<C> factory) {
+    IConsole[] consoles = consoleManager.getConsoles();
     for (IConsole console : consoles) {
       if (name.equals(console.getName())) {
         @SuppressWarnings("unchecked")
@@ -90,16 +84,12 @@ public class MessageConsoleUtilities {
       }
     }
     // console not found, so create a new one
-    C console = factory.createConsole(name);
-    manager.addConsoles(new IConsole[]{console});
-    return console;
+    return createConsole(name, factory);
   }
 
-  public static <C extends MessageConsole> C createConsole(String name, ConsoleFactory<C> factory) {
-    ConsolePlugin plugin = ConsolePlugin.getDefault();
-    IConsoleManager manager = plugin.getConsoleManager();
+  public <C extends MessageConsole> C createConsole(String name, ConsoleFactory<C> factory) {
     C console = factory.createConsole(name);
-    manager.addConsoles(new IConsole[]{console});
+    consoleManager.addConsoles(new IConsole[]{console});
     return console;
   }
 

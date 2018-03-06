@@ -471,7 +471,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     // configure the console for output
     IPreferenceStore store = DebugUIPlugin.getDefault().getPreferenceStore();
     ConsoleColorProvider colorProvider = new ConsoleColorProvider();
-    LocalAppEngineConsole console = MessageConsoleUtilities.findOrCreateConsole(
+    LocalAppEngineConsole console = new MessageConsoleUtilities().findOrCreateConsole(
         configuration.getName(), new LocalAppEngineConsole.Factory(serverBehaviour));
     console.clearConsole();
     console.activate();
