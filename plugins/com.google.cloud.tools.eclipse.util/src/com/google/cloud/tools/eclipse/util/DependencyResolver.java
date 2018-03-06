@@ -20,14 +20,15 @@ import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystem;
-import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.collection.CollectRequest;
 import org.eclipse.aether.graph.Dependency;
 import org.eclipse.aether.graph.DependencyFilter;
 import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.repository.RepositoryPolicy;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.resolution.DependencyResolutionException;
@@ -72,7 +73,11 @@ public class DependencyResolver {
         collectRequest.setRoot(new Dependency(artifact, JavaScopes.RUNTIME));
         collectRequest.setRepositories(centralRepository(system));
         DependencyRequest request = new DependencyRequest(collectRequest, filter);
-        RepositorySystemSession session = context.getRepositorySession();
+
+        // ensure checksum errors result in failure
+        DefaultRepositorySystemSession session =
+            new DefaultRepositorySystemSession(context.getRepositorySession());
+        session.setChecksumPolicy(RepositoryPolicy.CHECKSUM_POLICY_FAIL);
 
         try {
           List<ArtifactResult> artifacts =
