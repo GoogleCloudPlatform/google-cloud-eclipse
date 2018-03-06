@@ -29,7 +29,7 @@ import org.eclipse.ui.IWorkbench;
  * org.eclipse.jface.preference.FieldEditor FieldEditor} except that it is expected to be configured
  * from an extension point.
  *
- * <p>Preference areas should notify its listeners of changes using property change events.
+ * <p>Preference areas should notify their listeners of changes using property change events.
  */
 public abstract class PreferenceArea {
   /* property values */

@@ -189,7 +189,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       }
     }
     sdkVersionLabel.setText(Messages.getString("SdkVersion", version)); //$NON-NLS-1$
-    sdkVersionLabel.setToolTipText(location);
+    sdkVersionLabel.setToolTipText(location); // null is ok
   }
 
   private static String getSdkVersion(Path path) {

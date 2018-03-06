@@ -83,7 +83,7 @@ public class CloudSdkPreferenceAreaTest {
     assertFalse(area.getStatus().isOK());
     assertEquals(IStatus.ERROR, area.getStatus().getSeverity());
     assertEquals("SDK version: No SDK found", sdkVersion.getText());
-    // in manual, we always have a location so tooltip should be set
+    // in manual mode we always have a location, so tooltip should be set
     assertEquals("/non-existent", sdkVersion.getToolTipText());
   }
 
