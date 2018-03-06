@@ -23,7 +23,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyMap;
+import static org.mockito.Matchers.anyMapOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -232,11 +232,13 @@ public class PipelineArgumentsTabTest {
     doAnswer(getAttributes).when(launch).getAttribute(anyString(), anyString());
     doAnswer(getAttributes).when(launch).getAttribute(anyString(), anyInt());
     doAnswer(getAttributes).when(launch).getAttribute(anyString(), anyBoolean());
-    doAnswer(getAttributes).when(launch).getAttribute(anyString(), anyMap());
+    doAnswer(getAttributes).when(launch)
+        .getAttribute(anyString(), anyMapOf(String.class, String.class));
     doAnswer(setAttributes).when(launch).setAttribute(anyString(), anyString());
     doAnswer(setAttributes).when(launch).setAttribute(anyString(), anyInt());
     doAnswer(setAttributes).when(launch).setAttribute(anyString(), anyBoolean());
-    doAnswer(setAttributes).when(launch).setAttribute(anyString(), anyMap());
+    doAnswer(setAttributes).when(launch)
+        .setAttribute(anyString(), anyMapOf(String.class, String.class));
     return launch;
   }
 

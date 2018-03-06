@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.sdk.internal;
 
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.sdk.Messages;
+import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
 import com.google.cloud.tools.eclipse.util.jobs.MutexRule;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.cloud.tools.managedcloudsdk.ManagedCloudSdk;
@@ -30,7 +31,9 @@ import org.eclipse.core.runtime.IProgressMonitorWithBlocking;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
+import org.eclipse.ui.progress.IProgressConstants;
 
 /**
  * A base class for any jobs that seek to modify the managed Google Cloud SDK, ensuring that
@@ -40,7 +43,7 @@ public abstract class CloudSdkModifyJob extends Job {
 
   public static final Object CLOUD_SDK_MODIFY_JOB_FAMILY = new Object();
 
-  /** Scheduling rule to prevent running {@code CloudSdkModifyJob} concurrently. */
+  /** Scheduling rule to prevent running {@link CloudSdkModifyJob} concurrently. */
   @VisibleForTesting
   static final MutexRule MUTEX_RULE =
       new MutexRule("for " + CloudSdkModifyJob.class); // $NON-NLS-1$
@@ -48,12 +51,26 @@ public abstract class CloudSdkModifyJob extends Job {
   protected final MessageConsoleStream consoleStream;
   private final ReadWriteLock cloudSdkLock;
 
+  /** The severity reported on installation failure. */
+  protected int failureSeverity = IStatus.ERROR;
+
   public CloudSdkModifyJob(String jobName, MessageConsoleStream consoleStream,
       ReadWriteLock cloudSdkLock) {
     super(jobName);
-    this.consoleStream = consoleStream;
+    this.consoleStream = consoleStream != null ? consoleStream : createNewMessageConsole();
     this.cloudSdkLock = cloudSdkLock;
     setRule(MUTEX_RULE);
+  }
+
+  @VisibleForTesting
+  MessageConsoleStream createNewMessageConsole() {
+    MessageConsole console = MessageConsoleUtilities.getMessageConsole(
+        Messages.getString("configuring.cloud.sdk"), // $NON-NLS-1$
+        null /* imageDescriptor */);
+
+    setProperty(IProgressConstants.ACTION_PROPERTY, new ShowConsoleViewAction(console));
+
+    return console.newMessageStream();
   }
 
   @Override
@@ -63,6 +80,10 @@ public abstract class CloudSdkModifyJob extends Job {
 
   @Override
   protected final IStatus run(IProgressMonitor monitor) {
+    if (monitor.isCanceled()) {
+      return Status.CANCEL_STATUS;
+    }
+
     try {
       markBlocked(monitor);  // for better UI reporting of lock-waiting.
       cloudSdkLock.writeLock().lockInterruptibly();
@@ -106,11 +127,9 @@ public abstract class CloudSdkModifyJob extends Job {
 
   protected void subTask(IProgressMonitor monitor, String description) {
     monitor.subTask(description);
-    if (consoleStream != null) {
-      // make output headers distinguishable on the console
-      String section = String.format("[%s]", description); // $NON-NLS-1$
-      consoleStream.println(section);
-    }
+    // make output headers distinguishable on the console
+    String section = "[" + description + "]"; // $NON-NLS-1$ // $NON-NLS-2$
+    consoleStream.println(section);
   }
 
   @VisibleForTesting
@@ -126,5 +145,16 @@ public abstract class CloudSdkModifyJob extends Job {
     if (jobThread != null) {
       jobThread.interrupt();
     }
+  }
+
+  /**
+   * Set the {@link IStatus#getSeverity() severity} of modification failure. This is useful for
+   * situations where the Cloud SDK modification is a step of some other work, and the modification
+   * failure should be surfaced to the user in the context of that work. If reported as {@link
+   * IStatus#ERROR} then the Eclipse UI ProgressManager will report the modification failure
+   * directly.
+   */
+  public void setFailureSeverity(int severity) {
+    failureSeverity = severity;
   }
 }

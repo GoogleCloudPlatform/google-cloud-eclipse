@@ -48,7 +48,7 @@ public class StandardFacetInstallDelegate implements IDelegate {
                       IProjectFacetVersion version,
                       Object config,
                       IProgressMonitor monitor) throws CoreException {
-    createConfigFiles(project, monitor);
+    createConfigFiles(project, version, monitor);
     installAppEngineRuntimes(project);
   }
 
@@ -123,11 +123,10 @@ public class StandardFacetInstallDelegate implements IDelegate {
     }
   }
 
-  /**
-   * Creates an appengine-web.xml file in the WEB-INF folder if it doesn't exist.
-   */
+  /** Creates an appengine-web.xml file in the WEB-INF folder if it doesn't exist. */
   @VisibleForTesting
-  void createConfigFiles(IProject project, IProgressMonitor monitor)
+  void createConfigFiles(
+      IProject project, IProjectFacetVersion facetVersion, IProgressMonitor monitor)
       throws CoreException {
     SubMonitor progress = SubMonitor.convert(monitor, 10);
 
@@ -141,9 +140,12 @@ public class StandardFacetInstallDelegate implements IDelegate {
         new ByteArrayInputStream(new byte[0]), progress.newChild(2));
     String configFileLocation = appEngineWebXml.getLocation().toString();
     Map<String, String> parameters = new HashMap<>();
-    parameters.put("runtime", "java8");
-    Templates.createFileContent(configFileLocation, Templates.APPENGINE_WEB_XML_TEMPLATE,
-        parameters);
+    Object appEngineRuntime = facetVersion.getProperty("appengine.runtime");
+    if (appEngineRuntime instanceof String) {
+      parameters.put("runtime", (String) appEngineRuntime);
+    }
+    Templates.createFileContent(
+        configFileLocation, Templates.APPENGINE_WEB_XML_TEMPLATE, parameters);
     progress.worked(4);
     appEngineWebXml.refreshLocal(IFile.DEPTH_ZERO, progress.newChild(1));
   }

@@ -8,6 +8,6 @@
     <version>0.1.0-SNAPSHOT</version>
   </parent>
   <artifactId>com.google.cloud.tools.eclipse.suite.e45.feature</artifactId>
-  <version>1.5.1-SNAPSHOT</version>
+  <version>1.6.0-SNAPSHOT</version>
   <packaging>eclipse-feature</packaging>
 </project>

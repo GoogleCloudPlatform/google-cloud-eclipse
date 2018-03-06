@@ -52,16 +52,15 @@ public class AppEngineStandardFacetTest {
   public void testStandardFacetExists() {
     Assert.assertEquals("com.google.cloud.tools.eclipse.appengine.facets.standard",
         AppEngineStandardFacet.ID);
-    Assert.assertEquals("JRE7", AppEngineStandardFacet.JRE7.getVersionString());
     // see AppEngineStandardFacetVersionChangeTests for JRE8 test
     Assert.assertTrue(ProjectFacetsManager.isProjectFacetDefined(AppEngineStandardFacet.ID));
     Assert.assertEquals(AppEngineStandardFacet.ID, AppEngineStandardFacet.FACET.getId());
   }
 
   @Test
-  public void testDefaultFacetVersion() {
-    Assert.assertEquals(AppEngineStandardFacet.JRE7,
-        AppEngineStandardFacet.FACET.getDefaultVersion());
+  public void testJre7StandardFacetVersion() {
+    Assert.assertEquals("JRE7", AppEngineStandardFacet.JRE7.getVersionString());
+    Assert.assertNull(AppEngineStandardFacet.JRE7.getProperty("appengine.runtime"));
   }
 
   @Test

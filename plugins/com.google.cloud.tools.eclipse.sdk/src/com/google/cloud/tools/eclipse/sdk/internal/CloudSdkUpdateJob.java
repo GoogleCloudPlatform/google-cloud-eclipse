@@ -25,7 +25,7 @@ import com.google.cloud.tools.managedcloudsdk.ManagedSdkVersionMismatchException
 import com.google.cloud.tools.managedcloudsdk.UnsupportedOsException;
 import com.google.cloud.tools.managedcloudsdk.command.CommandExecutionException;
 import com.google.cloud.tools.managedcloudsdk.command.CommandExitException;
-import com.google.cloud.tools.managedcloudsdk.update.SdkUpdater;
+import com.google.cloud.tools.managedcloudsdk.components.SdkUpdater;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,9 +42,6 @@ public class CloudSdkUpdateJob extends CloudSdkModifyJob {
     super(Messages.getString("updating.cloud.sdk"), consoleStream, cloudSdkLock); //$NON-NLS-1$
   }
 
-  /** The severity reported on installation failure. */
-  private int failureSeverity = IStatus.ERROR;
-
   /**
    * Perform the installation and configuration of the managed Cloud SDK. Any errors are returned as
    * {@link IStatus#WARNING} to avoid the Eclipse UI ProgressManager reporting the error with no
@@ -52,10 +49,6 @@ public class CloudSdkUpdateJob extends CloudSdkModifyJob {
    */
   @Override
   protected IStatus modifySdk(IProgressMonitor monitor) {
-    if (monitor.isCanceled()) {
-      return Status.CANCEL_STATUS;
-    }
-    
     // todo should we convert to a submonitor here?
     
     monitor.beginTask(Messages.getString("configuring.cloud.sdk"), 10); //$NON-NLS-1$
@@ -99,16 +92,5 @@ public class CloudSdkUpdateJob extends CloudSdkModifyJob {
       throw new IllegalStateException(
           "This is never thrown because we always use LATEST.", e); //$NON-NLS-1$
     }
-  }
-
-  /**
-   * Set the {@link IStatus#getSeverity() severity} of installation failure. This is useful for
-   * situations where the Cloud SDK installation is a step of some other work, and the installation
-   * failure should be surfaced to the user in the context of that work. If reported as {@link
-   * IStatus#ERROR} then the Eclipse UI ProgressManager will report the installation failure
-   * directly.
-   */
-  public void setFailureSeverity(int severity) {
-    failureSeverity = severity;
   }
 }
