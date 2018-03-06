@@ -1,3 +1,14 @@
+# Principal feature renamed with 1.6.0.  Must provide update expression
+# for both the old feature ID as well as previous versions of current feature.
+update.description = Update Cloud Tools for Eclipse with old feature ID
+update.severity = 0
+update.matchExp = providedCapabilities.exists(pc | \
+  pc.namespace == 'org.eclipse.equinox.p2.iu' && \
+    (pc.name == 'com.google.cloud.tools.eclipse.suite.e45.feature.feature.group' || \
+      (pc.name == 'com.google.cloud.tools.eclipse.suite.feature.feature.group' && \
+        pc.version ~= '[0.0.0,$version$)')))
+
+# Anti-requisites to prevent being installed in conjuction with GPE
  requires.0.namespace = org.eclipse.equinox.p2.iu
  requires.0.name = com.google.appengine.eclipse.sdkbundle.feature.feature.group
  requires.0.min = 0

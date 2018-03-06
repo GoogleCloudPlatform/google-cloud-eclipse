@@ -34,7 +34,7 @@ public class CloudToolsInfo {
    */
   @VisibleForTesting
   static final String CLOUD_TOOLS_FOR_ECLIPSE_FEATURE_ID =
-      "com.google.cloud.tools.eclipse.suite.e45.feature";
+      "com.google.cloud.tools.eclipse.suite.feature";
 
   // Don't change the value; this name is used as an originating "application" of usage metrics.
   public static final String METRICS_NAME = "gcloud-eclipse-tools";

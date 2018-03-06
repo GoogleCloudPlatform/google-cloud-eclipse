@@ -48,7 +48,7 @@
             <extraRequirements>
               <requirement>
                 <type>eclipse-feature</type>
-                <id>com.google.cloud.tools.eclipse.suite.e45.feature</id>
+                <id>com.google.cloud.tools.eclipse.suite.feature</id>
                 <versionRange>0.0.0</versionRange>
               </requirement>
               <requirement>
