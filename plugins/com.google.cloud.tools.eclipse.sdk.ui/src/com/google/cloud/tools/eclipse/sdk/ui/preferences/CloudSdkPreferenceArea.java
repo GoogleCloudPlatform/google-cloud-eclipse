@@ -22,6 +22,7 @@ import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkVersionFileException;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkVersionFileNotFoundException;
 import com.google.cloud.tools.eclipse.preferences.areas.PreferenceArea;
 import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
@@ -30,6 +31,7 @@ import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.cloud.tools.managedcloudsdk.ManagedCloudSdk;
 import com.google.cloud.tools.managedcloudsdk.UnsupportedOsException;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -176,8 +178,24 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     String location = null;
     if (!cloudSdkManager.isManagedSdkFeatureEnabled() || chooseSdk.getSelection()) {
       location = sdkLocation.getStringValue();
-      Path path = Paths.get(location);
-      version = getSdkVersion(path);
+      if (Strings.isNullOrEmpty(location)) { 
+        try {
+          // look in default locations; see
+          // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2897
+          CloudSdk sdk = new CloudSdk.Builder().build();
+          location = sdk.getSdkPath().toString();
+          sdkLocation.setStringValue(location);
+          version = sdk.getVersion().toString();
+        } catch (CloudSdkNotFoundException | CloudSdkVersionFileNotFoundException ex) {
+          // surprising but here a CloudSdkVersionFileNotFoundException also means
+          // no SDK is found where expected, probably because it was moved or deleted
+          // behind Eclipse's back
+          version = Messages.getString("NoSdkFound");
+        }
+      } else {
+        Path path = Paths.get(location);
+        version = getSdkVersion(path);
+      }
     } else if (cloudSdkManager.isManagedSdkFeatureEnabled()) {
       try {
         Path home = ManagedCloudSdk.newManagedSdk().getSdkHome();
