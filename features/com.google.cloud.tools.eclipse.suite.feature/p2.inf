@@ -6,7 +6,7 @@ update.matchExp = providedCapabilities.exists(pc | \
   pc.namespace == 'org.eclipse.equinox.p2.iu' && \
     (pc.name == 'com.google.cloud.tools.eclipse.suite.e45.feature.feature.group' || \
       (pc.name == 'com.google.cloud.tools.eclipse.suite.feature.feature.group' && \
-        pc.version ~= '[0.0.0,$version$)')))
+        pc.version ~= range('[0.0.0,$version$)'))))
 
 # Anti-requisites to prevent being installed in conjuction with GPE
  requires.0.namespace = org.eclipse.equinox.p2.iu

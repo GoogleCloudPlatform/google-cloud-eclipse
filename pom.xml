@@ -363,6 +363,12 @@
           <version>3.0.2</version>
         </plugin>
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>1.8</version>
+        </plugin>
+
+        <plugin>
           <groupId>org.eclipse.scout</groupId>
           <artifactId>eclipse-settings-maven-plugin</artifactId>
           <version>3.0.2</version>

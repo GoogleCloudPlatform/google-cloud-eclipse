@@ -55,6 +55,29 @@
           <pomDependencies>consider</pomDependencies>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>verify-update-metadata</id>
+            <phase>package</phase>
+            <goals><goal>run</goal></goals>
+            <configuration>
+              <target description="verify p2 metadata for updating from old .e45 feature">
+                <fail message="p2 metadata missing com.google.cloud.tools.eclipse.suite.e45.feature update information">
+                  <condition>
+                    <not>
+                      <resourcecontains resource="${project.build.directory}/targetPlatformRepository/content.xml"
+                        substring="com.google.cloud.tools.eclipse.suite.e45.feature.feature.group"/>
+                    </not>
+                  </condition>
+                </fail>
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
