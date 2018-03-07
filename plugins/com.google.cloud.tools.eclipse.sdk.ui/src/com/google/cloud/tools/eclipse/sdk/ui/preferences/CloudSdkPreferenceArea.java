@@ -184,8 +184,9 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
           // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2897
           CloudSdk sdk = new CloudSdk.Builder().build();
           location = sdk.getSdkPath().toString();
-          sdkLocation.setStringValue(location);
           version = sdk.getVersion().toString();
+          // ends up calling this method again
+          sdkLocation.setStringValue(location);
         } catch (CloudSdkNotFoundException | CloudSdkVersionFileNotFoundException ex) {
           // surprising but here a CloudSdkVersionFileNotFoundException also means
           // no SDK is found where expected, probably because it was moved or deleted
