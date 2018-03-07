@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.ui.util;
+package com.google.cloud.tools.eclipse.ui;
 
 import static org.junit.Assert.assertEquals;
 
 import com.google.cloud.tools.eclipse.test.util.BasePluginXmlTest;
+import com.google.cloud.tools.eclipse.ui.util.OpenDropDownMenuHandler;
 import org.junit.Test;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -27,7 +28,7 @@ public class PluginXmlTest extends BasePluginXmlTest {
   @Test
   public void testExtensionPoint() {
     NodeList extensions = getDocument().getElementsByTagName("extension");
-    assertEquals(2, extensions.getLength());
+    assertEquals(3, extensions.getLength());
 
     // first element is the showPopup command
     Element extension = (Element) extensions.item(0);
@@ -58,6 +59,13 @@ public class PluginXmlTest extends BasePluginXmlTest {
     menuContribution = (Element) menuContributions.item(2);
     assertEquals("menu:com.google.cloud.tools.eclipse.ui.actions", //$NON-NLS-1$
         menuContribution.getAttribute("locationURI")); //$NON-NLS-1$
+
+    // last element is the keywords definition
+    extension = (Element) extensions.item(2);
+    assertEquals(
+        "org.eclipse.ui.keywords", extension.getAttribute("point")); // $NON-NLS-1$ //$NON-NLS-2$
+    NodeList keywords = extension.getElementsByTagName("keyword"); // $NON-NLS-1$
+    assertEquals(3, keywords.getLength());
   }
 
 }
