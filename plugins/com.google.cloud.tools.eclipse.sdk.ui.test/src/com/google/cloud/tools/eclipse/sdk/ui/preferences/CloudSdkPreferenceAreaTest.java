@@ -174,7 +174,6 @@ public class CloudSdkPreferenceAreaTest {
     assertEquals(sdkLocation.getText(), sdkVersion.getToolTipText());
   }
 
-
   @Test
   public void testControlStates_automaticSdk() {
     when(cloudSdkManager.isManagedSdkFeatureEnabled()).thenReturn(true);
