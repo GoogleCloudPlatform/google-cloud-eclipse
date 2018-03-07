@@ -89,5 +89,16 @@
      </menuContribution>
      
    </extension>
+   <extension
+         point="org.eclipse.ui.keywords">
+    <keyword label="%googleCloudPlatformAcronym"
+             id="com.google.cloud.tools.eclipse.ui.GCPKeyword"/>
+    <keyword label="%googleName"
+             id="com.google.cloud.tools.eclipse.ui.GoogleKeyword"/>
+    <keyword label="%cloudName"
+             id="com.google.cloud.tools.eclipse.ui.CloudKeyword"/>
+    <keyword label="%googleCloudPlatformName"
+             id="com.google.cloud.tools.eclipse.ui.GCPName"/>
+   </extension>
 
 </plugin>
