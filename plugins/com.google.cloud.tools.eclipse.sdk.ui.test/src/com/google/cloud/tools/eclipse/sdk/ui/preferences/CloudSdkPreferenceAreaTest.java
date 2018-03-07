@@ -156,6 +156,24 @@ public class CloudSdkPreferenceAreaTest {
     assertNotNull(sdkLocation);
     assertNotNull(sdkVersion);
   }
+  
+  @Test
+  public void testI2897() {
+    when(cloudSdkManager.isManagedSdkFeatureEnabled()).thenReturn(true);
+    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("");
+    
+    createPreferenceArea();
+    chooseSdk.setSelection(true);
+    sdkLocation.setText("");
+    
+    // now need to invoke update
+    area.updateSelectedVersion();
+    
+    assertTrue(sdkLocation.getText().endsWith("google-cloud-sdk"));
+    assertTrue(sdkVersion.getText().length() > 3);
+    assertEquals(sdkLocation.getText(), sdkVersion.getToolTipText());
+  }
+
 
   @Test
   public void testControlStates_automaticSdk() {

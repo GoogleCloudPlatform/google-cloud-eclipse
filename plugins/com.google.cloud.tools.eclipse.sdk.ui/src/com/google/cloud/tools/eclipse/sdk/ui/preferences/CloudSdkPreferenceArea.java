@@ -173,10 +173,13 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     // would be nice if we could updateSelectedVersion() when finished
   }
 
-  private void updateSelectedVersion() {
+  // todo anyway to force this through the UI widgets rather than direct invocation?
+  @VisibleForTesting
+  void updateSelectedVersion() {
     String version = Messages.getString("UnknownVersion"); //$NON-NLS-1$
     String location = null;
-    if (!cloudSdkManager.isManagedSdkFeatureEnabled() || chooseSdk.getSelection()) {
+    boolean manualSdk = chooseSdk.getSelection();
+    if (!cloudSdkManager.isManagedSdkFeatureEnabled() || manualSdk) {
       location = sdkLocation.getStringValue();
       if (Strings.isNullOrEmpty(location)) { 
         try {
