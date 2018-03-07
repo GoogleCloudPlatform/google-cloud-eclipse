@@ -158,16 +158,13 @@ public class CloudSdkPreferenceAreaTest {
   }
   
   @Test
-  public void testI2897() {
+  // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2897
+  public void testSearchSdkIfSdkLocationIsEmpty() {
     when(cloudSdkManager.isManagedSdkFeatureEnabled()).thenReturn(true);
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("");
+    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)).thenReturn("MANUAL");
     
     createPreferenceArea();
-    chooseSdk.setSelection(true);
-    sdkLocation.setText("");
-    
-    // now need to invoke update
-    area.updateSelectedVersion();
     
     assertTrue(sdkLocation.getText().endsWith("google-cloud-sdk"));
     assertTrue(sdkVersion.getText().length() > 3);
