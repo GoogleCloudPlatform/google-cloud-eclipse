@@ -34,6 +34,7 @@ import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
 import com.google.cloud.tools.eclipse.test.util.MockSdkGenerator;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
+import java.io.IOException;
 import java.nio.file.Path;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -88,7 +89,7 @@ public class CloudSdkPreferenceAreaTest {
   }
 
   @Test
-  public void testVersion() throws Exception {
+  public void testVersion() throws IOException {
     when(cloudSdkManager.isManagedSdkFeatureEnabled()).thenReturn(true);
 
     Path mockSdk = MockSdkGenerator.createMockSdk("1.23.4");

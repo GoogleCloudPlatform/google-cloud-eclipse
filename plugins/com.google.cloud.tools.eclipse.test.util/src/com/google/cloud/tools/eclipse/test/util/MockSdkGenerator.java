@@ -38,7 +38,7 @@ public class MockSdkGenerator {
     return createMockSdk("184.0.0");
   }
 
-  public static Path createMockSdk(String sdkVersion) throws Exception {
+  public static Path createMockSdk(String sdkVersion) throws IOException {
     Path mockSdk = Files.createTempDirectory("mock-gcloud-sdk");
     assertTrue(mockSdk.toFile().isDirectory());
 
@@ -61,11 +61,11 @@ public class MockSdkGenerator {
     MoreFiles.deleteRecursively(mockSdk, RecursiveDeleteOption.ALLOW_INSECURE);
   }
 
-  private static void createEmptyFile(Path path) throws Exception {
+  private static void createEmptyFile(Path path) throws IOException {
     createFile(path, "");
   }
 
-  private static void createFile(Path path, String content) throws Exception {
+  private static void createFile(Path path, String content) throws IOException {
     Files.createDirectories(path.getParent());
     assertTrue(path.getParent().toFile().isDirectory());
     Files.write(path, content.getBytes(StandardCharsets.UTF_8));
