@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyListener;
@@ -53,6 +54,7 @@ public class MavenCoordinatesWizardUi extends Composite {
 
     updateEnablement();
 
+    GridDataFactory.defaultsFor(mavenCoordinatesUi).indent(20, 0).applyTo(mavenCoordinatesUi);
     GridLayoutFactory.swtDefaults().generateLayout(this);
   }
 
