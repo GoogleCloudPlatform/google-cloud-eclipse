@@ -44,7 +44,7 @@ public class CloudSdkInstallJob extends CloudSdkModifyJob {
   private static final Logger logger = Logger.getLogger(CloudSdkInstallJob.class.getName());
 
   public CloudSdkInstallJob(MessageConsoleStream consoleStream, ReadWriteLock cloudSdkLock) {
-    super(Messages.getString("installing.cloud.sdk"), consoleStream, cloudSdkLock); // $NON-NLS-1$
+    super(consoleStream, cloudSdkLock);
   }
 
   /**

@@ -187,7 +187,7 @@ public class CloudSdkManagerTest {
     private final IStatus result;
 
     private FakeModifyJob(IStatus result) {
-      super("fake job", mock(MessageConsoleStream.class), modifyLock);
+      super(mock(MessageConsoleStream.class), modifyLock);
       this.result = result;
     }
 

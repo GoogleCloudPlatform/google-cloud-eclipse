@@ -184,12 +184,12 @@ public class CloudSdkModifyJobTest {
     private boolean modifiedSdk;
 
     private FakeModifyJob(boolean blockOnStart) {
-      super("fake job", mock(MessageConsoleStream.class), readWriteLock);
+      super(mock(MessageConsoleStream.class), readWriteLock);
       this.blockOnStart = blockOnStart;
     }
 
     private FakeModifyJob(MessageConsoleStream consoleStream) {
-      super("fake job", consoleStream, readWriteLock);
+      super(consoleStream, readWriteLock);
       blockOnStart = false;
     }
 

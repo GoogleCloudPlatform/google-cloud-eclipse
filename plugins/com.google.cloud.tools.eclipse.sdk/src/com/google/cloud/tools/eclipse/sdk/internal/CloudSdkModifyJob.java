@@ -54,9 +54,8 @@ public abstract class CloudSdkModifyJob extends Job {
   /** The severity reported on installation failure. */
   protected int failureSeverity = IStatus.ERROR;
 
-  public CloudSdkModifyJob(String jobName, MessageConsoleStream consoleStream,
-      ReadWriteLock cloudSdkLock) {
-    super(jobName);
+  public CloudSdkModifyJob(MessageConsoleStream consoleStream, ReadWriteLock cloudSdkLock) {
+    super(Messages.getString("configuring.cloud.sdk")); // $NON-NLS-1$
     this.consoleStream = consoleStream != null ? consoleStream : createNewMessageConsole();
     this.cloudSdkLock = cloudSdkLock;
     setRule(MUTEX_RULE);

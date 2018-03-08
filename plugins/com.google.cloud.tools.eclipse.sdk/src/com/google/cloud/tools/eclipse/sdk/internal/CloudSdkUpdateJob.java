@@ -39,7 +39,7 @@ public class CloudSdkUpdateJob extends CloudSdkModifyJob {
   private static final Logger logger = Logger.getLogger(CloudSdkUpdateJob.class.getName());
 
   public CloudSdkUpdateJob(MessageConsoleStream consoleStream, ReadWriteLock cloudSdkLock) {
-    super(Messages.getString("updating.cloud.sdk"), consoleStream, cloudSdkLock); //$NON-NLS-1$
+    super(consoleStream, cloudSdkLock);
   }
 
   /**
