@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -56,26 +57,31 @@ public class LocalAppEnginePublishOperationTest {
   private IServer server;
 
   @Before
-  public void setUp() throws IOException, CoreException {
+  public void setUp() throws IOException, CoreException, InterruptedException {
     projects = ProjectUtils.importProjects(getClass(),
         "projects/test-submodules.zip", true /* checkBuildErrors */, null);
     assertEquals(2, projects.size());
-    assertTrue("sox-server".equals(projects.get(0).getName())
-        || "sox-server".equals(projects.get(1).getName()));
-    assertTrue("sox-shared".equals(projects.get(1).getName())
-        || "sox-shared".equals(projects.get(0).getName()));
-    serverProject = projects.get("sox-server".equals(projects.get(0).getName()) ? 0 : 1);
-    assertNotNull("sox-server", serverProject);
-    sharedProject = projects.get("sox-shared".equals(projects.get(0).getName()) ? 0 : 1);
-    assertNotNull("sox-shared", sharedProject);
+    Predicate<IProject> isServerProject = project -> "sox-server".equals(project.getName());
+    Predicate<IProject> isSharedProject = project -> "sox-shared".equals(project.getName());
+    serverProject = projects.stream().filter(isServerProject).findFirst().get();
+    sharedProject = projects.stream().filter(isSharedProject).findFirst().get();
+
+    for (int i = 0; i < 100; i++) {
+      serverModule = ServerUtil.getModule(serverProject);
+      sharedModule = ServerUtil.getModule(sharedProject);
+      if (serverModule != null && sharedModule != null) {
+        break;
+      }
+      Thread.sleep(100);
+    }
 
     // To diagnose https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1798.
     logModules(serverProject);
     logModules(sharedProject);
+    assertTrue(serverProject.getFile("bin/sox/server/GreetingServiceImpl.class").exists());
+    assertTrue(sharedProject.getFile("bin/sox/shared/GreetingService.class").exists());
 
-    serverModule = ServerUtil.getModule(serverProject);
     assertNotNull(serverModule);
-    sharedModule = ServerUtil.getModule(sharedProject);
     assertNotNull(sharedModule);
   }
 
