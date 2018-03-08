@@ -102,7 +102,7 @@ public class WebXmlValidator implements XmlValidationHelper {
     for (int i = 0; i < servletClassList.getLength(); i++) {
       Node servletClassNode = servletClassList.item(i);
       String servletClassName = servletClassNode.getTextContent();
-      IJavaProject project = getProject(resource);
+      IJavaProject project = getJavaProject(resource);
       if (project != null && !classExists(project, servletClassName)) {
         DocumentLocation location = (DocumentLocation) servletClassNode.getUserData("location");
         BannedElement element =
@@ -205,7 +205,7 @@ public class WebXmlValidator implements XmlValidationHelper {
     return "2.5".equals(versionString);
   }
 
-  private static IJavaProject getProject(IResource resource) {
+  private static IJavaProject getJavaProject(IResource resource) {
     if (resource != null) {
       return JavaCore.create(resource.getProject());
     }

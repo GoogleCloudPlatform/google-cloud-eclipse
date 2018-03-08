@@ -34,8 +34,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.jface.window.IShellProvider;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 /**
@@ -75,11 +75,12 @@ public class GoogleLoginService implements IGoogleLoginService {
   protected void activate() {
     final IWorkbench workbench = PlatformUI.getWorkbench();
     LoginServiceLogger loginServiceLogger = new LoginServiceLogger();
-    IShellProvider shellProvider = new IShellProvider() {
-      @Override
-      public Shell getShell() {
-        return workbench.getDisplay().getActiveShell();
+    IShellProvider shellProvider = () -> {
+      IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
+      if (window != null && window.getShell() != null) {
+        return window.getShell();
       }
+      return workbench.getDisplay().getActiveShell();
     };
 
     LoginServiceUi uiFacade = new LoginServiceUi(workbench, shellProvider, workbench.getDisplay());
