@@ -274,14 +274,11 @@ public class AnalyticsPingManager {
     if (shouldShowOptInDialog()) {
       Display display = PlatformUI.getWorkbench().getDisplay();
 
-      display.syncExec(new Runnable() {
-        @Override
-        public void run() {
-          OptInDialog dialog = new OptInDialog(findShell(parentShell));
-          dialog.open();
-          boolean optIn = dialog.getReturnCode() == Window.OK;
-          registerOptInStatus(optIn);
-        }
+      display.syncExec(() -> {
+        OptInDialog dialog = new OptInDialog(findShell(parentShell));
+        dialog.open();
+        boolean optIn = dialog.getReturnCode() == Window.OK;
+        registerOptInStatus(optIn);
       });
     }
   }

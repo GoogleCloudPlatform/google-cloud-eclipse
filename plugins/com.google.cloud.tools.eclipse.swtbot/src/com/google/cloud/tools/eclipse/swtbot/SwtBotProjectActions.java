@@ -52,21 +52,15 @@ public final class SwtBotProjectActions {
       String packageName, final String className) {
     SWTBotTreeItem project = SwtBotProjectActions.selectProject(bot, projectName);
     selectProjectItem(project, sourceFolder, packageName).select();
-    SwtBotTestingUtilities.performAndWaitForWindowChange(bot, new Runnable() {
-      @Override
-      public void run() {
-        MenuItem menuItem = ContextMenuHelper.contextMenu(getProjectRootTree(bot), "New", "Class");
-        new SWTBotMenu(menuItem).click();
-      }
+    SwtBotTestingUtilities.performAndWaitForWindowChange(bot, () -> {
+      MenuItem menuItem = ContextMenuHelper.contextMenu(getProjectRootTree(bot), "New", "Class");
+      new SWTBotMenu(menuItem).click();
     });
 
-    SwtBotTestingUtilities.performAndWaitForWindowChange(bot, new Runnable() {
-      @Override
-      public void run() {
-        bot.activeShell();
-        bot.textWithLabel("Name:").setText(className);
-        SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
-      }
+    SwtBotTestingUtilities.performAndWaitForWindowChange(bot, () -> {
+      bot.activeShell();
+      bot.textWithLabel("Name:").setText(className);
+      SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
     });
   }
 
@@ -122,12 +116,8 @@ public final class SwtBotProjectActions {
    * @param projectName the name of the project
    */
   public static void deleteProject(final SWTWorkbenchBot bot, final String projectName) {
-    SwtBotTestingUtilities.performAndWaitForWindowChange(bot, new Runnable() {
-      @Override
-      public void run() {
-        selectProject(bot, projectName).contextMenu("Delete").click();
-        // Wait for confirmation window to come up
-      }
+    SwtBotTestingUtilities.performAndWaitForWindowChange(bot, () -> {
+      selectProject(bot, projectName).contextMenu("Delete").click();
     });
 
     // Select the "Delete project contents on disk (cannot be undone)"
@@ -192,13 +182,10 @@ public final class SwtBotProjectActions {
   public static void openProjectProperties(final SWTWorkbenchBot bot, String projectName) {
     selectProject(bot, projectName);
 
-    SwtBotTestingUtilities.performAndWaitForWindowChange(bot, new Runnable() {
-      @Override
-      public void run() {
-        // Open the Project Properties menu via the File menu
-        SWTBotMenu fileMenu = bot.menu("File");
-        fileMenu.menu("Properties").click();
-      }
+    SwtBotTestingUtilities.performAndWaitForWindowChange(bot, () -> {
+      // Open the Project Properties menu via the File menu
+      SWTBotMenu fileMenu = bot.menu("File");
+      fileMenu.menu("Properties").click();
     });
   }
 

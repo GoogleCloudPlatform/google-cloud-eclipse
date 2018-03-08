@@ -180,16 +180,13 @@ public class RunOptionsDefaultsComponent {
     stagingLocationInput.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false,
         columns - STAGING_LOCATION_SPENT_COLUMNS, 1));
 
-    accountSelector.addSelectionListener(new Runnable() {
-      @Override
-      public void run() {
-        // Don't use "removeAll()", as it will clear the text field too.
-        stagingLocationInput.remove(0, stagingLocationInput.getItemCount() - 1);
-        completionListener.setContents(ImmutableSortedSet.<String>of());
-        projectInput.setCredential(accountSelector.getSelectedCredential());
-        updateStagingLocations(0); // no delay
-        validate();
-      }
+    accountSelector.addSelectionListener(() -> {
+      // Don't use "removeAll()", as it will clear the text field too.
+      stagingLocationInput.remove(0, stagingLocationInput.getItemCount() - 1);
+      completionListener.setContents(ImmutableSortedSet.<String>of());
+      projectInput.setCredential(accountSelector.getSelectedCredential());
+      updateStagingLocations(0); // no delay
+      validate();
     });
 
     projectInput.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -354,12 +351,7 @@ public class RunOptionsDefaultsComponent {
 
     checkProjectConfigurationJob =
         new GcpProjectServicesJob(apiFactory, selectedCredential, project.getId());
-    checkProjectConfigurationJob.getFuture().addListener(new Runnable() {
-      @Override
-      public void run() {
-        validate();
-      }
-    }, displayExecutor);
+    checkProjectConfigurationJob.getFuture().addListener(this::validate, displayExecutor);
     checkProjectConfigurationJob.schedule();
   }
 
@@ -529,12 +521,7 @@ public class RunOptionsDefaultsComponent {
 
     verifyStagingLocationJob =
         new VerifyStagingLocationJob(getGcsClient(), accountEmail, stagingLocation);
-    verifyStagingLocationJob.onSuccess(displayExecutor, new Runnable() {
-      @Override
-      public void run() {
-        validate();
-      }
-    });
+    verifyStagingLocationJob.onSuccess(displayExecutor, this::validate);
     verifyStagingLocationJob.schedule(schedulingDelay);
   }
 

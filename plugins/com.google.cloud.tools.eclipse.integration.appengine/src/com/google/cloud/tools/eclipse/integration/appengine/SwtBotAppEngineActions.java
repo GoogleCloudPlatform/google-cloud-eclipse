@@ -60,13 +60,10 @@ public class SwtBotAppEngineActions {
   public static IProject createMavenWebAppProject(final SWTWorkbenchBot bot, String projectName,
       String location, String javaPackage, AppEngineRuntime runtime, final String mavenGroupId,
       final String mavenArtifactId) {
-    return createWebAppProject(bot, projectName, location, javaPackage, runtime, new Runnable() {
-      @Override
-      public void run() {
-        bot.checkBox("Create as Maven project").click();
-        bot.textWithLabel("Group ID:").setText(mavenGroupId);
-        bot.textWithLabel("Artifact ID:").setText(mavenArtifactId);
-      }
+    return createWebAppProject(bot, projectName, location, javaPackage, runtime, () -> {
+      bot.checkBox("Create as Maven project").click();
+      bot.textWithLabel("Group ID:").setText(mavenGroupId);
+      bot.textWithLabel("Artifact ID:").setText(mavenArtifactId);
     });
   }
 

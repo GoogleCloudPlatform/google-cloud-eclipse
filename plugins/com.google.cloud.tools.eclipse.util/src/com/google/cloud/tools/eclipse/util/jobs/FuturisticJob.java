@@ -103,15 +103,12 @@ public abstract class FuturisticJob<T> extends Job {
    * provided executor.
    */
   public void onSuccess(Executor executor, final Consumer<? super T> callback) {
-    Runnable dispatch = new Runnable() {
-      @Override
-      public void run() {
-        if (!abandoned && !future.isCancelled()) {
-          try {
-            callback.accept(future.get());
-          } catch (InterruptedException | ExecutionException ex) {
-            // ignore
-          }
+    Runnable dispatch = () -> {
+      if (!abandoned && !future.isCancelled()) {
+        try {
+          callback.accept(future.get());
+        } catch (InterruptedException | ExecutionException ex) {
+          // ignore
         }
       }
     };
@@ -135,19 +132,16 @@ public abstract class FuturisticJob<T> extends Job {
    * executed using the provided executor.
    */
   public void onError(Executor executor, final Consumer<? super Exception> callback) {
-    Runnable dispatch = new Runnable() {
-      @Override
-      public void run() {
-        if (!abandoned && !future.isCancelled()) {
-          try {
-            future.get();
-          } catch (ExecutionException ex) {
-            // #compute() only throws Exception
-            Verify.verify(ex.getCause() instanceof Exception);
-            callback.accept((Exception) ex.getCause());
-          } catch (InterruptedException ex) {
-            // ignored
-          }
+    Runnable dispatch = () -> {
+      if (!abandoned && !future.isCancelled()) {
+        try {
+          future.get();
+        } catch (ExecutionException ex) {
+          // #compute() only throws Exception
+          Verify.verify(ex.getCause() instanceof Exception);
+          callback.accept((Exception) ex.getCause());
+        } catch (InterruptedException ex) {
+          // ignored
         }
       }
     };

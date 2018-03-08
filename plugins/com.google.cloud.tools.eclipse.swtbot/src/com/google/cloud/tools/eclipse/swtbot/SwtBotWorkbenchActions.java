@@ -51,19 +51,16 @@ public final class SwtBotWorkbenchActions {
    * away.
    */
   public static void openPreferencesDialog(final SWTWorkbenchBot bot) {
-    SwtBotTestingUtilities.performAndWaitForWindowChange(bot, new Runnable() {
-      @Override
-      public void run() {
-        if (SwtBotTestingUtilities.isMac()) {
-          // TODO: Mac has "Preferences..." under the "Eclipse" menu item.
-          // However,
-          // the "Eclipse" menu item is a system menu item (like the Apple menu
-          // item), and can't be reached via SWTBot.
-          openPreferencesDialogViaEvents(bot);
-        } else {
-          SWTBotMenu windowMenu = bot.menu("Window");
-          windowMenu.menu("Preferences").click();
-        }
+    SwtBotTestingUtilities.performAndWaitForWindowChange(bot, () -> {
+      if (SwtBotTestingUtilities.isMac()) {
+        // TODO: Mac has "Preferences..." under the "Eclipse" menu item.
+        // However,
+        // the "Eclipse" menu item is a system menu item (like the Apple menu
+        // item), and can't be reached via SWTBot.
+        openPreferencesDialogViaEvents(bot);
+      } else {
+        SWTBotMenu windowMenu = bot.menu("Window");
+        windowMenu.menu("Preferences").click();
       }
     });
   }
@@ -72,12 +69,7 @@ public final class SwtBotWorkbenchActions {
    * Wait until all background tasks are complete.
    */
   public static void waitForProjects(final SWTBot bot, IProject... projects) {
-    Runnable delayTactic = new Runnable() {
-      @Override
-      public void run() {
-        bot.sleep(300);
-      }
-    };
+    Runnable delayTactic = () -> bot.sleep(300);
     ProjectUtils.waitForProjects(delayTactic, projects);
   }
 

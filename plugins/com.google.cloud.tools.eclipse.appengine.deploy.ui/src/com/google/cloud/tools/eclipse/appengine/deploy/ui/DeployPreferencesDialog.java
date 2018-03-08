@@ -93,7 +93,7 @@ public abstract class DeployPreferencesDialog extends TitleAreaDialog {
 
     Composite container = new Composite(area, SWT.NONE);
     content = createDeployPreferencesPanel(container, project, loginService,
-        getLayoutChangedHandler(), new ProjectRepository(googleApiFactory));
+        this::handleLayoutChange, new ProjectRepository(googleApiFactory));
     GridDataFactory.fillDefaults().grab(true, false).applyTo(content);
 
     // we pull in Dialog's content margins which are zeroed out by TitleAreaDialog
@@ -118,16 +118,11 @@ public abstract class DeployPreferencesDialog extends TitleAreaDialog {
       Composite container, IProject project, IGoogleLoginService loginService,
       Runnable layoutChangedHandler, ProjectRepository projectRepository);
 
-  private Runnable getLayoutChangedHandler() {
-    return new Runnable() {
-      @Override
-      public void run() {
-        Shell shell = getShell();
-        shell.setMinimumSize(shell.getSize().x, 0);
-        shell.pack();
-        shell.setMinimumSize(shell.getSize());
-      }
-    };
+  private void handleLayoutChange() {
+    Shell shell = getShell();
+    shell.setMinimumSize(shell.getSize().x, 0);
+    shell.pack();
+    shell.setMinimumSize(shell.getSize());
   }
 
   @Override

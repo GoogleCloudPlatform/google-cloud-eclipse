@@ -39,15 +39,8 @@ public class DisplayExecutorTest {
 
   @Test
   public void testExecute() {
-    Runnable runnable = new Runnable() {
-      @Override
-      public void run() {
-        return;
-      }
-    };
-    
+    Runnable runnable = () -> { /* no nothing */ };
     executor.execute(runnable);
-    
     verify(display).asyncExec(runnable);
   }
 }

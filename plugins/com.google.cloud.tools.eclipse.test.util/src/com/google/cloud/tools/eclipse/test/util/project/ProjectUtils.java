@@ -288,17 +288,14 @@ public class ProjectUtils {
 
   /** Wait for any spawned jobs and builds to complete (e.g., validation jobs). */
   public static void waitForProjects(IProject... projects) {
-    Runnable delayTactic = new Runnable() {
-      @Override
-      public void run() {
-        Display display = Display.getCurrent();
-        if (display != null) {
-          while (display.readAndDispatch()) {
-            /* spin */
-          }
+    Runnable delayTactic = () -> {
+      Display display = Display.getCurrent();
+      if (display != null) {
+        while (display.readAndDispatch()) {
+          /* spin */
         }
-        Thread.yield();
       }
+      Thread.yield();
     };
     waitForProjects(delayTactic, projects);
   }

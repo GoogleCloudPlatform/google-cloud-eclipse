@@ -496,15 +496,12 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
         }
       });
 
-      BusyIndicator.showWhile(composite.getDisplay(), new Runnable() {
-        @Override
-        public void run() {
-          try {
-            suppressDialogUpdates = true;
-            pipelineOptionsForm.updateForm(launchConfiguration, optionsHierarchy.get());
-          } finally {
-            suppressDialogUpdates = false;
-          }
+      BusyIndicator.showWhile(composite.getDisplay(), () -> {
+        try {
+          suppressDialogUpdates = true;
+          pipelineOptionsForm.updateForm(launchConfiguration, optionsHierarchy.get());
+        } finally {
+          suppressDialogUpdates = false;
         }
       });
     } catch (InvocationTargetException | InterruptedException ex) {
