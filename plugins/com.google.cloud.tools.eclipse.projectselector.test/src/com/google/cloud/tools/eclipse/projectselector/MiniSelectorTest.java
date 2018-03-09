@@ -39,9 +39,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
@@ -101,17 +99,13 @@ public class MiniSelectorTest {
   public void testListenerFired() {
     Credential credential = mock(Credential.class);
     mockProjectsList(credential, new GcpProject("foo", "foo.id"));
-    final MiniSelector selector =
-        new MiniSelector(shellResource.getShell(), apiFactory, credential);
+    MiniSelector selector = new MiniSelector(shellResource.getShell(), apiFactory, credential);
 
     assertNotNull(selector.getSelection());
     assertTrue(selector.getSelection().isEmpty());
-    final ISelection[] lastSelection = new ISelection[1];
-    selector.addSelectionChangedListener(new ISelectionChangedListener() {
-      @Override
-      public void selectionChanged(SelectionChangedEvent event) {
-        lastSelection[0] = event.getSelection();
-      }
+    ISelection[] lastSelection = new ISelection[1];
+    selector.addSelectionChangedListener(event -> {
+      lastSelection[0] = event.getSelection();
     });
 
     selector.setProject("foo.id");
@@ -126,7 +120,7 @@ public class MiniSelectorTest {
     assertEquals("foo.id", gcpProject.getId());
   }
 
-  private void waitUntilResolvedProject(final MiniSelector selector) {
+  private void waitUntilResolvedProject(MiniSelector selector) {
     bot.waitUntil(new DefaultCondition() {
       @Override
       public boolean test() throws Exception {
@@ -145,8 +139,7 @@ public class MiniSelectorTest {
   }
 
 
-  private void mockProjectsList(Credential credential,
-      GcpProject... gcpProjects) {
+  private void mockProjectsList(Credential credential, GcpProject... gcpProjects) {
     Projects projectsApi = mock(Projects.class);
     Projects.List listApi = mock(Projects.List.class);
     List<Project> projectsList = new ArrayList<>();

@@ -32,7 +32,6 @@ import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
 import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectVersionValidator;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorDialogErrorHandler;
-import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.QueryParameterProvider;
 import com.google.cloud.tools.eclipse.ui.util.images.SharedImages;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -40,7 +39,6 @@ import com.google.common.base.Strings;
 import com.google.common.net.UrlEscapers;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -68,8 +66,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
@@ -372,17 +368,11 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
                                                 CREATE_GCP_PROJECT_URL));
     createNewProject.setToolTipText(Messages.getString("projectselector.createproject.tooltip"));
     FontUtil.convertFontToItalic(createNewProject);
-    createNewProject.addSelectionListener(
-        new OpenUriSelectionListener(new QueryParameterProvider() {
-          @Override
-          public Map<String, String> getParameters() {
-            if (accountSelector.getSelectedEmail().isEmpty()) {
-              return Collections.emptyMap();
-            } else {
-              return Collections.singletonMap("authuser", accountSelector.getSelectedEmail());
-            }
-          }
-        }, new ErrorDialogErrorHandler(getShell())));
+    createNewProject.addSelectionListener(new OpenUriSelectionListener(
+        () -> accountSelector.getSelectedEmail().isEmpty()
+            ? Collections.emptyMap()
+            : Collections.singletonMap("authuser", accountSelector.getSelectedEmail()),
+        new ErrorDialogErrorHandler(getShell())));
     GridDataFactory.fillDefaults().applyTo(linkComposite);
     GridLayoutFactory.fillDefaults().generateLayout(linkComposite);
 
@@ -418,11 +408,8 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
         new ProjectSelectorSelectionChangedListener(accountSelector,
                                                     projectRepository,
                                                     projectSelector));
-    filterField.addModifyListener(new ModifyListener() {
-      @Override
-      public void modifyText(ModifyEvent event) {
-        projectSelector.setFilter(filterField.getText());
-      }
+    filterField.addModifyListener(event -> {
+      projectSelector.setFilter(filterField.getText());
     });
   }
 

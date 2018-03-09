@@ -54,12 +54,8 @@ import org.eclipse.jface.fieldassist.FieldDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
@@ -185,31 +181,25 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
         SWT.BORDER | SWT.SEARCH | SWT.ICON_SEARCH | SWT.ICON_CANCEL);
 
     projectSelector = new ProjectSelector(projectSelectorComposite);
-    projectSelector.addSelectionChangedListener(new ISelectionChangedListener() {
-      @Override
-      public void selectionChanged(SelectionChangedEvent event) {
-        boolean projectSelected = !projectSelector.getSelection().isEmpty();
-        createServiceKey.setEnabled(projectSelected);
+    projectSelector.addSelectionChangedListener(event -> {
+      boolean projectSelected = !projectSelector.getSelection().isEmpty();
+      createServiceKey.setEnabled(projectSelected);
 
-        if (!initializingUiValues) {
-          boolean savedIdAvailable = projectSelector.isProjectIdAvailable(gcpProjectIdModel);
-          // 1. If some project is selected, always save it.
-          // 2. Otherwise (no project selected), clear the saved project only when it is certain
-          // that the user explicitly removed selection (i.e., not because of logout).
-          if (projectSelected || savedIdAvailable) {
-            gcpProjectIdModel = projectSelector.getSelectedProjectId();
-            updateLaunchConfigurationDialog();
-          }
+      if (!initializingUiValues) {
+        boolean savedIdAvailable = projectSelector.isProjectIdAvailable(gcpProjectIdModel);
+        // 1. If some project is selected, always save it.
+        // 2. Otherwise (no project selected), clear the saved project only when it is certain
+        // that the user explicitly removed selection (i.e., not because of logout).
+        if (projectSelected || savedIdAvailable) {
+          gcpProjectIdModel = projectSelector.getSelectedProjectId();
+          updateLaunchConfigurationDialog();
         }
       }
     });
 
     filterField.setMessage(Messages.getString("project.filter.hint")); //$NON-NLS-1$
-    filterField.addModifyListener(new ModifyListener() {
-      @Override
-      public void modifyText(ModifyEvent event) {
-        projectSelector.setFilter(filterField.getText());
-      }
+    filterField.addModifyListener(event -> {
+      projectSelector.setFilter(filterField.getText());
     });
 
     // Service key row
@@ -217,12 +207,9 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     serviceKeyLabel.setText(Messages.getString("label.service.key")); //$NON-NLS-1$
     
     serviceKeyInput = new Text(composite, SWT.BORDER);
-    serviceKeyInput.addModifyListener(new ModifyListener() {
-      @Override
-      public void modifyText(ModifyEvent event) {
-        serviceKeyDecoration.hide();
-        updateLaunchConfigurationDialog();
-      }
+    serviceKeyInput.addModifyListener(event -> {
+      serviceKeyDecoration.hide();
+      updateLaunchConfigurationDialog();
     });
     Button browse = new Button(composite, SWT.NONE);
     browse.setText(Messages.getString("button.browse")); //$NON-NLS-1$

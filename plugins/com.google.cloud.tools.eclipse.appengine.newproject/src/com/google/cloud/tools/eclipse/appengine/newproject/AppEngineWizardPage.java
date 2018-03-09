@@ -35,12 +35,8 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 
@@ -80,12 +76,7 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     createCustomFields(container);
 
     mavenCoordinatesUi = new MavenCoordinatesWizardUi(container, SWT.NONE);
-    mavenCoordinatesUi.addChangeListener(new Listener() {
-      @Override
-      public void handleEvent(Event event) {
-        revalidate();
-      }
-    });
+    mavenCoordinatesUi.addChangeListener(event -> revalidate());
     mavenCoordinatesUi.addGroupIdModifyListener(new AutoPackageNameSetterOnGroupIdChange());
 
     // Manage APIs
@@ -134,19 +125,11 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     Label packageNameLabel = new Label(parent, SWT.LEAD);
     packageNameLabel.setText(Messages.getString("java.package")); //$NON-NLS-1$
     javaPackageField = new Text(parent, SWT.BORDER);
-    javaPackageField.addModifyListener(new ModifyListener() {
-      @Override
-      public void modifyText(ModifyEvent e) {
-        revalidate();
-      }
-    });
-    javaPackageField.addVerifyListener(new VerifyListener() {
-      @Override
-      public void verifyText(VerifyEvent event) {
-        // if the user ever changes the package name field, then we never auto-generate again.
-        if (!javaPackageProgrammaticUpdate) {
-          autoGeneratePackageName = false;
-        }
+    javaPackageField.addModifyListener(event -> revalidate());
+    javaPackageField.addVerifyListener(event -> {
+      // if the user ever changes the package name field, then we never auto-generate again.
+      if (!javaPackageProgrammaticUpdate) {
+        autoGeneratePackageName = false;
       }
     });
   }
@@ -157,12 +140,7 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     serviceNameLabel.setText(Messages.getString("app.engine.service")); //$NON-NLS-1$
     serviceNameField = new Text(parent, SWT.BORDER);
     serviceNameField.setMessage("default"); //$NON-NLS-1$
-    serviceNameField.addModifyListener(new ModifyListener() {
-      @Override
-      public void modifyText(ModifyEvent e) {
-        revalidate();
-      }
-    });
+    serviceNameField.addModifyListener(event -> revalidate());
   }
 
   @Override

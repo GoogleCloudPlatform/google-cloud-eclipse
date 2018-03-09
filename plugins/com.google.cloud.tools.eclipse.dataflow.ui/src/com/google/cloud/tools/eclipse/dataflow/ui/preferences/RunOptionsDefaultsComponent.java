@@ -192,24 +192,18 @@ public class RunOptionsDefaultsComponent {
       }
     });
 
-    projectInput.addSelectionChangedListener(new ISelectionChangedListener() {
-      @Override
-      public void selectionChanged(SelectionChangedEvent event) {
-        updateStagingLocations(0); // no delay
-        checkProjectConfiguration();
-        validate();
-      }
+    projectInput.addSelectionChangedListener(event -> {
+      updateStagingLocations(0); // no delay
+      checkProjectConfiguration();
+      validate();
     });
 
     completionListener = new SelectFirstMatchingPrefixListener(stagingLocationInput);
     stagingLocationInput.addModifyListener(completionListener);
-    stagingLocationInput.addModifyListener(new ModifyListener() {
-      @Override
-      public void modifyText(ModifyEvent event) {
-        startStagingLocationCheck(NEXT_KEY_DELAY_MS);
-        stagingLocationResults.hide();
-        validate();
-      }
+    stagingLocationInput.addModifyListener(event -> {
+      startStagingLocationCheck(NEXT_KEY_DELAY_MS);
+      stagingLocationResults.hide();
+      validate();
     });
     createButton.addSelectionListener(new CreateStagingLocationListener());
 

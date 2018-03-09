@@ -224,42 +224,31 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     locationBrowse.addSelectionListener(folderSelectionListener(getShell()));
 
     // Updating the group ID updates the default package name
-    ModifyListener propagateGroupIdToPackageListener = propagateGroupIdToPackageListener();
-    groupIdInput.addModifyListener(propagateGroupIdToPackageListener);
+    groupIdInput.addModifyListener(this::propagateGroupIdToPackageListener);
     packageInput.addFocusListener(
-        changeGroupIdPropogationListener(propagateGroupIdToPackageListener));
+        changeGroupIdPropogationListener(this::propagateGroupIdToPackageListener));
 
     // When the project inputs are modified, validate them and update the error message
-    locationInput.addModifyListener(validateAndSetProjectLocationListener());
-    groupIdInput.addModifyListener(validateAndSetMavenGroupIdListener());
-    artifactIdInput.addModifyListener(validateAndSetMavenArtifactIdListener());
-    packageInput.addModifyListener(validateAndSetPackageListener());
-    projectNameTemplate.addModifyListener(setProjectNameTemplate());
+    locationInput.addModifyListener(this::validateAndSetProjectLocationListener);
+    groupIdInput.addModifyListener(this::validateAndSetMavenGroupIdListener);
+    artifactIdInput.addModifyListener(this::validateAndSetMavenArtifactIdListener);
+    packageInput.addModifyListener(this::validateAndSetPackageListener);
+    projectNameTemplate.addModifyListener(this::setProjectNameTemplateListener);
 
     templateDropdown.addSelectionListener(templateListener());
-    templateVersionDropdown.addModifyListener(customTemplateVersionListener());
+    templateVersionDropdown.addModifyListener(event -> updateArchetypeVersion());
     templateVersionDropdown.addSelectionListener(templateVersionListener());
   }
 
-  private ModifyListener setProjectNameTemplate() {
-    return new ModifyListener() {
-      @Override
-      public void modifyText(ModifyEvent event) {
-        targetCreator.setProjectNameTemplate(projectNameTemplate.getText());
-      }
-    };
+  private void setProjectNameTemplateListener(ModifyEvent event) {
+    targetCreator.setProjectNameTemplate(projectNameTemplate.getText());
   }
 
-  private ModifyListener propagateGroupIdToPackageListener() {
-    return new ModifyListener() {
-      @Override
-      public void modifyText(ModifyEvent event) {
-        packageInput.setText(groupIdInput.getText());
-      }
-    };
+  private void propagateGroupIdToPackageListener(ModifyEvent event) {
+    packageInput.setText(groupIdInput.getText());
   }
 
-  private FocusListener changeGroupIdPropogationListener(final ModifyListener propogationListener) {
+  private FocusListener changeGroupIdPropogationListener(ModifyListener propogationListener) {
     return new FocusListener() {
       @Override
       public void focusLost(FocusEvent event) {
@@ -316,15 +305,6 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     updateArchetypeVersion();
   }
 
-  private ModifyListener customTemplateVersionListener() {
-    return new ModifyListener() {
-      @Override
-      public void modifyText(ModifyEvent modifyEvent) {
-        updateArchetypeVersion();
-      }
-    };
-  }
-
   private SelectionListener templateVersionListener() {
     return new SelectionAdapter() {
       @Override
@@ -365,52 +345,33 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     };
   }
 
-  private ModifyListener validateAndSetMavenArtifactIdListener() {
-    return new ModifyListener() {
-      @Override
-      public void modifyText(ModifyEvent event) {
-        targetCreator.setMavenArtifactId(artifactIdInput.getText());
-        validateAndSetError();
-      }
-    };
-  }
-  private ModifyListener validateAndSetMavenGroupIdListener() {
-    return new ModifyListener() {
-      @Override
-      public void modifyText(ModifyEvent event) {
-        targetCreator.setMavenGroupId(groupIdInput.getText());
-        validateAndSetError();
-      }
-    };
+  private void validateAndSetMavenArtifactIdListener(ModifyEvent event) {
+    targetCreator.setMavenArtifactId(artifactIdInput.getText());
+    validateAndSetError();
   }
 
-  private ModifyListener validateAndSetProjectLocationListener() {
-    return new ModifyListener() {
-      @Override
-      public void modifyText(ModifyEvent event) {
-        String locationInputString = locationInput.getText();
-        if (Strings.isNullOrEmpty(locationInputString)) {
-          targetCreator.setProjectLocation(null);
-          validateAndSetError();
-        } else {
-          File file = new File(locationInputString);
-          URI location = file.toURI();
-          targetCreator.setProjectLocation(location);
-          validateAndSetError();
-        }
-      }
-    };
+  private void validateAndSetMavenGroupIdListener(ModifyEvent event) {
+    targetCreator.setMavenGroupId(groupIdInput.getText());
+    validateAndSetError();
   }
 
-  private ModifyListener validateAndSetPackageListener() {
-    return new ModifyListener() {
-      @Override
-      public void modifyText(ModifyEvent event) {
-        String packageInputString = packageInput.getText();
-        targetCreator.setPackage(packageInputString);
-        validateAndSetError();
-      }
-    };
+  private void validateAndSetProjectLocationListener(ModifyEvent event) {
+    String locationInputString = locationInput.getText();
+    if (Strings.isNullOrEmpty(locationInputString)) {
+      targetCreator.setProjectLocation(null);
+      validateAndSetError();
+    } else {
+      File file = new File(locationInputString);
+      URI location = file.toURI();
+      targetCreator.setProjectLocation(location);
+      validateAndSetError();
+    }
+  }
+
+  private void validateAndSetPackageListener(ModifyEvent event) {
+    String packageInputString = packageInput.getText();
+    targetCreator.setPackage(packageInputString);
+    validateAndSetError();
   }
 
   /**
