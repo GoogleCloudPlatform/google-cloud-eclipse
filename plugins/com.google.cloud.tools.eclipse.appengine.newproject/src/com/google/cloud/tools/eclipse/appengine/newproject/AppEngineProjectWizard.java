@@ -31,13 +31,13 @@ import org.eclipse.ui.ide.undo.WorkspaceUndoUtil;
 
 public abstract class AppEngineProjectWizard extends Wizard implements INewWizard {
 
-  private final AppEngineWizardPage wizardPage;
+  private final AppEngineWizardPage appEnginePage;
   protected final AppEngineProjectConfig config = new AppEngineProjectConfig();
   private IWorkbench workbench;
 
   public AppEngineProjectWizard(AppEngineWizardPage appEngineWizardPage) {
-    wizardPage = Preconditions.checkNotNull(appEngineWizardPage);
-    addPage(wizardPage);
+    appEnginePage = Preconditions.checkNotNull(appEngineWizardPage);
+    addPage(appEnginePage);
     setNeedsProgressMonitor(true);
   }
 
@@ -91,18 +91,19 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
   }
 
   private void retrieveConfigurationValues() {
-    config.setServiceName(wizardPage.getServiceName());
-    config.setPackageName(wizardPage.getPackageName());
-    config.setRuntimeId(wizardPage.getRuntimeId());
-    config.setProject(wizardPage.getProjectHandle());
-    if (!wizardPage.useDefaults()) {
-      config.setEclipseProjectLocationUri(wizardPage.getLocationURI());
+    config.setServiceName(appEnginePage.getServiceName());
+    config.setPackageName(appEnginePage.getPackageName());
+    config.setRuntimeId(appEnginePage.getRuntimeId());
+    config.setProject(appEnginePage.getProjectHandle());
+    if (!appEnginePage.useDefaults()) {
+      config.setEclipseProjectLocationUri(appEnginePage.getLocationURI());
     }
 
-    config.setAppEngineLibraries(wizardPage.getSelectedLibraries());
+    config.setAppEngineLibraries(appEnginePage.getSelectedLibraries());
 
-    if (wizardPage.asMavenProject()) {
-      config.setUseMaven(wizardPage.getMavenGroupId(), wizardPage.getMavenArtifactId(), wizardPage.getMavenVersion());
+    if (appEnginePage.asMavenProject()) {
+      config.setUseMaven(appEnginePage.getMavenGroupId(), appEnginePage.getMavenArtifactId(),
+          appEnginePage.getMavenVersion());
     }
   }
 
