@@ -118,6 +118,7 @@ public final class SwtBotProjectActions {
   public static void deleteProject(final SWTWorkbenchBot bot, final String projectName) {
     SwtBotTestingUtilities.performAndWaitForWindowChange(bot, () -> {
       selectProject(bot, projectName).contextMenu("Delete").click();
+      // Wait for confirmation window to come up
     });
 
     // Select the "Delete project contents on disk (cannot be undone)"
