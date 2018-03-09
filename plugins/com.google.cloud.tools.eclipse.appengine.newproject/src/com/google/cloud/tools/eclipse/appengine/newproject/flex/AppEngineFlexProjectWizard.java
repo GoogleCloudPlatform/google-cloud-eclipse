@@ -33,17 +33,16 @@ public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
   private ILibraryRepositoryService repositoryService;
 
   public AppEngineFlexProjectWizard() {
+    super(new AppEngineFlexWizardPage());
     setWindowTitle(Messages.getString("new.app.engine.flex.project"));
   }
 
   @Override
-  public AppEngineFlexWizardPage createWizardPage() {
+  public void sendAnalyticsPing() {
     AnalyticsPingManager.getInstance().sendPingOnShell(getShell(),
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_FLEX);
-
-    return new AppEngineFlexWizardPage();
   }
 
   @Override

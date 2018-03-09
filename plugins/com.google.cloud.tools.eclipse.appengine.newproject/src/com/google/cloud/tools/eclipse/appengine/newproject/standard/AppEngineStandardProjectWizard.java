@@ -43,17 +43,16 @@ public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
   private ILibraryRepositoryService repositoryService;
 
   public AppEngineStandardProjectWizard() {
+    super(new AppEngineStandardWizardPage());
     setWindowTitle(Messages.getString("new.app.engine.standard.project"));
   }
 
   @Override
-  public AppEngineStandardWizardPage createWizardPage() {
+  public void sendAnalyticsPing() {
     AnalyticsPingManager.getInstance().sendPingOnShell(getShell(),
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_STANDARD);
-
-    return new AppEngineStandardWizardPage();
   }
 
   @Override
