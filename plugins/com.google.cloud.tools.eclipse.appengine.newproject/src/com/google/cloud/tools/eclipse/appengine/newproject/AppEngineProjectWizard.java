@@ -37,6 +37,7 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
 
   public AppEngineProjectWizard(AppEngineWizardPage appEngineWizardPage) {
     wizardPage = Preconditions.checkNotNull(appEngineWizardPage);
+    addPage(wizardPage);
     setNeedsProgressMonitor(true);
   }
 
@@ -54,7 +55,6 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
     Thread.interrupted();
 
     sendAnalyticsPing();
-    addPage(wizardPage);
   }
 
   @Override
