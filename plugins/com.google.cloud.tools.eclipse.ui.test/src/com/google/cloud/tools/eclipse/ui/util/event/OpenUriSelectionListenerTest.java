@@ -66,6 +66,7 @@ public class OpenUriSelectionListenerTest {
   @Before
   public void setUp() throws PartInitException {
     when(browserSupport.getExternalBrowser()).thenReturn(browser);
+    when(queryParameterProvider.get()).thenReturn(Collections.emptyMap());
   }
 
   private SelectionEvent getEvent(String uri) {
