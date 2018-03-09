@@ -38,12 +38,12 @@ public class SwtBotTestingUtilities {
 
   /** Click the button, wait for the window change. */
   public static void clickButtonAndWaitForWindowChange(SWTBot bot, final SWTBotButton button) {
-    performAndWaitForWindowChange(bot, () -> button.click());
+    performAndWaitForWindowChange(bot, button::click);
   }
 
   /** Click the button, wait for the window close. */
   public static void clickButtonAndWaitForWindowClose(SWTBot bot, final SWTBotButton button) {
-    performAndWaitForWindowClose(bot, () -> button.click());
+    performAndWaitForWindowClose(bot, button::click);
   }
 
   /**

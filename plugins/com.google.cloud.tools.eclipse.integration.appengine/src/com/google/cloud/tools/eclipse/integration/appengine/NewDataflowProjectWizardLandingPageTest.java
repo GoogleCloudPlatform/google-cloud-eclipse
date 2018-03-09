@@ -60,7 +60,7 @@ public class NewDataflowProjectWizardLandingPageTest {
 
   @After
   public void tearDown() {
-    display.syncExec(() -> shell.dispose());
+    display.syncExec(shell::dispose);
   }
 
   @Test
