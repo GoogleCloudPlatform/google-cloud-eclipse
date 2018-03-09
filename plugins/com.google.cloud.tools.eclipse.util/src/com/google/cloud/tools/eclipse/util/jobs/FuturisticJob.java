@@ -102,7 +102,7 @@ public abstract class FuturisticJob<T> extends Job {
    * providing that this job has not been abandoned or cancelled. The callback is executed using the
    * provided executor.
    */
-  public void onSuccess(Executor executor, final Consumer<? super T> callback) {
+  public void onSuccess(Executor executor, Consumer<? super T> callback) {
     Runnable dispatch = () -> {
       if (!abandoned && !future.isCancelled()) {
         try {
@@ -122,7 +122,7 @@ public abstract class FuturisticJob<T> extends Job {
    * this job has not been abandoned or cancelled. The runnable is executed using the provided
    * executor.
    */
-  public void onSuccess(Executor executor, final Runnable runnable) {
+  public void onSuccess(Executor executor, Runnable runnable) {
     onSuccess(executor, result -> runnable.run());
   }
 

@@ -270,7 +270,7 @@ public class AnalyticsPingManager {
   /**
    * @param parentShell if null, tries to show the dialog at the workbench level.
    */
-  private void showOptInDialogIfNeeded(final Shell parentShell) {
+  private void showOptInDialogIfNeeded(Shell parentShell) {
     if (shouldShowOptInDialog()) {
       Display display = PlatformUI.getWorkbench().getDisplay();
 

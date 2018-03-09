@@ -39,7 +39,7 @@ public class DisplayExecutorTest {
 
   @Test
   public void testExecute() {
-    Runnable runnable = () -> { /* no nothing */ };
+    Runnable runnable = () -> { /* do nothing */ };
     executor.execute(runnable);
     verify(display).asyncExec(runnable);
   }
