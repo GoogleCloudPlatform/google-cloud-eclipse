@@ -37,12 +37,12 @@ public class SwtBotTestingUtilities {
   public static final int EVENT_DOWN_UP_DELAY_MS = 100;
 
   /** Click the button, wait for the window change. */
-  public static void clickButtonAndWaitForWindowChange(SWTBot bot, final SWTBotButton button) {
+  public static void clickButtonAndWaitForWindowChange(SWTBot bot, SWTBotButton button) {
     performAndWaitForWindowChange(bot, button::click);
   }
 
   /** Click the button, wait for the window close. */
-  public static void clickButtonAndWaitForWindowClose(SWTBot bot, final SWTBotButton button) {
+  public static void clickButtonAndWaitForWindowClose(SWTBot bot, SWTBotButton button) {
     performAndWaitForWindowClose(bot, button::click);
   }
 
