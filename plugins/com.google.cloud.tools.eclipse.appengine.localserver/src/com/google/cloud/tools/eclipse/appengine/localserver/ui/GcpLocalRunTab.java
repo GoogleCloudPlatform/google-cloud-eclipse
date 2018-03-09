@@ -178,7 +178,7 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     projectLabel.setText(Messages.getString("label.project")); //$NON-NLS-1$
 
     Composite projectSelectorComposite = new Composite(composite, SWT.NONE);
-    final Text filterField = new Text(projectSelectorComposite,
+    Text filterField = new Text(projectSelectorComposite,
         SWT.BORDER | SWT.SEARCH | SWT.ICON_SEARCH | SWT.ICON_CANCEL);
 
     projectSelector = new ProjectSelector(projectSelectorComposite);
@@ -263,7 +263,7 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
   }
 
   private void updateProjectSelector() {
-    final Credential credential = accountSelector.getSelectedCredential();
+    Credential credential = accountSelector.getSelectedCredential();
     if (credential == null) {
       projectSelector.setProjects(new ArrayList<GcpProject>());
       return;

@@ -98,11 +98,10 @@ public class CloudToolsEclipseProjectNotifier implements IStartup {
   /**
    * Prompt the user to select the projects to upgrade.
    */
-  private Collection<IProject> promptUser(final Collection<IProject> projects,
-      SubMonitor progress) {
+  private Collection<IProject> promptUser(Collection<IProject> projects, SubMonitor progress) {
     Preconditions.checkArgument(!projects.isEmpty(), "no projects specified!"); // $NON-NLS-1$ //$NON-NLS-1$
     progress.setBlocked(StatusUtil.info(this, Messages.getString("waiting.for.user"))); //$NON-NLS-1$
-    final boolean[] proceed = new boolean[1];
+    boolean[] proceed = new boolean[1];
     workbench.getDisplay().syncExec(() -> {
       StringBuilder sb = new StringBuilder(
           Messages.getString("following.projects.must.be.updated")); //$NON-NLS-1$

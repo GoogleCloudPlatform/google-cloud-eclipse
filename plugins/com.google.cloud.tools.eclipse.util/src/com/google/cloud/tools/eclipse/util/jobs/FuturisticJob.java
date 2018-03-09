@@ -131,7 +131,7 @@ public abstract class FuturisticJob<T> extends Job {
    * the computation, providing that this job has not been abandoned or cancelled. The callback is
    * executed using the provided executor.
    */
-  public void onError(Executor executor, final Consumer<? super Exception> callback) {
+  public void onError(Executor executor, Consumer<? super Exception> callback) {
     Runnable dispatch = () -> {
       if (!abandoned && !future.isCancelled()) {
         try {

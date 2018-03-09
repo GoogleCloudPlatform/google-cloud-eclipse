@@ -109,7 +109,7 @@ public class SwtBotTestingUtilities {
   /**
    * Blocks the caller until the given shell is no longer active.
    */
-  public static void waitUntilShellIsNotActive(SWTBot bot, final SWTBotShell shell) {
+  public static void waitUntilShellIsNotActive(SWTBot bot, SWTBotShell shell) {
     bot.waitUntil(new DefaultCondition() {
       @Override
       public String getFailureMessage() {
@@ -126,7 +126,7 @@ public class SwtBotTestingUtilities {
   /**
    * Blocks the caller until the given shell is closed.
    */
-  public static void waitUntilShellIsClosed(SWTBot bot, final SWTBotShell shell) {
+  public static void waitUntilShellIsClosed(SWTBot bot, SWTBotShell shell) {
     bot.waitUntil(new DefaultCondition() {
       @Override
       public String getFailureMessage() {
@@ -143,8 +143,7 @@ public class SwtBotTestingUtilities {
   /**
    * Wait until the given text widget contains the provided string
    */
-  public static void waitUntilStyledTextContains(SWTBot bot, final String text,
-      final SWTBotStyledText widget) {
+  public static void waitUntilStyledTextContains(SWTBot bot, String text, SWTBotStyledText widget) {
     bot.waitUntil(new DefaultCondition() {
       @Override
       public boolean test() throws Exception {

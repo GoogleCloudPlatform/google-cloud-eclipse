@@ -88,7 +88,7 @@ public abstract class DeployPreferencesDialog extends TitleAreaDialog {
   }
 
   @Override
-  protected Control createDialogArea(final Composite parent) {
+  protected Control createDialogArea(Composite parent) {
     Composite area = (Composite) super.createDialogArea(parent);
 
     Composite container = new Composite(area, SWT.NONE);

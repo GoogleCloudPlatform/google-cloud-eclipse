@@ -119,7 +119,7 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
     consoleView.show();
     SwtBotTestingUtilities.waitUntilViewContentDescription(
         bot, consoleView, Matchers.containsString("App Engine Standard at localhost"));
-    final SWTBotStyledText consoleContents =
+    SWTBotStyledText consoleContents =
         new SWTBotStyledText(bot.widget(widgetOfType(StyledText.class), consoleView.getWidget()));
     SwtBotTestingUtilities.waitUntilStyledTextContains(bot,
         "Module instance default is running at http://localhost:8080", consoleContents);

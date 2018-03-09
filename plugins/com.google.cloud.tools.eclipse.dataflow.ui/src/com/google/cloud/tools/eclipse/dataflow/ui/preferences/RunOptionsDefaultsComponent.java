@@ -189,24 +189,18 @@ public class RunOptionsDefaultsComponent {
       validate();
     });
 
-    projectInput.addSelectionChangedListener(new ISelectionChangedListener() {
-      @Override
-      public void selectionChanged(SelectionChangedEvent event) {
-        updateStagingLocations(0); // no delay
-        checkProjectConfiguration();
-        validate();
-      }
+    projectInput.addSelectionChangedListener(event -> {
+      updateStagingLocations(0); // no delay
+      checkProjectConfiguration();
+      validate();
     });
 
     completionListener = new SelectFirstMatchingPrefixListener(stagingLocationInput);
     stagingLocationInput.addModifyListener(completionListener);
-    stagingLocationInput.addModifyListener(new ModifyListener() {
-      @Override
-      public void modifyText(ModifyEvent event) {
-        startStagingLocationCheck(NEXT_KEY_DELAY_MS);
-        stagingLocationResults.hide();
-        validate();
-      }
+    stagingLocationInput.addModifyListener(event -> {
+      startStagingLocationCheck(NEXT_KEY_DELAY_MS);
+      stagingLocationResults.hide();
+      validate();
     });
     createButton.addSelectionListener(new CreateStagingLocationListener());
 
@@ -288,7 +282,7 @@ public class RunOptionsDefaultsComponent {
       }
     }
 
-    final String bucketNamePart = GcsDataflowProjectClient.toGcsBucketName(getStagingLocation());
+    String bucketNamePart = GcsDataflowProjectClient.toGcsBucketName(getStagingLocation());
     if (bucketNamePart.isEmpty()) {
       // If the bucket name is empty, we don't have anything to verify; and we don't have any
       // interesting messaging.
@@ -403,7 +397,7 @@ public class RunOptionsDefaultsComponent {
 
   public void setStagingLocationText(String stagingLocation) {
     stagingLocationInput.setText(stagingLocation);
-    // programmtically set so initiate check immediately
+    // programmatically set so initiate check immediately
     startStagingLocationCheck(0);
   }
 
@@ -411,7 +405,7 @@ public class RunOptionsDefaultsComponent {
     accountSelector.addSelectionListener(listener);
   }
 
-  public void addModifyListener(final ModifyListener listener) {
+  public void addModifyListener(ModifyListener listener) {
     projectInput.addSelectionChangedListener(new ISelectionChangedListener() {
       @Override
       public void selectionChanged(SelectionChangedEvent event) {

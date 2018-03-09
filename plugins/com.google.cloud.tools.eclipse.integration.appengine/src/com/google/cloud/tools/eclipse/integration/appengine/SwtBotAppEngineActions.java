@@ -57,9 +57,9 @@ public class SwtBotAppEngineActions {
   /**
    * Create a new project with the Maven-based Google App Engine Standard Java Project wizard
    */
-  public static IProject createMavenWebAppProject(final SWTWorkbenchBot bot, String projectName,
-      String location, String javaPackage, AppEngineRuntime runtime, final String mavenGroupId,
-      final String mavenArtifactId) {
+  public static IProject createMavenWebAppProject(SWTWorkbenchBot bot, String projectName,
+      String location, String javaPackage, AppEngineRuntime runtime, String mavenGroupId,
+      String mavenArtifactId) {
     return createWebAppProject(bot, projectName, location, javaPackage, runtime, () -> {
       bot.checkBox("Create as Maven project").click();
       bot.textWithLabel("Group ID:").setText(mavenGroupId);
@@ -195,7 +195,7 @@ public class SwtBotAppEngineActions {
    *
    * @return the project
    */
-  private static IProject waitUntilFacetedProjectExists(SWTBot bot, final IProject project) {
+  private static IProject waitUntilFacetedProjectExists(SWTBot bot, IProject project) {
     bot.waitUntil(new DefaultCondition() {
       @Override
       public String getFailureMessage() {
