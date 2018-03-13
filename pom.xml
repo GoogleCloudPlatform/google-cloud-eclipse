@@ -324,7 +324,15 @@
               -Xms40m -Xmx1G -XX:MaxPermSize=512m
               -Djava.awt.headless=true
               -Dlogback.configurationFile=platform:/plugin/com.google.cloud.tools.eclipse.test.dependencies/logback.xml
-              ${os-jvm-flags}</argLine>
+              ${os-jvm-flags}
+            </argLine>
+            <bundleStartLevel>
+              <bundle>
+                 <id>com.google.cloud.tools.eclipse.test.dependencies</id>
+                 <level>1</level>
+                 <autoStart>true</autoStart>
+              </bundle>
+           </bundleStartLevel>
           </configuration>
         </plugin>
 

@@ -4,6 +4,7 @@ Bundle-Name: %pluginName
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.test.dependencies;singleton:=true
 Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: %providerName
+Bundle-Activator: com.google.cloud.tools.eclipse.test.dependencies.LogConfigurator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Localization: plugin
 Require-Bundle: org.junit;bundle-version="[4.12.0,4.12.1)";visibility:=reexport,
@@ -15,7 +16,8 @@ Require-Bundle: org.junit;bundle-version="[4.12.0,4.12.1)";visibility:=reexport,
  org.eclipse.wst.xsd.core;bundle-version="[1.1,2.0)",
  org.slf4j.api;bundle-version="[1.7.10,2)",
  org.slf4j.apis.log4j;bundle-version="[1.7.10,2)",
- org.slf4j.apis.jcl;bundle-version="[1.7.10,2)"
+ org.slf4j.apis.jcl;bundle-version="[1.7.10,2)",
+ org.slf4j.bridge.jul;bundle-version="[1.7.10,2)"
 Export-Package: org.mockito;provider=google;version="1.10.19";
   uses:="org.mockito.invocation,
    org.mockito.verification,
@@ -107,4 +109,7 @@ Export-Package: org.mockito;provider=google;version="1.10.19";
  org.mockito.verification;provider=google;version="1.10.19";uses:="org.mockito.internal.verification.api,org.mockito.internal.util",
  org.objenesis;provider=google;version="2.2.0";uses:="org.objenesis.instantiator,org.objenesis.strategy"
 Bundle-Classpath: lib/mockito-core-1.10.19.jar,
- lib/objenesis-2.2.jar
+ lib/objenesis-2.2.jar,
+ .
+Import-Package: org.osgi.framework
+Bundle-ActivationPolicy: lazy
