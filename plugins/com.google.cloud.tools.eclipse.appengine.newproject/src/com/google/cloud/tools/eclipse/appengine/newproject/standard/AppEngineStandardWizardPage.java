@@ -19,6 +19,8 @@ package com.google.cloud.tools.eclipse.appengine.newproject.standard;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineWizardPage;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -48,6 +50,16 @@ public class AppEngineStandardWizardPage extends AppEngineWizardPage {
   public void setHelp(Composite container) {
     PlatformUI.getWorkbench().getHelpSystem().setHelp(container,
         "com.google.cloud.tools.eclipse.appengine.newproject.NewStandardProjectContext"); //$NON-NLS-1$
+  }
+
+  @Override
+  public void createControl(Composite parent) {
+    super.createControl(parent);
+
+    AnalyticsPingManager.getInstance().sendPingOnShell(getShell(),
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_STANDARD);
   }
 
   @Override

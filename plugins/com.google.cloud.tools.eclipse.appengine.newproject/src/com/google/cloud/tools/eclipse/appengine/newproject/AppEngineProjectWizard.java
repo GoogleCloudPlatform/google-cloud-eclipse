@@ -41,8 +41,6 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
     setNeedsProgressMonitor(true);
   }
 
-  public abstract void sendAnalyticsPing();
-
   public abstract IStatus validateDependencies();
 
   public abstract CreateAppEngineWtpProject getAppEngineProjectCreationOperation(
@@ -53,8 +51,6 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
     // Clear interrupted state
     // (https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2064)
     Thread.interrupted();
-
-    sendAnalyticsPing();
   }
 
   @Override

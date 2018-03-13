@@ -23,6 +23,8 @@ import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowProjectValid
 import com.google.cloud.tools.eclipse.dataflow.core.project.MajorVersion;
 import com.google.cloud.tools.eclipse.dataflow.ui.Messages;
 import com.google.cloud.tools.eclipse.dataflow.ui.util.ButtonFactory;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
 import com.google.common.base.Strings;
 import java.io.File;
@@ -174,8 +176,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     locationBrowse.setEnabled(false);
 
     projectNameTemplate = addCombo(formComposite, Messages.getString("name.template"), false); //$NON-NLS-1$
-    projectNameTemplate.setToolTipText(
-        Messages.getString("name.template.tooltip")); //$NON-NLS-1$
+    projectNameTemplate.setToolTipText(Messages.getString("name.template.tooltip")); //$NON-NLS-1$
     projectNameTemplate.add("[artifactId]"); //$NON-NLS-1$
     projectNameTemplate.add("[groupId]-[artifactId]"); //$NON-NLS-1$
     projectNameTemplate.setLayoutData(gridSpan(GridData.FILL_HORIZONTAL, 1));
@@ -185,8 +186,10 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
 
     formComposite.layout();
     parent.layout();
+
+    AnalyticsPingManager.getInstance().sendPingOnShell(parent.getShell(),
+        AnalyticsEvents.DATAFLOW_NEW_PROJECT_WIZARD);
   }
-  
 
   private void setHelp(Composite container) {
     PlatformUI.getWorkbench().getHelpSystem().setHelp(container,

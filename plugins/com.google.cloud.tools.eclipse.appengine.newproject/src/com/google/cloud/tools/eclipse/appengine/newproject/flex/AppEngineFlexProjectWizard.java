@@ -38,14 +38,6 @@ public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
   }
 
   @Override
-  public void sendAnalyticsPing() {
-    AnalyticsPingManager.getInstance().sendPingOnShell(getShell(),
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_FLEX);
-  }
-
-  @Override
   public IStatus validateDependencies() {
     return Status.OK_STATUS;
   }
