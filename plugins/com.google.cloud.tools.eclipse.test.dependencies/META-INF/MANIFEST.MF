@@ -4,8 +4,9 @@ Bundle-Name: %pluginName
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.test.dependencies;singleton:=true
 Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: %providerName
-Bundle-Activator: com.google.cloud.tools.eclipse.test.dependencies.LogConfigurator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-Activator: com.google.cloud.tools.eclipse.test.dependencies.LogConfigurator
+Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
 Require-Bundle: org.junit;bundle-version="[4.12.0,4.12.1)";visibility:=reexport,
  org.hamcrest.core;bundle-version="[1.3.0,1.3.1)";visibility:=reexport,
@@ -18,6 +19,7 @@ Require-Bundle: org.junit;bundle-version="[4.12.0,4.12.1)";visibility:=reexport,
  org.slf4j.apis.log4j;bundle-version="[1.7.10,2)",
  org.slf4j.apis.jcl;bundle-version="[1.7.10,2)",
  org.slf4j.bridge.jul;bundle-version="[1.7.10,2)"
+Import-Package: org.osgi.framework
 Export-Package: org.mockito;provider=google;version="1.10.19";
   uses:="org.mockito.invocation,
    org.mockito.verification,
@@ -111,5 +113,3 @@ Export-Package: org.mockito;provider=google;version="1.10.19";
 Bundle-Classpath: lib/mockito-core-1.10.19.jar,
  lib/objenesis-2.2.jar,
  .
-Import-Package: org.osgi.framework
-Bundle-ActivationPolicy: lazy
