@@ -16,8 +16,11 @@
 
 package com.google.cloud.tools.eclipse.usagetracker;
 
+import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
@@ -102,7 +105,7 @@ public class AnalyticsPingManagerTest {
   public void testVirtualHostSet() {
     PingEvent event = new PingEvent("some.event-name", EMPTY_MAP, null);
     Map<String, String> parameters = pingManager.buildParametersMap(event);
-    assertTrue(parameters.get("dh").startsWith("virtual."));
+    assertThat(parameters.get("dh"), startsWith("virtual."));
   }
 
   @Test
@@ -110,7 +113,7 @@ public class AnalyticsPingManagerTest {
     PingEvent event = new PingEvent("some.event-name",
         ImmutableMap.of("times-happened", "1234"), null);
     Map<String, String> parameters = pingManager.buildParametersMap(event);
-    assertEquals("times-happened=1234", parameters.get("dt"));
+    assertThat(parameters.get("dt"), containsString("times-happened=1234"));
   }
 
   @Test
@@ -118,7 +121,8 @@ public class AnalyticsPingManagerTest {
     PingEvent event = new PingEvent("some.event-name",
         ImmutableMap.of("times-happened", "1234", "mode", "debug"), null);
     Map<String, String> parameters = pingManager.buildParametersMap(event);
-    assertEquals("times-happened=1234,mode=debug", parameters.get("dt"));
+    assertThat(parameters.get("dt"), containsString("times-happened=1234"));
+    assertThat(parameters.get("dt"), containsString("mode=debug"));
   }
 
   @Test
@@ -126,7 +130,16 @@ public class AnalyticsPingManagerTest {
     PingEvent event = new PingEvent("some.event-name",
         ImmutableMap.of("key , \\ = k", "value , \\ = v"), null);
     Map<String, String> parameters = pingManager.buildParametersMap(event);
-    assertEquals("key \\, \\\\ \\= k=value \\, \\\\ \\= v", parameters.get("dt"));
+    assertThat(parameters.get("dt"), containsString("key \\, \\\\ \\= k=value \\, \\\\ \\= v"));
+  }
+
+  @Test
+  public void testMetadataContainsPlatformInfo() {
+    ImmutableMap<String, String> customMetadata = ImmutableMap.of("times-happened", "1234");
+    PingEvent event = new PingEvent("some.event-name", customMetadata, null);
+    Map<String, String> parameters = pingManager.buildParametersMap(event);
+    assertThat(parameters.get("dt"), containsString("ct4e-version="));
+    assertThat(parameters.get("dt"), containsString("eclipse-version="));
   }
 
   @Test

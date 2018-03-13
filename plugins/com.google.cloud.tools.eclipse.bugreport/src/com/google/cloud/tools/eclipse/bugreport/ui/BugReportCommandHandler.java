@@ -26,9 +26,7 @@ import java.text.MessageFormat;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.program.Program;
-import org.osgi.framework.Bundle;
 
 public class BugReportCommandHandler extends AbstractHandler {
 
@@ -68,7 +66,7 @@ public class BugReportCommandHandler extends AbstractHandler {
   @VisibleForTesting
   static String formatReportUrl() {
     String body = MessageFormat.format(BODY_TEMPLATE, CloudToolsInfo.getToolsVersion(),
-        getCloudSdkVersion(), getEclipseVersion(),
+        getCloudSdkVersion(), CloudToolsInfo.getEclipseVersion(),
         System.getProperty("os.name"), System.getProperty("os.version"),
         System.getProperty("java.version"));
 
@@ -82,15 +80,6 @@ public class BugReportCommandHandler extends AbstractHandler {
       return sdk.getVersion().toString();
     } catch (AppEngineException ex) {
       return ex.toString();
-    }
-  }
-
-  private static String getEclipseVersion() {
-    Bundle bundle = Platform.getBundle("org.eclipse.platform");
-    if (bundle != null) {
-      return bundle.getVersion().toString();
-    } else {
-      return "_(failed to get bundle \"org.eclipse.platform\")_";
     }
   }
 }

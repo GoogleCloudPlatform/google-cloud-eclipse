@@ -248,10 +248,13 @@ public class AnalyticsPingManager {
     parametersMap.put("dp", virtualPageUrl);
     parametersMap.put("dh", "virtual.eclipse");
 
-    if (!pingEvent.metadata.isEmpty()) {
+    Map<String, String> metadata = new HashMap<>(pingEvent.metadata);
+    metadata.putAll(getPlatformInfo());
+
+    if (!metadata.isEmpty()) {
       List<String> escapedPairs = new ArrayList<>();
 
-      for (Map.Entry<String, String> entry : pingEvent.metadata.entrySet()) {
+      for (Map.Entry<String, String> entry : metadata.entrySet()) {
         String key = METADATA_ESCAPER.escape(entry.getKey());
         String value = METADATA_ESCAPER.escape(entry.getValue());
         escapedPairs.add(key + "=" + value);
@@ -260,6 +263,13 @@ public class AnalyticsPingManager {
       parametersMap.put("dt", Joiner.on(',').join(escapedPairs));
     }
     return parametersMap;
+  }
+
+  @VisibleForTesting
+  static Map<String, String> getPlatformInfo() {
+    return ImmutableMap.of(
+        "ct4e-version", CloudToolsInfo.getToolsVersion(),
+        "eclipse-version", CloudToolsInfo.getEclipseVersion());
   }
 
   @VisibleForTesting
