@@ -49,6 +49,7 @@ location "http://download.eclipse.org/tools/orbit/downloads/latest-R/" {
     org.slf4j.api
     org.slf4j.apis.jcl
     org.slf4j.apis.log4j
+    org.slf4j.bridge.jul
     ch.qos.logback.slf4j
 }
 
