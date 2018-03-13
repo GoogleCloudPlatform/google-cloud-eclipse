@@ -27,6 +27,8 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 public class LogConfigurator implements BundleActivator {
   @Override
   public void start(BundleContext context) throws Exception {
+    // remove any existing handlers on root logger
+    SLF4JBridgeHandler.removeHandlersForRootLogger();
     SLF4JBridgeHandler.install();
   }
 
