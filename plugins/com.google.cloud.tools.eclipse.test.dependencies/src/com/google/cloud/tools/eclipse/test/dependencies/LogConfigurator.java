@@ -27,13 +27,11 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 public class LogConfigurator implements BundleActivator {
   @Override
   public void start(BundleContext context) throws Exception {
-    System.err.println(">>> INSTALLING JUL -> SLF4J BRIDGE <<<");
     SLF4JBridgeHandler.install();
   }
 
   @Override
   public void stop(BundleContext context) throws Exception {
-    System.err.println(">>> UNINSTALLING JUL -> SLF4J BRIDGE <<<");
     SLF4JBridgeHandler.uninstall();
   }
 }
