@@ -83,6 +83,6 @@ public class RunAppEngineShortcutTest {
         new SWTWorkbenchBot(), project.getName());
     List<String> menuItems = selected.contextMenu("Run As").menuItems();
     Predicate<String> isAppEngineMenu = name -> name.contains("App Engine");
-    return menuItems.stream().filter(isAppEngineMenu).findAny().isPresent();
+    return menuItems.stream().anyMatch(isAppEngineMenu);
   }
 }
