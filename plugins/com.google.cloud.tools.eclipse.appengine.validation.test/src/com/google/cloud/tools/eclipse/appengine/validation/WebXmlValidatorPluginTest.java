@@ -20,7 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import java.io.ByteArrayInputStream;
@@ -37,7 +36,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -48,10 +46,12 @@ public class WebXmlValidatorPluginTest {
   private IJavaProject javaProject;
   private IResource resource;
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacets(
-      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
+      JavaFacet.VERSION_1_7);
 
-  @Before
-  public void setUp() throws CoreException {
+  private void setUpProject(boolean dynamicWebProject) throws CoreException {
+    if (dynamicWebProject) {
+      projectCreator.withFacets(WebFacetUtils.WEB_25);
+    }
     IProject project = projectCreator.getProject();
     javaProject = projectCreator.getJavaProject();
 
@@ -66,9 +66,11 @@ public class WebXmlValidatorPluginTest {
 
   @After
   public void tearDown() throws CoreException {
-    // Delete to avoid https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1916
-    javaProject.getProject().getFile("WebContent/InWebContent.jsp").delete(true, null);
-    javaProject.getProject().getFile("src/InSrc.jsp").delete(true, null);
+    if (javaProject != null) {
+      // Delete to avoid https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1916
+      javaProject.getProject().getFile("WebContent/InWebContent.jsp").delete(true, null);
+      javaProject.getProject().getFile("src/InSrc.jsp").delete(true, null);
+    }
   }
 
   private static void createFile(IProject project, String folder, String filename,
@@ -79,7 +81,10 @@ public class WebXmlValidatorPluginTest {
   }
 
   @Test
-  public void testCheckForElements_servletClass() throws ParserConfigurationException {
+  public void testCheckForElements_servletClass()
+      throws ParserConfigurationException, CoreException {
+    setUpProject(false);
+
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
     DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
     Document document = documentBuilder.newDocument();
@@ -103,7 +108,10 @@ public class WebXmlValidatorPluginTest {
   }
 
   @Test
-  public void testCheckForElements_servletClassExists() throws ParserConfigurationException {
+  public void testCheckForElements_servletClassExists()
+      throws ParserConfigurationException, CoreException {
+    setUpProject(false);
+
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
     DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
     Document document = documentBuilder.newDocument();
@@ -125,7 +133,9 @@ public class WebXmlValidatorPluginTest {
   }
 
   @Test
-  public void testValidateJsp() throws ParserConfigurationException {
+  public void testValidateJsp() throws ParserConfigurationException, CoreException {
+    setUpProject(true);
+
     // For a typical dynamic web project:
     //     /           -> WebContent
     // WEB-INF         -> WebContent/WEB-INF
@@ -165,7 +175,8 @@ public class WebXmlValidatorPluginTest {
   }
 
   @Test
-  public void testClassExists() {
+  public void testClassExists() throws CoreException {
+    setUpProject(false);
     assertFalse(WebXmlValidator.classExists(javaProject, "DoesNotExist"));
     assertFalse(WebXmlValidator.classExists(null, null));
     assertFalse(WebXmlValidator.classExists(null, ""));
@@ -173,7 +184,8 @@ public class WebXmlValidatorPluginTest {
   }
 
   @Test
-  public void testClassExists_inPackage() {
+  public void testClassExists_inPackage() throws CoreException {
+    setUpProject(false);
     assertTrue(WebXmlValidator.classExists(javaProject, "com.example.ServletClassInPackage"));
   }
 
