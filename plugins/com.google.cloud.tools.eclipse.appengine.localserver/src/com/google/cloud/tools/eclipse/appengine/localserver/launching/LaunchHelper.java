@@ -92,7 +92,7 @@ public class LaunchHelper {
    * @return an existing server
    */
   @VisibleForTesting
-  public Collection<IServer> findExistingServers(IModule[] modules, boolean exact,
+  Collection<IServer> findExistingServers(IModule[] modules, boolean exact,
       SubMonitor progress) {
     if (modules.length == 1) {
       IServer defaultServer = ServerCore.getDefaultServer(modules[0]);
