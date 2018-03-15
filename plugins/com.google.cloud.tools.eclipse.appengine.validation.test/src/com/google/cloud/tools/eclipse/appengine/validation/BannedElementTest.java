@@ -18,7 +18,9 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.wst.validation.internal.provisional.core.IMessage;
@@ -26,21 +28,31 @@ import org.junit.Test;
 
 public class BannedElementTest {
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testBannedElementConstructor_nullElementName() {
-    new BannedElement(null);
+    try {
+      new BannedElement(null);
+      fail();
+    } catch (NullPointerException ex) {
+      assertNotNull(ex.getMessage());
+    }
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testBannedElementConstructor_nullLocation() {
-    new BannedElement(
-        "test",
-        "org.eclipse.core.resources.problemmarker", 
-        IMarker.SEVERITY_WARNING, 
-        IMessage.NORMAL_SEVERITY, 
-        null,
-        0, 
-        null);
+    try {
+      new BannedElement(
+          "test",
+          "org.eclipse.core.resources.problemmarker",
+          IMarker.SEVERITY_WARNING,
+          IMessage.NORMAL_SEVERITY,
+          null,
+          0,
+          null);
+      fail();
+    } catch (NullPointerException ex) {
+      assertNotNull(ex.getMessage());
+    }
   }
   
   @SuppressWarnings("unlikely-arg-type")
