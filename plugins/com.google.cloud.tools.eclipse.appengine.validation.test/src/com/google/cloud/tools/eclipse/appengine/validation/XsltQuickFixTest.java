@@ -34,8 +34,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jst.common.project.facet.core.JavaFacet;
-import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
@@ -61,15 +59,14 @@ public class XsltQuickFixTest {
       + "<version>"
       + "</version>"
       + "</appengine-web-app>";
-  private IProject project;
+
   private IFile file;
 
-  @Rule public TestProjectCreator projectCreator =
-      new TestProjectCreator().withFacets(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
 
   @Before
   public void setup() {
-    project = projectCreator.getProject();
+    IProject project = projectCreator.getProject();
     file = project.getFile("testdata.xml");
   }
 
