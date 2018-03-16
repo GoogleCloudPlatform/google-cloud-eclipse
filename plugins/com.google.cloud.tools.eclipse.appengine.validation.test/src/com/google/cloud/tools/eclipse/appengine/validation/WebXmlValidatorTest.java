@@ -17,6 +17,8 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
@@ -57,7 +59,7 @@ public class WebXmlValidatorTest {
     when(resource.getProject()).thenReturn(project);
 
     // Assume the project has the Dynamic Web Module Facet 2.5.
-    when(servletApiSupportChecker.apply(project, "3.1")).thenReturn(false);
+    when(servletApiSupportChecker.apply(eq(project), anyString())).thenReturn(false);
     when(servletApiSupportChecker.apply(project, "2.5")).thenReturn(true);
   }
 
