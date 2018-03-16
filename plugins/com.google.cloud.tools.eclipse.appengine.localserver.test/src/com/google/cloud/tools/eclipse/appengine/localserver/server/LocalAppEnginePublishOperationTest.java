@@ -66,10 +66,13 @@ public class LocalAppEnginePublishOperationTest {
     serverProject = projects.stream().filter(isServerProject).findFirst().get();
     sharedProject = projects.stream().filter(isSharedProject).findFirst().get();
 
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1798
     for (int i = 0; i < 100; i++) {
       serverModule = ServerUtil.getModule(serverProject);
       sharedModule = ServerUtil.getModule(sharedProject);
-      if (serverModule != null && sharedModule != null) {
+      if (serverModule != null && sharedModule != null
+          && serverProject.getFile("bin/sox/server/GreetingServiceImpl.class").exists()
+          && sharedProject.getFile("bin/sox/shared/GreetingService.class").exists()) {
         break;
       }
       Thread.sleep(100);
