@@ -22,6 +22,7 @@ import com.google.common.base.Strings;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.namespace.NamespaceContext;
@@ -61,11 +62,22 @@ public class WebXmlValidator implements XmlValidationHelper {
   private IResource resource;
   private ArrayList<BannedElement> blacklist;
 
+  private final BiFunction<IProject, String, Boolean> servletApiSupportChecker;
+
+  public WebXmlValidator() {
+    this(AppEngineStandardFacet::checkServletApiSupport);
+  }
+
+  @VisibleForTesting
+  WebXmlValidator(BiFunction<IProject, String, Boolean> servletApiSupportChecker) {
+    this.servletApiSupportChecker = servletApiSupportChecker;
+  }
+
   @Override
   public ArrayList<BannedElement> checkForElements(IResource resource, Document document) {
     this.document = document;
     this.resource = resource;
-    this.blacklist = new ArrayList<>();
+    blacklist = new ArrayList<>();
     validateServletVersion();
     validateServletClass();
     validateServletMapping();
@@ -85,7 +97,7 @@ public class WebXmlValidator implements XmlValidationHelper {
       if ("http://xmlns.jcp.org/xml/ns/javaee".equals(namespace)
           || "http://java.sun.com/xml/ns/javaee".equals(namespace)) {
         // Check that web.xml version is compatible with our supported Dynamic Web Project versions
-        if (!AppEngineStandardFacet.checkServletApiSupport(resource.getProject(), version)) {
+        if (!servletApiSupportChecker.apply(resource.getProject(), version)) {
           DocumentLocation location = (DocumentLocation) webApp.getUserData("location");
           BannedElement element = new JavaServletElement(location, 0);
           blacklist.add(element);

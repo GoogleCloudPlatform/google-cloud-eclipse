@@ -194,7 +194,7 @@ public final class TestProjectCreator extends ExternalResource {
     }
   }
 
-  public void setAppEngineServiceId(String serviceId) throws CoreException {
+  private void setAppEngineServiceId(String serviceId) throws CoreException {
     IFile appEngineWebXml =
         WebProjectUtil.findInWebInf(getProject(), new Path("appengine-web.xml"));
     assertTrue("Project should have AppEngine Standard facet", appEngineWebXml.exists());

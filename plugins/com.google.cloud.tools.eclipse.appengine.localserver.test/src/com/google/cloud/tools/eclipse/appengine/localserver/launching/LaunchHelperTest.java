@@ -24,9 +24,11 @@ import static org.mockito.Mockito.when;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.localserver.ui.ServerTracker;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import java.io.ByteArrayInputStream;
 import java.util.Collection;
 import java.util.Collections;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.debug.core.ILaunch;
@@ -38,13 +40,10 @@ import org.eclipse.wst.server.core.IServer;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * Tests for the {@link LaunchAppEngineStandardHandler}.
  */
-@RunWith(MockitoJUnitRunner.class)
 public class LaunchHelperTest {
 
   @Rule
@@ -60,6 +59,9 @@ public class LaunchHelperTest {
   public TestProjectCreator appEngineStandardProject2 = new TestProjectCreator().withFacets(
       JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
 
+  @Rule
+  public TestProjectCreator projectCreator = new TestProjectCreator().withFacets(
+      JavaFacet.VERSION_1_7);
 
   @Before
   public void setUp() {
@@ -70,9 +72,8 @@ public class LaunchHelperTest {
         // do nothing
       }
 
-
       @Override
-      public Collection<IServer> findExistingServers(IModule[] modules, boolean exact,
+      Collection<IServer> findExistingServers(IModule[] modules, boolean exact,
           SubMonitor progress) {
         if (serverToReturn != null) {
           return Collections.singleton(serverToReturn);
@@ -81,7 +82,6 @@ public class LaunchHelperTest {
       }
     };
   }
-
 
   @Test
   public void testWithDefaultModule() throws CoreException {
@@ -93,9 +93,9 @@ public class LaunchHelperTest {
 
   @Test
   public void testWithTwoModules() throws CoreException {
-    appEngineStandardProject1.setAppEngineServiceId("default");
+    appEngineStandardProject1.withAppEngineServiceId("default");
     IModule module1 = appEngineStandardProject1.getModule();
-    appEngineStandardProject2.setAppEngineServiceId("other");
+    appEngineStandardProject2.withAppEngineServiceId("other");
     IModule module2 = appEngineStandardProject2.getModule();
 
     handler.launch(new IModule[] {module1, module2}, ILaunchManager.DEBUG_MODE);
@@ -116,9 +116,9 @@ public class LaunchHelperTest {
 
   @Test
   public void testInvariantToModuleOrder() throws CoreException {
-    appEngineStandardProject1.setAppEngineServiceId("default");
+    appEngineStandardProject1.withAppEngineServiceId("default");
     IModule module1 = appEngineStandardProject1.getModule();
-    appEngineStandardProject2.setAppEngineServiceId("other");
+    appEngineStandardProject2.withAppEngineServiceId("other");
     IModule module2 = appEngineStandardProject2.getModule();
 
     handler.launch(new IModule[] {module1, module2}, ILaunchManager.DEBUG_MODE);
@@ -131,9 +131,9 @@ public class LaunchHelperTest {
 
   @Test(expected = CoreException.class)
   public void failsWithClashingServiceIds() throws CoreException {
-    appEngineStandardProject1.setAppEngineServiceId("other");
+    appEngineStandardProject1.withAppEngineServiceId("other");
     IModule module1 = appEngineStandardProject1.getModule();
-    appEngineStandardProject2.setAppEngineServiceId("other");
+    appEngineStandardProject2.withAppEngineServiceId("other");
     IModule module2 = appEngineStandardProject2.getModule();
 
     handler.launch(new IModule[] {module1, module2}, ILaunchManager.DEBUG_MODE);
@@ -141,20 +141,21 @@ public class LaunchHelperTest {
 
   @Test
   public void testToProjectWithProject() {
-    assertEquals(appEngineStandardProject1.getProject(),
-        LaunchHelper.toProject(appEngineStandardProject1.getProject()));
+    assertEquals(projectCreator.getProject(), LaunchHelper.toProject(projectCreator.getProject()));
   }
 
   @Test
   public void testToProjectWithJavaProject() {
-    assertEquals(appEngineStandardProject1.getProject(),
-        LaunchHelper.toProject(appEngineStandardProject1.getJavaProject()));
+    assertEquals(projectCreator.getProject(),
+        LaunchHelper.toProject(projectCreator.getJavaProject()));
   }
 
   @Test
-  public void testToProjectWithFile() {
-    IFile file = appEngineStandardProject1.getProject().getFile("WebContent/META-INF/MANIFEST.MF");
-    assertTrue("MANIFEST.MF not found", file.exists());
-    assertEquals(appEngineStandardProject1.getProject(), LaunchHelper.toProject(file));
+  public void testToProjectWithFile() throws CoreException {
+    IProject project = projectCreator.getProject();
+    IFile file = project.getFile("some-file.txt");
+    file.create(new ByteArrayInputStream(new byte[0]), true, null);
+    assertTrue(file.exists());
+    assertEquals(projectCreator.getProject(), LaunchHelper.toProject(file));
   }
 }

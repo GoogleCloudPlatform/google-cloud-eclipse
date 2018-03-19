@@ -17,29 +17,51 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.when;
 
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.util.ArrayList;
+import java.util.function.BiFunction;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
-import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.Mockito;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+@RunWith(MockitoJUnitRunner.class)
 public class WebXmlValidatorTest {
 
   @Rule
   public TestProjectCreator projectCreator = new TestProjectCreator().withFacets(
-      WebFacetUtils.WEB_25, JavaFacet.VERSION_1_7, AppEngineStandardFacet.JRE7);
+      JavaFacet.VERSION_1_7);
 
-  private final WebXmlValidator validator = new WebXmlValidator();
+  @Mock private BiFunction<IProject, String, Boolean> servletApiSupportChecker;
+  @Mock private IResource resource;
+
+  private WebXmlValidator validator;
+
+  @Before
+  public void setUp() {
+    validator = new WebXmlValidator(servletApiSupportChecker);
+    
+    IProject project = projectCreator.getProject();
+    when(resource.getProject()).thenReturn(project);
+
+    // Assume the project has the Dynamic Web Module Facet 2.5.
+    when(servletApiSupportChecker.apply(eq(project), anyString())).thenReturn(false);
+    when(servletApiSupportChecker.apply(project, "2.5")).thenReturn(true);
+  }
 
   @Test
   public void testValidateJavaServlet() throws ParserConfigurationException {
@@ -52,8 +74,6 @@ public class WebXmlValidatorTest {
     element.setUserData("location", new DocumentLocation(1, 1), null);
     document.appendChild(element);
 
-    IResource resource = Mockito.mock(IResource.class);
-    Mockito.when(resource.getProject()).thenReturn(projectCreator.getProject());
     ArrayList<BannedElement> blacklist = validator.checkForElements(resource, document);
 
     assertEquals(1, blacklist.size());
@@ -63,6 +83,7 @@ public class WebXmlValidatorTest {
 
   @Test
   public void testCheckForElements_noElements() throws ParserConfigurationException {
+
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
     DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
     Document document = documentBuilder.newDocument();
@@ -72,10 +93,7 @@ public class WebXmlValidatorTest {
     element.setUserData("location", new DocumentLocation(1, 1), null);
     document.appendChild(element);
 
-    IResource resource = Mockito.mock(IResource.class);
-    Mockito.when(resource.getProject()).thenReturn(projectCreator.getProject());
     ArrayList<BannedElement> blacklist = validator.checkForElements(resource, document);
-
     assertEquals(0, blacklist.size());
   }
 
@@ -109,8 +127,6 @@ public class WebXmlValidatorTest {
 
     document.appendChild(webApp);
 
-    IResource resource = Mockito.mock(IResource.class);
-    Mockito.when(resource.getProject()).thenReturn(projectCreator.getProject());
     ArrayList<BannedElement> blacklist = validator.checkForElements(resource, document);
     assertEquals(1, blacklist.size());
   }

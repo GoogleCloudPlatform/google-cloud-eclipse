@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
+import com.google.common.base.Stopwatch;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -66,13 +67,18 @@ public class LocalAppEnginePublishOperationTest {
     serverProject = projects.stream().filter(isServerProject).findFirst().get();
     sharedProject = projects.stream().filter(isSharedProject).findFirst().get();
 
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1798
+    Stopwatch stopwatch = Stopwatch.createStarted();
     for (int i = 0; i < 100; i++) {
       serverModule = ServerUtil.getModule(serverProject);
       sharedModule = ServerUtil.getModule(sharedProject);
-      if (serverModule != null && sharedModule != null) {
+      if (serverModule != null && sharedModule != null
+          && serverProject.getFile("bin/sox/server/GreetingServiceImpl.class").exists()
+          && sharedProject.getFile("bin/sox/shared/GreetingService.class").exists()) {
         break;
       }
       Thread.sleep(100);
+      ThreadDumpingWatchdog.report("Until modules are fully ready", stopwatch);
     }
 
     // To diagnose https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1798.

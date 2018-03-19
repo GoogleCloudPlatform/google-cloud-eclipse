@@ -35,7 +35,6 @@ import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.validation.ValidationFramework;
 import org.eclipse.wst.validation.Validator;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -47,8 +46,6 @@ public class XmlValidatorTest {
   private static final String APPLICATION_MARKER =
       "com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker";
 
-  private IFile resource;
-
   @Rule public TestProjectCreator appEngineStandardProjectCreator =
       new TestProjectCreator().withFacets(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25,
           AppEngineStandardFacet.JRE7);
@@ -56,12 +53,7 @@ public class XmlValidatorTest {
   @Rule public TestProjectCreator dynamicWebProjectCreator =
       new TestProjectCreator().withFacets(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
 
-  @Before
-  public void setUp() throws CoreException {
-    IProject project = dynamicWebProjectCreator.getProject();
-    resource = project.getFile("bogus.resource.for.marker.tests");
-    resource.create(new ByteArrayInputStream(new byte[0]), true, null);
-  }
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
 
   @Test
   public void testValidate_appEngineStandard() {
@@ -91,19 +83,24 @@ public class XmlValidatorTest {
 
   @Test
   public void testValidate_badXml() throws IOException, CoreException {
-    byte[] badXml = BAD_XML.getBytes(StandardCharsets.UTF_8);
-
     XmlValidator validator = new XmlValidator();
     validator.setHelper(new AppEngineWebXmlValidator());
 
     // This method should not apply any markers for malformed XML
-    validator.validate(resource, badXml);
-    IMarker[] emptyMarkers = ProjectUtils.waitUntilNoMarkersFound(resource, IMarker.PROBLEM,
+    IFile file = createBogusProjectFile();
+    byte[] badXml = BAD_XML.getBytes(StandardCharsets.UTF_8);
+    validator.validate(file, badXml);
+
+    IMarker[] emptyMarkers = ProjectUtils.waitUntilNoMarkersFound(file, IMarker.PROBLEM,
         true /* includeSubtypes */, IResource.DEPTH_ZERO);
     assertEquals(0, emptyMarkers.length);
+  }
 
-    IProject project = dynamicWebProjectCreator.getProject();
-    IFile file = project.getFile("src/bad.xml");
+  @Test
+  public void testValidate_badXml_dynamicWebProject() throws CoreException {
+    IProject dynamicWebProject = dynamicWebProjectCreator.getProject();
+    IFile file = dynamicWebProject.getFile("src/bad.xml");
+    byte[] badXml = BAD_XML.getBytes(StandardCharsets.UTF_8);
     file.create(new ByteArrayInputStream(badXml), true, null);
 
     IMarker[] markers = ProjectUtils.waitUntilMarkersFound(file, IMarker.PROBLEM,
@@ -117,21 +114,27 @@ public class XmlValidatorTest {
 
   @Test
   public void testValidate_noBannedElements() throws IOException, CoreException {
-    byte[] bytes = XML_NO_BANNED_ELEMENTS.getBytes(StandardCharsets.UTF_8);
     XmlValidator validator = new XmlValidator();
     validator.setHelper(new AppEngineWebXmlValidator());
-    validator.validate(resource, bytes);
-    IMarker[] markers = resource.findMarkers(APPLICATION_MARKER, true, IResource.DEPTH_ZERO);
+
+    IFile file = createBogusProjectFile();
+    byte[] bytes = XML_NO_BANNED_ELEMENTS.getBytes(StandardCharsets.UTF_8);
+    validator.validate(file, bytes);
+
+    IMarker[] markers = file.findMarkers(APPLICATION_MARKER, true, IResource.DEPTH_ZERO);
     assertEquals(0, markers.length);
   }
 
   @Test
   public void testValidate_withBannedElements() throws IOException, CoreException {
-    byte[] bytes = XML.getBytes(StandardCharsets.UTF_8);
     XmlValidator validator = new XmlValidator();
     validator.setHelper(new AppEngineWebXmlValidator());
-    validator.validate(resource, bytes);
-    IMarker[] markers = resource.findMarkers(APPLICATION_MARKER, true, IResource.DEPTH_ZERO);
+
+    IFile file = createBogusProjectFile();
+    byte[] bytes = XML.getBytes(StandardCharsets.UTF_8);
+    validator.validate(file, bytes);
+
+    IMarker[] markers = file.findMarkers(APPLICATION_MARKER, true, IResource.DEPTH_ZERO);
     assertEquals(1, markers.length);
     String message = Messages.getString("application.element");
     assertEquals(message, markers[0].getAttribute(IMarker.MESSAGE));
@@ -158,11 +161,18 @@ public class XmlValidatorTest {
 
   @Test
   public void testCreateMarker() throws CoreException {
+    IFile file = createBogusProjectFile();
     String message = "Project ID should be specified at deploy time.";
     BannedElement element = new BannedElement(message);
-    XmlValidator.createMarker(resource, element);
-    IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
+    XmlValidator.createMarker(file, element);
+    IMarker[] markers = file.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
     assertEquals(message, markers[0].getAttribute(IMarker.MESSAGE));
   }
 
+  private IFile createBogusProjectFile() throws CoreException {
+    IProject project = projectCreator.getProject();
+    IFile file = project.getFile("bogus.resource.for.marker.tests");
+    file.create(new ByteArrayInputStream(new byte[0]), true, null);
+    return file;
+  }
 }
