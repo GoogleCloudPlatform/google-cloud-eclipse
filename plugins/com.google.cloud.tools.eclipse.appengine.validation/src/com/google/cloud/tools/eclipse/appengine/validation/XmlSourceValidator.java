@@ -22,6 +22,7 @@ import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
@@ -56,11 +57,21 @@ import org.xml.sax.SAXException;
  */
 public class XmlSourceValidator implements ISourceValidator, IValidator, IExecutableExtension {
 
-  private static final Logger logger = Logger.getLogger(
-      XmlSourceValidator.class.getName());
+  private static final Logger logger = Logger.getLogger(XmlSourceValidator.class.getName());
 
   private IDocument document;
   private XmlValidationHelper helper;
+
+  private final Predicate<IFacetedProject> hasAppEngineStandardFacet;
+
+  public XmlSourceValidator() {
+    this(AppEngineStandardFacet::hasFacet);
+  }
+
+  @VisibleForTesting
+  XmlSourceValidator(Predicate<IFacetedProject> hasAppEngineStandardFacet) {
+    this.hasAppEngineStandardFacet = hasAppEngineStandardFacet;
+  }
 
   /**
    * Validates a given {@link IDocument} if the project has the App Engine Standard facet.
@@ -70,7 +81,7 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
     IProject project = getProject(helper);
     try {
       IFacetedProject facetedProject = ProjectFacetsManager.create(project);
-      if (facetedProject != null && AppEngineStandardFacet.hasFacet(facetedProject)) {
+      if (facetedProject != null && hasAppEngineStandardFacet.test(facetedProject)) {
         String encoding = getDocumentEncoding(document);
         byte[] bytes = document.get().getBytes(encoding);
         IFile source = getFile(helper);
@@ -121,7 +132,7 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
       // bundle we can just use Class#forName(), though a general solution would require resolving
       // the class-name using the extension's defining bundle.
       Class<?> clazz = Class.forName(className);
-      this.setHelper((XmlValidationHelper) clazz.newInstance());
+      setHelper((XmlValidationHelper) clazz.newInstance());
     } catch (ClassNotFoundException
         | SecurityException
         | InstantiationException

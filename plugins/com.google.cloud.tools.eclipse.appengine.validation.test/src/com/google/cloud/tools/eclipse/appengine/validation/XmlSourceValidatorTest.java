@@ -23,28 +23,28 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jst.common.project.facet.core.JavaFacet;
-import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.sse.ui.internal.reconcile.validator.IncrementalHelper;
 import org.eclipse.wst.sse.ui.internal.reconcile.validator.IncrementalReporter;
 import org.eclipse.wst.validation.internal.core.ValidationException;
 import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 import org.eclipse.wst.validation.internal.provisional.core.IValidationContext;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 public class XmlSourceValidatorTest {
 
@@ -56,18 +56,24 @@ public class XmlSourceValidatorTest {
 
   private final IncrementalReporter reporter = new IncrementalReporter(null);
 
-  @Rule public TestProjectCreator nonFacetedProject = new TestProjectCreator();
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
 
-  @Rule public TestProjectCreator dynamicWebProject =
-      new TestProjectCreator().withFacets(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
+  @Rule public TestProjectCreator appEngineProjectCreator = new TestProjectCreator().withFacets();
 
-  @Rule public TestProjectCreator appEngineStandardProject =
-      new TestProjectCreator().withFacets(JavaFacet.VERSION_1_7,
-          WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
+  private XmlSourceValidator validator;
+  private Predicate<IFacetedProject> hasAppEngineStandardFacet;
+
+  @Before
+  public void setUp() {
+    IFacetedProject appEngineProject = appEngineProjectCreator.getFacetedProject();
+    hasAppEngineStandardFacet = project -> project == appEngineProject;
+
+    validator = new XmlSourceValidator(hasAppEngineStandardFacet);
+  }
 
   @Test
   public void testValidate_appEngineStandardFacet() throws CoreException, ValidationException {
-    IProject project = appEngineStandardProject.getProject();
+    IProject project = appEngineProjectCreator.getProject();
     IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), 0, null);
 
@@ -78,7 +84,6 @@ public class XmlSourceValidatorTest {
     IPath path = file.getFullPath();
     helper.setURI(path.toString());
 
-    XmlSourceValidator validator = new XmlSourceValidator();
     validator.setHelper(new AppEngineWebXmlValidator());
     validator.connect(document);
     validator.validate(helper, reporter);
@@ -86,8 +91,8 @@ public class XmlSourceValidatorTest {
   }
 
   @Test
-  public void testValidate_dynamicWebProject() throws CoreException, ValidationException {
-    IProject project = dynamicWebProject.getProject();
+  public void testValidate_nonAppEngineProject() throws CoreException, ValidationException {
+    IProject project = projectCreator.getProject();
     IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), 0, null);
 
@@ -98,7 +103,6 @@ public class XmlSourceValidatorTest {
     IPath path = file.getFullPath();
     helper.setURI(path.toString());
 
-    XmlSourceValidator validator = new XmlSourceValidator();
     validator.setHelper(new AppEngineWebXmlValidator());
     validator.connect(document);
     validator.validate(helper, reporter);
@@ -107,7 +111,6 @@ public class XmlSourceValidatorTest {
 
   @Test
   public void testValidate_noBannedElements() throws IOException {
-    XmlSourceValidator validator = new XmlSourceValidator();
     validator.setHelper(new AppEngineWebXmlValidator());
     byte[] xml = "<test></test>".getBytes(StandardCharsets.UTF_8);
     validator.validate(reporter, null, xml);
@@ -116,18 +119,18 @@ public class XmlSourceValidatorTest {
 
   @Test
   public void testValidate() throws IOException {
-    XmlSourceValidator validator = new XmlSourceValidator();
-    validator.setHelper(new WebXmlValidator());
+    BiFunction<IProject, String, Boolean> projectDoesNotSupportServlet31 =
+        (project, version) -> !version.equals("3.1");
+
+    validator.setHelper(new WebXmlValidator(projectDoesNotSupportServlet31));
     String xml = "<web-app xmlns='http://xmlns.jcp.org/xml/ns/javaee' version='3.1'></web-app>";
-    IFile file = Mockito.mock(IFile.class);
-    when(file.getProject()).thenReturn(appEngineStandardProject.getProject());
-    validator.validate(reporter, file, xml.getBytes(StandardCharsets.UTF_8));
+    validator.validate(reporter, mock(IFile.class), xml.getBytes(StandardCharsets.UTF_8));
     assertEquals(1, reporter.getMessages().size());
   }
 
   @Test
   public void getDocumentEncodingTest() throws CoreException {
-    IProject project = dynamicWebProject.getProject();
+    IProject project = projectCreator.getProject();
     IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), IFile.FORCE, null);
     IDocument document = ValidationTestUtils.getDocument(file);
@@ -136,7 +139,6 @@ public class XmlSourceValidatorTest {
 
   @Test
   public void testCreateMessage() {
-    XmlSourceValidator validator = new XmlSourceValidator();
     validator.setHelper(new AppEngineWebXmlValidator());
     BannedElement element =
         new AppEngineBlacklistElement("application", new DocumentLocation(5, 17), 0);
@@ -150,7 +152,7 @@ public class XmlSourceValidatorTest {
 
   @Test
   public void testGetFile() throws CoreException {
-    IProject project = dynamicWebProject.getProject();
+    IProject project = projectCreator.getProject();
     IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), 0, null);
 
@@ -165,7 +167,7 @@ public class XmlSourceValidatorTest {
 
   @Test
   public void testGetProject() throws CoreException {
-    IProject project = dynamicWebProject.getProject();
+    IProject project = projectCreator.getProject();
     IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), 0, null);
 
@@ -182,7 +184,7 @@ public class XmlSourceValidatorTest {
 
   @Test
   public void testNoErrorOnNonFacetedProject() throws CoreException, ValidationException {
-    IProject project = nonFacetedProject.getProject();
+    IProject project = projectCreator.getProject();
     assertNull("project should have not been faceted", ProjectFacetsManager.create(project));
 
     project.getFolder("folder").create(true, true, null);
