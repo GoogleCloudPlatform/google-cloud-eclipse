@@ -58,6 +58,10 @@ location "http://docker-editor.openanalytics.eu/update/" {
 	  eu.openanalytics.editor.docker.feature.group
 }
 
+location "http://download.eclipse.org/linuxtools/update-docker" {
+    org.eclipse.linuxtools.docker.feature.feature.group
+}
+
 location "http://dadacoalition.org/yedit/" {
   org.dadacoalition.yedit.feature.feature.group
 }
