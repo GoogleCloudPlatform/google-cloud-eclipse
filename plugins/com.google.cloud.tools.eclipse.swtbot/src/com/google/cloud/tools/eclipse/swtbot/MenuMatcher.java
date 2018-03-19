@@ -21,7 +21,6 @@ import static org.hamcrest.Matchers.is;
 import java.util.List;
 import java.util.stream.Stream;
 import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.finders.UIThreadRunnable;
 import org.eclipse.swtbot.swt.finder.matchers.AbstractMatcher;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
@@ -58,19 +57,11 @@ public class MenuMatcher<T> extends AbstractMatcher<T> {
   @Override
   protected boolean doMatch(Object item) {
     if (item instanceof SWTBotMenu) {
-      try {
-        List<String> menuTexts = ((SWTBotMenu) item).menuItems();
-        return menuTexts.stream().anyMatch(text -> menuLabelMatcher.matches(text));
-      } catch (WidgetNotFoundException ex) {
-        return false;
-      }
+      List<String> menuTexts = ((SWTBotMenu) item).menuItems();
+      return menuTexts.stream().anyMatch(text -> menuLabelMatcher.matches(text));
     } else if (item instanceof SWTBotRootMenu) {
-      try {
-        List<String> menuTexts = ((SWTBotRootMenu) item).menuItems();
-        return menuTexts.stream().anyMatch(text -> menuLabelMatcher.matches(text));
-      } catch (WidgetNotFoundException ex) {
-        return false;
-      }
+      List<String> menuTexts = ((SWTBotRootMenu) item).menuItems();
+      return menuTexts.stream().anyMatch(text -> menuLabelMatcher.matches(text));
     } else if (item instanceof Menu) {
       return UIThreadRunnable.syncExec(
           () ->
