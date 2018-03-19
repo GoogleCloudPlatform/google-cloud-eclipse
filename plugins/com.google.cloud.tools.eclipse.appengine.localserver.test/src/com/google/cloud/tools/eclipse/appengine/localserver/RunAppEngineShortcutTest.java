@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.swtbot.MenuMatcher;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
@@ -37,10 +38,10 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.finders.MenuFinder;
-import org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
+import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
 import org.junit.Rule;
 import org.junit.Test;
@@ -86,7 +87,7 @@ public class RunAppEngineShortcutTest {
     SWTBotTreeItem selected = SwtBotProjectActions.selectProject(
         new SWTWorkbenchBot(), project.getName());
     Menu runAsMenu = selected.contextMenu("Run As").widget.getMenu();
-    Matcher<MenuItem> matcher = WidgetMatcherFactory.withRegex("App Engine");
+    Matcher<MenuItem> matcher = MenuMatcher.hasMenuItem(CoreMatchers.endsWith("App Engine"));
 
     List<MenuItem> menuItems = new MenuFinder().findMenus(runAsMenu, matcher, false);
     return !menuItems.isEmpty();

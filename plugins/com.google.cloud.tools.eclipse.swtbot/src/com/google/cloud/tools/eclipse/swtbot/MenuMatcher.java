@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.integration.appengine;
+package com.google.cloud.tools.eclipse.swtbot;
 
 import static org.hamcrest.Matchers.is;
 
@@ -29,6 +29,10 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotRootMenu;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 
+/**
+ * Matches menu item with matching menu text. Supports {@link SWTBotMenu}, {@link SWTBotRootMenu},
+ * and {@link Menu}.
+ */
 public class MenuMatcher<T> extends AbstractMatcher<T> {
   /** Match the menu with the given label. */
   public static <T> Matcher<T> hasMenuItem(String label) {
