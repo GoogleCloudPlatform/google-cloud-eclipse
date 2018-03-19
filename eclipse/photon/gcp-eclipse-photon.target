@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde?>
 <!-- generated with https://github.com/mbarbero/fr.obeo.releng.targetplatform -->
-<target name="GCP for Eclipse Photon" sequenceNumber="1520041615">
+<target name="GCP for Eclipse Photon" sequenceNumber="1521485634">
   <locations>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
-      <unit id="org.eclipse.sdk.feature.group" version="4.8.0.v20180124-2000"/>
-      <unit id="org.eclipse.jdt.feature.group" version="3.14.0.v20180124-2000"/>
-      <unit id="org.eclipse.m2e.feature.feature.group" version="1.9.0.20180131-0104"/>
-      <unit id="org.eclipse.m2e.sdk.feature.feature.group" version="1.9.0.20180131-0104"/>
+      <unit id="org.eclipse.sdk.feature.group" version="4.8.0.v20180308-0630"/>
+      <unit id="org.eclipse.jdt.feature.group" version="3.14.0.v20180308-0630"/>
+      <unit id="org.eclipse.m2e.feature.feature.group" version="1.9.0.20180313-2237"/>
+      <unit id="org.eclipse.m2e.sdk.feature.feature.group" version="1.9.0.20180313-2237"/>
       <unit id="org.eclipse.m2e.wtp.feature.feature.group" version="1.3.2.20170517-2015"/>
       <unit id="org.eclipse.m2e.wtp.sdk.feature.feature.group" version="1.3.2.20170517-2015"/>
       <unit id="org.eclipse.mylyn.commons.feature.group" version="3.24.0.v20170629-1728"/>
-      <unit id="org.eclipse.jpt.jpa.feature.feature.group" version="3.5.100.v201705180510"/>
+      <unit id="org.eclipse.jpt.jpa.feature.feature.group" version="3.5.100.v201803012210"/>
       <unit id="org.eclipse.swtbot.eclipse.feature.group" version="2.6.0.201706141832"/>
-      <unit id="org.eclipse.epp.logging.aeri.feature.feature.group" version="2.0.6.v20170906-1226"/>
-      <unit id="org.eclipse.epp.logging.aeri.feature.source.feature.group" version="2.0.6.v20170906-1226"/>
+      <unit id="org.eclipse.epp.logging.aeri.feature.feature.group" version="2.0.7.v20170906-1327"/>
+      <unit id="org.eclipse.epp.logging.aeri.feature.source.feature.group" version="2.0.7.v20170906-1327"/>
       <unit id="org.eclipse.jetty.http" version="9.4.8.v20171121"/>
       <unit id="org.eclipse.jetty.servlet" version="9.4.8.v20171121"/>
       <unit id="org.eclipse.jetty.server" version="9.4.8.v20171121"/>
       <unit id="org.eclipse.jetty.util" version="9.4.8.v20171121"/>
-      <repository location="http://download.eclipse.org/releases/photon/201802021000"/>
+      <repository location="http://download.eclipse.org/releases/photon/201803161000"/>
     </location>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
       <unit id="org.eclipse.jst.web_sdk.feature.feature.group" version="3.8.0.v201802202154"/>
@@ -29,7 +29,7 @@
       <unit id="org.eclipse.wst.web_sdk.feature.feature.group" version="3.9.2.v201802091707"/>
       <unit id="org.eclipse.jst.enterprise_sdk.feature.feature.group" version="3.8.1.v201802202154"/>
       <unit id="org.eclipse.wst.server_adapters.sdk.feature.feature.group" version="3.2.601.v201802152148"/>
-      <repository location="http://download.eclipse.org/webtools/downloads/drops/R3.10.0/I-3.10.0-20180302140609/repository"/>
+      <repository location="http://download.eclipse.org/webtools/downloads/drops/R3.10.0/I-3.10.0-20180309052619/repository"/>
     </location>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
       <unit id="org.hamcrest.core" version="1.3.0.v201303031735"/>

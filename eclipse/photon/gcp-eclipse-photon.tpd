@@ -11,8 +11,8 @@
  */
 target "GCP for Eclipse Photon" with source requirements
 
-// Photon M5 (composite at http://download.eclipse.org/releases/photon/)
-location "http://download.eclipse.org/releases/photon/201802021000" {
+// Photon M6 (composite at http://download.eclipse.org/releases/photon/)
+location "http://download.eclipse.org/releases/photon/201803161000" {
 	org.eclipse.sdk.feature.group
 	org.eclipse.jdt.feature.group
 	org.eclipse.m2e.feature.feature.group
@@ -33,8 +33,8 @@ location "http://download.eclipse.org/releases/photon/201802021000" {
 }
 
 // WTP SDKs aren't exposed through the main release links
-// (composite at http://download.eclipse.org/webtools/repository/oxygen)
-location "http://download.eclipse.org/webtools/downloads/drops/R3.10.0/I-3.10.0-20180302140609/repository" {
+// (composite at http://download.eclipse.org/webtools/repository/photon)
+location "http://download.eclipse.org/webtools/downloads/drops/R3.10.0/I-3.10.0-20180309052619/repository" {
     org.eclipse.jst.web_sdk.feature.feature.group
     org.eclipse.jst.server_sdk.feature.feature.group
     org.eclipse.jst.common.fproj.enablement.jdt.sdk.feature.group
