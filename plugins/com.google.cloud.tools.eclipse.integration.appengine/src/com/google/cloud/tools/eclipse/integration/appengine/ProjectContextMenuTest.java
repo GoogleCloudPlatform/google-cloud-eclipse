@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.swtbot.MenuMatcher;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
@@ -29,10 +30,12 @@ import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 /** Ensure configured menu options are shown for various types of project. */
 public class ProjectContextMenuTest extends BaseProjectTest {
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
+  @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
   @Test
   public void testPlainJavaProject() {
@@ -113,6 +116,52 @@ public class ProjectContextMenuTest extends BaseProjectTest {
                 JavaFacet.VERSION_1_8,
                 WebFacetUtils.WEB_31)
             .getProject();
+    SWTBotTreeItem selected = SwtBotProjectActions.selectProject(bot, project.getName());
+    assertThat(selected.contextMenu("Debug As"), MenuMatcher.hasMenuItem(endsWith("App Engine")));
+    assertThat(selected.contextMenu("Run As"), MenuMatcher.hasMenuItem(endsWith("App Engine")));
+    assertThat(selected.contextMenu(), MenuMatcher.hasMenuItem("Deploy to App Engine Standard..."));
+    assertThat(
+        selected.contextMenu("Configure"),
+        not(MenuMatcher.hasMenuItem("Convert to App Engine Standard Project")));
+    assertThat(
+        selected.contextMenu("Configure"),
+        not(MenuMatcher.hasMenuItem("Reconfigure for App Engine Java 8 runtime")));
+  }
+
+  @Test
+  public void testMavenAppEngineStandardJava7() {
+    IProject project =
+        SwtBotAppEngineActions.createMavenWebAppProject(
+            bot,
+            "projectContextMenuJava7",
+            tempFolder.getRoot().getPath(),
+            "com.example.maven7",
+            AppEngineRuntime.STANDARD_JAVA_7,
+            "com.google.cloud.tools.eclipse.tests",
+            "projectContextMenuJava7");
+    SWTBotTreeItem selected = SwtBotProjectActions.selectProject(bot, project.getName());
+    assertThat(selected.contextMenu("Debug As"), MenuMatcher.hasMenuItem(endsWith("App Engine")));
+    assertThat(selected.contextMenu("Run As"), MenuMatcher.hasMenuItem(endsWith("App Engine")));
+    assertThat(selected.contextMenu(), MenuMatcher.hasMenuItem("Deploy to App Engine Standard..."));
+    assertThat(
+        selected.contextMenu("Configure"),
+        not(MenuMatcher.hasMenuItem("Convert to App Engine Standard Project")));
+    assertThat(
+        selected.contextMenu("Configure"),
+        not(MenuMatcher.hasMenuItem("Reconfigure for App Engine Java 8 runtime")));
+  }
+
+  @Test
+  public void testMavenAppEngineStandardJava8() {
+    IProject project =
+        SwtBotAppEngineActions.createMavenWebAppProject(
+            bot,
+            "projectContextMenuJava8",
+            tempFolder.getRoot().getPath(),
+            "com.example.maven7",
+            AppEngineRuntime.STANDARD_JAVA_8,
+            "com.google.cloud.tools.eclipse.tests",
+            "projectContextMenuJava8");
     SWTBotTreeItem selected = SwtBotProjectActions.selectProject(bot, project.getName());
     assertThat(selected.contextMenu("Debug As"), MenuMatcher.hasMenuItem(endsWith("App Engine")));
     assertThat(selected.contextMenu("Run As"), MenuMatcher.hasMenuItem(endsWith("App Engine")));
