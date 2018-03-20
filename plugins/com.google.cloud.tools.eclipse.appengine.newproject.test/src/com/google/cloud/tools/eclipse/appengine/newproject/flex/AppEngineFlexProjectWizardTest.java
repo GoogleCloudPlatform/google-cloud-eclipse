@@ -21,7 +21,7 @@ import org.junit.Test;
 
 public class AppEngineFlexProjectWizardTest {
 
-  private AppEngineFlexProjectWizard wizard = new AppEngineFlexProjectWizard();
+  private final AppEngineFlexProjectWizard wizard = new AppEngineFlexProjectWizard();
 
   @Test
   public void testWindowTitle() {

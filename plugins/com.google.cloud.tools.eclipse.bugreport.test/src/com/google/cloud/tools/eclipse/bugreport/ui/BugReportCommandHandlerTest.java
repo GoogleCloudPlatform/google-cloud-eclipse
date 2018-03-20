@@ -32,7 +32,7 @@ import org.junit.Test;
 public class BugReportCommandHandlerTest {
 
   @Test
-  public void formatReportUrl() throws MalformedURLException {
+  public void testFormatReportUrl() throws MalformedURLException {
     URL url = new URL(BugReportCommandHandler.formatReportUrl());
 
     assertEquals("https", url.getProtocol());
@@ -42,7 +42,11 @@ public class BugReportCommandHandlerTest {
     //@formatter:off
     // check that values are properly filled in
     Pattern pattern = Pattern.compile("body="
-        + "%28please\\+ensure\\+you\\+are\\+running\\+the\\+latest\\+version\\+of\\+CT4E\\+with\\+_Help\\+%3E\\+Check\\+for\\+Updates_%29%0A"
+        
+        + "Before\\+reporting\\+a\\+possible\\+bug%3A%0A%0A"
+        + "1.\\+Please\\+ensure\\+you\\+are\\+running\\+the\\+latest\\+version\\+of\\+CT4E\\+with\\+_Help\\+%3E\\+Check\\+for\\+Updates_%0A"
+        + "2.\\+If\\+the\\+problem\\+occurs\\+when\\+you\\+deploy\\+or\\+after\\+the\\+application\\+has\\+been\\+deployed%2C\\+try\\+deploying\\+from\\+the\\+command\\+line\\+using\\+gcloud\\+or\\+Maven."
+        + "\\+If\\+the\\+problem\\+does\\+not\\+go\\+away%2C\\+then\\+the\\+issue\\+is\\+likely\\+not\\+with\\+Cloud\\+Tools\\+for\\+Eclipse.%0A%0A"
         + "-\\+Cloud\\+Tools\\+for\\+Eclipse\\+version%3A\\+(?<toolVersion>.*)%0A"
         + "-\\+Google\\+Cloud\\+SDK\\+version%3A\\+(?<gcloudVersion>.*)%0A"
         + "-\\+Eclipse\\+version%3A\\+(?<eclipseVersion>.*)%0A"
@@ -51,10 +55,11 @@ public class BugReportCommandHandlerTest {
         + "\\*\\*What\\+did\\+you\\+do%3F\\*\\*%0A%0A" 
         + "\\*\\*What\\+did\\+you\\+expect\\+to\\+see%3F\\*\\*%0A%0A"
         + "\\*\\*What\\+did\\+you\\+see\\+instead%3F\\*\\*%0A%0A" 
-        + "%28screenshots\\+are\\+helpful%29");
+        + "Screenshots\\+and\\+stacktraces\\+are\\+helpful.");
     //@formatter:on
-    Matcher matcher = pattern.matcher(url.getQuery());
-    assertTrue(matcher.matches());
+    String query = url.getQuery();
+    Matcher matcher = pattern.matcher(query);
+    assertTrue(query, matcher.matches());
     String toolVersion = matcher.group("toolVersion");
     String gcloudVersion = matcher.group("gcloudVersion");
     String eclipseVersion = matcher.group("eclipseVersion");

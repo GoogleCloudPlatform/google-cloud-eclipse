@@ -53,6 +53,7 @@ import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jst.j2ee.classpathdep.UpdateClasspathAttributeUtil;
 import org.osgi.framework.FrameworkUtil;
 import org.xml.sax.SAXException;
@@ -283,6 +284,46 @@ public class BuildPath {
     } catch (IOException ex) {
       throw new CoreException(
           StatusUtil.error(BuildPath.class, "Error saving project library list", ex)); //$NON-NLS-1$
+    }
+  }
+
+  /**
+   * Check that the library list is still required (i.e., the classpath container may have been
+   * removed).
+   */
+  public static void checkLibraryList(IJavaProject javaProject, IProgressMonitor monitor) {
+    SubMonitor progress = SubMonitor.convert(monitor, 5);
+    LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer();
+    if (!serializer.hasLibraryIds(javaProject)) {
+      // nothing to do since no library list file found
+      return;
+    }
+    progress.worked(1);
+
+    try {
+      // Check if we can find our master library container
+      IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
+      progress.worked(2);
+      IPath containerPath = new Path(LibraryClasspathContainer.CONTAINER_PATH_PREFIX)
+          .append(CloudLibraries.MASTER_CONTAINER_ID);
+      for (IClasspathEntry entry : rawClasspath) {
+        if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER
+            && containerPath.equals(entry.getPath())) {
+          // container found, so library list should stay
+          return;
+        }
+      }
+      progress.worked(1);
+
+      serializer.removeLibraryIds(javaProject);
+      serializer.resetContainer(javaProject, containerPath);
+      progress.worked(1);
+    } catch (JavaModelException ex) {
+      logger.log(Level.WARNING,
+          "Unable to check classpath containers for: " + javaProject.getProject().getName());
+      return;
+    } catch (CoreException ex) {
+      logger.log(Level.SEVERE, "Unable to remove library ids", ex);
     }
   }
 

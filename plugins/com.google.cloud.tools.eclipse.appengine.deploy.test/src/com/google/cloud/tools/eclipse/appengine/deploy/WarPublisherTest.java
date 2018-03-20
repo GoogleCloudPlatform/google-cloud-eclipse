@@ -47,7 +47,7 @@ public class WarPublisherTest {
   @Mock private IProgressMonitor monitor;
 
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator()
-      .withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
+      .withFacets(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
 
   @Test
   public void testWriteProjectToStageDir_nullProject() throws CoreException {

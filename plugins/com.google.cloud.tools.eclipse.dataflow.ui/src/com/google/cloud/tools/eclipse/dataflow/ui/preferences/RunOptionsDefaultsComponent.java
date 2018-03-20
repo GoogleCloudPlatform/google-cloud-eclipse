@@ -38,15 +38,14 @@ import com.google.cloud.tools.eclipse.projectselector.MiniSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.ui.util.DisplayExecutor;
 import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
-import com.google.cloud.tools.eclipse.util.jobs.Consumer;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableSortedSet;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.SortedSet;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -181,36 +180,27 @@ public class RunOptionsDefaultsComponent {
     stagingLocationInput.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false,
         columns - STAGING_LOCATION_SPENT_COLUMNS, 1));
 
-    accountSelector.addSelectionListener(new Runnable() {
-      @Override
-      public void run() {
-        // Don't use "removeAll()", as it will clear the text field too.
-        stagingLocationInput.remove(0, stagingLocationInput.getItemCount() - 1);
-        completionListener.setContents(ImmutableSortedSet.<String>of());
-        projectInput.setCredential(accountSelector.getSelectedCredential());
-        updateStagingLocations(0); // no delay
-        validate();
-      }
+    accountSelector.addSelectionListener(() -> {
+      // Don't use "removeAll()", as it will clear the text field too.
+      stagingLocationInput.remove(0, stagingLocationInput.getItemCount() - 1);
+      completionListener.setContents(ImmutableSortedSet.<String>of());
+      projectInput.setCredential(accountSelector.getSelectedCredential());
+      updateStagingLocations(0); // no delay
+      validate();
     });
 
-    projectInput.addSelectionChangedListener(new ISelectionChangedListener() {
-      @Override
-      public void selectionChanged(SelectionChangedEvent event) {
-        updateStagingLocations(0); // no delay
-        checkProjectConfiguration();
-        validate();
-      }
+    projectInput.addSelectionChangedListener(event -> {
+      updateStagingLocations(0); // no delay
+      checkProjectConfiguration();
+      validate();
     });
 
     completionListener = new SelectFirstMatchingPrefixListener(stagingLocationInput);
     stagingLocationInput.addModifyListener(completionListener);
-    stagingLocationInput.addModifyListener(new ModifyListener() {
-      @Override
-      public void modifyText(ModifyEvent event) {
-        startStagingLocationCheck(NEXT_KEY_DELAY_MS);
-        stagingLocationResults.hide();
-        validate();
-      }
+    stagingLocationInput.addModifyListener(event -> {
+      startStagingLocationCheck(NEXT_KEY_DELAY_MS);
+      stagingLocationResults.hide();
+      validate();
     });
     createButton.addSelectionListener(new CreateStagingLocationListener());
 
@@ -292,7 +282,7 @@ public class RunOptionsDefaultsComponent {
       }
     }
 
-    final String bucketNamePart = GcsDataflowProjectClient.toGcsBucketName(getStagingLocation());
+    String bucketNamePart = GcsDataflowProjectClient.toGcsBucketName(getStagingLocation());
     if (bucketNamePart.isEmpty()) {
       // If the bucket name is empty, we don't have anything to verify; and we don't have any
       // interesting messaging.
@@ -311,7 +301,7 @@ public class RunOptionsDefaultsComponent {
     Optional<Object> verificationResult =
         verifyStagingLocationJob != null && verifyStagingLocationJob.isCurrent()
             ? verifyStagingLocationJob.getComputation()
-            : Optional.absent();
+            : Optional.empty();
     if (!verificationResult.isPresent()) {
       messageTarget.setInfo("Verifying staging location...");
       createButton.setEnabled(false);
@@ -355,12 +345,7 @@ public class RunOptionsDefaultsComponent {
 
     checkProjectConfigurationJob =
         new GcpProjectServicesJob(apiFactory, selectedCredential, project.getId());
-    checkProjectConfigurationJob.getFuture().addListener(new Runnable() {
-      @Override
-      public void run() {
-        validate();
-      }
-    }, displayExecutor);
+    checkProjectConfigurationJob.getFuture().addListener(this::validate, displayExecutor);
     checkProjectConfigurationJob.schedule();
   }
 
@@ -412,7 +397,7 @@ public class RunOptionsDefaultsComponent {
 
   public void setStagingLocationText(String stagingLocation) {
     stagingLocationInput.setText(stagingLocation);
-    // programmtically set so initiate check immediately
+    // programmatically set so initiate check immediately
     startStagingLocationCheck(0);
   }
 
@@ -420,7 +405,7 @@ public class RunOptionsDefaultsComponent {
     accountSelector.addSelectionListener(listener);
   }
 
-  public void addModifyListener(final ModifyListener listener) {
+  public void addModifyListener(ModifyListener listener) {
     projectInput.addSelectionChangedListener(new ISelectionChangedListener() {
       @Override
       public void selectionChanged(SelectionChangedEvent event) {
@@ -430,6 +415,12 @@ public class RunOptionsDefaultsComponent {
       }
     });
     stagingLocationInput.addModifyListener(listener);
+  }
+
+  @VisibleForTesting
+  public boolean isEnabled() {
+    // the accountSelector is the top-level item and its enablement state should reflect reality
+    return accountSelector.isEnabled();
   }
 
   public void setEnabled(boolean enabled) {
@@ -465,18 +456,19 @@ public class RunOptionsDefaultsComponent {
     if (project != null && credential != null) {
       fetchStagingLocationsJob =
           new FetchStagingLocationsJob(getGcsClient(), selectedEmail, project.getId());
-      fetchStagingLocationsJob.onSuccess(displayExecutor, new Consumer<SortedSet<String>>() {
-        @Override
-        public void accept(SortedSet<String> stagingLocations) {
-          updateStagingLocations(stagingLocations);
-          validate(); // reports message back to UI
-        }});
-      fetchStagingLocationsJob.onError(displayExecutor, new Consumer<Exception>() {
-        @Override
-        public void accept(Exception exception) {
-          DataflowUiPlugin.logError(exception, "Exception while retrieving staging locations"); //$NON-NLS-1$
-          validate();
-        }});
+      fetchStagingLocationsJob.onSuccess(
+          displayExecutor,
+          stagingLocations -> {
+            updateStagingLocations(stagingLocations);
+            validate(); // reports message back to UI
+          });
+      fetchStagingLocationsJob.onError(
+          displayExecutor,
+          exception -> {
+            DataflowUiPlugin.logError(
+                exception, "Exception while retrieving staging locations"); // $NON-NLS-1$
+            validate();
+          });
       fetchStagingLocationsJob.schedule(scheduleDelay);
     }
   }
@@ -523,12 +515,7 @@ public class RunOptionsDefaultsComponent {
 
     verifyStagingLocationJob =
         new VerifyStagingLocationJob(getGcsClient(), accountEmail, stagingLocation);
-    verifyStagingLocationJob.onSuccess(displayExecutor, new Runnable() {
-      @Override
-      public void run() {
-        validate();
-      }
-    });
+    verifyStagingLocationJob.onSuccess(displayExecutor, this::validate);
     verifyStagingLocationJob.schedule(schedulingDelay);
   }
 

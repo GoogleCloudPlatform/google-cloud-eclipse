@@ -28,20 +28,16 @@ import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
-import org.eclipse.swtbot.swt.finder.finders.MenuFinder;
-import org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
-import org.hamcrest.Matcher;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -51,8 +47,7 @@ public class RunAppEngineShortcutTest {
 
   @Rule public TestProjectCreator emptyProjectCreator = new TestProjectCreator();
   @Rule public TestProjectCreator appEngineProjectCreator = new TestProjectCreator()
-      .withFacetVersions(
-          JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
+      .withFacets(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
 
   @Test
   public void testRunAppEngine_enabledForAppEngineProject() {
@@ -86,10 +81,8 @@ public class RunAppEngineShortcutTest {
   private static boolean appEngineMenuExists(IProject project) {
     SWTBotTreeItem selected = SwtBotProjectActions.selectProject(
         new SWTWorkbenchBot(), project.getName());
-    Menu runAsMenu = selected.contextMenu("Run As").widget.getMenu();
-    Matcher<MenuItem> matcher = WidgetMatcherFactory.withRegex("App Engine");
-
-    List<MenuItem> menuItems = new MenuFinder().findMenus(runAsMenu, matcher, false);
-    return !menuItems.isEmpty();
+    List<String> menuItems = selected.contextMenu("Run As").menuItems();
+    Predicate<String> isAppEngineMenu = name -> name.contains("App Engine");
+    return menuItems.stream().anyMatch(isAppEngineMenu);
   }
 }

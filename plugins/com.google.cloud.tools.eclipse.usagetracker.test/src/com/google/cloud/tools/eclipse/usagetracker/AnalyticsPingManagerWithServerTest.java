@@ -16,8 +16,9 @@
 
 package com.google.cloud.tools.eclipse.usagetracker;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.test.util.http.TestHttpServer;
@@ -52,13 +53,14 @@ public class AnalyticsPingManagerWithServerTest {
   }
 
   @Test
-  public void testSendPing_noMetadata() throws InterruptedException {
+  public void testSendPing_platformMetadata() throws InterruptedException {
     pingManager.sendPing("some.event-name");
     pingManager.eventFlushJob.join();
 
     Map<String, String[]> parameters = server.getRequestParameters();
     verifyCommonParameters(parameters, "some.event-name");
-    assertNull(parameters.get("dt"));
+    assertThat(parameters.get("dt")[0], containsString("ct4e-version="));
+    assertThat(parameters.get("dt")[0], containsString("eclipse-version="));
   }
 
   @Test
@@ -68,7 +70,7 @@ public class AnalyticsPingManagerWithServerTest {
 
     Map<String, String[]> parameters = server.getRequestParameters();
     verifyCommonParameters(parameters, "another.event-name");
-    assertEquals("times-happened=1234", parameters.get("dt")[0]);
+    assertThat(parameters.get("dt")[0], containsString("times-happened=1234"));
   }
 
   private void verifyCommonParameters(Map<String, String[]> parameters, String expectedEventName) {

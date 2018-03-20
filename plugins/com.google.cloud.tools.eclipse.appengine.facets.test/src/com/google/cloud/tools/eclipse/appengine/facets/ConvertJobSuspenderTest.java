@@ -21,7 +21,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.common.base.Predicates;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -41,7 +40,7 @@ public class ConvertJobSuspenderTest {
   @Before
   public void setUp() {
     // Assume all test jobs are "ConvertJob"s.
-    ConvertJobSuspender.isConvertJob = Predicates.alwaysTrue();
+    ConvertJobSuspender.isConvertJob = job -> true;
   }
 
   @After
@@ -102,7 +101,7 @@ public class ConvertJobSuspenderTest {
   public void testNonConvertJobsAreNotSuspended() {
     ConvertJobSuspender.suspendFutureConvertJobs();
     // Assume all test jobs are not "ConvertJob"s.
-    ConvertJobSuspender.isConvertJob = Predicates.alwaysFalse();
+    ConvertJobSuspender.isConvertJob = job -> false;
     job1.schedule();
     job2.schedule(10000 /* ms */);
     assertTrue(Job.WAITING == job1.getState() || Job.RUNNING == job1.getState());

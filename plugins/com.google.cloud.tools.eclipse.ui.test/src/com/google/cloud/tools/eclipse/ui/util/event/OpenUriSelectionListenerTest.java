@@ -29,7 +29,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collections;
-
+import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Widget;
@@ -44,9 +46,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorHandler;
-import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.QueryParameterProvider;
-
 @RunWith(MockitoJUnitRunner.class)
 public class OpenUriSelectionListenerTest {
 
@@ -58,15 +57,16 @@ public class OpenUriSelectionListenerTest {
   
   @Mock private IWorkbenchBrowserSupport browserSupport;
   @Mock private IWebBrowser browser;
-  @Mock private ErrorHandler errorHandler;
+  @Mock private BiConsumer<Exception, URI> errorHandler;
   @Mock private Widget widget;
-  @Mock private QueryParameterProvider queryParameterProvider;
+  @Mock private Supplier<Map<String, String>> queryParameterProvider;
   
   @Captor private ArgumentCaptor<Exception> captor;
 
   @Before
   public void setUp() throws PartInitException {
     when(browserSupport.getExternalBrowser()).thenReturn(browser);
+    when(queryParameterProvider.get()).thenReturn(Collections.emptyMap());
   }
 
   private SelectionEvent getEvent(String uri) {
@@ -81,7 +81,7 @@ public class OpenUriSelectionListenerTest {
     SelectionEvent selectionEvent = getEvent(INVALID_URI);
 
     new OpenUriSelectionListener(queryParameterProvider, errorHandler, browserSupport).widgetSelected(selectionEvent);
-    verify(errorHandler).handle(captor.capture(), any(URI.class));
+    verify(errorHandler).accept(captor.capture(), any(URI.class));
     assertThat(captor.getValue(), instanceOf(URISyntaxException.class));
   }
 
@@ -90,7 +90,7 @@ public class OpenUriSelectionListenerTest {
     SelectionEvent selectionEvent = getEvent(INVALID_URI);
 
     new OpenUriSelectionListener(queryParameterProvider, errorHandler, browserSupport).widgetDefaultSelected(selectionEvent);
-    verify(errorHandler).handle(captor.capture(), any(URI.class));
+    verify(errorHandler).accept(captor.capture(), any(URI.class));
     assertThat(captor.getValue(), instanceOf(URISyntaxException.class));
   }
 
@@ -99,7 +99,7 @@ public class OpenUriSelectionListenerTest {
     SelectionEvent selectionEvent = getEvent(MALFORMED_URL);
 
     new OpenUriSelectionListener(queryParameterProvider, errorHandler, browserSupport).widgetSelected(selectionEvent);
-    verify(errorHandler).handle(captor.capture(), any(URI.class));
+    verify(errorHandler).accept(captor.capture(), any(URI.class));
     assertThat(captor.getValue(), instanceOf(MalformedURLException.class));
   }
 
@@ -108,7 +108,7 @@ public class OpenUriSelectionListenerTest {
     SelectionEvent selectionEvent = getEvent(MALFORMED_URL);
 
     new OpenUriSelectionListener(queryParameterProvider, errorHandler, browserSupport).widgetDefaultSelected(selectionEvent);
-    verify(errorHandler).handle(captor.capture(), any(URI.class));
+    verify(errorHandler).accept(captor.capture(), any(URI.class));
     assertThat(captor.getValue(), instanceOf(MalformedURLException.class));
   }
 
@@ -118,7 +118,7 @@ public class OpenUriSelectionListenerTest {
     doThrow(new PartInitException("fake exception")).when(browser).openURL(any(URL.class));
 
     new OpenUriSelectionListener(queryParameterProvider, errorHandler, browserSupport).widgetSelected(selectionEvent);
-    verify(errorHandler).handle(captor.capture(), any(URI.class));
+    verify(errorHandler).accept(captor.capture(), any(URI.class));
     assertThat(captor.getValue(), instanceOf(PartInitException.class));
   }
 
@@ -129,28 +129,28 @@ public class OpenUriSelectionListenerTest {
 
     new OpenUriSelectionListener(queryParameterProvider, errorHandler, browserSupport)
       .widgetDefaultSelected(selectionEvent);
-    verify(errorHandler).handle(captor.capture(), any(URI.class));
+    verify(errorHandler).accept(captor.capture(), any(URI.class));
     assertThat(captor.getValue(), instanceOf(PartInitException.class));
   }
 
   @Test
   public void testWidgetSelected_successful() throws PartInitException, MalformedURLException {
     SelectionEvent selectionEvent = getEvent(VALID_URI);
-    when(queryParameterProvider.getParameters()).thenReturn(Collections.singletonMap(URL_PARAM_PROJECT, PROJECT_ID));
+    when(queryParameterProvider.get()).thenReturn(Collections.singletonMap(URL_PARAM_PROJECT, PROJECT_ID));
 
     new OpenUriSelectionListener(queryParameterProvider, errorHandler, browserSupport).widgetSelected(selectionEvent);
-    verify(errorHandler, never()).handle(any(Exception.class), any(URI.class));
+    verify(errorHandler, never()).accept(any(Exception.class), any(URI.class));
     verify(browser).openURL(new URL(VALID_URI + "?project=" + PROJECT_ID));
   }
 
   @Test
   public void testWidgetDefaultSelected_successful() throws PartInitException, MalformedURLException {
     SelectionEvent selectionEvent = getEvent(VALID_URI);
-    when(queryParameterProvider.getParameters()).thenReturn(Collections.singletonMap(URL_PARAM_PROJECT, PROJECT_ID));
+    when(queryParameterProvider.get()).thenReturn(Collections.singletonMap(URL_PARAM_PROJECT, PROJECT_ID));
 
     new OpenUriSelectionListener(queryParameterProvider, errorHandler, browserSupport)
       .widgetDefaultSelected(selectionEvent);
-    verify(errorHandler, never()).handle(any(Exception.class), any(URI.class));
+    verify(errorHandler, never()).accept(any(Exception.class), any(URI.class));
     verify(browser).openURL(new URL(VALID_URI + "?project=" + PROJECT_ID));
   }
 }

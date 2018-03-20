@@ -77,19 +77,19 @@ public class CloudLibrariesPage extends WizardPage
   private IClasspathEntry newEntry;
 
   public CloudLibrariesPage() {
-    super(CloudLibraries.CLIENT_APIS_GROUP);
-    setTitle(Messages.getString("clientapis-title")); //$NON-NLS-1$
+    super("cloudPlatformLibrariesPage"); //$NON-NLS-1$
+    setTitle(Messages.getString("cloud-platform-libraries-title")); //$NON-NLS-1$
     setDescription(Messages.getString("apiclientlibrariespage-description")); //$NON-NLS-1$
     setImageDescriptor(SharedImages.GCP_WIZARD_IMAGE_DESCRIPTOR);
   }
 
   @Override
-  public void initialize(IJavaProject project, IClasspathEntry[] currentEntries) {
-    this.project = project;
-    isMavenProject = MavenUtils.hasMavenNature(project.getProject());
+  public void initialize(IJavaProject javaProject, IClasspathEntry[] currentEntries) {
+    this.project = javaProject;
+    isMavenProject = MavenUtils.hasMavenNature(javaProject.getProject());
 
     Map<String, String> groups = Maps.newLinkedHashMap();
-    if (AppEngineStandardFacet.getProjectFacetVersion(project.getProject()) != null) {
+    if (AppEngineStandardFacet.getProjectFacetVersion(javaProject.getProject()) != null) {
       groups.put(CloudLibraries.APP_ENGINE_GROUP, Messages.getString("appengine-title")); //$NON-NLS-1$
     }
     groups.put(CloudLibraries.CLIENT_APIS_GROUP, Messages.getString("clientapis-title")); //$NON-NLS-1$

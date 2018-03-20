@@ -45,9 +45,9 @@ class FlexDeployPreferencesDialog extends DeployPreferencesDialog {
 
   @Override
   protected Control createDialogArea(final Composite parent) {
-    Composite dialogArea = (Composite) super.createDialogArea(parent);
+    Composite area = (Composite) super.createDialogArea(parent);
 
-    Composite container = new Composite(dialogArea, SWT.NONE);
+    Composite container = new Composite(area, SWT.NONE);
     Link flexPricing = new Link(container, SWT.WRAP);
     flexPricing.setText(Messages.getString("deploy.preferences.dialog.flex.pricing")); //$NON-NLS-1$
     flexPricing.addSelectionListener(
@@ -60,7 +60,7 @@ class FlexDeployPreferencesDialog extends DeployPreferencesDialog {
         .extendedMargins(margins.x, margins.x, 0 /* no upper margin */, margins.y)
         .generateLayout(container);
 
-    return dialogArea;
+    return area;
   }
 
   @Override

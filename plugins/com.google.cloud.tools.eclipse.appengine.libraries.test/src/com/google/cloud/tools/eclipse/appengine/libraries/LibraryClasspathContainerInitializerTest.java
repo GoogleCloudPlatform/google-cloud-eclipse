@@ -83,7 +83,7 @@ public class LibraryClasspathContainerInitializerTest {
 
   @Rule
   public TestProjectCreator testProject = new TestProjectCreator()
-      .withFacetVersions(JavaFacet.VERSION_1_7).withClasspathContainerPath(TEST_LIBRARY_PATH);
+      .withFacets(JavaFacet.VERSION_1_7).withClasspathContainerPath(TEST_LIBRARY_PATH);
 
   @Rule
   public TemporaryFolder temporaryFolder = new TemporaryFolder();

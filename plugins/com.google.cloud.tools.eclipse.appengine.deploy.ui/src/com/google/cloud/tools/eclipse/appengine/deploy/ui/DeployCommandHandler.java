@@ -128,7 +128,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
     return project;
   }
 
-  private IWorkspace getWorkspace(ExecutionEvent event) {
+  private static IWorkspace getWorkspace(ExecutionEvent event) {
     return ServiceUtils.getService(event, IWorkspace.class);
   }
 

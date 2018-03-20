@@ -107,6 +107,7 @@ class LibraryFactory {
         MavenCoordinates mavenCoordinates = getMavenCoordinates(
             libraryFileElement.getChildren(ELEMENT_NAME_MAVEN_COORDINATES));
         LibraryFile libraryFile = loadSingleFile(libraryFileElement, mavenCoordinates);
+        libraryFile.updateVersion();
         libraryFiles.add(libraryFile);
       }
     }
@@ -133,6 +134,10 @@ class LibraryFactory {
   private static LibraryFile loadSingleFile(IConfigurationElement libraryFileElement,
       MavenCoordinates mavenCoordinates) throws URISyntaxException {
     LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
+    String pinned = libraryFileElement.getAttribute("pinned");
+    if ("true".equalsIgnoreCase(pinned)) {
+      libraryFile.setPinned(true);
+    }
     libraryFile.setFilters(getFilters(libraryFileElement.getChildren()));
     // todo do we really want these next two to be required?
     libraryFile.setSourceUri(

@@ -20,10 +20,17 @@ import com.google.cloud.tools.eclipse.dataflow.core.launcher.PipelineLaunchConfi
 import com.google.cloud.tools.eclipse.dataflow.core.launcher.options.PipelineOptionsProperty;
 import com.google.cloud.tools.eclipse.dataflow.core.launcher.options.PipelineOptionsType;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.component.LabeledTextMapComponent;
-import com.google.common.base.Optional;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
-
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
@@ -33,15 +40,6 @@ import org.eclipse.ui.forms.events.IExpansionListener;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * A Form containing collapsable inputs for {@code PipelineOptions} inputs.
@@ -58,7 +56,7 @@ public class PipelineOptionsFormComponent {
   private final Set<String> filterProperties;
 
   private final Composite parent;
-  private FormToolkit formToolkit;
+  private final FormToolkit formToolkit;
   private Form form;
   private Map<ExpandableComposite, LabeledTextMapComponent> optionsComponents =
       new LinkedHashMap<>();
@@ -120,7 +118,7 @@ public class PipelineOptionsFormComponent {
           } else {
             options.put(optionsType.getName(), propertyName);
           }
-          optionsDescriptions.put(propertyName, Optional.fromNullable(property.getDescription()));
+          optionsDescriptions.put(propertyName, Optional.ofNullable(property.getDescription()));
         }
       }
     }

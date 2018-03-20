@@ -18,7 +18,9 @@ package com.google.cloud.tools.eclipse.appengine.facets;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
@@ -55,13 +57,18 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class FacetUtilTest {
   @Mock private IFacetedProject mockFacetedProject;
-  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
-  @Rule public TestProjectCreator javaProjectCreator = new TestProjectCreator().withFacetVersions(
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacets();
+  @Rule public TestProjectCreator javaProjectCreator = new TestProjectCreator().withFacets(
       JavaFacet.VERSION_1_7);
 
-  @Test (expected = NullPointerException.class)
+  @Test
   public void testConstructor_nullFacetedProject() {
-    new FacetUtil(null);
+    try {
+      new FacetUtil(null);
+      fail();
+    } catch (NullPointerException ex) {
+      assertEquals("facetedProject is null", ex.getMessage());
+    }
   }
 
   @Test
@@ -69,9 +76,15 @@ public class FacetUtilTest {
     new FacetUtil(mockFacetedProject);
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testAddJavaFacetToBatch_nullFacet() {
-    new FacetUtil(mockFacetedProject).addJavaFacetToBatch(null);
+    FacetUtil facetUtil = new FacetUtil(mockFacetedProject);
+    try {
+      facetUtil.addJavaFacetToBatch(null);
+      fail();
+    } catch (NullPointerException ex) {
+      assertNotNull(ex.getMessage());
+    }
   }
 
   @Test
@@ -96,14 +109,26 @@ public class FacetUtilTest {
     Assert.assertEquals(0, facetUtil.facetInstallSet.size());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testAddJavaFacetToBatch_nonJavaFacet() {
-    new FacetUtil(mockFacetedProject).addJavaFacetToBatch(WebFacetUtils.WEB_25);
+    FacetUtil facetUtil = new FacetUtil(mockFacetedProject);
+    try {
+      facetUtil.addJavaFacetToBatch(WebFacetUtils.WEB_25);
+      fail();
+    } catch (IllegalArgumentException ex) {
+      assertNotNull(ex.getMessage());
+    }
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testAddWebFacetToBatch_nullFacet() {
-    new FacetUtil(mockFacetedProject).addWebFacetToBatch(null);
+    FacetUtil facetUtil = new FacetUtil(mockFacetedProject);
+    try {
+      facetUtil.addWebFacetToBatch(null);
+      fail();
+    } catch (NullPointerException ex) {
+      assertNotNull(ex.getMessage());
+    }
   }
 
   @Test
@@ -128,14 +153,26 @@ public class FacetUtilTest {
     Assert.assertEquals(0, facetUtil.facetInstallSet.size());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testAddWebFacetToBatch_nonWebFacet() {
-    new FacetUtil(mockFacetedProject).addWebFacetToBatch(JavaFacet.VERSION_1_7);
+    FacetUtil facetUtil = new FacetUtil(mockFacetedProject);
+    try {
+      facetUtil.addWebFacetToBatch(JavaFacet.VERSION_1_7);
+      fail();
+    } catch (IllegalArgumentException ex) {
+      assertNotNull(ex.getMessage());
+    }
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testAddFacetToBatch_nullFacet() {
-    new FacetUtil(mockFacetedProject).addFacetToBatch(null, null);
+    FacetUtil facetUtil = new FacetUtil(mockFacetedProject);
+    try {
+      facetUtil.addFacetToBatch(null, null);
+      fail();
+    } catch (NullPointerException ex) {
+      assertNotNull(ex.getMessage());
+    }
   }
 
   @Test
@@ -261,7 +298,7 @@ public class FacetUtilTest {
   }
 
   @Test
-  public void testHighestSatisfyingFacet() throws CoreException {
+  public void testHighestSatisfyingFacet() {
     IFacetedProjectWorkingCopy testProject = projectCreator.getFacetedProject().createWorkingCopy();
     testProject.addProjectFacet(AppEngineStandardFacet.JRE7);
     IProjectFacetVersion highestSatisfyingVersion =
@@ -270,7 +307,7 @@ public class FacetUtilTest {
   }
 
   @Test
-  public void testConflictsWith() throws CoreException {
+  public void testConflictsWith() {
     IFacetedProjectWorkingCopy testProject = projectCreator.getFacetedProject().createWorkingCopy();
     testProject.addProjectFacet(AppEngineStandardFacet.JRE7);
     assertFalse(FacetUtil.conflictsWith(testProject, WebFacetUtils.WEB_25));

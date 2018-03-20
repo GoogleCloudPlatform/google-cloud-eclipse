@@ -39,7 +39,7 @@ public class StaleResourcesStatusHandler implements IStatusHandler {
   static final int CONFIRM_LAUNCH_CODE = 255;
 
   /**
-   * A specially crafted status message that is pass into the Debug Prompter class to obtain our
+   * A specially crafted status message that is passed into the Debug Prompter class to obtain our
    * confirmation prompter.
    */
   public static final IStatus CONTINUE_LAUNCH_REQUEST = new Status(IStatus.INFO,

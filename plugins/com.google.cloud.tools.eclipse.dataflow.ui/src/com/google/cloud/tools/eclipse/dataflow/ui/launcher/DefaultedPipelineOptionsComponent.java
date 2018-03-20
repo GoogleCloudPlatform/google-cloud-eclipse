@@ -42,12 +42,13 @@ import org.eclipse.swt.widgets.Group;
 public class DefaultedPipelineOptionsComponent {
   private Group defaultsGroup;
 
-  private Button useDefaultsButton;
+  @VisibleForTesting
+  Button useDefaultsButton;
+  @VisibleForTesting
+  RunOptionsDefaultsComponent defaultOptions;
 
   private DataflowPreferences preferences;
   private Map<String, String> customValues;
-
-  private RunOptionsDefaultsComponent defaultOptions;
 
   public DefaultedPipelineOptionsComponent(Composite parent, Object layoutData,
       MessageTarget messageTarget, DataflowPreferences preferences) {
@@ -115,6 +116,16 @@ public class DefaultedPipelineOptionsComponent {
     if (isUseDefaultOptions()) {
       loadPreferences();
     }
+  }
+
+  @VisibleForTesting
+  boolean isEnabled() {
+    return useDefaultsButton.isEnabled();
+  }
+
+  public void setEnabled(boolean enabled) {
+    useDefaultsButton.setEnabled(enabled);
+    setWidgetsEnabled(enabled ? !useDefaultsButton.getSelection() : false);
   }
 
   private void setWidgetsEnabled(boolean enabled) {

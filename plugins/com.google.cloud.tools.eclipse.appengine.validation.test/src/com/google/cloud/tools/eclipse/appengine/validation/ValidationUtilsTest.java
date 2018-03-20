@@ -89,7 +89,7 @@ public class ValidationUtilsTest {
     blacklist.clear();
     byte[] bytes = MIXED_XML_WITH_PROJECT_ID.getBytes(StandardCharsets.UTF_8);
     DocumentLocation start = new DocumentLocation(3, 13);
-    BannedElement element = new BannedElement(
+    BannedElement bannedElement = new BannedElement(
         "application", 
         "", 
         IMarker.SEVERITY_WARNING, 
@@ -97,10 +97,10 @@ public class ValidationUtilsTest {
         start, 
         1, 
         null);
-    blacklist.add(element);
+    blacklist.add(bannedElement);
     Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist, "UTF-8");
     assertEquals(1, map.size());
-    int offset = map.get(element);
+    int offset = map.get(bannedElement);
     assertEquals(21, offset);
   }
   
@@ -115,13 +115,12 @@ public class ValidationUtilsTest {
   
   @Test
   public void testGetOffsetMap_orderedElements() {
-    
     DocumentLocation applicationLocation = new DocumentLocation(2, 14);
     DocumentLocation versionLocation = new DocumentLocation(1, 10);
     BannedElement application =
         new AppEngineBlacklistElement("application", applicationLocation, 0);
     BannedElement version = new AppEngineBlacklistElement("version", versionLocation, 0);
-    ArrayList<BannedElement> blacklist = new ArrayList<>(Arrays.asList(application, version));
+    blacklist = new ArrayList<>(Arrays.asList(application, version));
     
     String xml = "<version>   </version>\n\n<application>   </application>";
     byte[] bytes = xml.getBytes(StandardCharsets.UTF_8);

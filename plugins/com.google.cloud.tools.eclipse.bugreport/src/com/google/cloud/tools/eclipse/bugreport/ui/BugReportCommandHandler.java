@@ -26,9 +26,7 @@ import java.text.MessageFormat;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.program.Program;
-import org.osgi.framework.Bundle;
 
 public class BugReportCommandHandler extends AbstractHandler {
 
@@ -38,7 +36,12 @@ public class BugReportCommandHandler extends AbstractHandler {
   //@formatter:off
   // should be kept up to date with .github/ISSUE_TEMPLATE.md
   private static final String BODY_TEMPLATE =
-      "(please ensure you are running the latest version of CT4E with _Help > Check for Updates_)\n"
+      "Before reporting a possible bug:\n\n" 
+      + "1. Please ensure you are running the latest version of CT4E with _Help > Check for Updates_\n"
+      + "2. If the problem occurs when you deploy or after the application has been deployed, "
+      + "try deploying from the command line using gcloud or Maven. "
+      + "If the problem does not go away, then the issue is likely "
+      + "not with Cloud Tools for Eclipse.\n\n"
       + "- Cloud Tools for Eclipse version: {0}\n"
       + "- Google Cloud SDK version: {1}\n"
       + "- Eclipse version: {2}\n"
@@ -51,7 +54,7 @@ public class BugReportCommandHandler extends AbstractHandler {
       + "\n"
       + "**What did you see instead?**\n"
       + "\n"
-      + "(screenshots are helpful)";
+      + "Screenshots and stacktraces are helpful.";
   //@formatter:on
 
   @Override
@@ -63,7 +66,7 @@ public class BugReportCommandHandler extends AbstractHandler {
   @VisibleForTesting
   static String formatReportUrl() {
     String body = MessageFormat.format(BODY_TEMPLATE, CloudToolsInfo.getToolsVersion(),
-        getCloudSdkVersion(), getEclipseVersion(),
+        getCloudSdkVersion(), CloudToolsInfo.getEclipseVersion(),
         System.getProperty("os.name"), System.getProperty("os.version"),
         System.getProperty("java.version"));
 
@@ -77,15 +80,6 @@ public class BugReportCommandHandler extends AbstractHandler {
       return sdk.getVersion().toString();
     } catch (AppEngineException ex) {
       return ex.toString();
-    }
-  }
-
-  private static String getEclipseVersion() {
-    Bundle bundle = Platform.getBundle("org.eclipse.platform");
-    if (bundle != null) {
-      return bundle.getVersion().toString();
-    } else {
-      return "_(failed to get bundle \"org.eclipse.platform\")_";
     }
   }
 }

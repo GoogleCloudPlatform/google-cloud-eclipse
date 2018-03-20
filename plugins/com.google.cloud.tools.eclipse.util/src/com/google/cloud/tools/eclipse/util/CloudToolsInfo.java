@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 import org.eclipse.core.runtime.IBundleGroup;
 import org.eclipse.core.runtime.IBundleGroupProvider;
 import org.eclipse.core.runtime.Platform;
+import org.osgi.framework.Bundle;
 
 /**
  * Provides generic information about the plug-in, such as a name to be used for usage
@@ -34,7 +35,7 @@ public class CloudToolsInfo {
    */
   @VisibleForTesting
   static final String CLOUD_TOOLS_FOR_ECLIPSE_FEATURE_ID =
-      "com.google.cloud.tools.eclipse.suite.e45.feature";
+      "com.google.cloud.tools.eclipse.suite.feature";
 
   // Don't change the value; this name is used as an originating "application" of usage metrics.
   public static final String METRICS_NAME = "gcloud-eclipse-tools";
@@ -56,8 +57,17 @@ public class CloudToolsInfo {
       }
     }
     // May not have been installed with via a feature. Although we could report the bundle version,
-    // that may result in a confusing versions.
+    // that may result in a confusing version.
     logger.fine("Feature not found: " + CLOUD_TOOLS_FOR_ECLIPSE_FEATURE_ID);
     return "0.0.0";
+  }
+
+  public static String getEclipseVersion() {
+    Bundle bundle = Platform.getBundle("org.eclipse.platform");
+    if (bundle != null) {
+      return bundle.getVersion().toString();
+    } else {
+      return "_(failed to get bundle \"org.eclipse.platform\")_";
+    }
   }
 }

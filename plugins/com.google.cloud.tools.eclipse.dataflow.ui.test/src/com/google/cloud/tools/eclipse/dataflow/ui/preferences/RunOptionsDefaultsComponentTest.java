@@ -414,7 +414,7 @@ public class RunOptionsDefaultsComponentTest {
   }
   
   @Test
-  public void testBucketNameStatus_createIsOk() throws InterruptedException {
+  public void testBucketNameStatus_createIsOk() {
     component.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
     join();
@@ -445,7 +445,7 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testPartialValidity_account_project() throws InterruptedException {
+  public void testPartialValidity_account_project() {
     testPartialValidity_account();
     component.setCloudProjectText("project");
     join();
@@ -456,18 +456,14 @@ public class RunOptionsDefaultsComponentTest {
    * Spin until the RunOptionsDefaultsComponent has a project.
    */
   private void join() {
-    if (Display.getCurrent() != null) {
-      // seems surprising that this is required?
-      while (Display.getCurrent().readAndDispatch());
-    }
     try {
+      while (Display.getCurrent().readAndDispatch());
       component.join();
+      while (Display.getCurrent().readAndDispatch());
+      component.join();
+      while (Display.getCurrent().readAndDispatch());
     } catch (InterruptedException ex) {
       fail(ex.toString());
-    }
-    if (Display.getCurrent() != null) {
-      // seems surprising that this is required?
-      while (Display.getCurrent().readAndDispatch());
     }
   }
 

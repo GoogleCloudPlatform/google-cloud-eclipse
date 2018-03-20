@@ -16,18 +16,23 @@
 
 package com.google.cloud.tools.eclipse.dataflow.core.launcher;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 
 import com.google.cloud.tools.eclipse.dataflow.core.project.MajorVersion;
 import java.util.Arrays;
 import java.util.Set;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.debug.core.ILaunchConfiguration;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import org.mockito.AdditionalAnswers;
 
 /**
  * Test that each {@link MajorVersion} has associated configuration settings in the
@@ -66,4 +71,15 @@ public class MajorVersionPipelineRunnerConfigurationTest {
     Set<PipelineRunner> runners = PipelineRunner.inMajorVersion(majorVersion);
     assertThat(runners, CoreMatchers.hasItem(defaultRunner));
   }
+
+  @Test
+  public void testFromLaunchConfiguration_defaultRunner() throws CoreException {
+    ILaunchConfiguration empty =
+        mock(ILaunchConfiguration.class, AdditionalAnswers.returnsSecondArg());
+    PipelineLaunchConfiguration launchConfiguration =
+        PipelineLaunchConfiguration.fromLaunchConfiguration(majorVersion, empty);
+    assertEquals(PipelineLaunchConfiguration.defaultRunner(majorVersion),
+        launchConfiguration.getRunner());
+  }
+
 }

@@ -18,6 +18,8 @@ package com.google.cloud.tools.eclipse.appengine.newproject.flex;
 
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineWizardPage;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.PlatformUI;
 
@@ -35,4 +37,13 @@ public class AppEngineFlexWizardPage extends AppEngineWizardPage {
         "com.google.cloud.tools.eclipse.appengine.newproject.NewFlexProjectContext"); //$NON-NLS-1$
   }
 
+  @Override
+  public void createControl(Composite parent) {
+    super.createControl(parent);
+
+    AnalyticsPingManager.getInstance().sendPingOnShell(getShell(),
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_FLEX);
+  }
 }

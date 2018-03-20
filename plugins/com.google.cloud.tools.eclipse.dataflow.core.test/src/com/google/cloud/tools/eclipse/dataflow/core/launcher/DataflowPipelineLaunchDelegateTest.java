@@ -233,8 +233,7 @@ public class DataflowPipelineLaunchDelegateTest {
   }
 
   @Test
-  public void testLaunchWithProjectThatDoesNotExistThrowsIllegalArgumentException()
-      throws CoreException {
+  public void testLaunchWithProjectThatDoesNotExistThrowsCoreException() throws CoreException {
     ILaunchConfiguration configuration = mockILaunchConfiguration();
     when(project.exists()).thenReturn(false);
 
@@ -244,9 +243,9 @@ public class DataflowPipelineLaunchDelegateTest {
     try {
       dataflowDelegate.launch(configuration, mode, launch, monitor);
       fail();
-    } catch (IllegalArgumentException ex) {
+    } catch (CoreException ex) {
       assertTrue(
-          ex.getMessage().contains("Project with name Test-project,Name must exist to launch."));
+          ex.getMessage().contains("Project \"Test-project,Name\" does not exist"));
     }
   }
 
@@ -385,7 +384,7 @@ public class DataflowPipelineLaunchDelegateTest {
     assertTrue(expectedArgumentComponents.containsAll(Arrays.asList(argumentComponents)));
   }
 
-  private PipelineOptionsProperty requiredProperty(String name) {
+  private static PipelineOptionsProperty requiredProperty(String name) {
     return new PipelineOptionsProperty(name, false, true, Collections.<String>emptySet(), null);
   }
 
@@ -395,16 +394,12 @@ public class DataflowPipelineLaunchDelegateTest {
     when(configuration.getName()).thenReturn(configurationName);
 
     PipelineRunner runner = PipelineRunner.BLOCKING_DATAFLOW_PIPELINE_RUNNER;
-    when(
-        configuration.getAttribute(
-            PipelineConfigurationAttr.RUNNER_ARGUMENT.toString(),
-            PipelineLaunchConfiguration.defaultRunner(MajorVersion.ONE).getRunnerName()))
-        .thenReturn(runner.getRunnerName());
+    when(configuration.getAttribute(eq(PipelineConfigurationAttr.RUNNER_ARGUMENT.toString()),
+        anyString())).thenReturn(runner.getRunnerName());
 
     String projectName = "Test-project,Name";
-    when(configuration.getAttribute(
-        eq(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME), anyString()))
-        .thenReturn(projectName);
+    when(configuration.getAttribute(eq(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME),
+        anyString())).thenReturn(projectName);
     when(workspaceRoot.getProject(projectName)).thenReturn(project);
     when(project.exists()).thenReturn(true);
 

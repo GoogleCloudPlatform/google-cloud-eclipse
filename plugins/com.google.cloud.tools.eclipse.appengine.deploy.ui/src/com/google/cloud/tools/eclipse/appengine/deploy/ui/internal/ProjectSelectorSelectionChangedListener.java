@@ -24,9 +24,9 @@ import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.AppEngine;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Predicate;
 import com.google.common.net.UrlEscapers;
 import java.text.MessageFormat;
+import java.util.function.Predicate;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -43,12 +43,6 @@ public class ProjectSelectorSelectionChangedListener implements ISelectionChange
 
   @VisibleForTesting
   Job latestQueryJob;
-  private Predicate<Job> isLatestQueryJob = new Predicate<Job>() {
-    @Override
-    public boolean apply(Job job) {
-      return job == latestQueryJob;
-    }
-  };
 
   public ProjectSelectorSelectionChangedListener(AccountSelector accountSelector,
                                                  ProjectRepository projectRepository,
@@ -82,6 +76,7 @@ public class ProjectSelectorSelectionChangedListener implements ISelectionChange
       }
     } else {  // The project has never been queried.
       Credential credential = accountSelector.getSelectedCredential();
+      Predicate<Job> isLatestQueryJob = job -> job == latestQueryJob;
       latestQueryJob = new AppEngineApplicationQueryJob(project, credential, projectRepository,
           projectSelector, createAppLink, isLatestQueryJob);
       latestQueryJob.schedule();

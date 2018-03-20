@@ -276,7 +276,7 @@ public class AreaBasedPreferencePage extends PreferencePage
     super.dispose();
   }
 
-  private IPreferenceStore resolvePreferenceStore(String preferencePath) {
+  private static IPreferenceStore resolvePreferenceStore(String preferencePath) {
     try {
       URI uri = new URI(preferencePath);
       return PreferenceResolver.resolve(uri);
@@ -286,7 +286,7 @@ public class AreaBasedPreferencePage extends PreferencePage
     }
   }
 
-  private IExtensionRegistry getRegistry() {
+  private static IExtensionRegistry getRegistry() {
     return RegistryFactory.getRegistry();
   }
 

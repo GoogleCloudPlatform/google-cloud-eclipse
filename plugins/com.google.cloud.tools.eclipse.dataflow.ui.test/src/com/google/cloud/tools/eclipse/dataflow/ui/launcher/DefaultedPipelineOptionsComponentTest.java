@@ -17,7 +17,9 @@
 package com.google.cloud.tools.eclipse.dataflow.ui.launcher;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -54,6 +56,7 @@ public class DefaultedPipelineOptionsComponentTest {
   @Mock
   private DataflowPreferences preferences;
   private RunOptionsDefaultsComponent defaultOptions;
+  private boolean defaultOptionsEnabled;
   private String accountEmail;
   private String projectId;
   private String stagingLocation;
@@ -103,6 +106,19 @@ public class DefaultedPipelineOptionsComponentTest {
         return null;
       }
     };
+    Answer<Boolean> answerEnablement = new Answer<Boolean>() {
+      @Override
+      public Boolean answer(InvocationOnMock invocation) throws Throwable {
+        return defaultOptionsEnabled;
+      }
+    };
+    Answer<Void> recordEnablement = new Answer<Void>() {
+      @Override
+      public Void answer(InvocationOnMock invocation) throws Throwable {
+        defaultOptionsEnabled = invocation.getArgumentAt(0, Boolean.class);
+        return null;
+      }
+    };
 
     defaultOptions = mock(RunOptionsDefaultsComponent.class);
     doAnswer(answerAccountEmail).when(defaultOptions).getAccountEmail();
@@ -112,6 +128,8 @@ public class DefaultedPipelineOptionsComponentTest {
     doAnswer(recordProjectId).when(defaultOptions).setCloudProjectText(anyString());
     doAnswer(answerStagingLocation).when(defaultOptions).getStagingLocation();
     doAnswer(recordStagingLocation).when(defaultOptions).setStagingLocationText(anyString());
+    doAnswer(answerEnablement).when(defaultOptions).isEnabled();
+    doAnswer(recordEnablement).when(defaultOptions).setEnabled(anyBoolean());
   }
 
   @Test
@@ -237,5 +255,45 @@ public class DefaultedPipelineOptionsComponentTest {
     assertEquals("newProject", values.get(DataflowPreferences.PROJECT_PROPERTY));
     assertEquals("newStagingLocation", values.get(DataflowPreferences.STAGING_LOCATION_PROPERTY));
     assertEquals("newStagingLocation", values.get(DataflowPreferences.GCP_TEMP_LOCATION_PROPERTY));
+  }
+
+  @Test
+  public void testEnablement() {
+    DefaultedPipelineOptionsComponent component = new DefaultedPipelineOptionsComponent(
+        shellCreator.getShell(), null, messageTarget, preferences, defaultOptions);
+
+    assertTrue(component.isUseDefaultOptions());
+    assertTrue(component.useDefaultsButton.isEnabled());
+    assertFalse(component.defaultOptions.isEnabled()); // not enabled if useDefaultValues
+
+    component.setEnabled(false);
+    assertTrue(component.isUseDefaultOptions());
+    assertFalse(component.useDefaultsButton.isEnabled());
+    assertFalse(component.defaultOptions.isEnabled());
+
+    component.setEnabled(true);
+    assertTrue(component.isUseDefaultOptions());
+    assertTrue(component.useDefaultsButton.isEnabled());
+    assertFalse(component.defaultOptions.isEnabled()); // should not be re-enabled
+
+    component.setUseDefaultValues(false);
+    assertFalse(component.isUseDefaultOptions());
+    assertTrue(component.useDefaultsButton.isEnabled());
+    assertTrue(component.defaultOptions.isEnabled());
+
+    component.setEnabled(false);
+    assertFalse(component.isUseDefaultOptions());
+    assertFalse(component.useDefaultsButton.isEnabled());
+    assertFalse(component.defaultOptions.isEnabled());
+
+    component.setUseDefaultValues(true);
+    assertTrue(component.isUseDefaultOptions());
+    assertFalse(component.useDefaultsButton.isEnabled());
+    assertFalse(component.defaultOptions.isEnabled());
+
+    component.setEnabled(true);
+    assertTrue(component.isUseDefaultOptions());
+    assertTrue(component.useDefaultsButton.isEnabled());
+    assertFalse(component.defaultOptions.isEnabled()); // should not be re-enabled
   }
 }

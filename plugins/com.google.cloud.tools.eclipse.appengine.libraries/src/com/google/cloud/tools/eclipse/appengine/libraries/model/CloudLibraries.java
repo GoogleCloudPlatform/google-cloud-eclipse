@@ -82,8 +82,8 @@ public class CloudLibraries {
     Bundle bundle = FrameworkUtil.getBundle(CloudSdk.class);
     URL url = bundle.getResource("/com/google/cloud/tools/libraries/libraries.json");
     
-    try (InputStream in = url.openStream()) {
-      JsonReader reader = Json.createReader(in); 
+    try (InputStream in = url.openStream();
+        JsonReader reader = Json.createReader(in)) {
       JsonObject[] apis = reader.readArray().toArray(new JsonObject[0]); 
       List<Library> clientApis = new ArrayList<>(apis.length);
       for (JsonObject api : apis) {
@@ -103,6 +103,7 @@ public class CloudLibraries {
             if (language != null && "java".equals(language.getString())) {
               String toolTip = client.getString("infotip");
               library.setToolTip(toolTip);
+              library.setLaunchStage(client.getString("launchStage"));
               JsonObject coordinates = client.getJsonObject("mavenCoordinates");
               String groupId = coordinates.getString("groupId");
               String artifactId = coordinates.getString("artifactId");

@@ -17,15 +17,18 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
+import com.google.common.base.Stopwatch;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -35,6 +38,8 @@ import org.eclipse.wst.server.core.IServerType;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.ServerUtil;
+import org.eclipse.wst.server.core.internal.ModuleFactory;
+import org.eclipse.wst.server.core.internal.ServerPlugin;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -53,22 +58,36 @@ public class LocalAppEnginePublishOperationTest {
   private IServer server;
 
   @Before
-  public void setUp() throws IOException, CoreException {
+  public void setUp() throws IOException, CoreException, InterruptedException {
     projects = ProjectUtils.importProjects(getClass(),
         "projects/test-submodules.zip", true /* checkBuildErrors */, null);
     assertEquals(2, projects.size());
-    assertTrue("sox-server".equals(projects.get(0).getName())
-        || "sox-server".equals(projects.get(1).getName()));
-    assertTrue("sox-shared".equals(projects.get(1).getName())
-        || "sox-shared".equals(projects.get(0).getName()));
-    serverProject = projects.get("sox-server".equals(projects.get(0).getName()) ? 0 : 1);
-    assertNotNull("sox-server", serverProject);
-    sharedProject = projects.get("sox-shared".equals(projects.get(0).getName()) ? 0 : 1);
-    assertNotNull("sox-shared", sharedProject);
+    Predicate<IProject> isServerProject = project -> "sox-server".equals(project.getName());
+    Predicate<IProject> isSharedProject = project -> "sox-shared".equals(project.getName());
+    serverProject = projects.stream().filter(isServerProject).findFirst().get();
+    sharedProject = projects.stream().filter(isSharedProject).findFirst().get();
 
-    serverModule = ServerUtil.getModule(serverProject);
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1798
+    Stopwatch stopwatch = Stopwatch.createStarted();
+    for (int i = 0; i < 100; i++) {
+      serverModule = ServerUtil.getModule(serverProject);
+      sharedModule = ServerUtil.getModule(sharedProject);
+      if (serverModule != null && sharedModule != null
+          && serverProject.getFile("bin/sox/server/GreetingServiceImpl.class").exists()
+          && sharedProject.getFile("bin/sox/shared/GreetingService.class").exists()) {
+        break;
+      }
+      Thread.sleep(100);
+      ThreadDumpingWatchdog.report("Until modules are fully ready", stopwatch);
+    }
+
+    // To diagnose https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1798.
+    logModules(serverProject);
+    logModules(sharedProject);
+    assertTrue(serverProject.getFile("bin/sox/server/GreetingServiceImpl.class").exists());
+    assertTrue(sharedProject.getFile("bin/sox/shared/GreetingService.class").exists());
+
     assertNotNull(serverModule);
-    sharedModule = ServerUtil.getModule(sharedProject);
     assertNotNull(sharedModule);
   }
 
@@ -114,5 +133,40 @@ public class LocalAppEnginePublishOperationTest {
     assertTrue(new File(webInf, "classes/sox/server/GreetingServiceImpl.class").isFile());
     assertTrue(new File(webInf, "lib/servlet-2.5.jar").isFile());
     assertTrue(new File(webInf, "lib/sox-shared.jar").isFile());
+  }
+
+  // Code taken from "ServerUtil.getModules()" (which "ServerUtil.getModule()" calls) to diagnose
+  // one of the failures in https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1798.
+  private static void logModules(IProject project) {
+    System.out.println("  #### Testing getModules(" + project.getName() + ") ####");
+
+    ModuleFactory[] factories = ServerPlugin.getModuleFactories();
+    assertNotNull(factories);
+    assertNotEquals(0, factories.length);
+
+    for (ModuleFactory factory : factories) {
+      boolean factoryEnabled = factory.isEnabled(project, null);
+      System.out.println("    * " + factory + (!factoryEnabled? " (not enabled, skipping)" : ""));
+
+      System.out.print("      - All factory modules:");
+      printModules(factory.getDelegate(null).getModules());
+
+      if (factoryEnabled) {
+        System.out.print("      - Project modules:");
+        printModules(factory.getModules(project, null));
+      }
+    }
+  }
+
+  private static void printModules(IModule[] modules) {
+    if (modules == null) {
+      System.out.println(" <null>");
+    } else if (modules.length == 0) {
+      System.out.println(" <empty>");
+    } else {
+      for (IModule module : modules) {
+        System.out.println(" " + module.getName());
+      }
+    }
   }
 }

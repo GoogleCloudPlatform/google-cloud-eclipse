@@ -23,13 +23,13 @@ public class MessagesTest {
 
   @Test
   public void testAppEngineTitle() {
-    Assert.assertEquals("App Engine Standard Environment Libraries",
+    Assert.assertEquals("App Engine Standard Libraries",
         Messages.getString("appengine-title"));
   }
 
   @Test
   public void testClientApisTitle() {
-    Assert.assertEquals("Google Cloud Platform Libraries",
+    Assert.assertEquals("Cloud Client Libraries for Java",
         Messages.getString("clientapis-title"));
   }
 

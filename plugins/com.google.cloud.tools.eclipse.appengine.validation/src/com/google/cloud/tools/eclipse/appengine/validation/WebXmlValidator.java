@@ -22,6 +22,7 @@ import com.google.common.base.Strings;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.namespace.NamespaceContext;
@@ -29,7 +30,6 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.wst.common.componentcore.ComponentCore;
 import org.eclipse.wst.common.componentcore.resources.IVirtualComponent;
+import org.eclipse.wst.common.componentcore.resources.IVirtualFile;
 import org.eclipse.wst.common.componentcore.resources.IVirtualFolder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -61,11 +62,22 @@ public class WebXmlValidator implements XmlValidationHelper {
   private IResource resource;
   private ArrayList<BannedElement> blacklist;
 
+  private final BiFunction<IProject, String, Boolean> servletApiSupportChecker;
+
+  public WebXmlValidator() {
+    this(AppEngineStandardFacet::checkServletApiSupport);
+  }
+
+  @VisibleForTesting
+  WebXmlValidator(BiFunction<IProject, String, Boolean> servletApiSupportChecker) {
+    this.servletApiSupportChecker = servletApiSupportChecker;
+  }
+
   @Override
   public ArrayList<BannedElement> checkForElements(IResource resource, Document document) {
     this.document = document;
     this.resource = resource;
-    this.blacklist = new ArrayList<>();
+    blacklist = new ArrayList<>();
     validateServletVersion();
     validateServletClass();
     validateServletMapping();
@@ -85,7 +97,7 @@ public class WebXmlValidator implements XmlValidationHelper {
       if ("http://xmlns.jcp.org/xml/ns/javaee".equals(namespace)
           || "http://java.sun.com/xml/ns/javaee".equals(namespace)) {
         // Check that web.xml version is compatible with our supported Dynamic Web Project versions
-        if (!AppEngineStandardFacet.checkServletApiSupport(resource.getProject(), version)) {
+        if (!servletApiSupportChecker.apply(resource.getProject(), version)) {
           DocumentLocation location = (DocumentLocation) webApp.getUserData("location");
           BannedElement element = new JavaServletElement(location, 0);
           blacklist.add(element);
@@ -102,7 +114,7 @@ public class WebXmlValidator implements XmlValidationHelper {
     for (int i = 0; i < servletClassList.getLength(); i++) {
       Node servletClassNode = servletClassList.item(i);
       String servletClassName = servletClassNode.getTextContent();
-      IJavaProject project = getProject(resource);
+      IJavaProject project = getJavaProject(resource);
       if (project != null && !classExists(project, servletClassName)) {
         DocumentLocation location = (DocumentLocation) servletClassNode.getUserData("location");
         BannedElement element =
@@ -181,15 +193,15 @@ public class WebXmlValidator implements XmlValidationHelper {
     //    /            -> src/main/webapp
     // WEB-INF/classes -> src/main/java
     // WEB-INF/lib     -> src/main/webapp/WEB-INF/lib
-    IFile file = root.getFile(fileName).getUnderlyingFile();
+    IVirtualFile file = root.getFile(fileName);
     if (file.exists()) {
       return true;
     }
-    file = root.getFile("WEB-INF/" + fileName).getUnderlyingFile();
+    file = root.getFile("WEB-INF/" + fileName);
     if (file.exists()) {
       return true;
     }
-    file = root.getFile("WEB-INF/classes/" + fileName).getUnderlyingFile();
+    file = root.getFile("WEB-INF/classes/" + fileName);
     if (file.exists()) {
       return true;
     }
@@ -205,7 +217,7 @@ public class WebXmlValidator implements XmlValidationHelper {
     return "2.5".equals(versionString);
   }
 
-  private static IJavaProject getProject(IResource resource) {
+  private static IJavaProject getJavaProject(IResource resource) {
     if (resource != null) {
       return JavaCore.create(resource.getProject());
     }

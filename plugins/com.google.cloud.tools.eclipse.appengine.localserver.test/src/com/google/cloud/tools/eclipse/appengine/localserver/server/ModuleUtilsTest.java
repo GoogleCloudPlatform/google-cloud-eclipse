@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
-import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
@@ -26,6 +25,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.wst.server.core.IModule;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,6 +48,12 @@ public class ModuleUtilsTest {
   public void turnOffLogging() {
     Logger logger = Logger.getLogger(ModuleUtils.class.getName());
     logger.setLevel(Level.OFF);
+  }
+
+  @After
+  public void turnOnLogging() {
+    Logger logger = Logger.getLogger(ModuleUtils.class.getName());
+    logger.setLevel(null);
   }
 
   @Before
@@ -106,7 +112,7 @@ public class ModuleUtilsTest {
   }
 
   private void mockAppEngineWebXml(String testfile) throws CoreException {
-    InputStream in = this.getClass().getResourceAsStream(testfile);
-    Mockito.when(descriptorFile.getContents()).thenReturn(in);
+    Mockito.when(descriptorFile.getContents())
+        .thenReturn(this.getClass().getResourceAsStream(testfile));
   }
 }

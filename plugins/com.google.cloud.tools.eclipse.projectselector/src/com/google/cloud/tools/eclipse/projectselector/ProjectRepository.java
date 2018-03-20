@@ -68,7 +68,10 @@ public class ProjectRepository {
           listRequest = listRequest.setPageToken(token); 
         }
         ListProjectsResponse response = listRequest.execute();
-        projectList.addAll(response.getProjects());
+        List<Project> responseProjects = response.getProjects();
+        if (responseProjects != null) {
+          projectList.addAll(responseProjects);
+        }
         token = response.getNextPageToken();
       } while (token != null);
       List<GcpProject> gcpProjects = convertToGcpProjects(projectList);

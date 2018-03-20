@@ -31,6 +31,8 @@ import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -95,7 +97,7 @@ public class CodeTemplatesTest {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     config.setUseMaven("my.project.group.id", "my-project-artifact-id", "98.76.54");
     CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
-    validatePomXml();
+    validateStandardPomXml();
   }
 
   @Test
@@ -121,7 +123,7 @@ public class CodeTemplatesTest {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     config.setUseMaven("my.project.group.id", "my-project-artifact-id", "98.76.54");
     CodeTemplates.materializeAppEngineFlexFiles(project, config, monitor);
-    validatePomXml();
+    validateFlexPomXml();
   }
 
   private void validateNonConfigFiles(IFile mostImportant,
@@ -200,7 +202,19 @@ public class CodeTemplatesTest {
     }
   }
 
-  private void validatePomXml()
+  private void validateStandardPomXml()
+      throws ParserConfigurationException, SAXException, IOException, CoreException {
+    Element root = validatePom();
+    
+    String sdkVersion =
+        root.getElementsByTagName("appengine.api.sdk.version").item(0).getTextContent();
+    DefaultArtifactVersion sdkArtifactVersion =
+        new DefaultArtifactVersion(sdkVersion);
+    DefaultArtifactVersion expectedSdk = new DefaultArtifactVersion("1.9.62");
+    Assert.assertTrue(sdkVersion, sdkArtifactVersion.compareTo(expectedSdk) >= 0);    
+  }
+
+  private Element validatePom()
       throws ParserConfigurationException, SAXException, IOException, CoreException {
     IFile pomXml = project.getFile("pom.xml");
     Element root = buildDocument(pomXml).getDocumentElement();
@@ -216,6 +230,19 @@ public class CodeTemplatesTest {
     Assert.assertEquals("my-project-artifact-id", artifactId.getTextContent());
     Element version = (Element) root.getElementsByTagName("version").item(0);
     Assert.assertEquals("98.76.54", version.getTextContent());
+    
+    Element pluginVersion =
+        (Element) root.getElementsByTagName("appengine.maven.plugin.version").item(0);
+    DefaultArtifactVersion artifactVersion =
+        new DefaultArtifactVersion(pluginVersion.getTextContent());
+    DefaultArtifactVersion expected = new DefaultArtifactVersion("1.3.2");
+    Assert.assertTrue(artifactVersion.compareTo(expected) >= 0);
+    return root;
+  }
+
+  private void validateFlexPomXml()
+      throws ParserConfigurationException, SAXException, IOException, CoreException {
+    validatePom();
   }
 
   private Document buildDocument(IFile xml)

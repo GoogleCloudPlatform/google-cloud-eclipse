@@ -31,9 +31,12 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.junit.Assume;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+@RunWith(SWTBotJunit4ClassRunner.class)
 public class FlexMavenPackagedProjectStagingDelegateTest {
 
   @Test

@@ -18,10 +18,10 @@ package com.google.cloud.tools.eclipse.appengine.facets;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.runtime.jobs.Job;
@@ -58,12 +58,9 @@ class ConvertJobSuspender {
   }
 
   @VisibleForTesting
-  static Predicate<Job> isConvertJob = new Predicate<Job>() {
-    @Override
-    public boolean apply(Job job) {
-      Preconditions.checkNotNull(job);
-      return CONVERT_JOB_CLASS_NAME.equals(job.getClass().getName());
-    }
+  static Predicate<Job> isConvertJob = job -> {
+    Preconditions.checkNotNull(job);
+    return CONVERT_JOB_CLASS_NAME.equals(job.getClass().getName());
   };
 
   private static final AtomicBoolean suspended = new AtomicBoolean(false);
@@ -104,7 +101,7 @@ class ConvertJobSuspender {
   }
 
   static void suspendJob(Job job, long scheduleDelay) {
-    if (!isConvertJob.apply(job)) {
+    if (!isConvertJob.test(job)) {
       return;
     }
     synchronized (suspendedJobs) {

@@ -101,24 +101,18 @@ public class DeployPropertyPage extends PropertyPage {
     super.dispose();
   }
 
-  private Runnable getLayoutChangedHandler() {
-    return new Runnable() {
-
-      @Override
-      public void run() {
-        // resize the page to work around https://bugs.eclipse.org/bugs/show_bug.cgi?id=265237
-        Composite parent = getActivePanel().getParent();
-        while (parent != null) {
-          if (parent instanceof ScrolledComposite) {
-            ScrolledComposite scrolledComposite = (ScrolledComposite) parent;
-            scrolledComposite.setMinSize(getActivePanel().getParent().computeSize(SWT.DEFAULT, SWT.DEFAULT));
-            getActivePanel().layout();
-            return;
-          }
-          parent = parent.getParent();
-        }
+  private void handleLayoutChange() {
+    // resize the page to work around https://bugs.eclipse.org/bugs/show_bug.cgi?id=265237
+    Composite parent = getActivePanel().getParent();
+    while (parent != null) {
+      if (parent instanceof ScrolledComposite) {
+        ScrolledComposite scrolledComposite = (ScrolledComposite) parent;
+        scrolledComposite.setMinSize(getActivePanel().getParent().computeSize(SWT.DEFAULT, SWT.DEFAULT));
+        getActivePanel().layout();
+        return;
       }
-    };
+      parent = parent.getParent();
+    }
   }
 
   @Override
@@ -187,7 +181,7 @@ public class DeployPropertyPage extends PropertyPage {
   private void createStandardPanelIfNeeded() {
     if (standardPreferencesPanel == null) {
       standardPreferencesPanel = new StandardDeployPreferencesPanel(
-          container, facetedProject.getProject(), loginService, getLayoutChangedHandler(),
+          container, facetedProject.getProject(), loginService, this::handleLayoutChange,
           false /* requireValues */, new ProjectRepository(googleApiFactory));
     }
   }
@@ -195,7 +189,7 @@ public class DeployPropertyPage extends PropertyPage {
   private void createFlexPanelIfNeeded() {
     if (flexPreferencesPanel == null) {
       flexPreferencesPanel = new FlexDeployPreferencesPanel(
-          container, facetedProject.getProject(), loginService, getLayoutChangedHandler(),
+          container, facetedProject.getProject(), loginService, this::handleLayoutChange,
           false /* requireValues */, new ProjectRepository(googleApiFactory));
     }
   }

@@ -36,7 +36,8 @@ public class AppEngineFacetPresetsTest {
     IPreset preset = ProjectFacetsManager
         .getPreset("com.google.cloud.tools.eclipse.appengine.standard.jre7.preset");
     assertNotNull(preset);
-    assertEquals("App Engine standard environment with Java 7, Servlet 2.5", preset.getLabel());
+    assertEquals(
+        "App Engine standard environment with Java 7, Servlet 2.5 (deprecated)", preset.getLabel());
     assertThat(preset.getProjectFacets(), hasItem(JavaFacet.VERSION_1_7));
     assertThat(preset.getProjectFacets(), hasItem(WebFacetUtils.WEB_25));
     assertThat(preset.getProjectFacets(), hasItem(AppEngineStandardFacet.JRE7));

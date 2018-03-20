@@ -47,41 +47,34 @@ public final class SwtBotProjectActions {
    * @param packageName the name of the package the class should be created in
    * @param className the name of the class to be created
    */
-  public static void createJavaClass(final SWTWorkbenchBot bot, String sourceFolder,
-      String projectName,
-      String packageName, final String className) {
+  public static void createJavaClass(SWTWorkbenchBot bot, String sourceFolder, String projectName,
+      String packageName, String className) {
     SWTBotTreeItem project = SwtBotProjectActions.selectProject(bot, projectName);
     selectProjectItem(project, sourceFolder, packageName).select();
-    SwtBotTestingUtilities.performAndWaitForWindowChange(bot, new Runnable() {
-      @Override
-      public void run() {
-        MenuItem menuItem = ContextMenuHelper.contextMenu(getProjectRootTree(bot), "New", "Class");
-        new SWTBotMenu(menuItem).click();
-      }
+    SwtBotTestingUtilities.performAndWaitForWindowChange(bot, () -> {
+      MenuItem menuItem = ContextMenuHelper.contextMenu(getProjectRootTree(bot), "New", "Class");
+      new SWTBotMenu(menuItem).click();
     });
 
-    SwtBotTestingUtilities.performAndWaitForWindowChange(bot, new Runnable() {
-      @Override
-      public void run() {
-        bot.activeShell();
-        bot.textWithLabel("Name:").setText(className);
-        SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
-      }
+    SwtBotTestingUtilities.performAndWaitForWindowChange(bot, () -> {
+      bot.activeShell();
+      bot.textWithLabel("Name:").setText(className);
+      SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
     });
   }
 
   /**
    * Create a Maven project based on an archetype.
    */
-  public static IProject createMavenProject(final SWTWorkbenchBot bot, String groupId,
-      String artifactId, String archetypeGroupId, String archetypeArtifactId,
-      String archetypeVersion, String archetypeUrl, String javaPackage) {
+  public static IProject createMavenProject(SWTWorkbenchBot bot, String groupId, String artifactId,
+      String archetypeGroupId, String archetypeArtifactId, String archetypeVersion,
+      String archetypeUrl, String javaPackage) {
     bot.menu("File").menu("New").menu("Project...").click();
 
     SWTBotShell shell = bot.shell("New Project");
     shell.activate();
 
-    bot.tree().expandNode("Maven").select("Maven Project");
+    SwtBotTreeUtilities.select(bot, bot.tree(), "Maven", "Maven Project");
     bot.button("Next >").click();
 
     // we want to specify an archetype
@@ -121,13 +114,10 @@ public final class SwtBotProjectActions {
    * 
    * @param projectName the name of the project
    */
-  public static void deleteProject(final SWTWorkbenchBot bot, final String projectName) {
-    SwtBotTestingUtilities.performAndWaitForWindowChange(bot, new Runnable() {
-      @Override
-      public void run() {
-        selectProject(bot, projectName).contextMenu("Delete").click();
-        // Wait for confirmation window to come up
-      }
+  public static void deleteProject(SWTWorkbenchBot bot, String projectName) {
+    SwtBotTestingUtilities.performAndWaitForWindowChange(bot, () -> {
+      selectProject(bot, projectName).contextMenu("Delete").click();
+      // Wait for confirmation window to come up
     });
 
     // Select the "Delete project contents on disk (cannot be undone)"
@@ -144,7 +134,7 @@ public final class SwtBotProjectActions {
    * @param projectName the name of the project to be found
    * @return true if the project is found, and false if not found
    */
-  public static boolean projectFound(final SWTWorkbenchBot bot, String projectName) {
+  public static boolean projectFound(SWTWorkbenchBot bot, String projectName) {
     SWTBotView explorer = getExplorer(bot);
 
     // Select the root of the project tree in the explorer view
@@ -164,7 +154,7 @@ public final class SwtBotProjectActions {
    * 
    * @throws WidgetNotFoundException if an explorer is not found
    */
-  public static SWTBotView getExplorer(final SWTWorkbenchBot bot) {
+  public static SWTBotView getExplorer(SWTWorkbenchBot bot) {
     for (SWTBotView view : bot.views()) {
       if (view.getTitle().equals("Package Explorer")
           || view.getTitle().equals("Project Explorer")) {
@@ -189,16 +179,13 @@ public final class SwtBotProjectActions {
    *
    * This method assumes that either the Package Explorer or Project Explorer view is visible.
    */
-  public static void openProjectProperties(final SWTWorkbenchBot bot, String projectName) {
+  public static void openProjectProperties(SWTWorkbenchBot bot, String projectName) {
     selectProject(bot, projectName);
 
-    SwtBotTestingUtilities.performAndWaitForWindowChange(bot, new Runnable() {
-      @Override
-      public void run() {
-        // Open the Project Properties menu via the File menu
-        SWTBotMenu fileMenu = bot.menu("File");
-        fileMenu.menu("Properties").click();
-      }
+    SwtBotTestingUtilities.performAndWaitForWindowChange(bot, () -> {
+      // Open the Project Properties menu via the File menu
+      SWTBotMenu fileMenu = bot.menu("File");
+      fileMenu.menu("Properties").click();
     });
   }
 
@@ -207,7 +194,7 @@ public final class SwtBotProjectActions {
    *
    * @param projectName the project name
    */
-  public static void refreshProject(final SWTWorkbenchBot bot, String projectName) {
+  public static void refreshProject(SWTWorkbenchBot bot, String projectName) {
     SWTBotTreeItem project = selectProject(bot, projectName);
     project.contextMenu("Refresh").click();
   }
@@ -220,7 +207,7 @@ public final class SwtBotProjectActions {
    * @throws WidgetNotFoundException if the 'Package Explorer' or 'Project Explorer' view cannot be
    *         found or if the specified project cannot be found.
    */
-  public static SWTBotTreeItem selectProject(final SWTWorkbenchBot bot, String projectName) {
+  public static SWTBotTreeItem selectProject(SWTWorkbenchBot bot, String projectName) {
     SWTBotView explorer = getExplorer(bot);
 
     // Select the root of the project tree in the explorer view

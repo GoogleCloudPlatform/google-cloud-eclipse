@@ -23,7 +23,6 @@ import com.google.cloud.tools.eclipse.test.util.ArrayAssertions;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.ZipUtil;
 import com.google.cloud.tools.eclipse.test.util.reflection.ReflectionUtil;
-import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Stopwatch;
 import java.io.File;
@@ -97,8 +96,7 @@ public class ProjectUtils {
    * @throws CoreException if a project cannot be imported
    */
   public static List<IProject> importProjects(URL fileLocation,
-      boolean checkBuildErrors, IProgressMonitor monitor) throws IOException, CoreException
-  {
+      boolean checkBuildErrors, IProgressMonitor monitor) throws IOException, CoreException {
     SubMonitor progress = SubMonitor.convert(monitor, 100);
     URL zipLocation = FileLocator.toFileURL(fileLocation);
     if (!zipLocation.getProtocol().equals("file")) {
@@ -132,8 +130,7 @@ public class ProjectUtils {
     System.out.printf("Importing %d projects:\n", projectFiles.size());
     for (IPath projectFile : projectFiles) {
       System.out.println("    " + projectFile);
-      IProjectDescription descriptor =
-          root.getWorkspace().loadProjectDescription(projectFile);
+      IProjectDescription descriptor = root.getWorkspace().loadProjectDescription(projectFile);
       IProject project = root.getProject(descriptor.getName());
       // bring in the project to the workspace
       project.create(descriptor, progress.newChild(2));
@@ -144,10 +141,53 @@ public class ProjectUtils {
     // wait for any post-import operations too
     waitForProjects(projects);
     if (checkBuildErrors) {
-      failIfBuildErrors("Imported projects have errors", projects);
+      waitUntilNoBuildErrors();
+      // changed from specific projects to see all possible errors
+      failIfBuildErrors("Imported projects have errors");
     }
 
     return projects;
+  }
+
+  /**
+   * Waits until no error markers are found in the workspace. Returns true unless it times out
+   * after 300 seconds. Returns false if it times out.
+   * 
+   * This method does not wait for pending build and validation jobs, so it is usually required to
+   * call methods such as {@link #waitForProjects} beforehand.
+   */
+  public static boolean waitUntilNoBuildErrors() throws CoreException {
+    IProject[] projects = getWorkspace().getRoot().getProjects();
+    return waitUntilNoBuildErrors(projects);
+  }
+
+  /**
+   * Waits until no error markers are found for the projects. Returns true unless it times out after
+   * 300 seconds. Returns false if it times out.
+   * 
+   * This method does not wait for pending build and validation jobs, so it is usually required to
+   * call methods such as {@link #waitForProjects} beforehand.
+   */
+  public static boolean waitUntilNoBuildErrors(IProject... projects) throws CoreException {
+    try {
+      Stopwatch elapsed = Stopwatch.createStarted();
+      while (true) {
+        Set<String> errors = getAllBuildErrors(projects);
+        if (errors.isEmpty()) {
+          return true;
+        } else if (elapsed.elapsed(TimeUnit.SECONDS) > 300) {
+          return false;
+        }
+
+        if (Display.getCurrent() != null) {
+          while (Display.getCurrent().readAndDispatch());
+        }
+        Thread.sleep(50);
+      }
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      return false;
+    }
   }
 
   /** Fail if there are any build errors on any project in the workspace. */
@@ -248,17 +288,14 @@ public class ProjectUtils {
 
   /** Wait for any spawned jobs and builds to complete (e.g., validation jobs). */
   public static void waitForProjects(IProject... projects) {
-    Runnable delayTactic = new Runnable() {
-      @Override
-      public void run() {
-        Display display = Display.getCurrent();
-        if (display != null) {
-          while (display.readAndDispatch()) {
-            /* spin */
-          }
+    Runnable delayTactic = () -> {
+      Display display = Display.getCurrent();
+      if (display != null) {
+        while (display.readAndDispatch()) {
+          /* spin */
         }
-        Thread.yield();
       }
+      Thread.yield();
     };
     waitForProjects(delayTactic, projects);
   }
@@ -338,6 +375,8 @@ public class ProjectUtils {
         case "org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob":
           jobs.add(job);
           break;
+        default:
+          break;
       }
     }
     return jobs;
@@ -349,7 +388,7 @@ public class ProjectUtils {
 
 
   /**
-   * Wait until the project has finished building and markers have been registered.
+   * Wait until the project has finished building and markers have disappeared.
    * 
    * @throws AssertionError if markers are still present
    */
@@ -367,17 +406,12 @@ public class ProjectUtils {
       }
     } while (elapsed.elapsed(TimeUnit.SECONDS) < 300 && markers.length > 0);
 
-    ArrayAssertions.assertIsEmpty(markers, new Function<IMarker, String>() {
-      @Override
-      public String apply(IMarker marker) {
-        return ProjectUtils.formatProblem(marker);
-      }
-    });
+    ArrayAssertions.assertIsEmpty(markers, ProjectUtils::formatProblem);
     return markers;
   }
 
   /**
-   * Wait until the project has finished building and markers have disappeared.
+   * Wait until the project has finished building and markers have been registered.
    * 
    * @throws AssertionError if there are no markers by the timeout
    */

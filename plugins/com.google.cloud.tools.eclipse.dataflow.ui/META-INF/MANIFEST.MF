@@ -1,12 +1,12 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
+Automatic-Module-Name: com.google.cloud.tools.eclipse.dataflow.ui
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.dataflow.ui;singleton:=true
 Bundle-Version: 0.1.0.qualifier
-Bundle-Activator: com.google.cloud.tools.eclipse.dataflow.ui.DataflowUiPlugin
 Bundle-Vendor: %providerName
-Bundle-ClassPath: .
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-Activator: com.google.cloud.tools.eclipse.dataflow.ui.DataflowUiPlugin
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
 Export-Package: com.google.cloud.tools.eclipse.dataflow.ui.page,
@@ -30,10 +30,10 @@ Import-Package: com.google.api.client.auth.oauth2;version="[1.23.0,1.24.0)",
  com.google.cloud.tools.eclipse.usagetracker,
  com.google.cloud.tools.eclipse.util,
  com.google.cloud.tools.eclipse.util.jobs,
- com.google.common.annotations;version="[20.0.0,21.0.0)",
- com.google.common.base;version="[20.0.0,21.0.0)",
- com.google.common.collect;version="[20.0.0,21.0.0)",
- com.google.common.util.concurrent;version="[20.0.0,21.0.0)",
+ com.google.common.annotations;version="[21.0.0,22.0.0)",
+ com.google.common.base;version="[21.0.0,22.0.0)",
+ com.google.common.collect;version="[21.0.0,22.0.0)",
+ com.google.common.util.concurrent;version="[21.0.0,22.0.0)",
  org.eclipse.core.commands,
  org.eclipse.core.commands.common,
  org.eclipse.core.resources,

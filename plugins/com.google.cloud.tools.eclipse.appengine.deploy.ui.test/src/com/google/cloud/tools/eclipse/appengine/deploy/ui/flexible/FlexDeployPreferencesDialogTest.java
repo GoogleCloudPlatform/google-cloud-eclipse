@@ -24,7 +24,6 @@ import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
-import com.google.common.base.Predicate;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.widgets.Composite;
@@ -63,11 +62,8 @@ public class FlexDeployPreferencesDialogTest {
   }
 
   private static Control findGcpPricingLink(Composite dialogArea) {
-    return CompositeUtil.findControl(dialogArea, new Predicate<Control>() {
-      @Override
-      public boolean apply(Control control) {
-        return control instanceof Link && GCP_PRICING_MESSAGE.equals(((Link) control).getText());
-      }
-    });
+    return CompositeUtil.findControl(dialogArea,
+        control -> control instanceof Link && GCP_PRICING_MESSAGE.equals(((Link) control).getText())
+    );
   }
 }

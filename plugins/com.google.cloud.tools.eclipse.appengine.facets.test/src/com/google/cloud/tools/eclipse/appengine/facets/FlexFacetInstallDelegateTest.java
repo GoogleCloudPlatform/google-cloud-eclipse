@@ -30,10 +30,10 @@ import org.junit.Test;
 
 public class FlexFacetInstallDelegateTest {
 
-  @Rule public TestProjectCreator wtpProjectCreator = new TestProjectCreator().withFacetVersions(
+  @Rule public TestProjectCreator wtpProjectCreator = new TestProjectCreator().withFacets(
       JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
 
-  @Rule public TestProjectCreator javaProjectCreator = new TestProjectCreator().withFacetVersions(
+  @Rule public TestProjectCreator javaProjectCreator = new TestProjectCreator().withFacets(
       JavaFacet.VERSION_1_7);
 
   @Test

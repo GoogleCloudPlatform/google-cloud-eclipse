@@ -29,7 +29,6 @@ import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.eclipse.swtbot.swt.finder.widgets.TimeoutException;
 import org.eclipse.wst.common.project.facet.core.FacetedProjectFramework;
 import org.junit.Assert;
@@ -58,16 +57,13 @@ public class SwtBotAppEngineActions {
   /**
    * Create a new project with the Maven-based Google App Engine Standard Java Project wizard
    */
-  public static IProject createMavenWebAppProject(final SWTWorkbenchBot bot, String projectName,
-      String location, String javaPackage, AppEngineRuntime runtime, final String mavenGroupId,
-      final String mavenArtifactId) {
-    return createWebAppProject(bot, projectName, location, javaPackage, runtime, new Runnable() {
-      @Override
-      public void run() {
-        bot.checkBox("Create as Maven project").click();
-        bot.textWithLabel("Group ID:").setText(mavenGroupId);
-        bot.textWithLabel("Artifact ID:").setText(mavenArtifactId);
-      }
+  public static IProject createMavenWebAppProject(SWTWorkbenchBot bot, String projectName,
+      String location, String javaPackage, AppEngineRuntime runtime, String mavenGroupId,
+      String mavenArtifactId) {
+    return createWebAppProject(bot, projectName, location, javaPackage, runtime, () -> {
+      bot.checkBox("Create as Maven project").click();
+      bot.textWithLabel("Group ID:").setText(mavenGroupId);
+      bot.textWithLabel("Artifact ID:").setText(mavenArtifactId);
     });
   }
 
@@ -78,9 +74,8 @@ public class SwtBotAppEngineActions {
     SWTBotShell shell = bot.shell("New Project");
     shell.activate();
 
-    SwtBotTreeUtilities.waitUntilTreeHasItems(bot, bot.tree());
-    bot.tree().expandNode("Google Cloud Platform")
-        .select("Google App Engine Standard Java Project");
+    SwtBotTreeUtilities.select(
+        bot, bot.tree(), "Google Cloud Platform", "Google App Engine Standard Java Project");
     bot.button("Next >").click();
 
     if (extraBotActions != null) {
@@ -99,7 +94,7 @@ public class SwtBotAppEngineActions {
     }
     if (runtime != null) {
       if (runtime == AppEngineRuntime.STANDARD_JAVA_7) {
-        bot.comboBoxWithLabel("Java version:").setSelection("Java 7, Servlet 2.5");
+        bot.comboBoxWithLabel("Java version:").setSelection("Java 7, Servlet 2.5 (deprecated)");
       } else if (runtime == AppEngineRuntime.STANDARD_JAVA_8) {
         bot.comboBoxWithLabel("Java version:").setSelection("Java 8, Servlet 3.1");
       } else {
@@ -127,13 +122,13 @@ public class SwtBotAppEngineActions {
   }
 
   /**
-   * Use the the Eclipse general import project wizard to import an existing project from a
+   * Use the Eclipse general import project wizard to import an existing project from a
    * location.
    */
   public static IProject importNativeProject(SWTWorkbenchBot bot, String projectName,
       File extractedLocation) {
 
-    openImportExistingProjectsWizard(bot);
+    openImportProjectsWizard(bot, "General", "Existing Projects into Workspace");
     bot.button("Next >").click();
 
     // current comboBox is associated with a radio button
@@ -161,43 +156,19 @@ public class SwtBotAppEngineActions {
     return project;
   }
 
-  private static void openImportExistingProjectsWizard(SWTWorkbenchBot bot) {
-    for (int tries = 1; true; tries++) {
-      SWTBotShell shell = null;
-      try {
-        bot.menu("File").menu("Import...").click();
-        shell = bot.shell("Import");
-        shell.activate();
-
-        SwtBotTreeUtilities.waitUntilTreeHasItems(bot, bot.tree());
-        SWTBotTreeItem treeItem = bot.tree().expandNode("General");
-        SwtBotTreeUtilities.waitUntilTreeItemHasChild(bot, treeItem,
-            "Existing Projects into Workspace");
-        treeItem.select("Existing Projects into Workspace");
-        break;
-      } catch (TimeoutException e) {
-        if (tries == 2) {
-          throw e;
-        } else if (shell != null) {
-          shell.close();
-        }
-      }
-    }
-  }
-
-  /**
-   * Import a Maven project from a zip file
-   */
-  public static IProject importMavenProject(SWTWorkbenchBot bot, String projectName,
-      File extractedLocation) {
-
+  private static void openImportProjectsWizard(
+      SWTWorkbenchBot bot, String wizardCategory, String importWizardName) {
     bot.menu("File").menu("Import...").click();
-
     SWTBotShell shell = bot.shell("Import");
     shell.activate();
+    SwtBotTreeUtilities.select(bot, bot.tree(), wizardCategory, importWizardName);
+  }
 
-    SwtBotTreeUtilities.waitUntilTreeHasItems(bot, bot.tree());
-    bot.tree().expandNode("Maven").select("Existing Maven Projects");
+  /** Import a Maven project from a zip file. */
+  public static IProject importMavenProject(
+      SWTWorkbenchBot bot, String projectName, File extractedLocation) {
+
+    openImportProjectsWizard(bot, "Maven", "Existing Maven Projects");
     bot.button("Next >").click();
 
     bot.comboBoxWithLabel("Root Directory:").setText(extractedLocation.getAbsolutePath());
@@ -224,7 +195,7 @@ public class SwtBotAppEngineActions {
    *
    * @return the project
    */
-  private static IProject waitUntilFacetedProjectExists(SWTBot bot, final IProject project) {
+  private static IProject waitUntilFacetedProjectExists(SWTBot bot, IProject project) {
     bot.waitUntil(new DefaultCondition() {
       @Override
       public String getFailureMessage() {

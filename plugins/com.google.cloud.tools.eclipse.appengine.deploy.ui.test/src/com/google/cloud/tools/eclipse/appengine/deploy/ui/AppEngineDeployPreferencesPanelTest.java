@@ -43,7 +43,6 @@ import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.cloud.tools.login.Account;
-import com.google.common.base.Predicate;
 import java.util.Arrays;
 import java.util.HashSet;
 import org.eclipse.core.databinding.ValidationStatusProvider;
@@ -57,7 +56,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotCheckBox;
 import org.junit.Before;
 import org.junit.Rule;
@@ -154,8 +152,9 @@ public class AppEngineDeployPreferencesPanelTest {
   public void testUncheckStopPreviousVersionButtonWhenDisabled() {
     deployPanel = createPanel(true /* requireValues */);
 
-    Button promoteButton = getButtonWithText("Promote the deployed version to receive all traffic");
-    Button stopButton = getButtonWithText("Stop previous version");
+    Button promoteButton = CompositeUtil.findButton(deployPanel,
+        "Promote the deployed version to receive all traffic");
+    Button stopButton = CompositeUtil.findButton(deployPanel, "Stop previous version");
     SWTBotCheckBox promote = new SWTBotCheckBox(promoteButton);
     SWTBotCheckBox stop = new SWTBotCheckBox(stopButton);
 
@@ -302,15 +301,6 @@ public class AppEngineDeployPreferencesPanelTest {
 
     assertThat(getProjectSelector().getProjectCount(), is(1));
     assertThat(getProjectSelector().getSelection().size(), is(0));
-  }
-
-  private Button getButtonWithText(final String text) {
-    return (Button) CompositeUtil.findControl(deployPanel, new Predicate<Control>() {
-      @Override
-      public boolean apply(Control control) {
-        return control instanceof Button && ((Button) control).getText().equals(text);
-      }
-    });
   }
 
   private void selectAccount(Account account) {

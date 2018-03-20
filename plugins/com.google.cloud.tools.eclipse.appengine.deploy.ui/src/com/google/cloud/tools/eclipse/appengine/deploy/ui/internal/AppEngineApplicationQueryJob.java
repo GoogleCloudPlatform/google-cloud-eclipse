@@ -24,7 +24,7 @@ import com.google.cloud.tools.eclipse.projectselector.ProjectRepositoryException
 import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.AppEngine;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
-import com.google.common.base.Predicate;
+import java.util.function.Predicate;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -56,7 +56,7 @@ public class AppEngineApplicationQueryJob extends Job {
     this.projectRepository = projectRepository;
     this.projectSelector = projectSelector;
     this.createAppLink = createAppLink;
-    this.isLatestAppQueryJob = isLatestQueryJob;
+    isLatestAppQueryJob = isLatestQueryJob;
     display = projectSelector.getDisplay();
   }
 
@@ -89,15 +89,12 @@ public class AppEngineApplicationQueryJob extends Job {
     final Job thisJob = this;
 
     // The selector may have been disposed (i.e., dialog closed); check it in the UI thread.
-    display.syncExec(new Runnable() {
-      @Override
-      public void run() {
-        if (!projectSelector.isDisposed()
-            && isLatestAppQueryJob.apply(thisJob) /* intentionally checking in UI context */
-            // Covers the case where user switches accounts.
-            && !projectSelector.getSelection().isEmpty()) {
-          projectSelector.setStatusLink(statusMessage, statusTooltip);
-        }
+    display.syncExec(() -> {
+      if (!projectSelector.isDisposed()
+          && isLatestAppQueryJob.test(thisJob) /* intentionally checking in UI context */
+          // Covers the case where user switches accounts.
+          && !projectSelector.getSelection().isEmpty()) {
+        projectSelector.setStatusLink(statusMessage, statusTooltip);
       }
     });
   }

@@ -33,7 +33,7 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
-import com.google.cloud.tools.eclipse.sdk.MessageConsoleWriterOutputLineListener;
+import com.google.cloud.tools.eclipse.sdk.MessageConsoleWriterListener;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -47,6 +47,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -79,11 +80,6 @@ import org.eclipse.wst.server.core.util.SocketUtil;
  */
 public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     implements IModulePublishHelper {
-
-  @VisibleForTesting // and should be replaced by Java8 BiFunction
-  public interface PortChecker {
-    boolean isInUse(InetAddress addr, int port);
-  }
 
   /** Parse the numeric string. Return {@code defaultValue} if non-numeric. */
   private static int parseInt(String numeric, int defaultValue) {
@@ -154,17 +150,22 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
         devServer.stop(stopConfig);
       } catch (AppEngineException ex) {
         logger.log(Level.WARNING, "Error terminating server: " + ex.getMessage(), ex); //$NON-NLS-1$
+        terminate();
       }
     } else {
       // we've already given it a chance
-      logger.info("forced stop: destroying associated processes"); //$NON-NLS-1$
-      if (devProcess != null) {
-        devProcess.destroy();
-        devProcess = null;
-      }
-      devServer = null;
-      setServerState(IServer.STATE_STOPPED);
+      terminate();
     }
+  }
+
+  private void terminate() {
+    logger.info("forced stop: destroying associated processes"); //$NON-NLS-1$
+    if (devProcess != null) {
+      devProcess.destroy();
+      devProcess = null;
+    }
+    devServer = null;
+    setServerState(IServer.STATE_STOPPED);
   }
 
 
@@ -250,8 +251,8 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   }
 
   @VisibleForTesting
-  void checkPorts(DefaultRunConfiguration devServerRunConfiguration, PortChecker portInUse)
-      throws CoreException {
+  void checkPorts(DefaultRunConfiguration devServerRunConfiguration,
+      BiFunction<InetAddress, Integer, Boolean> portInUse) throws CoreException {
     InetAddress serverHost = InetAddress.getLoopbackAddress();
     if (devServerRunConfiguration.getHost() != null) {
       serverHost = LocalAppEngineServerLaunchConfigurationDelegate
@@ -285,14 +286,14 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
    * @throws CoreException if the port is in use
    */
   @VisibleForTesting
-  static int checkPort(InetAddress addr, int port, PortChecker portInUse)
-      throws CoreException {
+  static int checkPort(InetAddress addr, int port,
+      BiFunction<InetAddress, Integer, Boolean> portInUse) throws CoreException {
     Preconditions.checkNotNull(portInUse);
     if (port < 0 || port > 65535) {
       throw new CoreException(newErrorStatus(Messages.getString("PORT_OUT_OF_RANGE")));
     }
 
-    if (port != 0 && portInUse.isInUse(addr, port)) {
+    if (port != 0 && portInUse.apply(addr, port)) {
       throw new CoreException(
           newErrorStatus(Messages.getString("PORT_IN_USE", String.valueOf(port))));
     }
@@ -344,12 +345,9 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
       Path javaHomePath, MessageConsoleStream outputStream, MessageConsoleStream errorStream)
       throws CoreException {
 
-    PortChecker portInUse = new PortChecker() {
-      @Override
-      public boolean isInUse(InetAddress addr, int port) {
-        Preconditions.checkNotNull(port);
-        return SocketUtil.isPortInUse(addr, port);
-      }
+    BiFunction<InetAddress, Integer, Boolean> portInUse = (addr, port) -> {
+      Preconditions.checkArgument(port >= 0, "invalid port");
+      return SocketUtil.isPortInUse(addr, port);
     };
 
     checkPorts(devServerRunConfiguration, portInUse);
@@ -414,10 +412,8 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
 
   private void initializeDevServer(MessageConsoleStream stdout, MessageConsoleStream stderr,
       Path javaHomePath) {
-    MessageConsoleWriterOutputLineListener stdoutListener =
-        new MessageConsoleWriterOutputLineListener(stdout);
-    MessageConsoleWriterOutputLineListener stderrListener =
-        new MessageConsoleWriterOutputLineListener(stderr);
+    MessageConsoleWriterListener stdoutListener = new MessageConsoleWriterListener(stdout);
+    MessageConsoleWriterListener stderrListener = new MessageConsoleWriterListener(stderr);
 
     // dev_appserver output goes to stderr
     cloudSdk = new CloudSdk.Builder()

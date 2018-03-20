@@ -201,7 +201,7 @@ public class LibraryFileTest {
   
   @Test
   public void testUpdateVersion() {
-    MavenCoordinates mavenCoordinates = new MavenCoordinates.Builder()
+    mavenCoordinates = new MavenCoordinates.Builder()
         .setGroupId("com.google.guava")
         .setArtifactId("guava")
         .setVersion("15.0")

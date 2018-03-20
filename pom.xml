@@ -30,75 +30,21 @@
 
   <modules>
     <module>gcp-repo</module>
-    <module>features/com.google.cloud.tools.eclipse.suite.e45.feature</module>
-    <module>features/com.google.cloud.tools.eclipse.3rdparty.feature</module>
-    <module>features/com.google.licenses.apache_v2</module>
-
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.compat</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.compat.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy.ui</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy.ui.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.facets</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.facets.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.libraries</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.libraries.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.libraries.ui</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.libraries.ui.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.localserver</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.localserver.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.newproject</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.newproject.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.standard.java8</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.standard.java8.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.validation</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.validation.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.ui</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.ui.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.bugreport</module>
-    <module>plugins/com.google.cloud.tools.eclipse.bugreport.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.googleapis</module>
-    <module>plugins/com.google.cloud.tools.eclipse.googleapis.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.login</module>
-    <module>plugins/com.google.cloud.tools.eclipse.login.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.preferences</module>
-    <module>plugins/com.google.cloud.tools.eclipse.preferences.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.projectselector</module>
-    <module>plugins/com.google.cloud.tools.eclipse.projectselector.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.sdk</module>
-    <module>plugins/com.google.cloud.tools.eclipse.sdk.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.sdk.ui</module>
-    <module>plugins/com.google.cloud.tools.eclipse.sdk.ui.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.test.dependencies</module>
-    <module>plugins/com.google.cloud.tools.eclipse.test.util</module>
-    <module>plugins/com.google.cloud.tools.eclipse.test.logback</module>
-    <module>plugins/com.google.cloud.tools.eclipse.usagetracker</module>
-    <module>plugins/com.google.cloud.tools.eclipse.usagetracker.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.ui</module>
-    <module>plugins/com.google.cloud.tools.eclipse.ui.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.util</module>
-    <module>plugins/com.google.cloud.tools.eclipse.util.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.swtbot</module>
-    <module>plugins/com.google.cloud.tools.eclipse.welcome</module>
-    <module>plugins/com.google.cloud.tools.eclipse.welcome.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.aeri</module>
-    <module>plugins/com.google.cloud.tools.eclipse.aeri.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.dataflow.core</module>
-    <module>plugins/com.google.cloud.tools.eclipse.dataflow.core.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.dataflow.ui</module>
-    <module>plugins/com.google.cloud.tools.eclipse.dataflow.ui.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.integration.appengine</module>
-
-    <module>third_party/com.google.cloud.tools.eclipse.jdt.launching</module>
-    <module>third_party/com.google.cloud.tools.eclipse.jst.server.core</module>
+    <module>features</module>
+    <module>plugins</module>
+    <module>third_party</module>
   </modules>
 
   <properties>
-    <tycho.version>1.0.0</tycho.version>
+    <tycho.version>1.1.0</tycho.version>
     <tycho-extras.version>1.0.0</tycho-extras.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <eclipse.target>mars</eclipse.target>
+    <eclipse.target>oxygen</eclipse.target>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+
+    <!-- by default enable GTK3 support -->
+    <swt.gtk3>1</swt.gtk3>
 
     <!-- log surefire tests to stdout -->
     <tycho.showEclipseLog>true</tycho.showEclipseLog>
@@ -122,6 +68,12 @@
     <org.eclipse.swtbot.search.timeout>30000</org.eclipse.swtbot.search.timeout>
 
     <jgit.dirtyWorkingTree>warning</jgit.dirtyWorkingTree>
+
+    <!--
+      jgit provider uses git commit hash to generate bundle/feature version
+      qualifier; set to empty to work around bug building from git-worktrees
+    -->
+    <tycho.buildtimestamp.provider>jgit</tycho.buildtimestamp.provider>
   </properties>
 
   <!--
@@ -137,18 +89,18 @@
       <!-- bundle: com.google.gson -->
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
-      <version>2.7</version>
+      <version>2.8.2</version>
     </dependency>
     <dependency>
       <!-- bundle: com.google.cloud.tools.appengine -->
       <groupId>com.google.cloud.tools</groupId>
       <artifactId>appengine-plugins-core</artifactId>
-      <version>0.4.1</version>
+      <version>0.5.1</version>
     </dependency>
     <dependency>
       <!--
-        dependency used by appengine-plugins-core
         bundle: org.apache.commons.compress
+        dependency used by appengine-plugins-core
       -->
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
@@ -158,7 +110,7 @@
       <!-- bundle: com.google.guava -->
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>20.0</version>
+      <version>21.0</version>
     </dependency>
     <dependency>
       <!-- bundle: jackson-core-asl -->
@@ -220,6 +172,16 @@
         <groupId>org.objenesis</groupId>
         <artifactId>objenesis</artifactId>
         <version>2.2</version>
+      </dependency>
+      <dependency>
+        <groupId>org.hamcrest</groupId>
+        <artifactId>hamcrest-core</artifactId>
+        <version>1.3</version>
+      </dependency>
+      <dependency>
+        <groupId>org.hamcrest</groupId>
+        <artifactId>hamcrest-library</artifactId>
+        <version>1.3</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -297,7 +259,7 @@
           </dependency>
         </dependencies>
         <configuration>
-          <timestampProvider>jgit</timestampProvider>
+          <timestampProvider>${tycho.buildtimestamp.provider}</timestampProvider>
           <jgit.dirtyWorkingTree>${jgit.dirtyWorkingTree}</jgit.dirtyWorkingTree>
           <jgit.ignore>
             pom.xml
@@ -354,7 +316,23 @@
               - maven.artifact.threads=1 to workaround repository corruption seen in
                 https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2284
             -->
-            <argLine>${jacoco.agentArgLine} -Dmaven.artifact.threads=1 -Dorg.eclipse.swtbot.search.timeout=${org.eclipse.swtbot.search.timeout} -Xms40m -Xmx1G -XX:MaxPermSize=512m -Djava.awt.headless=true ${os-jvm-flags}</argLine>
+            <environmentVariables>
+              <SWT_GTK3>${swt.gtk3}</SWT_GTK3>
+            </environmentVariables>
+            <argLine>${jacoco.agentArgLine} -Dmaven.artifact.threads=1
+              -Dorg.eclipse.swtbot.search.timeout=${org.eclipse.swtbot.search.timeout}
+              -Xms40m -Xmx1G -XX:MaxPermSize=512m
+              -Djava.awt.headless=true
+              -Dlogback.configurationFile=platform:/plugin/com.google.cloud.tools.eclipse.test.dependencies/logback.xml
+              ${os-jvm-flags}
+            </argLine>
+            <bundleStartLevel>
+              <bundle>
+                 <id>com.google.cloud.tools.eclipse.test.dependencies</id>
+                 <level>1</level>
+                 <autoStart>true</autoStart>
+              </bundle>
+           </bundleStartLevel>
           </configuration>
         </plugin>
 
@@ -379,12 +357,29 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>2.5.1</version>
+          <version>3.6.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>2.12.4</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>1.8</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.eclipse.scout</groupId>
+          <artifactId>eclipse-settings-maven-plugin</artifactId>
+          <version>3.0.2</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -399,81 +394,6 @@
       <properties>
         <os-jvm-flags>-XstartOnFirstThread</os-jvm-flags>
       </properties>
-    </profile>
-
-    <profile>
-      <id>build-eclipse-mars</id>
-      <activation>
-        <!-- Default target if no eclipse.target specified. -->
-        <property>
-          <name>!eclipse.target</name>
-          <!-- when no longer the default: <name>eclipse.target</name> <value>mars</value> -->
-        </property>
-      </activation>
-      <properties>
-         <jettyMinVersion>9.1</jettyMinVersion>
-         <jettyMaxVersion>9.3</jettyMaxVersion>
-      </properties>
-      <!-- build against a known target platform -->
-      <modules>
-        <module>eclipse/mars</module>
-      </modules>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.eclipse.tycho</groupId>
-            <artifactId>target-platform-configuration</artifactId>
-            <configuration>
-            <target>
-              <artifact>
-                <groupId>com.google.cloud.tools.eclipse</groupId>
-                <artifactId>gcp-eclipse-mars</artifactId>
-                <version>4.5.0-SNAPSHOT</version>
-              </artifact>
-            </target>
-           </configuration>
-          </plugin>
-
-          <!--
-            Ensure we don't have buggy commons-collections nor Java-8 Guava.
-            Must be done here as Oxygen has moved to Guava 21.
-          -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-enforcer-plugin</artifactId>
-            <executions>
-              <execution>
-                <goals><goal>enforce</goal></goals>
-                <configuration>
-                  <rules>
-                    <bannedDependencies>
-                      <excludes>
-                        <exclude>commons-collections:commons-collections:[3.2.1]</exclude>
-                      </excludes>
-                    </bannedDependencies>
-                    <bannedDependencies>
-                      <!--
-                        Ensure our bundles only use Guava 20.0.0.
-                        Tycho identifies p2-resolved bundles are of form:
-                        p2.eclipse-plugin:com.google.guava:jar:20.0.0:system
-                      -->
-                      <searchTransitive>false</searchTransitive>
-                      <excludes>
-                        <exclude>com.google.guava:guava</exclude>
-                        <exclude>*:com.google.guava</exclude>
-                      </excludes>
-                      <includes>
-                        <include>com.google.guava:guava:[20,21)</include>
-                        <include>*:com.google.guava:[20,21)</include>
-                      </includes>
-                    </bannedDependencies>
-                  </rules>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
     </profile>
 
     <profile>
@@ -513,8 +433,10 @@
     <profile>
       <id>build-eclipse-oxygen</id>
       <activation>
+        <!-- Default target if no eclipse.target specified. -->
         <property>
-          <name>eclipse.target</name> <value>oxygen</value>
+          <name>!eclipse.target</name>
+          <!-- when no longer the default: <name>eclipse.target</name> <value>oxygen</value> -->
         </property>
       </activation>
       <properties>
@@ -556,14 +478,14 @@
     </profile>
 
     <!--
-      The following profiles work to prevent Java 8'isms (or Java 9!)
+      The following profiles work to prevent Java 9'isms
       using Maven and Tycho's support for toolchains.
     -->
     <profile>
        <!-- 
           We can only use tycho-compiler-plugin's `useJDK=BREE`
           mode when we're building with our minimum supported Java
-          runtime environment (currently JavaSE-1.7).  `BREE` mode
+          runtime environment (currently JavaSE-1.9).  `BREE` mode
           builds each bundle against a JDK that matches its
           Bundle-RequiredExecutionEnvironment, but results in
           compile-time resolving errors on Eclipse 4.6/Neon
@@ -571,7 +493,7 @@
       -->
       <id>building-with-minimum-java-runtime-</id>
       <activation>
-        <property><name>toolchain.java.runtime</name><value>JavaSE-1.7</value></property>
+        <property><name>toolchain.java.runtime</name><value>JavaSE-1.9</value></property>
       </activation>
       <properties>
          <tycho.toolchains>BREE</tycho.toolchains>
@@ -581,7 +503,7 @@
       <!--
           We use tycho-surefire-plugin's default `useJDK=SYSTEM`
           mode to run tests using the configured Maven toolchain.  So
-          specifying toolchain.java.runtime=JavaSE-1.7 will lead to test
+          specifying toolchain.java.runtime=JavaSE-1.9 will lead to test
           failures should we attempt to load bundles with BREE=JavaSE-1.8
           or that contains Java 8 code.  Same applies with Java 9.
       -->
@@ -664,6 +586,45 @@
         </plugins>
       </build>
     </profile>
+
+    <profile>
+      <id>errorprone</id>
+      <!-- add separate compilation step using the errorprone compiler -->
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>compile</phase>
+                <goals>
+                  <goal>compile</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <compilerId>javac-with-errorprone</compilerId>
+              <forceJavacCompilerUse>true</forceJavacCompilerUse>
+            </configuration>
+            <dependencies>
+              <dependency>
+                <groupId>org.codehaus.plexus</groupId>
+                <artifactId>plexus-compiler-javac-errorprone</artifactId>
+                <version>2.8.1</version>
+              </dependency>
+              <!-- override plexus-compiler-javac-errorprone's dependency on
+                 Error Prone with the latest version -->
+              <dependency>
+                <groupId>com.google.errorprone</groupId>
+                <artifactId>error_prone_core</artifactId>
+                <version>2.0.15</version>
+              </dependency>
+            </dependencies>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
 
   <repositories>
@@ -679,4 +640,6 @@
       </snapshots>
     </repository>
   </repositories>
+<pluginRepositories>
+</pluginRepositories>
 </project>

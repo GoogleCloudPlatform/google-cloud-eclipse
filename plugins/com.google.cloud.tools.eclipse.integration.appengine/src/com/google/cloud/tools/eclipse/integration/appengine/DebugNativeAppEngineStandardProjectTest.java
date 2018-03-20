@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotStyledText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotToolbarButton;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
@@ -90,11 +91,8 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
 
     SWTBotTreeItem testProject = SwtBotProjectActions.selectProject(bot, "testapp_java8");
     assertNotNull(testProject);
-    SwtBotTestingUtilities.performAndWaitForWindowChange(bot, new Runnable() {
-      @Override
-      public void run() {
-        bot.menu("Run").menu("Debug As").menu("1 Debug on Server").click();
-      }
+    SwtBotTestingUtilities.performAndWaitForWindowChange(bot, () -> {
+      bot.menu("Run").menu("Debug As").menu("1 Debug on Server").click();
     });
 
     SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
@@ -106,8 +104,11 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
     SWTBotTree launchTree =
         new SWTBotTree(bot.widget(widgetOfType(Tree.class), debugView.getWidget()));
 
-    // avoid any stray processes that may be lying around
-    launchTree.contextMenu("Remove All Terminated").click();
+    // clean up any stray processes that may be lying around
+    SWTBotMenu launchMenu = launchTree.contextMenu("Remove All Terminated");
+    if (launchMenu.isEnabled()) {
+      launchMenu.click();
+    }
 
     SwtBotTreeUtilities.waitUntilTreeHasItems(bot, launchTree);
     SWTBotTreeItem[] allItems = launchTree.getAllItems();
@@ -116,10 +117,9 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
 
     SWTBotView consoleView = bot.viewById("org.eclipse.ui.console.ConsoleView"); // IConsoleConstants.ID_CONSOLE_VIEW
     consoleView.show();
-    assertThat("App Engine console not active",
-        consoleView.getViewReference().getContentDescription(),
-        Matchers.containsString("App Engine Standard at localhost"));
-    final SWTBotStyledText consoleContents =
+    SwtBotTestingUtilities.waitUntilViewContentDescription(
+        bot, consoleView, Matchers.containsString("App Engine Standard at localhost"));
+    SWTBotStyledText consoleContents =
         new SWTBotStyledText(bot.widget(widgetOfType(StyledText.class), consoleView.getWidget()));
     SwtBotTestingUtilities.waitUntilStyledTextContains(bot,
         "Module instance default is running at http://localhost:8080", consoleContents);

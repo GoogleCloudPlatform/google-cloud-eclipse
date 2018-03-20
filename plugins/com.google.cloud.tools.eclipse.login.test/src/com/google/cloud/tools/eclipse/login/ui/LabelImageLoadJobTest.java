@@ -93,8 +93,7 @@ public class LabelImageLoadJobTest {
   @Test
   public void testRun_noErrorIfLabelIsAlreadyDisposed()
       throws MalformedURLException, InterruptedException {
-    URL url = new URL(server.getAddress() + "sample.gif");
-    loadJob = new LabelImageLoadJob(url, label);
+    loadJob = new LabelImageLoadJob(new URL(server.getAddress() + "sample.gif"), label);
 
     label.dispose();
     runAndWaitJob();

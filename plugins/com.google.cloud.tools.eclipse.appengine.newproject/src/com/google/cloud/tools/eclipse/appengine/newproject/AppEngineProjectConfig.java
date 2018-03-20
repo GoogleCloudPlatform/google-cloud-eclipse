@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
-import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,7 +28,6 @@ import org.eclipse.core.resources.IProject;
  * Collects all data needed to create and configure an App Engine Eclipse Project.
  */
 public class AppEngineProjectConfig {
-  private File cloudSdkLocation = null;
   private URI eclipseProjectLocationUri = null;
   private String packageName = "";
   private IProject project;
@@ -42,20 +40,12 @@ public class AppEngineProjectConfig {
   private String mavenArtifactId;
   private String mavenVersion;
 
-  File getCloudSdkLocation() {
-    return cloudSdkLocation;
-  }
-
-  void setCloudSdkLocation(File cloudSdkLocation) {
-    this.cloudSdkLocation = cloudSdkLocation;
-  }
-
   void setPackageName(String name) {
-    this.packageName = name;
+    packageName = name;
   }
 
   String getPackageName() {
-    return this.packageName;
+    return packageName;
   }
 
   /**
@@ -66,15 +56,15 @@ public class AppEngineProjectConfig {
   }
 
   IProject getProject() {
-    return this.project;
+    return project;
   }
 
   URI getEclipseProjectLocationUri() {
-    return this.eclipseProjectLocationUri;
+    return eclipseProjectLocationUri;
   }
 
   void setEclipseProjectLocationUri(URI uri) {
-    this.eclipseProjectLocationUri = uri;
+    eclipseProjectLocationUri = uri;
   }
 
   List<Library> getAppEngineLibraries() {
@@ -82,7 +72,7 @@ public class AppEngineProjectConfig {
   }
 
   public void setAppEngineLibraries(Collection<Library> libraries) {
-    this.appEngineLibraries = new ArrayList<>(libraries);
+    appEngineLibraries = new ArrayList<>(libraries);
   }
 
   String getServiceName() {
@@ -102,7 +92,7 @@ public class AppEngineProjectConfig {
   }
 
   void setUseMaven(String mavenGroupId, String mavenArtifactId, String mavenVersion) {
-    this.useMaven = true;
+    useMaven = true;
     this.mavenGroupId = mavenGroupId;
     this.mavenArtifactId = mavenArtifactId;
     this.mavenVersion = mavenVersion;

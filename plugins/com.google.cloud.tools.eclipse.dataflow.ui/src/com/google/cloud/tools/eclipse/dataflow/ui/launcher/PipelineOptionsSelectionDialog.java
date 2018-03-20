@@ -19,6 +19,8 @@ package com.google.cloud.tools.eclipse.dataflow.ui.launcher;
 import com.google.cloud.tools.eclipse.dataflow.core.launcher.options.PipelineOptionsType;
 import com.google.cloud.tools.eclipse.dataflow.ui.DataflowUiPlugin;
 import com.google.common.collect.Ordering;
+import java.util.Comparator;
+import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -34,8 +36,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.FilteredItemsSelectionDialog;
 import org.eclipse.ui.dialogs.SearchPattern;
-import java.util.Comparator;
-import java.util.Map;
 
 /**
  * A Dialog to select a {@link PipelineOptionsType}.

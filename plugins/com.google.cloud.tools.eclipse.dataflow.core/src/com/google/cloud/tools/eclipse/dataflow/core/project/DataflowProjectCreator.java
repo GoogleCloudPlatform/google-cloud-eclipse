@@ -251,7 +251,7 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
    * Gets the target platform of the environment's JDT plugin. If not found, use the default target
    * platform. If not supported, throw a {@link ProjectCreationException}.
    */
-  private String getTargetPlatform() throws ProjectCreationException {
+  private static String getTargetPlatform() throws ProjectCreationException {
     String targetPlatform = JavaCore.getOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM);
     if (targetPlatform == null || JAVA_VERSION_BLACKLIST.contains(targetPlatform)) {
       DataflowCorePlugin.logWarning(

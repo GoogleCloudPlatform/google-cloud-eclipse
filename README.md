@@ -20,21 +20,30 @@ Maven for building Eclipse bundles and features.
   this somewhere on your file system.
 
 1. The [Eclipse IDE](https://www.eclipse.org/downloads/eclipse-packages/).
-  It's easiest to use the _Eclipse IDE for Java EE Developers_ package. You can use
-  Eclipse 4.6 (Neon) or 4.7 (Oxygen) as we define a target platform to build and run against.
+  It's easiest to use the _Eclipse IDE for Java EE Developers_ package. You must use
+  Eclipse 4.7 (Oxygen) or later.  We use _target platforms_ to support building
+  for earlier versions of Eclipse.  You also need the following:
 
-  1. The [m2eclipse plugin](http://www.eclipse.org/m2e/) (also called m2e) is
-     required to import the projects into Eclipse.  m2eclipse is included in
+  1. The [M2Eclipse plugin](http://www.eclipse.org/m2e/) (also called m2e) is
+     required to import the projects into Eclipse.  M2Eclipse is included in
      [several packages](https://www.eclipse.org/downloads/compare.php?release=neon),
      such as the _Eclipse IDE for Java EE Developers_ package.
 
   2. The [m2e connector for maven-dependency-plugin](https://github.com/ianbrandt/m2e-maven-dependency-plugin)
      should be installed from `http://ianbrandt.github.io/m2e-maven-dependency-plugin/`.
+     This connector should be prompted for by M2Eclipse.  If not, use
+     _Preferences > Maven > Discovery > Open Catalog_ and search
+     for _Dependency_ and install.
+
+  3. The [Google Java Format plugin for Eclipse](https://github.com/google/google-java-format/).
+     Download the [latest version](https://github.com/google/google-java-format/releases/).
+     and place the jar into your Eclipse installation's `dropins/` directory
+     (on MacOS this may be in `Eclipse.app/Contents/Eclipse/dropins/`).
 
 1. Maven 3.5.0 or later.  Although m2eclipse is bundled with its own Maven install,
    Maven is necessary to test command-line builds.
 
-1. JDK 7
+1. JDK 8
 
 1. git (optional: you can use EGit from within Eclipse instead)
 
@@ -44,7 +53,7 @@ Maven for building Eclipse bundles and features.
 
 ## Configuring Maven/Tycho Builds
 
-The plugin is built using Maven/Tycho and targeted to Java 7.
+The plugin is built using Maven/Tycho and targeted to Java 8.
 
 The tests need to find the Google Cloud SDK.  You can either:
 
@@ -53,9 +62,9 @@ The tests need to find the Google Cloud SDK.  You can either:
 
 ### Changing the Eclipse Platform compilation and testing target
 
-By default, the build is targeted against Eclipse Mars / 4.5.
+By default, the build is targeted against Eclipse Oxygen / 4.7.
 You can explicitly set the `eclipse.target` property to
-`neon` (4.6) or `oxygen` (4.7).
+`neon` (4.6).
 ```
 $ mvn -Declipse.target=neon package
 ```
@@ -65,7 +74,9 @@ $ mvn -Declipse.target=neon package
 We normally put production code into a bundle and tests as a fragment hosted
 by that bundle, put under the `plugins/` directory.
 For now we have been committing both the `pom.xml` and Eclipse's
-`.project`, `.classpath`, and `.settings/` files.
+`.project`, `.classpath`, and `.settings/` files.  We have a master set 
+of project settings in [`eclipse/settings`](eclipse/settings/); see the
+[`README.md`](eclipse/settings/README.md) for more details.
 
 Our CI process is configured to run our tests with JaCoCo, which requires
 some additional configuration to add new bundles and fragments
@@ -105,7 +116,7 @@ target platform whenever dependencies are updated.
 ### Steps to import into the Eclipse IDE
 
 
-1. Setup JDK 7 in Eclipse
+1. Setup JDK 8 in Eclipse (this may already be set up by Eclipse's JRE/JDK auto-discovery)
 
   1. Select `Window/Preferences` (on Mac `Eclipse/Preferences`).
 
@@ -113,19 +124,19 @@ target platform whenever dependencies are updated.
 
   1. Select Standard VM and click `Next`.
 
-  1. Select the folder that contains the JDK 7 installation by clicking
+  1. Select the folder that contains the JDK 8 installation by clicking
      `Directory`.
 
   1. Click `Finish`.
 
   1. Select `Java/Installed JREs/Execution Environments` page.
 
-  1. Click on `JavaSE-1.7` in the list on the left under `Execution
+  1. Click on `JavaSE-1.8` in the list on the left under `Execution
      Environments:`.
 
   1. The JDK just added should show up in the list on the right along with other
-     installed JDKs/JREs. Set the checkbox next the the JDK 7 added in the
-     previous steps to mark it as compatible with the `JavaSE-1.7` execution
+     installed JDKs/JREs. Set the checkbox next to the JDK 8 added in the
+     previous steps to mark it as compatible with the `JavaSE-1.8` execution
      environment.
 
   1. Click `OK`.
@@ -156,7 +167,7 @@ target platform whenever dependencies are updated.
 
   8. Select your new target platform (instead of Running Platform) in the `Target Platform` preferences.
 
-  9. Click `OK` to load this new target platform.
+  9. Click `Apply and Finish` to load this new target platform.
 
   10. Eclipse will load the target.
 
@@ -236,7 +247,6 @@ features being built against. We currently maintain three target platforms,
 targeting the latest version of the current, previous, and next releases.
 This is currently:
 
-  - Eclipse Mars (4.5 SR2): [`eclipse/mars/gcp-eclipse-mars.target`](eclipse/mars/gcp-eclipse-mars.target)
   - Eclipse Neon (4.6): [`eclipse/neon/gcp-eclipse-neon.target`](eclipse/neon/gcp-eclipse-neon.target)
   - Eclipse Oxygen (4.7): [`eclipse/oxygen/gcp-eclipse-oxygen.target`](eclipse/oxygen/gcp-eclipse-oxygen.target)
 
@@ -261,7 +271,7 @@ The process is:
        `org.eclipse.core.runtime`).
        Features are specified using their Feature ID suffixed with `.feature.group`
        (e.g., `org.eclipse.rcp.feature.group`).
-  4. Right-click in the editor and choose _Create Target Definition File_
+  4. Select the file in the Package Explorer, right-click, and choose _Create Target Definition File_
      to update the corresponding .target file.
 
 Both the `.tpd` and `.target` files should be committed.
@@ -291,6 +301,12 @@ the identifiers are not p2 identifiers, and so features do not
 require the `.feature.group` suffix.
 
 
+## Other Miscellaneous Dev Tasks
+
+### Updating IDE settings
+
+See [`eclipse/settings/`](eclipse/settings/README.md) for details.
+
 ### Configuring Maven/Tycho Toolchains for CI Builds
 
 _Note: this section is only relevant for configuring CI builds_
@@ -308,7 +324,7 @@ require configuring [Maven's toolchains](https://maven.apache.org/guides/mini/gu
 to point to appropriate JRE installations.  Tycho further requires
 that a toolchain defines an `id` for the specified _Execution
 Environment_ identifier.  For example, a `~/.m2/toolchains.xml` to
-configure Maven for a Java 7 toolchain on a Mac might be:
+configure Maven for a Java 8 toolchain on a Mac might be:
 
 ```
 <?xml version="1.0"?>
@@ -316,12 +332,12 @@ configure Maven for a Java 7 toolchain on a Mac might be:
   <toolchain>
     <type>jdk</type>
     <provides>
-      <id>JavaSE-1.7</id> <!-- the Execution Environment -->
-      <version>1.7</version>
+      <id>JavaSE-1.8</id> <!-- the Execution Environment -->
+      <version>1.8</version>
       <vendor>oracle</vendor>
     </provides>
     <configuration>
-      <jdkHome>/Library/Java/JavaVirtualMachines/jdk1.7.0_79.jdk/Contents/Home/jre</jdkHome>
+      <jdkHome>/Library/Java/JavaVirtualMachines/jdk1.8.0_155.jdk/Contents/Home/jre</jdkHome>
     </configuration>
   </toolchain>
 </toolchains>

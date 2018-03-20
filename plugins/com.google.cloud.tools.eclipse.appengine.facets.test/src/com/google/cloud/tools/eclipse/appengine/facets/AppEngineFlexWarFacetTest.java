@@ -41,11 +41,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class AppEngineFlexWarFacetTest {
 
-  @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacetVersions();
-  @Rule public TestProjectCreator wtpProjectCreator = new TestProjectCreator().withFacetVersions(
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacets();
+  @Rule public TestProjectCreator wtpProjectCreator = new TestProjectCreator().withFacets(
       JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
 
-  @Mock private IFacetedProject facetedProject;
+  @Mock private IFacetedProject mockFacetedProject;
 
   @Test
   public void testFlexFacetExists() {
@@ -62,17 +62,17 @@ public class AppEngineFlexWarFacetTest {
   @Test
   public void testHasAppEngineFacet_withFacet() {
     IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexWarFacet.ID);
-    when(facetedProject.hasProjectFacet(projectFacet)).thenReturn(true);
+    when(mockFacetedProject.hasProjectFacet(projectFacet)).thenReturn(true);
 
-    Assert.assertTrue(AppEngineFlexWarFacet.hasFacet(facetedProject));
+    Assert.assertTrue(AppEngineFlexWarFacet.hasFacet(mockFacetedProject));
   }
 
   @Test
   public void testHasAppEngineFacet_withoutFacet() {
     IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexWarFacet.ID);
-    when(facetedProject.hasProjectFacet(projectFacet)).thenReturn(false);
+    when(mockFacetedProject.hasProjectFacet(projectFacet)).thenReturn(false);
 
-    Assert.assertFalse(AppEngineFlexWarFacet.hasFacet(facetedProject));
+    Assert.assertFalse(AppEngineFlexWarFacet.hasFacet(mockFacetedProject));
   }
 
   @Test
@@ -147,8 +147,8 @@ public class AppEngineFlexWarFacetTest {
   @Test
   public void testInstallAppEngineFacet_installDependentFacets() throws CoreException {
     IProject project = projectCreator.getProject();
+    IFacetedProject facetedProject = projectCreator.getFacetedProject();
 
-    IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     AppEngineFlexWarFacet.installAppEngineFacet(facetedProject,
         true /* installDependentFacets */, new NullProgressMonitor());
     Assert.assertTrue(AppEngineFlexWarFacet.hasFacet(facetedProject));
@@ -158,10 +158,8 @@ public class AppEngineFlexWarFacetTest {
   }
 
   @Test
-  public void testInstallAppEngineFacet_noDependentFacets() throws CoreException {
-    IProject project = projectCreator.getProject();
-
-    IFacetedProject facetedProject = ProjectFacetsManager.create(project);
+  public void testInstallAppEngineFacet_noDependentFacets() {
+    IFacetedProject facetedProject = projectCreator.getFacetedProject();
     try {
       AppEngineFlexWarFacet.installAppEngineFacet(facetedProject,
           false /* installDependentFacets */, new NullProgressMonitor());

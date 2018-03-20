@@ -1,23 +1,24 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Cloud Tools for Eclipse Common Utilities 
+Bundle-Name: %pluginName
+Automatic-Module-Name: com.google.cloud.tools.eclipse.util
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.util;singleton:=true
 Bundle-Version: 0.1.0.qualifier
-Bundle-Vendor: Google Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Vendor: %providerName
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Bundle-ClassPath: .
+Bundle-Localization: plugin
 Export-Package: com.google.cloud.tools.eclipse.util,
  com.google.cloud.tools.eclipse.util.io,
  com.google.cloud.tools.eclipse.util.jobs,
  com.google.cloud.tools.eclipse.util.service,
  com.google.cloud.tools.eclipse.util.status
-Import-Package: com.google.common.annotations;version="[20.0.0,21.0.0)",
- com.google.common.base;version="[20.0.0,21.0.0)",
- com.google.common.cache;version="[20.0.0,21.0.0)",
- com.google.common.collect;version="[20.0.0,21.0.0)",
- com.google.common.io;version="[20.0.0,21.0.0)",
- com.google.common.util.concurrent;version="[20.0.0,21.0.0)",
+Import-Package: com.google.common.annotations;version="[21.0.0,22.0.0)",
+ com.google.common.base;version="[21.0.0,22.0.0)",
+ com.google.common.cache;version="[21.0.0,22.0.0)",
+ com.google.common.collect;version="[21.0.0,22.0.0)",
+ com.google.common.io;version="[21.0.0,22.0.0)",
+ com.google.common.util.concurrent;version="[21.0.0,22.0.0)",
  freemarker.template;version="[2.3.25,2.4.0)",
  org.eclipse.core.commands,
  org.eclipse.core.expressions,

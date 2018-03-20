@@ -41,7 +41,7 @@ public class AccountSelector extends Composite {
   private IGoogleLoginService loginService;
   private String loginMessage;
   private Account selectedAccount;
-  private ListenerList selectionListeners = new ListenerList();
+  private ListenerList<Runnable> selectionListeners = new ListenerList<>();
 
   @VisibleForTesting Combo combo;
   @VisibleForTesting LogInOnSelect logInOnSelect = new LogInOnSelect();

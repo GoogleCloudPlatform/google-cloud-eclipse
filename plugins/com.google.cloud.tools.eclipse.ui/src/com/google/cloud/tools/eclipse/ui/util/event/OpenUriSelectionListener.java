@@ -25,6 +25,8 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -35,24 +37,22 @@ import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
 public class OpenUriSelectionListener implements SelectionListener {
 
-  private final ErrorHandler errorHandler;
+  private final BiConsumer<Exception, URI> errorHandler;
   private final IWorkbenchBrowserSupport browserSupport;
-  private final QueryParameterProvider queryParameterProvider;
+  private final Supplier<Map<String, String>> queryParameterProvider;
 
-  public OpenUriSelectionListener(QueryParameterProvider queryParameterProvider,
-      ErrorHandler errorHandler) {
+  public OpenUriSelectionListener(Supplier<Map<String, String>> queryParameterProvider,
+      BiConsumer<Exception, URI> errorHandler) {
     this(queryParameterProvider, errorHandler, PlatformUI.getWorkbench().getBrowserSupport());
   }
 
-  public OpenUriSelectionListener(ErrorHandler errorHandler) {
-    this(new EmptyQueryParameterProvider(), errorHandler,
-         PlatformUI.getWorkbench().getBrowserSupport());
+  public OpenUriSelectionListener(BiConsumer<Exception, URI> errorHandler) {
+    this(Collections::emptyMap, errorHandler, PlatformUI.getWorkbench().getBrowserSupport());
   }
 
   @VisibleForTesting
-  OpenUriSelectionListener(QueryParameterProvider queryParameterProvider,
-                           ErrorHandler errorHandler,
-                           IWorkbenchBrowserSupport browserSupport) {
+  OpenUriSelectionListener(Supplier<Map<String, String>> queryParameterProvider,
+      BiConsumer<Exception, URI> errorHandler, IWorkbenchBrowserSupport browserSupport) {
     this.queryParameterProvider = queryParameterProvider;
     this.errorHandler = errorHandler;
     this.browserSupport = browserSupport;
@@ -74,7 +74,7 @@ public class OpenUriSelectionListener implements SelectionListener {
       uri = appendQueryParameters(new URI(uriString));
       browserSupport.getExternalBrowser().openURL(uri.toURL());
     } catch (PartInitException | MalformedURLException | URISyntaxException ex) {
-      errorHandler.handle(ex, uri);
+      errorHandler.accept(ex, uri);
     }
   }
 
@@ -84,7 +84,7 @@ public class OpenUriSelectionListener implements SelectionListener {
       queryString = "";
     }
     StringBuilder query = new StringBuilder(queryString);
-    for (Entry<String, String> parameter : queryParameterProvider.getParameters().entrySet()) {
+    for (Entry<String, String> parameter : queryParameterProvider.get().entrySet()) {
       if (query.length() > 0) {
         query.append('&');
       }
@@ -97,22 +97,7 @@ public class OpenUriSelectionListener implements SelectionListener {
                    uri.getPort(), uri.getPath(), query.toString(), uri.getFragment());
   }
 
-  public static interface ErrorHandler {
-    void handle(Exception ex, URI uri);
-  }
-
-  public static interface QueryParameterProvider {
-    Map<String, String> getParameters();
-  }
-
-  private static class EmptyQueryParameterProvider implements QueryParameterProvider {
-    @Override
-    public Map<String, String> getParameters() {
-      return Collections.emptyMap();
-    }
-  }
-
-  public static class ErrorDialogErrorHandler implements ErrorHandler {
+  public static class ErrorDialogErrorHandler implements BiConsumer<Exception, URI> {
 
     private final Shell shell;
 
@@ -121,7 +106,7 @@ public class OpenUriSelectionListener implements SelectionListener {
     }
 
     @Override
-    public void handle(Exception ex, URI uri) {
+    public void accept(Exception ex, URI uri) {
       String message = Messages.getString("openurllistener.error.message");
       if (uri != null) {
         message += ": " + uri.toString();

@@ -23,9 +23,7 @@ import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
 import com.google.common.base.Verify;
-import com.google.common.collect.Iterables;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -38,6 +36,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -99,20 +98,18 @@ class Pom {
     }
     final Element dependencies = (Element) dependenciesList.item(0);
 
-    Predicate<LibraryFile> dependencyFound = new Predicate<LibraryFile>() {
-      @Override
-      public boolean apply(LibraryFile libraryFile) {
-        Preconditions.checkNotNull(libraryFile);
-        MavenCoordinates coordinates = libraryFile.getMavenCoordinates();
-        String groupId = coordinates.getGroupId();
-        String artifactId = coordinates.getArtifactId();
-        return dependencyExists(dependencies, groupId, artifactId);
-      }
+    Predicate<LibraryFile> dependencyFound = libraryFile -> {
+      Preconditions.checkNotNull(libraryFile);
+      MavenCoordinates coordinates = libraryFile.getMavenCoordinates();
+      String groupId = coordinates.getGroupId();
+      String artifactId = coordinates.getArtifactId();
+      return dependencyExists(dependencies, groupId, artifactId);
     };
 
     List<Library> matched = new ArrayList<>();
     for(Library library : availableLibraries) {
-      if (Iterables.all(library.getDirectDependencies(), dependencyFound)) {
+      boolean allMatch = library.getDirectDependencies().stream().allMatch(dependencyFound);
+      if (allMatch) {
         matched.add(library);
       }
     }

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature id="org.eclipse.license" version="0.0.0"/>
    <feature id="org.eclipse.sdk" version="0.0.0"/>
    <feature id="org.eclipse.jdt" version="0.0.0"/>
    <feature id="org.eclipse.m2e.feature" version="0.0.0"/>
@@ -9,7 +8,6 @@
    <feature id="org.eclipse.m2e.wtp.sdk.feature" version="0.0.0"/>
    <feature id="org.eclipse.mylyn.commons" version="0.0.0"/>
    <feature id="org.eclipse.jpt.jpa.feature" version="0.0.0"/>
-   <feature id="org.eclipse.datatools.sdk.feature" version="0.0.0"/>
    <feature id="org.eclipse.swtbot.eclipse" version="0.0.0"/>
    <feature id="org.eclipse.jst.web_sdk.feature" version="0.0.0"/>
    <feature id="org.eclipse.jst.server_sdk.feature" version="0.0.0"/>
@@ -22,7 +20,7 @@
    <feature id="org.eclipse.epp.logging.aeri.feature.source" version="0.0.0"/>
    -->
    <feature id="org.dadacoalition.yedit.feature" version="0.0.0"/>   
-   <feature id="eu.openanalytics.editor.docker" version="0.0.0"/>   
+   <feature id="org.eclipse.linuxtools.docker.feature" version="0.0.0"/>  
    
    <bundle id="org.eclipse.jetty.http" version="0.0.0"/>
    <bundle id="org.eclipse.jetty.servlet" version="0.0.0"/>
@@ -33,14 +31,24 @@
    <bundle id="org.mortbay.jetty.server" version="6.1.26"/>
    <bundle id="org.mortbay.jetty.util" version="6.1.26"/>
    <bundle id="org.freemarker.freemarker" version="2.3.25.stable-incubating"/>
-   <bundle id="com.google.guava" version="20.0.0"/>
-   <bundle id="com.google.gson" version="2.7.0"/>
+   <bundle id="com.google.guava" version="21.0.0"/>
+   <bundle id="com.google.gson" version="2.8.2"/>
    <bundle id="com.google.cloud.tools.appengine" version="0.0.0"/>
    <bundle id="org.apache.commons.compress" version="0.0.0"/>
    <bundle id="jackson-core-asl" version="1.9.13"/>
    <bundle id="com.fasterxml.jackson.core.jackson-core" version="0.0.0"/>
-   <bundle id="ch.qos.logback.slf4j" version="0.0.0"/>
-   <bundle id="org.slf4j.log4j" version="0.0.0"/>
    <bundle id="org.yaml.snakeyaml" version="1.17"/>
    <bundle id="org.glassfish.javax.json" version="1.0.4"/>
+   
+   <!--
+     Bind SLF4j to log over Logback
+
+     Unfortunately m2e specifically pulls in Orbit's org.slf4j.api bundle
+     so we cannot use the SLF4j bundles from Maven Central. 
+   -->
+   <bundle id="org.slf4j.api" version="0.0.0"/>
+   <bundle id="org.slf4j.apis.jcl" version="0.0.0"/>
+   <bundle id="org.slf4j.apis.log4j" version="0.0.0"/>
+   <bundle id="org.slf4j.bridge.jul" version="0.0.0"/>
+   <bundle id="ch.qos.logback.slf4j" version="0.0.0"/>
 </site>

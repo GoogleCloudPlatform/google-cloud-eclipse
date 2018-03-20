@@ -16,8 +16,8 @@
 
 package com.google.cloud.tools.eclipse.test.util;
 
-import com.google.common.base.Function;
-import com.google.common.base.Functions;
+import java.util.Objects;
+import java.util.function.Function;
 import org.junit.Assert;
 
 /**
@@ -25,11 +25,11 @@ import org.junit.Assert;
  */
 public class ArrayAssertions {
   public static <T> void assertIsEmpty(T[] arr) {
-    assertIsEmpty(null, arr, Functions.toStringFunction(), 120);
+    assertIsEmpty(null, arr, Objects::toString, 120);
   }
 
   public static <T> void assertIsEmpty(String message, T[] arr) {
-    assertIsEmpty(message, arr, Functions.toStringFunction(), 120);
+    assertIsEmpty(message, arr, Objects::toString, 120);
   }
 
   public static <T> void assertIsEmpty(T[] arr, Function<T, String> printer) {

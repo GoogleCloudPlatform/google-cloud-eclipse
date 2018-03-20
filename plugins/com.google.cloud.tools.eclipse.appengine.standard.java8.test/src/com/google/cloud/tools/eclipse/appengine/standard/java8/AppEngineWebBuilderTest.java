@@ -53,7 +53,7 @@ public class AppEngineWebBuilderTest {
   /** Project adding App Engine Standard facet should have our builder. */
   @Test
   public void testAddedBuilder() throws CoreException {
-    testProject.withFacetVersions(AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8,
+    testProject.withFacets(AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8,
         JavaFacet.VERSION_1_8, WebFacetUtils.WEB_25).getFacetedProject();
 
     assertProjectHasBuilder();
@@ -62,7 +62,7 @@ public class AppEngineWebBuilderTest {
   /** Project removing App Engine Standard facet should not have our builder. */
   @Test
   public void testBuilderRemoved() throws CoreException {
-    testProject.withFacetVersions(AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8,
+    testProject.withFacets(AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8,
         JavaFacet.VERSION_1_8, WebFacetUtils.WEB_25).getFacetedProject();
     assertProjectHasBuilder();
 
@@ -80,7 +80,7 @@ public class AppEngineWebBuilderTest {
   @Test
   public void testAddJava8Runtime() throws CoreException {
     testProject
-        .withFacetVersions(AppEngineStandardFacet.JRE7, JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25)
+        .withFacets(AppEngineStandardFacet.JRE7, JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25)
         .getFacetedProject();
     assertProjectHasBuilder();
 
@@ -104,7 +104,7 @@ public class AppEngineWebBuilderTest {
    */
   @Test
   public void testRemovingJava8Runtime() throws CoreException {
-    testProject.withFacetVersions(AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8,
+    testProject.withFacets(AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8,
         JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31).getFacetedProject();
     assertProjectHasBuilder();
 
@@ -125,7 +125,7 @@ public class AppEngineWebBuilderTest {
    */
   @Test
   public void testRemovingJava8Runtime_webFacet() throws CoreException {
-    testProject.withFacetVersions(AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8,
+    testProject.withFacets(AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8,
         JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31).getFacetedProject();
     assertProjectHasBuilder();
 

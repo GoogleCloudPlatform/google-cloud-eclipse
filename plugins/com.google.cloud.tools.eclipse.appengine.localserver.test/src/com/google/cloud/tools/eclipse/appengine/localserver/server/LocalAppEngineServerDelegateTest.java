@@ -24,8 +24,6 @@ import static org.mockito.Mockito.when;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
-import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.core.runtime.CoreException;
@@ -65,10 +63,10 @@ public class LocalAppEngineServerDelegateTest {
   @Mock private IWebModule webModule2;
   @Mock private IModule module3;
   @Rule public TestProjectCreator dynamicWebProject =
-      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
+      new TestProjectCreator().withFacets(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
   @Rule
   public TestProjectCreator appEngineStandardProject =
-      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25,
+      new TestProjectCreator().withFacets(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25,
           AppEngineStandardFacet.JRE7);
 
   @Before
@@ -113,12 +111,7 @@ public class LocalAppEngineServerDelegateTest {
   @Test
   public void testCheckConflictingId_defaultServiceIds() throws CoreException {
     delegate = getDelegateWithServer();
-    delegate.serviceIdFunction = new Function<IModule, String>() {
-      @Override
-      public String apply(IModule module) {
-        return "default";
-      }
-    };
+    delegate.serviceIdFunction = module -> "default";
 
     Assert.assertEquals(Status.ERROR, delegate.checkConflictingServiceIds(new IModule[] {module1},
         new IModule[] {module2}, null).getSeverity());
@@ -131,7 +124,7 @@ public class LocalAppEngineServerDelegateTest {
   @Test
   public void testCheckConflictingId_differentServiceIds() throws CoreException {
     delegate = getDelegateWithServer();
-    delegate.serviceIdFunction = new ModuleNameFunction();
+    delegate.serviceIdFunction = IModule::getName;
     when(module1.getName()).thenReturn("module1");
     when(module2.getName()).thenReturn("module2");
     Assert.assertEquals(Status.OK, delegate.checkConflictingServiceIds(
@@ -142,7 +135,7 @@ public class LocalAppEngineServerDelegateTest {
   @Test
   public void testCheckConflictingId_addExitingModule() throws CoreException {
     delegate = getDelegateWithServer();
-    delegate.serviceIdFunction = new ModuleNameFunction();
+    delegate.serviceIdFunction = IModule::getName;
     when(module1.getName()).thenReturn("module1");
     Assert.assertEquals(Status.OK, delegate.checkConflictingServiceIds(new IModule[] {module1},
         new IModule[] {module1}, null).getSeverity());
@@ -151,7 +144,7 @@ public class LocalAppEngineServerDelegateTest {
   @Test
   public void testCheckConflictingId_deletedModules() throws CoreException {
     delegate = getDelegateWithServer();
-    delegate.serviceIdFunction = new ModuleNameFunction();
+    delegate.serviceIdFunction = IModule::getName;
     when(module1.exists()).thenReturn(false);
     IStatus status;
 
@@ -251,7 +244,7 @@ public class LocalAppEngineServerDelegateTest {
     Assert.assertEquals("localhost", delegate.getServer().getHost());
     LocalAppEngineServerBehaviour behaviour = (LocalAppEngineServerBehaviour) delegate.getServer()
         .loadAdapter(LocalAppEngineServerBehaviour.class, null);
-    delegate.serviceIdFunction = new ModuleNameFunction();
+    delegate.serviceIdFunction = IModule::getName;
     behaviour.moduleToUrlMap.put("module1", "http://foo:9999");
     when(module1.getName()).thenReturn("module1");
 
@@ -279,13 +272,5 @@ public class LocalAppEngineServerDelegateTest {
     serverWorkingCopy.setRuntime(runtime);
     IServer original = serverWorkingCopy.save(true, null);
     return LocalAppEngineServerDelegate.getAppEngineServer(original);
-  }
-
-  private static class ModuleNameFunction implements Function<IModule, String> {
-    @Override
-    public String apply(IModule module) {
-      Preconditions.checkNotNull(module);
-      return module.getName();
-    }
   }
 }

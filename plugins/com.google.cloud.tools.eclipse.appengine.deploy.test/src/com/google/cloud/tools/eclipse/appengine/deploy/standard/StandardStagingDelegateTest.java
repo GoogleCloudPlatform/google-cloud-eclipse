@@ -49,7 +49,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class StandardStagingDelegateTest {
 
-  @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacetVersions(
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacets(
       JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
 
   @Mock private CloudSdkProcessWrapper cloudSdkWrapper;

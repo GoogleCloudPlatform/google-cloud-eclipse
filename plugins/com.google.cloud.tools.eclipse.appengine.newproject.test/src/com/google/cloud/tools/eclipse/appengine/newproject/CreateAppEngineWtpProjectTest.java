@@ -185,7 +185,7 @@ public abstract class CreateAppEngineWtpProjectTest {
     fail();
   }
 
-  private boolean containsSegment(IPath path, String segment) {
+  private static boolean containsSegment(IPath path, String segment) {
     return Arrays.asList(path.segments()).contains(segment);
   }
 

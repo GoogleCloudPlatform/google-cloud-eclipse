@@ -23,8 +23,8 @@ import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
 import java.util.List;
+import java.util.function.Predicate;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -71,14 +71,11 @@ public class GcpProjectQueryJob extends Job {
       final List<GcpProject> projects = projectRepository.getProjects(credential);
 
       // The selector may have been disposed (i.e., dialog closed); check it in the UI thread.
-      display.syncExec(new Runnable() {
-        @Override
-        public void run() {
-          if (!projectSelector.isDisposed()
-              && isLatestQueryJob.apply(thisJob) /* intentionally checking in UI context */) {
-            projectSelector.setProjects(projects);
-            dataBindingContext.updateTargets();  // Select saved choice, if any.
-          }
+      display.syncExec(() -> {
+        if (!projectSelector.isDisposed()
+            && isLatestQueryJob.test(thisJob) /* intentionally checking in UI context */) {
+          projectSelector.setProjects(projects);
+          dataBindingContext.updateTargets();  // Select saved choice, if any.
         }
       });
       return Status.OK_STATUS;

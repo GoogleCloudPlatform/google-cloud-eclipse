@@ -23,6 +23,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
@@ -58,9 +60,14 @@ public class BaseProjectTest {
     if (project != null) {
       // close editors, so no property changes are dispatched on delete
       bot.closeAllEditors();
-
       // ensure there are no jobs
       SwtBotWorkbenchActions.waitForProjects(bot, project);
+
+      try {
+        project.close(new NullProgressMonitor());
+      } catch (CoreException ex) {
+        logger.log(Level.SEVERE, "Exception closing test project: " + project, ex);
+      }
       try {
         SwtBotProjectActions.deleteProject(bot, project.getName());
       } catch (TimeoutException ex) {

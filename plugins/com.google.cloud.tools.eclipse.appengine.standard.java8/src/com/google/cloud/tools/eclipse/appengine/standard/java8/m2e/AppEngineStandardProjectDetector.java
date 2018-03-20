@@ -41,7 +41,7 @@ public class AppEngineStandardProjectDetector extends AbstractProjectConfigurato
     if (facetedProject == null || facetedProject.hasProjectFacet(AppEngineStandardFacet.FACET)) {
       return;
     }
-    IFile appEngineWebXml = WebProjectUtil.findInWebInf(project, new Path("appengine-web.xml"));
+    IFile appEngineWebXml = WebProjectUtil.findInWebInf(project, new Path("appengine-web.xml")); //$NON-NLS-1$
     if (appEngineWebXml == null || !appEngineWebXml.exists()) {
       return;
     }

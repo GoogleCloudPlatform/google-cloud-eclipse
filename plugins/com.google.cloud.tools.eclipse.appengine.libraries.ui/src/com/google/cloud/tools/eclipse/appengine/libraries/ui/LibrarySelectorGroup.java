@@ -57,7 +57,7 @@ public class LibrarySelectorGroup implements ISelectionProvider {
   private final Collection<Library> explicitSelectedLibraries = new HashSet<>();
 
   private final Map<Library, Button> libraryButtons = new LinkedHashMap<>();
-  private final ListenerList/* <ISelectedChangeListener> */ listeners = new ListenerList/* <> */();
+  private final ListenerList<ISelectionChangedListener> listeners = new ListenerList<>();
 
   public LibrarySelectorGroup(Composite parentContainer, String groupName, String groupLabel) {
     this(parentContainer, groupName, groupLabel, true); // $NON-NLS-1$
@@ -93,14 +93,19 @@ public class LibrarySelectorGroup implements ISelectionProvider {
     for (Library library : availableLibraries.values()) {
       Button libraryButton = new Button(apiGroup, SWT.CHECK);
       libraryButton.setText(getLibraryName(library));
-      if (library.getToolTip() != null) {
-        libraryButton.setToolTipText(library.getToolTip());
+      String toolTip = library.getToolTip();
+      if (toolTip != null) {
+        String stage = library.getLaunchStage();
+        if (!"GA".equals(stage)) { //$NON-NLS-1
+          toolTip += " (" + stage + ")";
+        }
+        libraryButton.setToolTipText(toolTip);
       }
       libraryButton.setData(library);
       libraryButton.addSelectionListener(new ManualSelectionTracker());
       libraryButtons.put(library, libraryButton);
     }
-    GridLayoutFactory.fillDefaults().generateLayout(apiGroup);
+    GridLayoutFactory.swtDefaults().generateLayout(apiGroup);
     apiGroup.pack();
 
     scrolledComposite.setContent(apiGroup);

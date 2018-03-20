@@ -1,21 +1,19 @@
 Manifest-Version: 1.0
-Bundle-ClassPath: .
 Bundle-ManifestVersion: 2
-Bundle-Name: Cloud Tools for Eclipse User Bug Reporting
+Bundle-Name: %pluginName
+Automatic-Module-Name: com.google.cloud.tools.eclipse.bugreport
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.bugreport;singleton:=true
 Bundle-Version: 0.1.0.qualifier
-Bundle-Vendor: Google Inc.
-Bundle-Localization: plugin
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Vendor: %providerName
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Import-Package: com.google.cloud.tools.appengine.api;version="0.4.1",
- com.google.cloud.tools.appengine.cloudsdk;version="0.4.1",
- com.google.cloud.tools.appengine.cloudsdk.serialization;version="0.4.1",
+Bundle-Localization: plugin
+Import-Package: com.google.cloud.tools.appengine.api;version="0.5.1",
+ com.google.cloud.tools.appengine.cloudsdk;version="0.5.1",
+ com.google.cloud.tools.appengine.cloudsdk.serialization;version="0.5.1",
  com.google.cloud.tools.eclipse.util,
- com.google.common.annotations;version="[20.0.0,21.0.0)",
- com.google.common.escape;version="[20.0.0,21.0.0)",
- com.google.common.net;version="[20.0.0,21.0.0)",
+ com.google.common.annotations;version="[21.0.0,22.0.0)",
+ com.google.common.escape;version="[21.0.0,22.0.0)",
+ com.google.common.net;version="[21.0.0,22.0.0)",
  org.eclipse.core.commands,
- org.eclipse.core.runtime;version="3.5.0",
- org.eclipse.swt.program,
- org.osgi.framework
+ org.eclipse.swt.program

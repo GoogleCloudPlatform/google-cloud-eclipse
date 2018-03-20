@@ -11,7 +11,8 @@
   <artifactId>${projectArtifactId}</artifactId>
 
   <properties>
-    <appengine.maven.plugin.version>1.3.1</appengine.maven.plugin.version>
+    <appengine.maven.plugin.version>${mavenPluginVersion}</appengine.maven.plugin.version>
+    <appengine.api.sdk.version>${appEngineApiSdkVersion}</appengine.api.sdk.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.compiler.source>${compilerVersion}</maven.compiler.source>
@@ -55,7 +56,7 @@
     <dependency>
       <groupId>com.google.appengine</groupId>
       <artifactId>appengine-api-1.0-sdk</artifactId>
-      <version>1.9.59</version>
+      <version>${appEngineApiSdkVersion}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

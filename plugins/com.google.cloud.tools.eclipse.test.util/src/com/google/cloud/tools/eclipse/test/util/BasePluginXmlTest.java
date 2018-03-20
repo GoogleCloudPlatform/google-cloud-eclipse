@@ -106,32 +106,12 @@ public abstract class BasePluginXmlTest {
   }
   
   @Test
-  public final void testBuildProperties() throws IOException {
+  public final void testBuildPropertiesContainsPluginFiles() {
     String[] binIncludes = buildProperties.get("bin.includes").split(",\\s*");
     Set<String> includes = Sets.newHashSet(binIncludes);
     
     Assert.assertTrue(includes.contains("plugin.xml"));
     Assert.assertTrue(includes.contains("plugin.properties"));
-    Assert.assertTrue(includes.contains("."));
-    Assert.assertTrue(includes.contains("META-INF/"));
-    
-    testIncludedIfPresent(includes, "helpContexts.xml");
-    testIncludedIfPresent(includes, "icons/");
-    testIncludedIfPresent(includes, "lib/");
-    testIncludedIfPresent(includes, "README.md");
-    testIncludedIfPresent(includes, "epl-v10.html");
-    testIncludedIfPresent(includes, "OSGI-INF/");
-    testIncludedIfPresent(includes, "fragment.xml");
-    testIncludedIfPresent(includes, "fragment.properties");
-    testIncludedIfPresent(includes, "lifecycle-mapping-metadata.xml"); // for m2e extensions
-  }
-
-  private static void testIncludedIfPresent(Set<String> includes, String name) 
-      throws IOException {
-    String path = EclipseProperties.getHostBundlePath() + "/" + name;
-    if (Files.exists(Paths.get(path))) {
-      Assert.assertTrue(includes.contains(name));
-    }
   }
   
   @Test
@@ -191,13 +171,32 @@ public abstract class BasePluginXmlTest {
     }
     assertEquals("Google Inc.", vendor);
   }
+  
+  @Test
+  public final void testBundleActivationPolicyLazy() throws IOException {
+    String policy = getManifestAttributes().getValue("Bundle-ActivationPolicy");
+    assertEquals("lazy", policy);
+  }
+  
+  @Test
+  public final void testManifestVersion() throws IOException {
+    Attributes manifest = getManifestAttributes();
+    assertEquals("1.0", manifest.getValue("Manifest-Version"));
+    assertEquals("2", manifest.getValue("Bundle-ManifestVersion"));
+  }
+
+  @Test
+  public final void testBundleExecutionEnvironment() throws IOException {
+    Attributes manifest = getManifestAttributes();
+    assertEquals("JavaSE-1.8", manifest.getValue("Bundle-RequiredExecutionEnvironment"));
+  }
 
   @Test
   public final void testGuavaImportVersions() throws IOException {
     checkDependencyDirectives(
-        "Import-Package", "com.google.common.", "version=\"[20.0.0,21.0.0)\"");
+        "Import-Package", "com.google.common.", "version=\"[21.0.0,22.0.0)\"");
     checkDependencyDirectives(
-        "Require-Bundle", "com.google.guava", "bundle-version=\"[20.0.0,21.0.0)\"");
+        "Require-Bundle", "com.google.guava", "bundle-version=\"[21.0.0,22.0.0)\"");
   }
 
   @Test

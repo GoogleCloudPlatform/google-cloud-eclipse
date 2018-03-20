@@ -21,14 +21,18 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
+import com.google.cloud.tools.eclipse.swtbot.SwtBotTreeUtilities;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+@RunWith(SWTBotJunit4ClassRunner.class)
 public class DeployPropertyPageTest extends BaseProjectTest {
   @Rule
   public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
@@ -43,7 +47,7 @@ public class DeployPropertyPageTest extends BaseProjectTest {
     assertTrue(AppEngineStandardFacet.hasFacet(facetedProject));
 
     SwtBotProjectActions.openProjectProperties(bot, projectName);
-    bot.tree().expandNode("Google Cloud Platform").select("App Engine Deployment");
+    SwtBotTreeUtilities.select(bot, bot.tree(), "Google Cloud Platform", "App Engine Deployment");
     bot.text("No projects found");
   }
 

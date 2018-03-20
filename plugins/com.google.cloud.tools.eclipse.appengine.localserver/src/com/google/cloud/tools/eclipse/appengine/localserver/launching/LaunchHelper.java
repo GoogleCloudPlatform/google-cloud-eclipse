@@ -92,12 +92,13 @@ public class LaunchHelper {
    * @return an existing server
    */
   @VisibleForTesting
-  public Collection<IServer> findExistingServers(IModule[] modules, boolean exact,
+  Collection<IServer> findExistingServers(IModule[] modules, boolean exact,
       SubMonitor progress) {
     if (modules.length == 1) {
       IServer defaultServer = ServerCore.getDefaultServer(modules[0]);
-      if (defaultServer != null && LocalAppEngineServerDelegate.SERVER_TYPE_ID
-          .equals(defaultServer.getServerType().getId())) {
+      if (defaultServer != null && defaultServer.getServerType() != null
+          && LocalAppEngineServerDelegate.SERVER_TYPE_ID
+              .equals(defaultServer.getServerType().getId())) {
         return Collections.singletonList(defaultServer);
       }
     }
@@ -130,6 +131,7 @@ public class LaunchHelper {
     return serverWorkingCopy.save(false, progress.newChild(2));
   }
 
+  @VisibleForTesting
   protected void launch(IServer server, String launchMode, SubMonitor progress)
       throws CoreException {
     // Explicitly offer to save dirty editors to avoid the puzzling prompt-to-save in

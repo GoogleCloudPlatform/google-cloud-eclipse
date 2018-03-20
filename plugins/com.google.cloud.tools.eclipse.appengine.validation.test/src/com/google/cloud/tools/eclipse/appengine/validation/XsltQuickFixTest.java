@@ -34,8 +34,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jst.common.project.facet.core.JavaFacet;
-import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
@@ -61,15 +59,14 @@ public class XsltQuickFixTest {
       + "<version>"
       + "</version>"
       + "</appengine-web-app>";
-  private IProject project;
+
   private IFile file;
 
-  @Rule public TestProjectCreator projectCreator =
-      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
 
   @Before
   public void setup() {
-    project = projectCreator.getProject();
+    IProject project = projectCreator.getProject();
     file = project.getFile("testdata.xml");
   }
 
@@ -83,7 +80,6 @@ public class XsltQuickFixTest {
   @Test
   public void testRun_removeApplicationElement() throws IOException, ParserConfigurationException,
       SAXException, CoreException {
-    IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), IFile.FORCE, null);
 
     IMarker marker = Mockito.mock(IMarker.class);
@@ -124,8 +120,6 @@ public class XsltQuickFixTest {
 
   @Test
   public void testRun_existingEditor() throws CoreException {
-
-    IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), IFile.FORCE, null);
 
     IWorkbench workbench = PlatformUI.getWorkbench();
@@ -151,8 +145,6 @@ public class XsltQuickFixTest {
 
   @Test
   public void testGetCurrentDocument_existingEditor() throws CoreException {
-
-    IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), IFile.FORCE, null);
 
     IWorkbench workbench = PlatformUI.getWorkbench();
@@ -166,10 +158,7 @@ public class XsltQuickFixTest {
 
   @Test
   public void testGetCurrentDocument_noEditor() throws CoreException {
-
-    IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), IFile.FORCE, null);
-
     assertNull(XsltQuickFix.getCurrentDocument(file));
   }
 

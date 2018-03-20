@@ -8,8 +8,8 @@
 # Follows the approach shown in
 # http://help.eclipse.org/neon/topic/org.eclipse.platform.doc.isv/guide/p2_customizing_metadata.html?cp=2_0_20_1_2#categoryGen
 
-# Pull in the IU that provides a definition; the definition version
-# is never shown in the UI and doesn't matter
+# Pull in the IU that provides a definition. The definition version
+# is never shown in the UI and doesn't matter.
 requires.1.namespace=org.eclipse.equinox.p2.iu
 requires.1.name=com.google.cloud.tools.eclipse.category.definition
 requires.1.range=[1.0.0,1.0.0]
@@ -41,14 +41,14 @@ units.1.properties.5.name=org.eclipse.equinox.p2.doc.url
 units.1.properties.5.value=https://cloud.google.com/eclipse/docs/
 units.1.properties.6.name=org.eclipse.equinox.p2.description
 units.1.properties.6.value=Supports development of Google Cloud Platform projects in Eclipse.
-units.1.copyright =Copyright 2016, 2017 Google Inc.
+units.1.copyright =Copyright 2016-2018 Google Inc.
 units.1.licenses.0 =\
 Cloud Tools for Eclipse is made available under the Apache License, Version 2.0. \
 Please visit the following URL for details:\n\n\
   https://www.apache.org/licenses/LICENSE-2.0
 units.1.licenses.0.location = https://www.apache.org/licenses/LICENSE-2.0
 units.1.requires.1.namespace=org.eclipse.equinox.p2.iu
-units.1.requires.1.name=com.google.cloud.tools.eclipse.suite.e45.feature.feature.group
+units.1.requires.1.name=com.google.cloud.tools.eclipse.suite.feature.feature.group
 units.1.requires.1.greedy=true
 units.1.provides.1.namespace=org.eclipse.equinox.p2.iu
 units.1.provides.1.name=com.google.cloud.tools.eclipse.category.definition
@@ -103,4 +103,5 @@ units.3.requires.1.greedy=true
 units.3.provides.1.namespace=org.eclipse.equinox.p2.iu
 units.3.provides.1.name=com.google.cloud.tools.eclipse.categories.docker.definition
 units.3.provides.1.version=1.0.0
+
 

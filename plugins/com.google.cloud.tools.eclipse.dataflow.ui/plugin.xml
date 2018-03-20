@@ -76,6 +76,9 @@
           name="%dataflowWizardName"
           project="true">
       <description>%dataflowWizardDescription</description>
+      <keywordReference id="com.google.cloud.tools.eclipse.ui.GCPKeyword"/>
+      <keywordReference id="com.google.cloud.tools.eclipse.ui.GoogleKeyword"/>
+      <keywordReference id="com.google.cloud.tools.eclipse.ui.CloudKeyword"/>
     </wizard>
   </extension>
 
