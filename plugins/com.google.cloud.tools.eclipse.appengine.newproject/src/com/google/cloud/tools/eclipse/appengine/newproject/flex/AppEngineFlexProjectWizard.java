@@ -58,7 +58,7 @@ public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
           ImmutableMap.of(
               AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
               AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_FLEX,
-              AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_BUILD_TYPE,
+              AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_BUILD_TOOL,
               config.getUseMaven()
                   ? AnalyticsEvents.MAVEN_PROJECT
                   : AnalyticsEvents.NATIVE_PROJECT));
