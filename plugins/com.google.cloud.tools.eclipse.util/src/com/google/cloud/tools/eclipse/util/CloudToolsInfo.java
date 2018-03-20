@@ -70,4 +70,5 @@ public class CloudToolsInfo {
       return "_(failed to get bundle \"org.eclipse.platform\")_";
     }
   }
+
 }

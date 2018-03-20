@@ -45,6 +45,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -237,6 +238,45 @@ public class CodeTemplatesTest {
         new DefaultArtifactVersion(pluginVersion.getTextContent());
     DefaultArtifactVersion expected = new DefaultArtifactVersion("1.3.2");
     Assert.assertTrue(artifactVersion.compareTo(expected) >= 0);
+    
+    NodeList dependencyManagement = root.getElementsByTagName("dependencyManagement");
+    Assert.assertEquals(1, dependencyManagement.getLength());
+    
+    for (int i = 0; i < dependencyManagement.getLength(); i++) {
+      Node item = dependencyManagement.item(i);
+      for (int j = 0; j < item.getChildNodes().getLength(); j++) {
+        Node dependencies = item.getChildNodes().item(j);
+        if (dependencies.getNodeType() == Node.ELEMENT_NODE) {
+          Assert.assertEquals("dependencies", dependencies.getNodeName());
+          NodeList coordinates = dependencies.getChildNodes();
+          for (int k = 0; k < coordinates.getLength(); k++) {
+            Node dependency = coordinates.item(k);
+            if (dependency.getNodeType() == Node.ELEMENT_NODE) {
+              Assert.assertEquals("dependency", dependency.getNodeName());
+              boolean scopePresent = false;
+              boolean typePresent = false;
+              for (int c = 0; c < dependency.getChildNodes().getLength(); c++) {
+                Node coord = dependency.getChildNodes().item(c);
+                if (coord.getNodeName().equals("version")) {
+                  DefaultArtifactVersion bomVersion = new DefaultArtifactVersion(
+                      coord.getTextContent().trim());
+                  Assert.assertTrue(
+                      bomVersion.compareTo(new DefaultArtifactVersion("0.40.0-alpha")) >= 0);
+                } else if (coord.getNodeName().equals("type")) {
+                  typePresent = true;
+                } else if (coord.getNodeName().equals("scope")) {
+                  scopePresent = true;
+                }
+              }
+              Assert.assertTrue(scopePresent);
+              Assert.assertTrue(typePresent);
+            }
+
+          }
+        }
+      }
+    }
+    
     return root;
   }
 

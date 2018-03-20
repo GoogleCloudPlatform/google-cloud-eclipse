@@ -23,6 +23,18 @@
   <prerequisites>
     <maven>3.3.9</maven>
   </prerequisites>
+  
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.google.cloud</groupId>
+        <artifactId>google-cloud</artifactId>
+        <version>${googleCloudJavaVersion}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <!-- Compile/runtime dependencies -->

@@ -199,6 +199,12 @@ public class CodeTemplates {
     properties.put("projectArtifactId", config.getMavenArtifactId()); //$NON-NLS-1$
     properties.put("projectVersion", config.getMavenVersion()); //$NON-NLS-1$
     
+    String bomVersion = getCurrentVersion(
+        "com.google.cloud", //$NON-NLS-1$
+        "google-cloud", //$NON-NLS-1$
+        "0.39.0-alpha"); //$NON-NLS-1$
+    properties.put("googleCloudJavaVersion", bomVersion); //$NON-NLS-1$
+    
     String mavenPluginVersion = getCurrentVersion(
         "com.google.cloud.tools", //$NON-NLS-1$
         "appengine-maven-plugin", //$NON-NLS-1$
@@ -208,7 +214,7 @@ public class CodeTemplates {
     String sdkVersion = getCurrentVersion(
         "com.google.appengine", //$NON-NLS-1$
         "appengine-api-1.0-sdk", //$NON-NLS-1$
-        "1.9.62"); //$NON-NLS-1$
+        "1.9.63"); //$NON-NLS-1$
     properties.put("appEngineApiSdkVersion", sdkVersion); //$NON-NLS-1$
     
     if (isStandardProject) {
@@ -229,6 +235,9 @@ public class CodeTemplates {
 
   private static String getCurrentVersion(String group, String artifact, String defaultVersion) {
     ArtifactVersion version = ArtifactRetriever.DEFAULT.getLatestReleaseVersion(group, artifact);
+    if (version == null) { // there is no release version
+      version = ArtifactRetriever.DEFAULT.getLatestVersion(group, artifact);
+    }
     if (version == null) {
       return defaultVersion;
     }
