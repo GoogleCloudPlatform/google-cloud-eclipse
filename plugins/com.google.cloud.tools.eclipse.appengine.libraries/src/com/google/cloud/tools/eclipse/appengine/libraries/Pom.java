@@ -164,18 +164,20 @@ class Pom {
           artifactIdElement.setTextContent(artifactId);
           dependency.appendChild(artifactIdElement);
 
-          String version = coordinates.getVersion();
-          ArtifactVersion latestVersion =
-              ArtifactRetriever.DEFAULT.getBestVersion(groupId, artifactId);
-          if (latestVersion != null) {
-            version = latestVersion.toString(); 
-          }
-          
-          // todo latest version may not be needed anymore.
-          if (!MavenCoordinates.LATEST_VERSION.equals(version)) {
-            Element versionElement = document.createElement("version");
-            versionElement.setTextContent(version);
-            dependency.appendChild(versionElement);
+          if (!dependencyManaged(groupId, artifactId)) {  
+            String version = coordinates.getVersion();
+            ArtifactVersion latestVersion =
+                ArtifactRetriever.DEFAULT.getBestVersion(groupId, artifactId);
+            if (latestVersion != null) {
+              version = latestVersion.toString(); 
+            }
+            
+            // todo latest version may not be needed anymore.
+            if (!MavenCoordinates.LATEST_VERSION.equals(version)) {
+              Element versionElement = document.createElement("version");
+              versionElement.setTextContent(version);
+              dependency.appendChild(versionElement);
+            }
           }
           
           dependencies.appendChild(dependency);
@@ -192,6 +194,18 @@ class Pom {
     } catch (TransformerException ex) {
       throw new CoreException(null);
     }   
+  }
+
+  /**
+   * @return true if and only if this artifact is controlled by a BOM
+   */
+  private boolean dependencyManaged(String groupId, String artifactId) {
+    NodeList elements =
+        document.getElementsByTagNameNS("http://maven.apache.org/POM/4.0.0", "dependencyManager");
+    if (elements.getLength() == 1) {
+      return Bom.defines((Element) elements.item(0), groupId, artifactId);
+    }
+    return false;
   }
 
   /**
