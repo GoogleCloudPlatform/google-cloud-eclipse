@@ -140,7 +140,7 @@ public class PollingStatusServiceImpl implements GcpStatusMonitoringService {
     } catch (IOException ex) {
       currentStatus = new GcpStatus(Severity.ERROR, ex.toString(), null);
     }
-    logger.info("current GCP status = " + currentStatus); //$NON-NLS-1$
+    logger.fine("current GCP status = " + currentStatus); //$NON-NLS-1$
     for (Consumer<GcpStatusMonitoringService> listener : listeners) {
       listener.accept(this);
     }
