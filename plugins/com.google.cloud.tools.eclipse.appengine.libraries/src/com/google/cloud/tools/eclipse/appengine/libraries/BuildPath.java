@@ -81,7 +81,8 @@ public class BuildPath {
     if (selectedLibraries.isEmpty() && removedLibraries.isEmpty()) {
       return; // nothing to do
     }
-    AnalyticsLibraryPingHelper.sendLibrarySelectionPing(AnalyticsEvents.MAVEN_PROJECT, selectedLibraries);
+    AnalyticsLibraryPingHelper.sendLibrarySelectionPing(AnalyticsEvents.MAVEN_PROJECT,
+        selectedLibraries);
 
     IFile pomFile = project.getFile("pom.xml"); //$NON-NLS-1$
     try {

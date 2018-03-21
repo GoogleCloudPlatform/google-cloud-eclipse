@@ -28,7 +28,7 @@
       <dependency>
         <groupId>com.google.cloud</groupId>
         <artifactId>google-cloud</artifactId>
-        <version>${googleCloudJavaVersion}</version>
+        <version>${googleCloudJavaBomVersion}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
