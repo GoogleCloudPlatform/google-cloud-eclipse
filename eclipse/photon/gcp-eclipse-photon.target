@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde?>
 <!-- generated with https://github.com/mbarbero/fr.obeo.releng.targetplatform -->
-<target name="GCP for Eclipse Photon" sequenceNumber="1521488470">
+<target name="GCP for Eclipse Photon" sequenceNumber="1521650335">
   <locations>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
       <unit id="org.eclipse.sdk.feature.group" version="4.8.0.v20180308-0630"/>
@@ -46,7 +46,7 @@
       <repository location="http://docker-editor.openanalytics.eu/update/"/>
     </location>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
-      <unit id="org.eclipse.linuxtools.docker.feature.feature.group" version="3.2.0.201712060514"/>
+      <unit id="org.eclipse.linuxtools.docker.feature.feature.group" version="3.2.1.201803061555"/>
       <repository location="http://download.eclipse.org/linuxtools/update-docker"/>
     </location>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
