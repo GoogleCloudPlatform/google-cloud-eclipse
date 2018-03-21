@@ -234,10 +234,7 @@ public class CodeTemplates {
   }
 
   private static String getCurrentVersion(String group, String artifact, String defaultVersion) {
-    ArtifactVersion version = ArtifactRetriever.DEFAULT.getLatestReleaseVersion(group, artifact);
-    if (version == null) { // there is no release version
-      version = ArtifactRetriever.DEFAULT.getLatestVersion(group, artifact);
-    }
+    ArtifactVersion version = ArtifactRetriever.DEFAULT.getBestVersion(group, artifact);
     if (version == null) {
       return defaultVersion;
     }
