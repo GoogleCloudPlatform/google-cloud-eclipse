@@ -20,7 +20,11 @@ import com.google.common.collect.ImmutableList;
 import java.util.Iterator;
 import javax.xml.namespace.NamespaceContext;
 
-class MavenNamespaceContext implements NamespaceContext {
+/**
+ * Maps all prefixes to http://maven.apache.org/POM/4.0.0 and
+ * all namespace URIs to "m". Not suitable for general use.
+ */
+class Maven4NamespaceContext implements NamespaceContext {
 
   @Override
   public String getNamespaceURI(String prefix) {

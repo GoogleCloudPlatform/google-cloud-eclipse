@@ -242,7 +242,7 @@ public class CodeTemplatesTest {
     Assert.assertTrue(artifactVersion.compareTo(expected) >= 0);
     
     XPath xpath = XPathFactory.newInstance().newXPath();
-    xpath.setNamespaceContext(new MavenNamespaceContext());
+    xpath.setNamespaceContext(new Maven4NamespaceContext());
     NodeList dependencyManagementNodes = (NodeList) xpath.evaluate(
         "./m:dependencyManagement",
         root,
