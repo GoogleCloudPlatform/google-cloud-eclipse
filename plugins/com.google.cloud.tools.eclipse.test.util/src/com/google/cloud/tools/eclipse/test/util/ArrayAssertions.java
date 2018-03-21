@@ -25,26 +25,43 @@ import org.junit.Assert;
  */
 public class ArrayAssertions {
   public static <T> void assertIsEmpty(T[] arr) {
-    assertIsEmpty(null, arr, Objects::toString, 120);
+    assertSize(null, 0, arr, Objects::toString, 120);
   }
 
   public static <T> void assertIsEmpty(String message, T[] arr) {
-    assertIsEmpty(message, arr, Objects::toString, 120);
+    assertSize(message, 0, arr, Objects::toString, 120);
   }
 
   public static <T> void assertIsEmpty(T[] arr, Function<T, String> printer) {
-    assertIsEmpty(null, arr, printer, 120);
+    assertSize(null, 0, arr, printer, 120);
+  }
+
+  public static <T> void assertIsEmpty(String message, T[] arr, Function<T, String> printer,
+      int maxLength) {
+    assertSize(message, 0, arr, printer, maxLength);
+  }
+
+  public static <T> void assertSize(int expecetedSize, T[] arr) {
+    assertSize(null, expecetedSize, arr, Objects::toString, 120);
+  }
+
+  public static <T> void assertSize(String message, int expecetedSize, T[] arr) {
+    assertSize(message, expecetedSize, arr, Objects::toString, 120);
+  }
+
+  public static <T> void assertSize(int expecetedSize, T[] arr, Function<T, String> printer) {
+    assertSize(null, expecetedSize, arr, printer, 120);
   }
 
   /**
-   * Assert that {@code arr} is empty; if not, fail with a message showing as many elements will fit
-   * until the total message size exceeds {@code maxLength}.
+   * Assert that {@code arr} has the expected size; if not, fail with a message showing as many
+   * elements will fit until the total message size exceeds {@code maxLength}.
    */
-  public static <T> void assertIsEmpty(String message, T[] arr, Function<T, String> printer,
-      int maxLength) {
+  public static <T> void assertSize(String message, int expectedSize, T[] arr,
+      Function<T, String> printer, int maxLength) {
     if (arr == null) {
       Assert.fail("array is null");
-    } else if (arr.length != 0) {
+    } else if (arr.length != expectedSize) {
       StringBuilder sb = new StringBuilder();
       if (message != null) {
         sb.append(message).append(": ");

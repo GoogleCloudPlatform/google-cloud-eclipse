@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.test.util.ArrayAssertions;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.io.ByteArrayInputStream;
@@ -93,7 +94,7 @@ public class XmlValidatorTest {
 
     IMarker[] emptyMarkers = ProjectUtils.waitUntilNoMarkersFound(file, IMarker.PROBLEM,
         true /* includeSubtypes */, IResource.DEPTH_ZERO);
-    assertEquals(0, emptyMarkers.length);
+    ArrayAssertions.assertIsEmpty(emptyMarkers);
   }
 
   @Test
@@ -105,7 +106,7 @@ public class XmlValidatorTest {
 
     IMarker[] markers = ProjectUtils.waitUntilMarkersFound(file, IMarker.PROBLEM,
         true /* includeSubtypes */, IResource.DEPTH_ZERO);
-    assertEquals(1, markers.length);
+    ArrayAssertions.assertSize(1, markers);
 
     String resultMessage = (String) markers[0].getAttribute(IMarker.MESSAGE);
     assertEquals("XML document structures must start and end within the same entity.",
@@ -122,7 +123,7 @@ public class XmlValidatorTest {
     validator.validate(file, bytes);
 
     IMarker[] markers = file.findMarkers(APPLICATION_MARKER, true, IResource.DEPTH_ZERO);
-    assertEquals(0, markers.length);
+    ArrayAssertions.assertIsEmpty(markers);
   }
 
   @Test
@@ -135,7 +136,7 @@ public class XmlValidatorTest {
     validator.validate(file, bytes);
 
     IMarker[] markers = file.findMarkers(APPLICATION_MARKER, true, IResource.DEPTH_ZERO);
-    assertEquals(1, markers.length);
+    ArrayAssertions.assertSize(1, markers);
     String message = Messages.getString("application.element");
     assertEquals(message, markers[0].getAttribute(IMarker.MESSAGE));
     assertEquals("line 1", markers[0].getAttribute(IMarker.LOCATION));
@@ -150,11 +151,11 @@ public class XmlValidatorTest {
     IFile file = project.getFile("WebContent/WEB-INF/appengine-web.xml");
     file.setContents(
         new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)), true, false, null);
-    ProjectUtils.waitForProjects(project);   // Wait until Eclipse puts an error marker.
+    ProjectUtils.waitForProjects(project);  // Wait until Eclipse puts an error marker.
 
     String problemMarker = "org.eclipse.core.resources.problemmarker";
     IMarker[] markers = file.findMarkers(problemMarker, true, IResource.DEPTH_ZERO);
-    assertEquals(1, markers.length);
+    ArrayAssertions.assertSize(1, markers);
     assertTrue(markers[0].getAttribute(IMarker.MESSAGE).toString().contains(
         "Invalid content was found starting with element 'foo'."));
   }
@@ -166,6 +167,7 @@ public class XmlValidatorTest {
     BannedElement element = new BannedElement(message);
     XmlValidator.createMarker(file, element);
     IMarker[] markers = file.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
+    ArrayAssertions.assertSize(1, markers);
     assertEquals(message, markers[0].getAttribute(IMarker.MESSAGE));
   }
 
