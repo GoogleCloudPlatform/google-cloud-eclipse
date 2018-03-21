@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde?>
 <!-- generated with https://github.com/mbarbero/fr.obeo.releng.targetplatform -->
-<target name="GCP for Eclipse Oxygen" sequenceNumber="1520958331">
+<target name="GCP for Eclipse Oxygen" sequenceNumber="1521647128">
   <locations>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
-      <unit id="org.eclipse.sdk.feature.group" version="4.7.2.v20171130-0906"/>
-      <unit id="org.eclipse.jdt.feature.group" version="3.13.2.v20171130-0906"/>
-      <unit id="org.eclipse.m2e.feature.feature.group" version="1.8.2.20171007-0217"/>
-      <unit id="org.eclipse.m2e.sdk.feature.feature.group" version="1.8.2.20171007-0217"/>
+      <unit id="org.eclipse.sdk.feature.group" version="4.7.3.v20180301-1154"/>
+      <unit id="org.eclipse.jdt.feature.group" version="3.13.3.v20180301-0715"/>
+      <unit id="org.eclipse.m2e.feature.feature.group" version="1.8.3.20180227-2137"/>
+      <unit id="org.eclipse.m2e.sdk.feature.feature.group" version="1.8.3.20180227-2137"/>
       <unit id="org.eclipse.m2e.wtp.feature.feature.group" version="1.3.3.20170823-1905"/>
       <unit id="org.eclipse.m2e.wtp.sdk.feature.feature.group" version="1.3.3.20170823-1905"/>
       <unit id="org.eclipse.mylyn.commons.feature.group" version="3.23.0.v20170503-0014"/>
       <unit id="org.eclipse.jpt.jpa.feature.feature.group" version="3.5.100.v201705180510"/>
       <unit id="org.eclipse.swtbot.eclipse.feature.group" version="2.6.0.201706141832"/>
-      <unit id="org.eclipse.epp.logging.aeri.feature.feature.group" version="2.0.6.v20170906-1226"/>
-      <unit id="org.eclipse.epp.logging.aeri.feature.source.feature.group" version="2.0.6.v20170906-1226"/>
-      <unit id="org.eclipse.jetty.http" version="9.4.7.v20170914"/>
-      <unit id="org.eclipse.jetty.servlet" version="9.4.7.v20170914"/>
-      <unit id="org.eclipse.jetty.server" version="9.4.7.v20170914"/>
-      <unit id="org.eclipse.jetty.util" version="9.4.7.v20170914"/>
+      <unit id="org.eclipse.epp.logging.aeri.feature.feature.group" version="2.0.7.v20170906-1327"/>
+      <unit id="org.eclipse.epp.logging.aeri.feature.source.feature.group" version="2.0.7.v20170906-1327"/>
+      <unit id="org.eclipse.jetty.http" version="9.4.8.v20171121"/>
+      <unit id="org.eclipse.jetty.servlet" version="9.4.8.v20171121"/>
+      <unit id="org.eclipse.jetty.server" version="9.4.8.v20171121"/>
+      <unit id="org.eclipse.jetty.util" version="9.4.8.v20171121"/>
       <repository location="http://download.eclipse.org/releases/oxygen/"/>
     </location>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
@@ -47,7 +47,7 @@
       <repository location="http://docker-editor.openanalytics.eu/update/"/>
     </location>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
-      <unit id="org.eclipse.linuxtools.docker.feature.feature.group" version="3.2.0.201712060514"/>
+      <unit id="org.eclipse.linuxtools.docker.feature.feature.group" version="3.2.1.201803061555"/>
       <repository location="http://download.eclipse.org/linuxtools/update-docker"/>
     </location>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">

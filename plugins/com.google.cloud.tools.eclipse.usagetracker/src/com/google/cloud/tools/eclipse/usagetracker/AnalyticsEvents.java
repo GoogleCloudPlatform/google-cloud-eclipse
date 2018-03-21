@@ -40,6 +40,7 @@ public class AnalyticsEvents {
   // Metadata keys
   public static final String APP_ENGINE_LOCAL_SERVER_MODE = "mode";
   public static final String APP_ENGINE_NEW_PROJECT_WIZARD_TYPE = "type";
+  public static final String APP_ENGINE_NEW_PROJECT_WIZARD_BUILD_TOOL = "build_tool";
   public static final String APP_ENGINE_DEPLOY_STANDARD = "standard";
   public static final String APP_ENGINE_DEPLOY_FLEXIBLE = "flex";
   public static final String DATAFLOW_RUN_RUNNER = "runner";

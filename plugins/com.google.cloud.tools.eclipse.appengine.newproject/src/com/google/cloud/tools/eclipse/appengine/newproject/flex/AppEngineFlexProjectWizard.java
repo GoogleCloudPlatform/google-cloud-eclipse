@@ -23,6 +23,7 @@ import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpPro
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
+import com.google.common.collect.ImmutableMap;
 import javax.inject.Inject;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
@@ -54,8 +55,13 @@ public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
     if (accepted) {
       AnalyticsPingManager.getInstance().sendPing(
           AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_COMPLETE,
-          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
-          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_FLEX);
+          ImmutableMap.of(
+              AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
+              AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_FLEX,
+              AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_BUILD_TOOL,
+              config.getUseMaven()
+                  ? AnalyticsEvents.MAVEN_PROJECT
+                  : AnalyticsEvents.NATIVE_PROJECT));
     }
     return accepted;
   }

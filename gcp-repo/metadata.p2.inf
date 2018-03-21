@@ -34,14 +34,14 @@ units.1.properties.1.value=true
 units.1.properties.2.name=org.eclipse.equinox.p2.name
 units.1.properties.2.value=Cloud Tools for Eclipse
 units.1.properties.3.name=org.eclipse.equinox.p2.provider
-units.1.properties.3.value=Google Inc.
+units.1.properties.3.value=Google LLC
 units.1.properties.4.name=org.eclipse.equinox.p2.contact
 units.1.properties.4.value=https://github.com/GoogleCloudPlatform/google-cloud-eclipse
 units.1.properties.5.name=org.eclipse.equinox.p2.doc.url
 units.1.properties.5.value=https://cloud.google.com/eclipse/docs/
 units.1.properties.6.name=org.eclipse.equinox.p2.description
 units.1.properties.6.value=Supports development of Google Cloud Platform projects in Eclipse.
-units.1.copyright =Copyright 2016-2018 Google Inc.
+units.1.copyright =Copyright 2016-2018 Google LLC
 units.1.licenses.0 =\
 Cloud Tools for Eclipse is made available under the Apache License, Version 2.0. \
 Please visit the following URL for details:\n\n\

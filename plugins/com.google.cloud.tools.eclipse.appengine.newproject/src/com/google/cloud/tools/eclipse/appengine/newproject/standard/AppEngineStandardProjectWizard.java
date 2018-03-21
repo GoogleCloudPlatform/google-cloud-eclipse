@@ -26,6 +26,7 @@ import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import com.google.common.collect.ImmutableMap;
 import java.lang.reflect.InvocationTargetException;
 import javax.inject.Inject;
 import org.eclipse.core.runtime.IAdaptable;
@@ -80,8 +81,13 @@ public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
     if (accepted) {
       AnalyticsPingManager.getInstance().sendPing(
           AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_COMPLETE,
-          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
-          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_STANDARD);
+          ImmutableMap.of(
+              AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
+              AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_STANDARD,
+              AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_BUILD_TOOL,
+              config.getUseMaven()
+                  ? AnalyticsEvents.MAVEN_PROJECT
+                  : AnalyticsEvents.NATIVE_PROJECT));
     }
     return accepted;
   }
