@@ -27,7 +27,7 @@ import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -49,14 +49,14 @@ public class StandardFacetInstallationTest {
 
   public final ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
-  private List<IProject> projects;
+  private Map<String, IProject> projects;
 
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacets();
 
   @After
   public void tearDown() throws CoreException {
     if (projects != null) {
-      for (IProject project : projects) {
+      for (IProject project : projects.values()) {
         try {
           project.delete(true, null);
         } catch (IllegalArgumentException ex) {
@@ -75,7 +75,7 @@ public class StandardFacetInstallationTest {
     projects = ProjectUtils.importProjects(getClass(),
         "projects/test-dynamic-web-project.zip", true /* checkBuildErrors */, null);
     assertEquals(1, projects.size());
-    IProject project = projects.get(0);
+    IProject project = projects.values().iterator().next();
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     // verify that the appengine-web.xml is installed in the dynamic web root folder
     AppEngineStandardFacet.installAppEngineFacet(facetedProject, true, null);

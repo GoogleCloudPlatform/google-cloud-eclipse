@@ -26,7 +26,7 @@ import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.common.base.Stopwatch;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import org.eclipse.core.resources.IProject;
@@ -50,7 +50,7 @@ public class LocalAppEnginePublishOperationTest {
   @Rule
   public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
-  private List<IProject> projects;
+  private Map<String, IProject> projects;
   private IProject serverProject;
   private IProject sharedProject;
   private IModule serverModule;
@@ -64,8 +64,8 @@ public class LocalAppEnginePublishOperationTest {
     assertEquals(2, projects.size());
     Predicate<IProject> isServerProject = project -> "sox-server".equals(project.getName());
     Predicate<IProject> isSharedProject = project -> "sox-shared".equals(project.getName());
-    serverProject = projects.stream().filter(isServerProject).findFirst().get();
-    sharedProject = projects.stream().filter(isSharedProject).findFirst().get();
+    serverProject = projects.get("sox-server");
+    sharedProject = projects.get("sox-shared");
 
     // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1798
     Stopwatch stopwatch = Stopwatch.createStarted();
@@ -94,7 +94,7 @@ public class LocalAppEnginePublishOperationTest {
   @After
   public void tearDown() throws CoreException {
     if (projects != null) {
-      for (IProject project : projects) {
+      for (IProject project : projects.values()) {
         project.delete(true, null);
       }
     }

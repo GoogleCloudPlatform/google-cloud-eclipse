@@ -29,7 +29,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
@@ -277,10 +277,11 @@ public class WebProjectUtilTest {
       throws CoreException, IOException {
     // WTP's Dynamic Web Project with multiple <wb-resource> elements
     // - looking up a file should look in the wb-resource in order
-    List<IProject> projects = ProjectUtils.importProjects(getClass(),
-        "projects/test-dynamic-web-project-dynamicrootsource.zip", true, null);
+    Map<String, IProject> projects =
+        ProjectUtils.importProjects(
+            getClass(), "projects/test-dynamic-web-project-dynamicrootsource.zip", true, null);
     assertEquals(1, projects.size());
-    importedProject = projects.get(0);
+    importedProject = projects.values().iterator().next();
 
     createFile(importedProject, new Path("target/m2e-wtp/web-resources/WEB-INF/foo.txt"),
         asInputStream("m2e-wtp"));
@@ -310,10 +311,11 @@ public class WebProjectUtilTest {
       throws CoreException, IOException {
     // WTP's Dynamic Web Project with multiple <wb-resource> elements
     // - creating a file should be put in the defaultRootSource
-    List<IProject> projects = ProjectUtils.importProjects(getClass(),
-        "projects/test-dynamic-web-project-dynamicrootsource.zip", true, null);
+    Map<String, IProject> projects =
+        ProjectUtils.importProjects(
+            getClass(), "projects/test-dynamic-web-project-dynamicrootsource.zip", true, null);
     assertEquals(1, projects.size());
-    importedProject = projects.get(0);
+    importedProject = projects.values().iterator().next();
 
     IFile fooTxt =
         WebProjectUtil.createFileInWebInf(importedProject, new Path("foo.txt"), asInputStream("foo"),
@@ -331,10 +333,11 @@ public class WebProjectUtilTest {
       throws CoreException, IOException {
     // WTP's Dynamic Web Project with multiple <wb-resource> elements
     // - creating a file should be put in the defaultRootSource
-    List<IProject> projects = ProjectUtils.importProjects(getClass(),
-        "projects/test-dynamic-web-project-dynamicrootsource.zip", true, null);
+    Map<String, IProject> projects =
+        ProjectUtils.importProjects(
+            getClass(), "projects/test-dynamic-web-project-dynamicrootsource.zip", true, null);
     assertEquals(1, projects.size());
-    importedProject = projects.get(0);
+    importedProject = projects.values().iterator().next();
     IFolder libFolder = WebProjectUtil.createFolderInWebInf(importedProject, new Path("lib"), null);
 
     // lib should be created in the <wb-resource> tagged with `defaultRootSource`

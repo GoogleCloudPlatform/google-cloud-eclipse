@@ -25,6 +25,7 @@ import com.google.cloud.tools.eclipse.test.util.ZipUtil;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,7 +46,7 @@ public abstract class ChildModuleWarPublishTest {
   public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
   private static final IProgressMonitor monitor = new NullProgressMonitor();
-  private static List<IProject> allProjects;
+  private static Map<String, IProject> allProjects;
   private static IProject project;
 
   protected abstract List<String> getExpectedChildModuleNames();
@@ -54,18 +55,14 @@ public abstract class ChildModuleWarPublishTest {
       throws IOException, CoreException {
     allProjects = ProjectUtils.importProjects(ChildModuleWarPublishTest.class,
         testZip, false /* checkBuildErrors */, monitor);
-    for (IProject loaded : allProjects) {
-      if (loaded.getName().equals(mainProject)) {
-        project = loaded;
-      }
-    }
+    project = allProjects.get(mainProject);
     assertNotNull(project);
   }
 
   @AfterClass
   public static void tearDown() {
-    ProjectUtils.waitForProjects(allProjects);
-    for (IProject project : allProjects) {
+    ProjectUtils.waitForProjects(allProjects.values());
+    for (IProject project : allProjects.values()) {
       try {
         project.delete(true, null);
       } catch (CoreException | RuntimeException ex) {

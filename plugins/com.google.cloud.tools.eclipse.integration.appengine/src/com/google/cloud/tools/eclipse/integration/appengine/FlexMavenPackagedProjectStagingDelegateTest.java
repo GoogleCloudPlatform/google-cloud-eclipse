@@ -24,7 +24,7 @@ import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexMavenPackagedPro
 import com.google.cloud.tools.eclipse.test.util.project.JavaRuntimeUtils;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.io.IOException;
-import java.util.List;
+import java.util.Map;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -43,11 +43,12 @@ public class FlexMavenPackagedProjectStagingDelegateTest {
   public void testStage_springBoot() throws IOException, CoreException {
     Assume.assumeTrue("Only for JavaSE-8", JavaRuntimeUtils.hasJavaSE8());
 
-    List<IProject> projects = ProjectUtils.importProjects(getClass(),
-        "test-projects/spring-boot-test.zip", false /* checkBuildErrors */, null);
+    Map<String, IProject> projects =
+        ProjectUtils.importProjects(
+            getClass(), "test-projects/spring-boot-test.zip", false /* checkBuildErrors */, null);
     assertEquals(1, projects.size());
 
-    IProject project = projects.get(0);
+    IProject project = projects.values().iterator().next();
     IPath safeWorkDirectory = project.getFolder("safe-work-directory").getLocation();
     IPath stagingDirectory = project.getFolder("staging-result").getLocation();
     IPath appEngineDirectory = project.getFolder("src/main/appengine").getLocation();

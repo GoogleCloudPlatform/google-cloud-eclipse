@@ -25,6 +25,7 @@ import com.google.cloud.tools.eclipse.test.util.ZipUtil;
 import com.google.cloud.tools.eclipse.test.util.reflection.ReflectionUtil;
 import com.google.common.base.Joiner;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.Maps;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -71,14 +72,14 @@ public class ProjectUtils {
   private static boolean DEBUG = false;
 
   /**
-   * Import the Eclipse projects found within the bundle containing {@code clazz} at the
-   * {@code relativeLocation}. Return the list of projects imported.
+   * Import the Eclipse projects found within the bundle containing {@code clazz} at the {@code
+   * relativeLocation}. Return the list of projects imported.
    *
    * @throws IOException if the zip cannot be accessed
    * @throws CoreException if a project cannot be imported
    */
-  public static List<IProject> importProjects(Class<?> clazz, String relativeLocation,
-      boolean checkBuildErrors, IProgressMonitor monitor)
+  public static Map<String, IProject> importProjects(
+      Class<?> clazz, String relativeLocation, boolean checkBuildErrors, IProgressMonitor monitor)
       throws IOException, CoreException {
 
     // Resolve the zip from within this bundle
@@ -89,14 +90,15 @@ public class ProjectUtils {
   }
 
   /**
-   * Import the Eclipse projects found within the bundle containing {@code clazz} at the
-   * {@code relativeLocation}. Return the list of projects imported.
+   * Import the Eclipse projects found within the bundle containing {@code clazz} at the {@code
+   * relativeLocation}. Return the list of projects imported.
    *
    * @throws IOException if the zip cannot be accessed
    * @throws CoreException if a project cannot be imported
    */
-  public static List<IProject> importProjects(URL fileLocation,
-      boolean checkBuildErrors, IProgressMonitor monitor) throws IOException, CoreException {
+  public static Map<String, IProject> importProjects(
+      URL fileLocation, boolean checkBuildErrors, IProgressMonitor monitor)
+      throws IOException, CoreException {
     SubMonitor progress = SubMonitor.convert(monitor, 100);
     URL zipLocation = FileLocator.toFileURL(fileLocation);
     if (!zipLocation.getProtocol().equals("file")) {
@@ -126,7 +128,7 @@ public class ProjectUtils {
 
     // import the projects
     progress.setWorkRemaining(10 * projectFiles.size() + 10);
-    List<IProject> projects = new ArrayList<>(projectFiles.size());
+    Map<String, IProject> projects = Maps.newLinkedHashMap();
     System.out.printf("Importing %d projects:\n", projectFiles.size());
     for (IPath projectFile : projectFiles) {
       System.out.println("    " + projectFile);
@@ -135,11 +137,11 @@ public class ProjectUtils {
       // bring in the project to the workspace
       project.create(descriptor, progress.newChild(2));
       project.open(progress.newChild(8));
-      projects.add(project);
+      projects.put(project.getName(), project);
     }
 
     // wait for any post-import operations too
-    waitForProjects(projects);
+    waitForProjects(projects.values());
     if (checkBuildErrors) {
       waitUntilNoBuildErrors();
       // changed from specific projects to see all possible errors
