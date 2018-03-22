@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Google Inc.
+ * Copyright 2017 Google LLC. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -37,6 +36,10 @@ import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -59,7 +62,8 @@ public class PomTest {
 
   // todo we're doing enough of this we should import or write some utilities
   private static final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-  
+  private static final XPathFactory xpathFactory = XPathFactory.newInstance();
+
   @BeforeClass 
   public static void configureParser() {
     factory.setNamespaceAware(true);
@@ -67,9 +71,12 @@ public class PomTest {
   
   private Pom pom;
   private IFile pomFile;
+  private final XPath xpath = xpathFactory.newXPath();
   
   @Before
   public void setUp() throws SAXException, IOException, CoreException {
+    xpath.setNamespaceContext(new Maven4NamespaceContext());
+    
     IProject project = projectCreator.getProject();
     pomFile = project.getFile("pom.xml");
     try (
@@ -109,8 +116,8 @@ public class PomTest {
       Document actual = parse(contents);
       
       NodeList dependencies = actual.getElementsByTagName("dependencies");
-      Assert.assertEquals(1, dependencies.getLength());
-      NodeList children = ((Element) dependencies.item(0)).getElementsByTagName("dependency");
+      Assert.assertEquals(2, dependencies.getLength());
+      NodeList children = ((Element) dependencies.item(1)).getElementsByTagName("dependency");
       
       Assert.assertEquals(4, children.getLength());
       
@@ -135,8 +142,9 @@ public class PomTest {
   }
 
   @Test
-  public void testAddDependencies_withDuplicates() 
-      throws CoreException, ParserConfigurationException, IOException, SAXException {
+  public void testAddDependencies_withDuplicates() throws CoreException,
+      ParserConfigurationException, IOException, SAXException, XPathExpressionException {
+    
     LibraryFile file1 = new LibraryFile(coordinates("com.example.group1", "artifact1"));
     LibraryFile file2 = new LibraryFile(coordinates("com.example.group2", "artifact2"));
     
@@ -151,19 +159,19 @@ public class PomTest {
     
     try (InputStream contents = pomFile.getContents()) {
       Document actual = parse(contents);
+
+      NodeList dependencyNodes = (NodeList) xpath.evaluate(
+            "./m:dependencies/m:dependency",
+            actual.getDocumentElement(),
+            XPathConstants.NODESET);
       
-      NodeList dependencies = actual.getElementsByTagName("dependencies");
-      NodeList children = ((Element) dependencies.item(0)).getElementsByTagName("dependency");
-      
-      Assert.assertEquals(2, children.getLength());
-      
-      Element child0 = (Element) children.item(0);
+      Element child0 = (Element) dependencyNodes.item(0);
       Element groupId = getOnlyChild(child0, "groupId");
       Assert.assertEquals("com.example.group1", groupId.getTextContent());
       Element artifactId = getOnlyChild(child0, "artifactId");
       Assert.assertEquals("artifact1", artifactId.getTextContent());
       
-      Element child1 = (Element) children.item(1);
+      Element child1 = (Element) dependencyNodes.item(1);
       Element groupId1 = getOnlyChild(child1, "groupId");
       Assert.assertEquals("com.example.group2", groupId1.getTextContent());
       Element artifactId1 = getOnlyChild(child1, "artifactId");
@@ -188,9 +196,9 @@ public class PomTest {
       Document actual = parse(contents);
       
       NodeList dependencies = actual.getElementsByTagName("dependencies");
-      Assert.assertEquals(1, dependencies.getLength());    
+      Assert.assertEquals(2, dependencies.getLength());    
       
-      Element dependency = getOnlyChild(((Element) dependencies.item(0)), "dependency");
+      Element dependency = getOnlyChild(((Element) dependencies.item(1)), "dependency");
       Element groupId = getOnlyChild(dependency, "groupId");
       Assert.assertEquals("com.googlecode.objectify", groupId.getTextContent());
       Element artifactId = getOnlyChild(dependency, "artifactId");
@@ -212,9 +220,9 @@ public class PomTest {
     try (InputStream contents = pomFile.getContents()) {
       Document actual = parse(contents);
       NodeList dependenciesList = actual.getElementsByTagName("dependencies");
-      Assert.assertEquals(1, dependenciesList.getLength());
-      Assert.assertTrue(dependenciesList.item(0) instanceof Element);
-      Element dependencies = (Element) dependenciesList.item(0);
+      Assert.assertEquals(2, dependenciesList.getLength());
+      
+      Element dependencies = (Element) dependenciesList.item(1);
       Assert.assertEquals(2, dependencies.getElementsByTagName("dependency").getLength());
   
       // no dependencies should be removed
@@ -236,9 +244,8 @@ public class PomTest {
     try (InputStream contents = pomFile.getContents()) {
       Document actual = parse(contents);
       NodeList dependenciesList = actual.getElementsByTagName("dependencies");
-      Assert.assertEquals(1, dependenciesList.getLength());
-      Assert.assertTrue(dependenciesList.item(0) instanceof Element);
-      Element dependencies = (Element) dependenciesList.item(0);
+      Assert.assertEquals(2, dependenciesList.getLength());
+      Element dependencies = (Element) dependenciesList.item(1);
       Assert.assertEquals(2, dependencies.getElementsByTagName("dependency").getLength());
   
       // dependencies from library2 should be removed
@@ -265,9 +272,8 @@ public class PomTest {
     try (InputStream contents = pomFile.getContents()) {
       Document actual = parse(contents);
       NodeList dependenciesList = actual.getElementsByTagName("dependencies");
-      Assert.assertEquals(1, dependenciesList.getLength());
-      Assert.assertTrue(dependenciesList.item(0) instanceof Element);
-      Element dependencies = (Element) dependenciesList.item(0);
+      Assert.assertEquals(2, dependenciesList.getLength());
+      Element dependencies = (Element) dependenciesList.item(1);
       Assert.assertEquals(2, dependencies.getElementsByTagName("dependency").getLength());
   
       // all dependencies should be removed
@@ -286,7 +292,7 @@ public class PomTest {
     Library library2 = newLibrary("id2", file1, file2);
 
     pom.updateDependencies(Arrays.asList(library1), Arrays.asList(library1, library2));
-
+    
     // library2 should not be resolved since file2 is not in the available libraries
     Collection<Library> resolved = pom.resolveLibraries(Arrays.asList(library1, library2));
     Assert.assertEquals(1, resolved.size());
@@ -331,6 +337,4 @@ public class PomTest {
     return new MavenCoordinates.Builder().setGroupId(groupId).setArtifactId(artifactId)
         .setVersion(version).build();
   }
-
-
 }
