@@ -96,6 +96,11 @@ public class PomTest {
   }
   
   @Test
+  public void testDependencyManaged() {
+    Assert.assertTrue(pom.dependencyManaged("com.google.cloud", "google-cloud-speech")); 
+  }
+  
+  @Test
   public void testAddDependencies() 
       throws CoreException, ParserConfigurationException, IOException, SAXException {
     

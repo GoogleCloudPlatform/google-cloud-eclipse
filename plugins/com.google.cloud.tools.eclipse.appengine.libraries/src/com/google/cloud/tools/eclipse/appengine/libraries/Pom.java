@@ -233,9 +233,10 @@ class Pom {
   /**
    * @return true if and only if this artifact is controlled by a BOM
    */
-  private boolean dependencyManaged(String groupId, String artifactId) {
-    NodeList elements =
-        document.getElementsByTagNameNS("http://maven.apache.org/POM/4.0.0", "dependencyManager");
+  @VisibleForTesting
+  boolean dependencyManaged(String groupId, String artifactId) {
+    NodeList elements = document.getElementsByTagNameNS(
+        "http://maven.apache.org/POM/4.0.0", "dependencyManagement");
     if (elements.getLength() == 1) {
       return Bom.defines((Element) elements.item(0), groupId, artifactId);
     }
