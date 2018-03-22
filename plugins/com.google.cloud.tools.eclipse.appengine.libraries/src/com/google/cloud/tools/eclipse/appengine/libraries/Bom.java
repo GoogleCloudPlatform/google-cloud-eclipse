@@ -16,7 +16,14 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
+import com.google.cloud.tools.libraries.json.CloudLibrary;
+import com.google.cloud.tools.libraries.json.CloudLibraryClient;
+import com.google.cloud.tools.libraries.json.CloudLibraryClientMavenCoordinates;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
@@ -31,37 +38,31 @@ class Bom {
   
   private final static XPathFactory factory = XPathFactory.newInstance();
 
-  private static Set<String> artifacts = ImmutableSet.of("google-cloud-speech",
-      "google-cloud-os-login",
-      "google-cloud-dialogflow",
-      "google-cloud-resourcemanager",
-      "google-cloud-dlp",
-      "google-cloud-video-intelligence",
-      "google-cloud-monitoring",
-      "google-cloud-errorreporting",
-      "google-cloud-firestore",
-      "google-cloud-trace",
-      "google-cloud-dns",
-      "google-cloud-vision",
-      "google-cloud-language",
-      "google-cloud-spanner",
-      "google-cloud-pubsub",
-      "google-cloud-bigquery",
-      "google-cloud-datastore",
-      "google-cloud-storage",
-      "google-cloud-translate",
-      "google-cloud-logging"); 
+  private static Set<String> artifacts; 
   
-  // needs https://github.com/GoogleCloudPlatform/appengine-plugins-core/issues/569
-  /* static {
+  static {
     try {
-      artifacts = com.google.cloud.tools.libraries.CloudLibraries.getCloudLibraries().stream()
-          .map(CloudLibrary::getArtifactId)
-          .collect(Collectors.toSet());
+      List<CloudLibrary> cloudLibraries =
+          com.google.cloud.tools.libraries.CloudLibraries.getCloudLibraries();
+      Builder<String> setBuilder = ImmutableSet.builder();
+      
+      for (CloudLibrary library : cloudLibraries) {
+        List<CloudLibraryClient> clients = library.getClients();
+        if (clients != null) {
+          for (CloudLibraryClient client : clients) {
+            CloudLibraryClientMavenCoordinates coordinates = client.getMavenCoordinates();
+            if (coordinates != null) {
+              setBuilder.add(coordinates.getArtifactId()); 
+            }
+          }
+        }
+      }
+      
+      artifacts = setBuilder.build();
     } catch (IOException ex) {
       artifacts = new HashSet<>();
     }
-  } */
+  }
   
   static boolean defines(Element dependencyManager, String groupId, String artifactId) {
     
