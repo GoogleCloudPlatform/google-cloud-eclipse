@@ -24,6 +24,7 @@ import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.cloud.tools.login.UiFacade;
 import com.google.cloud.tools.login.VerificationCodeHolder;
+import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
@@ -81,7 +82,7 @@ public class LoginServiceUi implements UiFacade {
 
   @Override
   public VerificationCodeHolder obtainVerificationCodeFromExternalUserInteraction(String message) {
-    LocalServerReceiver codeReceiver = new LocalServerReceiver();
+    LocalServerReceiver codeReceiver = createLocalServerReceiver();
 
     try {
       String redirectUrl = codeReceiver.getRedirectUri();
@@ -110,7 +111,16 @@ public class LoginServiceUi implements UiFacade {
     }
   }
 
-  private String showProgressDialogAndWaitForCode(final LocalServerReceiver codeReceiver)
+  @VisibleForTesting
+  static LocalServerReceiver createLocalServerReceiver() {
+    LocalServerReceiver.Builder builder = new LocalServerReceiver.Builder()
+        .setLandingPages(
+            "https://cloud.google.com/eclipse/auth_success",
+            "https://cloud.google.com/eclipse/auth_failure");
+    return builder.build();
+  }
+
+  private String showProgressDialogAndWaitForCode(LocalServerReceiver codeReceiver)
       throws IOException {
     try {
       final ProgressMonitorDialog dialog = new ProgressMonitorDialog(shellProvider.getShell()) {
