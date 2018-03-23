@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
+import com.google.cloud.tools.libraries.CloudLibraries;
 import com.google.cloud.tools.libraries.json.CloudLibrary;
 import com.google.cloud.tools.libraries.json.CloudLibraryClient;
 import com.google.cloud.tools.libraries.json.CloudLibraryClientMavenCoordinates;
@@ -39,8 +40,7 @@ class Bom {
   
   static {
     try {
-      List<CloudLibrary> cloudLibraries =
-          com.google.cloud.tools.libraries.CloudLibraries.getCloudLibraries();
+      List<CloudLibrary> cloudLibraries = CloudLibraries.getCloudLibraries();
       Builder<String> setBuilder = ImmutableSet.builder();
       
       for (CloudLibrary library : cloudLibraries) {
