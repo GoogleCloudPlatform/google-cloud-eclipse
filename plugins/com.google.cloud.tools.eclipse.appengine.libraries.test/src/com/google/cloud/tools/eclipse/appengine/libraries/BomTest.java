@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Google LLC.
+ * Copyright 2018 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.w3c.dom.Node;
 
 public class BomTest {
 
-  private Element dependencyManager;
+  private Element dependencyManagement;
   
   @Before
   public void setUp() throws ParserConfigurationException {
@@ -42,8 +42,8 @@ public class BomTest {
 
     Node rootElement = doc.getDocumentElement();
 
-    dependencyManager =
-        doc.createElementNS("http://maven.apache.org/POM/4.0.0", "dependencyManager");
+    dependencyManagement =
+        doc.createElementNS("http://maven.apache.org/POM/4.0.0", "dependencyManagement");
     Element dependencies = doc.createElementNS("http://maven.apache.org/POM/4.0.0", "dependencies");
     Element dependency = doc.createElementNS("http://maven.apache.org/POM/4.0.0", "dependency");
     Element groupId = doc.createElementNS("http://maven.apache.org/POM/4.0.0", "groupId");
@@ -53,8 +53,8 @@ public class BomTest {
     artifactId.setTextContent("google-cloud");
     version.setTextContent("0.40.0-alpha");
     
-    rootElement.appendChild(dependencyManager);
-    dependencyManager.appendChild(dependencies);
+    rootElement.appendChild(dependencyManagement);
+    dependencyManagement.appendChild(dependencies);
     dependencies.appendChild(dependency);
     dependency.appendChild(groupId);
     dependency.appendChild(artifactId);
@@ -63,27 +63,27 @@ public class BomTest {
 
   @Test
   public void testCloudSpeech() {
-    Assert.assertTrue(Bom.defines(dependencyManager, "com.google.cloud", "google-cloud-speech"));
+    Assert.assertTrue(Bom.defines(dependencyManagement, "com.google.cloud", "google-cloud-speech"));
   }
 
   @Test
   public void testGroupdId() {
-    Assert.assertFalse(Bom.defines(dependencyManager, "com.google", "google-cloud-speech"));
+    Assert.assertFalse(Bom.defines(dependencyManagement, "com.google", "google-cloud-speech"));
   }
   
   @Test
   public void testCloudVision() {
-    Assert.assertTrue(Bom.defines(dependencyManager, "com.google.cloud", "google-cloud-vision"));
+    Assert.assertTrue(Bom.defines(dependencyManagement, "com.google.cloud", "google-cloud-vision"));
   }
   
   @Test
   public void testUnknown() {
-    Assert.assertFalse(Bom.defines(dependencyManager, "com.google.cloud", "unknown"));
+    Assert.assertFalse(Bom.defines(dependencyManagement, "com.google.cloud", "unknown"));
   }
 
   @Test
   public void testGuava() {
-    Assert.assertFalse(Bom.defines(dependencyManager, "com.google.guava", "guava"));
+    Assert.assertFalse(Bom.defines(dependencyManagement, "com.google.guava", "guava"));
   }
   
 }

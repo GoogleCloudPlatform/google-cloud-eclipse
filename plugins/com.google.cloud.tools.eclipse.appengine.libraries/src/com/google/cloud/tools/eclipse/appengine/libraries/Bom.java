@@ -31,9 +31,6 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.Element;
 
-/**
- * 
- */
 class Bom {
   
   private final static XPathFactory factory = XPathFactory.newInstance();
@@ -64,7 +61,7 @@ class Bom {
     }
   }
   
-  static boolean defines(Element dependencyManager, String groupId, String artifactId) {
+  static boolean defines(Element dependencyManagement, String groupId, String artifactId) {
     
     XPath xpath = factory.newXPath();
     xpath.setNamespaceContext(new Maven4NamespaceContext());
@@ -72,11 +69,11 @@ class Bom {
     try {
       String bomGroupId = (String) xpath.evaluate(
           "string(./m:dependencies/m:dependency/m:groupId)",
-          dependencyManager,
+          dependencyManagement,
           XPathConstants.STRING);
       String bomArtifactId = (String) xpath.evaluate(
           "string(./m:dependencies/m:dependency/m:artifactId)",
-          dependencyManager,
+          dependencyManagement,
           XPathConstants.STRING);
 
       // todo get these dynamically by reading the BOM

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Google LLC. All Rights Reserved.
+ * Copyright 2017 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -169,6 +169,7 @@ public class PomTest {
             "./m:dependencies/m:dependency",
             actual.getDocumentElement(),
             XPathConstants.NODESET);
+      Assert.assertEquals(2, dependencyNodes.getLength());
       
       Element child0 = (Element) dependencyNodes.item(0);
       Element groupId = getOnlyChild(child0, "groupId");
@@ -227,6 +228,7 @@ public class PomTest {
       NodeList dependenciesList = actual.getElementsByTagName("dependencies");
       Assert.assertEquals(2, dependenciesList.getLength());
       
+      // first one is in dependencyManagement
       Element dependencies = (Element) dependenciesList.item(1);
       Assert.assertEquals(2, dependencies.getElementsByTagName("dependency").getLength());
   
