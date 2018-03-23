@@ -62,17 +62,16 @@ class Bom {
   }
   
   static boolean defines(Element dependencyManagement, String groupId, String artifactId) {
-    
     XPath xpath = factory.newXPath();
     xpath.setNamespaceContext(new Maven4NamespaceContext());
 
     try {
       String bomGroupId = (String) xpath.evaluate(
-          "string(./m:dependencies/m:dependency/m:groupId)",
+          "string(./m:dependencies/m:dependency[m:groupId='" + groupId + "']/m:groupId)",
           dependencyManagement,
           XPathConstants.STRING);
       String bomArtifactId = (String) xpath.evaluate(
-          "string(./m:dependencies/m:dependency/m:artifactId)",
+          "string(./m:dependencies/m:dependency[m:groupId='" + groupId + "']/m:artifactId)",
           dependencyManagement,
           XPathConstants.STRING);
 

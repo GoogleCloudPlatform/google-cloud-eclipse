@@ -45,20 +45,31 @@ public class BomTest {
     dependencyManagement =
         doc.createElementNS("http://maven.apache.org/POM/4.0.0", "dependencyManagement");
     Element dependencies = doc.createElementNS("http://maven.apache.org/POM/4.0.0", "dependencies");
-    Element dependency = doc.createElementNS("http://maven.apache.org/POM/4.0.0", "dependency");
-    Element groupId = doc.createElementNS("http://maven.apache.org/POM/4.0.0", "groupId");
-    Element artifactId = doc.createElementNS("http://maven.apache.org/POM/4.0.0", "artifactId");
-    Element version = doc.createElementNS("http://maven.apache.org/POM/4.0.0", "version");
-    groupId.setTextContent("com.google.cloud");
-    artifactId.setTextContent("google-cloud");
-    version.setTextContent("0.40.0-alpha");
-    
-    rootElement.appendChild(dependencyManagement);
+
+    Element springDependency =
+        configureBom(doc, "org.springframework.boot", "spring-boot-dependencies", "2.0.0.RELEASE");
+    dependencies.appendChild(springDependency);
+    Element cloudDependency = configureBom(doc, "com.google.cloud", "google-cloud", "0.40.0-alpha");
+    dependencies.appendChild(cloudDependency);
     dependencyManagement.appendChild(dependencies);
-    dependencies.appendChild(dependency);
-    dependency.appendChild(groupId);
-    dependency.appendChild(artifactId);
-    dependency.appendChild(version);
+    rootElement.appendChild(dependencyManagement);
+  }
+
+  private Element configureBom(Document doc, String groupId, String artifactId, String version) {
+    Element dependency = doc.createElementNS("http://maven.apache.org/POM/4.0.0", "dependency");
+    Element groupIdElement = doc.createElementNS("http://maven.apache.org/POM/4.0.0", "groupId");
+    Element artifactIdElement =
+        doc.createElementNS("http://maven.apache.org/POM/4.0.0", "artifactId");
+    Element versionElement = doc.createElementNS("http://maven.apache.org/POM/4.0.0", "version");
+
+    groupIdElement.setTextContent(groupId);
+    artifactIdElement.setTextContent(artifactId);
+    versionElement.setTextContent(version);
+
+    dependency.appendChild(groupIdElement);
+    dependency.appendChild(artifactIdElement);
+    dependency.appendChild(versionElement);
+    return dependency;
   }
 
   @Test
