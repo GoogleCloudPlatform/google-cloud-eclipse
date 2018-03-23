@@ -24,35 +24,52 @@ import org.junit.Assert;
  * Assertion tests for Arrays
  */
 public class ArrayAssertions {
-  public static <T> void assertIsEmpty(T[] arr) {
-    assertIsEmpty(null, arr, Objects::toString, 120);
+  public static <T> void assertIsEmpty(T[] array) {
+    assertSize(null, 0, array, Objects::toString, 120);
   }
 
-  public static <T> void assertIsEmpty(String message, T[] arr) {
-    assertIsEmpty(message, arr, Objects::toString, 120);
+  public static <T> void assertIsEmpty(String message, T[] array) {
+    assertSize(message, 0, array, Objects::toString, 120);
   }
 
-  public static <T> void assertIsEmpty(T[] arr, Function<T, String> printer) {
-    assertIsEmpty(null, arr, printer, 120);
+  public static <T> void assertIsEmpty(T[] array, Function<T, String> printer) {
+    assertSize(null, 0, array, printer, 120);
+  }
+
+  public static <T> void assertIsEmpty(String message, T[] array, Function<T, String> printer,
+      int maxLength) {
+    assertSize(message, 0, array, printer, maxLength);
+  }
+
+  public static <T> void assertSize(int expectedSize, T[] array) {
+    assertSize(null, expectedSize, array, Objects::toString, 120);
+  }
+
+  public static <T> void assertSize(String message, int expectedSize, T[] array) {
+    assertSize(message, expectedSize, array, Objects::toString, 120);
+  }
+
+  public static <T> void assertSize(int expectedSize, T[] array, Function<T, String> printer) {
+    assertSize(null, expectedSize, array, printer, 120);
   }
 
   /**
-   * Assert that {@code arr} is empty; if not, fail with a message showing as many elements will fit
-   * until the total message size exceeds {@code maxLength}.
+   * Assert that {@code array} has the expected size; if not, fail with a message showing as many
+   * elements as will fit until the total message size exceeds {@code maxLength}.
    */
-  public static <T> void assertIsEmpty(String message, T[] arr, Function<T, String> printer,
-      int maxLength) {
-    if (arr == null) {
+  public static <T> void assertSize(String message, int expectedSize, T[] array,
+      Function<T, String> printer, int maxLength) {
+    if (array == null) {
       Assert.fail("array is null");
-    } else if (arr.length != 0) {
+    } else if (array.length != expectedSize) {
       StringBuilder sb = new StringBuilder();
       if (message != null) {
         sb.append(message).append(": ");
       }
-      sb.append('[').append(printer.apply(arr[0]));
-      for (int i = 1; i < arr.length && sb.length() < maxLength; i++) {
+      sb.append('[').append(printer.apply(array[0]));
+      for (int i = 1; i < array.length && sb.length() < maxLength; i++) {
         sb.append(',');
-        sb.append(printer.apply(arr[i]));
+        sb.append(printer.apply(array[i]));
       }
       sb.append(']');
       Assert.fail(sb.toString());
