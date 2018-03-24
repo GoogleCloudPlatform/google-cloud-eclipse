@@ -34,10 +34,13 @@ cd git/google-cloud-eclipse
 xmlstarlet ed --inplace -u '/product/@version' -v "${CT4E_DISPLAY_VERSION}" \
   gcp-repo/metadata.product
 
-mvn -V -B -Doauth.client.id="${OAUTH_CLIENT_ID}" \
-          -Doauth.client.secret="${OAUTH_CLIENT_SECRET}" \
-          -Dga.tracking.id="${ANALYTICS_TRACKING_ID}" \
-  clean package  # TODO: clean verify
+# Need to unset `TMPDIR` for `xvfb-run` due to a bug:
+# https://bugs.launchpad.net/ubuntu/+source/xorg-server/+bug/972324
+TMPDIR= xvfb-run \
+  mvn -V -B -Doauth.client.id="${OAUTH_CLIENT_ID}" \
+            -Doauth.client.secret="${OAUTH_CLIENT_SECRET}" \
+            -Dga.tracking.id="${ANALYTICS_TRACKING_ID}" \
+    clean verify
 
 # Also export `metadata.product` and `metadata.p2.inf` to the second Kokoro job.
 readonly METADATA_DIR=gcp-repo/target/repository/metadata
