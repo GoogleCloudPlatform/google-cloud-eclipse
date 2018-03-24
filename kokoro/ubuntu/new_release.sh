@@ -9,8 +9,7 @@ set -e
 set -x
 
 export CLOUDSDK_CORE_DISABLE_USAGE_REPORTING=true
-# TODO: uncomment
-#gcloud components update --quiet
+gcloud components update --quiet
 gcloud components install app-engine-java --quiet
 
 echo "OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID}"
@@ -38,7 +37,7 @@ xmlstarlet ed --inplace -u '/product/@version' -v "${CT4E_DISPLAY_VERSION}" \
 mvn -V -B -Doauth.client.id="${OAUTH_CLIENT_ID}" \
           -Doauth.client.secret="${OAUTH_CLIENT_SECRET}" \
           -Dga.tracking.id="${ANALYTICS_TRACKING_ID}" \
-  clean package # TODO: clean verify
+  clean package  # TODO: clean verify
 
 # Also export `metadata.product` and `metadata.p2.inf` to the second Kokoro job.
 readonly METADATA_DIR=gcp-repo/target/repository/metadata
