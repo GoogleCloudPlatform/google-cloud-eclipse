@@ -19,10 +19,6 @@
     <maven.compiler.target>${compilerVersion}</maven.compiler.target>
     <maven.compiler.showDeprecation>true</maven.compiler.showDeprecation>
   </properties>
-
-  <prerequisites>
-    <maven>3.3.9</maven>
-  </prerequisites>
   
   <dependencyManagement>
     <dependencies>
@@ -109,6 +105,27 @@
         <groupId>com.google.cloud.tools</groupId>
         <artifactId>appengine-maven-plugin</artifactId>
         <version>${r"${appengine.maven.plugin.version}"}</version>
+      </plugin>
+      
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>x >= 3.3.9</version>
+        <executions>
+          <execution>
+            <id>enforce-maven</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireMavenVersion>
+                  <version>3.0</version>
+                </requireMavenVersion>
+              </rules>    
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
