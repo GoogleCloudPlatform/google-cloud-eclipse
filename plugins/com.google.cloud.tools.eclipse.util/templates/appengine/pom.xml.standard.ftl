@@ -110,7 +110,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <version>x >= 3.3.9</version>
+        <version>3.0.0-M1</version>
         <executions>
           <execution>
             <id>enforce-maven</id>
@@ -120,7 +120,7 @@
             <configuration>
               <rules>
                 <requireMavenVersion>
-                  <version>3.0</version>
+                  <version>x >= 3.3.9</version>
                 </requireMavenVersion>
               </rules>    
             </configuration>
