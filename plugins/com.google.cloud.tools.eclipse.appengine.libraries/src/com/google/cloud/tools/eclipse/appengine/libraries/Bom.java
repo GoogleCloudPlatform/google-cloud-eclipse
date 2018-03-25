@@ -24,6 +24,9 @@ import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+/**
+ * A cache of a pom.xml file and all its transitive dependencies.
+ */
 class Bom {
   
   private Map<String, Artifact> artifacts;
@@ -47,10 +50,6 @@ class Bom {
   
   boolean defines(String groupId, String artifactId) {
     return artifacts.containsKey(groupId + ":" + artifactId);
-  }
-  
-  String getVersion(String groupId, String artifactId) {
-    return artifacts.get(groupId + ":" + artifactId).getVersion();
   }
 
 }
