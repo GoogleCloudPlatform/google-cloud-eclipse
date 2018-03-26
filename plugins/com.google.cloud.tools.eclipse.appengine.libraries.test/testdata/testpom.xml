@@ -18,7 +18,7 @@
     <dependencies>
       <dependency>
         <groupId>com.google.cloud</groupId>
-        <artifactId>google-cloud</artifactId>
+        <artifactId>google-cloud-bom</artifactId>
         <version>0.40.0-alpha</version>
         <type>pom</type>
         <scope>import</scope>
