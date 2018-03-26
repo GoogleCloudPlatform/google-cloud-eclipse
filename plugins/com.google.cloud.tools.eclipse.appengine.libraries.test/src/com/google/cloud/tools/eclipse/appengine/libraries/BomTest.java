@@ -27,7 +27,7 @@ public class BomTest {
   
   @Before
   public void setUp() throws CoreException {
-    cloudBom = Bom.loadBom("com.google.cloud", "google-cloud", "0.41.0-alpha", null);
+    cloudBom = Bom.loadBom("com.google.cloud", "google-cloud-bom", "0.41.0-alpha", null);
   }
 
   @Test

@@ -44,8 +44,8 @@ import org.eclipse.m2e.core.internal.MavenPluginActivator;
 public class DependencyResolver {
 
   /**
-   * Returns all transitive runtime dependencies of the specified Maven artifact
-   * including the artifact itself.
+   * Returns all transitive runtime dependencies of the specified Maven 
+   * jar artifact including the artifact itself.
    *
    * @param groupId group ID of the Maven artifact to resolve
    * @param artifactId artifact ID of the Maven artifact to resolve
@@ -57,7 +57,26 @@ public class DependencyResolver {
       String groupId, String artifactId, String version, IProgressMonitor monitor)
           throws CoreException {
 
-    final Artifact artifact = new DefaultArtifact(groupId + ":" + artifactId + ":" + version);
+    return getTransitiveDependencies(groupId, artifactId, version, "jar", monitor); 
+  }
+  
+  /**
+   * Returns all transitive runtime dependencies of the specified Maven artifact
+   * including the artifact itself.
+   *
+   * @param groupId group ID of the Maven artifact to resolve
+   * @param artifactId artifact ID of the Maven artifact to resolve
+   * @param version version of the Maven artifact to resolve
+   * @param type jar or pom
+   * @return artifacts in the transitive dependency graph. Order not guaranteed.
+   * @throws CoreException if the dependencies could not be resolved
+   */
+  public static Collection<Artifact> getTransitiveDependencies(
+      String groupId, String artifactId, String version, String type, IProgressMonitor monitor)
+          throws CoreException {
+
+    final Artifact artifact =
+        new DefaultArtifact(groupId + ":" + artifactId + ":" + type + ":" + version);
 
     IMavenExecutionContext context = MavenPlugin.getMaven().createExecutionContext();
 

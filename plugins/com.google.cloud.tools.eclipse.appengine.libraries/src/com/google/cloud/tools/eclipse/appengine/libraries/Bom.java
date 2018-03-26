@@ -39,7 +39,7 @@ class Bom {
       throws CoreException {
     
     Collection<Artifact> dependencies =
-        DependencyResolver.getTransitiveDependencies(groupId, artifactId, version, monitor);
+        DependencyResolver.getTransitiveDependencies(groupId, artifactId, version, "pom", monitor);
     Map<String, Artifact> artifacts = new HashMap<>();
     for (Artifact artifact : dependencies) {
       artifacts.put(artifact.getGroupId() + ":" + artifact.getArtifactId(), artifact);
