@@ -45,7 +45,7 @@ public class CloudLibrariesInPluginXmlTest {
 
   @Test
   public void testLibrarySize() {
-    assertThat(CloudLibraries.getLibraries("appengine").size(), is(2));
+    assertThat(CloudLibraries.getLibraries("appengine").size(), is(3));
     // There may be different number of servlet libraries depending on whether the
     // .appengine.java.standard.java8 bundle is present
     List<Library> servletLibraries = CloudLibraries.getLibraries("servlet");
@@ -60,7 +60,7 @@ public class CloudLibrariesInPluginXmlTest {
     Library appEngineLibrary = CloudLibraries.getLibrary(APP_ENGINE_API_LIBRARY_ID);
     assertThat(appEngineLibrary.getId(), is(APP_ENGINE_API_LIBRARY_ID));
     assertThat(appEngineLibrary.getName(), is("App Engine API"));
-    assertThat(appEngineLibrary.getGroup(), is("appengine-api"));
+    assertThat(appEngineLibrary.getGroup(), is("appengine"));
     assertFalse(appEngineLibrary.getToolTip().isEmpty());
     assertThat(appEngineLibrary.getSiteUri(),
         is(new URI("https://cloud.google.com/appengine/docs/java/")));
@@ -71,7 +71,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(libraryFile.getJavadocUri(),
         is(new URI("https://cloud.google.com/appengine/docs/java/javadoc/")));
     assertNull(libraryFile.getSourceUri());
-    assertFalse("App Engine API exported", libraryFile.isExport());
+    assertTrue("App Engine API exported", libraryFile.isExport());
 
     assertNotNull(libraryFile.getMavenCoordinates());
     MavenCoordinates mavenCoordinates = libraryFile.getMavenCoordinates();

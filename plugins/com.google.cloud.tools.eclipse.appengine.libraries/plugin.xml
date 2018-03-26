@@ -9,7 +9,7 @@
              
     <library 
           id="appengine-api"
-          group="appengine-api"
+          group="appengine"
           name="App Engine API"
           tooltip="%appengine.api.tooltip"
           siteUri="https://cloud.google.com/appengine/docs/java/" >
