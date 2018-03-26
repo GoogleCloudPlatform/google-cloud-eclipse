@@ -62,12 +62,6 @@
     </dependency>
 </#if>
     <dependency>
-      <groupId>com.google.appengine</groupId>
-      <artifactId>appengine-api-1.0-sdk</artifactId>
-      <version>${appEngineApiSdkVersion}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <groupId>jstl</groupId>
       <artifactId>jstl</artifactId>
       <version>1.2</version>
