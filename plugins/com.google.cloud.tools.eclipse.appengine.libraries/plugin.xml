@@ -32,6 +32,7 @@
           tooltip="%endpoints.tooltip"
           dependencies="include"
           siteUri="https://cloud.google.com/endpoints/docs/frameworks/java/about-cloud-endpoints-frameworks" >
+      <libraryDependency id="appengine-api" />
       <libraryFile export="true" 
             javadocUri="https://cloud.google.com/endpoints/docs/frameworks/java/javadoc/">
         <mavenCoordinates
@@ -49,6 +50,7 @@
           tooltip="%objectify.tooltip"
           dependencies="include"
           siteUri="https://github.com/objectify/objectify/wiki" >
+      <libraryDependency id="appengine-api" />
       <libraryFile
           export="true"
           javadocUri="https://www.javadoc.io/doc/com.googlecode.objectify/objectify/5.1.22">
