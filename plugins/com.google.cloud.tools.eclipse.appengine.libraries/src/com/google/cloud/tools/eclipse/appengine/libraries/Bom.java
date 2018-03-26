@@ -77,7 +77,7 @@ class Bom {
 
       // todo determine this dynamically by reading the BOMs to see if any include the relevant
       // artifact
-      if ("com.google.cloud".equals(bomGroupId) && "google-cloud".equals(bomArtifactId)) {
+      if ("com.google.cloud".equals(bomGroupId) && "google-cloud-bom".equals(bomArtifactId)) {
         if ("com.google.cloud".equals(groupId)) {
           if (artifacts.contains(artifactId)) {
             return true;
