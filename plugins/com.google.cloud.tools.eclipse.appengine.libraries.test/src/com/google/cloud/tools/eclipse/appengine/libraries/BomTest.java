@@ -49,7 +49,7 @@ public class BomTest {
     Element springDependency =
         configureBom(doc, "org.springframework.boot", "spring-boot-dependencies", "2.0.0.RELEASE");
     dependencies.appendChild(springDependency);
-    Element cloudDependency = configureBom(doc, "com.google.cloud", "google-cloud", "0.40.0-alpha");
+    Element cloudDependency = configureBom(doc, "com.google.cloud", "google-cloud-bom", "0.40.0-alpha");
     dependencies.appendChild(cloudDependency);
     dependencyManagement.appendChild(dependencies);
     rootElement.appendChild(dependencyManagement);
