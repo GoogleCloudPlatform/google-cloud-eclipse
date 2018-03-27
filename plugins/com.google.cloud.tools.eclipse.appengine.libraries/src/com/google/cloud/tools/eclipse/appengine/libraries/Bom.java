@@ -45,6 +45,7 @@ class Bom {
     for (Dependency dependency : dependencies) {
       Artifact artifact = dependency.getArtifact();
       artifacts.put(artifact.getGroupId() + ":" + artifact.getArtifactId(), artifact);
+
     }
     
     return new Bom(artifacts);
