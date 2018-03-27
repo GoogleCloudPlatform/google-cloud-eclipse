@@ -61,10 +61,14 @@ public abstract class ChildModuleWarPublishTest {
   }
 
   @AfterClass
-  public static void tearDown() throws CoreException {
+  public static void tearDown() {
     ProjectUtils.waitForProjects(allProjects);
     for (IProject project : allProjects) {
-      project.delete(true, null);
+      try {
+        project.delete(true, null);
+      } catch (CoreException | RuntimeException ex) {
+        // ignore and continue
+      }
     }
   }
 
