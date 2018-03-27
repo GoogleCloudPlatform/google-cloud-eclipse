@@ -353,17 +353,6 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     }
   }
 
-  @VisibleForTesting
-  static boolean appEngineApiSdkJarExists(Path directory) {
-    Pattern pattern = Pattern.compile("^appengine-api-1.0-sdk-.+\\.jar$", Pattern.CASE_INSENSITIVE);
-    for (String filename : directory.toFile().list()) {
-      if (pattern.matcher(filename).matches()) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   private static int ifNull(Integer value, int defaultValue) {
     return value != null ? value : defaultValue;
   }

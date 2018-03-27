@@ -17,9 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -29,9 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.appengine.api.devserver.DefaultRunConfiguration;
-import java.io.IOException;
 import java.net.InetAddress;
-import java.nio.file.Path;
 import java.util.function.BiFunction;
 import org.eclipse.core.runtime.CoreException;
 import org.junit.Assume;
@@ -237,26 +233,6 @@ public class LocalAppEngineServerBehaviourTest {
     serverBehavior.checkPorts(runConfig, portProber);
     assertEquals(-1, serverBehavior.adminPort);
     verify(portProber, never()).apply(any(InetAddress.class), eq(8000));
-  }
-
-  @Test
-  public void testAppEngineApiSdkJarExists_noJar() {
-    Path emptyFolder = tempFolder.getRoot().toPath();
-    assertFalse(LocalAppEngineServerBehaviour.appEngineApiSdkJarExists(emptyFolder));
-  }
-
-  @Test
-  public void testAppEngineApiSdkJarExists_jarExists() throws IOException {
-    tempFolder.newFile("appengine-api-1.0-sdk-99.99.99.jar");
-    Path rootFolder = tempFolder.getRoot().toPath();
-    assertTrue(LocalAppEngineServerBehaviour.appEngineApiSdkJarExists(rootFolder));
-  }
-
-  @Test
-  public void testAppEngineApiSdkJarExists_caseInsensitive() throws IOException {
-    tempFolder.newFile("AppEngine-ApI-1.0-sDK-99.99.99.JaR");
-    Path rootFolder = tempFolder.getRoot().toPath();
-    assertTrue(LocalAppEngineServerBehaviour.appEngineApiSdkJarExists(rootFolder));
   }
 
 }
