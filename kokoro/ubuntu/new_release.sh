@@ -31,7 +31,7 @@ cd git/google-cloud-eclipse
 # https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2211
 readonly CT4E_DISPLAY_VERSION=$( \
   xmlstarlet sel -t -v '/product/@version' gcp-repo/metadata.product )
-readonly NO_QUALIIFER_VERSION="${CT4E_DISPLAY_VERSION%.qualifier}"
+readonly NO_QUALIFIER_VERSION="${CT4E_DISPLAY_VERSION%.qualifier}"
 xmlstarlet ed --inplace -u '/product/@version' -v "${NO_QUALIFIER_VERSION}" \
   gcp-repo/metadata.product
 
