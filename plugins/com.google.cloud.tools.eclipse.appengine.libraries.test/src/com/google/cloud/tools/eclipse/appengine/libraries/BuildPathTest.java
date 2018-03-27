@@ -105,6 +105,6 @@ public class BuildPathTest {
     // remove the master-library container, so checkLibraryList should remove the library ids file
     project.setRawClasspath(originalClasspath, null);
     BuildPath.checkLibraryList(project, null);
-    assertFalse(project.getProject().exists(librariesIdPath));
+    assertFalse(librariesIdPath + " not removed", project.getProject().exists(librariesIdPath));
   }
 }
