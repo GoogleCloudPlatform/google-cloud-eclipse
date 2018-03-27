@@ -60,8 +60,7 @@ public class DependencyResolver {
       String groupId, String artifactId, String version, IProgressMonitor monitor)
           throws CoreException {
 
-    final Artifact artifact =
-        new DefaultArtifact(groupId + ":" + artifactId + ":" + version);
+    Artifact artifact = new DefaultArtifact(groupId + ":" + artifactId + ":" + version);
 
     IMavenExecutionContext context = MavenPlugin.getMaven().createExecutionContext();
 
@@ -116,10 +115,9 @@ public class DependencyResolver {
   public static Collection<Dependency> getManagedDependencies(String groupId, String artifactId,
       String version, IProgressMonitor monitor) throws CoreException {
     
-    // todo we'd prefer not to depend on m2e here
-    final Artifact artifact =
-        new DefaultArtifact(groupId + ":" + artifactId + ":" + version);
+    Artifact artifact = new DefaultArtifact(groupId + ":" + artifactId + ":" + version);
 
+    // todo we'd prefer not to depend on m2e here
     IMavenExecutionContext context = MavenPlugin.getMaven().createExecutionContext();
 
     ICallable<List<Dependency>> callable = new ICallable<List<Dependency>>() {
