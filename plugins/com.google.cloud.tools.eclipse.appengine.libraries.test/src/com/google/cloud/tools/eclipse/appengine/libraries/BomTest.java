@@ -52,7 +52,7 @@ public class BomTest {
 
   @Test
   public void testGuava() { // transitive dependency
-    Assert.assertTrue(cloudBom.defines("com.google.guava", "guava"));
+    Assert.assertFalse(cloudBom.defines("com.google.guava", "guava"));
   }
   
 }
