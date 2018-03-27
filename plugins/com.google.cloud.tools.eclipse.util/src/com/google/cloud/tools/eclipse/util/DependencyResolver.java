@@ -25,6 +25,8 @@ import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.collection.CollectRequest;
+import org.eclipse.aether.resolution.ArtifactDescriptorException;
+import org.eclipse.aether.resolution.ArtifactDescriptorRequest;
 import org.eclipse.aether.graph.Dependency;
 import org.eclipse.aether.graph.DependencyFilter;
 import org.eclipse.aether.repository.RemoteRepository;
@@ -36,6 +38,7 @@ import org.eclipse.aether.util.artifact.JavaScopes;
 import org.eclipse.aether.util.filter.DependencyFilterUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.ICallable;
 import org.eclipse.m2e.core.embedder.IMavenExecutionContext;
@@ -57,26 +60,8 @@ public class DependencyResolver {
       String groupId, String artifactId, String version, IProgressMonitor monitor)
           throws CoreException {
 
-    return getTransitiveDependencies(groupId, artifactId, version, "jar", monitor); 
-  }
-  
-  /**
-   * Returns all transitive runtime dependencies of the specified Maven artifact
-   * including the artifact itself.
-   *
-   * @param groupId group ID of the Maven artifact to resolve
-   * @param artifactId artifact ID of the Maven artifact to resolve
-   * @param version version of the Maven artifact to resolve
-   * @param type jar or pom
-   * @return artifacts in the transitive dependency graph. Order not guaranteed.
-   * @throws CoreException if the dependencies could not be resolved
-   */
-  public static Collection<Artifact> getTransitiveDependencies(
-      String groupId, String artifactId, String version, String type, IProgressMonitor monitor)
-          throws CoreException {
-
     final Artifact artifact =
-        new DefaultArtifact(groupId + ":" + artifactId + ":" + type + ":" + version);
+        new DefaultArtifact(groupId + ":" + artifactId + ":" + version);
 
     IMavenExecutionContext context = MavenPlugin.getMaven().createExecutionContext();
 
@@ -126,5 +111,45 @@ public class DependencyResolver {
     List<RemoteRepository> repositories = new ArrayList<>();
     repositories.add(repository);
     return repositories;
+  }
+
+  public static Collection<Dependency> getManagedDependencies(String groupId, String artifactId,
+      String version, IProgressMonitor monitor) throws CoreException {
+    
+    // todo we'd prefer not to depend on m2e here
+    final Artifact artifact =
+        new DefaultArtifact(groupId + ":" + artifactId + ":" + version);
+
+    IMavenExecutionContext context = MavenPlugin.getMaven().createExecutionContext();
+
+    ICallable<List<Dependency>> callable = new ICallable<List<Dependency>>() {
+      @Override
+      public List<Dependency> call(IMavenExecutionContext context, IProgressMonitor monitor)
+          throws CoreException {
+        
+        // todo we'd prefer not to depend on m2e here
+        RepositorySystem system = MavenPluginActivator.getDefault().getRepositorySystem();
+
+        ArtifactDescriptorRequest request = new ArtifactDescriptorRequest();
+        request.setArtifact(artifact);
+        request.setRepositories(centralRepository(system));
+
+        // ensure checksum errors result in failure
+        DefaultRepositorySystemSession session =
+            new DefaultRepositorySystemSession(context.getRepositorySession());
+        session.setChecksumPolicy(RepositoryPolicy.CHECKSUM_POLICY_FAIL);
+
+        List<Dependency> managedDependencies;
+        try {
+          managedDependencies = system.readArtifactDescriptor(session, request).getManagedDependencies();
+        } catch (ArtifactDescriptorException ex) {
+          IStatus status = StatusUtil.error(DependencyResolver.class, ex.getMessage(), ex);
+          throw new CoreException(status);
+        }
+        
+        return managedDependencies;
+      }
+    };
+    return context.execute(callable, monitor);
   }
 }

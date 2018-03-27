@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import org.eclipse.aether.artifact.Artifact;
+import org.eclipse.aether.graph.Dependency;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -30,6 +31,13 @@ public class DependencyResolverTest {
 
   private NullProgressMonitor monitor = new NullProgressMonitor();
 
+  @Test
+  public void testGetManagedDependencies() throws CoreException {
+    Collection<Dependency> dependencies = DependencyResolver.getManagedDependencies(
+        "com.google.cloud", "google-cloud-bom", "0.40.0-alpha", null);
+    Assert.assertFalse(dependencies.isEmpty());
+  }
+  
   @Test
   public void testStorage() throws CoreException {
     Collection<Artifact> dependencies = DependencyResolver.getTransitiveDependencies(

@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.aether.artifact.Artifact;
+import org.eclipse.aether.graph.Dependency;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -38,10 +39,11 @@ class Bom {
   static Bom loadBom(String groupId, String artifactId, String version, IProgressMonitor monitor)
       throws CoreException {
     
-    Collection<Artifact> dependencies =
-        DependencyResolver.getTransitiveDependencies(groupId, artifactId, version, "pom", monitor);
+    Collection<Dependency> dependencies =
+        DependencyResolver.getManagedDependencies(groupId, artifactId, version, monitor);
     Map<String, Artifact> artifacts = new HashMap<>();
-    for (Artifact artifact : dependencies) {
+    for (Dependency dependency : dependencies) {
+      Artifact artifact = dependency.getArtifact();
       artifacts.put(artifact.getGroupId() + ":" + artifact.getArtifactId(), artifact);
     }
     
