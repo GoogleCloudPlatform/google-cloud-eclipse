@@ -60,10 +60,6 @@ public class DependencyResolver {
       String groupId, String artifactId, String version, IProgressMonitor monitor)
           throws CoreException {
 
-    Artifact artifact = new DefaultArtifact(groupId + ":" + artifactId + ":" + version);
-
-    IMavenExecutionContext context = MavenPlugin.getMaven().createExecutionContext();
-
     ICallable<List<Artifact>> callable = new ICallable<List<Artifact>>() {
       @Override
       public List<Artifact> call(IMavenExecutionContext context, IProgressMonitor monitor)
@@ -73,6 +69,8 @@ public class DependencyResolver {
         RepositorySystem system = MavenPluginActivator.getDefault().getRepositorySystem();
 
         CollectRequest collectRequest = new CollectRequest();
+        Artifact artifact = new DefaultArtifact(groupId + ":" + artifactId + ":" + version);
+
         collectRequest.setRoot(new Dependency(artifact, JavaScopes.RUNTIME));
         collectRequest.setRepositories(centralRepository(system));
         DependencyRequest request = new DependencyRequest(collectRequest, filter);
@@ -100,6 +98,9 @@ public class DependencyResolver {
       }
 
     };
+    
+    IMavenExecutionContext context = MavenPlugin.getMaven().createExecutionContext();
+
     return context.execute(callable, monitor);
   }
 
@@ -115,11 +116,6 @@ public class DependencyResolver {
   public static Collection<Dependency> getManagedDependencies(String groupId, String artifactId,
       String version, IProgressMonitor monitor) throws CoreException {
     
-    Artifact artifact = new DefaultArtifact(groupId + ":" + artifactId + ":" + version);
-
-    // todo we'd prefer not to depend on m2e here
-    IMavenExecutionContext context = MavenPlugin.getMaven().createExecutionContext();
-
     ICallable<List<Dependency>> callable = new ICallable<List<Dependency>>() {
       @Override
       public List<Dependency> call(IMavenExecutionContext context, IProgressMonitor monitor)
@@ -129,6 +125,8 @@ public class DependencyResolver {
         RepositorySystem system = MavenPluginActivator.getDefault().getRepositorySystem();
 
         ArtifactDescriptorRequest request = new ArtifactDescriptorRequest();
+        Artifact artifact = new DefaultArtifact(groupId + ":" + artifactId + ":" + version);
+
         request.setArtifact(artifact);
         request.setRepositories(centralRepository(system));
 
@@ -137,17 +135,20 @@ public class DependencyResolver {
             new DefaultRepositorySystemSession(context.getRepositorySession());
         session.setChecksumPolicy(RepositoryPolicy.CHECKSUM_POLICY_FAIL);
 
-        List<Dependency> managedDependencies;
         try {
-          managedDependencies = system.readArtifactDescriptor(session, request).getManagedDependencies();
+          List<Dependency> managedDependencies =
+              system.readArtifactDescriptor(session, request).getManagedDependencies();
+          return managedDependencies;
         } catch (ArtifactDescriptorException ex) {
           IStatus status = StatusUtil.error(DependencyResolver.class, ex.getMessage(), ex);
           throw new CoreException(status);
         }
         
-        return managedDependencies;
       }
     };
+    // todo we'd prefer not to depend on m2e here
+    IMavenExecutionContext context = MavenPlugin.getMaven().createExecutionContext();
+
     return context.execute(callable, monitor);
   }
 }
