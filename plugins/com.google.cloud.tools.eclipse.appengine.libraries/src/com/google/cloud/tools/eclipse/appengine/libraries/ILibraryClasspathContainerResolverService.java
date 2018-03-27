@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
+import com.google.common.util.concurrent.ListenableFuture;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -40,9 +41,10 @@ public interface ILibraryClasspathContainerResolverService {
 
   /**
    * Resolves the binary and source artifacts corresponding to the {@link Library} identified by
-   * <code>libraryId</code> synchronously and creates the {@link IClasspathEntry}s referring them.
+   * <code>libraryIds</code> asynchronously and creates the {@link IClasspathEntry}s referring them.
    */
-  IClasspathEntry[] resolveLibraryAttachSourcesSync(String libraryId) throws CoreException;
+  ListenableFuture<IClasspathEntry[]> resolveLibraryAttachSources(String... libraryIds)
+      throws CoreException;
 
   /**
    * Resolves a single {@link LibraryClasspathContainer} corresponding to <code>containerPath</code>

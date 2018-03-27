@@ -19,7 +19,10 @@ package com.google.cloud.tools.eclipse.appengine.localserver;
 import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
-import com.google.common.collect.ObjectArrays;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Inject;
@@ -67,7 +70,7 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
     } catch (CoreException ex) {
       logger.log(Level.WARNING, "Unable to obtain jst.web facet version", ex);
     }
-    return doResolveClasspathContainer(webFacetVersion);
+    return doResolveClasspathContainer(runtime, webFacetVersion);
   }
 
   // This method is called often as the result of user initiated UI actions, e.g. when the user
@@ -76,10 +79,11 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
   // persisting the resolved version the first time and using that later.
   @Override
   public IClasspathEntry[] resolveClasspathContainer(IRuntime runtime) {
-    return doResolveClasspathContainer(DEFAULT_DYNAMIC_WEB_VERSION);
+    return doResolveClasspathContainer(runtime, DEFAULT_DYNAMIC_WEB_VERSION);
   }
 
-  private IClasspathEntry[] doResolveClasspathContainer(IProjectFacetVersion dynamicWebVersion) {
+  private IClasspathEntry[] doResolveClasspathContainer(
+      IRuntime runtime, IProjectFacetVersion dynamicWebVersion) {
 
     String servletApiId;
     String jspApiId;
@@ -93,14 +97,28 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
     }
 
     try {
-      IClasspathEntry[] apiEntries =
-          resolverService.resolveLibraryAttachSourcesSync(servletApiId);
-      IClasspathEntry[] jspApiEntries = resolverService.resolveLibraryAttachSourcesSync(jspApiId);
-      IClasspathEntry[] result =
-          ObjectArrays.concat(apiEntries, jspApiEntries, IClasspathEntry.class);
-      return result;
-    } catch (CoreException ex) {
+      ListenableFuture<IClasspathEntry[]> apiEntries =
+          resolverService.resolveLibraryAttachSources(servletApiId, jspApiId);
+      if (apiEntries.isDone()) {
+        return apiEntries.get();
+      }
+      Futures.addCallback(
+          apiEntries,
+          new FutureCallback<IClasspathEntry[]>() {
+            @Override
+            public void onSuccess(IClasspathEntry[] entries) {
+              requestClasspathContainerUpdate(runtime, entries);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+              logger.log(Level.WARNING, "Failed to resolve servlet APIs", t);
+            }
+          });
+    } catch (CoreException | ExecutionException ex) {
       logger.log(Level.WARNING, "Failed to initialize libraries", ex);
+    } catch (InterruptedException ex) {
+      Thread.interrupted();
     }
     return null;
   }

@@ -30,11 +30,15 @@ import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 import org.apache.maven.artifact.Artifact;
@@ -96,19 +100,27 @@ public class LibraryClasspathContainerResolverService
   }
 
   @Override
-  public IClasspathEntry[] resolveLibraryAttachSourcesSync(String libraryId) throws CoreException {
-    Library library = CloudLibraries.getLibrary(libraryId);
-    if (library == null) {
-      throw new CoreException(
-          StatusUtil.error(this, Messages.getString("InvalidLibraryId", //$NON-NLS-1$
-          libraryId)));
-    }
+  public ListenableFuture<IClasspathEntry[]> resolveLibraryAttachSources(String... libraryIds)
+      throws CoreException {
+    Map<LibraryFile, IClasspathEntry> resolvedEntries = Maps.newHashMap();
+    for (String libraryId : libraryIds) {
+      Library library = CloudLibraries.getLibrary(libraryId);
+      if (library == null) {
+        throw new CoreException(
+            StatusUtil.error(
+                this,
+                Messages.getString(
+                    "InvalidLibraryId", // $NON-NLS-1$
+                    libraryId)));
+      }
 
-    List<IClasspathEntry> resolvedEntries = new ArrayList<>();
-    for (LibraryFile libraryFile : library.getAllDependencies()) {
-      resolvedEntries.add(resolveLibraryFileAttachSourceSync(libraryFile));
+      for (LibraryFile libraryFile : library.getAllDependencies()) {
+        if (!resolvedEntries.containsKey(libraryFile)) {
+          resolvedEntries.put(libraryFile, resolveLibraryFileAttachSourceSync(libraryFile));
+        }
+      }
     }
-    return resolvedEntries.toArray(new IClasspathEntry[0]);
+    return Futures.immediateFuture(resolvedEntries.values().toArray(new IClasspathEntry[0]));
   }
 
   @Override
