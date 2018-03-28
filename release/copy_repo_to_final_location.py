@@ -21,9 +21,8 @@ import sys
 def _AskRepoOrigin():
   print
   print "#"
-  print "# Enter the Cloud Console GCS URL of the Kokoro-built repo."
+  print "# Enter the GCS URL of the Kokoro-built repo."
   print '# ("Artficat location" in the "jar_signing" success email.)'
-  print "#"
   gcs_url = raw_input("URL? ")
 
   match_obj = re.search(
@@ -40,9 +39,6 @@ def _AskVersion():
   print
   print "#"
   print "# Enter the CT4E version (e.g., 9.9.9)."
-  print '# (The name for a subdirectory of "gs://cloud-tools-for-eclipse/'
-  print "# where the Kokoro-built repo will be print copied into."
-  print "#"
   version = raw_input("Version? ")
 
   match_obj = re.search(r'^\d+\.\d+\.\d+$', version)
@@ -75,7 +71,6 @@ def main(argv):
     print "#"
     print "# Command to delete:"
     print "# gsutil -m rm " + gcs_destination + "/**"
-    print "#"
     exit(1)
 
   # Copy the repo
@@ -91,7 +86,6 @@ def main(argv):
   print "# Copy done! The repo URL for installation:"
   print "#"
   print "# https://storage.googleapis.com/cloud-tools-for-eclipse/" + version
-  print "#"
 
 
 if __name__ == "__main__":
