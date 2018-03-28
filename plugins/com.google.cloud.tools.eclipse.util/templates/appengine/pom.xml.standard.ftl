@@ -19,16 +19,12 @@
     <maven.compiler.target>${compilerVersion}</maven.compiler.target>
     <maven.compiler.showDeprecation>true</maven.compiler.showDeprecation>
   </properties>
-
-  <prerequisites>
-    <maven>3.3.9</maven>
-  </prerequisites>
   
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>com.google.cloud</groupId>
-        <artifactId>google-cloud</artifactId>
+        <artifactId>google-cloud-bom</artifactId>
         <version>${googleCloudJavaBomVersion}</version>
         <type>pom</type>
         <scope>import</scope>
@@ -65,12 +61,6 @@
       <scope>provided</scope>
     </dependency>
 </#if>
-    <dependency>
-      <groupId>com.google.appengine</groupId>
-      <artifactId>appengine-api-1.0-sdk</artifactId>
-      <version>${appEngineApiSdkVersion}</version>
-      <scope>provided</scope>
-    </dependency>
     <dependency>
       <groupId>jstl</groupId>
       <artifactId>jstl</artifactId>

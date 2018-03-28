@@ -27,40 +27,29 @@ import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
 import com.google.cloud.tools.appengine.cloudsdk.serialization.CloudSdkVersion;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
-import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.sdk.MessageConsoleWriterListener;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import java.io.File;
-import java.io.IOException;
 import java.net.InetAddress;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.inject.Inject;
-import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.ui.console.MessageConsoleStream;
@@ -102,9 +91,6 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
 
   private static final Logger logger =
       Logger.getLogger(LocalAppEngineServerBehaviour.class.getName());
-
-  @Inject
-  private ILibraryRepositoryService repositoryService;
 
   private LocalAppEngineStartListener localAppEngineStartListener;
   private LocalAppEngineExitListener localAppEngineExitListener;
@@ -355,10 +341,6 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     setServerState(IServer.STATE_STARTING);
     setMode(mode);
 
-    // TODO(chanseok): remove once Bug 68205805 is fixed. This is a temporary workaround for
-    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2531.
-    putAppEngineApiSdkJarIntoApps(devServerRunConfiguration.getServices(), repositoryService);
-
     // Create dev app server instance
     initializeDevServer(outputStream, errorStream, javaHomePath);
 
@@ -369,41 +351,6 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
       Activator.logError("Error starting server: " + ex.getMessage()); //$NON-NLS-1$
       stop(true);
     }
-  }
-
-  @VisibleForTesting
-  static void putAppEngineApiSdkJarIntoApps(List<File> appDirectories,
-      ILibraryRepositoryService repositoryService) throws CoreException {
-    try {
-      Library library = CloudLibraries.getLibrary("appengine-api");
-      for (LibraryFile libraryFile : library.getAllDependencies()) {
-        Artifact artifact =
-            repositoryService.resolveArtifact(libraryFile, new NullProgressMonitor());
-        Path artifactPath = artifact.getFile().toPath();
-
-        for (File appDirectory : appDirectories) {
-          Path libDirectory = appDirectory.toPath().resolve("WEB-INF/lib");
-          libDirectory.toFile().mkdirs();
-          if (!appEngineApiSdkJarExists(libDirectory)) {
-            Files.copy(artifactPath, libDirectory.resolve(artifactPath.getFileName()));
-          }
-        }
-      }
-    } catch (IOException e) {
-      String message = Messages.getString("cannot.copy.appengine.api.sdk.jar");
-      throw new CoreException(StatusUtil.error(LocalAppEngineServerBehaviour.class, message, e));
-    }
-  }
-
-  @VisibleForTesting
-  static boolean appEngineApiSdkJarExists(Path directory) {
-    Pattern pattern = Pattern.compile("^appengine-api-1.0-sdk-.+\\.jar$", Pattern.CASE_INSENSITIVE);
-    for (String filename : directory.toFile().list()) {
-      if (pattern.matcher(filename).matches()) {
-        return true;
-      }
-    }
-    return false;
   }
 
   private static int ifNull(Integer value, int defaultValue) {

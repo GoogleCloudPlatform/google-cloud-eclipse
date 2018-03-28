@@ -74,6 +74,7 @@ class Pom {
   @VisibleForTesting
   final Document document;
   private final IFile pomFile;
+  private final List<Bom> boms = new ArrayList<>();
   
   private Pom(Document document, IFile pomFile) {
     this.document = document;
@@ -87,8 +88,31 @@ class Pom {
       DocumentBuilder builder = builderFactory.newDocumentBuilder();
       Document document = builder.parse(pomFile.getContents());
       Pom pom = new Pom(document, pomFile);
+      
+      XPath xpath = xpathFactory.newXPath();
+      xpath.setNamespaceContext(new Maven4NamespaceContext());
+
+      NodeList bomNodes = (NodeList) xpath.evaluate(
+          "//m:dependencyManagement/m:dependencies/m:dependency[m:type='pom'][m:scope='import']",
+          document.getDocumentElement(),
+          XPathConstants.NODESET);
+      
+      for (int i = 0; i < bomNodes.getLength(); i++) {
+        String artifactId = (String) xpath.evaluate("string(./m:artifactId)",
+            bomNodes.item(i),
+            XPathConstants.STRING);
+        String groupId = (String) xpath.evaluate("string(./m:groupId)",
+            bomNodes.item(i),
+            XPathConstants.STRING);
+        String version = (String) xpath.evaluate("string(./m:version)",
+            bomNodes.item(i),
+            XPathConstants.STRING);
+        Bom bom = Bom.loadBom(groupId, artifactId, version, null);
+        pom.boms.add(bom);
+      } 
+      
       return pom;
-    } catch (ParserConfigurationException ex) {
+    } catch (ParserConfigurationException | XPathExpressionException ex) {
       IStatus status = StatusUtil.error(Pom.class, ex.getMessage(), ex);
       throw new CoreException(status);
     }
@@ -235,10 +259,10 @@ class Pom {
    */
   @VisibleForTesting
   boolean dependencyManaged(String groupId, String artifactId) {
-    NodeList elements = document.getElementsByTagNameNS(
-        "http://maven.apache.org/POM/4.0.0", "dependencyManagement");
-    if (elements.getLength() == 1) {
-      return Bom.defines((Element) elements.item(0), groupId, artifactId);
+    for (Bom bom : boms) {
+      if (bom.defines(groupId, artifactId)) {
+        return true; 
+      }
     }
     return false;
   }
