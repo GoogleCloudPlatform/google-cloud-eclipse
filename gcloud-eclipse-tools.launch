@@ -22,7 +22,7 @@
 <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dosgi.requiredJavaVersion=1.8 -XX:MaxPermSize=256m -Xms256m -Xmx1024m -Doauth.client.id=${oauth_id} -Doauth.client.secret=${oauth_secret} -DenableFlexPropertySettingsPage=false"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dosgi.requiredJavaVersion=1.8 -XX:MaxPermSize=256m -Xms256m -Xmx1024m -Doauth.client.id=${oauth_id} -Doauth.client.secret=${oauth_secret}"/>
 <stringAttribute key="pde.version" value="3.3"/>
 <stringAttribute key="product" value="org.eclipse.sdk.ide"/>
 <booleanAttribute key="show_selected_only" value="false"/>
@@ -113,7 +113,6 @@
 <mapEntry key="org.eclipse.e4.core.contexts/debug/listeners" value="false"/>
 <mapEntry key="org.eclipse.e4.core.contexts/debug/names" value="false"/>
 <mapEntry key="org.eclipse.e4.core.di/debug" value="false"/>
-<mapEntry key="org.eclipse.e4.core.di/debug/injector" value="false"/>
 <mapEntry key="org.eclipse.e4.core.services/debug" value="false"/>
 <mapEntry key="org.eclipse.e4.core.services/debug/injector" value="false"/>
 <mapEntry key="org.eclipse.e4.ui.workbench.swt/debug" value="false"/>
@@ -130,10 +129,6 @@
 <mapEntry key="org.eclipse.e4.ui.workbench/trace/menus" value="false"/>
 <mapEntry key="org.eclipse.e4.ui.workbench/trace/renderer" value="false"/>
 <mapEntry key="org.eclipse.e4.ui.workbench/trace/workbench" value="false"/>
-<mapEntry key="org.eclipse.equinox.ds/debug" value="false"/>
-<mapEntry key="org.eclipse.equinox.ds/instantiate_all" value="false"/>
-<mapEntry key="org.eclipse.equinox.ds/performance" value="false"/>
-<mapEntry key="org.eclipse.equinox.ds/print_on_console" value="false"/>
 <mapEntry key="org.eclipse.equinox.p2.engine/certificatechecker/unsigned" value="false"/>
 <mapEntry key="org.eclipse.equinox.p2.engine/certificatechecker/untrusted" value="false"/>
 <mapEntry key="org.eclipse.equinox.p2.engine/engine/debug" value="false"/>
@@ -178,12 +173,25 @@
 <mapEntry key="org.eclipse.jdt.core/debug/dom/rewrite" value="false"/>
 <mapEntry key="org.eclipse.jdt.core/debug/formatter" value="false"/>
 <mapEntry key="org.eclipse.jdt.core/debug/hierarchy" value="false"/>
+<mapEntry key="org.eclipse.jdt.core/debug/index/freespacetest" value="false"/>
+<mapEntry key="org.eclipse.jdt.core/debug/index/indexer" value="false"/>
+<mapEntry key="org.eclipse.jdt.core/debug/index/insertions" value="false"/>
+<mapEntry key="org.eclipse.jdt.core/debug/index/locks" value="false"/>
+<mapEntry key="org.eclipse.jdt.core/debug/index/logsizemegs" value="0"/>
+<mapEntry key="org.eclipse.jdt.core/debug/index/pagecache" value="false"/>
+<mapEntry key="org.eclipse.jdt.core/debug/index/scheduling" value="false"/>
+<mapEntry key="org.eclipse.jdt.core/debug/index/selftest" value="false"/>
+<mapEntry key="org.eclipse.jdt.core/debug/index/space" value="false"/>
+<mapEntry key="org.eclipse.jdt.core/debug/index/timing" value="false"/>
 <mapEntry key="org.eclipse.jdt.core/debug/indexmanager" value="false"/>
 <mapEntry key="org.eclipse.jdt.core/debug/indexmanager/advanced" value="false"/>
 <mapEntry key="org.eclipse.jdt.core/debug/javadelta" value="false"/>
 <mapEntry key="org.eclipse.jdt.core/debug/javadelta/verbose" value="false"/>
 <mapEntry key="org.eclipse.jdt.core/debug/javamodel" value="false"/>
 <mapEntry key="org.eclipse.jdt.core/debug/javamodel/cache" value="false"/>
+<mapEntry key="org.eclipse.jdt.core/debug/javamodel/classpath" value="false"/>
+<mapEntry key="org.eclipse.jdt.core/debug/javamodel/insertions" value="false"/>
+<mapEntry key="org.eclipse.jdt.core/debug/javamodel/invalid_archives" value="false"/>
 <mapEntry key="org.eclipse.jdt.core/debug/postaction" value="false"/>
 <mapEntry key="org.eclipse.jdt.core/debug/resolution" value="false"/>
 <mapEntry key="org.eclipse.jdt.core/debug/search" value="false"/>
@@ -238,6 +246,19 @@
 <mapEntry key="org.eclipse.jface.text/debug/AnnotationPainter" value="false"/>
 <mapEntry key="org.eclipse.jface.text/debug/ContentAssistSubjectAdapters" value="false"/>
 <mapEntry key="org.eclipse.jface.text/debug/FastPartitioner/PositionCache" value="false"/>
+<mapEntry key="org.eclipse.jface/debug" value="true"/>
+<mapEntry key="org.eclipse.jface/debug/bidiUtils" value="false"/>
+<mapEntry key="org.eclipse.jface/debug/dialog/noparent" value="false"/>
+<mapEntry key="org.eclipse.jface/debug/loadURLImageDescriptor2x" value="true"/>
+<mapEntry key="org.eclipse.jface/debug/loadURLImageDescriptor2xPngForGif" value="false"/>
+<mapEntry key="org.eclipse.jface/debug/loadURLImageDescriptorDirectly" value="false"/>
+<mapEntry key="org.eclipse.jface/debug/logURLImageDescriptorMissing2x" value="false"/>
+<mapEntry key="org.eclipse.jface/debug/trace/URLImageDescriptor" value="false"/>
+<mapEntry key="org.eclipse.jface/debug/viewers/equalElements" value="false"/>
+<mapEntry key="org.eclipse.jface/debug/viewers/reentrantViewerCalls" value="false"/>
+<mapEntry key="org.eclipse.jface/newlook/preferences/showNewLook" value="false"/>
+<mapEntry key="org.eclipse.jface/trace/actions" value="false"/>
+<mapEntry key="org.eclipse.jface/trace/toolbarDisposal" value="false"/>
 <mapEntry key="org.eclipse.jpt.common.core/debug" value="true"/>
 <mapEntry key="org.eclipse.jpt.common.ui/debug" value="true"/>
 <mapEntry key="org.eclipse.jpt.common.ui/debug/Pane" value="false"/>
@@ -290,6 +311,7 @@
 <mapEntry key="org.eclipse.osgi/debug/security" value="false"/>
 <mapEntry key="org.eclipse.osgi/debug/services" value="false"/>
 <mapEntry key="org.eclipse.osgi/debug/startlevel" value="false"/>
+<mapEntry key="org.eclipse.osgi/debug/systemBundle" value="false"/>
 <mapEntry key="org.eclipse.osgi/eclipseadaptor/converter/debug" value="false"/>
 <mapEntry key="org.eclipse.osgi/eclipseadaptor/debug" value="false"/>
 <mapEntry key="org.eclipse.osgi/eclipseadaptor/debug/platformadmin" value="false"/>
@@ -324,6 +346,9 @@
 <mapEntry key="org.eclipse.pde.core/model" value="false"/>
 <mapEntry key="org.eclipse.pde.core/target/profile" value="false"/>
 <mapEntry key="org.eclipse.pde.core/validation" value="false"/>
+<mapEntry key="org.eclipse.pde.ds.annotations/debug" value="false"/>
+<mapEntry key="org.eclipse.pde.ds.annotations/ds-annotation-builder" value="false"/>
+<mapEntry key="org.eclipse.pde.ds.annotations/ds-annotation-builder/processor" value="false"/>
 <mapEntry key="org.eclipse.search/perf" value="false"/>
 <mapEntry key="org.eclipse.team.core/backgroundevents" value="false"/>
 <mapEntry key="org.eclipse.team.core/debug" value="false"/>
@@ -340,11 +365,19 @@
 <mapEntry key="org.eclipse.team.cvs.ui/consolebuffering" value="false"/>
 <mapEntry key="org.eclipse.team.cvs.ui/debug" value="false"/>
 <mapEntry key="org.eclipse.team.cvs.ui/history" value="false"/>
+<mapEntry key="org.eclipse.team.ui/compare_editor_input" value="false"/>
 <mapEntry key="org.eclipse.team.ui/debug" value="false"/>
 <mapEntry key="org.eclipse.team.ui/dnd" value="false"/>
 <mapEntry key="org.eclipse.team.ui/history" value="false"/>
 <mapEntry key="org.eclipse.team.ui/syncmodels" value="false"/>
+<mapEntry key="org.eclipse.tm.terminal.control/debug/log" value="false"/>
+<mapEntry key="org.eclipse.tm.terminal.control/debug/log/VT100Backend" value="false"/>
+<mapEntry key="org.eclipse.tm.terminal.control/debug/log/char" value="false"/>
 <mapEntry key="org.eclipse.ui.browser/debug" value="false"/>
+<mapEntry key="org.eclipse.ui.forms/debug" value="true"/>
+<mapEntry key="org.eclipse.ui.forms/debug/focus" value="true"/>
+<mapEntry key="org.eclipse.ui.forms/debug/text" value="true"/>
+<mapEntry key="org.eclipse.ui.forms/debug/textsize" value="true"/>
 <mapEntry key="org.eclipse.ui.ide/debug" value="false"/>
 <mapEntry key="org.eclipse.ui.ide/debug/gc" value="false"/>
 <mapEntry key="org.eclipse.ui.ide/debug/internalerror/openDialog" value="false"/>
@@ -359,6 +392,7 @@
 <mapEntry key="org.eclipse.ui.intro/trace/logInfo" value="true"/>
 <mapEntry key="org.eclipse.ui.intro/trace/logPerformance" value="false"/>
 <mapEntry key="org.eclipse.ui.intro/trace/printHTML" value="false"/>
+<mapEntry key="org.eclipse.ui.monitoring/debug/event_monitor" value="false"/>
 <mapEntry key="org.eclipse.ui.navigator/debug" value="false"/>
 <mapEntry key="org.eclipse.ui.navigator/debug/dnd" value="false"/>
 <mapEntry key="org.eclipse.ui.navigator/debug/resolution" value="false"/>
@@ -451,6 +485,7 @@
 <mapEntry key="org.eclipse.wst.jsdt.debug.crossfire/jsdi" value="false"/>
 <mapEntry key="org.eclipse.wst.jsdt.debug.crossfire/json" value="false"/>
 <mapEntry key="org.eclipse.wst.jsdt.debug.crossfire/packets" value="false"/>
+<mapEntry key="org.eclipse.wst.jsdt.ui/debug/ASTProvider" value="false"/>
 <mapEntry key="org.eclipse.wst.jsdt.ui/debug/ResultCollector" value="false"/>
 <mapEntry key="org.eclipse.wst.jsdt.ui/statusbar/offset" value="false"/>
 <mapEntry key="org.eclipse.wst.jsdt.web.core/debug" value="true"/>
