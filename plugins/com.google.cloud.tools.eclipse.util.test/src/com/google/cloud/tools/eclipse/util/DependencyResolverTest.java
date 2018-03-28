@@ -34,7 +34,7 @@ public class DependencyResolverTest {
   @Test
   public void testGetManagedDependencies() throws CoreException {
     Collection<Dependency> dependencies = DependencyResolver.getManagedDependencies(
-        "com.google.cloud", "google-cloud-bom", "0.40.0-alpha", null);
+        "com.google.cloud", "google-cloud-bom", "0.42.0-alpha", null);
     Assert.assertFalse(dependencies.isEmpty());
   }
   
