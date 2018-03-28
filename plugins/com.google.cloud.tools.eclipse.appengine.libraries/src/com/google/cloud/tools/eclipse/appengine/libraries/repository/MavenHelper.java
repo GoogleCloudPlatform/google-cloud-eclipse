@@ -35,25 +35,24 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.FrameworkUtil;
 
-/**
- * Wrapper class around {@link MavenUtils} to enable mocking in unit tests.
- */
+/** Wrapper class around {@link MavenUtils} to enable mocking in unit tests. */
 public class MavenHelper {
 
-  public static Artifact resolveArtifact(MavenCoordinates mavenCoordinates,
-      IProgressMonitor monitor) throws CoreException {
+  public static Artifact resolveArtifact(
+      MavenCoordinates mavenCoordinates, IProgressMonitor monitor) throws CoreException {
     List<ArtifactRepository> repository = getRepository(mavenCoordinates);
-    return MavenUtils.resolveArtifact(monitor,
-                                      mavenCoordinates.getGroupId(),
-                                      mavenCoordinates.getArtifactId(),
-                                      mavenCoordinates.getType(),
-                                      mavenCoordinates.getVersion(),
-                                      mavenCoordinates.getClassifier(),
-                                      repository);
+    return MavenUtils.resolveArtifact(
+        mavenCoordinates.getGroupId(),
+        mavenCoordinates.getArtifactId(),
+        mavenCoordinates.getType(),
+        mavenCoordinates.getVersion(),
+        mavenCoordinates.getClassifier(),
+        repository,
+        monitor);
   }
 
   private static List<ArtifactRepository> getRepository(MavenCoordinates mavenCoordinates)
-                                                                              throws CoreException {
+      throws CoreException {
     if (MavenCoordinates.MAVEN_CENTRAL_REPO.equals(mavenCoordinates.getRepository())) {
       // M2Eclipse will use the Maven Central repo in case null is used
       return null;
@@ -66,24 +65,28 @@ public class MavenHelper {
     try {
       URI repoUri = new URI(repository);
       if (!repoUri.isAbsolute()) {
-        throw new CoreException(StatusUtil.error(MavenHelper.class,
-            Messages.getString("RepositoryUriNotAbsolute", repository)));
+        throw new CoreException(
+            StatusUtil.error(
+                MavenHelper.class, Messages.getString("RepositoryUriNotAbsolute", repository)));
       }
       return MavenUtils.createRepository(repoUri.getHost(), repoUri.toString());
     } catch (URISyntaxException exception) {
-      throw new CoreException(StatusUtil.error(MavenHelper.class,
-          Messages.getString("RepositoryUriInvalid", repository), exception));
+      throw new CoreException(
+          StatusUtil.error(
+              MavenHelper.class,
+              Messages.getString("RepositoryUriInvalid", repository),
+              exception));
     }
   }
 
   /**
-   * Returns the folder to which the file described by <code>artifact</code> should be
-   * downloaded.
-   * <p>
-   * The folder is created as follows:
-   * <code>&lt;bundle_state_location&gt;/downloads/&lt;groupId&gt;/&lt;artifactId&gt;/&lt;version&gt;</code>
-   * <p>
-   * The <code>&lt;bundle_state_location&gt;</code> is determined by using the bundle containing
+   * Returns the folder to which the file described by <code>artifact</code> should be downloaded.
+   *
+   * <p>The folder is created as follows: <code>
+   * &lt;bundle_state_location&gt;/downloads/&lt;groupId&gt;/&lt;artifactId&gt;/&lt;version&gt;
+   * </code>
+   *
+   * <p>The <code>&lt;bundle_state_location&gt;</code> is determined by using the bundle containing
    * {@link MavenHelper}.
    *
    * @return the location of the download folder, may not exist
@@ -93,20 +96,20 @@ public class MavenHelper {
         !mavenCoordinates.getVersion().equals(MavenCoordinates.LATEST_VERSION));
     File downloadedSources =
         Platform.getStateLocation(FrameworkUtil.getBundle(MavenHelper.class))
-        .append("downloads")
-        .append(mavenCoordinates.getGroupId())
-        .append(mavenCoordinates.getArtifactId())
-        .append(mavenCoordinates.getVersion())
-        .toFile();
+            .append("downloads")
+            .append(mavenCoordinates.getGroupId())
+            .append(mavenCoordinates.getArtifactId())
+            .append(mavenCoordinates.getVersion())
+            .toFile();
     return new Path(downloadedSources.getAbsolutePath());
   }
 
   public static boolean isArtifactLocallyAvailable(MavenCoordinates mavenCoordinates) {
-    return MavenUtils.isArtifactAvailableLocally(mavenCoordinates.getGroupId(),
-                                                 mavenCoordinates.getArtifactId(),
-                                                 mavenCoordinates.getVersion(),
-                                                 mavenCoordinates.getType(),
-                                                 mavenCoordinates.getClassifier());
+    return MavenUtils.isArtifactAvailableLocally(
+        mavenCoordinates.getGroupId(),
+        mavenCoordinates.getArtifactId(),
+        mavenCoordinates.getVersion(),
+        mavenCoordinates.getType(),
+        mavenCoordinates.getClassifier());
   }
-
 }

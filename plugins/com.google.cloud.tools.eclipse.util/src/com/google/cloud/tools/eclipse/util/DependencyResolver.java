@@ -36,6 +36,8 @@ import org.eclipse.aether.util.artifact.JavaScopes;
 import org.eclipse.aether.util.filter.DependencyFilterUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.ICallable;
 import org.eclipse.m2e.core.embedder.IMavenExecutionContext;
@@ -44,8 +46,8 @@ import org.eclipse.m2e.core.internal.MavenPluginActivator;
 public class DependencyResolver {
 
   /**
-   * Returns all transitive runtime dependencies of the specified Maven artifact
-   * including the artifact itself.
+   * Returns all transitive runtime dependencies of the specified Maven artifact including the
+   * artifact itself.
    *
    * @param groupId group ID of the Maven artifact to resolve
    * @param artifactId artifact ID of the Maven artifact to resolve
@@ -55,49 +57,66 @@ public class DependencyResolver {
    */
   public static Collection<Artifact> getTransitiveDependencies(
       String groupId, String artifactId, String version, IProgressMonitor monitor)
-          throws CoreException {
+      throws CoreException {
 
     final Artifact artifact = new DefaultArtifact(groupId + ":" + artifactId + ":" + version);
 
     IMavenExecutionContext context = MavenPlugin.getMaven().createExecutionContext();
 
-    ICallable<List<Artifact>> callable = new ICallable<List<Artifact>>() {
-      @Override
-      public List<Artifact> call(IMavenExecutionContext context, IProgressMonitor monitor)
-          throws CoreException {
-        DependencyFilter filter = DependencyFilterUtils.classpathFilter(JavaScopes.RUNTIME);
-        // todo we'd prefer not to depend on m2e here
-        RepositorySystem system = MavenPluginActivator.getDefault().getRepositorySystem();
+    ICallable<List<Artifact>> callable =
+        new ICallable<List<Artifact>>() {
+          @Override
+          public List<Artifact> call(IMavenExecutionContext context, IProgressMonitor monitor)
+              throws CoreException {
+            SubMonitor progress = SubMonitor.convert(monitor, 10);
+            DependencyFilter filter = DependencyFilterUtils.classpathFilter(JavaScopes.RUNTIME);
+            // todo we'd prefer not to depend on m2e here
+            RepositorySystem system = MavenPluginActivator.getDefault().getRepositorySystem();
 
-        CollectRequest collectRequest = new CollectRequest();
-        collectRequest.setRoot(new Dependency(artifact, JavaScopes.RUNTIME));
-        collectRequest.setRepositories(centralRepository(system));
-        DependencyRequest request = new DependencyRequest(collectRequest, filter);
+            CollectRequest collectRequest = new CollectRequest();
+            collectRequest.setRoot(new Dependency(artifact, JavaScopes.RUNTIME));
+            collectRequest.setRepositories(centralRepository(system));
+            DependencyRequest request = new DependencyRequest(collectRequest, filter);
 
-        // ensure checksum errors result in failure
-        DefaultRepositorySystemSession session =
-            new DefaultRepositorySystemSession(context.getRepositorySession());
-        session.setChecksumPolicy(RepositoryPolicy.CHECKSUM_POLICY_FAIL);
+            // ensure checksum errors result in failure
+            DefaultRepositorySystemSession session =
+                new DefaultRepositorySystemSession(context.getRepositorySession());
+            session.setChecksumPolicy(RepositoryPolicy.CHECKSUM_POLICY_FAIL);
+            progress.worked(1);
 
-        try {
-          List<ArtifactResult> artifacts =
-              system.resolveDependencies(session, request).getArtifactResults();
-          List<Artifact> dependencies = new ArrayList<>();
-          for (ArtifactResult result : artifacts) {
-            Artifact dependency = result.getArtifact();
-            dependencies.add(dependency);
+            try {
+              return MavenUtils.runWithRule(
+                  mavenRule(),
+                  progress.split(1),
+                  () -> {
+                    List<ArtifactResult> artifacts =
+                        system.resolveDependencies(session, request).getArtifactResults();
+                    progress.setWorkRemaining(artifacts.size());
+                    List<Artifact> dependencies = new ArrayList<>();
+                    for (ArtifactResult result : artifacts) {
+                      Artifact dependency = result.getArtifact();
+                      dependencies.add(dependency);
+                      progress.worked(1);
+                    }
+                    return dependencies;
+                  });
+            } catch (DependencyResolutionException ex) {
+              throw new CoreException(StatusUtil.error(this, "Could not resolve dependencies", ex));
+            } catch (NullPointerException ex) {
+              throw new CoreException(
+                  StatusUtil.error(
+                      this,
+                      "Possible corrupt artifact in local .m2 repository for " + artifact,
+                      ex));
+            }
           }
-          return dependencies;
-        } catch (DependencyResolutionException ex) {
-          throw new CoreException(StatusUtil.error(this, "Could not resolve dependencies", ex));
-        } catch (NullPointerException ex) {
-          throw new CoreException(StatusUtil.error(this,
-              "Possible corrupt artifact in local .m2 repository for " + artifact, ex));
-        }
-      }
-
-    };
+        };
     return context.execute(callable, monitor);
+  }
+
+  /** Return the m2e scheduling rule used to serialize access to the Maven repository. */
+  private static ISchedulingRule mavenRule() {
+    return MavenPlugin.getProjectConfigurationManager().getRule();
   }
 
   private static List<RemoteRepository> centralRepository(RepositorySystem system) {

@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.util;
 
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Verify;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,6 +34,9 @@ import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
@@ -41,6 +45,17 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class MavenUtils {
+
+  /**
+   * An extension to {@link java.util.concurrent.Callable} that may throw an exception.
+   *
+   * @param <T> the return type
+   * @param <E> the exception type
+   */
+  @FunctionalInterface
+  public interface ExceptionalCallable<T, E extends Throwable> {
+    T call() throws E;
+  }
 
   public static final String MAVEN2_NATURE_ID = "org.eclipse.m2e.core.maven2Nature"; //$NON-NLS-1$
 
@@ -63,12 +78,60 @@ public class MavenUtils {
     }
   }
 
-  public static Artifact resolveArtifact(IProgressMonitor monitor, String groupId,
-      String artifactId, String type, String version, String classifier,
-      List<ArtifactRepository> repositories) throws CoreException {
-    Artifact artifact = MavenPlugin.getMaven().resolve(groupId, artifactId, version, type,
-        classifier, repositories, monitor);
-    return artifact;
+  public static Artifact resolveArtifact(
+      String groupId,
+      String artifactId,
+      String type,
+      String version,
+      String classifier,
+      List<ArtifactRepository> repositories,
+      IProgressMonitor monitor)
+      throws CoreException {
+    ISchedulingRule rule = mavenResolvingRule();
+    SubMonitor progress = SubMonitor.convert(monitor, 10);
+    return runWithRule(
+        rule,
+        progress.split(2),
+        () -> {
+          Artifact artifact =
+              MavenPlugin.getMaven()
+                  .resolve(
+                      groupId,
+                      artifactId,
+                      version,
+                      type,
+                      classifier,
+                      repositories,
+                      progress.split(8));
+          return artifact;
+        });
+  }
+
+  /**
+   * @param rule
+   * @param ruleMonitor
+   * @param callable
+   * @return
+   */
+  public static <T, E extends Throwable> T runWithRule(
+      ISchedulingRule rule, IProgressMonitor ruleMonitor, ExceptionalCallable<T, E> supplier)
+      throws E {
+    boolean acquireRule = Job.getJobManager().currentRule() == null;
+    if (acquireRule) {
+      Job.getJobManager().beginRule(rule, ruleMonitor);
+    }
+    Verify.verify(Job.getJobManager().currentRule().contains(rule));
+    try {
+      return supplier.call();
+    } finally {
+      if (acquireRule) {
+        Job.getJobManager().endRule(rule);
+      }
+    }
+  }
+
+  private static ISchedulingRule mavenResolvingRule() {
+    return MavenPlugin.getProjectConfigurationManager().getRule();
   }
 
   public static String getProperty(InputStream pomXml, String propertyName) throws CoreException {

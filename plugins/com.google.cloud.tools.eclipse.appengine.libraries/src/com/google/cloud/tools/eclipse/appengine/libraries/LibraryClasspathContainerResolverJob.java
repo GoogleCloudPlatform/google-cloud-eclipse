@@ -19,11 +19,15 @@ package com.google.cloud.tools.eclipse.appengine.libraries;
 import com.google.common.base.Preconditions;
 import java.util.logging.Logger;
 import javax.inject.Inject;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.m2e.core.MavenPlugin;
 
 public class LibraryClasspathContainerResolverJob extends Job {
   private static final Logger logger =
@@ -39,7 +43,18 @@ public class LibraryClasspathContainerResolverJob extends Job {
     Preconditions.checkNotNull(javaProject, "javaProject is null");
     this.javaProject = javaProject;
     setUser(true);
-    setRule(javaProject.getSchedulingRule());
+    setRule(resolvingRule());
+  }
+
+  /** Return the rule for updating the project's classpath. */
+  private ISchedulingRule resolvingRule() {
+    // Requires both the project rule and the Maven project configuration rule
+    IWorkspace workspace = javaProject.getProject().getWorkspace();
+    ISchedulingRule rule =
+        MultiRule.combine(
+            workspace.getRuleFactory().modifyRule(javaProject.getProject()),
+            MavenPlugin.getProjectConfigurationManager().getRule());
+    return rule;
   }
 
   @Override
