@@ -72,11 +72,12 @@ public class WebXmlValidatorPluginTest {
     DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
     Document document = documentBuilder.newDocument();
 
-    Element root = document.createElement("web-app");
+    Element root = document.createElementNS("http://java.sun.com/xml/ns/javaee", "web-app");
     root.setUserData("version", "2.5", null);
     root.setUserData("location", new DocumentLocation(1, 1), null);
 
-    Element element = document.createElement("servlet-class");
+    Element element =
+        document.createElementNS("http://java.sun.com/xml/ns/javaee", "servlet-class");
     element.setTextContent("DoesNotExist");
     element.setUserData("location", new DocumentLocation(2, 1), null);
     root.appendChild(element);
@@ -96,11 +97,11 @@ public class WebXmlValidatorPluginTest {
     DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
     Document document = documentBuilder.newDocument();
 
-    Element root = document.createElement("web-app");
+    Element root = document.createElementNS("http://java.sun.com/xml/ns/javaee", "web-app");
     root.setUserData("version", "2.5", null);
     root.setUserData("location", new DocumentLocation(1, 1), null);
 
-    Element element = document.createElement("servlet-class");
+    Element element = document.createElementNS("http://java.sun.com/xml/ns/javaee", "servlet-class");
     element.setTextContent("ServletClass");
     element.setUserData("location", new DocumentLocation(2, 1), null);
     root.appendChild(element);

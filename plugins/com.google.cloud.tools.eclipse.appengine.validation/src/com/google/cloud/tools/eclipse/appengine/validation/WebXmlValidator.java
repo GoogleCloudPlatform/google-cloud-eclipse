@@ -89,7 +89,10 @@ public class WebXmlValidator implements XmlValidationHelper {
    * Validates that web.xml specifies a compatible deployment descriptor version.
    */
   private void validateServletVersion() {
-    NodeList webAppList = document.getElementsByTagName("web-app");
+    NodeList webApp2List = document.getElementsByTagNameNS(
+        "http://java.sun.com/xml/ns/javaee", "web-app");
+    NodeList webApp3List = document.getElementsByTagNameNS(
+        "http://java.sun.com/xml/ns/javaee", "web-app");
     for (int i = 0; i < webAppList.getLength(); i++) {
       Element webApp = (Element) webAppList.item(i);
       String namespace = webApp.getNamespaceURI();
