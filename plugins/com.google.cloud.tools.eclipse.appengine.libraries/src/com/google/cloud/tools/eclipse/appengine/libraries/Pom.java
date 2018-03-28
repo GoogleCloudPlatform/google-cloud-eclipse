@@ -93,7 +93,7 @@ class Pom {
       xpath.setNamespaceContext(new Maven4NamespaceContext());
 
       NodeList bomNodes = (NodeList) xpath.evaluate(
-          "//m:dependencyManagement/m:dependencies/m:dependency[type='pom'][scope='import']",
+          "//m:dependencyManagement/m:dependencies/m:dependency[m:type='pom'][m:scope='import']",
           document.getDocumentElement(),
           XPathConstants.NODESET);
       
