@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -54,6 +55,7 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -197,6 +199,9 @@ class Pom {
       throw new CoreException(status);
     }
 
+    
+    Comment testComment = findTestComment(dependencies);
+    
     if (removedLibraries != null) {
       removeUnusedDependencies(dependencies, selectedLibraries, removedLibraries);
     }
@@ -238,7 +243,11 @@ class Pom {
             }
           }
           
-          dependencies.appendChild(dependency);
+          if (testComment == null) {
+            dependencies.appendChild(dependency);
+          } else {
+            dependencies.insertBefore(dependency, testComment);
+          }
         }
       }
     }
@@ -252,6 +261,20 @@ class Pom {
     } catch (TransformerException ex) {
       throw new CoreException(null);
     }   
+  }
+
+  private static Comment findTestComment(Element dependencies) {
+    NodeList children = dependencies.getChildNodes();
+    
+    for (int i = 0; i < children.getLength(); i++) {
+      Node node = children.item(i);
+      if (node.getNodeType() == Node.COMMENT_NODE) {
+        if (node.getNodeValue().trim().toLowerCase(Locale.US).startsWith("test")) {
+          return (Comment) node; 
+        }
+      }
+    }
+    return null;
   }
 
   /**
@@ -302,7 +325,9 @@ class Pom {
         currentDependencies.put(encoded, node);
       }
     }
-    Verify.verify(currentDependencies.isEmpty() == (dependencies.getChildNodes().getLength() == 0));
+    Verify.verify(currentDependencies.isEmpty() == (dependencies
+        .getElementsByTagNameNS("http://maven.apache.org/POM/4.0.0", "dependency")
+        .getLength() == 0));
 
     // iterate through each library-to-remove and, providing all of its dependencies are
     // present, then remove the dependencies that are not required by any selected library
