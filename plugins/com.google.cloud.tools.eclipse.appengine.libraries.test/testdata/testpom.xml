@@ -16,7 +16,21 @@
   
   <dependencyManagement>
     <dependencies>
-      <dependency>
+       <dependency>  <!-- wrong scope; not a bom -->
+         <groupId>org.springframework</groupId>
+         <artifactId>spring-framework-bom</artifactId>
+         <version>4.0.2.RELEASE</version>
+         <type>pom</type>
+         <scope>provided</scope>
+      </dependency>   
+      <dependency> <!-- wrong type; not a bom -->
+        <groupId>com.covisint.core</groupId>
+        <artifactId>httpclient-bom</artifactId>
+        <version>4.3.2</version>
+        <type>jar</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency> <!-- This is a bom -->
         <groupId>com.google.cloud</groupId>
         <artifactId>google-cloud-bom</artifactId>
         <version>0.40.0-alpha</version>
