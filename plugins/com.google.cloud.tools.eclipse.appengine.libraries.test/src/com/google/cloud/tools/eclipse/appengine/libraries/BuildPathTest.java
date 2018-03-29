@@ -28,10 +28,12 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
+import org.eclipse.m2e.core.MavenPlugin;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -106,5 +108,13 @@ public class BuildPathTest {
     project.setRawClasspath(originalClasspath, null);
     BuildPath.checkLibraryList(project, null);
     assertFalse(librariesIdPath + " not removed", project.getProject().exists(librariesIdPath));
+  }
+
+  @Test
+  public void testResolvingRule() {
+    ISchedulingRule rule = BuildPath.resolvingRule(project);
+    assertTrue(rule.contains(MavenPlugin.getProjectConfigurationManager().getRule()));
+    assertTrue(rule.isConflicting(MavenPlugin.getProjectConfigurationManager().getRule()));
+    assertTrue(rule.contains(project.getProject()));
   }
 }

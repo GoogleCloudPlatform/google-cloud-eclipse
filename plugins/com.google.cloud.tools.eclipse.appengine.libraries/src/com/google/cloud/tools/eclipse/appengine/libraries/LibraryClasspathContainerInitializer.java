@@ -34,22 +34,21 @@ import org.eclipse.jdt.core.JavaCore;
 /**
  * {@link ClasspathContainerInitializer} implementation that resolves containers for App Engine
  * libraries.
- * <p>
- * The container path is expected to be in the form of &lt;value of
- * {@link LibraryClasspathContainer#CONTAINER_PATH_PREFIX}&gt;/&lt;library ID&gt;
+ *
+ * <p>The container path is expected to be in the form of &lt;value of {@link
+ * LibraryClasspathContainer#CONTAINER_PATH_PREFIX}&gt;/&lt;library ID&gt;
  */
 public class LibraryClasspathContainerInitializer extends ClasspathContainerInitializer {
-  @Inject
-  private LibraryClasspathContainerSerializer serializer;
-  @Inject
-  private ILibraryClasspathContainerResolverService resolverService;
+  @Inject private LibraryClasspathContainerSerializer serializer;
+  @Inject private ILibraryClasspathContainerResolverService resolverService;
+  
   private String containerPathPrefix = LibraryClasspathContainer.CONTAINER_PATH_PREFIX;
 
-  public LibraryClasspathContainerInitializer() {
-  }
+  public LibraryClasspathContainerInitializer() {}
 
   @VisibleForTesting
-  LibraryClasspathContainerInitializer(String containerPathPrefix,
+  LibraryClasspathContainerInitializer(
+      String containerPathPrefix,
       LibraryClasspathContainerSerializer serializer,
       ILibraryClasspathContainerResolverService resolverService) {
     this.containerPathPrefix = containerPathPrefix;
@@ -60,24 +59,26 @@ public class LibraryClasspathContainerInitializer extends ClasspathContainerInit
   @Override
   public void initialize(IPath containerPath, IJavaProject project) throws CoreException {
     if (containerPath.segmentCount() != 2) {
-      throw new CoreException(StatusUtil.error(this,
-                                               "containerPath does not have exactly 2 segments: "
-                                                   + containerPath.toString()));
+      throw new CoreException(
+          StatusUtil.error(
+              this, "containerPath does not have exactly 2 segments: " + containerPath.toString()));
     }
     if (!containerPath.segment(0).equals(containerPathPrefix)) {
       throw new CoreException(
-          StatusUtil.error(this, MessageFormat.format("Unexpected first segment of container path, "
-                                                          + "expected: {0} was: {1}",
-                                                      containerPathPrefix,
-                                                      containerPath.segment(0))));
+          StatusUtil.error(
+              this,
+              MessageFormat.format(
+                  "Unexpected first segment of container path, " + "expected: {0} was: {1}",
+                  containerPathPrefix, containerPath.segment(0))));
     }
     try {
       LibraryClasspathContainer container = serializer.loadContainer(project, containerPath);
       if (container != null && jarPathsAreValid(container)) {
-        JavaCore.setClasspathContainer(containerPath,
-                                       new IJavaProject[] {project},
-                                       new IClasspathContainer[] {container},
-                                       new NullProgressMonitor());
+        JavaCore.setClasspathContainer(
+            containerPath,
+            new IJavaProject[] {project},
+            new IClasspathContainer[] {container},
+            new NullProgressMonitor());
       } else {
         resolverService.resolveContainer(project, containerPath, new NullProgressMonitor());
       }
@@ -92,7 +93,7 @@ public class LibraryClasspathContainerInitializer extends ClasspathContainerInit
     for (IClasspathEntry classpathEntry : classpathEntries) {
       if (!classpathEntry.getPath().toFile().exists()
           || (classpathEntry.getSourceAttachmentPath() != null
-          && !classpathEntry.getSourceAttachmentPath().toFile().exists())) {
+              && !classpathEntry.getSourceAttachmentPath().toFile().exists())) {
         return false;
       }
     }
@@ -100,9 +101,25 @@ public class LibraryClasspathContainerInitializer extends ClasspathContainerInit
   }
 
   @Override
+  public boolean canUpdateClasspathContainer(IPath containerPath, IJavaProject project) {
+    return true;
+  }
+
+  @Override
+  public void requestClasspathContainerUpdate(
+      IPath containerPath, IJavaProject project, IClasspathContainer containerSuggestion)
+      throws CoreException {
+
+    LibraryClasspathContainerResolverJob job =
+        new LibraryClasspathContainerResolverJob(resolverService, project);
+    job.setUser(true);
+    job.setRule(BuildPath.resolvingRule(project));
+    job.schedule();
+  }
+
+  @Override
   public Object getComparisonID(IPath containerPath, IJavaProject project) {
     // used to collapse duplicate classpath entries; we use the full path to identify libraries
     return containerPath;
   }
-
 }

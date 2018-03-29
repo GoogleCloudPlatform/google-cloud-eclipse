@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -65,11 +66,11 @@ public class SourceAttacherJob extends Job {
     this.libraryPath = libraryPath;
     this.sourceArtifactPathProvider = sourceArtifactPathProvider;
     serializer = new LibraryClasspathContainerSerializer();
-    setRule(javaProject.getSchedulingRule());
   }
 
   @Override
   protected IStatus run(IProgressMonitor monitor) {
+    Preconditions.checkState(getRule() != null);
     try {
       IClasspathContainer container = JavaCore.getClasspathContainer(containerPath, javaProject);
       LibraryClasspathContainer newContainer = attachSource(container);

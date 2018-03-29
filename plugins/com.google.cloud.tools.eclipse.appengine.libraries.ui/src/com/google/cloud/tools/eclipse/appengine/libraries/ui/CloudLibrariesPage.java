@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.libraries.ui;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.libraries.AnalyticsLibraryPingHelper;
 import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
+import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.ui.util.images.SharedImages;
@@ -27,6 +28,7 @@ import com.google.cloud.tools.eclipse.util.MavenUtils;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Verify;
 import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,8 +42,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.ui.wizards.IClasspathContainerPage;
 import org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -74,6 +78,8 @@ public class CloudLibrariesPage extends WizardPage
   final List<LibrarySelectorGroup> librariesSelectors = new ArrayList<>();
   private IJavaProject project;
   private boolean isMavenProject;
+
+  private IClasspathEntry originalEntry;
   private IClasspathEntry newEntry;
 
   public CloudLibrariesPage() {
@@ -147,16 +153,22 @@ public class CloudLibrariesPage extends WizardPage
         /*
          * FIXME: BuildPath.addNativeLibrary() is too heavy-weight here. ClasspathContainerWizard,
          * our wizard, is responsible for installing the classpath entry returned by getSelection(),
-         * which will perform the library resolution. We just need to save the selected libraries 
+         * which will perform the library resolution. We just need to save the selected libraries
          * so that they are resolved later.
          */
+        BuildPath.saveLibraryList(project, libraries, new NullProgressMonitor());
         Library masterLibrary =
             BuildPath.collectLibraryFiles(project, libraries, new NullProgressMonitor());
         newEntry = BuildPath.computeEntry(project, masterLibrary, new NullProgressMonitor());
-        BuildPath.saveLibraryList(project, libraries, new NullProgressMonitor());
         if (newEntry == null) {
-          // container-editing only refreshes the content if new
-          BuildPath.runContainerResolverJob(project);
+          // existing entry needs to be updated
+          ClasspathContainerInitializer initializer =
+              JavaCore.getClasspathContainerInitializer(
+                  LibraryClasspathContainer.CONTAINER_PATH_PREFIX);
+          if (initializer.canUpdateClasspathContainer(originalEntry.getPath(), project)) {
+            initializer.requestClasspathContainerUpdate(
+                originalEntry.getPath(), project, null /*containerSuggestion*/);
+          }
         }
       }
       return true;
@@ -190,6 +202,11 @@ public class CloudLibrariesPage extends WizardPage
 
   @Override
   public void setSelection(IClasspathEntry containerEntry) {
+    Verify.verify(
+        LibraryClasspathContainer.CONTAINER_PATH_PREFIX.equals(
+            containerEntry.getPath().segment(0)));
+    this.originalEntry = containerEntry;
+    
     try {
       Collection<Library> savedLibraries;
       if (isMavenProject) {
@@ -219,6 +236,6 @@ public class CloudLibrariesPage extends WizardPage
 
   @Override
   public IClasspathEntry getSelection() {
-    return newEntry;
+    return newEntry != null ? newEntry : originalEntry;
   }
 }

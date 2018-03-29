@@ -36,18 +36,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-import org.eclipse.e4.core.contexts.ContextInjectionFactory;
-import org.eclipse.e4.core.contexts.EclipseContextFactory;
-import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -55,7 +52,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jst.j2ee.classpathdep.UpdateClasspathAttributeUtil;
-import org.osgi.framework.FrameworkUtil;
+import org.eclipse.m2e.core.MavenPlugin;
 import org.xml.sax.SAXException;
 
 public class BuildPath {
@@ -129,7 +126,6 @@ public class BuildPath {
       ClasspathUtil.addClasspathEntry(javaProject.getProject(), masterEntry,
           subMonitor.newChild(8));
     }
-    runContainerResolverJob(javaProject);
   }
 
   /**
@@ -202,7 +198,7 @@ public class BuildPath {
     boolean alreadyExists = Arrays.asList(rawClasspath).contains(libraryContainer);
     return alreadyExists ? null : libraryContainer;
   }
-  
+
   private static IClasspathEntry makeClasspathEntry(Library library) throws CoreException {
     IClasspathAttribute[] classpathAttributes = new IClasspathAttribute[1];
     if (library.isExport()) {
@@ -216,23 +212,6 @@ public class BuildPath {
         .append(library.getId());
     return JavaCore.newContainerEntry(containerPath, new IAccessRule[0], classpathAttributes,
         false);
-  }
-
-  public static void runContainerResolverJob(IJavaProject javaProject) {
-    IEclipseContext context = EclipseContextFactory.getServiceContext(
-        FrameworkUtil.getBundle(BuildPath.class).getBundleContext());
-    final IEclipseContext childContext =
-        context.createChild(LibraryClasspathContainerResolverJob.class.getName());
-    childContext.set(IJavaProject.class, javaProject);
-    Job job =
-        ContextInjectionFactory.make(LibraryClasspathContainerResolverJob.class, childContext);
-    job.addJobChangeListener(new JobChangeAdapter() {
-      @Override
-      public void done(IJobChangeEvent event) {
-        childContext.dispose();
-      }
-    });
-    job.schedule();
   }
 
   /**
@@ -328,4 +307,17 @@ public class BuildPath {
     }
   }
 
+  /**
+   * Returns a suitable {@link ISchedulingRule scheduling rule} when resolving libraries for a
+   * project.
+   */
+  public static ISchedulingRule resolvingRule(IJavaProject javaProject) {
+    // Requires both the project modification rule and the Maven project configuration rule
+    IWorkspace workspace = javaProject.getProject().getWorkspace();
+    ISchedulingRule rule =
+        MultiRule.combine(
+            workspace.getRuleFactory().modifyRule(javaProject.getProject()),
+            MavenPlugin.getProjectConfigurationManager().getRule());
+    return rule;
+  }
 }
