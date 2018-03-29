@@ -32,7 +32,6 @@ import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 import com.google.cloud.tools.eclipse.util.NatureUtils;
 import java.nio.file.Paths;
-import java.util.function.Predicate;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -100,8 +99,7 @@ public class FlexDeployCommandHandlerTest {
   private static boolean flexDeployMenuVisible(IProject project) {
     SWTBotTreeItem selected = SwtBotProjectActions.selectProject(
         new SWTWorkbenchBot(), project.getName());
-    Predicate<String> isFlexDeployMenu = menu -> "Deploy to App Engine Flexible...".equals(menu);
-    return selected.contextMenu().menuItems().stream().anyMatch(isFlexDeployMenu);
+    return selected.contextMenu().menuItems().contains("Deploy to App Engine Flexible...");
   }
 
   @Test
