@@ -22,7 +22,7 @@ def _AskRepoOrigin():
   print
   print "#"
   print "# Enter the GCS URL of the Kokoro-built repo."
-  print '# ("Artficat location" in the "jar_signing" success email.)'
+  print '# ("Artifact location" in the "jar_signing" success email.)'
   url = raw_input("URL? ")
 
   gcs_url = _FormatGcsUrl(url)
