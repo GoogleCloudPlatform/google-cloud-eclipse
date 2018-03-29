@@ -23,16 +23,24 @@ def _AskRepoOrigin():
   print "#"
   print "# Enter the GCS URL of the Kokoro-built repo."
   print '# ("Artficat location" in the "jar_signing" success email.)'
-  gcs_url = raw_input("URL? ")
+  url = raw_input("URL? ")
 
-  match_obj = re.search(
-      r'kokoro-ct4e-release/prod/google-cloud-eclipse/ubuntu/jar_signing/\d+/[\d-]+$',
-      gcs_url)
-  if match_obj:
-    return "gs://" + match_obj.group()
+  gcs_url = _FormatGcsUrl(url)
+  if gcs_url:
+    return gcs_url
   else:
     print "Wrong URL. Try again."
     return _AskRepoOrigin()
+
+
+def _FormatGcsUrl(url):
+  match_obj = re.search(
+      r'kokoro-ct4e-release/prod/google-cloud-eclipse/ubuntu/jar_signing/\d+/[\d-]+$',
+      url)
+  if match_obj:
+    return "gs://" + match_obj.group()
+  else:
+    return False
 
 
 def _AskVersion():
@@ -41,12 +49,15 @@ def _AskVersion():
   print "# Enter the CT4E version (e.g., 9.9.9)."
   version = raw_input("Version? ")
 
-  match_obj = re.search(r'^\d+\.\d+\.\d+$', version)
-  if match_obj:
+  if _IsVersionString(version):
     return version
   else:
     print "Wrong format. Try again."
     return _AskVersion()
+
+
+def _IsVersionString(string):
+  return re.search(r'^\d+\.\d+\.\d+$', string)
 
 
 def _GcsLocationExists(gcs_location):
@@ -56,6 +67,14 @@ def _GcsLocationExists(gcs_location):
     return True
   except subprocess.CalledProcessError:
     return False
+
+
+def _GetCopyCommand(origin, destination):
+  return ["gsutil", "-m", "cp", "-R", origin, destination]
+
+
+def _GetPublicAccessCommand(target):
+  return ["gsutil", "-m", "acl", "ch", "-R", "-u", "AllUsers:R", target]
 
 
 def main(argv):
@@ -74,12 +93,12 @@ def main(argv):
     exit(1)
 
   # Copy the repo
-  subprocess.check_call(
-      ["gsutil", "-m", "cp", "-R", gcs_origin, gcs_destination])
+  copy_command = _GetCopyCommand(gcs_origin, gcs_destination)
+  subprocess.check_call(copy_command)
 
   # Make it publicly available
-  subprocess.check_call(
-      ["gsutil", "-m", "acl", "ch", "-R", "-u", "AllUsers:R", gcs_destination])
+  acl_command = _GetPublicAccessCommand(gcs_destination)
+  subprocess.check_call(acl_command)
 
   print
   print "#"
