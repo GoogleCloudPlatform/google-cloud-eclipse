@@ -31,8 +31,6 @@ import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -105,8 +103,7 @@ public class LibraryClasspathContainerResolverService
   }
 
   @Override
-  public ListenableFuture<IClasspathEntry[]> resolveLibraryAttachSources(String... libraryIds)
-      throws CoreException {
+  public IClasspathEntry[] resolveLibraryAttachSources(String... libraryIds) throws CoreException {
     Map<LibraryFile, IClasspathEntry> resolvedEntries = Maps.newHashMap();
     for (String libraryId : libraryIds) {
       Library library = CloudLibraries.getLibrary(libraryId);
@@ -125,7 +122,7 @@ public class LibraryClasspathContainerResolverService
         }
       }
     }
-    return Futures.immediateFuture(resolvedEntries.values().toArray(new IClasspathEntry[0]));
+    return resolvedEntries.values().toArray(new IClasspathEntry[0]);
   }
 
   @Override

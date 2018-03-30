@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.util;
 
+import com.google.cloud.tools.eclipse.util.MavenUtils.ExceptionalCallable;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -85,21 +86,22 @@ public class DependencyResolver {
             progress.worked(1);
 
             try {
+              ExceptionalCallable<List<Artifact>, DependencyResolutionException>
+                  retrieveDependenciesBlock =
+                      () -> {
+                        List<ArtifactResult> artifacts =
+                            system.resolveDependencies(session, request).getArtifactResults();
+                        progress.setWorkRemaining(artifacts.size());
+                        List<Artifact> dependencies = new ArrayList<>();
+                        for (ArtifactResult result : artifacts) {
+                          Artifact dependency = result.getArtifact();
+                          dependencies.add(dependency);
+                          progress.worked(1);
+                        }
+                        return dependencies;
+                      };
               return MavenUtils.runWithRule(
-                  mavenRule(),
-                  progress.split(1),
-                  () -> {
-                    List<ArtifactResult> artifacts =
-                        system.resolveDependencies(session, request).getArtifactResults();
-                    progress.setWorkRemaining(artifacts.size());
-                    List<Artifact> dependencies = new ArrayList<>();
-                    for (ArtifactResult result : artifacts) {
-                      Artifact dependency = result.getArtifact();
-                      dependencies.add(dependency);
-                      progress.worked(1);
-                    }
-                    return dependencies;
-                  });
+                  mavenRule(), progress.split(1), retrieveDependenciesBlock);
             } catch (DependencyResolutionException ex) {
               throw new CoreException(StatusUtil.error(this, "Could not resolve dependencies", ex));
             } catch (NullPointerException ex) {

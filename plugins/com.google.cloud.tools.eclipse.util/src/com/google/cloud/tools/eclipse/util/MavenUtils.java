@@ -108,10 +108,11 @@ public class MavenUtils {
   }
 
   /**
-   * @param rule
-   * @param ruleMonitor
-   * @param callable
-   * @return
+   * Perform some Maven-related action (that may throw an exception), ensuring that the given {@link
+   * ISchedulingRule scheduling rule} is held.
+   *
+   * @param rule the rule that must be held
+   * @param ruleMonitor a progress monitor to be used when waiting to obtain the rule
    */
   public static <T, E extends Throwable> T runWithRule(
       ISchedulingRule rule, IProgressMonitor ruleMonitor, ExceptionalCallable<T, E> supplier)
@@ -120,7 +121,9 @@ public class MavenUtils {
     if (acquireRule) {
       Job.getJobManager().beginRule(rule, ruleMonitor);
     }
-    Verify.verify(Job.getJobManager().currentRule().contains(rule));
+    Verify.verify(
+        Job.getJobManager().currentRule().contains(rule),
+        "require holding superset of rule: " + rule);
     try {
       return supplier.call();
     } finally {
