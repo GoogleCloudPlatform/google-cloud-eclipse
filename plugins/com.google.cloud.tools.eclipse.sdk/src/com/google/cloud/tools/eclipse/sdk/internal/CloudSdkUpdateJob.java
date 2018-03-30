@@ -16,6 +16,8 @@
 
 package com.google.cloud.tools.eclipse.sdk.internal;
 
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkVersionFileException;
 import com.google.cloud.tools.eclipse.sdk.MessageConsoleWriterListener;
 import com.google.cloud.tools.eclipse.sdk.Messages;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
@@ -83,11 +85,10 @@ public class CloudSdkUpdateJob extends CloudSdkModifyJob {
       logger.log(Level.WARNING, "Could not update Cloud SDK", e); //$NON-NLS-1$
       String message = Messages.getString("installing.cloud.sdk.failed"); //$NON-NLS-1$
       return StatusUtil.create(failureSeverity, this, message, e);
-    } catch (UnsupportedOsException e) {
+    } catch (UnsupportedOsException | CloudSdkVersionFileException | CloudSdkNotFoundException e) {
       logger.log(Level.WARNING, "Could not update Cloud SDK", e); // $NON-NLS-1$
       String message = Messages.getString("unsupported.os.installation"); //$NON-NLS-1$
       return StatusUtil.create(failureSeverity, this, message, e);
-
     } catch (ManagedSdkVersionMismatchException e) {
       throw new IllegalStateException(
           "This is never thrown because we always use LATEST.", e); //$NON-NLS-1$

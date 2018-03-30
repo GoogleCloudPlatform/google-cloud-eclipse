@@ -24,6 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
@@ -60,7 +61,7 @@ public class StandardStagingDelegateTest {
   private IPath stagingDirectory;
 
   @Before
-  public void setUp() {
+  public void setUp() throws CloudSdkNotFoundException {
     project = projectCreator.getProject();
     safeWorkDirectory = project.getFolder("safe-work-directory").getLocation();
     stagingDirectory = project.getFolder("staging-result").getLocation();
@@ -102,7 +103,7 @@ public class StandardStagingDelegateTest {
   }
 
   @Test
-  public void testSetJavaHome() {
+  public void testSetJavaHome() throws CloudSdkNotFoundException {
     Path javaHome = Paths.get("/some/path");
     StagingDelegate delegate = new StandardStagingDelegate(project, javaHome, cloudSdkWrapper);
     delegate.stage(stagingDirectory, safeWorkDirectory, null, null,

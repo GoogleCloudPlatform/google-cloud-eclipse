@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.util;
 
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
@@ -62,7 +63,8 @@ public class CloudSdkProcessWrapper {
   /**
    * Sets up a {@link CloudSdk} to be used for App Engine deploy.
    */
-  public void setUpDeployCloudSdk(Path credentialFile, MessageConsoleStream normalOutputStream) {
+  public void setUpDeployCloudSdk(Path credentialFile, MessageConsoleStream normalOutputStream)
+      throws CloudSdkNotFoundException {
     Preconditions.checkNotNull(credentialFile, "credential required for deploying");
     Preconditions.checkArgument(Files.exists(credentialFile), "non-existing credential file");
     Preconditions.checkState(cloudSdk == null, "CloudSdk already set up");
@@ -89,7 +91,8 @@ public class CloudSdkProcessWrapper {
    *     {@code appengine-tools-api.jar}; and 2) compile JSPs during staging
    */
   public void setUpStandardStagingCloudSdk(Path javaHome,
-      MessageConsoleStream stdoutOutputStream, MessageConsoleStream stderrOutputStream) {
+      MessageConsoleStream stdoutOutputStream, MessageConsoleStream stderrOutputStream) 
+          throws CloudSdkNotFoundException {
     Preconditions.checkState(cloudSdk == null, "CloudSdk already set up");
 
     CloudSdk.Builder cloudSdkBuilder = getBaseCloudSdkBuilder(stderrOutputStream)

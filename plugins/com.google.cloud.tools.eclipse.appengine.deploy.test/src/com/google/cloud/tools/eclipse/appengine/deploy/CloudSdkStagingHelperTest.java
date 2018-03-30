@@ -20,7 +20,9 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
@@ -66,25 +68,26 @@ public class CloudSdkStagingHelperTest {
 
   @Mock private IProgressMonitor monitor;
 
-  private final CloudSdk cloudSdk = new CloudSdk.Builder().async(false).build();
+  private CloudSdk cloudSdk;
 
   private IPath stagingDirectory;
   private IProject project;
 
   @Before
-  public void setUp() {
+  public void setUp() throws CloudSdkNotFoundException {
+    cloudSdk = new CloudSdk.Builder().async(false).build();
     project = projectCreator.getProject();
     stagingDirectory = new Path(tempFolder.getRoot().toString());
   }
 
   @Test(expected = OperationCanceledException.class)
-  public void testStage_cancelled() {
+  public void testStage_cancelled() throws AppEngineException {
     when(monitor.isCanceled()).thenReturn(true);
     CloudSdkStagingHelper.stageStandard(mock(IPath.class), stagingDirectory, cloudSdk, monitor);
   }
 
   @Test
-  public void testStageStandard() {
+  public void testStageStandard() throws AppEngineException {
     IPath explodedWarDirectory = project.getFolder("WebContent").getLocation();
     CloudSdkStagingHelper.stageStandard(explodedWarDirectory, stagingDirectory, cloudSdk, monitor);
 
@@ -93,7 +96,7 @@ public class CloudSdkStagingHelperTest {
   }
 
   @Test
-  public void testStageFlexible() throws CoreException {
+  public void testStageFlexible() throws CoreException, AppEngineException {
     IFolder appEngineDirectory = project.getFolder("src/main/appengine");
     ResourceUtils.createFolders(appEngineDirectory, monitor);
     createFile("src/main/appengine/app.yaml", APP_YAML);
@@ -108,7 +111,7 @@ public class CloudSdkStagingHelperTest {
   }
 
   @Test
-  public void testCloudSdkStaging_xmlConfigFilesConvertedToYaml() throws CoreException {
+  public void testCloudSdkStaging_xmlConfigFilesConvertedToYaml() throws CoreException, AppEngineException {
     createConfigFile("cron.xml", CRON_XML);
     createConfigFile("datastore-indexes.xml", DATASTORE_INDEXES_XML);
     createConfigFile("dispatch.xml", DISPATCH_XML);

@@ -16,6 +16,8 @@
 
 package com.google.cloud.tools.eclipse.sdk.internal;
 
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkVersionFileException;
 import com.google.cloud.tools.eclipse.sdk.MessageConsoleWriterListener;
 import com.google.cloud.tools.eclipse.sdk.Messages;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
@@ -53,7 +55,8 @@ public class CloudSdkInstallJob extends CloudSdkModifyJob {
    * context (e.g., that deployment fails as the Cloud SDK could not be installed).
    */
   @Override
-  protected IStatus modifySdk(IProgressMonitor monitor) {
+  protected IStatus modifySdk(IProgressMonitor monitor)
+      throws CloudSdkVersionFileException, CloudSdkNotFoundException {
     SubMonitor progress =
         SubMonitor.convert(monitor, Messages.getString("configuring.cloud.sdk"), 30); // $NON-NLS-1$
 

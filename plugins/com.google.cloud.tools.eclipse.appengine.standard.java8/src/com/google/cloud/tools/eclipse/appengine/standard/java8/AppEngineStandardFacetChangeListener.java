@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.standard.java8;
 
 import com.google.cloud.tools.appengine.AppEngineDescriptor;
+import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import java.io.IOException;
@@ -88,7 +89,11 @@ public class AppEngineStandardFacetChangeListener implements IFacetedProjectList
 
   private static boolean isJava8(IFile descriptor) throws IOException, CoreException, SAXException {
     try (InputStream input = descriptor.getContents()) {
-      return AppEngineDescriptor.parse(input).isJava8();
+      try {
+        return AppEngineDescriptor.parse(input).isJava8();
+      } catch (AppEngineException ex) {
+        throw new IOException(ex);
+      }
     }
   }
 
