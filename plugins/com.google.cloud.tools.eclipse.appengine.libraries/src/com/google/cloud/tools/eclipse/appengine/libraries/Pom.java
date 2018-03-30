@@ -199,7 +199,8 @@ class Pom {
       throw new CoreException(status);
     }
 
-    
+    // our template includes a <!— test dependencies —> comment 
+    // to delimit compilation/runtime dependencies from test dependencies.
     Comment testComment = findTestComment(dependencies);
     
     if (removedLibraries != null) {
