@@ -514,9 +514,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       throw ex;
     } catch (CloudSdkNotFoundException ex) {
       launch.terminate();
-      IStatus status =
-          StatusUtil.error(
-              LocalAppEngineServerLaunchConfigurationDelegate.class, ex.getMessage(), ex);
+      IStatus status = StatusUtil.error(this, ex.getMessage(), ex);
       throw new CoreException(status);
     }
   }

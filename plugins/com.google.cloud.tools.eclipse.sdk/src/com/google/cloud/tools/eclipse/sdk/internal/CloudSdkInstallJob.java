@@ -55,8 +55,7 @@ public class CloudSdkInstallJob extends CloudSdkModifyJob {
    * context (e.g., that deployment fails as the Cloud SDK could not be installed).
    */
   @Override
-  protected IStatus modifySdk(IProgressMonitor monitor)
-      throws CloudSdkVersionFileException, CloudSdkNotFoundException {
+  protected IStatus modifySdk(IProgressMonitor monitor) {
     SubMonitor progress =
         SubMonitor.convert(monitor, Messages.getString("configuring.cloud.sdk"), 30); // $NON-NLS-1$
 
@@ -97,9 +96,11 @@ public class CloudSdkInstallJob extends CloudSdkModifyJob {
       logger.log(Level.WARNING, "Could not install Cloud SDK", e);
       String message = Messages.getString("unsupported.os.installation");
       return StatusUtil.create(failureSeverity, this, message, e); // $NON-NLS-1$
-
     } catch (ManagedSdkVersionMismatchException e) {
       throw new IllegalStateException("This is never thrown because we always use LATEST.", e); //$NON-NLS-1$
+    } catch (CloudSdkVersionFileException | CloudSdkNotFoundException ex) {
+      IStatus status = StatusUtil.error(this, ex.getMessage(), ex);
+      return status;
     }
   }
 }

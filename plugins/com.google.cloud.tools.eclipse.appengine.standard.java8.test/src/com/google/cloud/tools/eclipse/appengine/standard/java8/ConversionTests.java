@@ -385,8 +385,7 @@ public class ConversionTests {
         true, null);
   }
 
-  /** Verify that appengine-web.xml has <runtime>java8</runtime>. 
-   * @throws AppEngineException */
+  /** Verify that appengine-web.xml has <runtime>java8</runtime>. */
   private void assertJava8Runtime(IFacetedProject project)
       throws IOException, SAXException, CoreException, AppEngineException {
     IFile appengineWebXml =

@@ -96,16 +96,12 @@ public abstract class CloudSdkModifyJob extends Job {
 
     try {
       return modifySdk(monitor);
-    } catch (CloudSdkVersionFileException | CloudSdkNotFoundException ex) {
-      IStatus status = StatusUtil.error(CloudSdkModifyJob.class, ex.getMessage(), ex);
-      return status;
     } finally {
       cloudSdkLock.writeLock().unlock();
     }
   }
 
-  protected abstract IStatus modifySdk(IProgressMonitor monitor)
-      throws CloudSdkVersionFileException, CloudSdkNotFoundException;
+  protected abstract IStatus modifySdk(IProgressMonitor monitor);
 
   /** Retrieve the version of the Cloud SDK at the provided location. */
   protected static String getVersion(Path sdkPath) 

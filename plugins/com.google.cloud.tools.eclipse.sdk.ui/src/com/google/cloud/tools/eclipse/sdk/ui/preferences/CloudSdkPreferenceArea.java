@@ -304,9 +304,13 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       status = new Status(IStatus.WARNING, getClass().getName(),
           Messages.getString("CloudSdkNotFound", location)); //$NON-NLS-1$
       return false;
-    } catch (AppEngineJavaComponentsNotInstalledException | InvalidJavaSdkException ex) {
+    } catch (AppEngineJavaComponentsNotInstalledException ex) {
       status = new Status(IStatus.WARNING, getClass().getName(),
           Messages.getString("AppEngineJavaComponentsNotInstalled", ex.getMessage())); //$NON-NLS-1$
+      return false;
+    } catch (InvalidJavaSdkException ex) {
+      status = new Status(IStatus.WARNING, getClass().getName(),
+          Messages.getString("JavaNotInstalled", ex.getMessage())); //$NON-NLS-1$
       return false;
     } catch (CloudSdkOutOfDateException | CloudSdkVersionFileException ex) {
       status = new Status(IStatus.ERROR, getClass().getName(),
