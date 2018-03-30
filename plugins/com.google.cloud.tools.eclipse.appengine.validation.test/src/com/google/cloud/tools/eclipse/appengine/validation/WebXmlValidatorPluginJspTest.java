@@ -76,25 +76,24 @@ public class WebXmlValidatorPluginJspTest {
     // WEB-INF/classes -> src
 
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-    builderFactory.setNamespaceAware(true);
     DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
     Document document = documentBuilder.newDocument();
 
-    Element root = document.createElementNS("http://java.sun.com/xml/ns/javaee", "web-app");
+    Element root = document.createElement("web-app");
     root.setUserData("location", new DocumentLocation(1, 1), null);
     root.setUserData("version", "2.5", null);
 
-    Element element = document.createElementNS("http://java.sun.com/xml/ns/javaee" ,"jsp-file");
+    Element element = document.createElement("jsp-file");
     element.setTextContent("InWebContent.jsp");
     element.setUserData("location", new DocumentLocation(2, 1), null);
     root.appendChild(element);
 
-    Element element2 = document.createElementNS("http://java.sun.com/xml/ns/javaee", "jsp-file");
+    Element element2 = document.createElement("jsp-file");
     element2.setTextContent("InSrc.jsp");
     element2.setUserData("location", new DocumentLocation(3, 1), null);
     root.appendChild(element2);
 
-    Element element3 = document.createElementNS("http://java.sun.com/xml/ns/javaee", "jsp-file");
+    Element element3 = document.createElement("jsp-file");
     element3.setTextContent("DoesNotExist.jsp");
     element3.setUserData("location", new DocumentLocation(4, 1), null);
     root.appendChild(element3);
