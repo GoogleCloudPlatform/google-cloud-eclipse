@@ -15,13 +15,11 @@ gcloud components install app-engine-java --quiet
 echo "OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID}"
 echo "OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET}"
 echo "ANALYTICS_TRACKING_ID: ${ANALYTICS_TRACKING_ID}"
-echo "CT4E_DISPLAY_VERSION: ${CT4E_DISPLAY_VERSION}"
 
 # Exit if undefined (zero-length).
 test -n "${OAUTH_CLIENT_ID}"
 test -n "${OAUTH_CLIENT_SECRET}"
 test -n "${ANALYTICS_TRACKING_ID}"
-test -n "${CT4E_DISPLAY_VERSION}"
 
 cd git/google-cloud-eclipse
 
@@ -31,7 +29,10 @@ cd git/google-cloud-eclipse
 #
 # https://github.com/GoogleCloudPlatform/google-cloud-eclipse/pull/2363#issuecomment-327844378
 # https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2211
-xmlstarlet ed --inplace -u '/product/@version' -v "${CT4E_DISPLAY_VERSION}" \
+readonly CT4E_DISPLAY_VERSION=$( \
+  xmlstarlet sel -t -v '/product/@version' gcp-repo/metadata.product )
+readonly NO_QUALIFIER_VERSION="${CT4E_DISPLAY_VERSION%.qualifier}"
+xmlstarlet ed --inplace -u '/product/@version' -v "${NO_QUALIFIER_VERSION}" \
   gcp-repo/metadata.product
 
 # Need to unset `TMPDIR` for `xvfb-run` due to a bug:

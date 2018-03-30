@@ -101,6 +101,16 @@ public class PomTest {
   }
   
   @Test
+  public void testWrongScope() {
+    Assert.assertFalse(pom.dependencyManaged("org.springframework", "spring-aop")); 
+  }
+  
+  @Test
+  public void testWrongType() {
+    Assert.assertFalse(pom.dependencyManaged("org.apache.httpcomponents", "httpcore")); 
+  }
+  
+  @Test
   public void testAddDependencies() 
       throws CoreException, ParserConfigurationException, IOException, SAXException {
     

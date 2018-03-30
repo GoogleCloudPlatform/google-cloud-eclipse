@@ -258,14 +258,14 @@ public class CodeTemplatesTest {
         "string(./m:dependencyManagement/m:dependencies/m:dependency/m:artifactId)",
         root,
         XPathConstants.STRING);
-    Assert.assertEquals("google-cloud", bomArtifactId);
+    Assert.assertEquals("google-cloud-bom", bomArtifactId);
 
     DefaultArtifactVersion bomVersion = new DefaultArtifactVersion((String) xpath.evaluate(
         "string(./m:dependencyManagement/m:dependencies/m:dependency/m:version)",
         root,
         XPathConstants.STRING));
     Assert.assertTrue(
-        bomVersion.compareTo(new DefaultArtifactVersion("0.40.0-alpha")) >= 0);
+        bomVersion.compareTo(new DefaultArtifactVersion("0.42.0-alpha")) >= 0);
 
     String scope = (String) xpath.evaluate(
         "string(./m:dependencyManagement/m:dependencies/m:dependency/m:scope)",

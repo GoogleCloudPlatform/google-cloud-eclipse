@@ -9,12 +9,12 @@
              
     <library 
           id="appengine-api"
-          group="appengine-api"
+          group="appengine"
           name="App Engine API"
           tooltip="%appengine.api.tooltip"
           siteUri="https://cloud.google.com/appengine/docs/java/" >
       <libraryFile javadocUri="https://cloud.google.com/appengine/docs/java/javadoc/"
-          export="false">
+          export="true">
         <mavenCoordinates
               artifactId="appengine-api-1.0-sdk"
               groupId="com.google.appengine" 
@@ -32,6 +32,7 @@
           tooltip="%endpoints.tooltip"
           dependencies="include"
           siteUri="https://cloud.google.com/endpoints/docs/frameworks/java/about-cloud-endpoints-frameworks" >
+      <libraryDependency id="appengine-api" />
       <libraryFile export="true" 
             javadocUri="https://cloud.google.com/endpoints/docs/frameworks/java/javadoc/">
         <mavenCoordinates
@@ -49,6 +50,7 @@
           tooltip="%objectify.tooltip"
           dependencies="include"
           siteUri="https://github.com/objectify/objectify/wiki" >
+      <libraryDependency id="appengine-api" />
       <libraryFile
           export="true"
           javadocUri="https://www.javadoc.io/doc/com.googlecode.objectify/objectify/5.1.22">

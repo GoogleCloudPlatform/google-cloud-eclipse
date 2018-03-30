@@ -31,7 +31,7 @@ public class CloudLibrariesTest {
       Assert.assertFalse(tooltip.isEmpty());
       Assert.assertFalse(tooltip, tooltip.startsWith("!"));
     }
-    Assert.assertEquals(2, libraries.size());
+    Assert.assertEquals(3, libraries.size());
   }
 
   @Test

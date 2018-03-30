@@ -26,6 +26,8 @@ import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -61,10 +63,15 @@ public abstract class ChildModuleWarPublishTest {
   }
 
   @AfterClass
-  public static void tearDown() throws CoreException {
+  public static void tearDown() {
     ProjectUtils.waitForProjects(allProjects);
     for (IProject project : allProjects) {
-      project.delete(true, null);
+      try {
+        project.delete(true, null);
+      } catch (CoreException | RuntimeException ex) {
+        Logger.getLogger(ChildModuleWarPublishTest.class.getName()).log(Level.WARNING,
+            ex.getMessage(), ex);
+      }
     }
   }
 

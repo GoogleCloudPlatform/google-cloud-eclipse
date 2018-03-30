@@ -17,5 +17,4 @@ Import-Package: com.google.cloud.tools.eclipse.swtbot,
  org.eclipse.jst.common.project.facet.core,
  org.eclipse.jst.j2ee.web.project.facet,
  org.eclipse.swtbot.eclipse.finder,
- org.eclipse.swtbot.swt.finder.exceptions,
  org.eclipse.swtbot.swt.finder.widgets

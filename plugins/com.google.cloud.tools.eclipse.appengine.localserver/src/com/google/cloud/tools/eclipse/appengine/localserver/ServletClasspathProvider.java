@@ -96,11 +96,8 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
       IClasspathEntry[] apiEntries =
           resolverService.resolveLibraryAttachSourcesSync(servletApiId);
       IClasspathEntry[] jspApiEntries = resolverService.resolveLibraryAttachSourcesSync(jspApiId);
-      IClasspathEntry[] appEngineSdkEntries =
-          resolverService.resolveLibraryAttachSourcesSync("appengine-api");
       IClasspathEntry[] result =
           ObjectArrays.concat(apiEntries, jspApiEntries, IClasspathEntry.class);
-      result = ObjectArrays.concat(result, appEngineSdkEntries, IClasspathEntry.class);
       return result;
     } catch (CoreException ex) {
       logger.log(Level.WARNING, "Failed to initialize libraries", ex);
