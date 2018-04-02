@@ -39,7 +39,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
-import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.junit.Rule;
 import org.junit.Test;
@@ -100,12 +99,7 @@ public class FlexDeployCommandHandlerTest {
   private static boolean flexDeployMenuVisible(IProject project) {
     SWTBotTreeItem selected = SwtBotProjectActions.selectProject(
         new SWTWorkbenchBot(), project.getName());
-    try {
-      selected.contextMenu("Deploy to App Engine Flexible...");
-      return true;
-    } catch (WidgetNotFoundException e) {
-      return false;
-    }
+    return selected.contextMenu().menuItems().contains("Deploy to App Engine Flexible...");
   }
 
   @Test

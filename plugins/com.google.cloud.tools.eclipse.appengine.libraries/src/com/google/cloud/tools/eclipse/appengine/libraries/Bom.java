@@ -16,78 +16,43 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
-import com.google.cloud.tools.libraries.CloudLibraries;
-import com.google.cloud.tools.libraries.json.CloudLibrary;
-import com.google.cloud.tools.libraries.json.CloudLibraryClient;
-import com.google.cloud.tools.libraries.json.CloudLibraryClientMavenCoordinates;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSet.Builder;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-import org.w3c.dom.Element;
+import com.google.cloud.tools.eclipse.util.DependencyResolver;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import org.eclipse.aether.artifact.Artifact;
+import org.eclipse.aether.graph.Dependency;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 
+/**
+ * A cache of a pom.xml file and all its transitive dependencies.
+ */
 class Bom {
   
-  private final static XPathFactory factory = XPathFactory.newInstance();
+  private Map<String, Artifact> artifacts;
 
-  private static Set<String> artifacts; 
-  
-  static {
-    try {
-      List<CloudLibrary> cloudLibraries = CloudLibraries.getCloudLibraries();
-      Builder<String> setBuilder = ImmutableSet.builder();
-      
-      for (CloudLibrary library : cloudLibraries) {
-        List<CloudLibraryClient> clients = library.getClients();
-        if (clients != null) {
-          for (CloudLibraryClient client : clients) {
-            CloudLibraryClientMavenCoordinates coordinates = client.getMavenCoordinates();
-            if (coordinates != null) {
-              setBuilder.add(coordinates.getArtifactId()); 
-            }
-          }
-        }
-      }
-      
-      artifacts = setBuilder.build();
-    } catch (IOException ex) {
-      artifacts = new HashSet<>();
+  private Bom(Map<String, Artifact> artifacts) {
+    this.artifacts = artifacts;
+  }
+
+  static Bom loadBom(String groupId, String artifactId, String version, IProgressMonitor monitor)
+      throws CoreException {
+    
+    Collection<Dependency> dependencies =
+        DependencyResolver.getManagedDependencies(groupId, artifactId, version, monitor);
+    Map<String, Artifact> artifacts = new HashMap<>();
+    for (Dependency dependency : dependencies) {
+      Artifact artifact = dependency.getArtifact();
+      artifacts.put(artifact.getGroupId() + ":" + artifact.getArtifactId(), artifact);
+
     }
+    
+    return new Bom(artifacts);
   }
   
-  static boolean defines(Element dependencyManagement, String groupId, String artifactId) {
-    XPath xpath = factory.newXPath();
-    xpath.setNamespaceContext(new Maven4NamespaceContext());
-
-    try {
-      String bomGroupId = (String) xpath.evaluate(
-          "string(./m:dependencies/m:dependency[m:groupId='" + groupId + "']/m:groupId)",
-          dependencyManagement,
-          XPathConstants.STRING);
-      String bomArtifactId = (String) xpath.evaluate(
-          "string(./m:dependencies/m:dependency[m:groupId='" + groupId + "']/m:artifactId)",
-          dependencyManagement,
-          XPathConstants.STRING);
-
-      // todo determine this dynamically by reading the BOMs to see if any include the relevant
-      // artifact
-      if ("com.google.cloud".equals(bomGroupId) && "google-cloud-bom".equals(bomArtifactId)) {
-        if ("com.google.cloud".equals(groupId)) {
-          if (artifacts.contains(artifactId)) {
-            return true;
-          }
-        }
-      }
-    } catch (XPathExpressionException ex) {
-      return false;
-    }
-    return false;
+  boolean defines(String groupId, String artifactId) {
+    return artifacts.containsKey(groupId + ":" + artifactId);
   }
 
 }

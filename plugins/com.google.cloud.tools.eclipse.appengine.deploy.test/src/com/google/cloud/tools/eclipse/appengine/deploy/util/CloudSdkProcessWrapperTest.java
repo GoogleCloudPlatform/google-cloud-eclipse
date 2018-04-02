@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.eclipse.appengine.deploy.util.CloudSdkProcessWrapper.ProcessExitRecorder;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -38,7 +39,7 @@ public class CloudSdkProcessWrapperTest {
   private final CloudSdkProcessWrapper wrapper = new CloudSdkProcessWrapper();
 
   @Test
-  public void testSetUpDeployCloudSdk_nullCredentialFile() {
+  public void testSetUpDeployCloudSdk_nullCredentialFile() throws CloudSdkNotFoundException {
     try {
       wrapper.setUpDeployCloudSdk(null, null);
       fail();
@@ -48,7 +49,7 @@ public class CloudSdkProcessWrapperTest {
   }
 
   @Test
-  public void testSetUpDeployCloudSdk_nonExistingCredentialFile() {
+  public void testSetUpDeployCloudSdk_nonExistingCredentialFile() throws CloudSdkNotFoundException {
     Path credential = tempFolder.getRoot().toPath().resolve("non-existing-file");
     assertFalse(Files.exists(credential));
 
@@ -71,20 +72,21 @@ public class CloudSdkProcessWrapperTest {
   }
 
   @Test
-  public void testGetCloudSdk_forDeploy() throws IOException {
+  public void testGetCloudSdk_forDeploy() throws IOException, CloudSdkNotFoundException {
     Path credential = tempFolder.newFile().toPath();
     wrapper.setUpDeployCloudSdk(credential, null);
     assertNotNull(wrapper.getCloudSdk());
   }
 
   @Test
-  public void testGetCloudSdk_forStandardStaging() {
+  public void testGetCloudSdk_forStandardStaging() throws CloudSdkNotFoundException {
     wrapper.setUpStandardStagingCloudSdk(null, null, null);
     assertNotNull(wrapper.getCloudSdk());
   }
 
   @Test
-  public void testSetUpDeployCloudSdk_cannotSetUpTwice() throws IOException {
+  public void testSetUpDeployCloudSdk_cannotSetUpTwice() 
+      throws IOException, CloudSdkNotFoundException {
     Path credential = tempFolder.newFile().toPath();
     wrapper.setUpDeployCloudSdk(credential, null);
     try {
@@ -96,7 +98,7 @@ public class CloudSdkProcessWrapperTest {
   }
 
   @Test
-  public void testSetUpStandardStagingCloudSdk_cannotSetUpTwice() {
+  public void testSetUpStandardStagingCloudSdk_cannotSetUpTwice() throws CloudSdkNotFoundException {
     wrapper.setUpStandardStagingCloudSdk(null, null, null);
     try {
       wrapper.setUpStandardStagingCloudSdk(null, null, null);
@@ -107,7 +109,7 @@ public class CloudSdkProcessWrapperTest {
   }
 
   @Test
-  public void testProcessExitRecorder_onErrorExitWithNullErrorMessageCollector() {
+  public void testProcessExitRecorder_onErrorExitWithNullErrorMessageCollector() throws CloudSdkNotFoundException {
     wrapper.setUpStandardStagingCloudSdk(null, null, null);
 
     ProcessExitRecorder recorder = wrapper.new ProcessExitRecorder();
@@ -118,7 +120,7 @@ public class CloudSdkProcessWrapperTest {
   }
 
   @Test
-  public void testProcessExitRecorder_onErrorExit() {
+  public void testProcessExitRecorder_onErrorExit() throws CloudSdkNotFoundException {
     wrapper.setUpStandardStagingCloudSdk(null, null, null);
 
     ProcessExitRecorder recorder = wrapper.new ProcessExitRecorder();
@@ -128,7 +130,7 @@ public class CloudSdkProcessWrapperTest {
   }
 
   @Test
-  public void testProcessExitRecorder_onOkExit() {
+  public void testProcessExitRecorder_onOkExit() throws CloudSdkNotFoundException {
     wrapper.setUpStandardStagingCloudSdk(null, null, null);
 
     ProcessExitRecorder recorder = wrapper.new ProcessExitRecorder();

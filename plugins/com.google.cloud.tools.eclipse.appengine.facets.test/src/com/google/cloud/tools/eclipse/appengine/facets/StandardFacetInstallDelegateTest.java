@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.facets;
 import static org.junit.Assert.assertNull;
 
 import com.google.cloud.tools.appengine.AppEngineDescriptor;
+import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import java.io.ByteArrayInputStream;
@@ -48,9 +49,10 @@ public class StandardFacetInstallDelegateTest {
   public void setUp() {
     project = projectCreator.getProject();
   }
-  
+
   @Test
-  public void testCreateConfigFiles() throws CoreException, IOException, SAXException {
+  public void testCreateConfigFiles()
+      throws CoreException, IOException, SAXException, AppEngineException {
     delegate.createConfigFiles(project, AppEngineStandardFacet.JRE7, monitor);
 
     IFile appengineWebXml = project.getFile("src/main/webapp/WEB-INF/appengine-web.xml");

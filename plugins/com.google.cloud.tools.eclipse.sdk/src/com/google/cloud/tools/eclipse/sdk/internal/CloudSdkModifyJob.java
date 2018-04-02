@@ -17,6 +17,8 @@
 package com.google.cloud.tools.eclipse.sdk.internal;
 
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkVersionFileException;
 import com.google.cloud.tools.eclipse.sdk.Messages;
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
 import com.google.cloud.tools.eclipse.util.jobs.MutexRule;
@@ -102,7 +104,8 @@ public abstract class CloudSdkModifyJob extends Job {
   protected abstract IStatus modifySdk(IProgressMonitor monitor);
 
   /** Retrieve the version of the Cloud SDK at the provided location. */
-  protected static String getVersion(Path sdkPath) {
+  protected static String getVersion(Path sdkPath) 
+      throws CloudSdkVersionFileException, CloudSdkNotFoundException {
     CloudSdk sdk = new CloudSdk.Builder().sdkPath(sdkPath).build();
     return sdk.getVersion().toString();
   }

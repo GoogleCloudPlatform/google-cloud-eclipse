@@ -81,6 +81,7 @@ public class DataflowJavaProjectNatureTest {
 
     try {
       DataflowJavaProjectNature.addDataflowJavaNatureToProject(project, new NullProgressMonitor());
+      fail();
     } catch (CoreException ex) {
       assertEquals("Can't add the Dataflow nature to closed project null", ex.getMessage());
     }

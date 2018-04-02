@@ -157,8 +157,8 @@ public class CloudSdkPreferenceAreaTest {
     assertNotNull(sdkVersion);
   }
   
-  @Test
   // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2897
+  @Test
   public void testSearchSdkIfSdkLocationIsEmpty() {
     when(cloudSdkManager.isManagedSdkFeatureEnabled()).thenReturn(true);
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("");

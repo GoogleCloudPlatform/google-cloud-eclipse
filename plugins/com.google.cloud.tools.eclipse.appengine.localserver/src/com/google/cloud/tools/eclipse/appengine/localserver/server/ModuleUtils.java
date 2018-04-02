@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import com.google.cloud.tools.appengine.AppEngineDescriptor;
+import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,7 +57,7 @@ public class ModuleUtils {
         }
       } catch (SAXException ex) {
         // Parsing failed due to malformed XML; return "default".
-      } catch (CoreException | IOException ex) {
+      } catch (CoreException | IOException | AppEngineException ex) {
         logger.log(Level.WARNING, "Unable to read " + descriptorFile.getFullPath(), ex);
       }
     }

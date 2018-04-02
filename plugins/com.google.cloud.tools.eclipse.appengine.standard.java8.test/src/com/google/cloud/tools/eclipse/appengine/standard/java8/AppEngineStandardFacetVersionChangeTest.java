@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.cloud.tools.appengine.AppEngineDescriptor;
+import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
@@ -64,7 +65,7 @@ public class AppEngineStandardFacetVersionChangeTest {
 
   /** Fail changing an App Engine Standard JRE7 project to JRE8 with no other changes. */
   @Test
-  public void testChange_AESJ7_AESJ8() throws CoreException, IOException, SAXException {
+  public void testChange_AESJ7_AESJ8() throws CoreException, IOException, SAXException, AppEngineException {
     IFacetedProject project = jre7Project.getFacetedProject();
     assertDescriptorRuntimeIsJre7(project);
 
@@ -82,7 +83,7 @@ public class AppEngineStandardFacetVersionChangeTest {
 
   /** Fail changing AppEngine Standard JRE8 to JRE7 with no other changes. */
   @Test
-  public void testChange_AESJ8_AESJ7() throws CoreException, IOException, SAXException {
+  public void testChange_AESJ8_AESJ7() throws CoreException, IOException, SAXException, AppEngineException {
     IFacetedProject project = jre8Project.getFacetedProject();
     assertDescriptorRuntimeIsJre8(project);
 
@@ -102,7 +103,7 @@ public class AppEngineStandardFacetVersionChangeTest {
    * via the appengine-web.xml.
    */
   @Test
-  public void testChange_AESJ8_AESJ7andJava7() throws CoreException, IOException, SAXException {
+  public void testChange_AESJ8_AESJ7andJava7() throws CoreException, IOException, SAXException, AppEngineException {
     IFacetedProject project = jre8Project.getFacetedProject();
     assertDescriptorRuntimeIsJre8(project);
 
@@ -133,14 +134,14 @@ public class AppEngineStandardFacetVersionChangeTest {
   }
 
   private static void assertDescriptorRuntimeIsJre7(IFacetedProject project)
-      throws IOException, CoreException, SAXException {
+      throws IOException, CoreException, SAXException, AppEngineException {
     AppEngineDescriptor descriptor = parseDescriptor(project);
     assertNotNull(descriptor);
     assertNull("should have no <runtime> element", descriptor.getRuntime());
   }
 
   private static void assertDescriptorRuntimeIsJre8(IFacetedProject project)
-      throws IOException, CoreException, SAXException {
+      throws IOException, CoreException, SAXException, AppEngineException {
     AppEngineDescriptor descriptor = parseDescriptor(project);
     assertNotNull(descriptor);
     assertTrue("missing <runtime>java8</runtime>", descriptor.isJava8());

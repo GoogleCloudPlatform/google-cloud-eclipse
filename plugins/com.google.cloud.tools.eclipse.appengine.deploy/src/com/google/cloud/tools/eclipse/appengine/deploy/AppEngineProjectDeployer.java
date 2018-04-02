@@ -20,6 +20,7 @@ import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDeployment;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.eclipse.appengine.deploy.util.CloudSdkProcessWrapper;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -52,7 +53,7 @@ public class AppEngineProjectDeployer {
 
   /**
    * @param optionalConfigurationFilesDirectory if not {@code null}, searches optional configuration
-   * files (such as {@code cron.yaml}) in this directory and deploys them together
+   *     files (such as {@code cron.yaml}) in this directory and deploys them together
    */
   public IStatus deploy(IPath stagingDirectory, Path credentialFile,
       DeployPreferences deployPreferences, IPath optionalConfigurationFilesDirectory,
@@ -61,7 +62,12 @@ public class AppEngineProjectDeployer {
       throw new OperationCanceledException();
     }
 
-    cloudSdkProcessWrapper.setUpDeployCloudSdk(credentialFile, stdoutOutputStream);
+    try {
+      cloudSdkProcessWrapper.setUpDeployCloudSdk(credentialFile, stdoutOutputStream);
+    } catch (CloudSdkNotFoundException ex) {
+      return StatusUtil.error(this, "Error deploying project: " + ex.getMessage(), ex);
+    }
+    
     CloudSdk cloudSdk = cloudSdkProcessWrapper.getCloudSdk();
 
     SubMonitor progress = SubMonitor.convert(monitor, 1);

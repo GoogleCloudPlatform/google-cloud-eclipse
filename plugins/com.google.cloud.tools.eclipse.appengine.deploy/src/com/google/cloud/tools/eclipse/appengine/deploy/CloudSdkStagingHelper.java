@@ -39,9 +39,10 @@ public class CloudSdkStagingHelper {
    * @param explodedWarDirectory the input of the staging operation
    * @param stagingDirectory where the result of the staging operation will be written
    * @param cloudSdk executes the staging operation
+   * @throws AppEngineException when staging fails
    */
   public static void stageStandard(IPath explodedWarDirectory, IPath stagingDirectory,
-      CloudSdk cloudSdk, IProgressMonitor monitor) {
+      CloudSdk cloudSdk, IProgressMonitor monitor) throws AppEngineException {
     if (monitor.isCanceled()) {
       throw new OperationCanceledException();
     }
@@ -69,7 +70,7 @@ public class CloudSdkStagingHelper {
    * @throws OperationCanceledException when user cancels the operation
    */
   public static void stageFlexible(IPath appEngineDirectory, IPath deployArtifact,
-      IPath stagingDirectory, IProgressMonitor monitor) {
+      IPath stagingDirectory, IProgressMonitor monitor) throws AppEngineException {
     if (monitor.isCanceled()) {
       throw new OperationCanceledException();
     }
