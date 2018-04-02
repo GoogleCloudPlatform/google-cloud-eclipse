@@ -19,6 +19,10 @@ package com.google.cloud.tools.eclipse.appengine.localserver;
 import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Inject;
@@ -69,15 +73,6 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
     return doResolveClasspathContainer(runtime, webFacetVersion);
   }
 
-  // This method is called often as the result of user initiated UI actions, e.g. when the user
-  // clicks through the project in the Project Explorer to drill down into the libraries
-  // attached to the project. This method resolves the servlet and jsp jars each time instead of
-  // persisting the resolved version the first time and using that later.
-  @Override
-  public IClasspathEntry[] resolveClasspathContainer(IRuntime runtime) {
-    return doResolveClasspathContainer(runtime, DEFAULT_DYNAMIC_WEB_VERSION);
-  }
-
   private IClasspathEntry[] doResolveClasspathContainer(
       IRuntime runtime, IProjectFacetVersion dynamicWebVersion) {
 
@@ -93,13 +88,28 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
     }
 
     try {
-      // todo: perhaps should be asynchronous and on completion, call
-      // requestClasspathContainerUpdate
-      IClasspathEntry[] apiEntries =
+      ListenableFuture<IClasspathEntry[]> apiEntries =
           resolverService.resolveLibraryAttachSources(servletApiId, jspApiId);
-      return apiEntries;
-    } catch (CoreException ex) {
+      if (apiEntries.isDone()) {
+        return apiEntries.get();
+      }
+      Futures.addCallback(
+          apiEntries,
+          new FutureCallback<IClasspathEntry[]>() {
+            @Override
+            public void onSuccess(IClasspathEntry[] entries) {
+              requestClasspathContainerUpdate(runtime, entries);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+              logger.log(Level.WARNING, "Failed to resolve servlet APIs", t);
+            }
+          });
+    } catch (CoreException | ExecutionException ex) {
       logger.log(Level.WARNING, "Failed to initialize libraries", ex);
+    } catch (InterruptedException ex) {
+      Thread.interrupted();
     }
     return null;
   }
