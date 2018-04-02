@@ -133,7 +133,7 @@ public class MavenUtils {
     }
   }
 
-  private static ISchedulingRule mavenResolvingRule() {
+  public static ISchedulingRule mavenResolvingRule() {
     return MavenPlugin.getProjectConfigurationManager().getRule();
   }
 
