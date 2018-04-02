@@ -23,17 +23,20 @@ import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
 import com.google.cloud.tools.eclipse.ui.util.ProjectFromSelectionHelper;
 import com.google.cloud.tools.eclipse.ui.util.ServiceUtils;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
+import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -148,8 +151,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
 
   private void launchDeployJob(IProject project, Credential credential)
       throws IOException, CoreException {
-    AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_DEPLOY,
-        analyticsDeployEventMetadataKey);
+    sendAnalyticsPing(AnalyticsEvents.APP_ENGINE_DEPLOY);
 
     IPath workDirectory = createWorkDirectory();
     DeployPreferences deployPreferences = getDeployPreferences(project);
@@ -177,8 +179,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
       @Override
       public void done(IJobChangeEvent event) {
         if (event.getResult().isOK()) {
-          AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_DEPLOY_SUCCESS,
-              analyticsDeployEventMetadataKey);
+          sendAnalyticsPing(AnalyticsEvents.APP_ENGINE_DEPLOY_SUCCESS);
         }
         launchCleanupJob();
       }
@@ -215,5 +216,17 @@ public abstract class DeployCommandHandler extends AbstractHandler {
     // DeployJob.class: create in the non-UI bundle.
     return Platform.getStateLocation(FrameworkUtil.getBundle(DeployJob.class))
         .append("tmp");
+  }
+
+  private void sendAnalyticsPing(String event) {
+    String cloudSdkManagement = CloudSdkPreferences.isAutoManaging()
+        ? AnalyticsEvents.MANAGED_CLOUD_SDK
+        : AnalyticsEvents.USER_CLOUD_SDK;
+    Map<String, String> metadata = ImmutableMap.of(
+        AnalyticsEvents.CLOUD_SDK_MANAGEMENT, cloudSdkManagement,
+        // For a historical reason, the key serves as an actual value for std vs. flex.
+        analyticsDeployEventMetadataKey, "null");
+
+    AnalyticsPingManager.getInstance().sendPing(event, metadata);
   }
 }

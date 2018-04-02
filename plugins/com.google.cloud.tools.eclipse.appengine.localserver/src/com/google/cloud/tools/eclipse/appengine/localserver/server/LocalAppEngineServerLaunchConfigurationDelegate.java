@@ -29,6 +29,7 @@ import com.google.cloud.tools.eclipse.appengine.localserver.PreferencesInitializ
 import com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsole;
 import com.google.cloud.tools.eclipse.appengine.localserver.ui.StaleResourcesStatusHandler;
 import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
+import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
@@ -37,6 +38,7 @@ import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.net.InetAddresses;
 import java.io.File;
 import java.net.InetAddress;
@@ -441,8 +443,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   @Override
   public void launch(ILaunchConfiguration configuration, String mode, final ILaunch launch,
       IProgressMonitor monitor) throws CoreException {
-    AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_LOCAL_SERVER,
-        AnalyticsEvents.APP_ENGINE_LOCAL_SERVER_MODE, mode);
+    sendAnalyticsPing(mode);
 
     IServer server = ServerUtil.getServer(configuration);
     if (server == null) {
@@ -517,6 +518,16 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       IStatus status = StatusUtil.error(this, ex.getMessage(), ex);
       throw new CoreException(status);
     }
+  }
+
+  private void sendAnalyticsPing(String serverMode) {
+    String cloudSdkManagement = CloudSdkPreferences.isAutoManaging()
+        ? AnalyticsEvents.MANAGED_CLOUD_SDK
+        : AnalyticsEvents.USER_CLOUD_SDK;
+    AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_LOCAL_SERVER,
+        ImmutableMap.of(
+            AnalyticsEvents.APP_ENGINE_LOCAL_SERVER_MODE, serverMode,
+            AnalyticsEvents.CLOUD_SDK_MANAGEMENT, cloudSdkManagement));
   }
 
   /**

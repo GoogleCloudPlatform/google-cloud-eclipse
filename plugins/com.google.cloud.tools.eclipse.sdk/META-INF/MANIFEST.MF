@@ -28,4 +28,4 @@ Import-Package: com.google.cloud.tools.eclipse.ui.util,
  org.osgi.service.prefs
 Eclipse-RegisterBuddy: com.google.cloud.tools.appengine
 Export-Package: com.google.cloud.tools.eclipse.sdk,
- com.google.cloud.tools.eclipse.sdk.internal;x-friends:="com.google.cloud.tools.eclipse.sdk.ui"
+ com.google.cloud.tools.eclipse.sdk.internal

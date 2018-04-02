@@ -40,10 +40,11 @@ public class AnalyticsEvents {
   // Metadata keys
   public static final String APP_ENGINE_LOCAL_SERVER_MODE = "mode";
   public static final String APP_ENGINE_NEW_PROJECT_WIZARD_TYPE = "type";
-  public static final String APP_ENGINE_NEW_PROJECT_WIZARD_BUILD_TOOL = "build_tool";
+  public static final String APP_ENGINE_NEW_PROJECT_WIZARD_BUILD_TOOL = "build.tool";
   public static final String APP_ENGINE_DEPLOY_STANDARD = "standard";
   public static final String APP_ENGINE_DEPLOY_FLEXIBLE = "flex";
   public static final String DATAFLOW_RUN_RUNNER = "runner";
+  public static final String CLOUD_SDK_MANAGEMENT = "cloud.sdk.management";
 
   public static final String PROJECT_TYPE = "project.type";
   public static final String LIBRARY_IDS = "library.ids";
@@ -55,4 +56,7 @@ public class AnalyticsEvents {
 
   public static final String NATIVE_PROJECT = "native.project";
   public static final String MAVEN_PROJECT = "maven.project";
+
+  public static final String MANAGED_CLOUD_SDK = "managed";
+  public static final String USER_CLOUD_SDK = "user.managed";
 }
