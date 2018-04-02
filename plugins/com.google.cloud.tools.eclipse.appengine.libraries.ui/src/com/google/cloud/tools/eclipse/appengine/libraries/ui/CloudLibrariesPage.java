@@ -203,8 +203,9 @@ public class CloudLibrariesPage extends WizardPage
   @Override
   public void setSelection(IClasspathEntry containerEntry) {
     Verify.verify(
-        LibraryClasspathContainer.CONTAINER_PATH_PREFIX.equals(
-            containerEntry.getPath().segment(0)));
+        containerEntry == null
+            || LibraryClasspathContainer.CONTAINER_PATH_PREFIX.equals(
+                containerEntry.getPath().segment(0)));
     this.originalEntry = containerEntry;
     
     try {
