@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.facets;
 
 import com.google.cloud.tools.appengine.AppEngineDescriptor;
+import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.io.IOException;
 import java.io.InputStream;
@@ -96,7 +97,7 @@ public class AppEngineStandardJre7ProjectFacetDetector extends ProjectFacetDetec
         progress.worked(1);
       }
       AppEngineStandardFacet.installAllAppEngineRuntimes(workingCopy, progress.newChild(1));
-    } catch (SAXException | IOException ex) {
+    } catch (SAXException | IOException | AppEngineException ex) {
       throw new CoreException(StatusUtil.error(this, "Unable to retrieve appengine-web.xml", ex));
     }
   }

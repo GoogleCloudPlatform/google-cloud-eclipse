@@ -21,6 +21,8 @@ import com.google.cloud.tools.appengine.api.devserver.RunConfiguration;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkVersionFileException;
+import com.google.cloud.tools.appengine.cloudsdk.InvalidJavaSdkException;
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.appengine.localserver.PreferencesInitializer;
@@ -132,12 +134,12 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       CloudSdk cloudSdk = new CloudSdk.Builder().build();
       cloudSdk.validateCloudSdk();
       return Status.OK_STATUS;
-    } catch (CloudSdkNotFoundException ex) {
+    } catch (CloudSdkNotFoundException | InvalidJavaSdkException ex) {
       return StatusUtil.error(
           LocalAppEngineServerLaunchConfigurationDelegate.class,
           Messages.getString("cloudsdk.not.configured"), // $NON-NLS-1$
           ex);
-    } catch (CloudSdkOutOfDateException ex) {
+    } catch (CloudSdkOutOfDateException | CloudSdkVersionFileException ex) {
       return StatusUtil.error(
           LocalAppEngineServerLaunchConfigurationDelegate.class,
           Messages.getString("cloudsdk.out.of.date"), // $NON-NLS-1$
@@ -510,6 +512,10 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     } catch (CoreException ex) {
       launch.terminate();
       throw ex;
+    } catch (CloudSdkNotFoundException ex) {
+      launch.terminate();
+      IStatus status = StatusUtil.error(this, ex.getMessage(), ex);
+      throw new CoreException(status);
     }
   }
 

@@ -22,7 +22,7 @@ import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkVersionFileException;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkVersionFileNotFoundException;
+import com.google.cloud.tools.appengine.cloudsdk.InvalidJavaSdkException;
 import com.google.cloud.tools.eclipse.preferences.areas.PreferenceArea;
 import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
@@ -187,7 +187,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
           version = sdk.getVersion().toString();
           // ends up calling this method again
           sdkLocation.setStringValue(location);
-        } catch (CloudSdkNotFoundException | CloudSdkVersionFileNotFoundException ex) {
+        } catch (CloudSdkNotFoundException | CloudSdkVersionFileException ex) {
           // surprising but here a CloudSdkVersionFileNotFoundException also means
           // no SDK is found where expected, probably because it was moved or deleted
           // behind Eclipse's back
@@ -218,7 +218,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
     try {
       return new CloudSdk.Builder().sdkPath(path).build().getVersion().toString();
-    } catch (CloudSdkVersionFileException ex) {
+    } catch (CloudSdkVersionFileException | CloudSdkNotFoundException ex) {
       return Messages.getString("NoSdkFound"); //$NON-NLS-1$
     }
   }
@@ -292,8 +292,8 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
   }
 
   private boolean validateSdk(Path location) {
-    CloudSdk sdk = new CloudSdk.Builder().sdkPath(location).build();
     try {
+      CloudSdk sdk = new CloudSdk.Builder().sdkPath(location).build();
       sdk.validateCloudSdk();
       sdk.validateAppEngineJavaComponents();
       status = Status.OK_STATUS;
@@ -302,13 +302,17 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       // accept a seemingly invalid location in case the SDK organization
       // has changed and the CloudSdk#validate() code is out of date
       status = new Status(IStatus.WARNING, getClass().getName(),
-          Messages.getString("CloudSdkNotFound", sdk.getSdkPath())); //$NON-NLS-1$
+          Messages.getString("CloudSdkNotFound", location)); //$NON-NLS-1$
       return false;
     } catch (AppEngineJavaComponentsNotInstalledException ex) {
       status = new Status(IStatus.WARNING, getClass().getName(),
           Messages.getString("AppEngineJavaComponentsNotInstalled", ex.getMessage())); //$NON-NLS-1$
       return false;
-    } catch (CloudSdkOutOfDateException ex) {
+    } catch (InvalidJavaSdkException ex) {
+      status = new Status(IStatus.WARNING, getClass().getName(),
+          Messages.getString("JavaNotInstalled", ex.getMessage())); //$NON-NLS-1$
+      return false;
+    } catch (CloudSdkOutOfDateException | CloudSdkVersionFileException ex) {
       status = new Status(IStatus.ERROR, getClass().getName(),
           Messages.getString("CloudSdkOutOfDate")); //$NON-NLS-1$
         return false;

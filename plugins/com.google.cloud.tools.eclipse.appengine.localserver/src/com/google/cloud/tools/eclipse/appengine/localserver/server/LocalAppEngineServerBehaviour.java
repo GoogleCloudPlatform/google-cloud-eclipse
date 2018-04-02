@@ -23,6 +23,7 @@ import com.google.cloud.tools.appengine.api.devserver.DefaultStopConfiguration;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDevServer1;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDevServer2;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
@@ -329,7 +330,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
    */
   void startDevServer(String mode, DefaultRunConfiguration devServerRunConfiguration,
       Path javaHomePath, MessageConsoleStream outputStream, MessageConsoleStream errorStream)
-      throws CoreException {
+      throws CoreException, CloudSdkNotFoundException {
 
     BiFunction<InetAddress, Integer, Boolean> portInUse = (addr, port) -> {
       Preconditions.checkArgument(port >= 0, "invalid port");
@@ -358,7 +359,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   }
 
   private void initializeDevServer(MessageConsoleStream stdout, MessageConsoleStream stderr,
-      Path javaHomePath) {
+      Path javaHomePath) throws CloudSdkNotFoundException {
     MessageConsoleWriterListener stdoutListener = new MessageConsoleWriterListener(stdout);
     MessageConsoleWriterListener stderrListener = new MessageConsoleWriterListener(stderr);
 

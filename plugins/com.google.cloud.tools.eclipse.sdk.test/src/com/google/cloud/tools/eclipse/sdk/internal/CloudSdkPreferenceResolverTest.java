@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkResolver;
 import java.io.File;
 import java.util.Collections;
@@ -36,7 +37,7 @@ import org.junit.Test;
 public class CloudSdkPreferenceResolverTest {
 
   @Test
-  public void testSetPreferenceInvalid() {
+  public void testSetPreferenceInvalid() throws CloudSdkNotFoundException {
     // A path that almost certainly does not contain the SDK
     File root = File.listRoots()[0];
     IPreferenceStore preferences = mock(IPreferenceStore.class);
