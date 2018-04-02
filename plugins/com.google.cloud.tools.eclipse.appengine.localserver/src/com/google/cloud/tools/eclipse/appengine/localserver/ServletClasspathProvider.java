@@ -70,26 +70,12 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
     } catch (CoreException ex) {
       logger.log(Level.WARNING, "Unable to obtain jst.web facet version", ex);
     }
-    return doResolveClasspathContainer(runtime, webFacetVersion);
-  }
-
-  private IClasspathEntry[] doResolveClasspathContainer(
-      IRuntime runtime, IProjectFacetVersion dynamicWebVersion) {
-
-    String servletApiId;
-    String jspApiId;
-    if (WebFacetUtils.WEB_31.equals(dynamicWebVersion)
-        || WebFacetUtils.WEB_30.equals(dynamicWebVersion)) {
-      servletApiId = "servlet-api-3.1";
-      jspApiId = "jsp-api-2.3";
-    } else {
-      servletApiId = "servlet-api-2.5";
-      jspApiId = "jsp-api-2.1";
-    }
+    String[] apiLibraryIds = getApiLibraryIds(webFacetVersion);
 
     try {
       ListenableFuture<IClasspathEntry[]> apiEntries =
-          resolverService.resolveLibraryAttachSources(servletApiId, jspApiId);
+          resolverService.resolveLibraryAttachSources(apiLibraryIds);
+      // may return immediately if cached or locally available
       if (apiEntries.isDone()) {
         return apiEntries.get();
       }
@@ -109,8 +95,18 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
     } catch (CoreException | ExecutionException ex) {
       logger.log(Level.WARNING, "Failed to initialize libraries", ex);
     } catch (InterruptedException ex) {
-      Thread.interrupted();
+      Thread.currentThread().interrupt();
     }
     return null;
+  }
+
+  /** Return the Library IDs for the Servlet APIs for the given dynamic web facet version. */
+  private String[] getApiLibraryIds(IProjectFacetVersion dynamicWebVersion) {
+    if (WebFacetUtils.WEB_31.equals(dynamicWebVersion)
+        || WebFacetUtils.WEB_30.equals(dynamicWebVersion)) {
+      return new String[] {"servlet-api-3.1", "jsp-api-2.3"};
+    } else {
+      return new String[] {"servlet-api-2.5", "jsp-api-2.1"};
+    }
   }
 }

@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.util;
 
-import com.google.cloud.tools.eclipse.util.MavenUtils.ExceptionalCallable;
+import com.google.cloud.tools.eclipse.util.MavenUtils.ExceptionalCallableWithProgress;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,7 +38,6 @@ import org.eclipse.aether.util.filter.DependencyFilterUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.ICallable;
 import org.eclipse.m2e.core.embedder.IMavenExecutionContext;
@@ -86,22 +85,21 @@ public class DependencyResolver {
             progress.worked(1);
 
             try {
-              ExceptionalCallable<List<Artifact>, DependencyResolutionException>
+              ExceptionalCallableWithProgress<List<Artifact>, DependencyResolutionException>
                   retrieveDependenciesBlock =
-                      () -> {
+                      submonitor -> {
                         List<ArtifactResult> artifacts =
                             system.resolveDependencies(session, request).getArtifactResults();
-                        progress.setWorkRemaining(artifacts.size());
+                        submonitor.setWorkRemaining(artifacts.size());
                         List<Artifact> dependencies = new ArrayList<>();
                         for (ArtifactResult result : artifacts) {
                           Artifact dependency = result.getArtifact();
                           dependencies.add(dependency);
-                          progress.worked(1);
+                          submonitor.worked(1);
                         }
                         return dependencies;
                       };
-              return MavenUtils.runWithRule(
-                  mavenRule(), progress.split(1), retrieveDependenciesBlock);
+              return MavenUtils.runWithRule(retrieveDependenciesBlock, progress);
             } catch (DependencyResolutionException ex) {
               throw new CoreException(StatusUtil.error(this, "Could not resolve dependencies", ex));
             } catch (NullPointerException ex) {
@@ -114,11 +112,6 @@ public class DependencyResolver {
           }
         };
     return context.execute(callable, monitor);
-  }
-
-  /** Return the m2e scheduling rule used to serialize access to the Maven repository. */
-  private static ISchedulingRule mavenRule() {
-    return MavenPlugin.getProjectConfigurationManager().getRule();
   }
 
   private static List<RemoteRepository> centralRepository(RepositorySystem system) {

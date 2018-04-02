@@ -16,9 +16,12 @@
 
 package com.google.cloud.tools.eclipse.util;
 
+import static org.junit.Assert.assertEquals;
+
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.m2e.core.MavenPlugin;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -44,4 +47,9 @@ public class MavenUtilsTest {
     Assert.assertFalse(MavenUtils.hasMavenNature(project));
   }
 
+  @Test
+  public void testMavenResovingRule() {
+    assertEquals(
+        MavenPlugin.getProjectConfigurationManager().getRule(), MavenUtils.mavenResolvingRule());
+  }
 }

@@ -53,8 +53,8 @@ public class MavenUtils {
    * @param <E> the exception type
    */
   @FunctionalInterface
-  public interface ExceptionalCallable<T, E extends Throwable> {
-    T call() throws E;
+  public interface ExceptionalCallableWithProgress<T, E extends Throwable> {
+    T call(SubMonitor monitor) throws E;
   }
 
   public static final String MAVEN2_NATURE_ID = "org.eclipse.m2e.core.maven2Nature"; //$NON-NLS-1$
@@ -87,24 +87,14 @@ public class MavenUtils {
       List<ArtifactRepository> repositories,
       IProgressMonitor monitor)
       throws CoreException {
-    ISchedulingRule rule = mavenResolvingRule();
-    SubMonitor progress = SubMonitor.convert(monitor, 10);
     return runWithRule(
-        rule,
-        progress.split(2),
-        () -> {
+        progress -> {
           Artifact artifact =
               MavenPlugin.getMaven()
-                  .resolve(
-                      groupId,
-                      artifactId,
-                      version,
-                      type,
-                      classifier,
-                      repositories,
-                      progress.split(8));
+                  .resolve(groupId, artifactId, version, type, classifier, repositories, progress);
           return artifact;
-        });
+        },
+        monitor);
   }
 
   /**
@@ -115,17 +105,18 @@ public class MavenUtils {
    * @param ruleMonitor a progress monitor to be used when waiting to obtain the rule
    */
   public static <T, E extends Throwable> T runWithRule(
-      ISchedulingRule rule, IProgressMonitor ruleMonitor, ExceptionalCallable<T, E> supplier)
-      throws E {
+      ExceptionalCallableWithProgress<T, E> supplier, IProgressMonitor monitor) throws E {
+    SubMonitor progress = SubMonitor.convert(monitor, 10);
+    ISchedulingRule rule = mavenResolvingRule();
     boolean acquireRule = Job.getJobManager().currentRule() == null;
     if (acquireRule) {
-      Job.getJobManager().beginRule(rule, ruleMonitor);
+      Job.getJobManager().beginRule(rule, progress.split(2));
     }
     Verify.verify(
         Job.getJobManager().currentRule().contains(rule),
         "require holding superset of rule: " + rule);
     try {
-      return supplier.call();
+      return supplier.call(progress.split(8));
     } finally {
       if (acquireRule) {
         Job.getJobManager().endRule(rule);
@@ -133,6 +124,7 @@ public class MavenUtils {
     }
   }
 
+  /** Return the m2e scheduling rule used to serialize access to the Maven repository. */
   public static ISchedulingRule mavenResolvingRule() {
     return MavenPlugin.getProjectConfigurationManager().getRule();
   }

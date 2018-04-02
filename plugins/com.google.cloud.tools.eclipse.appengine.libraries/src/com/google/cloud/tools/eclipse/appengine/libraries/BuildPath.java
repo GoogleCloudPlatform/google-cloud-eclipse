@@ -22,6 +22,7 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.util.ClasspathUtil;
+import com.google.cloud.tools.eclipse.util.MavenUtils;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Preconditions;
 import java.io.IOException;
@@ -52,7 +53,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jst.j2ee.classpathdep.UpdateClasspathAttributeUtil;
-import org.eclipse.m2e.core.MavenPlugin;
 import org.xml.sax.SAXException;
 
 public class BuildPath {
@@ -317,7 +317,7 @@ public class BuildPath {
     ISchedulingRule rule =
         MultiRule.combine(
             workspace.getRuleFactory().modifyRule(javaProject.getProject()),
-            MavenPlugin.getProjectConfigurationManager().getRule());
+            MavenUtils.mavenResolvingRule());
     return rule;
   }
 }
