@@ -79,19 +79,23 @@ public class CloudSdkUpdateJob extends CloudSdkModifyJob {
       }
       return Status.OK_STATUS;
 
-    } catch (InterruptedException e) {
+    } catch (InterruptedException ex) {
       return Status.CANCEL_STATUS;
-    } catch (ManagedSdkVerificationException | CommandExecutionException | CommandExitException e) {
-      logger.log(Level.WARNING, "Could not update Cloud SDK", e); //$NON-NLS-1$
+    } catch (ManagedSdkVerificationException | CommandExecutionException | CommandExitException ex) {
+      logger.log(Level.WARNING, "Could not update Cloud SDK", ex); //$NON-NLS-1$
       String message = Messages.getString("installing.cloud.sdk.failed"); //$NON-NLS-1$
-      return StatusUtil.create(failureSeverity, this, message, e);
-    } catch (UnsupportedOsException | CloudSdkVersionFileException | CloudSdkNotFoundException e) {
-      logger.log(Level.WARNING, "Could not update Cloud SDK", e); // $NON-NLS-1$
+      return StatusUtil.create(failureSeverity, this, message, ex);
+    } catch (UnsupportedOsException ex) {
+      logger.log(Level.WARNING, "Could not update Cloud SDK", ex); // $NON-NLS-1$
       String message = Messages.getString("unsupported.os.installation"); //$NON-NLS-1$
-      return StatusUtil.create(failureSeverity, this, message, e);
-    } catch (ManagedSdkVersionMismatchException e) {
+      return StatusUtil.create(failureSeverity, this, message, ex);
+    } catch (CloudSdkVersionFileException | CloudSdkNotFoundException ex) {
+      logger.log(Level.WARNING, "Cloud SDK not found where expected", ex); // $NON-NLS-1$
+      String message = Messages.getString("corrupt.cloud.sdk"); //$NON-NLS-1$
+      return StatusUtil.create(failureSeverity, this, message, ex);
+    } catch (ManagedSdkVersionMismatchException ex) {
       throw new IllegalStateException(
-          "This is never thrown because we always use LATEST.", e); //$NON-NLS-1$
+          "This is never thrown because we always use LATEST.", ex); //$NON-NLS-1$
     }
   }
 }
