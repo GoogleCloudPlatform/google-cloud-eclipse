@@ -99,7 +99,8 @@ public class CloudSdkInstallJob extends CloudSdkModifyJob {
     } catch (ManagedSdkVersionMismatchException e) {
       throw new IllegalStateException("This is never thrown because we always use LATEST.", e); //$NON-NLS-1$
     } catch (CloudSdkVersionFileException | CloudSdkNotFoundException ex) {
-      IStatus status = StatusUtil.error(this, ex.getMessage(), ex);
+      logger.log(Level.WARNING, "Cloud SDK not found where expected", ex); // $NON-NLS-1$
+      IStatus status = StatusUtil.create(failureSeverity, this, ex.getMessage(), ex); // $NON-NLS-1$
       return status;
     }
   }
