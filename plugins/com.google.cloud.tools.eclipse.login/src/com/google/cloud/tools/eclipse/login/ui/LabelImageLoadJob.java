@@ -47,7 +47,8 @@ class LabelImageLoadJob extends Job {
   @Override
   protected IStatus run(IProgressMonitor monitor) {
     ImageDescriptor descriptor = ImageDescriptor.createFromURL(imageUrl);
-    imageData = descriptor.getImageData();
+    int zoom = 100; // percent, 1:1
+    imageData = descriptor.getImageData(zoom);
     if (imageData != null) {
       LabelImageLoader.storeInCache(imageUrl.toString(), imageData);
       display.syncExec(new SetImageRunnable());
