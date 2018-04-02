@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.eclipse.login.CredentialHelper;
 import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
@@ -165,13 +164,8 @@ public class DeployJob extends WorkspaceJob {
       optionalConfigurationFilesDirectory = stager.getOptionalConfigurationFilesDirectory();
     }
 
-    try {
-      return deployer.deploy(stagingDirectory, credentialFile, deployPreferences,
-          optionalConfigurationFilesDirectory, stdoutOutputStream, monitor);
-    } catch (CloudSdkNotFoundException ex) {
-      IStatus status = StatusUtil.error(DeployJob.class, ex.getMessage(), ex);
-      return status;
-    }
+    return deployer.deploy(stagingDirectory, credentialFile, deployPreferences,
+        optionalConfigurationFilesDirectory, stdoutOutputStream, monitor);
   }
 
   private IStatus openAppInBrowser() {
