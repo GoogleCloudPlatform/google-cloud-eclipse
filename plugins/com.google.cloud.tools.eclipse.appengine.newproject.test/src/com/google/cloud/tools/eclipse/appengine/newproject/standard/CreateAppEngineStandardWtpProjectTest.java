@@ -84,14 +84,14 @@ public class CreateAppEngineStandardWtpProjectTest extends CreateAppEngineWtpPro
   private void assertAppEngineApiSdkOnClasspath() throws CoreException {
     IJavaProject javaProject = JavaCore.create(project);
     Matcher<IClasspathEntry> masterLibraryEntryMatcher =
-        new CustomTypeSafeMatcher<IClasspathEntry>("has master container") {
+        new CustomTypeSafeMatcher<IClasspathEntry>("master container") {
       @Override
       protected boolean matchesSafely(IClasspathEntry entry) {
         return entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER && entry.getPath().toString()
             .equals("com.google.cloud.tools.eclipse.appengine.libraries/master-container");
       }};
     Matcher<IClasspathEntry> appEngineSdkMatcher =
-        new CustomTypeSafeMatcher<IClasspathEntry>("has appengine-api-1.0-sdk") {
+        new CustomTypeSafeMatcher<IClasspathEntry>("appengine-api-1.0-sdk") {
           @Override
           protected boolean matchesSafely(IClasspathEntry entry) {
             return entry.getEntryKind() == IClasspathEntry.CPE_LIBRARY
