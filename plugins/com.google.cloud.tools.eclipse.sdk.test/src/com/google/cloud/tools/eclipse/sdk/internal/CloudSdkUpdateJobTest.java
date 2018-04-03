@@ -92,21 +92,6 @@ public class CloudSdkUpdateJobTest {
   }
 
   @Test
-  public void testFailureSeverity()
-      throws ManagedSdkVerificationException, ManagedSdkVersionMismatchException,
-          InterruptedException {
-    when(managedCloudSdk.isInstalled()).thenReturn(false);
-
-    CloudSdkUpdateJob job = newCloudSdkUpdateJob();
-    job.schedule();
-    job.join();
-
-    IStatus result = job.getResult();
-    assertEquals(IStatus.ERROR, result.getSeverity());
-    assertEquals("Google Cloud SDK is not installed", result.getMessage());
-  }
-
-  @Test
   public void testRun_sdkInstalled_noUpdateIfUpToDate()
       throws ManagedSdkVerificationException, ManagedSdkVersionMismatchException,
           InterruptedException {
