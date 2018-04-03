@@ -52,7 +52,7 @@ public class CloudSdkUpdateJob extends CloudSdkModifyJob {
    */
   @Override
   protected IStatus modifySdk(IProgressMonitor monitor) {
-    monitor = SubMonitor.convert(monitor, 
+    SubMonitor subMonitor = SubMonitor.convert(monitor, 
         Messages.getString("configuring.cloud.sdk"), 10); //$NON-NLS-1$
     
     try {
@@ -62,12 +62,11 @@ public class CloudSdkUpdateJob extends CloudSdkModifyJob {
         return StatusUtil.create(
             failureSeverity, this, Messages.getString("cloud.sdk.not.installed")); //$NON-NLS-1$
       } else if (!managedSdk.isUpToDate()) {
-        subTask(monitor, Messages.getString("updating.cloud.sdk")); //$NON-NLS-1$
+        subTask(subMonitor, Messages.getString("updating.cloud.sdk")); //$NON-NLS-1$
         String oldVersion = getVersion(managedSdk.getSdkHome());
         SdkUpdater updater = managedSdk.newUpdater();
-        updater.update(
-            new ProgressWrapper(monitor), new MessageConsoleWriterListener(consoleStream));
-        monitor.worked(10);
+        updater.update(new ProgressWrapper(subMonitor.split(10)),
+            new MessageConsoleWriterListener(consoleStream));
         String newVersion = getVersion(managedSdk.getSdkHome());
         logger.info(
             "Managed Google Cloud SDK updated from " //$NON-NLS-1$
