@@ -57,6 +57,6 @@ public class AnalyticsEvents {
   public static final String NATIVE_PROJECT = "native.project";
   public static final String MAVEN_PROJECT = "maven.project";
 
-  public static final String MANAGED_CLOUD_SDK = "managed";
-  public static final String USER_CLOUD_SDK = "user.managed";
+  public static final String AUTOMATIC_CLOUD_SDK = "automatic";
+  public static final String MANUAL_CLOUD_SDK = "manual";
 }

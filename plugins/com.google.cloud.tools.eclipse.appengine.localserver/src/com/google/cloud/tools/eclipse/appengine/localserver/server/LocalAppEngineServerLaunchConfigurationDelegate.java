@@ -522,8 +522,8 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
   private void sendAnalyticsPing(String serverMode) {
     String cloudSdkManagement = CloudSdkPreferences.isAutoManaging()
-        ? AnalyticsEvents.MANAGED_CLOUD_SDK
-        : AnalyticsEvents.USER_CLOUD_SDK;
+        ? AnalyticsEvents.AUTOMATIC_CLOUD_SDK
+        : AnalyticsEvents.MANUAL_CLOUD_SDK;
     AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_LOCAL_SERVER,
         ImmutableMap.of(
             AnalyticsEvents.APP_ENGINE_LOCAL_SERVER_MODE, serverMode,

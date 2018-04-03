@@ -220,8 +220,8 @@ public abstract class DeployCommandHandler extends AbstractHandler {
 
   private void sendAnalyticsPing(String event) {
     String cloudSdkManagement = CloudSdkPreferences.isAutoManaging()
-        ? AnalyticsEvents.MANAGED_CLOUD_SDK
-        : AnalyticsEvents.USER_CLOUD_SDK;
+        ? AnalyticsEvents.AUTOMATIC_CLOUD_SDK
+        : AnalyticsEvents.MANUAL_CLOUD_SDK;
     Map<String, String> metadata = ImmutableMap.of(
         AnalyticsEvents.CLOUD_SDK_MANAGEMENT, cloudSdkManagement,
         // For a historical reason, the key serves as an actual value for std vs. flex.
