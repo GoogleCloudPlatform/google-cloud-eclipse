@@ -28,7 +28,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -62,8 +61,6 @@ public class LocalAppEnginePublishOperationTest {
     projects = ProjectUtils.importProjects(getClass(),
         "projects/test-submodules.zip", true /* checkBuildErrors */, null);
     assertEquals(2, projects.size());
-    Predicate<IProject> isServerProject = project -> "sox-server".equals(project.getName());
-    Predicate<IProject> isSharedProject = project -> "sox-shared".equals(project.getName());
     serverProject = projects.get("sox-server");
     sharedProject = projects.get("sox-shared");
 

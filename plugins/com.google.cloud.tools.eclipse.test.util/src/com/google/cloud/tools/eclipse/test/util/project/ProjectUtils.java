@@ -25,7 +25,6 @@ import com.google.cloud.tools.eclipse.test.util.ZipUtil;
 import com.google.cloud.tools.eclipse.test.util.reflection.ReflectionUtil;
 import com.google.common.base.Joiner;
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.Maps;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -34,6 +33,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -128,7 +128,7 @@ public class ProjectUtils {
 
     // import the projects
     progress.setWorkRemaining(10 * projectFiles.size() + 10);
-    Map<String, IProject> projects = Maps.newLinkedHashMap();
+    Map<String, IProject> projects = new LinkedHashMap<>();
     System.out.printf("Importing %d projects:\n", projectFiles.size());
     for (IPath projectFile : projectFiles) {
       System.out.println("    " + projectFile);
