@@ -49,6 +49,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import org.apache.maven.artifact.Artifact;
@@ -166,19 +167,19 @@ public class LibraryClasspathContainerResolverService
     }
     String jobTitle = Messages.getString("TaskResolveArtifacts", Joiner.on(", ").join(libraryIds));
     FuturisticJob<IClasspathEntry[]> job =
-        new PluggableJob<>(
-            jobTitle,
-            () -> {
-              Set<IClasspathEntry> result = Sets.newLinkedHashSet();
-              for (String libraryId : libraryIds) {
-                IClasspathEntry[] resolved = libraryEntries.get(libraryId);
-                Collections.addAll(result, resolved);
-              }
-              return result.toArray(new IClasspathEntry[0]);
-            });
+        new PluggableJob<>(jobTitle, () -> resolveLibraries(libraryIds));
     job.setRule(MavenUtils.mavenResolvingRule());
     job.schedule();
     return job.getFuture();
+  }
+
+  private IClasspathEntry[] resolveLibraries(String... libraryIds) throws ExecutionException {
+    Set<IClasspathEntry> result = Sets.newLinkedHashSet();
+    for (String libraryId : libraryIds) {
+      IClasspathEntry[] resolved = libraryEntries.get(libraryId);
+      Collections.addAll(result, resolved);
+    }
+    return result.toArray(new IClasspathEntry[0]);
   }
 
   @Override
