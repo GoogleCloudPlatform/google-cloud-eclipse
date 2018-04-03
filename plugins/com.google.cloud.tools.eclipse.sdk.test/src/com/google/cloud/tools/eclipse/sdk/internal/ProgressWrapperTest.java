@@ -24,6 +24,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import com.google.cloud.tools.managedcloudsdk.ProgressListener;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -35,14 +37,22 @@ import org.mockito.runners.MockitoJUnitRunner;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class ProgressWrapperTest {
-  @Mock IProgressMonitor monitor;
-
+  
+  // SubMonitor can't be mocked directly
+  @Mock private IProgressMonitor monitor;
+  private ProgressWrapper wrapper;
+  
+  @Before
+  public void setUp() {
+    SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
+    wrapper = new ProgressWrapper(subMonitor);   
+  }
+  
   @Test
   public void testLifecycle() {
     // SubMonitor may issue calls with slightly different numbers and in different orders.
     ArgumentCaptor<Integer> totalWorkCaptor = ArgumentCaptor.forClass(Integer.class);
 
-    ProgressWrapper wrapper = new ProgressWrapper(monitor);
     wrapper.start("message", 100);
     wrapper.update("update");
     wrapper.update(100);
@@ -52,13 +62,11 @@ public class ProgressWrapperTest {
     verify(monitor).setTaskName("message");
     verify(monitor).subTask("update");
     verify(monitor).worked(totalWorkCaptor.getValue());
-    verify(monitor).done();
     verifyNoMoreInteractions(monitor);
   }
 
   @Test
   public void testNewChild() {
-    ProgressWrapper wrapper = new ProgressWrapper(monitor);
     wrapper.start("testNewChild", 100);
     assertThat(wrapper.newChild(10), instanceOf(ProgressListener.class));
   }

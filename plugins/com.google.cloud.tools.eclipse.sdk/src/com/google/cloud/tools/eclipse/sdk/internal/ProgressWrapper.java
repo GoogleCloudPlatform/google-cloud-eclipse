@@ -25,15 +25,11 @@ import org.eclipse.core.runtime.SubMonitor;
  * be safe as it seems unlikely that {@code appengine-plugins-core} will download anything &gt; 2gb.
  */
 class ProgressWrapper implements ProgressListener {
-  private final IProgressMonitor wrapped;
 
   private final SubMonitor progress;
 
-  ProgressWrapper(IProgressMonitor progressMonitor) {
-    // Store wrapped monitor as SubMonitor#convert() says that caller is responsible for calling
-    // done() on argument
-    progress = SubMonitor.convert(progressMonitor);
-    wrapped = progressMonitor;
+  ProgressWrapper(SubMonitor progress) {
+    this.progress = progress;
   }
 
   @Override
@@ -54,7 +50,6 @@ class ProgressWrapper implements ProgressListener {
   @Override
   public void done() {
     progress.done();
-    wrapped.done(); // SubMonitor#done() does not call done() on wrapped monitor
   }
 
   @Override
