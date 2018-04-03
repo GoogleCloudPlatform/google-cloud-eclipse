@@ -31,6 +31,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.eclipse.aether.RepositorySystem;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -38,6 +39,8 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.embedder.IMavenExecutionContext;
+import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -53,8 +56,9 @@ public class MavenUtils {
    * @param <E> the exception type
    */
   @FunctionalInterface
-  public interface ExceptionalCallableWithProgress<T, E extends Throwable> {
-    T call(SubMonitor monitor) throws E;
+  public interface ExceptionalCallableWithProgress<T> {
+    T call(IMavenExecutionContext context, RepositorySystem system, SubMonitor monitor)
+        throws CoreException;
   }
 
   public static final String MAVEN2_NATURE_ID = "org.eclipse.m2e.core.maven2Nature"; //$NON-NLS-1$
@@ -88,24 +92,24 @@ public class MavenUtils {
       IProgressMonitor monitor)
       throws CoreException {
     return runWithRule(
-        progress -> {
+        monitor,
+        (context, system, progress) -> {
           Artifact artifact =
               MavenPlugin.getMaven()
                   .resolve(groupId, artifactId, version, type, classifier, repositories, progress);
           return artifact;
-        },
-        monitor);
+        });
   }
 
   /**
    * Perform some Maven-related action (that may throw an exception), ensuring that the given {@link
    * ISchedulingRule scheduling rule} is held.
    *
-   * @param rule the rule that must be held
    * @param ruleMonitor a progress monitor to be used when waiting to obtain the rule
+   * @param rule the rule that must be held
    */
   public static <T, E extends Throwable> T runWithRule(
-      ExceptionalCallableWithProgress<T, E> supplier, IProgressMonitor monitor) throws E {
+      IProgressMonitor monitor, ExceptionalCallableWithProgress<T> supplier) throws CoreException {
     SubMonitor progress = SubMonitor.convert(monitor, 10);
     ISchedulingRule rule = mavenResolvingRule();
     boolean acquireRule = Job.getJobManager().currentRule() == null;
@@ -116,7 +120,14 @@ public class MavenUtils {
         Job.getJobManager().currentRule().contains(rule),
         "require holding superset of rule: " + rule);
     try {
-      return supplier.call(progress.split(8));
+      IMavenExecutionContext context = MavenPlugin.getMaven().createExecutionContext();
+      return context.execute(
+          (context2, monitor2) -> {
+            // todo we'd prefer not to depend on m2e here
+            RepositorySystem system = MavenPluginActivator.getDefault().getRepositorySystem();
+            return supplier.call(context2, system, SubMonitor.convert(monitor2));
+          },
+          progress.split(8));
     } finally {
       if (acquireRule) {
         Job.getJobManager().endRule(rule);

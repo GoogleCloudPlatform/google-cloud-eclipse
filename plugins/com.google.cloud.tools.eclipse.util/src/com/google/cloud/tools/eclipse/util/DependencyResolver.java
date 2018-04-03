@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.util;
 
-import com.google.cloud.tools.eclipse.util.MavenUtils.ExceptionalCallableWithProgress;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,10 +38,8 @@ import org.eclipse.aether.util.filter.DependencyFilterUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.m2e.core.MavenPlugin;
-import org.eclipse.m2e.core.embedder.ICallable;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.m2e.core.embedder.IMavenExecutionContext;
-import org.eclipse.m2e.core.internal.MavenPluginActivator;
 
 public class DependencyResolver {
 
@@ -59,56 +56,57 @@ public class DependencyResolver {
   public static Collection<Artifact> getTransitiveDependencies(
       String groupId, String artifactId, String version, IProgressMonitor monitor)
       throws CoreException {
+    return MavenUtils.runWithRule(
+        monitor,
+        (context, system, progress) ->
+            _getTransitiveDependencies(context, system, groupId, artifactId, version, progress));
+  }
 
-    ICallable<List<Artifact>> callable =
-        new ICallable<List<Artifact>>() {
-          @Override
-          public List<Artifact> call(IMavenExecutionContext context, IProgressMonitor monitor)
-              throws CoreException {
-            DependencyFilter filter = DependencyFilterUtils.classpathFilter(JavaScopes.RUNTIME);
-            // todo we'd prefer not to depend on m2e here
-            RepositorySystem system = MavenPluginActivator.getDefault().getRepositorySystem();
+  private static Collection<Artifact> _getTransitiveDependencies(
+      IMavenExecutionContext context,
+      RepositorySystem system,
+      String groupId,
+      String artifactId,
+      String version,
+      IProgressMonitor monitor)
+      throws CoreException {
+    SubMonitor progress = SubMonitor.convert(monitor);
+    DependencyFilter filter = DependencyFilterUtils.classpathFilter(JavaScopes.RUNTIME);
+    // todo we'd prefer not to depend on m2e here
 
-            String coords = groupId + ":" + artifactId + ":" + version;
-            Artifact artifact = new DefaultArtifact(coords);
-            CollectRequest collectRequest = new CollectRequest();
-            collectRequest.setRoot(new Dependency(artifact, JavaScopes.RUNTIME));
-            collectRequest.setRepositories(centralRepository(system));
-            DependencyRequest request = new DependencyRequest(collectRequest, filter);
+    String coords = groupId + ":" + artifactId + ":" + version;
+    Artifact artifact = new DefaultArtifact(coords);
+    CollectRequest collectRequest = new CollectRequest();
+    collectRequest.setRoot(new Dependency(artifact, JavaScopes.RUNTIME));
+    collectRequest.setRepositories(centralRepository(system));
+    DependencyRequest request = new DependencyRequest(collectRequest, filter);
 
-            // ensure checksum errors result in failure
-            DefaultRepositorySystemSession session =
-                new DefaultRepositorySystemSession(context.getRepositorySession());
-            session.setChecksumPolicy(RepositoryPolicy.CHECKSUM_POLICY_FAIL);
+    // ensure checksum errors result in failure
+    DefaultRepositorySystemSession session =
+        new DefaultRepositorySystemSession(context.getRepositorySession());
+    session.setChecksumPolicy(RepositoryPolicy.CHECKSUM_POLICY_FAIL);
 
-            try {
-              ExceptionalCallableWithProgress<List<Artifact>, RepositoryException>
-                  retrieveDependenciesBlock =
-                      progress -> {
-                        List<ArtifactResult> artifacts =
-                            system.resolveDependencies(session, request).getArtifactResults();
-                        progress.setWorkRemaining(artifacts.size());
-                        List<Artifact> dependencies = new ArrayList<>();
-                        for (ArtifactResult result : artifacts) {
-                          Artifact dependency = result.getArtifact();
-                          dependencies.add(dependency);
-                          progress.worked(1);
-                        }
-                        return dependencies;
-                      };
-              return MavenUtils.runWithRule(retrieveDependenciesBlock, monitor);
-            } catch (RepositoryException ex) {
-              throw new CoreException(StatusUtil.error(this, "Could not resolve dependencies", ex));
-            } catch (NullPointerException ex) {
-              throw new CoreException(
-                  StatusUtil.error(
-                      this, "Possible corrupt artifact in local .m2 repository for " + coords, ex));
-            }
-          }
-        };
-
-    IMavenExecutionContext context = MavenPlugin.getMaven().createExecutionContext();
-    return context.execute(callable, monitor);
+    try {
+      List<ArtifactResult> artifacts =
+          system.resolveDependencies(session, request).getArtifactResults();
+      progress.setWorkRemaining(artifacts.size());
+      List<Artifact> dependencies = new ArrayList<>();
+      for (ArtifactResult result : artifacts) {
+        Artifact dependency = result.getArtifact();
+        dependencies.add(dependency);
+        progress.worked(1);
+      }
+      return dependencies;
+    } catch (RepositoryException ex) {
+      throw new CoreException(
+          StatusUtil.error(DependencyResolver.class, "Could not resolve dependencies", ex));
+    } catch (NullPointerException ex) {
+      throw new CoreException(
+          StatusUtil.error(
+              DependencyResolver.class,
+              "Possible corrupt artifact in local .m2 repository for " + coords,
+              ex));
+    }
   }
 
   private static List<RemoteRepository> centralRepository(RepositorySystem system) {
@@ -120,48 +118,42 @@ public class DependencyResolver {
     return repositories;
   }
 
-  public static Collection<Dependency> getManagedDependencies(String groupId, String artifactId,
-      String version, IProgressMonitor monitor) throws CoreException {
+  public static Collection<Dependency> getManagedDependencies(
+      String groupId, String artifactId, String version, IProgressMonitor monitor)
+      throws CoreException {
 
-    ICallable<List<Dependency>> callable =
-        new ICallable<List<Dependency>>() {
-          @Override
-          public List<Dependency> call(IMavenExecutionContext context, IProgressMonitor monitor)
-              throws CoreException {
+    return MavenUtils.runWithRule(
+        monitor,
+        (context, system, progress) ->
+            _getManagedDependencies(context, system, groupId, artifactId, version, progress));
+  }
 
-            // todo we'd prefer not to depend on m2e here
-            RepositorySystem system = MavenPluginActivator.getDefault().getRepositorySystem();
+  private static Collection<Dependency> _getManagedDependencies(
+      IMavenExecutionContext context,
+      RepositorySystem system,
+      String groupId,
+      String artifactId,
+      String version,
+      SubMonitor monitor)
+      throws CoreException {
+    ArtifactDescriptorRequest request = new ArtifactDescriptorRequest();
+    String coords = groupId + ":" + artifactId + ":" + version;
+    Artifact artifact = new DefaultArtifact(coords);
+    request.setArtifact(artifact);
+    request.setRepositories(centralRepository(system));
 
-            ArtifactDescriptorRequest request = new ArtifactDescriptorRequest();
-            String coords = groupId + ":" + artifactId + ":" + version;
-            Artifact artifact = new DefaultArtifact(coords);
-            request.setArtifact(artifact);
-            request.setRepositories(centralRepository(system));
+    // ensure checksum errors result in failure
+    DefaultRepositorySystemSession session =
+        new DefaultRepositorySystemSession(context.getRepositorySession());
+    session.setChecksumPolicy(RepositoryPolicy.CHECKSUM_POLICY_FAIL);
 
-            // ensure checksum errors result in failure
-            DefaultRepositorySystemSession session =
-                new DefaultRepositorySystemSession(context.getRepositorySession());
-            session.setChecksumPolicy(RepositoryPolicy.CHECKSUM_POLICY_FAIL);
-
-            try {
-              ExceptionalCallableWithProgress<List<Dependency>, RepositoryException>
-                  retrieveDependenciesBlock =
-                      progress -> {
-                        List<Dependency> managedDependencies =
-                            system
-                                .readArtifactDescriptor(session, request)
-                                .getManagedDependencies();
-                        return managedDependencies;
-                      };
-              return MavenUtils.runWithRule(retrieveDependenciesBlock, monitor);
-            } catch (RepositoryException ex) {
-              IStatus status = StatusUtil.error(DependencyResolver.class, ex.getMessage(), ex);
-              throw new CoreException(status);
-            }
-          }
-        };
-    // todo we'd prefer not to depend on m2e here
-    IMavenExecutionContext context = MavenPlugin.getMaven().createExecutionContext();
-    return context.execute(callable, monitor);
+    try {
+      List<Dependency> managedDependencies =
+          system.readArtifactDescriptor(session, request).getManagedDependencies();
+      return managedDependencies;
+    } catch (RepositoryException ex) {
+      IStatus status = StatusUtil.error(DependencyResolver.class, ex.getMessage(), ex);
+      throw new CoreException(status);
+    }
   }
 }
