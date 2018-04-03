@@ -24,12 +24,12 @@ import org.eclipse.core.runtime.SubMonitor;
  * Wraps an {@link IProgressMonitor}. Assume that {@code totalWork} fits within an int which should
  * be safe as it seems unlikely that {@code appengine-plugins-core} will download anything &gt; 2gb.
  */
-public class ProgressWrapper implements ProgressListener {
+class ProgressWrapper implements ProgressListener {
   private final IProgressMonitor wrapped;
 
   private final SubMonitor progress;
 
-  public ProgressWrapper(IProgressMonitor progressMonitor) {
+  ProgressWrapper(IProgressMonitor progressMonitor) {
     // Store wrapped monitor as SubMonitor#convert() says that caller is responsible for calling
     // done() on argument
     progress = SubMonitor.convert(progressMonitor);

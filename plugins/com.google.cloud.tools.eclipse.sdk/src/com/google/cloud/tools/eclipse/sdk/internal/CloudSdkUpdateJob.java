@@ -52,9 +52,9 @@ public class CloudSdkUpdateJob extends CloudSdkModifyJob {
    */
   @Override
   protected IStatus modifySdk(IProgressMonitor monitor) {
-    monitor = SubMonitor.convert(monitor, 30);
+    monitor = SubMonitor.convert(monitor, 
+        Messages.getString("configuring.cloud.sdk"), 10); //$NON-NLS-1$
     
-    monitor.beginTask(Messages.getString("configuring.cloud.sdk"), 10); //$NON-NLS-1$
     try {
       ManagedCloudSdk managedSdk = getManagedCloudSdk();
       if (!managedSdk.isInstalled()) {
