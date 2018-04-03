@@ -34,6 +34,7 @@ import java.util.logging.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.ui.console.MessageConsoleStream;
 
 /** Updates the Managed Google Cloud SDK, if installed. */
@@ -51,7 +52,7 @@ public class CloudSdkUpdateJob extends CloudSdkModifyJob {
    */
   @Override
   protected IStatus modifySdk(IProgressMonitor monitor) {
-    // todo should we convert to a submonitor here?
+    monitor = SubMonitor.convert(monitor, 30);
     
     monitor.beginTask(Messages.getString("configuring.cloud.sdk"), 10); //$NON-NLS-1$
     try {
