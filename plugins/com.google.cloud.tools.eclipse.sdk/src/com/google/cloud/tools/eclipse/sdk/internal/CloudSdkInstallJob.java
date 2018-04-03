@@ -49,6 +49,11 @@ public class CloudSdkInstallJob extends CloudSdkModifyJob {
     super(consoleStream, cloudSdkLock);
   }
 
+  public CloudSdkInstallJob(MessageConsoleStream consoleStream, ReadWriteLock cloudSdkLock,
+      int failureSeverity) {
+    super(consoleStream, cloudSdkLock, failureSeverity);
+  }  
+  
   /**
    * Perform the installation and configuration of the managed Cloud SDK. Any errors are returned as
    * {@link IStatus#WARNING} to avoid the Eclipse UI ProgressManager reporting the error with no
@@ -91,16 +96,18 @@ public class CloudSdkInstallJob extends CloudSdkModifyJob {
         CommandExecutionException | CommandExitException e) {
       logger.log(Level.WARNING, "Could not install Cloud SDK", e);
       String message = Messages.getString("installing.cloud.sdk.failed");
-      return StatusUtil.create(failureSeverity, this, message, e); // $NON-NLS-1$
+      return StatusUtil.create(getFailureSeverity(), this, message, e); // $NON-NLS-1$
     } catch (UnsupportedOsException e) {
       logger.log(Level.WARNING, "Could not install Cloud SDK", e);
       String message = Messages.getString("unsupported.os.installation");
-      return StatusUtil.create(failureSeverity, this, message, e); // $NON-NLS-1$
-    } catch (ManagedSdkVersionMismatchException e) {
-      throw new IllegalStateException("This is never thrown because we always use LATEST.", e); //$NON-NLS-1$
+      return StatusUtil.create(getFailureSeverity(), this, message, e); // $NON-NLS-1$
+    } catch (ManagedSdkVersionMismatchException ex) {
+      throw new IllegalStateException(
+          "This is never thrown because we always use LATEST.", ex); //$NON-NLS-1$
     } catch (CloudSdkVersionFileException | CloudSdkNotFoundException ex) {
       logger.log(Level.WARNING, "Cloud SDK not found where expected", ex); // $NON-NLS-1$
-      IStatus status = StatusUtil.create(failureSeverity, this, ex.getMessage(), ex); // $NON-NLS-1$
+      IStatus status = StatusUtil.create(
+          getFailureSeverity(), this, ex.getMessage(), ex); // $NON-NLS-1$
       return status;
     }
   }

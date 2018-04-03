@@ -98,12 +98,11 @@ public class CloudSdkUpdateJobTest {
     when(managedCloudSdk.isInstalled()).thenReturn(false);
 
     CloudSdkUpdateJob job = newCloudSdkUpdateJob();
-    job.setFailureSeverity(IStatus.WARNING);
     job.schedule();
     job.join();
 
     IStatus result = job.getResult();
-    assertEquals(IStatus.WARNING, result.getSeverity());
+    assertEquals(IStatus.ERROR, result.getSeverity());
     assertEquals("Google Cloud SDK is not installed", result.getMessage());
   }
 

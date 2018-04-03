@@ -130,7 +130,6 @@ public class CloudSdkInstallJobTest {
         .thenThrow(installerException);
 
     CloudSdkInstallJob job = newCloudSdkInstallJob();
-    job.setFailureSeverity(IStatus.WARNING);
     job.schedule();
     job.join();
 
@@ -184,7 +183,7 @@ public class CloudSdkInstallJobTest {
   }
 
   private CloudSdkInstallJob newCloudSdkInstallJob() {
-    return new CloudSdkInstallJob(consoleStream, new ReentrantReadWriteLock()) {
+    return new CloudSdkInstallJob(consoleStream, new ReentrantReadWriteLock(), IStatus.WARNING) {
       @Override
       protected ManagedCloudSdk getManagedCloudSdk() throws UnsupportedOsException {
         return managedCloudSdk;

@@ -134,10 +134,10 @@ public class CloudSdkManager {
       if (CloudSdkPreferences.isAutoManaging()) {
         // We don't check if the Cloud SDK installed but always schedule the install job; such check
         // may pass while the SDK is being installed and in an incomplete state.
-        CloudSdkInstallJob installJob = new CloudSdkInstallJob(consoleStream, modifyLock);
         // Mark installation failure as non-ERROR to avoid job failure reporting dialogs from the
         // overly helpful Eclipse UI ProgressManager
-        installJob.setFailureSeverity(IStatus.WARNING);
+        CloudSdkInstallJob installJob = new CloudSdkInstallJob(
+            consoleStream, modifyLock, IStatus.WARNING);
 
         IStatus result = runInstallJob(consoleStream, installJob, monitor);
         if (!result.isOK()) {

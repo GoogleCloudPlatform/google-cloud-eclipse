@@ -58,8 +58,8 @@ public class CloudSdkUpdateJob extends CloudSdkModifyJob {
       ManagedCloudSdk managedSdk = getManagedCloudSdk();
       if (!managedSdk.isInstalled()) {
         logger.info("Google Cloud SDK is not installed"); //$NON-NLS-1$
-        return StatusUtil.create(
-            failureSeverity, this, Messages.getString("cloud.sdk.not.installed")); //$NON-NLS-1$
+        return StatusUtil.create(getFailureSeverity(), 
+            this, Messages.getString("cloud.sdk.not.installed")); //$NON-NLS-1$
       } else if (!managedSdk.isUpToDate()) {
         subTask(monitor, Messages.getString("updating.cloud.sdk")); //$NON-NLS-1$
         String oldVersion = getVersion(managedSdk.getSdkHome());
@@ -84,15 +84,15 @@ public class CloudSdkUpdateJob extends CloudSdkModifyJob {
     } catch (ManagedSdkVerificationException | CommandExecutionException | CommandExitException ex) {
       logger.log(Level.WARNING, "Could not update Cloud SDK", ex); //$NON-NLS-1$
       String message = Messages.getString("installing.cloud.sdk.failed"); //$NON-NLS-1$
-      return StatusUtil.create(failureSeverity, this, message, ex);
+      return StatusUtil.create(getFailureSeverity(), this, message, ex);
     } catch (UnsupportedOsException ex) {
       logger.log(Level.WARNING, "Could not update Cloud SDK", ex); // $NON-NLS-1$
       String message = Messages.getString("unsupported.os.installation"); //$NON-NLS-1$
-      return StatusUtil.create(failureSeverity, this, message, ex);
+      return StatusUtil.create(getFailureSeverity(), this, message, ex);
     } catch (CloudSdkVersionFileException | CloudSdkNotFoundException ex) {
       logger.log(Level.WARNING, "Cloud SDK not found where expected", ex); // $NON-NLS-1$
       String message = Messages.getString("corrupt.cloud.sdk"); //$NON-NLS-1$
-      return StatusUtil.create(failureSeverity, this, message, ex);
+      return StatusUtil.create(getFailureSeverity(), this, message, ex);
     } catch (ManagedSdkVersionMismatchException ex) {
       throw new IllegalStateException(
           "This is never thrown because we always use LATEST.", ex); //$NON-NLS-1$

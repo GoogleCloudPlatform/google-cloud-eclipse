@@ -53,13 +53,18 @@ public abstract class CloudSdkModifyJob extends Job {
   protected final MessageConsoleStream consoleStream;
   private final ReadWriteLock cloudSdkLock;
 
-  /** The severity reported on installation failure. */
-  protected int failureSeverity = IStatus.ERROR;
+  /** The severity reported on modification failure. */
+  private final int failureSeverity;
 
   public CloudSdkModifyJob(MessageConsoleStream consoleStream, ReadWriteLock cloudSdkLock) {
+    this(consoleStream, cloudSdkLock, IStatus.ERROR);
+  }
+  
+  public CloudSdkModifyJob(MessageConsoleStream consoleStream, ReadWriteLock cloudSdkLock, int failureSeverity) {
     super(Messages.getString("configuring.cloud.sdk")); // $NON-NLS-1$
     this.consoleStream = consoleStream != null ? consoleStream : createNewMessageConsole();
     this.cloudSdkLock = cloudSdkLock;
+    this.failureSeverity = failureSeverity;
     setRule(MUTEX_RULE);
   }
 
@@ -149,14 +154,14 @@ public abstract class CloudSdkModifyJob extends Job {
     }
   }
 
-  /**
-   * Set the {@link IStatus#getSeverity() severity} of modification failure. This is useful for
+  /** 
+   * Returns the severity reported on modification failure.  This is useful for
    * situations where the Cloud SDK modification is a step of some other work, and the modification
    * failure should be surfaced to the user in the context of that work. If reported as {@link
    * IStatus#ERROR} then the Eclipse UI ProgressManager will report the modification failure
    * directly.
    */
-  public void setFailureSeverity(int severity) {
-    failureSeverity = severity;
+  protected int getFailureSeverity() {
+    return failureSeverity;
   }
 }
