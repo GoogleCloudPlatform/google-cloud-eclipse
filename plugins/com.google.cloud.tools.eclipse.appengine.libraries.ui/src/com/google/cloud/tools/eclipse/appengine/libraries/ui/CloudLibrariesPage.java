@@ -40,6 +40,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
@@ -81,6 +82,7 @@ public class CloudLibrariesPage extends WizardPage
 
   private IClasspathEntry originalEntry;
   private IClasspathEntry newEntry;
+  private IClasspathEntry[] existingEntries;
 
   public CloudLibrariesPage() {
     super("cloudPlatformLibrariesPage"); //$NON-NLS-1$
@@ -93,6 +95,13 @@ public class CloudLibrariesPage extends WizardPage
   public void initialize(IJavaProject javaProject, IClasspathEntry[] currentEntries) {
     this.project = javaProject;
     isMavenProject = MavenUtils.hasMavenNature(javaProject.getProject());
+    existingEntries = currentEntries != null ? currentEntries : new IClasspathEntry[0];
+    // we don't support multiple containers, so we edit the existing container entry (if present)
+    originalEntry =
+        Stream.of(existingEntries)
+            .filter(LibraryClasspathContainer::isEntry)
+            .findAny()
+            .orElse(null);
 
     Map<String, String> groups = Maps.newLinkedHashMap();
     if (AppEngineStandardFacet.getProjectFacetVersion(javaProject.getProject()) != null) {
@@ -159,13 +168,17 @@ public class CloudLibrariesPage extends WizardPage
         BuildPath.saveLibraryList(project, libraries, new NullProgressMonitor());
         Library masterLibrary =
             BuildPath.collectLibraryFiles(project, libraries, new NullProgressMonitor());
-        newEntry = BuildPath.computeEntry(project, masterLibrary, new NullProgressMonitor());
-        if (newEntry == null) {
-          // existing entry needs to be updated
+        // skip computeEntry() if we have an existing entry: unnecessary and simplifies testing too
+        if (originalEntry == null) {
+          newEntry = BuildPath.computeEntry(project, masterLibrary, new NullProgressMonitor());
+          Verify.verifyNotNull(newEntry); // new entry should be created
+        } else {
+          // request update of existing entry
           ClasspathContainerInitializer initializer =
               JavaCore.getClasspathContainerInitializer(
                   LibraryClasspathContainer.CONTAINER_PATH_PREFIX);
           if (initializer.canUpdateClasspathContainer(originalEntry.getPath(), project)) {
+            // existing entry needs to be updated
             initializer.requestClasspathContainerUpdate(
                 originalEntry.getPath(), project, null /*containerSuggestion*/);
           }
@@ -201,13 +214,12 @@ public class CloudLibrariesPage extends WizardPage
   }
 
   @Override
-  public void setSelection(IClasspathEntry containerEntry) {
-    Verify.verify(
-        containerEntry == null
-            || LibraryClasspathContainer.CONTAINER_PATH_PREFIX.equals(
-                containerEntry.getPath().segment(0)));
-    this.originalEntry = containerEntry;
-    
+  public void setSelection(IClasspathEntry entry) {
+    // entry == null if user is creating a new container.
+    Preconditions.checkArgument(entry == null || LibraryClasspathContainer.isEntry(entry));
+    // we should have found the existing entry already in initialize()
+    Preconditions.checkState(entry == null || entry == originalEntry);
+
     try {
       Collection<Library> savedLibraries;
       if (isMavenProject) {
@@ -237,6 +249,7 @@ public class CloudLibrariesPage extends WizardPage
 
   @Override
   public IClasspathEntry getSelection() {
-    return newEntry != null ? newEntry : originalEntry;
+    // newEntry is null if no container was created, namely because there was an existing container
+    return newEntry;
   }
 }

@@ -17,10 +17,14 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.ui;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
@@ -30,6 +34,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
@@ -42,6 +49,10 @@ import org.junit.Rule;
 import org.junit.Test;
 
 public class CloudLibrariesPageTest {
+  private static final IPath MASTER_CONTAINER_PATH =
+      new Path(LibraryClasspathContainer.CONTAINER_PATH_PREFIX)
+          .append(CloudLibraries.MASTER_CONTAINER_ID);
+
   private final CloudLibrariesPage page = new CloudLibrariesPage();
 
   @Rule
@@ -157,6 +168,25 @@ public class CloudLibrariesPageTest {
     returnedLibraries = page.getSelectedLibraries();
     Assert.assertEquals(1, returnedLibraries.size());
     assertThat(returnedLibraries, Matchers.hasItem(new LibraryMatcher("googlecloudstorage")));
+  }
+
+  @Test
+  public void testPreventMultipleContainers() {
+    IClasspathEntry existingEntry = mock(IClasspathEntry.class);
+    when(existingEntry.getEntryKind()).thenReturn(IClasspathEntry.CPE_CONTAINER);
+    when(existingEntry.getPath()).thenReturn(MASTER_CONTAINER_PATH);
+    assertTrue(LibraryClasspathContainer.isEntry(existingEntry));
+
+    // explicitly configure App Engine and GCP libraries
+    IJavaProject javaProject = plainJavaProjectCreator.getJavaProject();
+    LinkedHashMap<String, String> groups = Maps.newLinkedHashMap();
+
+    page.initialize(javaProject, new IClasspathEntry[] {existingEntry});
+    page.setSelection(null);
+    page.createControl(shellTestResource.getShell());
+
+    assertTrue(page.finish()); // should be ok
+    assertNull(page.getSelection()); // no new container created
   }
 
   private static class LibraryMatcher extends BaseMatcher<Library> {
