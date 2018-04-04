@@ -177,6 +177,7 @@ public class CloudLibrariesPage extends WizardPage
           ClasspathContainerInitializer initializer =
               JavaCore.getClasspathContainerInitializer(
                   LibraryClasspathContainer.CONTAINER_PATH_PREFIX);
+          // this is always true for our initializer
           if (initializer.canUpdateClasspathContainer(originalEntry.getPath(), project)) {
             // existing entry needs to be updated
             initializer.requestClasspathContainerUpdate(

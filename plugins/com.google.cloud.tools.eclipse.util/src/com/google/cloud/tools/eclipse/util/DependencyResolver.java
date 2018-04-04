@@ -56,7 +56,7 @@ public class DependencyResolver {
   public static Collection<Artifact> getTransitiveDependencies(
       String groupId, String artifactId, String version, IProgressMonitor monitor)
       throws CoreException {
-    return MavenUtils.runWithRule(
+    return MavenUtils.runOperation(
         monitor,
         (context, system, progress) ->
             _getTransitiveDependencies(context, system, groupId, artifactId, version, progress));
@@ -122,7 +122,7 @@ public class DependencyResolver {
       String groupId, String artifactId, String version, IProgressMonitor monitor)
       throws CoreException {
 
-    return MavenUtils.runWithRule(
+    return MavenUtils.runOperation(
         monitor,
         (context, system, progress) ->
             _getManagedDependencies(context, system, groupId, artifactId, version, progress));

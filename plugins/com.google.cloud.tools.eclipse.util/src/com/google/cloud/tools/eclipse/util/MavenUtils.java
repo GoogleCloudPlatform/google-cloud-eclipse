@@ -50,13 +50,12 @@ import org.xml.sax.SAXException;
 public class MavenUtils {
 
   /**
-   * An extension to {@link java.util.concurrent.Callable} that may throw an exception.
+   * An operation that may modify the local Maven repository.
    *
-   * @param <T> the return type
-   * @param <E> the exception type
+   * @param <T> the return type of the operation
    */
   @FunctionalInterface
-  public interface ExceptionalCallableWithProgress<T> {
+  interface MavenRepositoryOperation<T> {
     T call(IMavenExecutionContext context, RepositorySystem system, SubMonitor monitor)
         throws CoreException;
   }
@@ -91,7 +90,7 @@ public class MavenUtils {
       List<ArtifactRepository> repositories,
       IProgressMonitor monitor)
       throws CoreException {
-    return runWithRule(
+    return runOperation(
         monitor,
         (context, system, progress) -> {
           Artifact artifact =
@@ -102,24 +101,24 @@ public class MavenUtils {
   }
 
   /**
-   * Perform some Maven-related action (that may throw an exception), ensuring that the given {@link
-   * ISchedulingRule scheduling rule} is held.
+   * Perform some Maven-related action that may result in a change to the local Maven repositories,
+   * ensuring that required {@link ISchedulingRule scheduling rules} are held.
    *
    * @param ruleMonitor a progress monitor to be used when waiting to obtain the rule
    * @param rule the rule that must be held
    */
-  public static <T, E extends Throwable> T runWithRule(
-      IProgressMonitor monitor, ExceptionalCallableWithProgress<T> supplier) throws CoreException {
+  public static <T, E extends Throwable> T runOperation(
+      IProgressMonitor monitor, MavenRepositoryOperation<T> supplier) throws CoreException {
     SubMonitor progress = SubMonitor.convert(monitor, 10);
     ISchedulingRule rule = mavenResolvingRule();
     boolean acquireRule = Job.getJobManager().currentRule() == null;
     if (acquireRule) {
       Job.getJobManager().beginRule(rule, progress.split(2));
     }
-    Verify.verify(
-        Job.getJobManager().currentRule().contains(rule),
-        "require holding superset of rule: " + rule);
     try {
+      Verify.verify(
+          Job.getJobManager().currentRule().contains(rule),
+          "require holding superset of rule: " + rule);
       IMavenExecutionContext context = MavenPlugin.getMaven().createExecutionContext();
       return context.execute(
           (context2, monitor2) -> {

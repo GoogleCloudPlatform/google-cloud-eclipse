@@ -70,9 +70,9 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
     } catch (CoreException ex) {
       logger.log(Level.WARNING, "Unable to obtain jst.web facet version", ex);
     }
-    String[] apiLibraryIds = getApiLibraryIds(webFacetVersion);
 
     try {
+      String[] apiLibraryIds = getApiLibraryIds(webFacetVersion);
       ListenableFuture<IClasspathEntry[]> apiEntries =
           resolverService.resolveLibraryAttachSources(apiLibraryIds);
       // may return immediately if cached or locally available

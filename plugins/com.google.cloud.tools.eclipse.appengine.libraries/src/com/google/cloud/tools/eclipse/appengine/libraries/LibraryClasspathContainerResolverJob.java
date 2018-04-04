@@ -41,6 +41,7 @@ public class LibraryClasspathContainerResolverJob extends Job {
 
   @Override
   protected IStatus run(IProgressMonitor monitor) {
+    // This job must be protected; our lower-level Maven classes actions do more verification
     Preconditions.checkState(getRule() != null);
 
     // may have been deleted before this job runs
