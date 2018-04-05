@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -57,8 +58,12 @@ public class SourceAttacherJob extends Job {
   private final Callable<IPath> sourceArtifactPathProvider;
   private final LibraryClasspathContainerSerializer serializer;
 
-  public SourceAttacherJob(IJavaProject javaProject, IPath containerPath, IPath libraryPath,
-                    Callable<IPath> sourceArtifactPathProvider) {
+  public SourceAttacherJob(
+      ISchedulingRule rule,
+      IJavaProject javaProject,
+      IPath containerPath,
+      IPath libraryPath,
+      Callable<IPath> sourceArtifactPathProvider) {
     super(Messages.getString("SourceAttachmentDownloaderJobName",
                              javaProject.getProject().getName()));
     this.javaProject = javaProject;
@@ -66,6 +71,7 @@ public class SourceAttacherJob extends Job {
     this.libraryPath = libraryPath;
     this.sourceArtifactPathProvider = sourceArtifactPathProvider;
     serializer = new LibraryClasspathContainerSerializer();
+    setRule(rule);
   }
 
   @Override

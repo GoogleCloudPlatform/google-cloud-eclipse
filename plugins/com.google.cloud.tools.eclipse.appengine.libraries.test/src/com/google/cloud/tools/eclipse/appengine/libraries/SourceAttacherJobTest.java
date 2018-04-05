@@ -45,7 +45,7 @@ public class SourceAttacherJobTest {
     IPath path = mock(IPath.class);
     IJavaProject javaProject = mock(IJavaProject.class);
     when(javaProject.getProject()).thenReturn(mock(IProject.class));
-    attacherJob = new SourceAttacherJob(javaProject, path, path, mock(Callable.class));
+    attacherJob = new SourceAttacherJob(null, javaProject, path, path, mock(Callable.class));
   }
 
   @SuppressWarnings("unchecked")

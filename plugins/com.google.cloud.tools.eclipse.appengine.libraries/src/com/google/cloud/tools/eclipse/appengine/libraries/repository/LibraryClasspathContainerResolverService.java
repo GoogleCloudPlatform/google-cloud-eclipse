@@ -321,11 +321,11 @@ public class LibraryClasspathContainerResolverService
       final Artifact artifact,
       IPath libraryPath) {
 
+    ISchedulingRule rule = BuildPath.resolvingRule(javaProject);
     Callable<IPath> resolver =
         () -> repositoryService.resolveSourceArtifact(libraryFile, artifact.getVersion(), monitor);
     SourceAttacherJob job =
-        new SourceAttacherJob(javaProject, containerPath, libraryPath, resolver);
-    job.setRule(BuildPath.resolvingRule(javaProject));
+        new SourceAttacherJob(rule, javaProject, containerPath, libraryPath, resolver);
     return job;
   }
 
