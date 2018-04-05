@@ -26,10 +26,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.InetSocketAddress;
+import java.net.NoRouteToHostException;
 import java.net.Proxy;
 import java.net.Proxy.Type;
 import java.net.URI;
 import java.net.URLConnection;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -138,8 +140,13 @@ public class PollingStatusServiceImpl implements GcpStatusMonitoringService {
               new GcpStatus(highestSeverity, Joiner.on(", ").join(affectedServices), activeIncidents); //$NON-NLS-1$
         }
       }
+    } catch (UnknownHostException | NoRouteToHostException ex) {
+      logger.log(Level.WARNING, "Cannot connect to GCP", ex); //$NON-NLS1$
+      currentStatus =
+          new GcpStatus(
+              Severity.ERROR, Messages.getString("cannot.connect.to.gcp"), null); //$NON-NLS1$
     } catch (IOException ex) {
-      logger.log(Level.WARNING, "Unable to retrieve GCP status", ex); //$NON-NLS1$
+      logger.log(Level.WARNING, "Failure to retrieve GCP status", ex); //$NON-NLS1$
       currentStatus =
           new GcpStatus(
               Severity.ERROR, Messages.getString("failure.retrieving.status"), null); //$NON-NLS1$
