@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
 
@@ -32,18 +33,20 @@ public class LibraryClasspathContainerResolverJob extends Job {
   private IJavaProject javaProject;
 
   public LibraryClasspathContainerResolverJob(
-      ILibraryClasspathContainerResolverService service, IJavaProject javaProject) {
+      ISchedulingRule rule,
+      ILibraryClasspathContainerResolverService service,
+      IJavaProject javaProject) {
     super(Messages.getString("AppEngineLibraryContainerResolverJobName"));
+    // This job must be protected; our lower-level Maven classes actions do more verification
+    Preconditions.checkNotNull(rule, "rule must be prvided");
     Preconditions.checkNotNull(javaProject, "javaProject is null");
     this.resolverService = service;
     this.javaProject = javaProject;
+    setRule(rule);
   }
 
   @Override
   protected IStatus run(IProgressMonitor monitor) {
-    // This job must be protected; our lower-level Maven classes actions do more verification
-    Preconditions.checkState(getRule() != null);
-
     // may have been deleted before this job runs
     if (!javaProject.exists()) {
       logger.warning("Project no longer exists: " + javaProject.getElementName());

@@ -111,9 +111,9 @@ public class LibraryClasspathContainerInitializer extends ClasspathContainerInit
       throws CoreException {
 
     LibraryClasspathContainerResolverJob job =
-        new LibraryClasspathContainerResolverJob(resolverService, project);
+        new LibraryClasspathContainerResolverJob(
+            BuildPath.resolvingRule(project), resolverService, project);
     job.setUser(true);
-    job.setRule(BuildPath.resolvingRule(project));
     job.schedule();
   }
 
