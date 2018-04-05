@@ -56,7 +56,7 @@ public class MavenUtils {
    */
   @FunctionalInterface
   interface MavenRepositoryOperation<T> {
-    T call(IMavenExecutionContext context, RepositorySystem system, SubMonitor monitor)
+    T run(IMavenExecutionContext context, RepositorySystem system, SubMonitor monitor)
         throws CoreException;
   }
 
@@ -68,8 +68,8 @@ public class MavenUtils {
   private static final String POM_XML_NAMESPACE_URI = "http://maven.apache.org/POM/4.0.0"; //$NON-NLS-1$
 
   /**
-   * Returns {@code true} if the given project has the Maven 2 nature. This
-   * checks for the Maven nature used by m2Eclipse 1.0.0.
+   * Returns {@code true} if the given project has the Maven 2 nature. This checks for the Maven
+   * nature used by M2Eclipse 1.X.
    */
   public static boolean hasMavenNature(IProject project) {
     try {
@@ -103,12 +103,9 @@ public class MavenUtils {
   /**
    * Perform some Maven-related action that may result in a change to the local Maven repositories,
    * ensuring that required {@link ISchedulingRule scheduling rules} are held.
-   *
-   * @param ruleMonitor a progress monitor to be used when waiting to obtain the rule
-   * @param rule the rule that must be held
    */
-  public static <T, E extends Throwable> T runOperation(
-      IProgressMonitor monitor, MavenRepositoryOperation<T> supplier) throws CoreException {
+  public static <T> T runOperation(IProgressMonitor monitor, MavenRepositoryOperation<T> operation)
+      throws CoreException {
     SubMonitor progress = SubMonitor.convert(monitor, 10);
     ISchedulingRule rule = mavenResolvingRule();
     boolean acquireRule = Job.getJobManager().currentRule() == null;
@@ -124,7 +121,7 @@ public class MavenUtils {
           (context2, monitor2) -> {
             // todo we'd prefer not to depend on m2e here
             RepositorySystem system = MavenPluginActivator.getDefault().getRepositorySystem();
-            return supplier.call(context2, system, SubMonitor.convert(monitor2));
+            return operation.run(context2, system, SubMonitor.convert(monitor2));
           },
           progress.split(8));
     } finally {
