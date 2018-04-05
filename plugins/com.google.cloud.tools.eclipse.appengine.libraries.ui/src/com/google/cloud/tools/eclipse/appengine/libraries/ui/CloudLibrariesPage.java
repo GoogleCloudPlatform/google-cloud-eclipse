@@ -82,7 +82,6 @@ public class CloudLibrariesPage extends WizardPage
 
   private IClasspathEntry originalEntry;
   private IClasspathEntry newEntry;
-  private IClasspathEntry[] existingEntries;
 
   public CloudLibrariesPage() {
     super("cloudPlatformLibrariesPage"); //$NON-NLS-1$
@@ -95,13 +94,12 @@ public class CloudLibrariesPage extends WizardPage
   public void initialize(IJavaProject javaProject, IClasspathEntry[] currentEntries) {
     this.project = javaProject;
     isMavenProject = MavenUtils.hasMavenNature(javaProject.getProject());
-    existingEntries = currentEntries != null ? currentEntries : new IClasspathEntry[0];
-    // we don't support multiple containers, so we edit the existing container entry (if present)
-    originalEntry =
-        Stream.of(existingEntries)
-            .filter(LibraryClasspathContainer::isEntry)
-            .findAny()
-            .orElse(null);
+
+    // As we don't support multiple containers, we pretend to edit the existing container if
+    // present and cause getSelection() to return null
+    Stream<IClasspathEntry> entries =
+        currentEntries != null ? Stream.of(currentEntries) : Stream.empty();
+    originalEntry = entries.filter(LibraryClasspathContainer::isEntry).findAny().orElse(null);
 
     Map<String, String> groups = new LinkedHashMap<>();
     if (AppEngineStandardFacet.getProjectFacetVersion(javaProject.getProject()) != null) {

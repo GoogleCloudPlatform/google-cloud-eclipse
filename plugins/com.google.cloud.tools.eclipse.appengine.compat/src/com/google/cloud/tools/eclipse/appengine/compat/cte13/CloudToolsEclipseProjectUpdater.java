@@ -57,7 +57,7 @@ public class CloudToolsEclipseProjectUpdater {
       IJavaProject javaProject = JavaCore.create(project);
       for (IClasspathEntry entry : javaProject.getRawClasspath()) {
         IPath containerPath = entry.getPath();
-        if (isLibraryContainer(entry, containerPath)
+        if (LibraryClasspathContainer.isEntry(entry)
             && !CloudLibraries.MASTER_CONTAINER_ID.equals(containerPath.segment(1))) {
           return true;
         }
@@ -81,7 +81,7 @@ public class CloudToolsEclipseProjectUpdater {
       Set<String> libraryIds = new HashSet<>();
       for (IClasspathEntry entry : javaProject.getRawClasspath()) {
         IPath containerPath = entry.getPath();
-        if (isLibraryContainer(entry, containerPath)
+        if (LibraryClasspathContainer.isEntry(entry)
             && !CloudLibraries.MASTER_CONTAINER_ID.equals(containerPath.segment(1))) {
           libraryIds.add(containerPath.segment(1));
         } else {
@@ -131,13 +131,4 @@ public class CloudToolsEclipseProjectUpdater {
           Messages.getString("unable.to.update.project", project.getName()), ex); //$NON-NLS-1$
     }
   }
-
-  private static boolean isLibraryContainer(IClasspathEntry entry, IPath containerPath) {
-    return entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER
-        && containerPath.segmentCount() == 2
-        && LibraryClasspathContainer.CONTAINER_PATH_PREFIX
-            .equals(containerPath.segment(0));
-  }
-
-
 }

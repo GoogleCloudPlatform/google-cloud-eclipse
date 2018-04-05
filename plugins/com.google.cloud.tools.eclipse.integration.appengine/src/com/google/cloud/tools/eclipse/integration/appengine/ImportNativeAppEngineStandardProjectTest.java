@@ -16,13 +16,17 @@
 
 package com.google.cloud.tools.eclipse.integration.appengine;
 
+import static org.hamcrest.Matchers.arrayWithSize;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.compat.cte13.CloudToolsEclipseProjectUpdater;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.ZipUtil;
 import com.google.cloud.tools.eclipse.test.util.project.JavaRuntimeUtils;
@@ -33,6 +37,11 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.jdt.core.IClasspathContainer;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
@@ -112,12 +121,18 @@ public class ImportNativeAppEngineStandardProjectTest extends BaseProjectTest {
         facetedProject.getProjectFacetVersion(WebFacetUtils.WEB_FACET));
   }
 
-  private void updateOldContainers() {
+  private void updateOldContainers() throws JavaModelException {
     assertTrue(CloudToolsEclipseProjectUpdater.hasOldContainers(project));
     IStatus updateStatus =
         CloudToolsEclipseProjectUpdater.updateProject(project, SubMonitor.convert(null));
     assertTrue("Update failed: " + updateStatus.getMessage(), updateStatus.isOK());
     assertFalse(CloudToolsEclipseProjectUpdater.hasOldContainers(project));
+
+    IJavaProject javaProject = JavaCore.create(project);
+    IClasspathEntry masterContainerEntry = BuildPath.findMasterContainer(javaProject);
+    IClasspathContainer masterContainer =
+        JavaCore.getClasspathContainer(BuildPath.MASTER_CONTAINER_PATH, javaProject);
+    assertThat(masterContainer.getClasspathEntries(), arrayWithSize(greaterThan(0)));
   }
 
 }
