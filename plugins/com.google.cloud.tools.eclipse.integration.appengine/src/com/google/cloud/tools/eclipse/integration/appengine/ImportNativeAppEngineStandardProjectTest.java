@@ -38,7 +38,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.IClasspathContainer;
-import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -128,8 +127,8 @@ public class ImportNativeAppEngineStandardProjectTest extends BaseProjectTest {
     assertTrue("Update failed: " + updateStatus.getMessage(), updateStatus.isOK());
     assertFalse(CloudToolsEclipseProjectUpdater.hasOldContainers(project));
 
+    // ensure the master-library container has been resolved by checking its contents
     IJavaProject javaProject = JavaCore.create(project);
-    IClasspathEntry masterContainerEntry = BuildPath.findMasterContainer(javaProject);
     IClasspathContainer masterContainer =
         JavaCore.getClasspathContainer(BuildPath.MASTER_CONTAINER_PATH, javaProject);
     assertThat(masterContainer.getClasspathEntries(), arrayWithSize(greaterThan(0)));
