@@ -29,7 +29,6 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
-import com.google.common.collect.Maps;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -121,7 +120,7 @@ public class CloudLibrariesPageTest {
   public void testSelectionMaintained() {
     // explicitly configure App Engine and GCP libraries
     IJavaProject javaProject = plainJavaProjectCreator.getJavaProject();
-    LinkedHashMap<String, String> groups = Maps.newLinkedHashMap();
+    LinkedHashMap<String, String> groups = new LinkedHashMap<>();
     groups.put(CloudLibraries.APP_ENGINE_GROUP, CloudLibraries.APP_ENGINE_GROUP);
     groups.put(CloudLibraries.CLIENT_APIS_GROUP, CloudLibraries.CLIENT_APIS_GROUP);
 
@@ -179,7 +178,6 @@ public class CloudLibrariesPageTest {
 
     // explicitly configure App Engine and GCP libraries
     IJavaProject javaProject = plainJavaProjectCreator.getJavaProject();
-    LinkedHashMap<String, String> groups = Maps.newLinkedHashMap();
 
     page.initialize(javaProject, new IClasspathEntry[] {existingEntry});
     page.setSelection(null);

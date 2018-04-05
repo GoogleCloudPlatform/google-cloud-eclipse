@@ -29,11 +29,11 @@ import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
-import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -103,7 +103,7 @@ public class CloudLibrariesPage extends WizardPage
             .findAny()
             .orElse(null);
 
-    Map<String, String> groups = Maps.newLinkedHashMap();
+    Map<String, String> groups = new LinkedHashMap<>();
     if (AppEngineStandardFacet.getProjectFacetVersion(javaProject.getProject()) != null) {
       groups.put(CloudLibraries.APP_ENGINE_GROUP, Messages.getString("appengine-title")); //$NON-NLS-1$
     }

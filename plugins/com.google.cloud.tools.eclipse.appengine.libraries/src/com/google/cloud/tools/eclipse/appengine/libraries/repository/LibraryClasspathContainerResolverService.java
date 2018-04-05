@@ -37,7 +37,6 @@ import com.google.common.base.Strings;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.io.IOException;
@@ -107,7 +106,7 @@ public class LibraryClasspathContainerResolverService
                                 libraryId)));
                   }
                   // linked set as order may be important
-                  LinkedHashSet<IClasspathEntry> resolved = Sets.newLinkedHashSet();
+                  LinkedHashSet<IClasspathEntry> resolved = new LinkedHashSet<>();
                   for (LibraryFile libraryFile : library.getAllDependencies()) {
                     IClasspathEntry entry = resolveLibraryFileAttachSourceSync(libraryFile);
                     resolved.add(entry);
@@ -152,7 +151,7 @@ public class LibraryClasspathContainerResolverService
   public ListenableFuture<IClasspathEntry[]> resolveLibraryAttachSources(String... libraryIds)
       throws CoreException {
     boolean allResolved = true;
-    LinkedHashSet<IClasspathEntry> entries = Sets.newLinkedHashSet();
+    LinkedHashSet<IClasspathEntry> entries = new LinkedHashSet<>();
     for (String libraryId : libraryIds) {
       IClasspathEntry[] resolved = libraryEntries.getIfPresent(libraryId);
       if (resolved == null) {
@@ -174,7 +173,7 @@ public class LibraryClasspathContainerResolverService
   }
 
   private IClasspathEntry[] resolveLibraries(String... libraryIds) throws ExecutionException {
-    Set<IClasspathEntry> result = Sets.newLinkedHashSet();
+    Set<IClasspathEntry> result = new LinkedHashSet<>();
     for (String libraryId : libraryIds) {
       IClasspathEntry[] resolved = libraryEntries.get(libraryId);
       Collections.addAll(result, resolved);
