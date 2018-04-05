@@ -35,6 +35,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.net.proxy.IProxyData;
 import org.eclipse.core.net.proxy.IProxyService;
@@ -138,7 +139,10 @@ public class PollingStatusServiceImpl implements GcpStatusMonitoringService {
         }
       }
     } catch (IOException ex) {
-      currentStatus = new GcpStatus(Severity.ERROR, ex.toString(), null);
+      logger.log(Level.WARNING, "Unable to retrieve GCP status", ex); //$NON-NLS1$
+      currentStatus =
+          new GcpStatus(
+              Severity.ERROR, Messages.getString("failure.retrieving.status"), null); //$NON-NLS1$
     }
     for (Consumer<GcpStatusMonitoringService> listener : listeners) {
       listener.accept(this);
