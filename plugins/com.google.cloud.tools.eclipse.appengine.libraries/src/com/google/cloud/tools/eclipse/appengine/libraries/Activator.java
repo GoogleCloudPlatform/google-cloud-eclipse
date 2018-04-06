@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -36,7 +37,7 @@ public class Activator implements BundleActivator {
    * Listen for changes to Java project classpath containers. If our Google Cloud Libraries
    * container has been removed, then clean up any definition files.
    */
-  private IElementChangedListener listener = new IElementChangedListener() {
+  private static final IElementChangedListener listener = new IElementChangedListener() {
     @Override
     public void elementChanged(ElementChangedEvent event) {
       visit(event.getDelta());
@@ -80,6 +81,11 @@ public class Activator implements BundleActivator {
 
   @Override
   public void stop(BundleContext context) {
+    removeLibraryListCheckListener();
+  }
+
+  @VisibleForTesting
+  static void removeLibraryListCheckListener() {
     JavaCore.removeElementChangedListener(listener);
   }
 }

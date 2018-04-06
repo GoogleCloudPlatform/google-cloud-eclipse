@@ -90,9 +90,10 @@ public class BuildPathTest {
 
   @Test
   public void testCheckLibraries() throws CoreException {
-    IPath librariesIdPath =
-        new Path(".settings").append(LibraryClasspathContainer.CONTAINER_PATH_PREFIX)
-            .append("_libraries.container");
+    Activator.removeLibraryListCheckListener();
+
+    IPath librariesIdPath = new Path(
+        ".settings/com.google.cloud.tools.eclipse.appengine.libraries/_libraries.container");
 
     // original classpath without our master-library container
     IClasspathEntry[] originalClasspath = project.getRawClasspath();
