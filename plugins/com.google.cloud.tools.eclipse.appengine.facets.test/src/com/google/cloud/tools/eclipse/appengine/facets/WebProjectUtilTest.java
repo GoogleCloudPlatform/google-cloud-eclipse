@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
@@ -357,7 +358,7 @@ public class WebProjectUtilTest {
   @Test
   public void testHasJsps_noFiles() throws CoreException {
     IVirtualFolder root = mock(IVirtualFolder.class, "/");
-    IVirtualFolder txt = mock(IVirtualFolder.class, "/a.txt");
+    IVirtualFile txt = mock(IVirtualFile.class, "/a.txt");
     when(txt.getFileExtension()).thenReturn("txt");
     IVirtualFolder folder = mock(IVirtualFolder.class, "/a");
     when(root.members()).thenReturn(new IVirtualResource[] {txt, folder});
@@ -365,9 +366,10 @@ public class WebProjectUtilTest {
 
     assertFalse(WebProjectUtil.hasJsps(root));
     // no jsps, should traverse all folders
-    verify(root).members();
-    verify(folder).members();
+    verify(root, times(2)).members();
+    verify(folder, times(2)).members();
     verify(txt).getFileExtension();
+    verifyNoMoreInteractions(root, folder, txt);
   }
 
   @Test
@@ -384,6 +386,7 @@ public class WebProjectUtilTest {
     verify(root).members();
     verify(jsp).getFileExtension();
     verify(folder, times(0)).members();
+    verifyNoMoreInteractions(root, folder, jsp);
   }
 
   @Test
@@ -396,9 +399,10 @@ public class WebProjectUtilTest {
     when(folder.members()).thenReturn(new IVirtualResource[] {jsp});
 
     assertTrue(WebProjectUtil.hasJsps(root));
-    verify(root).members();
+    verify(root, times(2)).members();
     verify(folder).members();
     verify(jsp).getFileExtension();
+    verifyNoMoreInteractions(root, folder, jsp);
   }
 
   /** Create a file at the specific location, ensuring all folders are created as required. */
