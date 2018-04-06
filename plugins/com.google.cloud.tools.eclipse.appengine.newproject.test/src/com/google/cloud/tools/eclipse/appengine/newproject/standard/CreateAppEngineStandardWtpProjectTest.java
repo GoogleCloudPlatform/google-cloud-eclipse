@@ -27,7 +27,9 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProjectTest;
+import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
+import com.google.common.base.Stopwatch;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -106,6 +108,7 @@ public class CreateAppEngineStandardWtpProjectTest extends CreateAppEngineWtpPro
     assertThat(Arrays.asList(javaProject.getRawClasspath()), hasItem(masterLibraryEntryMatcher));
 
     // To combat flakiness: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2996
+    Stopwatch stopwatch = Stopwatch.createStarted();
     for (int i = 0; i < 100; i++) {
       IClasspathEntry[] resolvedClasspath = javaProject.getResolvedClasspath(true);
       boolean hasAppEngineApi = Arrays.stream(resolvedClasspath)
@@ -114,6 +117,7 @@ public class CreateAppEngineStandardWtpProjectTest extends CreateAppEngineWtpPro
         break;
       }
       Thread.sleep(100);
+      ThreadDumpingWatchdog.report("Until App Engine API exists", stopwatch);
     }
     assertThat(Arrays.asList(javaProject.getResolvedClasspath(true)), hasItem(appEngineSdkMatcher));
   }
