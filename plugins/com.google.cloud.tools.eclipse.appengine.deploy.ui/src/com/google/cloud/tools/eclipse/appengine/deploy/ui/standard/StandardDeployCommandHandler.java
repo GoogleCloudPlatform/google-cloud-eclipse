@@ -79,12 +79,16 @@ public class StandardDeployCommandHandler extends DeployCommandHandler {
   }
 
   @Override
-  protected StagingDelegate getStagingDelegate(IProject project) throws CoreException {
-    IJavaProject javaProject = JavaCore.create(project);
-    IVMInstall vmInstall = JavaRuntime.getVMInstall(javaProject);
+  protected StagingDelegate getStagingDelegate(IProject project) {
     Path javaHome = null;
-    if (vmInstall != null) {
-      javaHome = vmInstall.getInstallLocation().toPath();
+    try {
+      IJavaProject javaProject = JavaCore.create(project);
+      IVMInstall vmInstall = JavaRuntime.getVMInstall(javaProject);
+      if (vmInstall != null) {
+        javaHome = vmInstall.getInstallLocation().toPath();
+      }
+    } catch (CoreException ex) {
+      // Give up.
     }
     return new StandardStagingDelegate(project, javaHome);
   }
