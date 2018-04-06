@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstall2;
 import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 
@@ -46,21 +47,30 @@ public class StandardDeployCommandHandler extends DeployCommandHandler {
 
   @Override
   protected boolean checkProject(Shell shell, IProject project) throws CoreException {
-    if (WebProjectUtil.hasJsps(project)) {
-      IJavaProject javaProject = JavaCore.create(project);
-      IVMInstall vmInstall = JavaRuntime.getVMInstall(javaProject);
-      if (!JreDetector.isDevelopmentKit(vmInstall)) {
-        return MessageDialog.openQuestion(
-            shell,
-            Messages.getString("vm.is.jre.title"),
-            Messages.getString(
-                "vm.is.jre.proceed",
-                project.getName(),
-                describeVm(vmInstall),
-                vmInstall.getInstallLocation()));
-      }
+    // If we have JSPs, ensure the project is configured with a JDK: required by staging
+    // which precompiles the JSPs.  We could try to find a compatible JDK, but there's
+    if (!WebProjectUtil.hasJsps(project)) {
+      return true;
     }
-    return true;
+
+    IJavaProject javaProject = JavaCore.create(project);
+    IVMInstall vmInstall = JavaRuntime.getVMInstall(javaProject);
+    if (JreDetector.isDevelopmentKit(vmInstall)) {
+      return true;
+    }
+
+    String title = Messages.getString("vm.is.jre.title");
+    String message =
+        Messages.getString(
+            "vm.is.jre.proceed",
+            project.getName(),
+            describeVm(vmInstall),
+            vmInstall.getInstallLocation());
+    String[] buttonLabels =
+        new String[] {Messages.getString("deploy.button"), IDialogConstants.CANCEL_LABEL};
+    MessageDialog dialog =
+        new MessageDialog(shell, title, null, message, MessageDialog.QUESTION, 0, buttonLabels);
+    return dialog.open() == 0;
   }
 
   private String describeVm(IVMInstall vmInstall) {
@@ -71,8 +81,11 @@ public class StandardDeployCommandHandler extends DeployCommandHandler {
   }
 
   @Override
-  protected DeployPreferencesDialog newDeployPreferencesDialog(Shell shell, IProject project,
-      IGoogleLoginService loginService, IGoogleApiFactory googleApiFactory) {
+  protected DeployPreferencesDialog newDeployPreferencesDialog(
+      Shell shell,
+      IProject project,
+      IGoogleLoginService loginService,
+      IGoogleApiFactory googleApiFactory) {
     String title = Messages.getString("deploy.preferences.dialog.title.standard");
     return new StandardDeployPreferencesDialog(
         shell, title, project, loginService, googleApiFactory);
