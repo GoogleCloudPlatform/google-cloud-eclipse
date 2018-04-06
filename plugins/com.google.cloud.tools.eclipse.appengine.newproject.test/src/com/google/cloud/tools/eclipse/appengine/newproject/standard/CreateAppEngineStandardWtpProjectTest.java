@@ -69,7 +69,8 @@ public class CreateAppEngineStandardWtpProjectTest extends CreateAppEngineWtpPro
   }
 
   @Test
-  public void testAppEngineLibrariesAdded() throws InvocationTargetException, CoreException {
+  public void testAppEngineLibrariesAdded()
+      throws InvocationTargetException, CoreException, InterruptedException {
     Library library = CloudLibraries.getLibrary("appengine-api");
     List<Library> libraries = new ArrayList<>();
     libraries.add(library);
@@ -81,7 +82,12 @@ public class CreateAppEngineStandardWtpProjectTest extends CreateAppEngineWtpPro
     assertAppEngineApiSdkOnClasspath();
   }
 
-  private void assertAppEngineApiSdkOnClasspath() throws CoreException {
+  private static boolean isAppEngineApiClasspath(IClasspathEntry entry) {
+    return entry.getEntryKind() == IClasspathEntry.CPE_LIBRARY
+        && entry.getPath().toString().contains("appengine-api-1.0-sdk");
+  }
+
+  private void assertAppEngineApiSdkOnClasspath() throws CoreException, InterruptedException {
     IJavaProject javaProject = JavaCore.create(project);
     Matcher<IClasspathEntry> masterLibraryEntryMatcher =
         new CustomTypeSafeMatcher<IClasspathEntry>("master container") {
@@ -94,11 +100,21 @@ public class CreateAppEngineStandardWtpProjectTest extends CreateAppEngineWtpPro
         new CustomTypeSafeMatcher<IClasspathEntry>("appengine-api-1.0-sdk") {
           @Override
           protected boolean matchesSafely(IClasspathEntry entry) {
-            return entry.getEntryKind() == IClasspathEntry.CPE_LIBRARY
-                && entry.getPath().toString().contains("appengine-api-1.0-sdk");
+            return isAppEngineApiClasspath(entry);
           }
         };
     assertThat(Arrays.asList(javaProject.getRawClasspath()), hasItem(masterLibraryEntryMatcher));
+
+    // To combat flakiness: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2996
+    for (int i = 0; i < 100; i++) {
+      IClasspathEntry[] resolvedClasspath = javaProject.getResolvedClasspath(true);
+      boolean hasAppEngineApi = Arrays.stream(resolvedClasspath)
+          .anyMatch(CreateAppEngineStandardWtpProjectTest::isAppEngineApiClasspath);
+      if (hasAppEngineApi) {
+        break;
+      }
+      Thread.sleep(100);
+    }
     assertThat(Arrays.asList(javaProject.getResolvedClasspath(true)), hasItem(appEngineSdkMatcher));
   }
 
