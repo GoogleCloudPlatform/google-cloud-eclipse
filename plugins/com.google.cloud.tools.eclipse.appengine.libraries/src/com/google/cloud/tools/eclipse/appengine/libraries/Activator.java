@@ -85,7 +85,7 @@ public class Activator implements BundleActivator {
   }
 
   @VisibleForTesting
-  static void removeLibraryListCheckListener() {
+  public static void removeLibraryListCheckListener() {
     JavaCore.removeElementChangedListener(listener);
   }
 }

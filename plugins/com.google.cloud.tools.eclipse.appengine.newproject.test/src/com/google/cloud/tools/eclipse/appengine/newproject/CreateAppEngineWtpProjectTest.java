@@ -25,6 +25,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.Activator;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
@@ -82,6 +83,9 @@ public abstract class CreateAppEngineWtpProjectTest {
 
   @Before
   public void setUp() throws CoreException {
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2996
+    Activator.removeLibraryListCheckListener();
+
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
     project = workspace.getRoot().getProject("testproject" + Math.random());
     config.setProject(project);
