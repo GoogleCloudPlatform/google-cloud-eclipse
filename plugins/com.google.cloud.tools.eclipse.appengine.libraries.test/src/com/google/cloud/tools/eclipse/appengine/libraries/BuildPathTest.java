@@ -52,6 +52,9 @@ public class BuildPathTest {
 
   @Before
   public void setUp() throws JavaModelException {
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2758
+    Activator.removeLibraryListCheckListener();
+
     project = projectCreator.getJavaProject();
     initialClasspathSize = project.getRawClasspath().length;
     assertNull(BuildPath.findMasterContainer(project));
@@ -90,8 +93,6 @@ public class BuildPathTest {
 
   @Test
   public void testCheckLibraries() throws CoreException {
-    Activator.removeLibraryListCheckListener();
-
     IPath librariesIdPath = new Path(
         ".settings/com.google.cloud.tools.eclipse.appengine.libraries/_libraries.container");
 
