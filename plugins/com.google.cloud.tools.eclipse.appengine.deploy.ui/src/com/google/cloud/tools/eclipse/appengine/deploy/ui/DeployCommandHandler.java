@@ -93,17 +93,22 @@ public abstract class DeployCommandHandler extends AbstractHandler {
           Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
         }
       }
+      Shell shell = HandlerUtil.getActiveShell(event);
       if (project != null && !checkProjectErrors(project)) {
-        MessageDialog.openInformation(HandlerUtil.getActiveShell(event),
-                                      Messages.getString("build.error.dialog.title"),
-                                      Messages.getString("build.error.dialog.message"));
+        MessageDialog.openInformation(
+            shell,
+            Messages.getString("build.error.dialog.title"),
+            Messages.getString("build.error.dialog.message"));
+        return null;
+      }
+      if (!checkProject(shell, project)) {
         return null;
       }
 
       IGoogleLoginService loginService = ServiceUtils.getService(event, IGoogleLoginService.class);
       IGoogleApiFactory googleApiFactory = ServiceUtils.getService(event, IGoogleApiFactory.class);
-      DeployPreferencesDialog dialog = newDeployPreferencesDialog(
-          HandlerUtil.getActiveShell(event), project, loginService, googleApiFactory);
+      DeployPreferencesDialog dialog =
+          newDeployPreferencesDialog(shell, project, loginService, googleApiFactory);
       if (dialog.open() == Window.OK) {
         launchDeployJob(project, dialog.getCredential());
       }
@@ -116,6 +121,16 @@ public abstract class DeployCommandHandler extends AbstractHandler {
       /* ignore */
       return null;
     }
+  }
+
+  /**
+   * Check that the project is deployable.
+   *
+   * @return {@code true} if deployable
+   * @throws CoreException on error
+   */
+  protected boolean checkProject(Shell shell, IProject project) throws CoreException {
+    return true;
   }
 
   protected IProject getSelectedProject(ExecutionEvent event)

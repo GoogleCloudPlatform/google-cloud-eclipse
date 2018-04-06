@@ -17,9 +17,14 @@
 package com.google.cloud.tools.eclipse.appengine.facets;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
@@ -39,6 +44,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.eclipse.wst.common.componentcore.resources.IVirtualFile;
+import org.eclipse.wst.common.componentcore.resources.IVirtualFolder;
+import org.eclipse.wst.common.componentcore.resources.IVirtualResource;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
@@ -346,6 +354,52 @@ public class WebProjectUtilTest {
     assertEquals("src/main/webapp/WEB-INF/lib", libFolder.getProjectRelativePath().toString());
   }
 
+  @Test
+  public void testHasJsps_noFiles() throws CoreException {
+    IVirtualFolder root = mock(IVirtualFolder.class, "/");
+    IVirtualFolder txt = mock(IVirtualFolder.class, "/a.txt");
+    when(txt.getFileExtension()).thenReturn("txt");
+    IVirtualFolder folder = mock(IVirtualFolder.class, "/a");
+    when(root.members()).thenReturn(new IVirtualResource[] {txt, folder});
+    when(folder.members()).thenReturn(new IVirtualResource[] {});
+
+    assertFalse(WebProjectUtil.hasJsps(root));
+    // no jsps, should traverse all folders
+    verify(root).members();
+    verify(folder).members();
+    verify(txt).getFileExtension();
+  }
+
+  @Test
+  public void testHasJsps_jspInRoot() throws CoreException {
+    IVirtualFolder root = mock(IVirtualFolder.class, "/");
+    IVirtualFile jsp = mock(IVirtualFile.class, "/a.jsp");
+    when(jsp.getFileExtension()).thenReturn("jsp");
+    IVirtualFolder folder = mock(IVirtualFolder.class, "/a");
+    when(root.members()).thenReturn(new IVirtualResource[] {jsp, folder});
+    when(folder.members()).thenReturn(new IVirtualResource[] {});
+
+    assertTrue(WebProjectUtil.hasJsps(root));
+    // jsp in root means no traversal to folder
+    verify(root).members();
+    verify(jsp).getFileExtension();
+    verify(folder, times(0)).members();
+  }
+
+  @Test
+  public void testHasJsps_jspInSub() throws CoreException {
+    IVirtualFolder root = mock(IVirtualFolder.class, "/");
+    IVirtualFolder folder = mock(IVirtualFolder.class, "/a");
+    IVirtualFile jsp = mock(IVirtualFile.class, "/a/a.jsp");
+    when(jsp.getFileExtension()).thenReturn("jsp");
+    when(root.members()).thenReturn(new IVirtualResource[] {folder});
+    when(folder.members()).thenReturn(new IVirtualResource[] {jsp});
+
+    assertTrue(WebProjectUtil.hasJsps(root));
+    verify(root).members();
+    verify(folder).members();
+    verify(jsp).getFileExtension();
+  }
 
   /** Create a file at the specific location, ensuring all folders are created as required. */
   private IFile createFile(IProject project, Path filePath, InputStream fileContents)

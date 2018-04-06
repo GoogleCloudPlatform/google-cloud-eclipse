@@ -22,22 +22,52 @@ import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardStagingD
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployCommandHandler;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesDialog;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
+import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.util.jdt.JreDetector;
 import java.nio.file.Path;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.IVMInstall2;
 import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 
 public class StandardDeployCommandHandler extends DeployCommandHandler {
 
   public StandardDeployCommandHandler() {
     super(AnalyticsEvents.APP_ENGINE_DEPLOY_STANDARD);
+  }
+
+  @Override
+  protected boolean checkProject(Shell shell, IProject project) throws CoreException {
+    if (WebProjectUtil.hasJsps(project)) {
+      IJavaProject javaProject = JavaCore.create(project);
+      IVMInstall vmInstall = JavaRuntime.getVMInstall(javaProject);
+      if (!JreDetector.isDevelopmentKit(vmInstall)) {
+        return MessageDialog.openQuestion(
+            shell,
+            Messages.getString("vm.is.jre.title"),
+            Messages.getString(
+                "vm.is.jre.proceed",
+                project.getName(),
+                describeVm(vmInstall),
+                vmInstall.getInstallLocation()));
+      }
+    }
+    return true;
+  }
+
+  private String describeVm(IVMInstall vmInstall) {
+    if (vmInstall instanceof IVMInstall2) {
+      return vmInstall.getName() + " (" + ((IVMInstall2) vmInstall).getJavaVersion() + ")";
+    }
+    return vmInstall.getName();
   }
 
   @Override
@@ -49,24 +79,14 @@ public class StandardDeployCommandHandler extends DeployCommandHandler {
   }
 
   @Override
-  protected StagingDelegate getStagingDelegate(IProject project) {
-    // TODO: this may still not be a JDK (although it will be very likely):
-    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2195#issuecomment-318439239
-    Path javaHome = getProjectVm(project);
-    return new StandardStagingDelegate(project, javaHome);
-  }
-
-  private static Path getProjectVm(IProject project) {
-    try {
-      IJavaProject javaProject = JavaCore.create(project);
-      IVMInstall vmInstall = JavaRuntime.getVMInstall(javaProject);
-      if (vmInstall != null) {
-        return vmInstall.getInstallLocation().toPath();
-      }
-    } catch (CoreException ex) {
-      // Give up.
+  protected StagingDelegate getStagingDelegate(IProject project) throws CoreException {
+    IJavaProject javaProject = JavaCore.create(project);
+    IVMInstall vmInstall = JavaRuntime.getVMInstall(javaProject);
+    Path javaHome = null;
+    if (vmInstall != null) {
+      javaHome = vmInstall.getInstallLocation().toPath();
     }
-    return null;
+    return new StandardStagingDelegate(project, javaHome);
   }
 
   @Override

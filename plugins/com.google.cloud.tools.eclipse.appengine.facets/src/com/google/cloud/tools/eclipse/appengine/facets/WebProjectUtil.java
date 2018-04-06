@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableList;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -39,6 +40,7 @@ import org.eclipse.wst.common.componentcore.ComponentCore;
 import org.eclipse.wst.common.componentcore.resources.IVirtualComponent;
 import org.eclipse.wst.common.componentcore.resources.IVirtualFile;
 import org.eclipse.wst.common.componentcore.resources.IVirtualFolder;
+import org.eclipse.wst.common.componentcore.resources.IVirtualResource;
 
 /**
  * Utility classes for accessing and creating configuration files under {@code WEB-INF}. These
@@ -201,5 +203,44 @@ public class WebProjectUtil {
     } catch (JavaModelException ex) {
       return Collections.emptyList();
     }
+  }
+
+  /**
+   * Return {@code true} if this project appears to contain JSPs for deployment.
+   *
+   * @throws CoreException on error
+   */
+  public static boolean hasJsps(IProject project) throws CoreException {
+    IVirtualComponent component = ComponentCore.createComponent(project);
+    if (component == null || !component.exists()) {
+      return false;
+    }
+    // todo: should we check for JSPs in jars?
+    return hasJsps(component.getRootFolder());
+  }
+
+  public static boolean hasJsps(IVirtualFolder top) throws CoreException {
+    // Use BFS as most JSPs are usually in the top-level folder, or its immediate sub-folders.
+    LinkedList<IVirtualFolder> folders = new LinkedList<>();
+    folders.add(top);
+    
+    while (!folders.isEmpty()) {
+      IVirtualFolder folder = folders.removeFirst();
+
+      // first check for JSP files
+      for (IVirtualResource resource : folder.members()) {
+        if (resource instanceof IVirtualFile
+            && "jsp".equalsIgnoreCase(((IVirtualFile) resource).getFileExtension())) {
+          return true;
+        }
+      }
+      // queue up child folders
+      for (IVirtualResource resource : folder.members()) {
+        if (resource instanceof IVirtualFolder) {
+          folders.addLast((IVirtualFolder) resource);
+        }
+      }
+    }
+    return false;
   }
 }

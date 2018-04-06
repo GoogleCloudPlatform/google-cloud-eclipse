@@ -10,6 +10,7 @@ Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
 Export-Package: com.google.cloud.tools.eclipse.util,
  com.google.cloud.tools.eclipse.util.io,
+ com.google.cloud.tools.eclipse.util.jdt,
  com.google.cloud.tools.eclipse.util.jobs,
  com.google.cloud.tools.eclipse.util.service,
  com.google.cloud.tools.eclipse.util.status
@@ -28,6 +29,8 @@ Import-Package: com.google.common.annotations;version="[21.0.0,22.0.0)",
  org.eclipse.e4.core.contexts,
  org.eclipse.e4.core.di,
  org.eclipse.jdt.core,
+ org.eclipse.jdt.launching,
+ org.eclipse.jdt.launching.environments,
  org.eclipse.ui.statushandlers,
  org.eclipse.wst.common.project.facet.core,
  org.osgi.framework
