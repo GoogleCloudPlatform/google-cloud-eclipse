@@ -49,6 +49,7 @@ public class StandardDeployCommandHandler extends DeployCommandHandler {
   protected boolean checkProject(Shell shell, IProject project) throws CoreException {
     // If we have JSPs, ensure the project is configured with a JDK: required by staging
     // which precompiles the JSPs.  We could try to find a compatible JDK, but there's
+    // a possibility that we select an inappropriate one and introduce problems.
     if (!WebProjectUtil.hasJsps(project)) {
       return true;
     }
