@@ -21,6 +21,7 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
+import com.google.cloud.tools.eclipse.util.MappedNamespaceContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -32,7 +33,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -75,7 +75,7 @@ public class PomTest {
   
   @Before
   public void setUp() throws SAXException, IOException, CoreException {
-    xpath.setNamespaceContext(new Maven4NamespaceContext());
+    xpath.setNamespaceContext(new MappedNamespaceContext("m", "http://maven.apache.org/POM/4.0.0"));
     
     IProject project = projectCreator.getProject();
     pomFile = project.getFile("pom.xml");

@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
+import com.google.cloud.tools.eclipse.util.MappedNamespaceContext;
 import java.util.ArrayList;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.xpath.XPath;
@@ -40,7 +41,8 @@ public class PomXmlValidator implements XmlValidationHelper {
     ArrayList<BannedElement> blacklist = new ArrayList<>();
     try {
       XPath xPath = FACTORY.newXPath();
-      NamespaceContext nsContext = new MavenContext();
+      NamespaceContext nsContext =
+          new MappedNamespaceContext("prefix", "http://maven.apache.org/POM/4.0.0");
       xPath.setNamespaceContext(nsContext);
       String selectGroupId = "//prefix:plugin/prefix:groupId[.='com.google.appengine']"
           + "[../prefix:artifactId[text()='appengine-maven-plugin'"
