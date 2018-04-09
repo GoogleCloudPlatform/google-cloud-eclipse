@@ -36,7 +36,7 @@ public class Activator implements BundleActivator {
    * Listen for changes to Java project classpath containers. If our Google Cloud Libraries
    * container has been removed, then clean up any definition files.
    */
-  private IElementChangedListener listener = new IElementChangedListener() {
+  private static final IElementChangedListener listener = new IElementChangedListener() {
     @Override
     public void elementChanged(ElementChangedEvent event) {
       visit(event.getDelta());
