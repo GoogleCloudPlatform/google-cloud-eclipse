@@ -188,7 +188,7 @@ public class LocalAppEnginePublishOperationTest {
     }
     ProjectUtils.waitForProjects(projects.values());
     serverModule = ServerUtil.getModule(serverProject);
-    sharedModule = ServerUtil.getModule(serverProject);
+    sharedModule = ServerUtil.getModule(sharedProject);
   }
 
   private interface ThrowingRunnable {
