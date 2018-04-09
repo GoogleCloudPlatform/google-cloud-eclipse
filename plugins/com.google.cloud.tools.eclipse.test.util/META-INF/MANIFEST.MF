@@ -45,6 +45,8 @@ Import-Package: com.google.cloud.tools.eclipse.appengine.facets,
  org.eclipse.wst.common.project.facet.core.internal,
  org.eclipse.wst.common.project.facet.core.util.internal,
  org.eclipse.wst.server.core,
+ org.eclipse.wst.server.core.internal,
+ org.eclipse.wst.server.core.model,
  org.eclipse.wst.validation,
  org.osgi.framework;version="1.8.0"
 Export-Package: com.google.cloud.tools.eclipse.test.util,
