@@ -34,6 +34,7 @@ public class MappedNamespaceContext implements NamespaceContext {
   }
 
   public MappedNamespaceContext(Map<String, String> prefixMapping) {
+    // TODO: check null keys and values
     this.prefixMapping = new HashMap<>(prefixMapping);
   }
 
