@@ -18,10 +18,11 @@ package com.google.cloud.tools.eclipse.dataflow.core.project;
 
 import com.google.cloud.tools.eclipse.dataflow.core.DataflowCorePlugin;
 import com.google.cloud.tools.eclipse.dataflow.core.natures.DataflowJavaProjectNature;
+import com.google.cloud.tools.eclipse.util.MappedNamespaceContext;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
-import java.util.Iterator;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.xpath.XPath;
@@ -193,29 +194,9 @@ public class DataflowMavenModel {
      * provides that namespace for the prefix 'pom'.
      */
     @VisibleForTesting
-    static final NamespaceContext POM_NS_CONTEXT = new NamespaceContext() {
-      @Override
-      public String getNamespaceURI(String prefix) {
-        if (prefix == null) {
-          throw new NullPointerException("Null prefix");
-        } else if ("pom".equals(prefix)) {
-          return "http://maven.apache.org/POM/4.0.0";
-        } else if ("xml".equals(prefix)) {
-          return XMLConstants.XML_NS_URI;
-        }
-        return XMLConstants.NULL_NS_URI;
-      }
-
-      @Override
-      public String getPrefix(String namespaceURI) {
-        throw new UnsupportedOperationException();
-      }
-
-      @Override
-      public Iterator<?> getPrefixes(String namespaceURI) {
-        throw new UnsupportedOperationException();
-      }
-    };
+    static final NamespaceContext POM_NS_CONTEXT = new MappedNamespaceContext(ImmutableMap.of(
+        "pom", "http://maven.apache.org/POM/4.0.0",
+        "xml", XMLConstants.XML_NS_URI));
 
     private final DataflowDependencyManager dependencyManager;
     private final IMavenProjectRegistry projectRegistry;
