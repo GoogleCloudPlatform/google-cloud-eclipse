@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
 import org.eclipse.ui.progress.UIJob;
@@ -55,6 +56,15 @@ public class OptInDialogTest {
     if (dialogCloser != null) {
       dialogCloser.join();  // to exit cleanly without any potential job-running warning
     }
+  }
+
+  @Test
+  public void testPrivacyPolicyLink() {
+    dialog.createDialogArea(shell);
+    Link link = CompositeUtil.findControl(shell, Link.class);
+    assertEquals("Sharing usage statistics is subject to the"
+        + " <a href=\"http://www.google.com/policies/privacy/\">Google Privacy Policy</a>.",
+        link.getText());
   }
 
   @Test
