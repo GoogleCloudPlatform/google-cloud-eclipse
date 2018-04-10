@@ -29,12 +29,18 @@ public class MappedNamespaceContext implements NamespaceContext {
   private final Map<String, String> prefixMapping;
 
   public MappedNamespaceContext(String prefix, String namespaceUri) {
+    if (prefix == null || namespaceUri == null) {
+      throw new IllegalArgumentException("prefix and URI can't be null");
+    }
     prefixMapping = new HashMap<>();
     prefixMapping.put(prefix, namespaceUri);
   }
 
   public MappedNamespaceContext(Map<String, String> prefixMapping) {
-    // TODO: check null keys and values
+    if (prefixMapping.entrySet().stream().anyMatch(
+        entry -> entry.getKey() == null || entry.getValue() == null)) {
+      throw new IllegalArgumentException("prefix and URI can't be null");
+    }
     this.prefixMapping = new HashMap<>(prefixMapping);
   }
 
