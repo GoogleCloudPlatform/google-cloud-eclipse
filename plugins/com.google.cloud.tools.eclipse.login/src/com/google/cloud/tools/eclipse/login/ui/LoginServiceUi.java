@@ -35,9 +35,7 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.program.Program;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.services.IServiceLocator;
 
 public class LoginServiceUi implements UiFacade {
@@ -46,13 +44,10 @@ public class LoginServiceUi implements UiFacade {
 
   private IServiceLocator serviceLocator;
   private IShellProvider shellProvider;
-  private Display display;
 
-  public LoginServiceUi(IServiceLocator serviceLocator, IShellProvider shellProvider,
-      Display display) {
+  public LoginServiceUi(IServiceLocator serviceLocator, IShellProvider shellProvider) {
     this.serviceLocator = serviceLocator;
     this.shellProvider = shellProvider;
-    this.display = display;
   }
 
   public void showErrorDialogHelper(String title, String message) {
@@ -74,10 +69,7 @@ public class LoginServiceUi implements UiFacade {
   @Override
   public void notifyStatusIndicator() {
     // Update and refresh the menu, toolbar button, and tooltip.
-    display.asyncExec(() ->
-        serviceLocator.getService(ICommandService.class).refreshElements(
-            "com.google.cloud.tools.eclipse.login.commands.loginCommand", //$NON-NLS-1$
-            null));
+    MenuContributionInitializer.updateLoginCommand();
   }
 
   @Override

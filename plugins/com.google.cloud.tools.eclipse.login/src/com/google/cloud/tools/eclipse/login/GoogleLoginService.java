@@ -83,7 +83,7 @@ public class GoogleLoginService implements IGoogleLoginService {
       return workbench.getDisplay().getActiveShell();
     };
 
-    LoginServiceUi uiFacade = new LoginServiceUi(workbench, shellProvider, workbench.getDisplay());
+    LoginServiceUi uiFacade = new LoginServiceUi(workbench, shellProvider);
     OAuthDataStore dataStore =
         new JavaPreferenceOAuthDataStore(PREFERENCE_PATH_OAUTH_DATA_STORE, loginServiceLogger);
     loginState = new GoogleLoginState(
