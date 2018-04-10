@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.common.collect.ImmutableList;
@@ -151,6 +152,8 @@ public class MappedNamespaceContextTest {
   public void testGetPrefixes_immutable() {
     String mavenUri = "http://maven.apache.org/POM/4.0.0";
     Iterator<String> iterator = SAMPLE_CONTEXT.getPrefixes(mavenUri);
+
+    assertTrue(iterator.hasNext());
     while (iterator.hasNext()) {
       iterator.next();
       iterator.remove();
