@@ -40,7 +40,7 @@ public class DeployArtifactValidatorTest {
 
   @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
-  @Mock private IObservableValue deployArtifactPath;
+  @Mock private IObservableValue<String> deployArtifactPath;
 
   private IPath basePath;
   private DeployArtifactValidator pathValidator;
