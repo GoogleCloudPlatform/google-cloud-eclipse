@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
@@ -29,17 +30,22 @@ public class MappedNamespaceContext implements NamespaceContext {
   private final Map<String, String> prefixMapping;
 
   public MappedNamespaceContext(String prefix, String namespaceUri) {
-    if (prefix == null || namespaceUri == null) {
-      throw new IllegalArgumentException("prefix and URI can't be null");
+    if (prefix == null) {
+      throw new IllegalArgumentException("Prefix can't be null");
+    } else if (namespaceUri == null) {
+      throw new IllegalArgumentException("Namespace URI can't be null");
     }
     prefixMapping = new HashMap<>();
     prefixMapping.put(prefix, namespaceUri);
   }
 
   public MappedNamespaceContext(Map<String, String> prefixMapping) {
-    if (prefixMapping.entrySet().stream().anyMatch(
-        entry -> entry.getKey() == null || entry.getValue() == null)) {
-      throw new IllegalArgumentException("prefix and URI can't be null");
+    for (Entry<String, String> entry : prefixMapping.entrySet()) {
+      if (entry.getKey() == null) {
+        throw new IllegalArgumentException("Prefix can't be null");
+      } else if (entry.getValue() == null) {
+        throw new IllegalArgumentException("Namespace URI can't be null");
+      }
     }
     this.prefixMapping = new HashMap<>(prefixMapping);
   }
@@ -47,7 +53,7 @@ public class MappedNamespaceContext implements NamespaceContext {
   @Override
   public String getNamespaceURI(String prefix) {
     if (prefix == null) {
-      throw new IllegalArgumentException("prefix can't be null");
+      throw new IllegalArgumentException("Prefix can't be null");
     }
     return prefixMapping.getOrDefault(prefix, XMLConstants.NULL_NS_URI);
   }
@@ -61,7 +67,7 @@ public class MappedNamespaceContext implements NamespaceContext {
   @Override
   public Iterator<String> getPrefixes(String namespaceURI) {
     if (namespaceURI == null) {
-      throw new IllegalArgumentException("namespaceUri can't be null");
+      throw new IllegalArgumentException("Namespace URI can't be null");
     }
     List<String> prefixes = prefixMapping.entrySet().stream()
         .filter(entry -> entry.getValue().equals(namespaceURI))

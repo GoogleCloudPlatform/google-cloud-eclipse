@@ -46,7 +46,7 @@ public class MappedNamespaceContextTest {
       new MappedNamespaceContext(null, "scheme://host/path/");
       fail();
     } catch (IllegalArgumentException ex) {
-      assertEquals("prefix and URI can't be null", ex.getMessage());
+      assertEquals("Prefix can't be null", ex.getMessage());
     }
   }
 
@@ -56,7 +56,7 @@ public class MappedNamespaceContextTest {
       new MappedNamespaceContext("p", null);
       fail();
     } catch (IllegalArgumentException ex) {
-      assertEquals("prefix and URI can't be null", ex.getMessage());
+      assertEquals("Namespace URI can't be null", ex.getMessage());
     }
   }
 
@@ -68,7 +68,7 @@ public class MappedNamespaceContextTest {
       new MappedNamespaceContext(map);
       fail();
     } catch (IllegalArgumentException ex) {
-      assertEquals("prefix and URI can't be null", ex.getMessage());
+      assertEquals("Prefix can't be null", ex.getMessage());
     }
   }
 
@@ -80,7 +80,7 @@ public class MappedNamespaceContextTest {
       new MappedNamespaceContext(map);
       fail();
     } catch (IllegalArgumentException ex) {
-      assertEquals("prefix and URI can't be null", ex.getMessage());
+      assertEquals("Namespace URI can't be null", ex.getMessage());
     }
   }
 
@@ -90,7 +90,7 @@ public class MappedNamespaceContextTest {
       SAMPLE_CONTEXT.getNamespaceURI(null);
       fail();
     } catch (IllegalArgumentException ex) {
-      assertEquals("prefix can't be null", ex.getMessage());
+      assertEquals("Prefix can't be null", ex.getMessage());
     }
   }
 
@@ -111,7 +111,7 @@ public class MappedNamespaceContextTest {
       SAMPLE_CONTEXT.getPrefix(null);
       fail();
     } catch (IllegalArgumentException ex) {
-      assertEquals("namespaceUri can't be null", ex.getMessage());
+      assertEquals("Namespace URI can't be null", ex.getMessage());
     }
   }
 
@@ -131,7 +131,7 @@ public class MappedNamespaceContextTest {
       SAMPLE_CONTEXT.getPrefixes(null);
       fail();
     } catch (IllegalArgumentException ex) {
-      assertEquals("namespaceUri can't be null", ex.getMessage());
+      assertEquals("Namespace URI can't be null", ex.getMessage());
     }
   }
 
