@@ -34,10 +34,14 @@ public class MappedNamespaceContext implements NamespaceContext {
 
   public MappedNamespaceContext(String prefix, String namespaceUri) {
     this();
-    addMapping(prefix, namespaceUri);
+    addMappingInternal(prefix, namespaceUri);
   }
 
   public MappedNamespaceContext addMapping(String prefix, String namespaceUri) {
+    return addMappingInternal(prefix, namespaceUri);
+  }
+
+  private MappedNamespaceContext addMappingInternal(String prefix, String namespaceUri) {
     if (prefix == null) {
       throw new IllegalArgumentException("Prefix can't be null");
     } else if (namespaceUri == null) {
