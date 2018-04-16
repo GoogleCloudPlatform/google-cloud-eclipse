@@ -36,17 +36,14 @@ import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.services.IServiceLocator;
 
 public class LoginServiceUi implements UiFacade {
 
   private static final Logger logger = Logger.getLogger(LoginServiceUi.class.getName());
 
-  private IServiceLocator serviceLocator;
-  private IShellProvider shellProvider;
+  private final IShellProvider shellProvider;
 
-  public LoginServiceUi(IServiceLocator serviceLocator, IShellProvider shellProvider) {
-    this.serviceLocator = serviceLocator;
+  public LoginServiceUi(IShellProvider shellProvider) {
     this.shellProvider = shellProvider;
   }
 
