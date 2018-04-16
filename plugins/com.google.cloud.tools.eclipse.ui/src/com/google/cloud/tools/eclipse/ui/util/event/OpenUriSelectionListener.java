@@ -107,13 +107,12 @@ public class OpenUriSelectionListener implements SelectionListener {
 
     @Override
     public void accept(Exception ex, URI uri) {
+      String title = Messages.getString("openurllistener.error.title");
       String message = Messages.getString("openurllistener.error.message");
       if (uri != null) {
         message += ": " + uri.toString();
       }
-      ErrorDialog.openError(shell,
-                            Messages.getString("openurllistener.error.title"),
-                            message, StatusUtil.error(this, message));
+      ErrorDialog.openError(shell, title, message, StatusUtil.error(this, message, ex));
     }
   }
 }
