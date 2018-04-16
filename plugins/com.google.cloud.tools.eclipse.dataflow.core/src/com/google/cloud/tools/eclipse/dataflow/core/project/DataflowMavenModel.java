@@ -191,8 +191,7 @@ public class DataflowMavenModel {
      * <p>A well-formed POM file declares a namespace in the project element. This NamespaceContext
      * provides that namespace for the prefix 'pom'.
      */
-    @VisibleForTesting
-    static final NamespaceContext pomNamespaceContext =
+    private static final NamespaceContext pomNamespaceContext =
         new MappedNamespaceContext("pom", "http://maven.apache.org/POM/4.0.0");
 
     private final DataflowDependencyManager dependencyManager;

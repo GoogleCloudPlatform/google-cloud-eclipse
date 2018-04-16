@@ -21,9 +21,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowMavenModel.DataflowMavenModelFactory;
+import com.google.cloud.tools.eclipse.util.MappedNamespaceContext;
 import java.io.ByteArrayInputStream;
-import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
@@ -171,7 +170,8 @@ public class DataflowMavenModelTest {
         new ByteArrayInputStream(simplifiedModel.getBytes()));
 
     XPath realXpath = XPathFactory.newInstance().newXPath();
-    realXpath.setNamespaceContext(DataflowMavenModelFactory.pomNamespaceContext);
+    realXpath.setNamespaceContext(
+        new MappedNamespaceContext("pom", "http://maven.apache.org/POM/4.0.0"));
     NodeList matchingNodes =
         DataflowMavenModel.getMatchingNodes(realXpath,
             simpleModelDocument, DataflowMavenModel.DATAFLOW_VERSION_XPATH_EXPR);
@@ -180,23 +180,5 @@ public class DataflowMavenModelTest {
     Node matched = matchingNodes.item(0);
     assertEquals("version", matched.getLocalName());
     assertEquals("FOO-BAR", matched.getTextContent());
-  }
-
-  @Test
-  public void testNamespaceUri_pomPrefix() {
-    assertEquals("http://maven.apache.org/POM/4.0.0",
-        DataflowMavenModelFactory.pomNamespaceContext.getNamespaceURI("pom"));
-  }
-
-  @Test
-  public void testNamespaceUri_xmlPrefix() {
-    assertEquals(XMLConstants.XML_NS_URI,
-        DataflowMavenModelFactory.pomNamespaceContext.getNamespaceURI("xml"));
-  }
-
-  @Test
-  public void testNamespaceUri_noMapping() {
-    assertEquals(XMLConstants.NULL_NS_URI,
-        DataflowMavenModelFactory.pomNamespaceContext.getNamespaceURI("unmapped"));
   }
 }
