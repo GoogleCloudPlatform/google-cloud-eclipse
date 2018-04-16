@@ -171,7 +171,7 @@ public class DataflowMavenModelTest {
         new ByteArrayInputStream(simplifiedModel.getBytes()));
 
     XPath realXpath = XPathFactory.newInstance().newXPath();
-    realXpath.setNamespaceContext(DataflowMavenModelFactory.POM_NS_CONTEXT);
+    realXpath.setNamespaceContext(DataflowMavenModelFactory.pomNamespaceContext);
     NodeList matchingNodes =
         DataflowMavenModel.getMatchingNodes(realXpath,
             simpleModelDocument, DataflowMavenModel.DATAFLOW_VERSION_XPATH_EXPR);
@@ -185,18 +185,18 @@ public class DataflowMavenModelTest {
   @Test
   public void testNamespaceUri_pomPrefix() {
     assertEquals("http://maven.apache.org/POM/4.0.0",
-        DataflowMavenModelFactory.POM_NS_CONTEXT.getNamespaceURI("pom"));
+        DataflowMavenModelFactory.pomNamespaceContext.getNamespaceURI("pom"));
   }
 
   @Test
   public void testNamespaceUri_xmlPrefix() {
     assertEquals(XMLConstants.XML_NS_URI,
-        DataflowMavenModelFactory.POM_NS_CONTEXT.getNamespaceURI("xml"));
+        DataflowMavenModelFactory.pomNamespaceContext.getNamespaceURI("xml"));
   }
 
   @Test
   public void testNamespaceUri_noMapping() {
     assertEquals(XMLConstants.NULL_NS_URI,
-        DataflowMavenModelFactory.POM_NS_CONTEXT.getNamespaceURI("unmapped"));
+        DataflowMavenModelFactory.pomNamespaceContext.getNamespaceURI("unmapped"));
   }
 }

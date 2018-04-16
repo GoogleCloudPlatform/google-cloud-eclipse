@@ -192,7 +192,7 @@ public class DataflowMavenModel {
      * provides that namespace for the prefix 'pom'.
      */
     @VisibleForTesting
-    static final NamespaceContext POM_NS_CONTEXT =
+    static final NamespaceContext pomNamespaceContext =
         new MappedNamespaceContext("pom", "http://maven.apache.org/POM/4.0.0");
 
     private final DataflowDependencyManager dependencyManager;
@@ -228,7 +228,7 @@ public class DataflowMavenModel {
             StructuredModelManager.getModelManager().getModelForEdit(file);
         if (structuredModel instanceof IDOMModel) {
           XPath xpath = XPathFactory.newInstance().newXPath();
-          xpath.setNamespaceContext(POM_NS_CONTEXT);
+          xpath.setNamespaceContext(pomNamespaceContext);
           return new DataflowMavenModel(
               dependencyManager, xpath, file.getProject(), (IDOMModel) structuredModel);
         } else {

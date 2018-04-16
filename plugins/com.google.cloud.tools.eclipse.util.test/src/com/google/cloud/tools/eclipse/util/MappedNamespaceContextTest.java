@@ -24,24 +24,20 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import javax.xml.XMLConstants;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
 public class MappedNamespaceContextTest {
 
-  private static final MappedNamespaceContext SAMPLE_CONTEXT = new MappedNamespaceContext(
-      ImmutableMap.of(
-          "p", "scheme://multiple/prefixes/",
-          "prefix", "scheme://multiple/prefixes/",
-          "maven", "http://maven.apache.org/POM/4.0.0"));
+  private static final MappedNamespaceContext sampleContext = new MappedNamespaceContext()
+      .addMapping("p", "scheme://multiple/prefixes/")
+      .addMapping("prefix", "scheme://multiple/prefixes/")
+      .addMapping("maven", "http://maven.apache.org/POM/4.0.0");
 
   @Test
-  public void testConstructor_singleMappingNullPrefix() {
+  public void testConstructor_nullPrefix() {
     try {
       new MappedNamespaceContext(null, "scheme://host/path/");
       fail();
@@ -51,7 +47,7 @@ public class MappedNamespaceContextTest {
   }
 
   @Test
-  public void testConstructor_singleMappingNullUri() {
+  public void testConstructor_nullUri() {
     try {
       new MappedNamespaceContext("p", null);
       fail();
@@ -61,11 +57,9 @@ public class MappedNamespaceContextTest {
   }
 
   @Test
-  public void testConstructor_nullPrefix() {
+  public void testAddMapping_nullPrefix() {
     try {
-      Map<String, String> map = new HashMap<>();
-      map.put(null, "scheme://host/path/");
-      new MappedNamespaceContext(map);
+      sampleContext.addMapping(null, "scheme://host/path/");
       fail();
     } catch (IllegalArgumentException ex) {
       assertEquals("Prefix can't be null", ex.getMessage());
@@ -73,11 +67,9 @@ public class MappedNamespaceContextTest {
   }
 
   @Test
-  public void testConstructor_nullUri() {
+  public void testAddMapping_nullUri() {
     try {
-      Map<String, String> map = new HashMap<>();
-      map.put("p", null);
-      new MappedNamespaceContext(map);
+      sampleContext.addMapping("p", null);
       fail();
     } catch (IllegalArgumentException ex) {
       assertEquals("Namespace URI can't be null", ex.getMessage());
@@ -87,7 +79,7 @@ public class MappedNamespaceContextTest {
   @Test
   public void testGetNamespaceUri_nullPrefix() {
     try {
-      SAMPLE_CONTEXT.getNamespaceURI(null);
+      sampleContext.getNamespaceURI(null);
       fail();
     } catch (IllegalArgumentException ex) {
       assertEquals("Prefix can't be null", ex.getMessage());
@@ -96,19 +88,19 @@ public class MappedNamespaceContextTest {
 
   @Test
   public void testGetNamespaceUri() {
-    assertEquals("http://maven.apache.org/POM/4.0.0", SAMPLE_CONTEXT.getNamespaceURI("maven"));
-    assertEquals("scheme://multiple/prefixes/", SAMPLE_CONTEXT.getNamespaceURI("p"));
+    assertEquals("http://maven.apache.org/POM/4.0.0", sampleContext.getNamespaceURI("maven"));
+    assertEquals("scheme://multiple/prefixes/", sampleContext.getNamespaceURI("p"));
   }
 
   @Test
   public void testGetNamespaceUri_noMapping() {
-    assertEquals(XMLConstants.NULL_NS_URI, SAMPLE_CONTEXT.getNamespaceURI("html"));
+    assertEquals(XMLConstants.NULL_NS_URI, sampleContext.getNamespaceURI("html"));
   }
 
   @Test
   public void testGetPrefix_nullUri() {
     try {
-      SAMPLE_CONTEXT.getPrefix(null);
+      sampleContext.getPrefix(null);
       fail();
     } catch (IllegalArgumentException ex) {
       assertEquals("Namespace URI can't be null", ex.getMessage());
@@ -117,18 +109,18 @@ public class MappedNamespaceContextTest {
 
   @Test
   public void testGetPrefix() {
-    assertEquals("maven", SAMPLE_CONTEXT.getPrefix("http://maven.apache.org/POM/4.0.0"));
+    assertEquals("maven", sampleContext.getPrefix("http://maven.apache.org/POM/4.0.0"));
   }
 
   @Test
   public void testGetPrefix_noMapping() {
-    assertNull(SAMPLE_CONTEXT.getPrefix("ftp://no/mapping"));
+    assertNull(sampleContext.getPrefix("ftp://no/mapping"));
   }
 
   @Test
   public void testGetPrefixes_nullUri() {
     try {
-      SAMPLE_CONTEXT.getPrefixes(null);
+      sampleContext.getPrefixes(null);
       fail();
     } catch (IllegalArgumentException ex) {
       assertEquals("Namespace URI can't be null", ex.getMessage());
@@ -137,7 +129,7 @@ public class MappedNamespaceContextTest {
 
   @Test
   public void testGetPrefixes() {
-    Iterator<String> iterator = SAMPLE_CONTEXT.getPrefixes("scheme://multiple/prefixes/");
+    Iterator<String> iterator = sampleContext.getPrefixes("scheme://multiple/prefixes/");
     ImmutableList<String> prefixes = ImmutableList.copyOf(iterator);
     assertThat(prefixes, Matchers.hasItem("p"));
     assertThat(prefixes, Matchers.hasItem("prefix"));
@@ -145,13 +137,13 @@ public class MappedNamespaceContextTest {
 
   @Test
   public void testGetPrefixes_noMapping() {
-    assertFalse(SAMPLE_CONTEXT.getPrefixes("ftp://no/mapping").hasNext());
+    assertFalse(sampleContext.getPrefixes("ftp://no/mapping").hasNext());
   }
 
   @Test
   public void testGetPrefixes_immutable() {
     String mavenUri = "http://maven.apache.org/POM/4.0.0";
-    Iterator<String> iterator = SAMPLE_CONTEXT.getPrefixes(mavenUri);
+    Iterator<String> iterator = sampleContext.getPrefixes(mavenUri);
 
     assertTrue(iterator.hasNext());
     while (iterator.hasNext()) {
@@ -159,32 +151,21 @@ public class MappedNamespaceContextTest {
       iterator.remove();
     }
 
-    assertEquals("maven", SAMPLE_CONTEXT.getPrefix(mavenUri));
+    assertEquals("maven", sampleContext.getPrefix(mavenUri));
   }
-
-  @Test
-  public void testConstructor_snapshotsMap() {
-    Map<String, String> map = new HashMap<>();
-    map.put("echo", "echo://echo/uri");
-    MappedNamespaceContext context = new MappedNamespaceContext(map);
-    map.clear();  // clearing after constructing the context
-
-    assertEquals("echo", context.getPrefix("echo://echo/uri"));
-  }
-
 
   @Test
   public void testGetNamespaceUri_xmlPrefix() {
-    assertEquals("http://www.w3.org/XML/1998/namespace", SAMPLE_CONTEXT.getNamespaceURI("xml"));
+    assertEquals("http://www.w3.org/XML/1998/namespace", sampleContext.getNamespaceURI("xml"));
   }
 
   @Test
   public void testGetPrefix_xmlNamespace() {
-    assertEquals("xml", SAMPLE_CONTEXT.getPrefix("http://www.w3.org/XML/1998/namespace"));
+    assertEquals("xml", sampleContext.getPrefix("http://www.w3.org/XML/1998/namespace"));
   }
 
   @Test
-  public void testConstructor_singleMappingXmlPrefix() {
+  public void testConstructor_xmlPrefix() {
     try {
       new MappedNamespaceContext("xml", "http://example.com/");
       fail();
@@ -194,14 +175,27 @@ public class MappedNamespaceContextTest {
   }
 
   @Test
-  public void testConstructor_xmlPrefix() {
+  public void testAddMapping_xmlPrefix() {
     try {
-      Map<String, String> map = new HashMap<>();
-      map.put("xml", null);
-      new MappedNamespaceContext(map);
+      sampleContext.addMapping("xml", "http://example.com/");
       fail();
     } catch (IllegalArgumentException ex) {
       assertEquals("Cannot redefine the 'xml' prefix", ex.getMessage());
     }
+  }
+
+  @Test
+  public void testConstructor_noErrorWhenXmlPrefixWithCorrectUri() {
+    MappedNamespaceContext context = new MappedNamespaceContext(
+        "xml", "http://www.w3.org/XML/1998/namespace");
+    assertEquals("http://www.w3.org/XML/1998/namespace", context.getNamespaceURI("xml"));
+    assertEquals("xml", context.getPrefix("http://www.w3.org/XML/1998/namespace"));
+  }
+
+  @Test
+  public void testAddMapping_noErrorWhenXmlPrefixWithCorrectUri() {
+    sampleContext.addMapping("xml", "http://www.w3.org/XML/1998/namespace");
+    assertEquals("http://www.w3.org/XML/1998/namespace", sampleContext.getNamespaceURI("xml"));
+    assertEquals("xml", sampleContext.getPrefix("http://www.w3.org/XML/1998/namespace"));
   }
 }

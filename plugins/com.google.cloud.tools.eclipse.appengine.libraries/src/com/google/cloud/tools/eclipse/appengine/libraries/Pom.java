@@ -70,7 +70,7 @@ class Pom {
   // todo we're doing enough of this we should import or write some utilities
   private static final DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
   private static final TransformerFactory transformerFactory = TransformerFactory.newInstance();
-  private static final NamespaceContext MAVEN_4_NAMESPACE_CONTEXT =
+  private static final NamespaceContext maven4NamespaceContext =
       new MappedNamespaceContext("m", "http://maven.apache.org/POM/4.0.0");
   
   static {
@@ -96,7 +96,7 @@ class Pom {
       Pom pom = new Pom(document, pomFile);
       
       XPath xpath = xpathFactory.newXPath();
-      xpath.setNamespaceContext(MAVEN_4_NAMESPACE_CONTEXT);
+      xpath.setNamespaceContext(maven4NamespaceContext);
 
       NodeList bomNodes = (NodeList) xpath.evaluate(
           "//m:dependencyManagement/m:dependencies/m:dependency[m:type='pom'][m:scope='import']",
@@ -129,7 +129,7 @@ class Pom {
    */
   public Collection<Library> resolveLibraries(Collection<Library> availableLibraries) {
     XPath xpath = xpathFactory.newXPath();
-    xpath.setNamespaceContext(MAVEN_4_NAMESPACE_CONTEXT);
+    xpath.setNamespaceContext(maven4NamespaceContext);
 
     try {
       NodeList dependenciesNodes = (NodeList) xpath.evaluate(
@@ -184,7 +184,7 @@ class Pom {
     // m2e-core/org.eclipse.m2e.core.ui/src/org/eclipse/m2e/core/ui/internal/editing/AddDependencyOperation.java
     
     XPath xpath = xpathFactory.newXPath();
-    xpath.setNamespaceContext(MAVEN_4_NAMESPACE_CONTEXT);
+    xpath.setNamespaceContext(maven4NamespaceContext);
     
     Element dependencies;
     try {
