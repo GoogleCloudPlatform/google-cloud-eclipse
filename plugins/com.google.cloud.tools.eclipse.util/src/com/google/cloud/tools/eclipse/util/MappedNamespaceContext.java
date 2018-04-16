@@ -27,27 +27,30 @@ import javax.xml.namespace.NamespaceContext;
 
 public class MappedNamespaceContext implements NamespaceContext {
 
-  private final Map<String, String> prefixMapping;
+  private final Map<String, String> prefixMapping = new HashMap<>();
 
   public MappedNamespaceContext(String prefix, String namespaceUri) {
-    if (prefix == null) {
-      throw new IllegalArgumentException("Prefix can't be null");
-    } else if (namespaceUri == null) {
-      throw new IllegalArgumentException("Namespace URI can't be null");
-    }
-    prefixMapping = new HashMap<>();
+    checkMapping(prefix, namespaceUri);
+    prefixMapping.put("xml", XMLConstants.XML_NS_URI);
     prefixMapping.put(prefix, namespaceUri);
   }
 
   public MappedNamespaceContext(Map<String, String> prefixMapping) {
     for (Entry<String, String> entry : prefixMapping.entrySet()) {
-      if (entry.getKey() == null) {
-        throw new IllegalArgumentException("Prefix can't be null");
-      } else if (entry.getValue() == null) {
-        throw new IllegalArgumentException("Namespace URI can't be null");
-      }
+      checkMapping(entry.getKey(), entry.getValue());
     }
-    this.prefixMapping = new HashMap<>(prefixMapping);
+    this.prefixMapping.put("xml", XMLConstants.XML_NS_URI);
+    this.prefixMapping.putAll(prefixMapping);
+  }
+
+  private static void checkMapping(String prefix, String namespaceUri) {
+    if (prefix == null) {
+      throw new IllegalArgumentException("Prefix can't be null");
+    } else if (prefix.equals("xml")) {
+      throw new IllegalArgumentException("Cannot redefine the 'xml' prefix");
+    } else if (namespaceUri == null) {
+      throw new IllegalArgumentException("Namespace URI can't be null");
+    }
   }
 
   @Override

@@ -21,9 +21,7 @@ import com.google.cloud.tools.eclipse.dataflow.core.natures.DataflowJavaProjectN
 import com.google.cloud.tools.eclipse.util.MappedNamespaceContext;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
-import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
@@ -194,9 +192,8 @@ public class DataflowMavenModel {
      * provides that namespace for the prefix 'pom'.
      */
     @VisibleForTesting
-    static final NamespaceContext POM_NS_CONTEXT = new MappedNamespaceContext(ImmutableMap.of(
-        "pom", "http://maven.apache.org/POM/4.0.0",
-        "xml", XMLConstants.XML_NS_URI));
+    static final NamespaceContext POM_NS_CONTEXT =
+        new MappedNamespaceContext("pom", "http://maven.apache.org/POM/4.0.0");
 
     private final DataflowDependencyManager dependencyManager;
     private final IMavenProjectRegistry projectRegistry;

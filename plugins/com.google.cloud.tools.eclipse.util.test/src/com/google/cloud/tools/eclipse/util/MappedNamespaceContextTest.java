@@ -171,4 +171,37 @@ public class MappedNamespaceContextTest {
 
     assertEquals("echo", context.getPrefix("echo://echo/uri"));
   }
+
+
+  @Test
+  public void testGetNamespaceUri_xmlPrefix() {
+    assertEquals("http://www.w3.org/XML/1998/namespace", SAMPLE_CONTEXT.getNamespaceURI("xml"));
+  }
+
+  @Test
+  public void testGetPrefix_xmlNamespace() {
+    assertEquals("xml", SAMPLE_CONTEXT.getPrefix("http://www.w3.org/XML/1998/namespace"));
+  }
+
+  @Test
+  public void testConstructor_singleMappingXmlPrefix() {
+    try {
+      new MappedNamespaceContext("xml", "http://example.com/");
+      fail();
+    } catch (IllegalArgumentException ex) {
+      assertEquals("Cannot redefine the 'xml' prefix", ex.getMessage());
+    }
+  }
+
+  @Test
+  public void testConstructor_xmlPrefix() {
+    try {
+      Map<String, String> map = new HashMap<>();
+      map.put("xml", null);
+      new MappedNamespaceContext(map);
+      fail();
+    } catch (IllegalArgumentException ex) {
+      assertEquals("Cannot redefine the 'xml' prefix", ex.getMessage());
+    }
+  }
 }
