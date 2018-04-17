@@ -47,10 +47,16 @@ public class MappedNamespaceContext implements NamespaceContext {
       throw new IllegalArgumentException("Prefix can't be null");
     } else if (namespaceUri == null) {
       throw new IllegalArgumentException("Namespace URI can't be null");
+    }
+
+    // Prevent redefining special prefixes to a wrong URI.
+    if (prefix.equals("xmlns")) {
+      if (!namespaceUri.equals(XMLConstants.NULL_NS_URI)
+          && !namespaceUri.equals(XMLConstants.XMLNS_ATTRIBUTE_NS_URI)) {
+        throw new IllegalArgumentException("Cannot redefine the 'xmlns' prefix");
+      }
     } else if (prefix.equals("xml")) {
-      if (namespaceUri.equals(XMLConstants.XML_NS_URI)) {
-        return;  // Matches the correct URI; just return.
-      } else {
+      if (!namespaceUri.equals(XMLConstants.XML_NS_URI)) {
         throw new IllegalArgumentException("Cannot redefine the 'xml' prefix");
       }
     }

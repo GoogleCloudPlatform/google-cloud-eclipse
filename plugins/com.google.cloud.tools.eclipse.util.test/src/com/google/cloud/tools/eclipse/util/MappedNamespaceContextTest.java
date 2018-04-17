@@ -198,4 +198,53 @@ public class MappedNamespaceContextTest {
     assertEquals("http://www.w3.org/XML/1998/namespace", sampleContext.getNamespaceURI("xml"));
     assertEquals("xml", sampleContext.getPrefix("http://www.w3.org/XML/1998/namespace"));
   }
+
+  @Test
+  public void testConstructor_xmlnsPrefix() {
+    try {
+      new MappedNamespaceContext("xmlns", "http://example.com/");
+      fail();
+    } catch (IllegalArgumentException ex) {
+      assertEquals("Cannot redefine the 'xmlns' prefix", ex.getMessage());
+    }
+  }
+
+  @Test
+  public void testDeclareNamespace_xmlnsPrefix() {
+    try {
+      sampleContext.declareNamespace("xmlns", "http://example.com/");
+      fail();
+    } catch (IllegalArgumentException ex) {
+      assertEquals("Cannot redefine the 'xmlns' prefix", ex.getMessage());
+    }
+  }
+
+  @Test
+  public void testConstructor_noErrorWhenXmlnsPrefixWithCorrectUri() {
+    MappedNamespaceContext context = new MappedNamespaceContext(
+        "xmlns", "http://www.w3.org/2000/xmlns/");
+    assertEquals("http://www.w3.org/2000/xmlns/", context.getNamespaceURI("xmlns"));
+    assertEquals("xmlns", context.getPrefix("http://www.w3.org/2000/xmlns/"));
+  }
+
+  @Test
+  public void testDeclareNamespace_noErrorWhenXmlnsPrefixWithCorrectUri() {
+    sampleContext.declareNamespace("xmlns", "http://www.w3.org/2000/xmlns/");
+    assertEquals("http://www.w3.org/2000/xmlns/", sampleContext.getNamespaceURI("xmlns"));
+    assertEquals("xmlns", sampleContext.getPrefix("http://www.w3.org/2000/xmlns/"));
+  }
+
+  @Test
+  public void testConstructor_noErrorWhenXmlnsPrefixWithNullUri() {
+    MappedNamespaceContext context = new MappedNamespaceContext("xmlns", "");
+    assertEquals("", context.getNamespaceURI("xmlns"));
+    assertEquals("xmlns", context.getPrefix(""));
+  }
+
+  @Test
+  public void testDeclareNamespace_noErrorWhenXmlnsPrefixWithNulltUri() {
+    sampleContext.declareNamespace("xmlns", "");
+    assertEquals("", sampleContext.getNamespaceURI("xmlns"));
+    assertEquals("xmlns", sampleContext.getPrefix(""));
+  }
 }
