@@ -32,9 +32,9 @@ import org.junit.Test;
 public class MappedNamespaceContextTest {
 
   private static final MappedNamespaceContext sampleContext = new MappedNamespaceContext()
-      .addMapping("p", "scheme://multiple/prefixes/")
-      .addMapping("prefix", "scheme://multiple/prefixes/")
-      .addMapping("maven", "http://maven.apache.org/POM/4.0.0");
+      .declareNamespace("p", "scheme://multiple/prefixes/")
+      .declareNamespace("prefix", "scheme://multiple/prefixes/")
+      .declareNamespace("maven", "http://maven.apache.org/POM/4.0.0");
 
   @Test
   public void testConstructor_nullPrefix() {
@@ -57,9 +57,9 @@ public class MappedNamespaceContextTest {
   }
 
   @Test
-  public void testAddMapping_nullPrefix() {
+  public void testDeclareNamespace_nullPrefix() {
     try {
-      sampleContext.addMapping(null, "scheme://host/path/");
+      sampleContext.declareNamespace(null, "scheme://host/path/");
       fail();
     } catch (IllegalArgumentException ex) {
       assertEquals("Prefix can't be null", ex.getMessage());
@@ -67,9 +67,9 @@ public class MappedNamespaceContextTest {
   }
 
   @Test
-  public void testAddMapping_nullUri() {
+  public void testDeclareNamespace_nullUri() {
     try {
-      sampleContext.addMapping("p", null);
+      sampleContext.declareNamespace("p", null);
       fail();
     } catch (IllegalArgumentException ex) {
       assertEquals("Namespace URI can't be null", ex.getMessage());
@@ -175,9 +175,9 @@ public class MappedNamespaceContextTest {
   }
 
   @Test
-  public void testAddMapping_xmlPrefix() {
+  public void testDeclareNamespace_xmlPrefix() {
     try {
-      sampleContext.addMapping("xml", "http://example.com/");
+      sampleContext.declareNamespace("xml", "http://example.com/");
       fail();
     } catch (IllegalArgumentException ex) {
       assertEquals("Cannot redefine the 'xml' prefix", ex.getMessage());
@@ -193,8 +193,8 @@ public class MappedNamespaceContextTest {
   }
 
   @Test
-  public void testAddMapping_noErrorWhenXmlPrefixWithCorrectUri() {
-    sampleContext.addMapping("xml", "http://www.w3.org/XML/1998/namespace");
+  public void testDeclareNamespace_noErrorWhenXmlPrefixWithCorrectUri() {
+    sampleContext.declareNamespace("xml", "http://www.w3.org/XML/1998/namespace");
     assertEquals("http://www.w3.org/XML/1998/namespace", sampleContext.getNamespaceURI("xml"));
     assertEquals("xml", sampleContext.getPrefix("http://www.w3.org/XML/1998/namespace"));
   }

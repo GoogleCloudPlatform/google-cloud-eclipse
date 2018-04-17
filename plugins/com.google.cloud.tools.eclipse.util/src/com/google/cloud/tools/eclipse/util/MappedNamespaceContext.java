@@ -26,22 +26,22 @@ import javax.xml.namespace.NamespaceContext;
 
 public class MappedNamespaceContext implements NamespaceContext {
 
-  private final Map<String, String> prefixMapping = new HashMap<>();
+  private final Map<String, String> prefixMap = new HashMap<>();
 
   public MappedNamespaceContext() {
-    prefixMapping.put("xml", XMLConstants.XML_NS_URI);
+    prefixMap.put("xml", XMLConstants.XML_NS_URI);
   }
 
   public MappedNamespaceContext(String prefix, String namespaceUri) {
     this();
-    addMappingInternal(prefix, namespaceUri);
+    addMapping(prefix, namespaceUri);
   }
 
-  public MappedNamespaceContext addMapping(String prefix, String namespaceUri) {
-    return addMappingInternal(prefix, namespaceUri);
+  public MappedNamespaceContext declareNamespace(String prefix, String namespaceUri) {
+    return addMapping(prefix, namespaceUri);
   }
 
-  private MappedNamespaceContext addMappingInternal(String prefix, String namespaceUri) {
+  private MappedNamespaceContext addMapping(String prefix, String namespaceUri) {
     if (prefix == null) {
       throw new IllegalArgumentException("Prefix can't be null");
     } else if (namespaceUri == null) {
@@ -54,7 +54,7 @@ public class MappedNamespaceContext implements NamespaceContext {
       }
     }
 
-    prefixMapping.put(prefix, namespaceUri);
+    prefixMap.put(prefix, namespaceUri);
     return this;
   }
 
@@ -63,7 +63,7 @@ public class MappedNamespaceContext implements NamespaceContext {
     if (prefix == null) {
       throw new IllegalArgumentException("Prefix can't be null");
     }
-    return prefixMapping.getOrDefault(prefix, XMLConstants.NULL_NS_URI);
+    return prefixMap.getOrDefault(prefix, XMLConstants.NULL_NS_URI);
   }
 
   @Override
@@ -77,7 +77,7 @@ public class MappedNamespaceContext implements NamespaceContext {
     if (namespaceURI == null) {
       throw new IllegalArgumentException("Namespace URI can't be null");
     }
-    List<String> prefixes = prefixMapping.entrySet().stream()
+    List<String> prefixes = prefixMap.entrySet().stream()
         .filter(entry -> entry.getValue().equals(namespaceURI))
         .map(entry -> entry.getKey())
         .collect(Collectors.toList());
