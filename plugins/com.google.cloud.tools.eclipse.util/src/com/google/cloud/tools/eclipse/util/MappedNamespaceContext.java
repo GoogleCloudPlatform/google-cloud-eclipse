@@ -38,24 +38,24 @@ public class MappedNamespaceContext implements NamespaceContext {
   }
 
   public MappedNamespaceContext declareNamespace(String prefix, String namespaceUri) {
-    return addMapping(prefix, namespaceUri);
+    addMapping(prefix, namespaceUri);
+    return this;
   }
 
-  private MappedNamespaceContext addMapping(String prefix, String namespaceUri) {
+  private void addMapping(String prefix, String namespaceUri) {
     if (prefix == null) {
       throw new IllegalArgumentException("Prefix can't be null");
     } else if (namespaceUri == null) {
       throw new IllegalArgumentException("Namespace URI can't be null");
     } else if (prefix.equals("xml")) {
       if (namespaceUri.equals(XMLConstants.XML_NS_URI)) {
-        return this;  // Matches the correct URI; just return.
+        return;  // Matches the correct URI; just return.
       } else {
         throw new IllegalArgumentException("Cannot redefine the 'xml' prefix");
       }
     }
 
     prefixMap.put(prefix, namespaceUri);
-    return this;
   }
 
   @Override
