@@ -25,9 +25,9 @@ import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.common.base.Stopwatch;
 import java.io.File;
-import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -57,26 +57,17 @@ public class LocalAppEnginePublishOperationTest {
   private IServer server;
 
   @Before
-  public void setUp() throws IOException, CoreException, InterruptedException {
+  public void setUp() throws Exception {
     projects = ProjectUtils.importProjects(getClass(),
         "projects/test-submodules.zip", true /* checkBuildErrors */, null);
     assertEquals(2, projects.size());
     serverProject = projects.get("sox-server");
     sharedProject = projects.get("sox-shared");
+    serverModule = ServerUtil.getModule(serverProject);
+    sharedModule = ServerUtil.getModule(serverProject);
 
     // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1798
-    Stopwatch stopwatch = Stopwatch.createStarted();
-    for (int i = 0; i < 100; i++) {
-      serverModule = ServerUtil.getModule(serverProject);
-      sharedModule = ServerUtil.getModule(sharedProject);
-      if (serverModule != null && sharedModule != null
-          && serverProject.getFile("bin/sox/server/GreetingServiceImpl.class").exists()
-          && sharedProject.getFile("bin/sox/shared/GreetingService.class").exists()) {
-        break;
-      }
-      Thread.sleep(100);
-      ThreadDumpingWatchdog.report("Until modules are fully ready", stopwatch);
-    }
+    waitUntilProjectsReady();
 
     // To diagnose https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1798.
     logModules(serverProject);
@@ -166,4 +157,41 @@ public class LocalAppEnginePublishOperationTest {
       }
     }
   }
+
+  private void waitUntilProjectsReady() throws Exception {
+    waitUntilCondition("Until fully built", this::classFilesExist, () -> Thread.sleep(100), 100);
+    waitUntilCondition("Until modules fully ready", this::modulesReady, this::reopenProjects, 10);
+  }
+
+  private static void waitUntilCondition(String comment, BooleanSupplier condition,
+      ThrowingRunnable interimAction, int tries) throws Exception {
+    Stopwatch stopwatch = Stopwatch.createStarted();
+    for (int i = 0; i < tries && !condition.getAsBoolean(); i++) {
+      ThreadDumpingWatchdog.report(comment, stopwatch);
+      interimAction.run();
+    }
+  }
+
+  private boolean classFilesExist() {
+    return serverProject.getFile("bin/sox/server/GreetingServiceImpl.class").exists()
+        && sharedProject.getFile("bin/sox/shared/GreetingService.class").exists();
+  }
+
+  private boolean modulesReady() {
+    return serverModule != null && sharedModule != null;
+  }
+
+  private void reopenProjects() throws CoreException {
+    for (IProject project : projects.values()) {
+      project.close(null);
+      project.open(null);
+    }
+    ProjectUtils.waitForProjects(projects.values());
+    serverModule = ServerUtil.getModule(serverProject);
+    sharedModule = ServerUtil.getModule(sharedProject);
+  }
+
+  private interface ThrowingRunnable {
+    void run() throws Exception;
+  };
 }

@@ -73,9 +73,8 @@ public class GoogleLoginService implements IGoogleLoginService {
    * as an OSGi service.
    */
   protected void activate() {
-    final IWorkbench workbench = PlatformUI.getWorkbench();
-    LoginServiceLogger loginServiceLogger = new LoginServiceLogger();
     IShellProvider shellProvider = () -> {
+      IWorkbench workbench = PlatformUI.getWorkbench();
       IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
       if (window != null && window.getShell() != null) {
         return window.getShell();
@@ -83,7 +82,8 @@ public class GoogleLoginService implements IGoogleLoginService {
       return workbench.getDisplay().getActiveShell();
     };
 
-    LoginServiceUi uiFacade = new LoginServiceUi(workbench, shellProvider, workbench.getDisplay());
+    LoginServiceLogger loginServiceLogger = new LoginServiceLogger();
+    LoginServiceUi uiFacade = new LoginServiceUi(shellProvider);
     OAuthDataStore dataStore =
         new JavaPreferenceOAuthDataStore(PREFERENCE_PATH_OAUTH_DATA_STORE, loginServiceLogger);
     loginState = new GoogleLoginState(

@@ -16,6 +16,8 @@
 
 package com.google.cloud.tools.eclipse.usagetracker;
 
+import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
+import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorDialogErrorHandler;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.window.Window;
@@ -25,6 +27,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
@@ -93,6 +96,12 @@ public class OptInDialog extends Dialog {
 
     Label label = new Label(container, SWT.WRAP);
     label.setText(Messages.getString("OPT_IN_DIALOG_TEXT"));
+
+    // The privacy policy disclaimer with a clickable link
+    Link privacyDisclaimer = new Link(container, SWT.NONE);
+    privacyDisclaimer.setText(Messages.getString("PREFERENCE_PAGE_PRIVACY_DISCLAIMER"));
+    privacyDisclaimer.addSelectionListener(
+        new OpenUriSelectionListener(new ErrorDialogErrorHandler(container.getShell())));
 
     return container;
   }
