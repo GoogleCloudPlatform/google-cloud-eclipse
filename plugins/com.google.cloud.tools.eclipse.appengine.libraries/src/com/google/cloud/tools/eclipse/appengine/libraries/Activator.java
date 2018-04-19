@@ -16,9 +16,12 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IElementChangedListener;
@@ -26,7 +29,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.ui.progress.UIJob;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
@@ -47,13 +49,16 @@ public class Activator implements BundleActivator {
         case IJavaElement.JAVA_PROJECT:
           if ((delta.getFlags() & IJavaElementDelta.F_CLASSPATH_CHANGED) != 0) {
             final IJavaProject javaProject = (IJavaProject) delta.getElement();
-            Job updateContainerStateJob = new UIJob("Updating Google Cloud libraries") {
+            Job updateContainerStateJob = new WorkspaceJob("Updating Google Cloud libraries") {
               @Override
-              public IStatus runInUIThread(IProgressMonitor monitor) {
+              public IStatus runInWorkspace(IProgressMonitor monitor) {
                 BuildPath.checkLibraryList(javaProject, null);
                 return Status.OK_STATUS;
               }
             };
+            IWorkspace workspace = javaProject.getProject().getWorkspace();
+            ISchedulingRule buildRule = workspace.getRuleFactory().buildRule();
+            updateContainerStateJob.setRule(buildRule);
             updateContainerStateJob.setSystem(true);
             updateContainerStateJob.schedule();
           }

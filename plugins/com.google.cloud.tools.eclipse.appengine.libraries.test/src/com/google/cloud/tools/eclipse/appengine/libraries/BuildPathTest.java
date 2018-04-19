@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
@@ -90,32 +91,42 @@ public class BuildPathTest {
 
   @Test
   public void testCheckLibraries() throws CoreException {
-    IPath librariesIdPath =
-        new Path(".settings").append(LibraryClasspathContainer.CONTAINER_PATH_PREFIX)
-            .append("_libraries.container");
+    // Activator.listener monitors Java classpath changes and schedule concurrent jobs that call
+    // "checkLibraryList()", which is the method being tested here. Prevent concurrent updates
+    // to avoid flakiness: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2758
+    ISchedulingRule buildRule = project.getProject().getWorkspace().getRuleFactory().buildRule();
+    Job.getJobManager().beginRule(buildRule, null);
 
-    // original classpath without our master-library container
-    IClasspathEntry[] originalClasspath = project.getRawClasspath();
+    try {
+      IPath librariesIdPath =
+          new Path(".settings").append(LibraryClasspathContainer.CONTAINER_PATH_PREFIX)
+              .append("_libraries.container");
 
-    Library library = new Library("libraryId");
-    List<Library> libraries = new ArrayList<>();
-    libraries.add(library);
+      // original classpath without our master-library container
+      IClasspathEntry[] originalClasspath = project.getRawClasspath();
 
-    BuildPath.addNativeLibrary(project, libraries, monitor);
-    assertEquals(initialClasspathSize + 1, project.getRawClasspath().length);
-    assertNotNull(BuildPath.findMasterContainer(project));
-    assertTrue(project.getProject().exists(librariesIdPath));
+      Library library = new Library("libraryId");
+      List<Library> libraries = new ArrayList<>();
+      libraries.add(library);
 
-    // master-library container exists, so checkLibraryList should make no change
-    BuildPath.checkLibraryList(project, null);
-    assertEquals(initialClasspathSize + 1, project.getRawClasspath().length);
-    assertNotNull(BuildPath.findMasterContainer(project));
-    assertTrue(project.getProject().exists(librariesIdPath));
+      BuildPath.addNativeLibrary(project, libraries, monitor);
+      assertEquals(initialClasspathSize + 1, project.getRawClasspath().length);
+      assertNotNull(BuildPath.findMasterContainer(project));
+      assertTrue(project.getProject().exists(librariesIdPath));
 
-    // remove the master-library container, so checkLibraryList should remove the library ids file
-    project.setRawClasspath(originalClasspath, null);
-    BuildPath.checkLibraryList(project, null);
-    assertFalse(librariesIdPath + " not removed", project.getProject().exists(librariesIdPath));
+      // master-library container exists, so checkLibraryList should make no change
+      BuildPath.checkLibraryList(project, null);
+      assertEquals(initialClasspathSize + 1, project.getRawClasspath().length);
+      assertNotNull(BuildPath.findMasterContainer(project));
+      assertTrue(project.getProject().exists(librariesIdPath));
+
+      // remove the master-library container, so checkLibraryList should remove the library ids file
+      project.setRawClasspath(originalClasspath, null);
+      BuildPath.checkLibraryList(project, null);
+      assertFalse(librariesIdPath + " not removed", project.getProject().exists(librariesIdPath));
+    } finally {
+      Job.getJobManager().endRule(buildRule);
+    }
   }
 
   @Test
