@@ -42,7 +42,7 @@ public class AppYamlValidatorTest {
 
   @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
-  @Mock private IObservableValue appYamlPath;
+  @Mock private IObservableValue<String> appYamlPath;
 
   private IPath basePath;
   private AppYamlValidator pathValidator;

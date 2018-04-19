@@ -48,7 +48,9 @@ public class BugReportCommandHandlerTest {
         + "2.\\+If\\+the\\+problem\\+occurs\\+when\\+you\\+deploy\\+or\\+after\\+the\\+application\\+has\\+been\\+deployed%2C\\+try\\+deploying\\+from\\+the\\+command\\+line\\+using\\+gcloud\\+or\\+Maven."
         + "\\+If\\+the\\+problem\\+does\\+not\\+go\\+away%2C\\+then\\+the\\+issue\\+is\\+likely\\+not\\+with\\+Cloud\\+Tools\\+for\\+Eclipse.%0A%0A"
         + "-\\+Cloud\\+Tools\\+for\\+Eclipse\\+version%3A\\+(?<toolVersion>.*)%0A"
-        + "-\\+Google\\+Cloud\\+SDK\\+version%3A\\+(?<gcloudVersion>.*)%0A"
+        // Must be a non-managed SDK in the testing environment; otherwise, it means a new SDK is
+        // being downloaded automatically during tests.
+        + "-\\+Google\\+Cloud\\+SDK\\+version%3A\\+(?<gcloudVersion>[\\d.]*)\\+%28non-managed%29%0A"
         + "-\\+Eclipse\\+version%3A\\+(?<eclipseVersion>.*)%0A"
         + "-\\+OS%3A\\+(?<os>.*)%0A"
         + "-\\+Java\\+version%3A\\+(?<javaVersion>.*)%0A%0A"

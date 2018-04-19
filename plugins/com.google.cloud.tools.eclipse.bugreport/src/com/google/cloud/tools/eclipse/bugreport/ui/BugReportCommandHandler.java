@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.bugreport.ui;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.escape.Escaper;
@@ -43,10 +44,10 @@ public class BugReportCommandHandler extends AbstractHandler {
       + "If the problem does not go away, then the issue is likely "
       + "not with Cloud Tools for Eclipse.\n\n"
       + "- Cloud Tools for Eclipse version: {0}\n"
-      + "- Google Cloud SDK version: {1}\n"
-      + "- Eclipse version: {2}\n"
-      + "- OS: {3} {4}\n"
-      + "- Java version: {5}\n"
+      + "- Google Cloud SDK version: {1} {2}\n"
+      + "- Eclipse version: {3}\n"
+      + "- OS: {4} {5}\n"
+      + "- Java version: {6}\n"
       + "\n"
       + "**What did you do?**\n"
       + "\n"
@@ -66,12 +67,17 @@ public class BugReportCommandHandler extends AbstractHandler {
   @VisibleForTesting
   static String formatReportUrl() {
     String body = MessageFormat.format(BODY_TEMPLATE, CloudToolsInfo.getToolsVersion(),
-        getCloudSdkVersion(), CloudToolsInfo.getEclipseVersion(),
+        getCloudSdkVersion(), getCloudSdkManagementOption(),
+        CloudToolsInfo.getEclipseVersion(),
         System.getProperty("os.name"), System.getProperty("os.version"),
         System.getProperty("java.version"));
 
     Escaper escaper = UrlEscapers.urlFormParameterEscaper();
     return BUG_REPORT_URL + "?body=" + escaper.escape(body);
+  }
+
+  private static Object getCloudSdkManagementOption() {
+    return CloudSdkPreferences.isAutoManaging() ? "(auto-managed)" : "(non-managed)";
   }
 
   private static String getCloudSdkVersion() {

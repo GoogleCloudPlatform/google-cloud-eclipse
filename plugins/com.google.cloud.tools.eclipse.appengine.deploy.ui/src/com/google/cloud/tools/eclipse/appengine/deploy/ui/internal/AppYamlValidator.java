@@ -45,9 +45,10 @@ import org.yaml.snakeyaml.scanner.ScannerException;
 public class AppYamlValidator extends FixedMultiValidator {
 
   private final IPath basePath;
-  private final IObservableValue appYamlPath;
+  private final IObservableValue<String> appYamlPath;
 
-  public AppYamlValidator(IPath basePath, IObservableValue appYamlPath) {
+  @VisibleForTesting
+  AppYamlValidator(IPath basePath, IObservableValue<String> appYamlPath) {
     Preconditions.checkArgument(basePath.isAbsolute(), "basePath is not absolute.");
     Preconditions.checkArgument(String.class.equals(appYamlPath.getValueType()));
     this.basePath = basePath;
@@ -67,7 +68,7 @@ public class AppYamlValidator extends FixedMultiValidator {
       return ValidationStatus.error(Messages.getString("error.app.yaml.empty"));
     }
 
-    File appYaml = new File((String) appYamlPath.getValue());
+    File appYaml = new File(appYamlPath.getValue());
     if (!appYaml.isAbsolute()) {
       appYaml = new File(basePath + "/" + appYaml);
     }

@@ -21,7 +21,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowMavenModel.DataflowMavenModelFactory;
+import com.google.cloud.tools.eclipse.util.MappedNamespaceContext;
+import java.io.ByteArrayInputStream;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
@@ -39,12 +45,6 @@ import org.mockito.MockitoAnnotations;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import java.io.ByteArrayInputStream;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathFactory;
 
 /**
  * Tests for {@link DataflowMavenModel}.
@@ -170,7 +170,8 @@ public class DataflowMavenModelTest {
         new ByteArrayInputStream(simplifiedModel.getBytes()));
 
     XPath realXpath = XPathFactory.newInstance().newXPath();
-    realXpath.setNamespaceContext(DataflowMavenModelFactory.POM_NS_CONTEXT);
+    realXpath.setNamespaceContext(
+        new MappedNamespaceContext("pom", "http://maven.apache.org/POM/4.0.0"));
     NodeList matchingNodes =
         DataflowMavenModel.getMatchingNodes(realXpath,
             simpleModelDocument, DataflowMavenModel.DATAFLOW_VERSION_XPATH_EXPR);

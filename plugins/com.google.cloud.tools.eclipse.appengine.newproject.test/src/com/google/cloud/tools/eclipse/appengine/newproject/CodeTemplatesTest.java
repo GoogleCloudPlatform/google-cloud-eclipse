@@ -20,6 +20,7 @@ import static org.junit.Assert.assertFalse;
 
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import com.google.cloud.tools.eclipse.util.MappedNamespaceContext;
 import com.google.cloud.tools.eclipse.util.Templates;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -242,7 +243,7 @@ public class CodeTemplatesTest {
     Assert.assertTrue(artifactVersion.compareTo(expected) >= 0);
     
     XPath xpath = XPathFactory.newInstance().newXPath();
-    xpath.setNamespaceContext(new Maven4NamespaceContext());
+    xpath.setNamespaceContext(new MappedNamespaceContext("m", "http://maven.apache.org/POM/4.0.0"));
     NodeList dependencyManagementNodes = (NodeList) xpath.evaluate(
         "./m:dependencyManagement",
         root,
