@@ -213,8 +213,6 @@ public class DataflowPipelineLaunchDelegateTest {
         mockILaunchConfigurationWorkingCopy(environmentVariables);
 
     dataflowDelegate.setLoginCredential(workingCopy, "bogus@example.com");
-    verify(workingCopy).setAttribute(
-        eq(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES), variableMapCaptor.capture());
     assertTrue(environmentVariables.isEmpty());
   }
 
