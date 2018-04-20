@@ -21,6 +21,7 @@ mvn -V -B --settings kokoro\windows\m2-settings.xml ^
     -N io.takari:maven:wrapper -Dmaven=3.5.0
 call mvnw.cmd -V -B --settings kokoro\windows\m2-settings.xml ^
               --fail-at-end -Ptravis verify
+set MAVEN_BUILD_EXIT=%ERRORLEVEL%
 @echo on
 
 rem Delete files under "T:\src" to make Kokoro exit quickly. "rsync" will be
@@ -33,4 +34,4 @@ for /f %%i in ('dir /b /a:D ^| findstr /v kokoro') do rmdir /s /q %%i
 rem Clean "T:\src\gfile" too.
 rmdir /s /q %KOKORO_GFILE_DIR%
 
-exit /b %ERRORLEVEL%
+exit /b %MAVEN_BUILD_EXIT%
