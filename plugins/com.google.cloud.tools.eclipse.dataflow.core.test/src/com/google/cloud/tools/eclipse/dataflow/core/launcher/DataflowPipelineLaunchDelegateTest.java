@@ -201,6 +201,16 @@ public class DataflowPipelineLaunchDelegateTest {
   }
 
   @Test
+  public void testSetLoginCredential_originalEnvironmentMapUntouched() throws CoreException {
+    Map<String, String> environmentVariables = new HashMap<>();
+    ILaunchConfigurationWorkingCopy workingCopy =
+        mockILaunchConfigurationWorkingCopy(environmentVariables);
+
+    dataflowDelegate.setLoginCredential(workingCopy, "bogus@example.com");
+    assertTrue(environmentVariables.isEmpty());
+  }
+
+  @Test
   public void testLaunchWithLaunchConfigurationWithIncompleteArgsThrowsIllegalArgumentException()
       throws CoreException {
     ILaunchConfiguration configuration = mockILaunchConfiguration();

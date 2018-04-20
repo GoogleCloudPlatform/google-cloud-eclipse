@@ -198,9 +198,10 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
       CredentialHelper.toJsonFile(credential, jsonCredential);
       jsonCredential.toFile().deleteOnExit();
 
-      variableMap.put(GOOGLE_APPLICATION_CREDENTIALS_ENVIRONMENT_VARIABLE,
+      Map<String, String> variableMapCopy = new HashMap<>(variableMap);
+      variableMapCopy.put(GOOGLE_APPLICATION_CREDENTIALS_ENVIRONMENT_VARIABLE,
           jsonCredential.toAbsolutePath().toString());
-      workingCopy.setAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, variableMap);
+      workingCopy.setAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, variableMapCopy);
     } catch (IOException ex) {
       throw new CoreException(
           new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, ex.getMessage(), ex));
