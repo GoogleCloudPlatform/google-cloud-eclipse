@@ -69,6 +69,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -79,6 +80,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class DataflowPipelineLaunchDelegateTest {
   private DataflowPipelineLaunchDelegate dataflowDelegate;
   private final NullProgressMonitor monitor = new NullProgressMonitor();
+
+  @Captor private ArgumentCaptor<Map<String, String>> variableMapCaptor;
 
   @Mock
   private DataflowDependencyManager dependencyManager;
@@ -188,7 +191,10 @@ public class DataflowPipelineLaunchDelegateTest {
         mockILaunchConfigurationWorkingCopy(environmentVariables);
 
     dataflowDelegate.setLoginCredential(workingCopy, "bogus@example.com");
-    String jsonCredentialPath = environmentVariables.get("GOOGLE_APPLICATION_CREDENTIALS");
+
+    verify(workingCopy).setAttribute(
+        eq(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES), variableMapCaptor.capture());
+    String jsonCredentialPath = variableMapCaptor.getValue().get("GOOGLE_APPLICATION_CREDENTIALS");
     assertNotNull(jsonCredentialPath);
     assertThat(jsonCredentialPath, containsString("google-ct4e-"));
     assertThat(jsonCredentialPath, endsWith(".json"));
@@ -207,6 +213,8 @@ public class DataflowPipelineLaunchDelegateTest {
         mockILaunchConfigurationWorkingCopy(environmentVariables);
 
     dataflowDelegate.setLoginCredential(workingCopy, "bogus@example.com");
+    verify(workingCopy).setAttribute(
+        eq(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES), variableMapCaptor.capture());
     assertTrue(environmentVariables.isEmpty());
   }
 
@@ -278,7 +286,9 @@ public class DataflowPipelineLaunchDelegateTest {
 
     dataflowDelegate.launch(configuration, "run" /* mode */, mock(ILaunch.class), monitor);
 
-    String jsonCredentialPath = environmentVariables.get("GOOGLE_APPLICATION_CREDENTIALS");
+    verify(expectedConfiguration).setAttribute(
+        eq(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES), variableMapCaptor.capture());
+    String jsonCredentialPath = variableMapCaptor.getValue().get("GOOGLE_APPLICATION_CREDENTIALS");
     assertNotNull(jsonCredentialPath);
     assertTrue(Files.exists(Paths.get(jsonCredentialPath)));
   }
