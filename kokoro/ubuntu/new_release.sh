@@ -15,6 +15,7 @@ gcloud components install app-engine-java --quiet
 echo "OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID}"
 echo "OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET}"
 echo "ANALYTICS_TRACKING_ID: ${ANALYTICS_TRACKING_ID}"
+echo "CT4E_DISPLAY_VERSION_PREFIX: ${CT4E_DISPLAY_VERSION_PREFIX}"
 
 # Exit if undefined (zero-length).
 test -n "${OAUTH_CLIENT_ID}"
@@ -29,8 +30,8 @@ cd git/google-cloud-eclipse
 #
 # https://github.com/GoogleCloudPlatform/google-cloud-eclipse/pull/2363#issuecomment-327844378
 # https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2211
-readonly CT4E_DISPLAY_VERSION=$( \
-  xmlstarlet sel -t -v '/product/@version' gcp-repo/metadata.product )
+readonly CT4E_DISPLAY_VERSION="${CT4E_DISPLAY_VERSION_PREFIX}$( \
+  xmlstarlet sel -t -v '/product/@version' gcp-repo/metadata.product )"
 readonly NO_QUALIFIER_VERSION="${CT4E_DISPLAY_VERSION%.qualifier}"
 xmlstarlet ed --inplace -u '/product/@version' -v "${NO_QUALIFIER_VERSION}" \
   gcp-repo/metadata.product
