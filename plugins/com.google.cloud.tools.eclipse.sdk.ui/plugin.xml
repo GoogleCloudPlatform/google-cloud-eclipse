@@ -13,7 +13,7 @@
    <extension
          point="org.eclipse.ui.startup">
       <startup
-            class="com.google.cloud.tools.eclipse.sdk.ui.InstallManagedCloudSdkStartup">
+            class="com.google.cloud.tools.eclipse.sdk.ui.ManagedCloudSdkStartup">
       </startup>
    </extension>
    <extension
@@ -22,7 +22,7 @@
             categoryId="com.google.cloud.tools.eclipse.ui.commands"
             defaultHandler="com.google.cloud.tools.eclipse.sdk.ui.UpdateManagedCloudSdkHandler"
             id="com.google.cloud.tools.eclipse.sdk.ui.updateManagedCloudSdk"
-            name="Update Managed Google Cloud SDK">
+            name="%update.managed.sdk">
       </command>
    </extension>
 </plugin>

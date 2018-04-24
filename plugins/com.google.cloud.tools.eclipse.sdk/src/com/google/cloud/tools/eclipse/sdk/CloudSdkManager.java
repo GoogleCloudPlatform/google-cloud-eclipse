@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -37,6 +38,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 
 public class CloudSdkManager {
+  private static final Logger logger = Logger.getLogger(CloudSdkManager.class.getName());
 
   private static final String OPTION_MANAGED_CLOUD_SDK =
       "com.google.cloud.tools.eclipse.sdk/enable.managed.cloud.sdk";
@@ -50,8 +52,9 @@ public class CloudSdkManager {
 
   public static synchronized CloudSdkManager getInstance() {
     if (instance == null) {
-      instance = new CloudSdkManager(
-          new ReentrantReadWriteLock(), CloudSdkManager::getManagedCloudSdkDebugOption);
+      instance =
+          new CloudSdkManager(
+              new ReentrantReadWriteLock(), CloudSdkManager::getManagedCloudSdkDebugOption);
     }
     return instance;
   }
@@ -136,8 +139,8 @@ public class CloudSdkManager {
         // may pass while the SDK is being installed and in an incomplete state.
         // Mark installation failure as non-ERROR to avoid job failure reporting dialogs from the
         // overly helpful Eclipse UI ProgressManager
-        CloudSdkInstallJob installJob = new CloudSdkInstallJob(
-            consoleStream, modifyLock, IStatus.WARNING);
+        CloudSdkInstallJob installJob =
+            new CloudSdkInstallJob(consoleStream, modifyLock, IStatus.WARNING);
 
         IStatus result = runInstallJob(consoleStream, installJob, monitor);
         if (!result.isOK()) {
