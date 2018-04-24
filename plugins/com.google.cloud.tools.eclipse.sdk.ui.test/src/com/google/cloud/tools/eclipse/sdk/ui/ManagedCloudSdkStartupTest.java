@@ -52,8 +52,8 @@ public class ManagedCloudSdkStartupTest {
   public void testInstallIfNotInstalled()
       throws ManagedSdkVerificationException, ManagedSdkVersionMismatchException {
     doReturn(false).when(installation).isInstalled();
+    
     ManagedCloudSdkStartup startup = new ManagedCloudSdkStartup(workbench);
-
     startup.checkInstallation(sdkManager, installation, null);
     verify(sdkManager).installManagedSdkAsync();
     verify(installation).isInstalled();
@@ -65,8 +65,8 @@ public class ManagedCloudSdkStartupTest {
       throws ManagedSdkVerificationException, ManagedSdkVersionMismatchException {
     doReturn(true).when(installation).isInstalled();
     doReturn(false).when(installation).isUpToDate();
+    
     ManagedCloudSdkStartup startup = new ManagedCloudSdkStartup(workbench);
-
     startup.checkInstallation(sdkManager, installation, null);
     verify(installation).isInstalled();
     verify(installation).isUpToDate();
@@ -82,8 +82,8 @@ public class ManagedCloudSdkStartupTest {
       throws ManagedSdkVerificationException, ManagedSdkVersionMismatchException {
     doReturn(true).when(installation).isInstalled();
     doReturn(true).when(installation).isUpToDate();
-    ManagedCloudSdkStartup startup = new ManagedCloudSdkStartup();
 
+    ManagedCloudSdkStartup startup = new ManagedCloudSdkStartup(workbench);
     startup.checkInstallation(sdkManager, installation, null);
     verify(installation).isInstalled();
     verify(installation).isUpToDate();

@@ -40,10 +40,10 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.WorkbenchJob;
 
 /**
- * A simple startup task for triggering events relating to the managed Google Cloud SDK, providing
- * it's enabled. If the Google Cloud SDK is not installed, then it silently triggers installation of
- * the Google Cloud SDK. Otherwise it checks if the managed installation is up-to-date and if not,
- * notifies the user to prompt an update.
+ * A simple startup task for triggering events relating to the managed Google Cloud SDK, when
+ * enabled. If the Google Cloud SDK is not installed, then we silently trigger installation of the
+ * Google Cloud SDK. Otherwise we check if the managed installation is up-to-date and if not, notify
+ * the user of the update.
  *
  * <p>earlyStartup() is called on a non-UI worker thread and runs before the Eclipse Workbench is
  * actually rendered. Since installing the SDK takes some time, we launch a WorkspaceJob to wait
