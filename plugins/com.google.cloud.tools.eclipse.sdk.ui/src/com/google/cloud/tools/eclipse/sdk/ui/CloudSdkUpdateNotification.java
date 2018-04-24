@@ -19,7 +19,9 @@ package com.google.cloud.tools.eclipse.sdk.ui;
 import com.google.cloud.tools.appengine.cloudsdk.serialization.CloudSdkVersion;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.cloud.tools.eclipse.ui.util.images.SharedImages;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.mylyn.commons.ui.dialogs.AbstractNotificationPopup;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -32,9 +34,6 @@ import org.eclipse.ui.IWorkbench;
 /** A notification that a new version of the Cloud SDK is available. */
 public class CloudSdkUpdateNotification extends AbstractNotificationPopup {
   private static final Logger logger = Logger.getLogger(CloudSdkUpdateNotification.class.getName());
-
-  private static final String CLOUD_SDK_RELEASE_NOTES_URL =
-      "https://cloud.google.com/sdk/docs/release-notes";
 
   /** Show a notification that an update is available. */
   public static void showNotification(
@@ -83,28 +82,18 @@ public class CloudSdkUpdateNotification extends AbstractNotificationPopup {
         new SelectionAdapter() {
           @Override
           public void widgetSelected(SelectionEvent event) {
-            switch (event.text) {
-              case "update":
-                updateRunnable.run();
-                break;
-              case "releasenotes":
-                showReleaseNotes();
-                break;
-              default:
-                logger.warning("Unknown selection event: " + event.text);
-                break;
+            if ("update".equals(event.text)) {
+              updateRunnable.run();
+            } else if (event.text != null && event.text.startsWith("http")) {
+              IStatus status = WorkbenchUtil.openInBrowser(workbench, event.text);
+              if (!status.isOK()) {
+                logger.log(Level.SEVERE, status.getMessage(), status.getException());
+              }
+            } else {
+              logger.warning("Unknown selection event: " + event.text);
             }
           }
         });
-  }
-
-  protected void showReleaseNotes() {
-    WorkbenchUtil.openInBrowser(
-        workbench,
-        CLOUD_SDK_RELEASE_NOTES_URL,
-        "com.google.cloud.tools.sdk.releasenotes",
-        null,
-        null);
   }
 
   @Override
