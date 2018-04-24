@@ -36,8 +36,8 @@ public class MessagesTest {
   @Test
   public void testCloudSdkUpdateNotificationMessage() {
     Assert.assertEquals(
-        "<a href=\"update\">Update now</a> from version 1.9.0.\n"
-            + "See the <a href=\"releasenotes\">release notes</a> for changes.",
+        "<a href=\"update\">Update now</a>, or update later via \"Google Cloud Tools\" preferences.\n"
+            + "See the <a href=\"releasenotes\">release notes</a> for changes since 1.9.0.",
         Messages.getString("CloudSdkUpdateNotificationMessage", new CloudSdkVersion("1.9.0")));
   }
 }
