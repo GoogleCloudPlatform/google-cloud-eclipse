@@ -51,7 +51,6 @@ public class CloudSdkUpdateNotification extends AbstractNotificationPopup {
   private IWorkbench workbench;
   private CloudSdkVersion sdkVersion;
   private Runnable updateRunnable;
-  private Image gcpImage;
 
   private CloudSdkUpdateNotification(
       IWorkbench wb, CloudSdkVersion currentVersion, Runnable triggerUpdate) {
@@ -68,10 +67,7 @@ public class CloudSdkUpdateNotification extends AbstractNotificationPopup {
 
   @Override
   protected Image getPopupShellImage(int maximumHeight) {
-    if (gcpImage == null) {
-      gcpImage = SharedImages.CLOUDSDK_IMAGE_DESCRIPTOR.createImage(workbench.getDisplay());
-    }
-    return gcpImage;
+    return resources.createImage(SharedImages.CLOUDSDK_IMAGE_DESCRIPTOR);
   }
 
   @Override
@@ -94,14 +90,5 @@ public class CloudSdkUpdateNotification extends AbstractNotificationPopup {
             }
           }
         });
-  }
-
-  @Override
-  protected void handleShellCloseEvent() {
-    super.handleShellCloseEvent();
-    if (gcpImage != null && !gcpImage.isDisposed()) {
-      gcpImage.dispose();
-    }
-    gcpImage = null;
   }
 }
