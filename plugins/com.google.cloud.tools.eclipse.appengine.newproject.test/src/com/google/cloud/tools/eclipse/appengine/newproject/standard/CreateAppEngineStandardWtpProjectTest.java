@@ -78,11 +78,12 @@ public class CreateAppEngineStandardWtpProjectTest extends CreateAppEngineWtpPro
     libraries.add(library);
     config.setAppEngineLibraries(libraries);
     CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
+    
+    // CreateAppEngineWtpProject/WorkspaceModificationOperation normally acquires the
+    // workspace lock in `run()`
     ISchedulingRule rule = ResourcesPlugin.getWorkspace().getRoot();
+    Job.getJobManager().beginRule(rule, null);
     try {
-      // CreateAppEngineWtpProject/WorkspaceModificationOperation normally acquires the
-      // workspace lock in `run()`
-      Job.getJobManager().beginRule(rule, null);
       creator.execute(monitor);
     } finally {
       Job.getJobManager().endRule(rule);
