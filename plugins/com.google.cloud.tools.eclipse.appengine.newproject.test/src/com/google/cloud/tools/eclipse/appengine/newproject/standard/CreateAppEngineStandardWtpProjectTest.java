@@ -80,6 +80,8 @@ public class CreateAppEngineStandardWtpProjectTest extends CreateAppEngineWtpPro
     CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
     ISchedulingRule rule = ResourcesPlugin.getWorkspace().getRoot();
     try {
+      // CreateAppEngineWtpProject/WorkspaceModificationOperation normally acquires the
+      // workspace lock in `run()`
       Job.getJobManager().beginRule(rule, null);
       creator.execute(monitor);
     } finally {
