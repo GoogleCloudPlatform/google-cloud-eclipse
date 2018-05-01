@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.standard;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfig;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectWizard;
@@ -29,9 +28,6 @@ import javax.inject.Inject;
 import org.eclipse.core.runtime.IAdaptable;
 
 public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
-
-  @Inject
-  private ILibraryClasspathContainerResolverService resolverService;
 
   @Inject
   private ILibraryRepositoryService repositoryService;

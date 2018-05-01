@@ -26,7 +26,6 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.Filter;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
-import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 import com.google.cloud.tools.eclipse.util.jobs.FuturisticJob;
 import com.google.cloud.tools.eclipse.util.jobs.PluggableJob;
@@ -229,33 +228,6 @@ public class LibraryClasspathContainerResolverService
     } catch (CoreException | IOException ex) {
       return StatusUtil.error(
           this, Messages.getString("TaskResolveContainerError", containerPath), ex);
-    }
-  }
-
-  @Override
-  public IStatus checkRuntimeAvailability(AppEngineRuntime runtime, IProgressMonitor monitor) {
-    switch (runtime) {
-      case STANDARD_JAVA_7:
-        return checkAppEngineStandardJava7(monitor);
-      default:
-        throw new IllegalArgumentException("Unhandled runtime: " + runtime);
-    }
-  }
-
-  private IStatus checkAppEngineStandardJava7(IProgressMonitor monitor) {
-    try {
-      for (String libraryId : new String[] {"servlet-api-2.5", "jsp-api-2.1"}) {
-        Library library = CloudLibraries.getLibrary(libraryId);
-        for (LibraryFile libraryFile : library.getAllDependencies()) {
-          if (monitor.isCanceled()) {
-            return Status.CANCEL_STATUS;
-          }
-          repositoryService.makeArtifactAvailable(libraryFile, monitor);
-        }
-      }
-      return Status.OK_STATUS;
-    } catch (CoreException ex) {
-      return StatusUtil.error(this, Messages.getString("LibraryUnavailable"), ex);
     }
   }
 

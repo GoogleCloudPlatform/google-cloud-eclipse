@@ -103,13 +103,4 @@ public class MavenHelper {
             .toFile();
     return new Path(downloadedSources.getAbsolutePath());
   }
-
-  public static boolean isArtifactLocallyAvailable(MavenCoordinates mavenCoordinates) {
-    return MavenUtils.isArtifactAvailableLocally(
-        mavenCoordinates.getGroupId(),
-        mavenCoordinates.getArtifactId(),
-        mavenCoordinates.getVersion(),
-        mavenCoordinates.getType(),
-        mavenCoordinates.getClassifier());
-  }
 }
