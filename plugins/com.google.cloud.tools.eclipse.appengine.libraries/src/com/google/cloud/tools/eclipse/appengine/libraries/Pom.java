@@ -381,7 +381,8 @@ class Pom {
   }
 
   private static String getValue(Element dependency, String childName) {
-    NodeList children = dependency.getElementsByTagName(childName);
+    NodeList children = dependency.getElementsByTagNameNS(
+        "http://maven.apache.org/POM/4.0.0", childName);
     if (children.getLength() > 0) {
       return children.item(0).getTextContent();
     }

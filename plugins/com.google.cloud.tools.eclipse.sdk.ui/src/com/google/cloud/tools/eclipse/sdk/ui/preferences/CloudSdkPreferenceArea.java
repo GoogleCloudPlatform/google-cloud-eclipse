@@ -27,6 +27,7 @@ import com.google.cloud.tools.eclipse.preferences.areas.PreferenceArea;
 import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences.CloudSdkManagementOption;
+import com.google.cloud.tools.eclipse.sdk.ui.Messages;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.cloud.tools.managedcloudsdk.ManagedCloudSdk;
 import com.google.cloud.tools.managedcloudsdk.UnsupportedOsException;

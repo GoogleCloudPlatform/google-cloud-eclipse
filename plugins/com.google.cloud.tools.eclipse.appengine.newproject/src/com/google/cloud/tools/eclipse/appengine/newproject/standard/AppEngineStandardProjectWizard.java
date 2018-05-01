@@ -22,18 +22,11 @@ import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfi
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectWizard;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
-import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
-import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.collect.ImmutableMap;
-import java.lang.reflect.InvocationTargetException;
 import javax.inject.Inject;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 
 public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
 
@@ -46,27 +39,6 @@ public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
   public AppEngineStandardProjectWizard() {
     super(new AppEngineStandardWizardPage());
     setWindowTitle(Messages.getString("new.app.engine.standard.project"));
-  }
-
-  @Override
-  public IStatus validateDependencies() {
-    try {
-      boolean fork = true;
-      boolean cancelable = true;
-      DependencyValidator dependencyValidator = new DependencyValidator();
-      getContainer().run(fork, cancelable, dependencyValidator);
-      if (dependencyValidator.result.isOK()) {
-        return Status.OK_STATUS;
-      } else {
-        return StatusUtil.setErrorStatus(this, Messages.getString("project.creation.failed"),
-            dependencyValidator.result);
-      }
-    } catch (InvocationTargetException ex) {
-      return StatusUtil.setErrorStatus(this, Messages.getString("project.creation.failed"),
-          ex.getCause());
-    } catch (InterruptedException ex) {
-      return Status.CANCEL_STATUS;
-    }
   }
 
   @Override
@@ -91,17 +63,4 @@ public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
     }
     return accepted;
   }
-
-
-  private class DependencyValidator implements IRunnableWithProgress {
-
-    private IStatus result;
-
-    @Override
-    public void run(IProgressMonitor monitor)
-        throws InvocationTargetException, InterruptedException {
-      result = resolverService.checkRuntimeAvailability(AppEngineRuntime.STANDARD_JAVA_7, monitor);
-    }
-  }
-
 }

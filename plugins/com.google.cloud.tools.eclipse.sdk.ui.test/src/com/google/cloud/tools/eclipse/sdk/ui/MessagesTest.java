@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.sdk.ui.preferences;
+package com.google.cloud.tools.eclipse.sdk.ui;
 
+import com.google.cloud.tools.appengine.cloudsdk.serialization.CloudSdkVersion;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -26,4 +27,17 @@ public class MessagesTest {
     Assert.assertEquals("Choose SDK", Messages.getString("UseLocalSdk"));
   }
 
+  @Test
+  public void testCloudSdkUpdateNotificationTitle() {
+    Assert.assertEquals(
+        "Google Cloud SDK Update Available", Messages.getString("CloudSdkUpdateNotificationTitle"));
+  }
+
+  @Test
+  public void testCloudSdkUpdateNotificationMessage() {
+    Assert.assertEquals(
+        "<a href=\"update\">Update now</a> or from the Google Cloud Tools preference page.\n"
+            + "See the <a href=\"https://cloud.google.com/sdk/docs/release-notes\">release notes</a> for changes since 1.9.0.",
+        Messages.getString("CloudSdkUpdateNotificationMessage", new CloudSdkVersion("1.9.0")));
+  }
 }

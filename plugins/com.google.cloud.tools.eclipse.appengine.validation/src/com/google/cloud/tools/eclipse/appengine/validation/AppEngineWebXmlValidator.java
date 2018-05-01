@@ -32,7 +32,8 @@ public class AppEngineWebXmlValidator implements XmlValidationHelper {
     ArrayList<BannedElement> blacklist = new ArrayList<>();
     ArrayList<String> blacklistedElements = AppEngineWebBlacklist.getBlacklistElements();
     for (String elementName : blacklistedElements) {
-      NodeList nodeList = document.getElementsByTagName(elementName);
+      NodeList nodeList =
+          document.getElementsByTagNameNS("http://appengine.google.com/ns/1.0", elementName);
       for (int i = 0; i < nodeList.getLength(); i++) {
         Node node = nodeList.item(i);
         DocumentLocation userData = (DocumentLocation) node.getUserData("location");

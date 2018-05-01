@@ -42,7 +42,8 @@ import org.junit.Test;
 public class XmlValidatorTest {
 
   private static final String XML_NO_BANNED_ELEMENTS = "<test></test>";
-  private static final String XML = "<application></application>";
+  private static final String XML =
+      "<application xmlns='http://appengine.google.com/ns/1.0'></application>";
   private static final String BAD_XML = "<";
   private static final String APPLICATION_MARKER =
       "com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker";

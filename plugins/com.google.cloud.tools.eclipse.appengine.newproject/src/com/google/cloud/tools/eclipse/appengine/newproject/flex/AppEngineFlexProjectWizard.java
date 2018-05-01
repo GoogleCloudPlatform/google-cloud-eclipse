@@ -26,8 +26,6 @@ import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.common.collect.ImmutableMap;
 import javax.inject.Inject;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 
 public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
   @Inject
@@ -36,11 +34,6 @@ public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
   public AppEngineFlexProjectWizard() {
     super(new AppEngineFlexWizardPage());
     setWindowTitle(Messages.getString("new.app.engine.flex.project"));
-  }
-
-  @Override
-  public IStatus validateDependencies() {
-    return Status.OK_STATUS;
   }
 
   @Override

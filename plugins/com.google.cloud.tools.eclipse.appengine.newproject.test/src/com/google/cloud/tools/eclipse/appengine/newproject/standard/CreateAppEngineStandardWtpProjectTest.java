@@ -32,8 +32,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -75,7 +78,16 @@ public class CreateAppEngineStandardWtpProjectTest extends CreateAppEngineWtpPro
     libraries.add(library);
     config.setAppEngineLibraries(libraries);
     CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
-    creator.execute(monitor);
+    
+    // CreateAppEngineWtpProject/WorkspaceModificationOperation normally acquires the
+    // workspace lock in `run()`
+    ISchedulingRule rule = ResourcesPlugin.getWorkspace().getRoot();
+    Job.getJobManager().beginRule(rule, null);
+    try {
+      creator.execute(monitor);
+    } finally {
+      Job.getJobManager().endRule(rule);
+    }
 
     assertTrue(project.hasNature(JavaCore.NATURE_ID));
     assertAppEngineApiSdkOnClasspath();
