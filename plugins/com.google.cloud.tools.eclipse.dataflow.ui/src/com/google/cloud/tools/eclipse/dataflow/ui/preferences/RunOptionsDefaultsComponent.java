@@ -45,6 +45,7 @@ import com.google.common.base.Strings;
 import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableSortedSet;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Objects;
@@ -106,6 +107,7 @@ public class RunOptionsDefaultsComponent {
   private final Combo stagingLocationInput;
   private final Button createButton;
   private final Text serviceAccountKey;
+  private final Button browse;
 
   private SelectFirstMatchingPrefixListener completionListener;
   private ControlDecoration stagingLocationResults;
@@ -180,7 +182,7 @@ public class RunOptionsDefaultsComponent {
     serviceAccountKey.setToolTipText(
         Messages.getString("service.account.key.tooltip")); //$NON-NLS-1$
 
-    Button browse = new Button(target, SWT.NONE);
+    browse = new Button(target, SWT.NONE);
     browse.setText(Messages.getString("button.browse")); //$NON-NLS-1$
     String[] filterExtensions = new String[] {"*.json"}; //$NON-NLS-1$
     browse.addSelectionListener(new FileFieldSetter(serviceAccountKey, filterExtensions));
@@ -268,7 +270,7 @@ public class RunOptionsDefaultsComponent {
 
     String key = serviceAccountKey.getText();
     if (!Strings.isNullOrEmpty(key)) {
-      java.nio.file.Path path = Paths.get(key);
+      Path path = Paths.get(key);
       if (!Files.exists(path)) {
         messageTarget.setError(Messages.getString("error.file.does.not.exist", key)); //$NON-NLS-1$
         return;
@@ -494,6 +496,8 @@ public class RunOptionsDefaultsComponent {
     accountSelector.setEnabled(enabled);
     projectInput.setEnabled(enabled);
     stagingLocationInput.setEnabled(enabled);
+    serviceAccountKey.setEnabled(enabled);
+    browse.setEnabled(enabled);
   }
 
 
