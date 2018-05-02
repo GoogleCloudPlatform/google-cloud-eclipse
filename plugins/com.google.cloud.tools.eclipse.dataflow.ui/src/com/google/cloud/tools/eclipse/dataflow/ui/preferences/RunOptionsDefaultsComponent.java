@@ -38,11 +38,14 @@ import com.google.cloud.tools.eclipse.projectselector.MiniSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.ui.util.DisplayExecutor;
 import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
+import com.google.cloud.tools.eclipse.ui.util.event.FileFieldSetter;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableSortedSet;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
@@ -69,6 +72,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 
 /**
@@ -79,6 +83,7 @@ public class RunOptionsDefaultsComponent {
   private static final int PROJECT_INPUT_SPENT_COLUMNS = 1;
   private static final int STAGING_LOCATION_SPENT_COLUMNS = 2;
   private static final int ACCOUNT_SPENT_COLUMNS = 1;
+  private static final int SERVICE_ACCOUNT_KEY_SPENT_COLUMNS = 2;
 
   /** Milliseconds to wait after a key before launching a job, to avoid needless computation. */
   private static final long NEXT_KEY_DELAY_MS = 250L;
@@ -100,6 +105,7 @@ public class RunOptionsDefaultsComponent {
   private final MiniSelector projectInput;
   private final Combo stagingLocationInput;
   private final Button createButton;
+  private final Text serviceAccountKey;
 
   private SelectFirstMatchingPrefixListener completionListener;
   private ControlDecoration stagingLocationResults;
@@ -165,6 +171,20 @@ public class RunOptionsDefaultsComponent {
     String stagingLocation = preferences.getDefaultStagingLocation();
     stagingLocationInput.setText(Strings.nullToEmpty(stagingLocation));
 
+    Label serviceAccountKeyLabel = new Label(target, SWT.NULL);
+    serviceAccountKeyLabel.setText(Messages.getString("service.account.key.label")); //$NON-NLS-1$
+    serviceAccountKeyLabel.setToolTipText(
+        Messages.getString("service.account.key.tooltip")); //$NON-NLS-1$
+
+    serviceAccountKey = new Text(target, SWT.BORDER);
+    serviceAccountKey.setToolTipText(
+        Messages.getString("service.account.key.tooltip")); //$NON-NLS-1$
+
+    Button browse = new Button(target, SWT.NONE);
+    browse.setText(Messages.getString("button.browse")); //$NON-NLS-1$
+    String[] filterExtensions = new String[] {"*.json"}; //$NON-NLS-1$
+    browse.addSelectionListener(new FileFieldSetter(serviceAccountKey, filterExtensions));
+
     // Account selection occupies a single row
     accountLabel.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false, 1, 1));
     accountSelector.setLayoutData(
@@ -179,6 +199,13 @@ public class RunOptionsDefaultsComponent {
     comboLabel.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false, 1, 1));
     stagingLocationInput.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false,
         columns - STAGING_LOCATION_SPENT_COLUMNS, 1));
+
+    // Service account key row
+    serviceAccountKeyLabel.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false, 1, 1));
+    serviceAccountKey.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false,
+        columns - SERVICE_ACCOUNT_KEY_SPENT_COLUMNS, 1));
+
+    alignButtons(createButton, browse);
 
     accountSelector.addSelectionListener(() -> {
       // Don't use "removeAll()", as it will clear the text field too.
@@ -195,6 +222,8 @@ public class RunOptionsDefaultsComponent {
       validate();
     });
 
+    serviceAccountKey.addModifyListener(event -> validate());
+
     completionListener = new SelectFirstMatchingPrefixListener(stagingLocationInput);
     stagingLocationInput.addModifyListener(completionListener);
     stagingLocationInput.addModifyListener(event -> {
@@ -210,6 +239,21 @@ public class RunOptionsDefaultsComponent {
     validate();
   }
 
+  /** Estimates the width of all the buttons and gives the same width hint to them. */
+  private void alignButtons(Button... buttons) {
+    int maxWidth = 0;
+    for (Button button : buttons) {
+      int width = button.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+      maxWidth = Math.max(maxWidth, width);
+    }
+
+    for (Button button : buttons) {
+      GridData gridData = new GridData(SWT.CENTER, SWT.CENTER, false, false, 1, 1);
+      gridData.widthHint = maxWidth;
+      button.setLayoutData(gridData);
+    }
+  }
+
   @VisibleForTesting
   void validate() {
     Preconditions.checkState(Display.getCurrent() != null, "Must be called on SWT UI thread");
@@ -221,6 +265,21 @@ public class RunOptionsDefaultsComponent {
     // we set pageComplete to the value of `allowIncomplete` if the fields are valid
     setPageComplete(false);
     messageTarget.clear();
+
+    String key = serviceAccountKey.getText();
+    if (!Strings.isNullOrEmpty(key)) {
+      java.nio.file.Path path = Paths.get(key);
+      if (!Files.exists(path)) {
+        messageTarget.setError(Messages.getString("error.file.does.not.exist", key)); //$NON-NLS-1$
+        return;
+      } else if (Files.isDirectory(path)) {
+        messageTarget.setError(Messages.getString("error.is.a.directory", key)); //$NON-NLS-1$
+        return;
+      } else if (!Files.isReadable(path)) {
+        messageTarget.setError(Messages.getString("error.is.not.readable", key)); //$NON-NLS-1$
+        return;
+      }
+    }
 
     Credential selectedCredential = accountSelector.getSelectedCredential();
     if (selectedCredential == null) {
@@ -386,6 +445,14 @@ public class RunOptionsDefaultsComponent {
 
   public void setCloudProjectText(String project) {
     projectInput.setProject(project);
+  }
+
+  public String getServiceAccountKey() {
+    return serviceAccountKey.getText();
+  }
+
+  public void setServiceAccountKey(String key) {
+    serviceAccountKey.setText(key);
   }
 
   /**

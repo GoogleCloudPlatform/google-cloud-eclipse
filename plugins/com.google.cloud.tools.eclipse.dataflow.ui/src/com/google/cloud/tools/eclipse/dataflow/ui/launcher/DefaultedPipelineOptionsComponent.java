@@ -139,6 +139,8 @@ public class DefaultedPipelineOptionsComponent {
     values.put(DataflowPreferences.STAGING_LOCATION_PROPERTY, defaultOptions.getStagingLocation());
     // TODO: Give this a separate input
     values.put(DataflowPreferences.GCP_TEMP_LOCATION_PROPERTY, defaultOptions.getStagingLocation());
+    values.put(DataflowPreferences.SERVICE_ACCOUNT_KEY_PROPERTY,
+        defaultOptions.getServiceAccountKey());
     return values;
   }
 
@@ -167,6 +169,8 @@ public class DefaultedPipelineOptionsComponent {
     // TODO: Give this a separate input
     customValues.put(DataflowPreferences.GCP_TEMP_LOCATION_PROPERTY,
         defaultOptions.getStagingLocation());
+    customValues.put(DataflowPreferences.SERVICE_ACCOUNT_KEY_PROPERTY,
+        defaultOptions.getServiceAccountKey());
   }
 
   private void loadPreferences() {
@@ -176,6 +180,8 @@ public class DefaultedPipelineOptionsComponent {
     defaultOptions.setCloudProjectText(Strings.nullToEmpty(defaultProject));
     String defaultStagingLocation = preferences.getDefaultStagingLocation();
     defaultOptions.setStagingLocationText(Strings.nullToEmpty(defaultStagingLocation));
+    String defaultKey = preferences.getDefaultServiceAccountKey();
+    defaultOptions.setServiceAccountKey(Strings.nullToEmpty(defaultKey));
   }
 
   private void loadCustomValues() {
@@ -185,6 +191,8 @@ public class DefaultedPipelineOptionsComponent {
     defaultOptions.setCloudProjectText(Strings.nullToEmpty(project));
     String stagingLocation = customValues.get(DataflowPreferences.STAGING_LOCATION_PROPERTY);
     defaultOptions.setStagingLocationText(Strings.nullToEmpty(stagingLocation));
+    String key = customValues.get(DataflowPreferences.SERVICE_ACCOUNT_KEY_PROPERTY);
+    defaultOptions.setServiceAccountKey(Strings.nullToEmpty(key));
   }
 
   public void addAccountSelectionListener(Runnable listener) {
