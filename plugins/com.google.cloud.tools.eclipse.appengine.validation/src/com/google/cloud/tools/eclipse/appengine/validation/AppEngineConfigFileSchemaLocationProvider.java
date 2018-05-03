@@ -27,7 +27,7 @@ import org.eclipse.wst.xml.core.contentmodel.modelquery.IExternalSchemaLocationP
 
 /**
  * Associate schemas for App Engine standard environment configuration files. Configured from the
- * {@code org.eclipse.wst.xml.core.externalSchemaLocations} extension point
+ * {@code org.eclipse.wst.xml.core.externalSchemaLocations} extension point.
  */
 public class AppEngineConfigFileSchemaLocationProvider implements IExternalSchemaLocationProvider {
   // Relevant XSDs are in this bundle
@@ -45,9 +45,11 @@ public class AppEngineConfigFileSchemaLocationProvider implements IExternalSchem
     switch (basename) {
       // appengine-web.xml has a known namespace
       case "appengine-web.xml":
-        return ImmutableMap.of(NO_NAMESPACE_SCHEMA_LOCATION,
-            SCHEMA_LOCATIONS_PREFIX + "appengine-web.xsd", SCHEMA_LOCATION,
-            "http://appengine.google.com/ns/1.0 " + SCHEMA_LOCATIONS_PREFIX + "appengine-web.xsd");
+        return ImmutableMap.<String, String>builder()
+            .put(NO_NAMESPACE_SCHEMA_LOCATION, SCHEMA_LOCATIONS_PREFIX + "appengine-web.xsd")
+            .put(SCHEMA_LOCATION, "http://appengine.google.com/ns/1.0 " + SCHEMA_LOCATIONS_PREFIX
+                + "appengine-web.xsd")
+            .build();
 
       case "datastore-indexes.xml":
       case "datastore-indexes-auto.xml":
