@@ -244,7 +244,8 @@ public class RunOptionsDefaultsComponent {
   }
 
   /** Estimates the width of all the buttons and gives the same width hint to them. */
-  private void alignButtons(Button... buttons) {
+  @VisibleForTesting
+  static void alignButtons(Button... buttons) {
     int maxWidth = 0;
     for (Button button : buttons) {
       int width = button.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;

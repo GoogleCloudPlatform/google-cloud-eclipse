@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.dataflow.ui.preferences;
 
 import static org.eclipse.swtbot.swt.finder.waits.Conditions.widgetIsEnabled;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -61,6 +62,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Display;
@@ -74,6 +77,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -89,8 +93,7 @@ public class RunOptionsDefaultsComponentTest {
   @Mock private MessageTarget messageTarget;
   @Mock private IGoogleLoginService loginService;
   @Mock private IGoogleApiFactory apiFactory;
-  @Mock
-  private WizardPage page;
+  @Mock private WizardPage page;
 
   private SWTBot bot;
   private RunOptionsDefaultsComponent component;
@@ -100,7 +103,6 @@ public class RunOptionsDefaultsComponentTest {
   private Combo projectID;
   private Combo stagingLocations;
   private Button createButton;
-
 
   @Before
   public void setUp() throws IOException {
@@ -450,6 +452,28 @@ public class RunOptionsDefaultsComponentTest {
     component.setCloudProjectText("project");
     join();
     assertTrue("should be complete with account and project", page.isPageComplete());
+  }
+
+  @Test
+  public void testAlignButtons() {
+    Button width13 = mock(Button.class);
+    Button width18 = mock(Button.class);
+    Button width10 = mock(Button.class);
+    when(width13.computeSize(anyInt(), anyInt())).thenReturn(new Point(13, 0));
+    when(width18.computeSize(anyInt(), anyInt())).thenReturn(new Point(18, 0));
+    when(width10.computeSize(anyInt(), anyInt())).thenReturn(new Point(10, 0));
+
+    RunOptionsDefaultsComponent.alignButtons(width13, width18, width10);
+
+    ArgumentCaptor<GridData> captor = ArgumentCaptor.forClass(GridData.class);  // reusable
+    verify(width13).setLayoutData(captor.capture());
+    assertEquals(18, captor.getValue().widthHint);
+
+    verify(width18).setLayoutData(captor.capture());
+    assertEquals(18, captor.getValue().widthHint);
+
+    verify(width10).setLayoutData(captor.capture());
+    assertEquals(18, captor.getValue().widthHint);
   }
 
   /**
