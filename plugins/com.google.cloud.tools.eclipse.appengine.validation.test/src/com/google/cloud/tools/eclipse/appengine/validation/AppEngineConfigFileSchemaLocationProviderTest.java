@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 import java.net.URI;
 import java.util.Map;
@@ -34,9 +33,14 @@ public class AppEngineConfigFileSchemaLocationProviderTest {
 
   @Test
   public void testAppEngineWebXml() {
-    assertSchemaLocation(
-        "http://appengine.google.com/ns/1.0 platform:/plugin/com.google.cloud.tools.eclipse.appengine.validation/xsd/appengine-web.xsd",
-        fixture.getExternalSchemaLocation(URI.create("/foo/WEB-INF/appengine-web.xml")));
+    Map<String, String> locations =
+        fixture.getExternalSchemaLocation(URI.create("/foo/WEB-INF/appengine-web.xml"));
+    assertNotNull(locations);
+    assertEquals(2, locations.size());
+    assertEquals("platform:/plugin/com.google.cloud.tools.eclipse.appengine.validation/xsd/appengine-web.xsd",
+        locations.get(IExternalSchemaLocationProvider.NO_NAMESPACE_SCHEMA_LOCATION));
+    assertEquals("http://appengine.google.com/ns/1.0 platform:/plugin/com.google.cloud.tools.eclipse.appengine.validation/xsd/appengine-web.xsd",
+        locations.get(IExternalSchemaLocationProvider.SCHEMA_LOCATION));
   }
 
   @Test
@@ -75,8 +79,18 @@ public class AppEngineConfigFileSchemaLocationProviderTest {
   }
 
   @Test
+  public void testNoFile() {
+    Map<String, String> locations = fixture.getExternalSchemaLocation(URI.create("/"));
+    assertNotNull(locations);
+    assertEquals(0, locations.size());
+  }
+
+  @Test
   public void testUnknownFile() {
-    assertNull(fixture.getExternalSchemaLocation(URI.create("/foo/WEB-INF/foobar.xml")));
+    Map<String, String> locations =
+        fixture.getExternalSchemaLocation(URI.create("/foo/WEB-INF/foobar.xml"));
+    assertNotNull(locations);
+    assertEquals(0, locations.size());
   }
 
   private void assertNoNamespaceSchemaLocation(String expected,
@@ -85,14 +99,5 @@ public class AppEngineConfigFileSchemaLocationProviderTest {
     assertEquals(1, externalSchemaLocationMap.size());
     assertEquals(expected, externalSchemaLocationMap
         .get(IExternalSchemaLocationProvider.NO_NAMESPACE_SCHEMA_LOCATION));
-  }
-
-  private void assertSchemaLocation(String expected,
-      Map<String, String> externalSchemaLocationMap) {
-    assertNotNull(externalSchemaLocationMap);
-    assertEquals(1, externalSchemaLocationMap.size());
-    assertEquals(expected,
-        externalSchemaLocationMap.get(IExternalSchemaLocationProvider.SCHEMA_LOCATION));
-
   }
 }
