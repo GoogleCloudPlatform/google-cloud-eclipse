@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
+import com.google.common.annotations.VisibleForTesting;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -35,6 +36,12 @@ public class DatastoreIndexUpdateData {
     if (defaultService == null) {
       return null;
     }
+    return detect(configuration, server, defaultService);
+  }
+
+  @VisibleForTesting
+  static DatastoreIndexUpdateData detect(ILaunchConfiguration configuration, IServer server,
+      IModule defaultService) {
     LocalAppEngineServerBehaviour serverBehaviour = (LocalAppEngineServerBehaviour) server
         .loadAdapter(LocalAppEngineServerBehaviour.class, null);
     IPath deployPath = serverBehaviour.getModuleDeployDirectory(defaultService);
