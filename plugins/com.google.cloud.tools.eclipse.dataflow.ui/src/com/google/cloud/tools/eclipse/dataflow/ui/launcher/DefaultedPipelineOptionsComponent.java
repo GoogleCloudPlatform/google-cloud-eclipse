@@ -106,6 +106,10 @@ public class DefaultedPipelineOptionsComponent {
         .customValues.put(
             DataflowPreferences.GCP_TEMP_LOCATION_PROPERTY,
             customValues.get(DataflowPreferences.STAGING_LOCATION_PROPERTY));
+    this
+        .customValues.put(
+            DataflowPreferences.SERVICE_ACCOUNT_KEY_PROPERTY,
+            customValues.get(DataflowPreferences.SERVICE_ACCOUNT_KEY_PROPERTY));
     if (!isUseDefaultOptions()) {
       loadCustomValues();
     }

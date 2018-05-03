@@ -56,7 +56,7 @@ import org.junit.rules.ExternalResource;
 
 /**
  * Utility class to create and configure a Faceted Project. Installs a Java 1.7 facet if no facets
- * are specified with {@link #withFacetVersions}.
+ * are specified with {@link #withFacets}.
  */
 public final class TestProjectCreator extends ExternalResource {
   private static final Logger logger = Logger.getLogger(TestProjectCreator.class.getName());

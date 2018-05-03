@@ -110,6 +110,11 @@ public class WritableDataflowPreferences implements DataflowPreferences {
       result.put(STAGING_LOCATION_PROPERTY, defaultStagingLocation);
       result.put(GCP_TEMP_LOCATION_PROPERTY, defaultStagingLocation);
     }
+
+    String defaultKey = getDefaultServiceAccountKey();
+    if (defaultKey != null) {
+      result.put(SERVICE_ACCOUNT_KEY_PROPERTY, defaultKey);
+    }
     return result;
   }
 }

@@ -181,6 +181,8 @@ public class RunOptionsDefaultsComponent {
     serviceAccountKey = new Text(target, SWT.BORDER);
     serviceAccountKey.setToolTipText(
         Messages.getString("service.account.key.tooltip")); //$NON-NLS-1$
+    String key = preferences.getDefaultServiceAccountKey();
+    serviceAccountKey.setText(Strings.nullToEmpty(key));
 
     browse = new Button(target, SWT.NONE);
     browse.setText(Messages.getString("button.browse")); //$NON-NLS-1$
