@@ -532,6 +532,8 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
         launchConfiguration.getMissingRequiredProperties(hierarchy, getPreferences());
 
     setErrorMessage(null);
+    defaultOptionsComponent.validate();
+
     return validateRequiredProperties(validationFailures)
         && validateRequiredGroups(validationFailures);
   }

@@ -226,8 +226,6 @@ public class RunOptionsDefaultsComponent {
       validate();
     });
 
-    serviceAccountKey.addModifyListener(event -> validate());
-
     completionListener = new SelectFirstMatchingPrefixListener(stagingLocationInput);
     stagingLocationInput.addModifyListener(completionListener);
     stagingLocationInput.addModifyListener(event -> {
@@ -236,6 +234,8 @@ public class RunOptionsDefaultsComponent {
       validate();
     });
     createButton.addSelectionListener(new CreateStagingLocationListener());
+
+    serviceAccountKey.addModifyListener(event -> validate());
 
     startStagingLocationCheck(0); // no delay
     updateStagingLocations(0); // no delay
@@ -258,8 +258,7 @@ public class RunOptionsDefaultsComponent {
     }
   }
 
-  @VisibleForTesting
-  void validate() {
+  public void validate() {
     Preconditions.checkState(Display.getCurrent() != null, "Must be called on SWT UI thread");
     // may be from deferred event
     if (target.isDisposed()) {
@@ -486,6 +485,7 @@ public class RunOptionsDefaultsComponent {
       }
     });
     stagingLocationInput.addModifyListener(listener);
+    serviceAccountKey.addModifyListener(listener);
   }
 
   @VisibleForTesting

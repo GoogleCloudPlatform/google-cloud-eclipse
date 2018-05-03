@@ -184,7 +184,6 @@ public class DefaultedPipelineOptionsComponentTest {
     assertEquals("", values.get(DataflowPreferences.GCP_TEMP_LOCATION_PROPERTY));
   }
 
-
   @Test
   public void testCustomValues_values() {
     DefaultedPipelineOptionsComponent component = new DefaultedPipelineOptionsComponent(

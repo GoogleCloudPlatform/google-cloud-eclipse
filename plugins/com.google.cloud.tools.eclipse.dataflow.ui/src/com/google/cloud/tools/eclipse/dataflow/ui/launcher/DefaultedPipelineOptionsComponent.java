@@ -232,4 +232,8 @@ public class DefaultedPipelineOptionsComponent {
     }
 
   }
+
+  public void validate() {
+    defaultOptions.validate();
+  }
 }
