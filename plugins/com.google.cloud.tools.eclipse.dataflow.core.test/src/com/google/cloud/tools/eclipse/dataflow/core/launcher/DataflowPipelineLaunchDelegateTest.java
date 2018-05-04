@@ -85,9 +85,9 @@ public class DataflowPipelineLaunchDelegateTest {
   private DataflowPipelineLaunchDelegate dataflowDelegate;
   private final NullProgressMonitor monitor = new NullProgressMonitor();
 
-  @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
-
   @Captor private ArgumentCaptor<Map<String, String>> variableMapCaptor;
+
+  @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
   @Mock private DataflowDependencyManager dependencyManager;
   @Mock private JavaLaunchDelegate javaDelegate;
@@ -247,27 +247,6 @@ public class DataflowPipelineLaunchDelegateTest {
     verifyServiceAccountKeySet(keyFile);
   }
 
-  @Test
-  public void testSetCredential_originalEnvironmentMapUntouched_loginAccount()
-      throws CoreException, IOException {
-    pipelineArguments.put("accountEmail", "bogus@example.com");
-
-    dataflowDelegate.setCredential(configurationWorkingCopy, pipelineArguments);
-    verifyLoginAccountSet();
-    assertTrue(environmentMap.isEmpty());
-  }
-
-  @Test
-  public void testSetCredential_originalEnvironmentMapUntouched_serviceAccount()
-      throws CoreException, IOException {
-    String keyFile = tempFolder.newFile().getAbsolutePath();
-    pipelineArguments.put("serviceAccountKey", keyFile);
-
-    dataflowDelegate.setCredential(configurationWorkingCopy, pipelineArguments);
-    verifyServiceAccountKeySet(keyFile);
-    assertTrue(environmentMap.isEmpty());
-  }
-
   private void verifyLoginAccountSet() throws IOException {
     verify(configurationWorkingCopy).setAttribute(
         eq(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES), variableMapCaptor.capture());
@@ -288,6 +267,27 @@ public class DataflowPipelineLaunchDelegateTest {
         eq(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES), variableMapCaptor.capture());
     String keyFile = variableMapCaptor.getValue().get("GOOGLE_APPLICATION_CREDENTIALS");
     assertEquals(keyFileGiven, keyFile);
+  }
+
+  @Test
+  public void testSetCredential_originalEnvironmentMapUntouched_loginAccount()
+      throws CoreException, IOException {
+    pipelineArguments.put("accountEmail", "bogus@example.com");
+
+    dataflowDelegate.setCredential(configurationWorkingCopy, pipelineArguments);
+    verifyLoginAccountSet();
+    assertTrue(environmentMap.isEmpty());
+  }
+
+  @Test
+  public void testSetCredential_originalEnvironmentMapUntouched_serviceAccount()
+      throws CoreException, IOException {
+    String keyFile = tempFolder.newFile().getAbsolutePath();
+    pipelineArguments.put("serviceAccountKey", keyFile);
+
+    dataflowDelegate.setCredential(configurationWorkingCopy, pipelineArguments);
+    verifyServiceAccountKeySet(keyFile);
+    assertTrue(environmentMap.isEmpty());
   }
 
   @Test
