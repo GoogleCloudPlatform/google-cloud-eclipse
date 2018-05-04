@@ -270,27 +270,16 @@ public class RunOptionsDefaultsComponent {
     setPageComplete(false);
     messageTarget.clear();
 
-    String key = serviceAccountKey.getText();
-    if (!Strings.isNullOrEmpty(key)) {
-      Path path = Paths.get(key);
-      if (!Files.exists(path)) {
-        messageTarget.setError(Messages.getString("error.file.does.not.exist", key)); //$NON-NLS-1$
-        return;
-      } else if (Files.isDirectory(path)) {
-        messageTarget.setError(Messages.getString("error.is.a.directory", key)); //$NON-NLS-1$
-        return;
-      } else if (!Files.isReadable(path)) {
-        messageTarget.setError(Messages.getString("error.is.not.readable", key)); //$NON-NLS-1$
-        return;
-      }
-    }
+    // Do not exit immediately even if the checks fail; we need to check the account, project ID,
+    // and GCS bucket to make their enablement correct.
+    boolean quickChecksOk = doIsolatedQuickChecks();
 
     Credential selectedCredential = accountSelector.getSelectedCredential();
     if (selectedCredential == null) {
       projectInput.setEnabled(false);
       stagingLocationInput.setEnabled(false);
       createButton.setEnabled(false);
-      setPageComplete(allowIncomplete);
+      setPageComplete(quickChecksOk && allowIncomplete);
       return;
     }
 
@@ -298,7 +287,7 @@ public class RunOptionsDefaultsComponent {
     if (projectInput.getProject() == null) {
       stagingLocationInput.setEnabled(false);
       createButton.setEnabled(false);
-      setPageComplete(allowIncomplete);
+      setPageComplete(quickChecksOk && allowIncomplete);
       return;
     }
 
@@ -350,7 +339,7 @@ public class RunOptionsDefaultsComponent {
       // If the bucket name is empty, we don't have anything to verify; and we don't have any
       // interesting messaging.
       createButton.setEnabled(false);
-      setPageComplete(allowIncomplete);
+      setPageComplete(quickChecksOk && allowIncomplete);
       return;
     }
 
@@ -380,13 +369,37 @@ public class RunOptionsDefaultsComponent {
       if (result.accessible) {
         messageTarget.setInfo(Messages.getString("verified.bucket.is.accessible", bucketNamePart)); //$NON-NLS-1$
         createButton.setEnabled(false);
-        setPageComplete(true);
+        setPageComplete(quickChecksOk);
       } else {
         // user must create this bucket; feels odd that this is flagged as an error
         messageTarget.setError(Messages.getString("could.not.fetch.bucket", bucketNamePart)); //$NON-NLS-1$
         createButton.setEnabled(true);
       }
     }
+  }
+
+  /**
+   * Validates input values that can be checked quickly in a synchronous manner and are independent
+   * from account, project ID, and GCS bucket. (The account, project ID, and GCS buckets are
+   * tightly coupled regarding enablement of the input widgets and should always be validated
+   * to make their interconnected enablement correct.)
+   */
+  private boolean doIsolatedQuickChecks() {
+    String key = serviceAccountKey.getText();
+    if (!Strings.isNullOrEmpty(key)) {
+      Path path = Paths.get(key);
+      if (!Files.exists(path)) {
+        messageTarget.setError(Messages.getString("error.file.does.not.exist", key)); //$NON-NLS-1$
+        return false;
+      } else if (Files.isDirectory(path)) {
+        messageTarget.setError(Messages.getString("error.is.a.directory", key)); //$NON-NLS-1$
+        return false;
+      } else if (!Files.isReadable(path)) {
+        messageTarget.setError(Messages.getString("error.is.not.readable", key)); //$NON-NLS-1$
+        return false;
+      }
+    }
+    return true;
   }
 
   protected void checkProjectConfiguration() {
