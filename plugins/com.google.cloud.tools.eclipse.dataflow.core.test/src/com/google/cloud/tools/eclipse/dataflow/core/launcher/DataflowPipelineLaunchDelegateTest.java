@@ -133,6 +133,47 @@ public class DataflowPipelineLaunchDelegateTest {
   }
 
   @Test
+  public void testSetCredential_assumesAccountEmailIsGiven() throws CoreException {
+    pipelineArguments.remove("accountEmail");
+
+    try {
+      dataflowDelegate.setCredential(configurationWorkingCopy, pipelineArguments);
+      fail();
+    } catch (NullPointerException ex) {
+      assertEquals("account email missing in launch configuration or preferences", ex.getMessage());
+    }
+  }
+
+  @Test
+  public void testSetCredential_credentialEnvironmentVariableSet_serviceAccountKey()
+      throws IOException {
+    pipelineArguments.put("serviceAccountKey", tempFolder.newFile().getAbsolutePath());
+    environmentMap.put("GOOGLE_APPLICATION_CREDENTIALS", "user-set-path");
+
+    try {
+      dataflowDelegate.setCredential(configurationWorkingCopy, pipelineArguments);
+      fail();
+    } catch (CoreException ex) {
+      assertEquals("You cannot define the environment variable GOOGLE_APPLICATION_CREDENTIALS"
+          + " when launching Dataflow pipelines from Cloud Tools for Eclipse.", ex.getMessage());
+    }
+  }
+
+  @Test
+  public void testSetCredential_credentialEnvironmentVariableSet_loginAccount() {
+    pipelineArguments.put("accountEmail", "bogus@example.com");
+    environmentMap.put("GOOGLE_APPLICATION_CREDENTIALS", "user-set-path");
+
+    try {
+      dataflowDelegate.setCredential(configurationWorkingCopy, pipelineArguments);
+      fail();
+    } catch (CoreException ex) {
+      assertEquals("You cannot define the environment variable GOOGLE_APPLICATION_CREDENTIALS"
+          + " when launching Dataflow pipelines from Cloud Tools for Eclipse.", ex.getMessage());
+    }
+  }
+
+  @Test
   public void testSetCredential_noCredentialGiven() {
     try {
       dataflowDelegate.setCredential(configurationWorkingCopy, pipelineArguments);
@@ -173,18 +214,6 @@ public class DataflowPipelineLaunchDelegateTest {
 
     dataflowDelegate.setCredential(configurationWorkingCopy, pipelineArguments);
     verifyServiceAccountKeySet(keyFile);
-  }
-
-  @Test
-  public void testSetCredential_assumesAccountEmailIsGiven() throws CoreException {
-    pipelineArguments.remove("accountEmail");
-
-    try {
-      dataflowDelegate.setCredential(configurationWorkingCopy, pipelineArguments);
-      fail();
-    } catch (NullPointerException ex) {
-      assertEquals("account email missing in launch configuration or preferences", ex.getMessage());
-    }
   }
 
   @Test
@@ -237,35 +266,6 @@ public class DataflowPipelineLaunchDelegateTest {
     dataflowDelegate.setCredential(configurationWorkingCopy, pipelineArguments);
     verifyServiceAccountKeySet(keyFile);
     assertTrue(environmentMap.isEmpty());
-  }
-
-  @Test
-  public void testSetCredential_credentialEnvironmentVariableSet_serviceAccountKey()
-      throws IOException {
-    pipelineArguments.put("serviceAccountKey", tempFolder.newFile().getAbsolutePath());
-    environmentMap.put("GOOGLE_APPLICATION_CREDENTIALS", "user-set-path");
-
-    try {
-      dataflowDelegate.setCredential(configurationWorkingCopy, pipelineArguments);
-      fail();
-    } catch (CoreException ex) {
-      assertEquals("You cannot define the environment variable GOOGLE_APPLICATION_CREDENTIALS"
-          + " when launching Dataflow pipelines from Cloud Tools for Eclipse.", ex.getMessage());
-    }
-  }
-
-  @Test
-  public void testSetCredential_credentialEnvironmentVariableSet_loginAccount() {
-    pipelineArguments.put("accountEmail", "bogus@example.com");
-    environmentMap.put("GOOGLE_APPLICATION_CREDENTIALS", "user-set-path");
-
-    try {
-      dataflowDelegate.setCredential(configurationWorkingCopy, pipelineArguments);
-      fail();
-    } catch (CoreException ex) {
-      assertEquals("You cannot define the environment variable GOOGLE_APPLICATION_CREDENTIALS"
-          + " when launching Dataflow pipelines from Cloud Tools for Eclipse.", ex.getMessage());
-    }
   }
 
   private void verifyLoginAccountSet() throws IOException {
