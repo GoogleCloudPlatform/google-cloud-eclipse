@@ -169,6 +169,7 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
   @VisibleForTesting
   void setCredential(ILaunchConfigurationWorkingCopy workingCopy,
       Map<String, String> effectiveArguments) throws CoreException {
+
     String serviceAccountKey =
         effectiveArguments.get(DataflowPreferences.SERVICE_ACCOUNT_KEY_PROPERTY);
 
@@ -180,11 +181,13 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
     }
   }
 
-  @VisibleForTesting
-  void setServiceAccountCredential(ILaunchConfigurationWorkingCopy workingCopy,
+  private void setServiceAccountCredential(ILaunchConfigurationWorkingCopy workingCopy,
       String serviceAccountKey) throws CoreException {
     Path jsonKey = Paths.get(serviceAccountKey);
-    if (!Files.isReadable(jsonKey)) {
+    if (Files.isDirectory(jsonKey)) {
+      String message = "Not a file but directory: " + jsonKey;
+      throw new CoreException(new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, message));
+    } else if (!Files.isReadable(jsonKey)) {
       String message = "Cannot open a service account key file: " + jsonKey;
       throw new CoreException(new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, message));
     }
@@ -192,8 +195,7 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
     setCredentialEnvironmentVariable(workingCopy, serviceAccountKey);
   }
 
-  @VisibleForTesting
-  void setLoginCredential(ILaunchConfigurationWorkingCopy workingCopy, String accountEmail)
+  private void setLoginCredential(ILaunchConfigurationWorkingCopy workingCopy, String accountEmail)
       throws CoreException {
     Preconditions.checkNotNull(accountEmail,
         "account email missing in launch configuration or preferences");
@@ -222,8 +224,7 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
     }
   }
 
-  @VisibleForTesting
-  void setCredentialEnvironmentVariable(
+  private void setCredentialEnvironmentVariable(
       ILaunchConfigurationWorkingCopy workingCopy, String value) throws CoreException {
     // Dataflow SDK doesn't yet support reading credentials from an arbitrary JSON, so we use the
     // workaround of setting the "GOOGLE_APPLICATION_CREDENTIALS" environment variable.
