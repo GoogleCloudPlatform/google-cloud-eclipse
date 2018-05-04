@@ -68,6 +68,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
@@ -78,11 +79,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RunOptionsDefaultsComponentTest {
@@ -103,6 +103,8 @@ public class RunOptionsDefaultsComponentTest {
   private Combo projectID;
   private Combo stagingLocations;
   private Button createButton;
+  private Text serviceAccountKey;
+  private Button browse;
 
   @Before
   public void setUp() throws IOException {
@@ -137,7 +139,9 @@ public class RunOptionsDefaultsComponentTest {
         CompositeUtil.findControlAfterLabel(shell, Combo.class, "Cloud Platform &project ID:");
     stagingLocations =
         CompositeUtil.findControlAfterLabel(shell, Combo.class, "Cloud Storage staging &location:");
-    createButton = CompositeUtil.findControl(shell, Button.class);
+    createButton = CompositeUtil.findButton(shell, "&Create Bucket");
+    serviceAccountKey = CompositeUtil.findControl(shell, Text.class);
+    browse = CompositeUtil.findButton(shell, "Browse...");
   }
 
   private void mockProjectList(Credential credential, GcpProject... gcpProjects)
@@ -165,28 +169,22 @@ public class RunOptionsDefaultsComponentTest {
     Storage.Buckets bucketsApi = mock(Storage.Buckets.class);
     Storage.Buckets.List listApi = mock(Storage.Buckets.List.class);
     Buckets buckets = new Buckets();
-    final List<Bucket> bucketList = new ArrayList<>();
+    List<Bucket> bucketList = new ArrayList<>();
 
     doReturn(storageApi).when(apiFactory).newStorageApi(credential);
     doReturn(bucketsApi).when(storageApi).buckets();
     doThrow(new IOException("not found")).when(bucketsApi).list(anyString());
-    doReturn(listApi).when(bucketsApi).list(eq(projectId));
+    doReturn(listApi).when(bucketsApi).list(projectId);
     doReturn(buckets).when(listApi).execute();
     
-    when(bucketsApi.insert(eq(projectId), any(Bucket.class))).thenAnswer(new Answer<Insert>() {
-      @Override
-      public Insert answer(InvocationOnMock invocation) throws Throwable {
-        final Bucket newBucket = invocation.getArgumentAt(1, Bucket.class);
-        Insert insert = mock(Insert.class);
-        when(insert.execute()).thenAnswer(new Answer<Bucket>() {
-          @Override
-          public Bucket answer(InvocationOnMock invocation) throws Throwable {
-            bucketList.add(newBucket);
-            return newBucket;
-          }
-        });
-        return insert;
-      }
+    when(bucketsApi.insert(eq(projectId), any(Bucket.class))).thenAnswer(invocationOnMock -> {
+      Bucket newBucket = invocationOnMock.getArgumentAt(1, Bucket.class);
+      Insert insert = mock(Insert.class);
+      when(insert.execute()).thenAnswer(unused -> {
+        bucketList.add(newBucket);
+        return newBucket;
+      });
+      return insert;
     });
 
     Storage.Buckets.Get exceptionGet = mock(Storage.Buckets.Get.class);
@@ -284,6 +282,8 @@ public class RunOptionsDefaultsComponentTest {
     assertFalse(projectID.isEnabled());
     assertFalse(stagingLocations.isEnabled());
     assertFalse(createButton.isEnabled());
+    assertTrue(serviceAccountKey.isEnabled());
+    assertTrue(browse.isEnabled());
   }
 
   @Test
@@ -294,6 +294,8 @@ public class RunOptionsDefaultsComponentTest {
     assertTrue(projectID.isEnabled());
     assertFalse(stagingLocations.isEnabled());
     assertFalse(createButton.isEnabled());
+    assertTrue(serviceAccountKey.isEnabled());
+    assertTrue(browse.isEnabled());
   }
 
   @Test
@@ -306,6 +308,8 @@ public class RunOptionsDefaultsComponentTest {
     assertTrue(projectID.isEnabled());
     assertTrue(stagingLocations.isEnabled());
     assertFalse(createButton.isEnabled());
+    assertTrue(serviceAccountKey.isEnabled());
+    assertTrue(browse.isEnabled());
   }
 
   @Test
@@ -319,6 +323,8 @@ public class RunOptionsDefaultsComponentTest {
     assertTrue(projectID.isEnabled());
     assertFalse(stagingLocations.isEnabled());
     assertFalse(page.isPageComplete());
+    assertTrue(serviceAccountKey.isEnabled());
+    assertTrue(browse.isEnabled());
   }
 
   @Test
@@ -336,6 +342,8 @@ public class RunOptionsDefaultsComponentTest {
     assertTrue(stagingLocations.isEnabled());
     assertFalse(createButton.isEnabled());
     assertTrue(page.isPageComplete());
+    assertTrue(serviceAccountKey.isEnabled());
+    assertTrue(browse.isEnabled());
   }
 
   @Test
@@ -354,6 +362,14 @@ public class RunOptionsDefaultsComponentTest {
     assertTrue(stagingLocations.isEnabled());
     assertTrue(createButton.isEnabled());
     assertFalse(page.isPageComplete());
+    assertTrue(serviceAccountKey.isEnabled());
+    assertTrue(browse.isEnabled());
+  }
+
+  @Test
+  public void testGetServiceAccountKey() {
+    serviceAccountKey.setText("/some/random/file.ext");
+    assertEquals("/some/random/file.ext", component.getServiceAccountKey());
   }
 
   @Test
@@ -433,10 +449,32 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
+  public void testValidity_nonExistingServiceAccountKey() {
+    serviceAccountKey.setText("/non/existing/file.ext");
+    verify(messageTarget).setError("/non/existing/file.ext does not exist.");
+  }
+
+  @Test
+  public void testValidity_directoryAsServiceAccountKey() {
+    serviceAccountKey.setText("/");
+    verify(messageTarget).setError(Matchers.contains(" is a directory."));
+  }
+
+  @Test
   public void testPartialValidity_allEmpty() {
     component = new RunOptionsDefaultsComponent(shell, 3, messageTarget, preferences, page,
         true /* allowIncomplete */, loginService, apiFactory);
     assertTrue("should be complete when totally empty", page.isPageComplete());
+  }
+
+  @Test
+  public void testPartialValidity_invalidServiceAccountKey() {
+    component = new RunOptionsDefaultsComponent(shell, 3, messageTarget, preferences, page,
+        true /* allowIncomplete */, loginService, apiFactory);
+    serviceAccountKey.setText("/non/existing/file.ext");
+
+    assertFalse("should be incomplete with invalid service key even if allowInComplete is true",
+        page.isPageComplete());
   }
 
   @Test
