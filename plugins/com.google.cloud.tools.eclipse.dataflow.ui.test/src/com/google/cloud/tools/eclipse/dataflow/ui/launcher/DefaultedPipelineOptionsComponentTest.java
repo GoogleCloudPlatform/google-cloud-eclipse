@@ -62,7 +62,7 @@ public class DefaultedPipelineOptionsComponentTest {
   public void setUp() {
     // This is easier than subclassing RunOptionsDefaultComponent
     Answer<String> answerAccountEmail = unused -> Strings.nullToEmpty(
-          accountEmail == null ? preferences.getDefaultAccountEmail() : accountEmail);
+        accountEmail == null ? preferences.getDefaultAccountEmail() : accountEmail);
     Answer<Void> recordAccountEmail = invocationOnMock -> {
       accountEmail = invocationOnMock.getArgumentAt(0, String.class);
       return null;
