@@ -18,6 +18,8 @@ package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.common.annotations.VisibleForTesting;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -26,6 +28,8 @@ import org.eclipse.wst.server.core.IServer;
 
 /** A simple value class to capture that updates to a module's {@code datastore-indexes.xml}. */
 public class DatastoreIndexUpdateData {
+  private static final Logger logger = Logger.getLogger(DatastoreIndexUpdateData.class.getName());
+
   /**
    * Check the server configuration and detect if a {@code datastore-indexes-auto.xml} was found.
    * Return {@code null} if not found.
@@ -52,6 +56,16 @@ public class DatastoreIndexUpdateData {
     // the datastore-indexes-auto.xml may be generated even if the datastore-indexes.xml does not exist
     IFile datastoreIndexesXml =
         WebProjectUtil.findInWebInf(defaultService.getProject(), new org.eclipse.core.runtime.Path("datastore-indexes.xml"));
+
+    if (datastoreIndexesXml != null && datastoreIndexesXml.exists()) {
+      long sourceTimestamp = datastoreIndexesXml.getLocalTimeStamp();
+      long generatedTimestamp = datastoreIndexesAutoXml.toFile().lastModified();
+      if (sourceTimestamp > generatedTimestamp) {
+        logger.log(Level.FINE, "no change based on datastore-indexes timestamps");
+        return null;
+      }
+    }
+
     return new DatastoreIndexUpdateData(server, configuration, defaultService, datastoreIndexesXml,
         datastoreIndexesAutoXml);
   }

@@ -96,7 +96,7 @@ public class DatastoreIndexUpdateDataTest {
   }
 
   @Test
-  public void testExistingDatastoreIndexesXml() throws IOException {
+  public void testExistingDatastoreIndexesXml_updated() throws IOException {
     createDatastoreIndexesAutoXml();
 
     IFolder projectWebContent = mock(IFolder.class, "WebContent");
@@ -112,6 +112,9 @@ public class DatastoreIndexUpdateDataTest {
         .thenReturn(projectDatastoreIndexXml);
     when(projectDatastoreIndexXml.exists()).thenReturn(true);
 
+    // updated, so the original should be older than generated
+    when(projectDatastoreIndexXml.getLocalTimeStamp()).thenReturn(0L);
+
     DatastoreIndexUpdateData update =
         DatastoreIndexUpdateData.detect(launchConfiguration, server, defaultService);
     assertNotNull(update);
@@ -120,6 +123,30 @@ public class DatastoreIndexUpdateDataTest {
     assertEquals(defaultService, update.module);
     assertEquals(projectDatastoreIndexXml, update.datastoreIndexesXml);
     assertNotNull(update.datastoreIndexesAutoXml);
+  }
+
+  @Test
+  public void testExistingDatastoreIndexesXml_noUpdate() throws IOException {
+    createDatastoreIndexesAutoXml();
+
+    IFolder projectWebContent = mock(IFolder.class, "WebContent");
+    IFolder projectWebInf = mock(IFolder.class, "WEB-INF");
+    IFile projectDatastoreIndexXml = mock(IFile.class, "datastore-indexes.xml");
+    when(project.getFolder("WebContent")).thenReturn(projectWebContent);
+    when(projectWebContent.exists()).thenReturn(true);
+    when(projectWebContent.getFolder("WEB-INF")).thenReturn(projectWebInf);
+    when(projectWebInf.exists()).thenReturn(true);
+    when(projectWebInf.getFile("datastore-indexes.xml")).thenReturn(projectDatastoreIndexXml);
+    when(projectWebInf.getFile(new Path("datastore-indexes.xml")))
+        .thenReturn(projectDatastoreIndexXml);
+    when(projectDatastoreIndexXml.exists()).thenReturn(true);
+
+    // no updates, so original should be newer than generated
+    when(projectDatastoreIndexXml.getLocalTimeStamp()).thenReturn(System.currentTimeMillis() + 1);
+
+    DatastoreIndexUpdateData update =
+        DatastoreIndexUpdateData.detect(launchConfiguration, server, defaultService);
+    assertNull(update);
   }
 
   private void createDatastoreIndexesAutoXml() throws IOException {
