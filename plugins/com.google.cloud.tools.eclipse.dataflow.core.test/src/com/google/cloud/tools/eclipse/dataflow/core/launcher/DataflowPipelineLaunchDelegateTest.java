@@ -259,13 +259,15 @@ public class DataflowPipelineLaunchDelegateTest {
 
   @Test
   public void testSetCredential_nonExistingServiceAccountKey() {
-    pipelineArguments.put("serviceAccountKey", "/non/existing/file");
+    pipelineArguments.put("serviceAccountKey", "/non/existing/file.ext");
 
     try {
       dataflowDelegate.setCredential(configurationWorkingCopy, pipelineArguments);
       fail();
     } catch (CoreException ex) {
-      assertEquals("Cannot open a service account key file: /non/existing/file", ex.getMessage());
+      assertThat(ex.getMessage(), startsWith("Cannot open a service account key file: "));
+      assertThat(ex.getMessage(), containsString("existing"));
+      assertThat(ex.getMessage(), containsString("file.ext"));
     }
   }
 
