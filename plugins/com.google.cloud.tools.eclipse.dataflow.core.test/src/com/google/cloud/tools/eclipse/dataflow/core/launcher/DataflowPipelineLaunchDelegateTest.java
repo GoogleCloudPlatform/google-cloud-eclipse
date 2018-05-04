@@ -267,7 +267,7 @@ public class DataflowPipelineLaunchDelegateTest {
     } catch (CoreException ex) {
       assertThat(ex.getMessage(), startsWith("Cannot open a service account key file: "));
       assertThat(ex.getMessage(), containsString("existing"));
-      assertThat(ex.getMessage(), containsString("file.ext"));
+      assertThat(ex.getMessage(), endsWith("file.ext"));
     }
   }
 
