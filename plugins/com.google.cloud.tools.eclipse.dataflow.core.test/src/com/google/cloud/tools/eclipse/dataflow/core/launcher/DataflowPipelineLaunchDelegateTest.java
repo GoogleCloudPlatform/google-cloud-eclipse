@@ -184,39 +184,6 @@ public class DataflowPipelineLaunchDelegateTest {
   }
 
   @Test
-  public void testSetCredential_nonExistingServiceAccountKey() {
-    pipelineArguments.put("serviceAccountKey", "/non/existing/file");
-
-    try {
-      dataflowDelegate.setCredential(configurationWorkingCopy, pipelineArguments);
-      fail();
-    } catch (CoreException ex) {
-      assertEquals("Cannot open a service account key file: /non/existing/file", ex.getMessage());
-    }
-  }
-
-  @Test
-  public void testSetCredential_directoryAsServiceAccountKey() {
-    pipelineArguments.put("serviceAccountKey", "/");
-
-    try {
-      dataflowDelegate.setCredential(configurationWorkingCopy, pipelineArguments);
-      fail();
-    } catch (CoreException ex) {
-      assertThat(ex.getMessage(), startsWith("Not a file but directory: "));
-    }
-  }
-
-  @Test
-  public void testSetCredential_serviceAccountKey() throws CoreException, IOException {
-    String keyFile = tempFolder.newFile().getAbsolutePath();
-    pipelineArguments.put("serviceAccountKey", keyFile);
-
-    dataflowDelegate.setCredential(configurationWorkingCopy, pipelineArguments);
-    verifyServiceAccountKeySet(keyFile);
-  }
-
-  @Test
   public void testSetCredential_savedAccountNotLoggedIn() {
     pipelineArguments.put("accountEmail", "bogus@example.com");
     when(loginService.getCredential("bogus@example.com")).thenReturn(null);  // not logged in
@@ -288,6 +255,39 @@ public class DataflowPipelineLaunchDelegateTest {
     dataflowDelegate.setCredential(configurationWorkingCopy, pipelineArguments);
     verifyServiceAccountKeySet(keyFile);
     assertTrue(environmentMap.isEmpty());
+  }
+
+  @Test
+  public void testSetCredential_nonExistingServiceAccountKey() {
+    pipelineArguments.put("serviceAccountKey", "/non/existing/file");
+
+    try {
+      dataflowDelegate.setCredential(configurationWorkingCopy, pipelineArguments);
+      fail();
+    } catch (CoreException ex) {
+      assertEquals("Cannot open a service account key file: /non/existing/file", ex.getMessage());
+    }
+  }
+
+  @Test
+  public void testSetCredential_directoryAsServiceAccountKey() {
+    pipelineArguments.put("serviceAccountKey", "/");
+
+    try {
+      dataflowDelegate.setCredential(configurationWorkingCopy, pipelineArguments);
+      fail();
+    } catch (CoreException ex) {
+      assertThat(ex.getMessage(), startsWith("Not a file but directory: "));
+    }
+  }
+
+  @Test
+  public void testSetCredential_serviceAccountKey() throws CoreException, IOException {
+    String keyFile = tempFolder.newFile().getAbsolutePath();
+    pipelineArguments.put("serviceAccountKey", keyFile);
+
+    dataflowDelegate.setCredential(configurationWorkingCopy, pipelineArguments);
+    verifyServiceAccountKeySet(keyFile);
   }
 
   @Test
