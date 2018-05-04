@@ -48,6 +48,7 @@ import org.eclipse.debug.core.IStatusHandler;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.team.ui.synchronize.SaveableCompareEditorInput;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
@@ -90,17 +91,19 @@ public class DatastoreIndexesUpdatedStatusHandler implements IStatusHandler {
     }
 
     IWorkbenchPage page = getActivePage();
-    // should consider using MessageDialogWithToggle? if original doesn't exist, should we copy into
-    // place?
-    boolean review = MessageDialog.openQuestion(page.getWorkbenchWindow().getShell(),
-        Messages.getString("REVIEW_DATASTORE_INDEXES_UPDATE_TITLE"), //$NON-NLS-1$
-        Messages.getString("REVIEW_DATASTORE_INDEXES_UPDATE_MESSAGE")); //$NON-NLS-1$
-    if (!review) {
+    Shell shell = page.getWorkbenchWindow().getShell();
+    String[] buttonLabels =
+        new String[] {Messages.getString("REVIEW_CHANGES"), Messages.getString("IGNORE_CHANGES")};
+    MessageDialog dialog =
+        new MessageDialog(shell, Messages.getString("REVIEW_DATASTORE_INDEXES_UPDATE_TITLE"), //$NON-NLS-1$
+            null, Messages.getString("REVIEW_DATASTORE_INDEXES_UPDATE_MESSAGE"), //$NON-NLS-1$
+            MessageDialog.QUESTION, 0, buttonLabels);
+    if (dialog.open() != 0) {
       return null;
     }
-    IFile datastoreIndexesXml = update.datastoreIndexesXml;
 
     // create an empty source file if it doesn't exist
+    IFile datastoreIndexesXml = update.datastoreIndexesXml;
     if (datastoreIndexesXml == null) {
       IProject project = update.module.getProject();
       try {
@@ -110,8 +113,8 @@ public class DatastoreIndexesUpdatedStatusHandler implements IStatusHandler {
       }
     }
 
-    CompareEditorInput input = new GeneratedDatastoreIndexesUpdateEditorInput(page, datastoreIndexesXml,
-        update.datastoreIndexesAutoXml.toFile());
+    CompareEditorInput input = new GeneratedDatastoreIndexesUpdateEditorInput(page,
+        datastoreIndexesXml, update.datastoreIndexesAutoXml.toFile());
     CompareUI.openCompareEditor(input);
     return null;
   }

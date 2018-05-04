@@ -728,7 +728,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       if (update == null) {
         return;
       }
-      logger.info("datastore-indexes-auto.xml found " + update.datastoreIndexesAutoXml);
+      logger.fine("datastore-indexes-auto.xml found " + update.datastoreIndexesAutoXml);
       
       // punts to UI thread
       IStatusHandler prompter = DebugPlugin.getDefault().getStatusHandler(promptStatus);
