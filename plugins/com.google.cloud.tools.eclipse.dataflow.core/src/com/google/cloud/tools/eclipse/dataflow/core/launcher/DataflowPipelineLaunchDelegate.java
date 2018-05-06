@@ -188,7 +188,7 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
       String message = "Not a file but directory: " + jsonKey;
       throw new CoreException(new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, message));
     } else if (!Files.isReadable(jsonKey)) {
-      String message = "Cannot open a service account key file: " + jsonKey;
+      String message = "Cannot open service account key file: " + jsonKey;
       throw new CoreException(new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, message));
     }
 
