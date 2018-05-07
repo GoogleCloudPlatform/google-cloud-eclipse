@@ -292,6 +292,9 @@ public class RunOptionsDefaultsComponent {
 
     String bucketNamePart = GcsDataflowProjectClient.toGcsBucketName(getStagingLocation());
     if (bucketNamePart.isEmpty()) {
+      // If the bucket name is empty, we don't have anything to verify; and we don't have any
+      // interesting messaging.
+      createButton.setEnabled(false);
       setPageComplete(allowIncomplete);
       return;
     }
