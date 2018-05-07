@@ -83,6 +83,7 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
   private String defaultAccountEmail;
   private String defaultProject;
   private String defaultStagingLocation;
+  private String defaultServiceAccountKey;
 
   private DataflowProjectCreator(IProjectConfigurationManager projectConfigurationManager) {
     this.projectConfigurationManager = projectConfigurationManager;
@@ -103,7 +104,7 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
   }
 
   public void setProjectNameTemplate(String projectName) {
-    this.projectNameTemplate = projectName;
+    projectNameTemplate = projectName;
   }
 
   public void setPackage(String packageString) {
@@ -144,6 +145,10 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
 
   public void setDefaultStagingLocation(String defaultStagingLocation) {
     this.defaultStagingLocation = defaultStagingLocation;
+  }
+
+  public void setDefaultServiceAccountKey(String defaultServiceAccountKey) {
+    this.defaultServiceAccountKey = defaultServiceAccountKey;
   }
 
   @Override
@@ -244,6 +249,7 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
     prefs.setDefaultAccountEmail(defaultAccountEmail);
     prefs.setDefaultProject(defaultProject);
     prefs.setDefaultStagingLocation(defaultStagingLocation);
+    prefs.setDefaultServiceAccountKey(defaultServiceAccountKey);
     prefs.save();
   }
 
