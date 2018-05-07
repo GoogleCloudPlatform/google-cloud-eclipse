@@ -47,19 +47,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DatastoreIndexUpdateDataTest {
-  @Rule
-  public TemporaryFolder root = new TemporaryFolder();
+  @Rule public TemporaryFolder root = new TemporaryFolder();
 
-  @Mock
-  private ILaunchConfiguration launchConfiguration;
-  @Mock
-  private IServer server;
-  @Mock
-  private LocalAppEngineServerBehaviour serverBehaviour;
-  @Mock
-  private IModule defaultService;
-  @Mock
-  private IProject project;
+  @Mock private ILaunchConfiguration launchConfiguration;
+  @Mock private IServer server;
+  @Mock private LocalAppEngineServerBehaviour serverBehaviour;
+  @Mock private IModule defaultService;
+  @Mock private IProject project;
 
   private File webInf;
 
@@ -69,7 +63,8 @@ public class DatastoreIndexUpdateDataTest {
     when(server.loadAdapter(eq(LocalAppEngineServerBehaviour.class), any(IProgressMonitor.class)))
         .thenReturn(serverBehaviour);
     when(defaultService.getProject()).thenReturn(project);
-    doReturn(new Path(root.getRoot().getPath())).when(serverBehaviour)
+    doReturn(new Path(root.getRoot().getPath()))
+        .when(serverBehaviour)
         .getModuleDeployDirectory(defaultService);
     webInf = root.newFolder("WEB-INF");
   }
@@ -154,5 +149,4 @@ public class DatastoreIndexUpdateDataTest {
     assertTrue(appengineGenerated.mkdirs());
     assertTrue(datastoreIndexesAutoXml.createNewFile());
   }
-
 }
