@@ -171,10 +171,10 @@ public class AccountSelector extends Composite {
             combo.deselectAll();
           }
         }
-        return;
+      } else {
+        selectedAccount = (Account) combo.getData(getSelectedEmail());
+        fireSelectionListeners();
       }
-      selectedAccount = (Account) combo.getData(getSelectedEmail());
-      fireSelectionListeners();
     }
 
     private void addAndSelectAccount(Account account) {

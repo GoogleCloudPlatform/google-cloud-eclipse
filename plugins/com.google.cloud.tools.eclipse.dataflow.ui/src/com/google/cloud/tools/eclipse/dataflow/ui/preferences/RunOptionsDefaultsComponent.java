@@ -108,6 +108,14 @@ public class RunOptionsDefaultsComponent {
   private FetchStagingLocationsJob fetchStagingLocationsJob;
   private VerifyStagingLocationJob verifyStagingLocationJob;
 
+  /**
+   * Remembers the last parameter value given to {@link #setEnabled}. In other words, the logical
+   * enablement state of the instance when restricted only to the instance (i.e., ignores the widget
+   * enablement states of parent composites). As such, the value may be different from
+   * {@link #isEnabled}.
+   */
+  private boolean canEnableChildren = true;
+
   public RunOptionsDefaultsComponent(Composite target, int columns, MessageTarget messageTarget,
       DataflowPreferences preferences) {
     this(target, columns, messageTarget, preferences, null, false /* allowIncomplete */);
@@ -231,7 +239,7 @@ public class RunOptionsDefaultsComponent {
       return;
     }
 
-    projectInput.setEnabled(true);
+    projectInput.setEnabled(canEnableChildren);
     if (projectInput.getProject() == null) {
       stagingLocationInput.setEnabled(false);
       createButton.setEnabled(false);
@@ -263,7 +271,7 @@ public class RunOptionsDefaultsComponent {
       }
     }
 
-    stagingLocationInput.setEnabled(true);
+    stagingLocationInput.setEnabled(canEnableChildren);
 
     // fetchStagingLocationsJob is a proxy for project checking
     if (fetchStagingLocationsJob != null) {
@@ -284,9 +292,6 @@ public class RunOptionsDefaultsComponent {
 
     String bucketNamePart = GcsDataflowProjectClient.toGcsBucketName(getStagingLocation());
     if (bucketNamePart.isEmpty()) {
-      // If the bucket name is empty, we don't have anything to verify; and we don't have any
-      // interesting messaging.
-      createButton.setEnabled(false);
       setPageComplete(allowIncomplete);
       return;
     }
@@ -321,7 +326,7 @@ public class RunOptionsDefaultsComponent {
       } else {
         // user must create this bucket; feels odd that this is flagged as an error
         messageTarget.setError(Messages.getString("could.not.fetch.bucket", bucketNamePart)); //$NON-NLS-1$
-        createButton.setEnabled(true);
+        createButton.setEnabled(canEnableChildren);
       }
     }
   }
@@ -424,11 +429,16 @@ public class RunOptionsDefaultsComponent {
   }
 
   public void setEnabled(boolean enabled) {
+    canEnableChildren = enabled;
     accountSelector.setEnabled(enabled);
     projectInput.setEnabled(enabled);
     stagingLocationInput.setEnabled(enabled);
-  }
+    createButton.setEnabled(enabled);
 
+    if (enabled) {
+      validate();  // Some widgets may need to be disabled depending on their values.
+    }
+  }
 
   /**
    * Fetch the staging locations from GCS in a background task and update the Staging Locations
