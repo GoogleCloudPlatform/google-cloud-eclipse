@@ -51,15 +51,15 @@ public class DatastoreIndexUpdateDataTest {
   public TemporaryFolder root = new TemporaryFolder();
 
   @Mock
-  ILaunchConfiguration launchConfiguration;
+  private ILaunchConfiguration launchConfiguration;
   @Mock
-  IServer server;
+  private IServer server;
   @Mock
-  LocalAppEngineServerBehaviour serverBehaviour;
+  private LocalAppEngineServerBehaviour serverBehaviour;
   @Mock
-  IModule defaultService;
+  private IModule defaultService;
   @Mock
-  IProject project;
+  private IProject project;
 
   private File webInf;
 
@@ -106,8 +106,7 @@ public class DatastoreIndexUpdateDataTest {
     when(projectWebContent.exists()).thenReturn(true);
     when(projectWebContent.getFolder("WEB-INF")).thenReturn(projectWebInf);
     when(projectWebInf.exists()).thenReturn(true);
-    when(projectWebInf.getFile("datastore-indexes.xml"))
-        .thenReturn(projectDatastoreIndexXml);
+    when(projectWebInf.getFile("datastore-indexes.xml")).thenReturn(projectDatastoreIndexXml);
     when(projectWebInf.getFile(new Path("datastore-indexes.xml")))
         .thenReturn(projectDatastoreIndexXml);
     when(projectDatastoreIndexXml.exists()).thenReturn(true);
