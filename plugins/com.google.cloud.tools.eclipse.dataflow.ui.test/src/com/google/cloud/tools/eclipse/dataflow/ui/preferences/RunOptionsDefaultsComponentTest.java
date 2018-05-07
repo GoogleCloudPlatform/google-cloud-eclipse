@@ -355,6 +355,26 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
+  public void testEnablement_disabledWhileAllValuesValid() {
+    selector.selectAccount("alice@example.com");
+    component.setCloudProjectText("project");
+    join();
+    component.setStagingLocationText("alice-bucket-1");
+    component.startStagingLocationCheck(0); // force right now
+    join();
+    component.validate();
+    assertTrue(projectID.isEnabled());
+    assertTrue(stagingLocations.isEnabled());
+    assertTrue(page.isPageComplete());
+
+    component.setEnabled(false);
+    component.validate();
+    assertFalse(projectID.isEnabled());
+    assertFalse(stagingLocations.isEnabled());
+    assertTrue(page.isPageComplete());
+  }
+
+  @Test
   public void testStagingLocation() {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
