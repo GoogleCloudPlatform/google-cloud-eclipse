@@ -34,7 +34,7 @@ import org.eclipse.ui.IWorkbench;
  * A Wizard to create a new Google Cloud Dataflow Project.
  */
 public class NewDataflowProjectWizard extends Wizard implements INewWizard {
-  private DataflowProjectCreator creator = DataflowProjectCreator.create();
+  private final DataflowProjectCreator creator = DataflowProjectCreator.create();
 
   private NewDataflowProjectWizardDefaultRunOptionsPage defaultRunOptionsPage;
 
@@ -46,6 +46,7 @@ public class NewDataflowProjectWizard extends Wizard implements INewWizard {
     creator.setDefaultAccountEmail(defaultRunOptionsPage.getAccountEmail());
     creator.setDefaultProject(defaultRunOptionsPage.getProjectId());
     creator.setDefaultStagingLocation(defaultRunOptionsPage.getStagingLocation());
+    creator.setDefaultServiceAccountKey(defaultRunOptionsPage.getServiceAccountKey());
 
     if (!creator.isValid()) {
       String message =

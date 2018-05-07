@@ -35,6 +35,7 @@ import com.google.common.base.Strings;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -142,8 +143,7 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
     workingCopy.setAttribute(
         IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, SPACE_JOINER.join(argComponents));
 
-    String accountEmail = effectiveArguments.get("accountEmail");
-    setLoginCredential(workingCopy, accountEmail);
+    setCredential(workingCopy, effectiveArguments);
 
     PipelineRunner pipelineRunner = pipelineConfig.getRunner();
     AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.DATAFLOW_RUN,
@@ -167,7 +167,35 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
   }
 
   @VisibleForTesting
-  void setLoginCredential(ILaunchConfigurationWorkingCopy workingCopy, String accountEmail)
+  void setCredential(ILaunchConfigurationWorkingCopy workingCopy,
+      Map<String, String> effectiveArguments) throws CoreException {
+
+    String serviceAccountKey =
+        effectiveArguments.get(DataflowPreferences.SERVICE_ACCOUNT_KEY_PROPERTY);
+
+    if (!Strings.isNullOrEmpty(serviceAccountKey)) {
+      setServiceAccountCredential(workingCopy, serviceAccountKey);
+    } else {
+      String accountEmail = effectiveArguments.get(DataflowPreferences.ACCOUNT_EMAIL_PROPERTY);
+      setLoginCredential(workingCopy, accountEmail);
+    }
+  }
+
+  private void setServiceAccountCredential(ILaunchConfigurationWorkingCopy workingCopy,
+      String serviceAccountKey) throws CoreException {
+    Path jsonKey = Paths.get(serviceAccountKey);
+    if (Files.isDirectory(jsonKey)) {
+      String message = "Not a file but directory: " + jsonKey;
+      throw new CoreException(new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, message));
+    } else if (!Files.isReadable(jsonKey)) {
+      String message = "Cannot open service account key file: " + jsonKey;
+      throw new CoreException(new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, message));
+    }
+
+    setCredentialEnvironmentVariable(workingCopy, serviceAccountKey);
+  }
+
+  private void setLoginCredential(ILaunchConfigurationWorkingCopy workingCopy, String accountEmail)
       throws CoreException {
     Preconditions.checkNotNull(accountEmail,
         "account email missing in launch configuration or preferences");
@@ -184,28 +212,33 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
         throw new CoreException(new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, message));
       }
 
-      // Dataflow SDK doesn't yet support reading credentials from an arbitrary JSON, so we use the
-      // workaround of setting the "GOOGLE_APPLICATION_CREDENTIALS" environment variable.
-      Map<String, String> variableMap = workingCopy.getAttribute(
-          ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, new HashMap<String, String>());
-      if (variableMap.containsKey(GOOGLE_APPLICATION_CREDENTIALS_ENVIRONMENT_VARIABLE)) {
-        String message = "You cannot define the environment variable GOOGLE_APPLICATION_CREDENTIALS"
-            + " when launching Dataflow pipelines from Cloud Tools for Eclipse.";
-        throw new CoreException(new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, message));
-      }
-
       Path jsonCredential = Files.createTempFile("google-ct4e-" + workingCopy.getName(), ".json");
       CredentialHelper.toJsonFile(credential, jsonCredential);
       jsonCredential.toFile().deleteOnExit();
 
-      Map<String, String> variableMapCopy = new HashMap<>(variableMap);
-      variableMapCopy.put(GOOGLE_APPLICATION_CREDENTIALS_ENVIRONMENT_VARIABLE,
-          jsonCredential.toAbsolutePath().toString());
-      workingCopy.setAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, variableMapCopy);
+      String path = jsonCredential.toAbsolutePath().toString();
+      setCredentialEnvironmentVariable(workingCopy, path);
     } catch (IOException ex) {
       throw new CoreException(
           new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, ex.getMessage(), ex));
     }
+  }
+
+  private void setCredentialEnvironmentVariable(
+      ILaunchConfigurationWorkingCopy workingCopy, String value) throws CoreException {
+    // Dataflow SDK doesn't yet support reading credentials from an arbitrary JSON, so we use the
+    // workaround of setting the "GOOGLE_APPLICATION_CREDENTIALS" environment variable.
+    Map<String, String> variableMap = workingCopy.getAttribute(
+        ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, new HashMap<String, String>());
+    if (variableMap.containsKey(GOOGLE_APPLICATION_CREDENTIALS_ENVIRONMENT_VARIABLE)) {
+      String message = "You cannot define the environment variable GOOGLE_APPLICATION_CREDENTIALS"
+          + " when launching Dataflow pipelines from Cloud Tools for Eclipse.";
+      throw new CoreException(new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, message));
+    }
+
+    Map<String, String> variableMapCopy = new HashMap<>(variableMap);
+    variableMapCopy.put(GOOGLE_APPLICATION_CREDENTIALS_ENVIRONMENT_VARIABLE, value);
+    workingCopy.setAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, variableMapCopy);
   }
 
   private static IGoogleLoginService getLoginService() {

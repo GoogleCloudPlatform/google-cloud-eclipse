@@ -59,6 +59,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -132,6 +133,18 @@ public class PipelineArgumentsTabTest {
     @Test
     public void testGetName() {
       Assert.assertEquals("Pipeline Arguments", pipelineArgumentsTab.getName());
+    }
+
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/3048
+    @Test
+    public void testValidatePage_doesNotClearErrorSetByChildren() {
+      Text serviceAccountKey = CompositeUtil.findControlAfterLabel(shellResource.getShell(),
+          Text.class, "Service account key:");
+      serviceAccountKey.setText("/non/existing/file");
+      assertEquals("/non/existing/file does not exist.", pipelineArgumentsTab.getErrorMessage());
+
+      pipelineArgumentsTab.isValid(configuration1);
+      assertEquals("/non/existing/file does not exist.", pipelineArgumentsTab.getErrorMessage());
     }
 
     @Test

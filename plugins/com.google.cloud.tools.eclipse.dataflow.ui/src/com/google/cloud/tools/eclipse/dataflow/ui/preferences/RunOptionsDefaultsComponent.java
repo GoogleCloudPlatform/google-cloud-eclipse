@@ -38,11 +38,15 @@ import com.google.cloud.tools.eclipse.projectselector.MiniSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.ui.util.DisplayExecutor;
 import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
+import com.google.cloud.tools.eclipse.ui.util.event.FileFieldSetter;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableSortedSet;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
@@ -69,6 +73,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 
 /**
@@ -79,6 +84,7 @@ public class RunOptionsDefaultsComponent {
   private static final int PROJECT_INPUT_SPENT_COLUMNS = 1;
   private static final int STAGING_LOCATION_SPENT_COLUMNS = 2;
   private static final int ACCOUNT_SPENT_COLUMNS = 1;
+  private static final int SERVICE_ACCOUNT_KEY_SPENT_COLUMNS = 2;
 
   /** Milliseconds to wait after a key before launching a job, to avoid needless computation. */
   private static final long NEXT_KEY_DELAY_MS = 250L;
@@ -100,6 +106,8 @@ public class RunOptionsDefaultsComponent {
   private final MiniSelector projectInput;
   private final Combo stagingLocationInput;
   private final Button createButton;
+  private final Text serviceAccountKey;
+  private final Button browse;
 
   private SelectFirstMatchingPrefixListener completionListener;
   private ControlDecoration stagingLocationResults;
@@ -173,6 +181,22 @@ public class RunOptionsDefaultsComponent {
     String stagingLocation = preferences.getDefaultStagingLocation();
     stagingLocationInput.setText(Strings.nullToEmpty(stagingLocation));
 
+    Label serviceAccountKeyLabel = new Label(target, SWT.NULL);
+    serviceAccountKeyLabel.setText(Messages.getString("service.account.key.label")); //$NON-NLS-1$
+    serviceAccountKeyLabel.setToolTipText(
+        Messages.getString("service.account.key.tooltip")); //$NON-NLS-1$
+
+    serviceAccountKey = new Text(target, SWT.BORDER);
+    serviceAccountKey.setToolTipText(
+        Messages.getString("service.account.key.tooltip")); //$NON-NLS-1$
+    String key = preferences.getDefaultServiceAccountKey();
+    serviceAccountKey.setText(Strings.nullToEmpty(key));
+
+    browse = new Button(target, SWT.NONE);
+    browse.setText(Messages.getString("button.browse")); //$NON-NLS-1$
+    String[] filterExtensions = new String[] {"*.json"}; //$NON-NLS-1$
+    browse.addSelectionListener(new FileFieldSetter(serviceAccountKey, filterExtensions));
+
     // Account selection occupies a single row
     accountLabel.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false, 1, 1));
     accountSelector.setLayoutData(
@@ -187,6 +211,13 @@ public class RunOptionsDefaultsComponent {
     comboLabel.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false, 1, 1));
     stagingLocationInput.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false,
         columns - STAGING_LOCATION_SPENT_COLUMNS, 1));
+
+    // Service account key row
+    serviceAccountKeyLabel.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false, 1, 1));
+    serviceAccountKey.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false,
+        columns - SERVICE_ACCOUNT_KEY_SPENT_COLUMNS, 1));
+
+    alignButtons(createButton, browse);
 
     accountSelector.addSelectionListener(() -> {
       // Don't use "removeAll()", as it will clear the text field too.
@@ -212,14 +243,31 @@ public class RunOptionsDefaultsComponent {
     });
     createButton.addSelectionListener(new CreateStagingLocationListener());
 
+    serviceAccountKey.addModifyListener(event -> validate());
+
     startStagingLocationCheck(0); // no delay
     updateStagingLocations(0); // no delay
     messageTarget.setInfo(Messages.getString("set.pipeline.run.option.defaults")); //$NON-NLS-1$
     validate();
   }
 
+  /** Estimates the width of all the buttons and gives the same width hint to them. */
   @VisibleForTesting
-  void validate() {
+  static void alignButtons(Button... buttons) {
+    int maxWidth = 0;
+    for (Button button : buttons) {
+      int width = button.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+      maxWidth = Math.max(maxWidth, width);
+    }
+
+    for (Button button : buttons) {
+      GridData gridData = new GridData(SWT.CENTER, SWT.CENTER, false, false, 1, 1);
+      gridData.widthHint = maxWidth;
+      button.setLayoutData(gridData);
+    }
+  }
+
+  public void validate() {
     Preconditions.checkState(Display.getCurrent() != null, "Must be called on SWT UI thread");
     // may be from deferred event
     if (target.isDisposed()) {
@@ -230,12 +278,16 @@ public class RunOptionsDefaultsComponent {
     setPageComplete(false);
     messageTarget.clear();
 
+    // Do not exit immediately even if the checks fail; we need to check the account, project ID,
+    // and GCS bucket to make their enablement correct.
+    boolean quickChecksOk = doIsolatedQuickChecks();
+
     Credential selectedCredential = accountSelector.getSelectedCredential();
     if (selectedCredential == null) {
       projectInput.setEnabled(false);
       stagingLocationInput.setEnabled(false);
       createButton.setEnabled(false);
-      setPageComplete(allowIncomplete);
+      setPageComplete(quickChecksOk && allowIncomplete);
       return;
     }
 
@@ -243,7 +295,7 @@ public class RunOptionsDefaultsComponent {
     if (projectInput.getProject() == null) {
       stagingLocationInput.setEnabled(false);
       createButton.setEnabled(false);
-      setPageComplete(allowIncomplete);
+      setPageComplete(quickChecksOk && allowIncomplete);
       return;
     }
 
@@ -295,7 +347,7 @@ public class RunOptionsDefaultsComponent {
       // If the bucket name is empty, we don't have anything to verify; and we don't have any
       // interesting messaging.
       createButton.setEnabled(false);
-      setPageComplete(allowIncomplete);
+      setPageComplete(quickChecksOk && allowIncomplete);
       return;
     }
 
@@ -325,13 +377,37 @@ public class RunOptionsDefaultsComponent {
       if (result.accessible) {
         messageTarget.setInfo(Messages.getString("verified.bucket.is.accessible", bucketNamePart)); //$NON-NLS-1$
         createButton.setEnabled(false);
-        setPageComplete(true);
+        setPageComplete(quickChecksOk);
       } else {
         // user must create this bucket; feels odd that this is flagged as an error
         messageTarget.setError(Messages.getString("could.not.fetch.bucket", bucketNamePart)); //$NON-NLS-1$
         createButton.setEnabled(canEnableChildren);
       }
     }
+  }
+
+  /**
+   * Validates input values that can be checked quickly in a synchronous manner and are independent
+   * from account, project ID, and GCS bucket. (The account, project ID, and GCS buckets are
+   * tightly coupled regarding enablement of the input widgets and should always be validated
+   * to make their interconnected enablement correct.)
+   */
+  private boolean doIsolatedQuickChecks() {
+    String key = serviceAccountKey.getText();
+    if (!Strings.isNullOrEmpty(key)) {
+      Path path = Paths.get(key);
+      if (!Files.exists(path)) {
+        messageTarget.setError(Messages.getString("error.file.does.not.exist", key)); //$NON-NLS-1$
+        return false;
+      } else if (Files.isDirectory(path)) {
+        messageTarget.setError(Messages.getString("error.is.a.directory", key)); //$NON-NLS-1$
+        return false;
+      } else if (!Files.isReadable(path)) {
+        messageTarget.setError(Messages.getString("error.is.not.readable", key)); //$NON-NLS-1$
+        return false;
+      }
+    }
+    return true;
   }
 
   protected void checkProjectConfiguration() {
@@ -396,6 +472,14 @@ public class RunOptionsDefaultsComponent {
     projectInput.setProject(project);
   }
 
+  public String getServiceAccountKey() {
+    return serviceAccountKey.getText();
+  }
+
+  public void setServiceAccountKey(String key) {
+    serviceAccountKey.setText(key);
+  }
+
   /**
    * Return the selected staging location, or {@code ""} if no staging location specified.
    */
@@ -423,6 +507,7 @@ public class RunOptionsDefaultsComponent {
       }
     });
     stagingLocationInput.addModifyListener(listener);
+    serviceAccountKey.addModifyListener(listener);
   }
 
   @VisibleForTesting
@@ -437,6 +522,8 @@ public class RunOptionsDefaultsComponent {
     projectInput.setEnabled(enabled);
     stagingLocationInput.setEnabled(enabled);
     createButton.setEnabled(enabled);
+    serviceAccountKey.setEnabled(enabled);
+    browse.setEnabled(enabled);
 
     if (enabled) {
       validate();  // Some widgets may need to be disabled depending on their values.
