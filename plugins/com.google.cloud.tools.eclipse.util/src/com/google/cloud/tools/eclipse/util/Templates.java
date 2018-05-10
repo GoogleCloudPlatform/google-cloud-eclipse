@@ -45,6 +45,7 @@ public class Templates {
   public static final String APP_YAML_TEMPLATE = "app.yaml.ftl";
   public static final String POM_XML_STANDARD_TEMPLATE = "pom.xml.standard.ftl";
   public static final String POM_XML_FLEX_TEMPLATE = "pom.xml.flex.ftl";
+  public static final String LOGGING_PROPERTIES_TEMPLATE = "logging.properties.ftl";
 
   private static Configuration configuration;
 

@@ -41,8 +41,8 @@ public class StandardFacetInstallDelegateTest {
 
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
   
-  private StandardFacetInstallDelegate delegate = new StandardFacetInstallDelegate();
-  private IProgressMonitor monitor = new NullProgressMonitor(); 
+  private final StandardFacetInstallDelegate delegate = new StandardFacetInstallDelegate();
+  private final IProgressMonitor monitor = new NullProgressMonitor();
   private IProject project;
   
   @Before 
@@ -56,8 +56,10 @@ public class StandardFacetInstallDelegateTest {
     delegate.createConfigFiles(project, AppEngineStandardFacet.JRE7, monitor);
 
     IFile appengineWebXml = project.getFile("src/main/webapp/WEB-INF/appengine-web.xml");
+    IFile loggingProperties = project.getFile("src/main/webapp/WEB-INF/logging.properties");
     Assert.assertTrue(appengineWebXml.exists());
-    
+    Assert.assertTrue(loggingProperties.exists());
+
     try (InputStream in = appengineWebXml.getContents(true)) {
       AppEngineDescriptor descriptor = AppEngineDescriptor.parse(in);
       assertNull(descriptor.getRuntime());
@@ -65,23 +67,25 @@ public class StandardFacetInstallDelegateTest {
   }
   
   @Test
-  public void testCreateConfigFiles_dontOverwrite() 
-      throws CoreException, IOException {
-    
+  public void testCreateConfigFiles_dontOverwrite() throws CoreException, IOException {
     IFolder webInfDir = project.getFolder("src/main/webapp/WEB-INF");
     ResourceUtils.createFolders(webInfDir, monitor);
-    IFile appengineWebXml = project.getFile("src/main/webapp/WEB-INF/appengine-web.xml");
+    IFile appengineWebXml = webInfDir.getFile("appengine-web.xml");
+    IFile loggingProperties = project.getFile("logging.properties");
     appengineWebXml.create(new ByteArrayInputStream(new byte[0]), true, monitor);
+    loggingProperties.create(new ByteArrayInputStream(new byte[0]), true, monitor);
 
     Assert.assertTrue(appengineWebXml.exists());
+    Assert.assertTrue(loggingProperties.exists());
 
     delegate.createConfigFiles(project, AppEngineStandardFacet.JRE7, monitor);
 
-    // Make sure createConfigFiles did not write any data into appengine-web.xml
-    try (InputStream in = appengineWebXml.getContents(true)) {
-      Assert.assertEquals("appengine-web.xml is not empty", -1, in.read());       
+    // Make sure createConfigFiles did not overwrite appengine-web.xml or logging.properties
+    try (InputStream appengineXmlIn = appengineWebXml.getContents(true);
+        InputStream loggingPropertiesIn = loggingProperties.getContents(true)) {
+      Assert.assertEquals("appengine-web.xml is not empty", -1, appengineXmlIn.read());
+      Assert.assertEquals("logging.properties is not empty", -1, loggingPropertiesIn.read());
     }
-
   }
 
 }

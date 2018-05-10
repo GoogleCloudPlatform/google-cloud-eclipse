@@ -26,7 +26,6 @@ import com.google.common.base.Strings;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -84,7 +83,7 @@ public class CodeTemplates {
     IFile hello =
         createJavaSourceFiles(project, config, isStandardProject, subMonitor.newChild(15));
 
-    createAppEngineWebXmlOrAppYaml(project, config, isStandardProject, subMonitor.newChild(5));
+    createAppEngineConfigFiles(project, config, isStandardProject, subMonitor.newChild(5));
 
     createWebXml(project, config, isStandardProject, subMonitor.newChild(5));
 
@@ -131,7 +130,7 @@ public class CodeTemplates {
     return hello;
   }
 
-  private static void createAppEngineWebXmlOrAppYaml(IProject project,
+  private static void createAppEngineConfigFiles(IProject project,
       AppEngineProjectConfig config, boolean isStandardProject, IProgressMonitor monitor)
       throws CoreException {
     Map<String, String> properties = new HashMap<>();
@@ -148,6 +147,9 @@ public class CodeTemplates {
       IFolder webInf = project.getFolder("src/main/webapp/WEB-INF"); //$NON-NLS-1$
       createChildFile("appengine-web.xml", //$NON-NLS-1$
           Templates.APPENGINE_WEB_XML_TEMPLATE,
+          webInf, properties, monitor);
+      createChildFile("logging.properties", //$NON-NLS-1$
+          Templates.LOGGING_PROPERTIES_TEMPLATE,
           webInf, properties, monitor);
     } else {
       IFolder appengine = project.getFolder("src/main/appengine"); //$NON-NLS-1$

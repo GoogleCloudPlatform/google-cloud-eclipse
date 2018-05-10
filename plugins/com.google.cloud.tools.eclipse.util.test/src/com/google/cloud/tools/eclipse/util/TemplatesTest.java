@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.util;
 
-import com.google.cloud.tools.eclipse.util.Templates;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -171,6 +170,13 @@ public class TemplatesTest {
     compareToFile("helloAppEngineJava8.txt");
   }
 
+  @Test
+  public void testCreateFileContent_loggingProperties() throws CoreException, IOException {
+    Templates.createFileContent(fileLocation, Templates.LOGGING_PROPERTIES_TEMPLATE, dataMap);
+
+    compareToFile("loggingProperties.txt");
+  }
+
   private static InputStream getDataFile(String fileName) throws IOException {
     Bundle bundle = FrameworkUtil.getBundle(TemplatesTest.class);
     URL expectedFileUrl = bundle.getResource("/testData/templates/appengine/" + fileName);
@@ -182,7 +188,7 @@ public class TemplatesTest {
 
   private void compareToFile(String expected) throws IOException {
 
-    try (InputStream testFileStream = Files.newInputStream(Paths.get((fileLocation)));
+    try (InputStream testFileStream = Files.newInputStream(Paths.get(fileLocation));
         InputStream expectedFileStream = getDataFile(expected);
         Scanner expectedScanner = new Scanner(expectedFileStream);
         Scanner actualScanner = new Scanner(testFileStream)) {
