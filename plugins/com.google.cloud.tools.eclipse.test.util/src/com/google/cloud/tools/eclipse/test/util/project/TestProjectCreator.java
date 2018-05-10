@@ -31,7 +31,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
@@ -107,7 +106,7 @@ public final class TestProjectCreator extends ExternalResource {
         }
         project.delete(true, null);
       } catch (IllegalArgumentException ex) {
-        new ThreadDumpingWatchdog(0, TimeUnit.DAYS).run();
+        ThreadDumpingWatchdog.report();
         throw ex;
       } catch (CoreException ex) {
         throw new AssertionError("Could not delete project", ex);
