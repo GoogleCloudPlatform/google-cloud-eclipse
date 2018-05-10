@@ -85,7 +85,10 @@ public class ThreadDumpingWatchdog extends TestWatcher {
   @Override
   protected void starting(Description description) {
     this.description = description;
+    installTimer();
+  }
 
+  private void installTimer() {
     // reset the interrupted state in case it was leaked (http://bugs.eclipse.org/505920)
     Thread.interrupted();
 
