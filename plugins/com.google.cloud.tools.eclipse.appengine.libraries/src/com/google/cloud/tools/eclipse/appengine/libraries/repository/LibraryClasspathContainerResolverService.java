@@ -93,8 +93,8 @@ public class LibraryClasspathContainerResolverService
                 @Override
                 public IClasspathEntry[] load(String libraryId) throws Exception {
                   ISchedulingRule currentRule = Job.getJobManager().currentRule();
-                  Preconditions.checkState(
-                      currentRule != null && currentRule.contains(MavenUtils.mavenResolvingRule()));
+                  Preconditions.checkNotNull(currentRule);
+                  Preconditions.checkState(currentRule.contains(MavenUtils.mavenResolvingRule()));
                   Library library = CloudLibraries.getLibrary(libraryId);
                   if (library == null) {
                     throw new CoreException(
