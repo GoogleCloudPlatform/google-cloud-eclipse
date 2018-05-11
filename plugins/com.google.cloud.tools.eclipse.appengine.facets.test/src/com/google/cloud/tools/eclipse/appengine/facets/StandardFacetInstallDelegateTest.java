@@ -51,40 +51,52 @@ public class StandardFacetInstallDelegateTest {
   }
 
   @Test
-  public void testCreateConfigFiles()
+  public void testCreateConfigFiles_appengineWebXml()
       throws CoreException, IOException, SAXException, AppEngineException {
     delegate.createConfigFiles(project, AppEngineStandardFacet.JRE7, monitor);
 
     IFile appengineWebXml = project.getFile("src/main/webapp/WEB-INF/appengine-web.xml");
-    IFile loggingProperties = project.getFile("src/main/webapp/WEB-INF/logging.properties");
     Assert.assertTrue(appengineWebXml.exists());
-    Assert.assertTrue(loggingProperties.exists());
 
     try (InputStream in = appengineWebXml.getContents(true)) {
       AppEngineDescriptor descriptor = AppEngineDescriptor.parse(in);
       assertNull(descriptor.getRuntime());
     }
   }
-  
+
   @Test
-  public void testCreateConfigFiles_dontOverwrite() throws CoreException, IOException {
+  public void testCreateConfigFiles_loggingProperties() throws CoreException {
+    delegate.createConfigFiles(project, AppEngineStandardFacet.JRE7, monitor);
+
+    IFile loggingProperties = project.getFile("src/main/webapp/WEB-INF/logging.properties");
+    Assert.assertTrue(loggingProperties.exists());
+  }
+
+  @Test
+  public void testCreateConfigFiles_dontOverwriteAppengineWebXml()
+      throws CoreException, IOException {
+    assertNoOverwriting("appengine-web.xml");
+  }
+
+  @Test
+  public void testCreateConfigFiles_dontOverwriteLoggingProperties()
+      throws CoreException, IOException {
+    assertNoOverwriting("logging.properties");
+  }
+
+  private void assertNoOverwriting(String fileInWebInf) throws CoreException, IOException {
     IFolder webInfDir = project.getFolder("src/main/webapp/WEB-INF");
     ResourceUtils.createFolders(webInfDir, monitor);
-    IFile appengineWebXml = webInfDir.getFile("appengine-web.xml");
-    IFile loggingProperties = project.getFile("logging.properties");
-    appengineWebXml.create(new ByteArrayInputStream(new byte[0]), true, monitor);
-    loggingProperties.create(new ByteArrayInputStream(new byte[0]), true, monitor);
+    IFile file = webInfDir.getFile(fileInWebInf);
+    file.create(new ByteArrayInputStream(new byte[0]), true, monitor);
 
-    Assert.assertTrue(appengineWebXml.exists());
-    Assert.assertTrue(loggingProperties.exists());
+    Assert.assertTrue(file.exists());
 
     delegate.createConfigFiles(project, AppEngineStandardFacet.JRE7, monitor);
 
-    // Make sure createConfigFiles did not overwrite appengine-web.xml or logging.properties
-    try (InputStream appengineXmlIn = appengineWebXml.getContents(true);
-        InputStream loggingPropertiesIn = loggingProperties.getContents(true)) {
-      Assert.assertEquals("appengine-web.xml is not empty", -1, appengineXmlIn.read());
-      Assert.assertEquals("logging.properties is not empty", -1, loggingPropertiesIn.read());
+    // Make sure createConfigFiles did not overwrite the file in WEB-INF
+    try (InputStream in = file.getContents(true)) {
+      Assert.assertEquals(fileInWebInf + " is not empty", -1, in.read());
     }
   }
 

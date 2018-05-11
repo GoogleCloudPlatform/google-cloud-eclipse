@@ -137,7 +137,7 @@ public class StandardFacetInstallDelegate implements IDelegate {
     SubMonitor progress = SubMonitor.convert(monitor, 10);
 
     createFileInWebInf(project, "logging.properties", Templates.LOGGING_PROPERTIES_TEMPLATE,
-        Collections.emptyMap(), progress.newChild(5));
+        Collections.emptyMap(), progress.split(5));
 
     Map<String, String> parameters = new HashMap<>();
     Object appEngineRuntime = facetVersion.getProperty("appengine.runtime");
@@ -145,7 +145,7 @@ public class StandardFacetInstallDelegate implements IDelegate {
       parameters.put("runtime", (String) appEngineRuntime);
     }
     createFileInWebInf(project, "appengine-web.xml", Templates.APPENGINE_WEB_XML_TEMPLATE,
-        parameters, progress.newChild(5));
+        parameters, progress.split(5));
   }
 
   /** Creates a file in the WEB-INF folder if it doesn't exist. */
@@ -160,10 +160,10 @@ public class StandardFacetInstallDelegate implements IDelegate {
 
     // Use the virtual component model to decide where to create the file
     targetFile = WebProjectUtil.createFileInWebInf(project, new Path(filename),
-        new ByteArrayInputStream(new byte[0]), progress.newChild(2));
+        new ByteArrayInputStream(new byte[0]), progress.split(2));
     String fileLocation = targetFile.getLocation().toString();
     Templates.createFileContent(fileLocation, templateName, templateParameters);
     progress.worked(4);
-    targetFile.refreshLocal(IFile.DEPTH_ZERO, progress.newChild(1));
+    targetFile.refreshLocal(IFile.DEPTH_ZERO, progress.split(1));
   }
 }
