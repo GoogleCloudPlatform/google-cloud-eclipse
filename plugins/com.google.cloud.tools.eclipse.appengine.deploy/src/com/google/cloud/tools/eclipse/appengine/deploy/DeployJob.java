@@ -17,13 +17,14 @@
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.cloud.tools.appengine.cloudsdk.JsonParseException;
+import com.google.cloud.tools.appengine.cloudsdk.serialization.AppEngineDeployResult;
 import com.google.cloud.tools.eclipse.login.CredentialHelper;
 import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.google.gson.JsonParseException;
 import java.io.IOException;
 import java.nio.file.Path;
 import org.eclipse.core.resources.WorkspaceJob;
@@ -171,7 +172,7 @@ public class DeployJob extends WorkspaceJob {
   private IStatus openAppInBrowser() {
     try {
       String rawDeployOutput = deployer.getJsonDeployResult();
-      AppEngineDeployOutput structuredOutput = AppEngineDeployOutput.parse(rawDeployOutput);
+      AppEngineDeployResult structuredOutput = AppEngineDeployResult.parse(rawDeployOutput);
 
       boolean promoted = deployPreferences.isAutoPromote();
       String appLocation = getDeployedAppUrl(promoted, structuredOutput);
@@ -179,16 +180,16 @@ public class DeployJob extends WorkspaceJob {
       String browserTitle = Messages.getString("browser.launch.title", project);
       WorkbenchUtil.openInBrowserInUiThread(appLocation, null, browserTitle, browserTitle);
       return Status.OK_STATUS;
-    } catch (IndexOutOfBoundsException | JsonParseException ex)  {
+    } catch (IndexOutOfBoundsException | JsonParseException ex) {
       return StatusUtil.error(this, Messages.getString("browser.launch.failed"), ex);
     }
   }
 
   @VisibleForTesting
-  static String getDeployedAppUrl(boolean promoted, AppEngineDeployOutput deployOutput) {
-    String version = deployOutput.getVersion();
-    String service = deployOutput.getService();
-    String projectId = deployOutput.getProject();
+  static String getDeployedAppUrl(boolean promoted, AppEngineDeployResult deployResult) {
+    String version = deployResult.getVersion(0);
+    String service = deployResult.getService(0);
+    String projectId = deployResult.getProject(0);
     boolean usingDefaultService = DEFAULT_SERVICE.equals(service);
 
     String domain = ".appspot.com";
