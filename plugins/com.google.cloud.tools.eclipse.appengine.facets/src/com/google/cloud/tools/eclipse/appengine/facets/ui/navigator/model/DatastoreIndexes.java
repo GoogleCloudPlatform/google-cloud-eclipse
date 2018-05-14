@@ -22,9 +22,9 @@ import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 /**
  * Represents a {@code datastore-indexes.xml}.
  */
-public class AppEngineDatastoreIndexes extends AppEngineResourceElement {
+public class DatastoreIndexes extends AppEngineResourceElement {
 
-  public AppEngineDatastoreIndexes(IFacetedProject project, IFile datastoreIndexes) {
+  public DatastoreIndexes(IFacetedProject project, IFile datastoreIndexes) {
     super(project, datastoreIndexes);
   }
 

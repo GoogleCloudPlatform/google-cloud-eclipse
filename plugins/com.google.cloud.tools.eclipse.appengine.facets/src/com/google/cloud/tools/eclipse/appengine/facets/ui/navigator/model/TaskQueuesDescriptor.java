@@ -22,8 +22,8 @@ import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 /**
  * Represents an {@code queue.xml} element.
  */
-public class AppEngineTaskQueuesDescriptor extends AppEngineResourceElement {
-  public AppEngineTaskQueuesDescriptor(IFacetedProject project, IFile file) {
+public class TaskQueuesDescriptor extends AppEngineResourceElement {
+  public TaskQueuesDescriptor(IFacetedProject project, IFile file) {
     super(project, file);
   }
 }

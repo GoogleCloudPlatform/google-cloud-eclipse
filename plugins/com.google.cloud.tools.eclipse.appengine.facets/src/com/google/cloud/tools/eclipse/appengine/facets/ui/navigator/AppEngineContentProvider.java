@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.google.cloud.tools.eclipse.appengine.facets.ui.navigator;
 
@@ -5,12 +20,12 @@ import com.google.cloud.tools.appengine.AppEngineDescriptor;
 import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
-import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineCronDescriptor;
-import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineDatastoreIndexes;
-import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineDenialOfServiceDescriptor;
-import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineDispatchDescriptor;
-import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineTaskQueuesDescriptor;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineWebDescriptor;
+import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.CronDescriptor;
+import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.DatastoreIndexes;
+import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.DenialOfServiceDescriptor;
+import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.RequestDispatchDescriptor;
+import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.TaskQueuesDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -66,6 +81,7 @@ public class AppEngineContentProvider implements ITreeContentProvider {
       AppEngineWebDescriptor webElement = (AppEngineWebDescriptor) parentElement;
       try {
         AppEngineDescriptor descriptor = webElement.getDescriptor();
+        // ancillary config files are only taken from the default module
         if (descriptor.getServiceId() == null || "default".equals(descriptor.getServiceId())) {
           addCron(webElement.getProject(), contents);
           addDatastoreIndexes(webElement.getProject(), contents);
@@ -86,7 +102,7 @@ public class AppEngineContentProvider implements ITreeContentProvider {
   private void addCron(IFacetedProject project, List<Object> contents) {
     IFile cronXml = WebProjectUtil.findInWebInf(project.getProject(), new Path("cron.xml"));
     if (cronXml != null && cronXml.exists()) {
-      contents.add(new AppEngineCronDescriptor(project, cronXml));
+      contents.add(new CronDescriptor(project, cronXml));
     }
   }
 
@@ -95,7 +111,7 @@ public class AppEngineContentProvider implements ITreeContentProvider {
     IFile datastoreIndexes =
         WebProjectUtil.findInWebInf(project.getProject(), new Path("datastore-indexes.xml"));
     if (datastoreIndexes != null && datastoreIndexes.exists()) {
-      contents.add(new AppEngineDatastoreIndexes(project, datastoreIndexes));
+      contents.add(new DatastoreIndexes(project, datastoreIndexes));
     }
   }
 
@@ -103,7 +119,7 @@ public class AppEngineContentProvider implements ITreeContentProvider {
   private void addDispatch(IFacetedProject project, List<Object> contents) {
     IFile dispatchXml = WebProjectUtil.findInWebInf(project.getProject(), new Path("dispatch.xml"));
     if (dispatchXml != null && dispatchXml.exists()) {
-      contents.add(new AppEngineDispatchDescriptor(project, dispatchXml));
+      contents.add(new RequestDispatchDescriptor(project, dispatchXml));
     }
   }
 
@@ -113,7 +129,7 @@ public class AppEngineContentProvider implements ITreeContentProvider {
   private void addDenialOfService(IFacetedProject project, List<Object> contents) {
     IFile dosXml = WebProjectUtil.findInWebInf(project.getProject(), new Path("dos.xml"));
     if (dosXml != null && dosXml.exists()) {
-      contents.add(new AppEngineDenialOfServiceDescriptor(project, dosXml));
+      contents.add(new DenialOfServiceDescriptor(project, dosXml));
     }
   }
 
@@ -121,10 +137,9 @@ public class AppEngineContentProvider implements ITreeContentProvider {
   private void addTaskQueues(IFacetedProject project, List<Object> contents) {
     IFile queueXml = WebProjectUtil.findInWebInf(project.getProject(), new Path("queue.xml"));
     if (queueXml != null && queueXml.exists()) {
-      contents.add(new AppEngineTaskQueuesDescriptor(project, queueXml));
+      contents.add(new TaskQueuesDescriptor(project, queueXml));
     }
   }
-
 
   @Override
   public Object getParent(Object element) {

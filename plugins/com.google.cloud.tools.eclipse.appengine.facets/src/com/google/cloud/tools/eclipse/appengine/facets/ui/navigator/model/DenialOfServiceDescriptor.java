@@ -22,8 +22,8 @@ import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 /**
  * Represents a {@code dos.xml} element.
  */
-public class AppEngineDenialOfServiceDescriptor extends AppEngineResourceElement {
-  public AppEngineDenialOfServiceDescriptor(IFacetedProject project, IFile file) {
+public class DenialOfServiceDescriptor extends AppEngineResourceElement {
+  public DenialOfServiceDescriptor(IFacetedProject project, IFile file) {
     super(project, file);
   }
 }

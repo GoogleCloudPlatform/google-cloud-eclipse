@@ -22,8 +22,8 @@ import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 /**
  * Represents the {@code cron.xml}.
  */
-public class AppEngineCronDescriptor extends AppEngineResourceElement {
-  public AppEngineCronDescriptor(IFacetedProject project, IFile file) {
+public class CronDescriptor extends AppEngineResourceElement {
+  public CronDescriptor(IFacetedProject project, IFile file) {
     super(project, file);
   }
 }

@@ -22,8 +22,8 @@ import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 /**
  * Represents a {@code dispatch.xml} element.
  */
-public class AppEngineDispatchDescriptor extends AppEngineResourceElement {
-  public AppEngineDispatchDescriptor(IFacetedProject project, IFile file) {
+public class RequestDispatchDescriptor extends AppEngineResourceElement {
+  public RequestDispatchDescriptor(IFacetedProject project, IFile file) {
     super(project, file);
   }
 
