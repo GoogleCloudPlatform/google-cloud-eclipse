@@ -23,7 +23,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
-import com.google.cloud.tools.eclipse.appengine.deploy.util.CloudSdkProcessWrapper.ProcessExitRecorder;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -109,32 +108,23 @@ public class CloudSdkProcessWrapperTest {
   }
 
   @Test
-  public void testProcessExitRecorder_onErrorExitWithNullErrorMessageCollector() throws CloudSdkNotFoundException {
-    wrapper.setUpStandardStagingCloudSdk(null, null, null);
-
-    ProcessExitRecorder recorder = wrapper.new ProcessExitRecorder();
-    recorder.onExit(15);
+  public void testProcessExitRecorder_onErrorExitWithNullErrorMessageCollector() {
+    wrapper.recordProcessExitCode(15);
 
     assertEquals(Status.ERROR, wrapper.getExitStatus().getSeverity());
     assertEquals("Process exited with error code 15", wrapper.getExitStatus().getMessage());
   }
 
   @Test
-  public void testProcessExitRecorder_onErrorExit() throws CloudSdkNotFoundException {
-    wrapper.setUpStandardStagingCloudSdk(null, null, null);
-
-    ProcessExitRecorder recorder = wrapper.new ProcessExitRecorder();
-    recorder.onExit(23);
+  public void testProcessExitRecorder_onErrorExit() {
+    wrapper.recordProcessExitCode(235);
 
     assertEquals(Status.ERROR, wrapper.getExitStatus().getSeverity());
   }
 
   @Test
-  public void testProcessExitRecorder_onOkExit() throws CloudSdkNotFoundException {
-    wrapper.setUpStandardStagingCloudSdk(null, null, null);
-
-    ProcessExitRecorder recorder = wrapper.new ProcessExitRecorder();
-    recorder.onExit(0);
+  public void testProcessExitRecorder_onOkExit() {
+    wrapper.recordProcessExitCode(0);
 
     assertTrue(wrapper.getExitStatus().isOK());
   }

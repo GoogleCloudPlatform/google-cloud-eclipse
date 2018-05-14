@@ -18,9 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.deploy.util;
 
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
-import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
-import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.StringBuilderProcessOutputLineListener;
 import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
 import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
@@ -106,8 +104,8 @@ public class CloudSdkProcessWrapper {
   private CloudSdk.Builder getBaseCloudSdkBuilder(MessageConsoleStream stdErrStream) {
     return new CloudSdk.Builder()
         .addStdErrLineListener(new MessageConsoleWriterListener(stdErrStream))
-        .startListener(new StoreProcessObjectListener())
-        .exitListener(new ProcessExitRecorder())
+        .startListener(this::storeProcessObject)
+        .exitListener(this::recordProcessExitCode)
         .appCommandMetricsEnvironment(CloudToolsInfo.METRICS_NAME)
         .appCommandMetricsEnvironmentVersion(CloudToolsInfo.getToolsVersion())
         .appCommandOutputFormat("json");  // Deploy result will be in JSON.
@@ -136,38 +134,31 @@ public class CloudSdkProcessWrapper {
     return stdOutCaptor.toString();
   }
 
-  private class StoreProcessObjectListener implements ProcessStartListener {
-    @Override
-    public void onStart(Process process) {
-      synchronized (CloudSdkProcessWrapper.this) {
-        CloudSdkProcessWrapper.this.process = process;
-        if (interrupted) {
-          CloudSdkProcessWrapper.this.process.destroy();
-        }
+  private void storeProcessObject(Process process) {
+    synchronized (this) {
+      this.process = process;
+      if (interrupted) {
+        process.destroy();
       }
     }
   }
 
   @VisibleForTesting
-  class ProcessExitRecorder implements ProcessExitListener {
+  void recordProcessExitCode(int exitCode) {
+    if (exitCode != 0) {
+      exitStatus = StatusUtil.error(this, getErrorMessage(exitCode), exitCode);
+    } else {
+      exitStatus = Status.OK_STATUS;
+    }
+  }
 
-    @Override
-    public void onExit(int exitCode) {
-      if (exitCode != 0) {
-        exitStatus = StatusUtil.error(this, getErrorMessage(exitCode), exitCode);
-      } else {
-        exitStatus = Status.OK_STATUS;
+  private String getErrorMessage(int exitCode) {
+    if (gcloudErrorMessageCollector != null) {
+      List<String> lines = gcloudErrorMessageCollector.getErrorMessages();
+      if (!lines.isEmpty()) {
+        return Joiner.on('\n').join(lines);
       }
     }
-
-    private String getErrorMessage(int exitCode) {
-      if (gcloudErrorMessageCollector != null) {
-        List<String> lines = gcloudErrorMessageCollector.getErrorMessages();
-        if (!lines.isEmpty()) {
-          return Joiner.on('\n').join(lines);
-        }
-      }
-      return Messages.getString("cloudsdk.process.failed", exitCode);
-    }
+    return Messages.getString("cloudsdk.process.failed", exitCode);
   }
 }
