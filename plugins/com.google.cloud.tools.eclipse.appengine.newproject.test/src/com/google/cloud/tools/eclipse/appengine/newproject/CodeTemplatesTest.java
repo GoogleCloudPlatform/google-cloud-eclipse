@@ -23,12 +23,17 @@ import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.util.MappedNamespaceContext;
 import com.google.cloud.tools.eclipse.util.Templates;
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -75,6 +80,7 @@ public class CodeTemplatesTest {
     validateNonConfigFiles(mostImportant, "http://java.sun.com/xml/ns/javaee",
         "http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd", "2.5");
     validateAppEngineWebXml(AppEngineRuntime.STANDARD_JAVA_7);
+    validateLoggingProperties();
   }
 
   @Test
@@ -86,6 +92,7 @@ public class CodeTemplatesTest {
     validateNonConfigFiles(mostImportant, "http://xmlns.jcp.org/xml/ns/javaee",
         "http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd", "3.1");
     validateAppEngineWebXml(AppEngineRuntime.STANDARD_JAVA_8);
+    validateLoggingProperties();
   }
 
   @Test
@@ -207,6 +214,18 @@ public class CodeTemplatesTest {
         new InputStreamReader(appYaml.getContents(), StandardCharsets.UTF_8))) {
       Assert.assertEquals("runtime: java", reader.readLine());
       Assert.assertEquals("env: flex", reader.readLine());
+    }
+  }
+
+  private void validateLoggingProperties() throws FileNotFoundException, IOException {
+    IFolder loggingProperties = project.getFolder("src/main/webapp/WEB-INF/logging.properties");
+    Path path = Paths.get(loggingProperties.getLocation().toString());
+    try (InputStream in = Files.newInputStream(path)) {
+      Properties properties = new Properties();
+      properties.load(in);
+
+      Assert.assertEquals(1, properties.keySet().size());
+      Assert.assertEquals("WARNING", properties.getProperty(".level"));
     }
   }
 

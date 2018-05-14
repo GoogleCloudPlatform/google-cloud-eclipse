@@ -68,5 +68,9 @@ public class NewDataflowProjectWizardDefaultRunOptionsPage extends WizardPage {
     return runOptionsDefaultsComponent.getStagingLocation();
   }
 
+  public String getServiceAccountKey() {
+    return runOptionsDefaultsComponent.getServiceAccountKey();
+  }
+
 }
 

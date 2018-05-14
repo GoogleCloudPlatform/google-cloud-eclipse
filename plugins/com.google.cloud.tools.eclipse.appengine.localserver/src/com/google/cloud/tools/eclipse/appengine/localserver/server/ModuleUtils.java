@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
+import com.google.api.client.util.Preconditions;
 import com.google.cloud.tools.appengine.AppEngineDescriptor;
 import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
@@ -63,6 +64,18 @@ public class ModuleUtils {
     }
 
     return "default";
+  }
+
+  /** Find the module with the given App Engine Service ID. */
+  public static IModule findService(IServer server, String serviceId) {
+    Preconditions.checkNotNull(server);
+    Preconditions.checkNotNull(serviceId);
+    for (IModule module : server.getModules()) {
+      if (serviceId.equals(getServiceId(module))) {
+        return module;
+      }
+    }
+    return null;
   }
 
   /**

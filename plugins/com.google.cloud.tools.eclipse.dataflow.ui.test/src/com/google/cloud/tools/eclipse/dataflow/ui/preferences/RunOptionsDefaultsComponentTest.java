@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.dataflow.ui.preferences;
 
 import static org.eclipse.swtbot.swt.finder.waits.Conditions.widgetIsEnabled;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -61,10 +62,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
@@ -74,11 +78,11 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RunOptionsDefaultsComponentTest {
@@ -89,8 +93,7 @@ public class RunOptionsDefaultsComponentTest {
   @Mock private MessageTarget messageTarget;
   @Mock private IGoogleLoginService loginService;
   @Mock private IGoogleApiFactory apiFactory;
-  @Mock
-  private WizardPage page;
+  @Mock private WizardPage page;
 
   private SWTBot bot;
   private RunOptionsDefaultsComponent component;
@@ -100,7 +103,8 @@ public class RunOptionsDefaultsComponentTest {
   private Combo projectID;
   private Combo stagingLocations;
   private Button createButton;
-
+  private Text serviceAccountKey;
+  private Button browse;
 
   @Before
   public void setUp() throws IOException {
@@ -135,7 +139,9 @@ public class RunOptionsDefaultsComponentTest {
         CompositeUtil.findControlAfterLabel(shell, Combo.class, "Cloud Platform &project ID:");
     stagingLocations =
         CompositeUtil.findControlAfterLabel(shell, Combo.class, "Cloud Storage staging &location:");
-    createButton = CompositeUtil.findControl(shell, Button.class);
+    createButton = CompositeUtil.findButton(shell, "&Create Bucket");
+    serviceAccountKey = CompositeUtil.findControl(shell, Text.class);
+    browse = CompositeUtil.findButton(shell, "Browse...");
   }
 
   private void mockProjectList(Credential credential, GcpProject... gcpProjects)
@@ -163,28 +169,22 @@ public class RunOptionsDefaultsComponentTest {
     Storage.Buckets bucketsApi = mock(Storage.Buckets.class);
     Storage.Buckets.List listApi = mock(Storage.Buckets.List.class);
     Buckets buckets = new Buckets();
-    final List<Bucket> bucketList = new ArrayList<>();
+    List<Bucket> bucketList = new ArrayList<>();
 
     doReturn(storageApi).when(apiFactory).newStorageApi(credential);
     doReturn(bucketsApi).when(storageApi).buckets();
     doThrow(new IOException("not found")).when(bucketsApi).list(anyString());
-    doReturn(listApi).when(bucketsApi).list(eq(projectId));
+    doReturn(listApi).when(bucketsApi).list(projectId);
     doReturn(buckets).when(listApi).execute();
     
-    when(bucketsApi.insert(eq(projectId), any(Bucket.class))).thenAnswer(new Answer<Insert>() {
-      @Override
-      public Insert answer(InvocationOnMock invocation) throws Throwable {
-        final Bucket newBucket = invocation.getArgumentAt(1, Bucket.class);
-        Insert insert = mock(Insert.class);
-        when(insert.execute()).thenAnswer(new Answer<Bucket>() {
-          @Override
-          public Bucket answer(InvocationOnMock invocation) throws Throwable {
-            bucketList.add(newBucket);
-            return newBucket;
-          }
-        });
-        return insert;
-      }
+    when(bucketsApi.insert(eq(projectId), any(Bucket.class))).thenAnswer(invocationOnMock -> {
+      Bucket newBucket = invocationOnMock.getArgumentAt(1, Bucket.class);
+      Insert insert = mock(Insert.class);
+      when(insert.execute()).thenAnswer(unused -> {
+        bucketList.add(newBucket);
+        return newBucket;
+      });
+      return insert;
     });
 
     Storage.Buckets.Get exceptionGet = mock(Storage.Buckets.Get.class);
@@ -282,6 +282,8 @@ public class RunOptionsDefaultsComponentTest {
     assertFalse(projectID.isEnabled());
     assertFalse(stagingLocations.isEnabled());
     assertFalse(createButton.isEnabled());
+    assertTrue(serviceAccountKey.isEnabled());
+    assertTrue(browse.isEnabled());
   }
 
   @Test
@@ -292,6 +294,8 @@ public class RunOptionsDefaultsComponentTest {
     assertTrue(projectID.isEnabled());
     assertFalse(stagingLocations.isEnabled());
     assertFalse(createButton.isEnabled());
+    assertTrue(serviceAccountKey.isEnabled());
+    assertTrue(browse.isEnabled());
   }
 
   @Test
@@ -304,6 +308,8 @@ public class RunOptionsDefaultsComponentTest {
     assertTrue(projectID.isEnabled());
     assertTrue(stagingLocations.isEnabled());
     assertFalse(createButton.isEnabled());
+    assertTrue(serviceAccountKey.isEnabled());
+    assertTrue(browse.isEnabled());
   }
 
   @Test
@@ -317,6 +323,8 @@ public class RunOptionsDefaultsComponentTest {
     assertTrue(projectID.isEnabled());
     assertFalse(stagingLocations.isEnabled());
     assertFalse(page.isPageComplete());
+    assertTrue(serviceAccountKey.isEnabled());
+    assertTrue(browse.isEnabled());
   }
 
   @Test
@@ -334,6 +342,8 @@ public class RunOptionsDefaultsComponentTest {
     assertTrue(stagingLocations.isEnabled());
     assertFalse(createButton.isEnabled());
     assertTrue(page.isPageComplete());
+    assertTrue(serviceAccountKey.isEnabled());
+    assertTrue(browse.isEnabled());
   }
 
   @Test
@@ -352,6 +362,34 @@ public class RunOptionsDefaultsComponentTest {
     assertTrue(stagingLocations.isEnabled());
     assertTrue(createButton.isEnabled());
     assertFalse(page.isPageComplete());
+    assertTrue(serviceAccountKey.isEnabled());
+    assertTrue(browse.isEnabled());
+  }
+
+  @Test
+  public void testGetServiceAccountKey() {
+    serviceAccountKey.setText("/some/random/file.ext");
+    assertEquals("/some/random/file.ext", component.getServiceAccountKey());
+  }
+
+  @Test
+  public void testEnablement_disabledWhileAllValuesValid() {
+    selector.selectAccount("alice@example.com");
+    component.setCloudProjectText("project");
+    join();
+    component.setStagingLocationText("alice-bucket-1");
+    component.startStagingLocationCheck(0); // force right now
+    join();
+    component.validate();
+    assertTrue(projectID.isEnabled());
+    assertTrue(stagingLocations.isEnabled());
+    assertTrue(page.isPageComplete());
+
+    component.setEnabled(false);
+    component.validate();
+    assertFalse(projectID.isEnabled());
+    assertFalse(stagingLocations.isEnabled());
+    assertTrue(page.isPageComplete());
   }
 
   @Test
@@ -431,10 +469,32 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
+  public void testValidity_nonExistingServiceAccountKey() {
+    serviceAccountKey.setText("/non/existing/file.ext");
+    verify(messageTarget).setError("/non/existing/file.ext does not exist.");
+  }
+
+  @Test
+  public void testValidity_directoryAsServiceAccountKey() {
+    serviceAccountKey.setText("/");
+    verify(messageTarget).setError(Matchers.contains(" is a directory."));
+  }
+
+  @Test
   public void testPartialValidity_allEmpty() {
     component = new RunOptionsDefaultsComponent(shell, 3, messageTarget, preferences, page,
         true /* allowIncomplete */, loginService, apiFactory);
     assertTrue("should be complete when totally empty", page.isPageComplete());
+  }
+
+  @Test
+  public void testPartialValidity_invalidServiceAccountKey() {
+    component = new RunOptionsDefaultsComponent(shell, 3, messageTarget, preferences, page,
+        true /* allowIncomplete */, loginService, apiFactory);
+    serviceAccountKey.setText("/non/existing/file.ext");
+
+    assertFalse("should be incomplete with invalid service key even if allowInComplete is true",
+        page.isPageComplete());
   }
 
   @Test
@@ -450,6 +510,28 @@ public class RunOptionsDefaultsComponentTest {
     component.setCloudProjectText("project");
     join();
     assertTrue("should be complete with account and project", page.isPageComplete());
+  }
+
+  @Test
+  public void testAlignButtons() {
+    Button width13 = mock(Button.class);
+    Button width18 = mock(Button.class);
+    Button width10 = mock(Button.class);
+    when(width13.computeSize(anyInt(), anyInt())).thenReturn(new Point(13, 0));
+    when(width18.computeSize(anyInt(), anyInt())).thenReturn(new Point(18, 0));
+    when(width10.computeSize(anyInt(), anyInt())).thenReturn(new Point(10, 0));
+
+    RunOptionsDefaultsComponent.alignButtons(width13, width18, width10);
+
+    ArgumentCaptor<GridData> captor = ArgumentCaptor.forClass(GridData.class);  // reusable
+    verify(width13).setLayoutData(captor.capture());
+    assertEquals(18, captor.getValue().widthHint);
+
+    verify(width18).setLayoutData(captor.capture());
+    assertEquals(18, captor.getValue().widthHint);
+
+    verify(width10).setLayoutData(captor.capture());
+    assertEquals(18, captor.getValue().widthHint);
   }
 
   /**

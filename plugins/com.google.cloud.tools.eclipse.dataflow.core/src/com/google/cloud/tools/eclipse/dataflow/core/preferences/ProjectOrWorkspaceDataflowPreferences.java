@@ -96,6 +96,17 @@ public class ProjectOrWorkspaceDataflowPreferences implements DataflowPreference
   }
 
   @Override
+  public String getDefaultServiceAccountKey() {
+    for (DataflowPreferences subPref : preferenceChain) {
+      String defaultKey = subPref.getDefaultServiceAccountKey();
+      if (defaultKey != null) {
+        return defaultKey;
+      }
+    }
+    return null;
+  }
+
+  @Override
   public Map<String, String> asDefaultPropertyMap() {
     Map<String, String> result = new HashMap<>();
     for (DataflowPreferences preferences : Lists.reverse(preferenceChain)) {

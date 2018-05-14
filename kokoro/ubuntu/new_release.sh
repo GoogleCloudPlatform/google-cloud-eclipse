@@ -8,6 +8,9 @@ set -e
 # Display commands being run.
 set -x
 
+gsutil -q cp "gs://ct4e-m2-repositories/m2-oxygen.tar" - \
+  | tar -C "${HOME}" -xf -
+
 export CLOUDSDK_CORE_DISABLE_USAGE_REPORTING=true
 gcloud components update --quiet
 gcloud components install app-engine-java --quiet
@@ -36,8 +39,3 @@ TMPDIR= xvfb-run \
       -Dga.tracking.id="${ANALYTICS_TRACKING_ID}" \
       ${PRODUCT_VERSION_SUFFIX:+-Dproduct.version.qualifier.suffix="'${PRODUCT_VERSION_SUFFIX}'"} \
     clean verify
-
-# Also export `metadata.product` and `metadata.p2.inf` to the second Kokoro job.
-readonly METADATA_DIR=gcp-repo/target/repository/metadata
-mkdir "${METADATA_DIR}"
-cp gcp-repo/metadata.p2.inf gcp-repo/metadata.product "${METADATA_DIR}"

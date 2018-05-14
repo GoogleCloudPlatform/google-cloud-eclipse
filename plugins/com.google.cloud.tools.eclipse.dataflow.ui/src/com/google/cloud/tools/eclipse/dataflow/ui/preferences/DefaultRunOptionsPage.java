@@ -74,11 +74,12 @@ public class DefaultRunOptionsPage
     preferences.setDefaultAccountEmail(runOptionsComponent.getAccountEmail());
     preferences.setDefaultProject(runOptionsComponent.getProjectId());
     preferences.setDefaultStagingLocation(runOptionsComponent.getStagingLocation());
+    preferences.setDefaultServiceAccountKey(runOptionsComponent.getServiceAccountKey());
   }
 
   @Override
   public void init(IWorkbench workbench) {
-    this.preferences = WritableDataflowPreferences.global();
+    preferences = WritableDataflowPreferences.global();
   }
 
   @Override
@@ -88,12 +89,12 @@ public class DefaultRunOptionsPage
 
   @Override
   public void setElement(IAdaptable element) {
-    this.selectedProject = element.getAdapter(IProject.class);
+    selectedProject = element.getAdapter(IProject.class);
     if (selectedProject == null) {
       throw new IllegalArgumentException(
           "Provided element " + element + " isn't adaptable to a project."); //$NON-NLS-1$ //$NON-NLS-2$
     } else {
-      this.preferences = WritableDataflowPreferences.forProject(this.selectedProject);
+      preferences = WritableDataflowPreferences.forProject(selectedProject);
     }
   }
 

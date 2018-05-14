@@ -172,7 +172,7 @@ public class WebProjectUtil {
         defaultLocation = defaultLocation.getFolder(WEB_INF);
         if (defaultLocation != null && defaultLocation.exists()) {
           IFile resourceFile = defaultLocation.getFile(filePath);
-          if (resourceFile.exists()) {
+          if (resourceFile != null && resourceFile.exists()) {
             return resourceFile;
           }
         }

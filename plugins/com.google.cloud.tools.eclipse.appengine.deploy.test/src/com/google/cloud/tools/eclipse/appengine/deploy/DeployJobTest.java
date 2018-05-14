@@ -16,14 +16,16 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
+import com.google.cloud.tools.appengine.cloudsdk.JsonParseException;
+import com.google.cloud.tools.appengine.cloudsdk.serialization.AppEngineDeployResult;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class DeployJobTest {
 
   @Test
-  public void testGetDeployedAppUrl_internal() {
-    AppEngineDeployOutput deployOutput =
+  public void testGetDeployedAppUrl_internal() throws JsonParseException {
+    AppEngineDeployResult deployOutput =
         createDeployOutput("google.com:notable-torch", "version", "default");
 
     Assert.assertEquals("https://notable-torch.googleplex.com",
@@ -31,8 +33,8 @@ public class DeployJobTest {
   }
 
   @Test
-  public void testGetDeployedAppUrl_withPartition() {
-    AppEngineDeployOutput deployOutput =
+  public void testGetDeployedAppUrl_withPartition() throws JsonParseException {
+    AppEngineDeployResult deployOutput =
         createDeployOutput("s~google.com:notable-torch", "version", "default");
 
     Assert.assertEquals("https://notable-torch.googleplex.com",
@@ -40,39 +42,39 @@ public class DeployJobTest {
   }
 
   @Test
-  public void testGetDeployedAppUrl_promoteWithDefaultService() {
-    AppEngineDeployOutput deployOutput = createDeployOutput("testProject", "version", "default");
+  public void testGetDeployedAppUrl_promoteWithDefaultService() throws JsonParseException {
+    AppEngineDeployResult deployOutput = createDeployOutput("testProject", "version", "default");
 
     Assert.assertEquals("https://testProject.appspot.com",
         DeployJob.getDeployedAppUrl(true /* promoted */, deployOutput));
   }
 
   @Test
-  public void testGetDeployedAppUrl_promoteWithNonDefaultService() {
-    AppEngineDeployOutput deployOutput = createDeployOutput("testProject", "version", "service");
+  public void testGetDeployedAppUrl_promoteWithNonDefaultService() throws JsonParseException {
+    AppEngineDeployResult deployOutput = createDeployOutput("testProject", "version", "service");
 
     Assert.assertEquals("https://service-dot-testProject.appspot.com",
         DeployJob.getDeployedAppUrl(true /* promoted */, deployOutput));
   }
 
   @Test
-  public void testGetDeployedAppUrl_noPromoteWithDefaultService() {
-    AppEngineDeployOutput deployOutput = createDeployOutput("testProject", "version", "default");
+  public void testGetDeployedAppUrl_noPromoteWithDefaultService() throws JsonParseException {
+    AppEngineDeployResult deployOutput = createDeployOutput("testProject", "version", "default");
 
     Assert.assertEquals("https://version-dot-testProject.appspot.com",
         DeployJob.getDeployedAppUrl(false /* promoted */, deployOutput));
   }
 
   @Test
-  public void testGetDeployedAppUrl_noPromoteWithNonDefaultService() {
-    AppEngineDeployOutput deployOutput = createDeployOutput("testProject", "version", "service");
+  public void testGetDeployedAppUrl_noPromoteWithNonDefaultService() throws JsonParseException {
+    AppEngineDeployResult deployOutput = createDeployOutput("testProject", "version", "service");
 
     Assert.assertEquals("https://version-dot-service-dot-testProject.appspot.com",
         DeployJob.getDeployedAppUrl(false /* promoted */, deployOutput));
   }
 
-  private static AppEngineDeployOutput createDeployOutput(String project, String version,
-      String service) {
+  private static AppEngineDeployResult createDeployOutput(String project, String version,
+      String service) throws JsonParseException {
     String jsonOutput =
         "{\n" +
         "  \"configs\": [],\n" +
@@ -87,6 +89,6 @@ public class DeployJobTest {
         "    }\n" +
         "  ]\n" +
         "}\n";
-    return AppEngineDeployOutput.parse(jsonOutput);
+    return AppEngineDeployResult.parse(jsonOutput);
   }
 }

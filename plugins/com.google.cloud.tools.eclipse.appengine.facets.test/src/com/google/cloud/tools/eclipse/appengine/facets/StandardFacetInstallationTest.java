@@ -90,6 +90,18 @@ public class StandardFacetInstallationTest {
   }
 
   @Test
+  public void testStandardFacetInstallation_createsLoggingProperties() throws CoreException {
+    IProject project = projectCreator.getProject();
+    assertFalse(project.getFile("src/main/webapp/WEB-INF/logging.properties").exists());
+
+    IFacetedProject facetedProject = projectCreator.getFacetedProject();
+    AppEngineStandardFacet.installAppEngineFacet(facetedProject, true, null);
+    ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
+
+    assertTrue(project.getFile("src/main/webapp/WEB-INF/logging.properties").exists());
+  }
+
+  @Test
   public void testStandardFacetInstallation_createsWebXml() throws CoreException {
     IProject project = projectCreator.getProject();
     assertFalse(project.getFile("src/main/webapp/WEB-INF/web.xml").exists());

@@ -155,6 +155,7 @@
       <xs:element type="xs:positiveInteger" name="target-disk-read-ops-per-sec" minOccurs="0"/>
       <xs:element type="xs:positiveInteger" name="target-request-count-per-sec" minOccurs="0"/>
       <xs:element type="xs:positiveInteger" name="target-concurrent-requests" minOccurs="0"/>
+      <xs:element type="ns:flex-custom-metrics-array" name="custom-metrics" minOccurs="0"/>
     </xs:all>
   </xs:complexType>
   <xs:complexType name="cpu-utilization-type">
@@ -168,6 +169,20 @@
         </xs:simpleType>
       </xs:element>
       <xs:element type="xs:positiveInteger" name="aggregation-window-length-sec" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+  <xs:complexType name="flex-custom-metrics-array">
+    <xs:sequence>
+      <xs:element type="ns:custom-metric-utilization-type" name="custom-metric" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="custom-metric-utilization-type">
+    <xs:all>
+      <xs:element type="xs:string" name="metric-name"  minOccurs="0"/>
+      <xs:element type="xs:string" name="target-type"  minOccurs="0"/>
+      <xs:element type="xs:double" name="target-utilization"  minOccurs="0"/>
+      <xs:element type="xs:double" name="single-instance-assignment"  minOccurs="0"/>
+      <xs:element type="xs:string" name="filter"  minOccurs="0"/>
     </xs:all>
   </xs:complexType>
   <xs:complexType name="vm-health-checkType">

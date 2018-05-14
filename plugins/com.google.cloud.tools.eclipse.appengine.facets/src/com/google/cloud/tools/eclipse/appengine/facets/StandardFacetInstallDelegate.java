@@ -18,8 +18,8 @@ package com.google.cloud.tools.eclipse.appengine.facets;
 
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.cloud.tools.eclipse.util.Templates;
-import com.google.common.annotations.VisibleForTesting;
 import java.io.ByteArrayInputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.core.resources.IFile;
@@ -39,8 +39,6 @@ import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 public class StandardFacetInstallDelegate implements IDelegate {
-  private static final String APPENGINE_WEB_XML = "appengine-web.xml";
-
   private static final String JSDT_FACET_ID = "wst.jsdt.web";
   private static final int MAX_JSDT_CHECK_RETRIES = 100;
 
@@ -134,30 +132,38 @@ public class StandardFacetInstallDelegate implements IDelegate {
     }
   }
 
-  /** Creates an appengine-web.xml file in the WEB-INF folder if it doesn't exist. */
-  @VisibleForTesting
-  void createConfigFiles(
-      IProject project, IProjectFacetVersion facetVersion, IProgressMonitor monitor)
-      throws CoreException {
+  void createConfigFiles(IProject project, IProjectFacetVersion facetVersion,
+      IProgressMonitor monitor) throws CoreException {
     SubMonitor progress = SubMonitor.convert(monitor, 10);
 
-    IFile appEngineWebXml = WebProjectUtil.findInWebInf(project, new Path(APPENGINE_WEB_XML));
-    if (appEngineWebXml != null && appEngineWebXml.exists()) {
-      return;
-    }
+    createFileInWebInf(project, "logging.properties", Templates.LOGGING_PROPERTIES_TEMPLATE,
+        Collections.emptyMap(), progress.split(5));
 
-    // Use the virtual component model decide where to create the appengine-web.xml
-    appEngineWebXml = WebProjectUtil.createFileInWebInf(project, new Path(APPENGINE_WEB_XML),
-        new ByteArrayInputStream(new byte[0]), progress.newChild(2));
-    String configFileLocation = appEngineWebXml.getLocation().toString();
     Map<String, String> parameters = new HashMap<>();
     Object appEngineRuntime = facetVersion.getProperty("appengine.runtime");
     if (appEngineRuntime instanceof String) {
       parameters.put("runtime", (String) appEngineRuntime);
     }
-    Templates.createFileContent(
-        configFileLocation, Templates.APPENGINE_WEB_XML_TEMPLATE, parameters);
+    createFileInWebInf(project, "appengine-web.xml", Templates.APPENGINE_WEB_XML_TEMPLATE,
+        parameters, progress.split(5));
+  }
+
+  /** Creates a file in the WEB-INF folder if it doesn't exist. */
+  private void createFileInWebInf(IProject project, String filename, String templateName,
+      Map<String, String> templateParameters, IProgressMonitor monitor) throws CoreException {
+    SubMonitor progress = SubMonitor.convert(monitor, 7);
+
+    IFile targetFile = WebProjectUtil.findInWebInf(project, new Path(filename));
+    if (targetFile != null && targetFile.exists()) {
+      return;
+    }
+
+    // Use the virtual component model to decide where to create the file
+    targetFile = WebProjectUtil.createFileInWebInf(project, new Path(filename),
+        new ByteArrayInputStream(new byte[0]), progress.split(2));
+    String fileLocation = targetFile.getLocation().toString();
+    Templates.createFileContent(fileLocation, templateName, templateParameters);
     progress.worked(4);
-    appEngineWebXml.refreshLocal(IFile.DEPTH_ZERO, progress.newChild(1));
+    targetFile.refreshLocal(IFile.DEPTH_ZERO, progress.split(1));
   }
 }

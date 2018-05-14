@@ -8,4 +8,8 @@
 <#if runtime??>  <runtime>${runtime}</runtime>
 </#if>
 
+  <system-properties>
+    <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
+  </system-properties>
+
 </appengine-web-app>

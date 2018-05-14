@@ -22,7 +22,6 @@ import com.google.common.base.Preconditions;
 import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
@@ -41,8 +40,6 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
     setNeedsProgressMonitor(true);
   }
 
-  public abstract IStatus validateDependencies();
-
   public abstract CreateAppEngineWtpProject getAppEngineProjectCreationOperation(
       AppEngineProjectConfig config, IAdaptable uiInfoAdapter);
 
@@ -55,12 +52,6 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
 
   @Override
   public boolean performFinish() {
-    IStatus status = validateDependencies();
-    if (!status.isOK()) {
-      StatusUtil.setErrorStatus(this, status.getMessage(), status);
-      return false;
-    }
-
     retrieveConfigurationValues();
 
     // todo set up
