@@ -31,7 +31,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
@@ -56,7 +55,7 @@ import org.junit.rules.ExternalResource;
 
 /**
  * Utility class to create and configure a Faceted Project. Installs a Java 1.7 facet if no facets
- * are specified with {@link #withFacetVersions}.
+ * are specified with {@link #withFacets}.
  */
 public final class TestProjectCreator extends ExternalResource {
   private static final Logger logger = Logger.getLogger(TestProjectCreator.class.getName());
@@ -107,7 +106,7 @@ public final class TestProjectCreator extends ExternalResource {
         }
         project.delete(true, null);
       } catch (IllegalArgumentException ex) {
-        new ThreadDumpingWatchdog(0, TimeUnit.DAYS).run();
+        ThreadDumpingWatchdog.report();
         throw ex;
       } catch (CoreException ex) {
         throw new AssertionError("Could not delete project", ex);

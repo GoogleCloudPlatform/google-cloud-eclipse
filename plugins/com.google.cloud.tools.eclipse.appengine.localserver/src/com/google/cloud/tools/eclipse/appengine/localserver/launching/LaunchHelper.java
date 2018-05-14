@@ -50,7 +50,7 @@ import org.eclipse.wst.server.core.ServerUtil;
 import org.eclipse.wst.server.ui.internal.ServerUIPlugin;
 
 /**
- * A helper class for launching modules on a server
+ * A helper class for launching modules on a server.
  */
 public class LaunchHelper {
   private static final Logger logger = Logger.getLogger(LaunchHelper.class.getName());

@@ -17,13 +17,11 @@
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
-import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 
@@ -52,13 +50,4 @@ public interface ILibraryClasspathContainerResolverService {
    * asynchronously.
    */
   IStatus resolveContainer(IJavaProject javaProject, IPath containerPath, IProgressMonitor monitor);
-
-  /**
-   * Verifies that dependencies of a given runtime are available locally or can be downloaded.
-   *
-   * @return {@link Status#OK_STATUS} if all dependencies are available,
-   * {@link Status#CANCEL_STATUS} if the operation was cancelled via the <code>monitor</code>, or a
-   * {@link Status} object describing the error that happened while checking availability
-   */
-  IStatus checkRuntimeAvailability(AppEngineRuntime runtime, IProgressMonitor monitor);
 }

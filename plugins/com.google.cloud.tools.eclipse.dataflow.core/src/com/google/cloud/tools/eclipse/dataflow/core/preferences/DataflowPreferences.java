@@ -44,10 +44,16 @@ public interface DataflowPreferences {
   String GCP_TEMP_LOCATION_PROPERTY = "gcpTempLocation";
 
   /**
+   * The PipelineOptions property representing the optional service account key file to be used
+   * instead of the login credential when set.
+   */
+  String SERVICE_ACCOUNT_KEY_PROPERTY = "serviceAccountKey";
+
+  /**
    * All properties that can be used for defaulting options in a Pipeline Launch.
    */
-  ImmutableSet<String> SUPPORTED_DEFAULT_PROPERTIES =
-      ImmutableSet.of(PROJECT_PROPERTY, STAGING_LOCATION_PROPERTY, GCP_TEMP_LOCATION_PROPERTY);
+  ImmutableSet<String> SUPPORTED_DEFAULT_PROPERTIES = ImmutableSet.of(PROJECT_PROPERTY,
+      STAGING_LOCATION_PROPERTY, GCP_TEMP_LOCATION_PROPERTY, SERVICE_ACCOUNT_KEY_PROPERTY);
 
   /**
    * Gets the default account email.
@@ -68,6 +74,11 @@ public interface DataflowPreferences {
    * Gets the default GCP Temp location.
    */
   String getDefaultGcpTempLocation();
+
+  /**
+   * Gets the default service account key.
+   */
+  String getDefaultServiceAccountKey();
 
   /**
    * Gets the preferences as a Map from property name to value, removing any absent properties.

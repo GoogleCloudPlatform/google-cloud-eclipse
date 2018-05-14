@@ -39,14 +39,13 @@ import org.eclipse.core.internal.jobs.InternalJob;
 import org.eclipse.core.internal.jobs.JobManager;
 import org.eclipse.core.internal.jobs.LockManager;
 import org.eclipse.core.runtime.jobs.Job;
-import org.junit.rules.TestRule;
+import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
 
 /**
  * A JUnit test helper that periodically performs stack dumps for the current threads.
  */
-public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
+public class ThreadDumpingWatchdog extends TestWatcher {
   private final long period;
   private final TimeUnit unit;
   private final boolean ignoreUselessThreads;
@@ -59,7 +58,7 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
 
   /** Dump report right now. */
   public static void report() {
-    new ThreadDumpingWatchdog(0, TimeUnit.DAYS).run();
+    new ThreadDumpingWatchdog(0, TimeUnit.DAYS).dump();
   }
 
   /**
@@ -69,7 +68,7 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
     ThreadDumpingWatchdog watchdog = new ThreadDumpingWatchdog(0, TimeUnit.DAYS);
     watchdog.title = title;
     watchdog.stopwatch = stopwatch;
-    watchdog.run();
+    watchdog.dump();
   }
 
 
@@ -84,22 +83,12 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
   }
 
   @Override
-  public Statement apply(final Statement base, Description description) {
+  protected void starting(Description description) {
     this.description = description;
-    return new Statement() {
-      @Override
-      public void evaluate() throws Throwable {
-        install();
-        try {
-          base.evaluate();
-        } finally {
-          remove();
-        }
-      }
-    };
+    installTimer();
   }
 
-  protected void install() {
+  private void installTimer() {
     // reset the interrupted state in case it was leaked (http://bugs.eclipse.org/505920)
     Thread.interrupted();
 
@@ -107,16 +96,22 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
     // so it's hard to tell what test we're associated with
     System.out.println("[Watchdog] > " + description);
     timer = new Timer("Thread Dumping Watchdog");
-    timer.scheduleAtFixedRate(this, unit.toMillis(period), unit.toMillis(period));
+    TimerTask timerTask = new TimerTask() {
+      @Override
+      public void run() {
+        dump();
+      }
+    };
+    timer.scheduleAtFixedRate(timerTask, unit.toMillis(period), unit.toMillis(period));
     stopwatch = Stopwatch.createStarted();
   }
 
-  protected void remove() {
+  @Override
+  protected void finished(Description description) {
     timer.cancel();
   }
 
-  @Override
-  public void run() {
+  private void dump() {
     dumpingTime = Stopwatch.createStarted();
     ThreadMXBean bean = ManagementFactory.getThreadMXBean();
     ThreadInfo[] infos = bean.dumpAllThreads(true, true);

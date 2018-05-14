@@ -26,6 +26,7 @@ import com.google.cloud.tools.appengine.cloudsdk.InvalidJavaSdkException;
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.appengine.localserver.PreferencesInitializer;
+import com.google.cloud.tools.eclipse.appengine.localserver.ui.DatastoreIndexesUpdatedStatusHandler;
 import com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsole;
 import com.google.cloud.tools.eclipse.appengine.localserver.ui.StaleResourcesStatusHandler;
 import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
@@ -671,6 +672,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
             } catch (DebugException ex) {
               logger.log(Level.WARNING, "Unable to terminate launch", ex); //$NON-NLS-1$
             }
+            checkUpdatedDatastoreIndex(launch.getLaunchConfiguration());
             return;
 
           default:
@@ -718,6 +720,26 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       this.serverBehaviour = serverBehaviour;
       server = serverBehaviour.getServer();
       this.console = console;
+    }
+
+    /** Check for an updated {@code datastore-index-auto.xml} in the {@code default} module. */
+    private void checkUpdatedDatastoreIndex(ILaunchConfiguration configuration) {
+      DatastoreIndexUpdateData update = DatastoreIndexUpdateData.detect(configuration, server);
+      if (update == null) {
+        return;
+      }
+      logger.fine("datastore-indexes-auto.xml found " + update.datastoreIndexesAutoXml);
+      
+      // punts to UI thread
+      IStatusHandler prompter = DebugPlugin.getDefault().getStatusHandler(promptStatus);
+      if (prompter != null) {
+        try {
+          prompter.handleStatus(DatastoreIndexesUpdatedStatusHandler.DATASTORE_INDEXES_UPDATED,
+              update);
+        } catch (CoreException ex) {
+          logger.log(Level.WARNING, "Unexpected failure", ex);
+        }
+      }
     }
 
     private void removeConsole() {
