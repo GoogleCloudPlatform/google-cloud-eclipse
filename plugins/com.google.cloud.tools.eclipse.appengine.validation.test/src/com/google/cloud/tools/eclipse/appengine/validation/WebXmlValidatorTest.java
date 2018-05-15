@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.util.ArrayList;
-import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -46,7 +46,7 @@ public class WebXmlValidatorTest {
   public TestProjectCreator projectCreator = new TestProjectCreator().withFacets(
       JavaFacet.VERSION_1_7);
 
-  @Mock private BiFunction<IProject, String, Boolean> servletApiSupportChecker;
+  @Mock private BiPredicate<IProject, String> servletApiSupportChecker;
   @Mock private IResource resource;
 
   private WebXmlValidator validator;
@@ -59,8 +59,8 @@ public class WebXmlValidatorTest {
     when(resource.getProject()).thenReturn(project);
 
     // Assume the project has the Dynamic Web Module Facet 2.5.
-    when(servletApiSupportChecker.apply(eq(project), anyString())).thenReturn(false);
-    when(servletApiSupportChecker.apply(project, "2.5")).thenReturn(true);
+    when(servletApiSupportChecker.test(eq(project), anyString())).thenReturn(false);
+    when(servletApiSupportChecker.test(project, "2.5")).thenReturn(true);
   }
 
   @Test
