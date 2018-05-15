@@ -17,15 +17,21 @@
 package com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 
 /**
  * Represents a {@code datastore-indexes.xml}.
  */
-public class DatastoreIndexes extends AppEngineResourceElement {
+public class DatastoreIndexesDescriptor extends AppEngineResourceElement {
 
-  public DatastoreIndexes(IFacetedProject project, IFile datastoreIndexes) {
+  public DatastoreIndexesDescriptor(IFacetedProject project, IFile datastoreIndexes) {
     super(project, datastoreIndexes);
+  }
+
+  @Override
+  public StyledString getStyledLabel() {
+    return new StyledString("Datastore Indexes");
   }
 
 }

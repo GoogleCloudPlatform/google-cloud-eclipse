@@ -17,14 +17,20 @@
 package com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 
 /**
  * Represents a {@code dispatch.xml} element.
  */
-public class RequestDispatchDescriptor extends AppEngineResourceElement {
-  public RequestDispatchDescriptor(IFacetedProject project, IFile file) {
+public class DispatchRoutingDescriptor extends AppEngineResourceElement {
+  public DispatchRoutingDescriptor(IFacetedProject project, IFile file) {
     super(project, file);
+  }
+
+  @Override
+  public StyledString getStyledLabel() {
+    return new StyledString("Dispatch Routing Rules");
   }
 
 }

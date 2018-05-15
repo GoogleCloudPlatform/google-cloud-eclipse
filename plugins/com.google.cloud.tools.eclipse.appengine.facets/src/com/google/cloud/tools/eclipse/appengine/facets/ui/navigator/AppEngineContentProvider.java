@@ -22,9 +22,9 @@ import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineWebDescriptor;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.CronDescriptor;
-import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.DatastoreIndexes;
+import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.DatastoreIndexesDescriptor;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.DenialOfServiceDescriptor;
-import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.RequestDispatchDescriptor;
+import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.DispatchRoutingDescriptor;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.TaskQueuesDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
@@ -111,7 +111,7 @@ public class AppEngineContentProvider implements ITreeContentProvider {
     IFile datastoreIndexes =
         WebProjectUtil.findInWebInf(project.getProject(), new Path("datastore-indexes.xml"));
     if (datastoreIndexes != null && datastoreIndexes.exists()) {
-      contents.add(new DatastoreIndexes(project, datastoreIndexes));
+      contents.add(new DatastoreIndexesDescriptor(project, datastoreIndexes));
     }
   }
 
@@ -119,7 +119,7 @@ public class AppEngineContentProvider implements ITreeContentProvider {
   private void addDispatch(IFacetedProject project, List<Object> contents) {
     IFile dispatchXml = WebProjectUtil.findInWebInf(project.getProject(), new Path("dispatch.xml"));
     if (dispatchXml != null && dispatchXml.exists()) {
-      contents.add(new RequestDispatchDescriptor(project, dispatchXml));
+      contents.add(new DispatchRoutingDescriptor(project, dispatchXml));
     }
   }
 
@@ -144,6 +144,12 @@ public class AppEngineContentProvider implements ITreeContentProvider {
   @Override
   public Object getParent(Object element) {
     return null;
+  }
+
+  /** Return {@code true} if the project is an App Engine Standard project. */
+  static boolean isStandard(IProject project) {
+    IFacetedProject facetedProject = AppEngineContentProvider.getProject(project);
+    return project != null && AppEngineStandardFacet.hasFacet(facetedProject);
   }
 
   /** Try to get a project from the given element, return {@code null} otherwise. */

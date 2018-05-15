@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model;
 import com.google.common.base.Preconditions;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 
 public abstract class AppEngineResourceElement implements IAdaptable {
@@ -45,5 +46,10 @@ public abstract class AppEngineResourceElement implements IAdaptable {
     }
     return null;
   }
+
+  /**
+   * Return a stylish description suitable for use in the Project Explorer.
+   */
+  public abstract StyledString getStyledLabel();
 
 }

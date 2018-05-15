@@ -17,8 +17,11 @@
 package com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model;
 
 import com.google.cloud.tools.appengine.AppEngineDescriptor;
+import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 
 /**
@@ -31,6 +34,23 @@ public class AppEngineWebDescriptor extends AppEngineResourceElement {
       AppEngineDescriptor descriptor) {
     super(project, file);
     this.descriptor = Preconditions.checkNotNull(descriptor);
+  }
+
+  @Override
+  public StyledString getStyledLabel() {
+    StyledString str = new StyledString("App Engine");
+    str.append(" [standard", StyledString.QUALIFIER_STYLER);
+    try {
+      StyledString qualifier = new StyledString(": ", StyledString.QUALIFIER_STYLER); //$NON-NLS-1$
+      qualifier.append(
+          Strings.isNullOrEmpty(descriptor.getRuntime()) ? "java7" : descriptor.getRuntime(),
+          StyledString.QUALIFIER_STYLER);
+      qualifier.append("]", StyledString.QUALIFIER_STYLER); //$NON-NLS-1$
+      str.append(qualifier);
+    } catch (AppEngineException ex) {
+      // ignored
+    }
+    return str;
   }
 
   public AppEngineDescriptor getDescriptor() {

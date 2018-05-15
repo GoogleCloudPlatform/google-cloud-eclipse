@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 
 /**
@@ -25,5 +26,10 @@ import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 public class DenialOfServiceDescriptor extends AppEngineResourceElement {
   public DenialOfServiceDescriptor(IFacetedProject project, IFile file) {
     super(project, file);
+  }
+
+  @Override
+  public StyledString getStyledLabel() {
+    return new StyledString("Denial of Service Protection");
   }
 }

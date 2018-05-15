@@ -298,7 +298,7 @@
            activeByDefault="true"
            appearsBefore="org.eclipse.jst.jee.ui.web"
            contentProvider="com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.AppEngineContentProvider"
-           icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gae-16x16.png"
+           icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/obj16/appengine.png"
            id="com.google.cloud.tools.eclipse.appengine.navigator"
            labelProvider="com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.AppEngineLabelProvider"
            name="App Engine Content Provider"
