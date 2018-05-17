@@ -87,7 +87,7 @@ public class LibraryClasspathContainerResolverService
   /** Cached set of JDT classpath entries for Cloud Libraries. */
   private final LoadingCache<String, IClasspathEntry[]> libraryEntries =
       CacheBuilder.newBuilder()
-          .refreshAfterWrite(10, TimeUnit.MINUTES)
+          .expireAfterAccess(10, TimeUnit.MINUTES)
           .build(
               new CacheLoader<String, IClasspathEntry[]>() {
                 @Override
