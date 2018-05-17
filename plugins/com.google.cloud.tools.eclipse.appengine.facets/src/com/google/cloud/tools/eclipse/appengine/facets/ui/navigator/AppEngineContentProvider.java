@@ -55,28 +55,12 @@ public class AppEngineContentProvider implements ITreeContentProvider {
 
   @Override
   public boolean hasChildren(Object element) {
-    return element instanceof IProject || element instanceof AppEngineWebDescriptor;
+    return getProject(element) != null || element instanceof AppEngineWebDescriptor;
   }
 
   @Override
   public Object[] getChildren(Object parentElement) {
-    if (parentElement instanceof IProject) {
-      IFacetedProject project = getProject(parentElement);
-      if (project != null && AppEngineStandardFacet.hasFacet(project)) {
-        IFile appEngineWebDescriptorFile =
-            WebProjectUtil.findInWebInf(project.getProject(), new Path("appengine-web.xml"));
-        if (appEngineWebDescriptorFile != null && appEngineWebDescriptorFile.exists()) {
-          try (InputStream input = appEngineWebDescriptorFile.getContents()) {
-            AppEngineDescriptor descriptor = AppEngineDescriptor.parse(input);
-            return new Object[] {
-                new AppEngineWebDescriptor(project, appEngineWebDescriptorFile, descriptor)};
-          } catch (CoreException | SAXException | IOException ex) {
-            IPath path = appEngineWebDescriptorFile.getFullPath();
-            logger.log(Level.WARNING, "Unable to parse " + path, ex);
-          }
-        }
-      }
-    } else if (parentElement instanceof AppEngineWebDescriptor) {
+    if (parentElement instanceof AppEngineWebDescriptor) {
       List<Object> contents = new ArrayList<>();
       AppEngineWebDescriptor webElement = (AppEngineWebDescriptor) parentElement;
       try {
@@ -93,6 +77,22 @@ public class AppEngineContentProvider implements ITreeContentProvider {
       } catch (AppEngineException ex) {
         IPath path = webElement.getFile().getFullPath();
         logger.log(Level.WARNING, "Unable to parse " + path, ex);
+      }
+    }
+    IFacetedProject project = getProject(parentElement);
+    if (project != null && AppEngineStandardFacet.hasFacet(project)) {
+      IFile appEngineWebDescriptorFile =
+          WebProjectUtil.findInWebInf(project.getProject(), new Path("appengine-web.xml"));
+      if (appEngineWebDescriptorFile != null && appEngineWebDescriptorFile.exists()) {
+        try (InputStream input = appEngineWebDescriptorFile.getContents()) {
+          AppEngineDescriptor descriptor = AppEngineDescriptor.parse(input);
+          return new Object[] {
+            new AppEngineWebDescriptor(project, appEngineWebDescriptorFile, descriptor)
+          };
+        } catch (CoreException | SAXException | IOException ex) {
+          IPath path = appEngineWebDescriptorFile.getFullPath();
+          logger.log(Level.WARNING, "Unable to parse " + path, ex);
+        }
       }
     }
     return EMPTY_ARRAY;
@@ -123,9 +123,7 @@ public class AppEngineContentProvider implements ITreeContentProvider {
     }
   }
 
-  /**
-   * Add a {@code dos.xml} element if found.
-   */
+  /** Add a {@code dos.xml} element if found. */
   private void addDenialOfService(IFacetedProject project, List<Object> contents) {
     IFile dosXml = WebProjectUtil.findInWebInf(project.getProject(), new Path("dos.xml"));
     if (dosXml != null && dosXml.exists()) {
@@ -173,7 +171,7 @@ public class AppEngineContentProvider implements ITreeContentProvider {
         }
         IResource resource = ((IAdaptable) inputElement).getAdapter(IResource.class);
         if (resource != null) {
-          return ProjectFacetsManager.create(((IResource) inputElement).getProject());
+          return ProjectFacetsManager.create(resource.getProject());
         }
       }
     } catch (CoreException ex) {
