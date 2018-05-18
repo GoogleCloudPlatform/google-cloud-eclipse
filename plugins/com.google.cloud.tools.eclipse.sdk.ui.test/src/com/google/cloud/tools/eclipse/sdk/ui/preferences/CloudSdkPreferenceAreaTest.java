@@ -20,7 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -131,17 +130,6 @@ public class CloudSdkPreferenceAreaTest {
   }
 
   @Test
-  public void testUi_noSdkManagementFeature() {
-    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("");
-    createPreferenceArea();
-
-    assertNull(chooseSdk);
-    assertNotNull(sdkLocation);
-    assertTrue(sdkLocation.isEnabled());
-    assertNotNull(sdkVersion);
-  }
-
-  @Test
   public void testUi_sdkManagementFeature() {
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
@@ -227,13 +215,6 @@ public class CloudSdkPreferenceAreaTest {
     area.performApply();
     verify(cloudSdkManager).installManagedSdkAsync();
     verifyNoMoreInteractions(cloudSdkManager);
-  }
-
-  @Test
-  public void testUpdateSdk_notVisible() {
-    createPreferenceArea();
-    assertNotNull(updateSdkButton);
-    assertFalse(updateSdkButton.getVisible()); // isVisible checks parent
   }
 
   @Test
