@@ -100,17 +100,26 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
     return null;
   }
 
-  /** Request that a project's runtime server container be updated. */
+  /** Request that a project's Server Runtime classpath container be updated. */
   private void requestClasspathContainerUpdate(
       IProject project, IRuntime runtime, IClasspathEntry[] entries) {
-    /* Updating a container is done by either explicitly requesting an update from a
-     * {@code ClasspathContainerInitializer#requestClasspathContainerUpdate()} or by calling {@code
-     * JavaCore.setClasspathContainer()}. Both require knowledge of how the WTP Server Runtime
-     * containers are named. But {@code resolveClasspathContainerImpl()}'s implementation calls our
-     * {@code resolveClasspathContainer()} and calls {@code JavaCore.setClasspathContainer()} if the
-     * classpath entries change. */
+    /*
+     * The deceptively-named {@code requestClasspathContainerUpdate()} on our superclass
+     * does not actually request an update of our Server Runtime classpath container.
+     *
+     * A JDT classpath container can be updated either by explicitly requesting an update from its
+     * initializer ({@code ClasspathContainerInitializer#requestClasspathContainerUpdate()}), or
+     * by calling {@code JavaCore.setClasspathContainer()}.  Both approaches require specifying the
+     * container path (the container ID, so to speak), and the Server Runtime classpath container's
+     * path is considered internal to WTP.
+     *
+     * But our superclass' {@code resolveClasspathContainerImpl()} implementation does call
+     * {@code JavaCore.setClasspathContainer()} to update the container if the
+     * classpath entries returned from our {@code resolveClasspathContainer()} change.
+     * https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/3055#issuecomment-390242592
+     */
     requestClasspathContainerUpdate(runtime, entries);
-    resolveClasspathContainerImpl(project, runtime);
+    resolveClasspathContainerImpl(project, runtime); // triggers update of this classpath container
   }
 
   /** Return the Library IDs for the Servlet APIs for the given dynamic web facet version. */
