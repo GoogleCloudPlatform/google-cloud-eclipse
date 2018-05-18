@@ -301,7 +301,7 @@
            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/obj16/appengine.png"
            id="com.google.cloud.tools.eclipse.appengine.navigator"
            labelProvider="com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.AppEngineLabelProvider"
-           name="App Engine Content Provider"
+           name="%appengineNavigatorContentProvider"
            priority="high">
         <triggerPoints>
           <reference
