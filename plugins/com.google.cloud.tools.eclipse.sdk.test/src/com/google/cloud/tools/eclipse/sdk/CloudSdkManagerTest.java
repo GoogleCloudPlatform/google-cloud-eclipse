@@ -19,10 +19,15 @@ package com.google.cloud.tools.eclipse.sdk;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.cloudsdk.InvalidJavaSdkException;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkModifyJob;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import java.io.IOException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -33,9 +38,13 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 public class CloudSdkManagerTest {
+
+  @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
   private final ReadWriteLock modifyLock = new ReentrantReadWriteLock();
   private final Supplier<Boolean> alwaysEnabled = () -> true;
@@ -54,6 +63,28 @@ public class CloudSdkManagerTest {
   @Test
   public void testManagedSdkOption_featureForced() {
     assertTrue(fixture.isManagedSdkFeatureEnabled());
+  }
+
+  @Test
+  public void testValidateJdk() {
+    try {
+      CloudSdk sdk = mock(CloudSdk.class);
+      when(sdk.getJavaHomePath()).thenReturn(tempFolder.getRoot().toPath());
+      CloudSdkManager.validateJdk(sdk);
+      fail();
+    } catch (InvalidJavaSdkException ex) {
+      assertTrue(ex.getMessage().startsWith("Invalid Java SDK."));
+    }
+  }
+
+  @Test
+  public void testValidateJdk_noError() throws InvalidJavaSdkException, IOException {
+    tempFolder.newFolder("bin");
+    tempFolder.newFile("bin/java");
+    tempFolder.newFile("bin/java.exe");
+    CloudSdk sdk = mock(CloudSdk.class);
+    when(sdk.getJavaHomePath()).thenReturn(tempFolder.getRoot().toPath());
+    CloudSdkManager.validateJdk(sdk);
   }
 
   @Test

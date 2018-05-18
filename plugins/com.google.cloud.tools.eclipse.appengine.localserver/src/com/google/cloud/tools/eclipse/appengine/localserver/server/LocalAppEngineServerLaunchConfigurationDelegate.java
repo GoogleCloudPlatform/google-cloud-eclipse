@@ -18,10 +18,12 @@ package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import com.google.cloud.tools.appengine.api.devserver.DefaultRunConfiguration;
 import com.google.cloud.tools.appengine.api.devserver.RunConfiguration;
+import com.google.cloud.tools.appengine.cloudsdk.AppEngineJavaComponentsNotInstalledException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkVersionFileException;
+import com.google.cloud.tools.appengine.cloudsdk.InvalidJavaSdkException;
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.appengine.localserver.PreferencesInitializer;
@@ -135,8 +137,11 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     try {
       CloudSdk cloudSdk = new CloudSdk.Builder().build();
       cloudSdk.validateCloudSdk();
+      // TODO: call cloudSdk.validateJdk() once it becomes public.
+      CloudSdkManager.validateJdk(cloudSdk);
+      cloudSdk.validateAppEngineJavaComponents();
       return Status.OK_STATUS;
-    } catch (CloudSdkNotFoundException ex) {
+    } catch (CloudSdkNotFoundException | InvalidJavaSdkException ex) {
       return StatusUtil.error(
           LocalAppEngineServerLaunchConfigurationDelegate.class,
           Messages.getString("cloudsdk.not.configured"), // $NON-NLS-1$
@@ -145,6 +150,11 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       return StatusUtil.error(
           LocalAppEngineServerLaunchConfigurationDelegate.class,
           Messages.getString("cloudsdk.out.of.date"), // $NON-NLS-1$
+          ex);
+    } catch (AppEngineJavaComponentsNotInstalledException ex) {
+      return StatusUtil.error(
+          LocalAppEngineServerLaunchConfigurationDelegate.class,
+          Messages.getString("cloudsdk.no.app.engine.java.component"), // $NON-NLS-1$
           ex);
     }
   }
