@@ -84,7 +84,7 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
           new FutureCallback<IClasspathEntry[]>() {
             @Override
             public void onSuccess(IClasspathEntry[] entries) {
-              requestClasspathContainerUpdate(runtime, entries);
+              requestClasspathContainerUpdate(project, runtime, entries);
             }
 
             @Override
@@ -98,6 +98,19 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
       Thread.currentThread().interrupt();
     }
     return null;
+  }
+
+  /** Request that a project's runtime server container be updated. */
+  private void requestClasspathContainerUpdate(
+      IProject project, IRuntime runtime, IClasspathEntry[] entries) {
+    /* Updating a container is done by either explicitly requesting an update from a
+     * {@code ClasspathContainerInitializer#requestClasspathContainerUpdate()} or by calling {@code
+     * JavaCore.setClasspathContainer()}. Both require knowledge of how the WTP Server Runtime
+     * containers are named. But {@code resolveClasspathContainerImpl()}'s implementation calls our
+     * {@code resolveClasspathContainer()} and calls {@code JavaCore.setClasspathContainer()} if the
+     * classpath entries change. */
+    requestClasspathContainerUpdate(runtime, entries);
+    resolveClasspathContainerImpl(project, runtime);
   }
 
   /** Return the Library IDs for the Servlet APIs for the given dynamic web facet version. */
