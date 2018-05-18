@@ -95,10 +95,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
   public Control createContents(Composite parent) {
     Composite contents = new Composite(parent, SWT.NONE);
     Link instructions = new Link(contents, SWT.WRAP);
-    instructions.setText(
-        cloudSdkManager.isManagedSdkFeatureEnabled()
-            ? Messages.getString("CloudSdkRequiredWithManagedSdk") // $NON-NLS-1$
-            : Messages.getString("CloudSdkRequired")); // $NON-NLS-1$
+    instructions.setText(Messages.getString("CloudSdkRequiredWithManagedSdk")); // $NON-NLS-1$
     instructions.setFont(contents.getFont());
     instructions.addSelectionListener(new SelectionAdapter() {
       @Override
@@ -120,28 +117,25 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
             updateManagedSdk();
           }
         });
-    updateSdk.setVisible(cloudSdkManager.isManagedSdkFeatureEnabled());
     GridDataFactory.defaultsFor(sdkVersionLabel).grab(true, false).applyTo(sdkVersionLabel);
     GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(versionArea);
 
-    if (cloudSdkManager.isManagedSdkFeatureEnabled()) {
-      chooseSdk = new Button(parent, SWT.CHECK);
-      chooseSdk.setText(Messages.getString("UseLocalSdk")); //$NON-NLS-1$
-      chooseSdk.addSelectionListener(new SelectionAdapter() {
-        @Override
-        public void widgetSelected(SelectionEvent event) {
-          if (!chooseSdk.getSelection()) {
-            status = Status.OK_STATUS;
-          } else {
-            sdkLocation.doCheckState();
-          }
-          updateSelectedVersion();
-          fireValueChanged(VALUE, "", ""); //$NON-NLS-1$ //$NON-NLS-2$
-
-          updateControlEnablement();
+    chooseSdk = new Button(parent, SWT.CHECK);
+    chooseSdk.setText(Messages.getString("UseLocalSdk")); //$NON-NLS-1$
+    chooseSdk.addSelectionListener(new SelectionAdapter() {
+      @Override
+      public void widgetSelected(SelectionEvent event) {
+        if (!chooseSdk.getSelection()) {
+          status = Status.OK_STATUS;
+        } else {
+          sdkLocation.doCheckState();
         }
-      });
-    }
+        updateSelectedVersion();
+        fireValueChanged(VALUE, "", ""); //$NON-NLS-1$ //$NON-NLS-2$
+
+        updateControlEnablement();
+      }
+    });
 
     chooseSdkArea = new Composite(parent, SWT.NONE);
 
@@ -154,14 +148,9 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     sdkLocation.setPreferenceStore(getPreferenceStore());
     sdkLocation.setPropertyChangeListener(wrappedPropertyChangeListener);
 
-    if (cloudSdkManager.isManagedSdkFeatureEnabled()) {
-      GridLayoutFactory.fillDefaults().numColumns(sdkLocation.getNumberOfControls())
-          .extendedMargins(IDialogConstants.LEFT_MARGIN, 0, 0, 0)
-          .generateLayout(chooseSdkArea);
-    } else {
-      GridLayoutFactory.fillDefaults().numColumns(sdkLocation.getNumberOfControls())
-          .generateLayout(chooseSdkArea);
-    }
+    GridLayoutFactory.fillDefaults().numColumns(sdkLocation.getNumberOfControls())
+        .extendedMargins(IDialogConstants.LEFT_MARGIN, 0, 0, 0)
+        .generateLayout(chooseSdkArea);
     GridLayoutFactory.fillDefaults().generateLayout(contents);
 
     Dialog.applyDialogFont(contents);
@@ -176,7 +165,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
   private void updateSelectedVersion() {
     String version = Messages.getString("UnknownVersion"); //$NON-NLS-1$
     String location = null;
-    if (!cloudSdkManager.isManagedSdkFeatureEnabled() || chooseSdk.getSelection()) {
+    if (chooseSdk.getSelection()) {
       location = sdkLocation.getStringValue();
       if (Strings.isNullOrEmpty(location)) { 
         try {
@@ -197,7 +186,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
         Path path = Paths.get(location);
         version = getSdkVersion(path);
       }
-    } else if (cloudSdkManager.isManagedSdkFeatureEnabled()) {
+    } else {
       try {
         Path home = ManagedCloudSdk.newManagedSdk().getSdkHome();
         version = getSdkVersion(home);
@@ -245,10 +234,8 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
   @Override
   public void load() {
-    if (cloudSdkManager.isManagedSdkFeatureEnabled()) {
-      loadSdkManagement(false /* loadDefault */);
-      updateControlEnablement();
-    }
+    loadSdkManagement(false /* loadDefault */);
+    updateControlEnablement();
     sdkLocation.load();
     updateSelectedVersion();
     fireValueChanged(VALUE, "", ""); //$NON-NLS-1$ //$NON-NLS-2$
@@ -256,10 +243,8 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
   @Override
   public void loadDefault() {
-    if (cloudSdkManager.isManagedSdkFeatureEnabled()) {
-      loadSdkManagement(true /* loadDefault */);
-      updateControlEnablement();
-    }
+    loadSdkManagement(true /* loadDefault */);
+    updateControlEnablement();
     updateSelectedVersion();
   }
 
@@ -270,15 +255,13 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
   @Override
   public void performApply() {
-    if (cloudSdkManager.isManagedSdkFeatureEnabled()) {
-      if (chooseSdk.getSelection()) {
-        getPreferenceStore().putValue(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT,
-            CloudSdkManagementOption.MANUAL.name());
-      } else {
-        getPreferenceStore().putValue(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT,
-            CloudSdkManagementOption.AUTOMATIC.name());
-        cloudSdkManager.installManagedSdkAsync();
-      }
+    if (chooseSdk.getSelection()) {
+      getPreferenceStore().putValue(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT,
+          CloudSdkManagementOption.MANUAL.name());
+    } else {
+      getPreferenceStore().putValue(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT,
+          CloudSdkManagementOption.AUTOMATIC.name());
+      cloudSdkManager.installManagedSdkAsync();
     }
     sdkLocation.store();
   }
@@ -334,7 +317,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
     @Override
     protected boolean doCheckState() {
-      if (cloudSdkManager.isManagedSdkFeatureEnabled() && !chooseSdk.getSelection()) {
+      if (!chooseSdk.getSelection()) {
         // return early if we're not using a local SDK
         return true;
       }
