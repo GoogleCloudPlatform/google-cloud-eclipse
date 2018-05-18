@@ -92,6 +92,8 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
     SWTBotTreeItem testProject = SwtBotProjectActions.selectProject(bot, "testapp_java8");
     assertNotNull(testProject);
     SwtBotTestingUtilities.performAndWaitForWindowChange(bot, () -> {
+      System.out.println("==== menu items of Run > Debug As ====");
+      bot.menu("Run").menu("Debug As").menuItems().forEach(System.out::println);
       bot.menu("Run").menu("Debug As").menu("1 Debug on Server").click();
     });
 
