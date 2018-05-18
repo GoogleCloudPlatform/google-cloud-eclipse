@@ -26,6 +26,7 @@ import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.Datast
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.DenialOfServiceDescriptor;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.DispatchRoutingDescriptor;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.TaskQueuesDescriptor;
+import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -146,8 +147,9 @@ public class AppEngineContentProvider implements ITreeContentProvider {
 
   /** Return {@code true} if the project is an App Engine Standard project. */
   static boolean isStandard(IProject project) {
+    Preconditions.checkNotNull(project);
     IFacetedProject facetedProject = AppEngineContentProvider.getProject(project);
-    return project != null && AppEngineStandardFacet.hasFacet(facetedProject);
+    return facetedProject != null && AppEngineStandardFacet.hasFacet(facetedProject);
   }
 
   /** Try to get a project from the given element, return {@code null} otherwise. */
