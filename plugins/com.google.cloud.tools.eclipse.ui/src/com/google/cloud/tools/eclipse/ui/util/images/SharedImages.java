@@ -37,10 +37,6 @@ public class SharedImages {
   public static final ImageDescriptor GCP_WIZARD_IMAGE_DESCRIPTOR = AbstractUIPlugin
       .imageDescriptorFromPlugin("com.google.cloud.tools.eclipse.ui", "icons/wizban/gcp.png");
 
-  public static final ImageDescriptor COMPUTE_GREY_IMAGE_DESCRIPTOR =
-      AbstractUIPlugin.imageDescriptorFromPlugin("com.google.cloud.tools.eclipse.ui",
-          "icons/obj16/grey/compute.png");
-
   public static final ImageDescriptor DATASTORE_GREY_IMAGE_DESCRIPTOR =
       AbstractUIPlugin.imageDescriptorFromPlugin("com.google.cloud.tools.eclipse.ui",
           "icons/obj16/grey/datastore.png");

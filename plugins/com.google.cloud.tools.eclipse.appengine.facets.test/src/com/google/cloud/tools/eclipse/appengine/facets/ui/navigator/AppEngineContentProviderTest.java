@@ -24,6 +24,11 @@ import static org.mockito.Mockito.mock;
 import com.google.cloud.tools.appengine.AppEngineDescriptor;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineWebDescriptor;
+import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.CronDescriptor;
+import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.DatastoreIndexesDescriptor;
+import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.DenialOfServiceDescriptor;
+import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.DispatchRoutingDescriptor;
+import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.TaskQueuesDescriptor;
 import com.google.common.base.Strings;
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,9 +56,9 @@ public class AppEngineContentProviderTest {
     facetedProject =
         mockWorkspace.createFacetedProject(
             "foo", // $NON-NLS-1$
-            AppEngineStandardFacet.FACET.getVersion("JRE8"), // $NON-NLS-1$
-            WebFacetUtils.WEB_31,
-            JavaFacet.VERSION_1_8);
+            AppEngineStandardFacet.JRE7,
+            WebFacetUtils.WEB_25,
+            JavaFacet.VERSION_1_7);
   }
 
   private IFile createAppEngineWebXml(String serviceId) {
@@ -74,6 +79,34 @@ public class AppEngineContentProviderTest {
         facetedProject.getProject(),
         new Path("WebContent/WEB-INF/cron.xml"), // $NON-NLS-1$
         "<cronentries/>"); // $NON-NLS-1$
+  }
+
+  private IFile createEmptyDispatchXml() {
+    return mockWorkspace.createFile(
+        facetedProject.getProject(),
+        new Path("WebContent/WEB-INF/dispatch.xml"), // $NON-NLS-1$
+        "<dispatch-entries/>"); // $NON-NLS-1$
+  }
+
+  private IFile createEmptyDosXml() {
+    return mockWorkspace.createFile(
+        facetedProject.getProject(),
+        new Path("WebContent/WEB-INF/dos.xml"), // $NON-NLS-1$
+        "<blacklistentries/>"); // $NON-NLS-1$
+  }
+
+  private IFile createEmptyQueueXml() {
+    return mockWorkspace.createFile(
+        facetedProject.getProject(),
+        new Path("WebContent/WEB-INF/queue.xml"), // $NON-NLS-1$
+        "<queue-entries/>"); // $NON-NLS-1$
+  }
+
+  private IFile createEmptyDatastoreIndexesXml() {
+    return mockWorkspace.createFile(
+        facetedProject.getProject(),
+        new Path("WebContent/WEB-INF/datastore-indexes.xml"), // $NON-NLS-1$
+        "<datastore-indexes/>"); // $NON-NLS-1$
   }
 
   @Test
@@ -105,7 +138,7 @@ public class AppEngineContentProviderTest {
   public void testGetChildren_AppEngineWebDescriptor_noDefault_cronIgnored()
       throws IOException, SAXException, CoreException {
     IFile appEngineWebXml = createAppEngineWebXml("service"); // $NON-NLS-1$
-    IFile cronXml = createEmptyCronXml();
+    createEmptyCronXml();
     AppEngineDescriptor descriptor;
     try (InputStream contents = appEngineWebXml.getContents()) {
       descriptor = AppEngineDescriptor.parse(contents);
@@ -122,7 +155,7 @@ public class AppEngineContentProviderTest {
   public void testGetChildren_AppEngineWebDescriptor_default_cron()
       throws IOException, SAXException, CoreException {
     IFile appEngineWebXml = createAppEngineWebXml("default"); // $NON-NLS-1$
-    IFile cronXml = createEmptyCronXml();
+    createEmptyCronXml();
     AppEngineDescriptor descriptor;
     try (InputStream contents = appEngineWebXml.getContents()) {
       descriptor = AppEngineDescriptor.parse(contents);
@@ -133,6 +166,79 @@ public class AppEngineContentProviderTest {
     Object[] children = fixture.getChildren(webDescriptor);
     assertNotNull(children);
     assertEquals(1, children.length);
+    assertTrue(children[0] instanceof CronDescriptor);
+  }
+
+  @Test
+  public void testGetChildren_AppEngineWebDescriptor_default_dispatch()
+      throws IOException, SAXException, CoreException {
+    IFile appEngineWebXml = createAppEngineWebXml("default"); // $NON-NLS-1$
+    createEmptyDispatchXml();
+    AppEngineDescriptor descriptor;
+    try (InputStream contents = appEngineWebXml.getContents()) {
+      descriptor = AppEngineDescriptor.parse(contents);
+    }
+    AppEngineWebDescriptor webDescriptor =
+        new AppEngineWebDescriptor(facetedProject, appEngineWebXml, descriptor);
+
+    Object[] children = fixture.getChildren(webDescriptor);
+    assertNotNull(children);
+    assertEquals(1, children.length);
+    assertTrue(children[0] instanceof DispatchRoutingDescriptor);
+  }
+
+  @Test
+  public void testGetChildren_AppEngineWebDescriptor_default_datastoreIndexes()
+      throws IOException, SAXException, CoreException {
+    IFile appEngineWebXml = createAppEngineWebXml("default"); // $NON-NLS-1$
+    createEmptyDatastoreIndexesXml();
+    AppEngineDescriptor descriptor;
+    try (InputStream contents = appEngineWebXml.getContents()) {
+      descriptor = AppEngineDescriptor.parse(contents);
+    }
+    AppEngineWebDescriptor webDescriptor =
+        new AppEngineWebDescriptor(facetedProject, appEngineWebXml, descriptor);
+
+    Object[] children = fixture.getChildren(webDescriptor);
+    assertNotNull(children);
+    assertEquals(1, children.length);
+    assertTrue(children[0] instanceof DatastoreIndexesDescriptor);
+  }
+
+  @Test
+  public void testGetChildren_AppEngineWebDescriptor_default_denialOfService()
+      throws IOException, SAXException, CoreException {
+    IFile appEngineWebXml = createAppEngineWebXml("default"); // $NON-NLS-1$
+    createEmptyDosXml();
+    AppEngineDescriptor descriptor;
+    try (InputStream contents = appEngineWebXml.getContents()) {
+      descriptor = AppEngineDescriptor.parse(contents);
+    }
+    AppEngineWebDescriptor webDescriptor =
+        new AppEngineWebDescriptor(facetedProject, appEngineWebXml, descriptor);
+
+    Object[] children = fixture.getChildren(webDescriptor);
+    assertNotNull(children);
+    assertEquals(1, children.length);
+    assertTrue(children[0] instanceof DenialOfServiceDescriptor);
+  }
+
+  @Test
+  public void testGetChildren_AppEngineWebDescriptor_default_taskQueue()
+      throws IOException, SAXException, CoreException {
+    IFile appEngineWebXml = createAppEngineWebXml("default"); // $NON-NLS-1$
+    createEmptyQueueXml();
+    AppEngineDescriptor descriptor;
+    try (InputStream contents = appEngineWebXml.getContents()) {
+      descriptor = AppEngineDescriptor.parse(contents);
+    }
+    AppEngineWebDescriptor webDescriptor =
+        new AppEngineWebDescriptor(facetedProject, appEngineWebXml, descriptor);
+
+    Object[] children = fixture.getChildren(webDescriptor);
+    assertNotNull(children);
+    assertEquals(1, children.length);
+    assertTrue(children[0] instanceof TaskQueuesDescriptor);
   }
 
   @Test
