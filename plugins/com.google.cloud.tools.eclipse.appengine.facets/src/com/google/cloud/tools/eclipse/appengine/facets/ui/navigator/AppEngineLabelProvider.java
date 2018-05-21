@@ -75,19 +75,19 @@ public class AppEngineLabelProvider extends LabelProvider implements IStyledLabe
       // continue on to the next
       return null;
     }
-    StyledString str = new StyledString(project.getName());
+    StyledString result = new StyledString(project.getName());
     try (InputStream input = appEngineWeb.getContents()) {
       AppEngineDescriptor descriptor = AppEngineDescriptor.parse(input);
       String qualifier = getVersionTuple(descriptor);
       if (qualifier.length() > 0) {
-        str.append(" [", StyledString.QUALIFIER_STYLER); //$NON-NLS-1$
-        str.append(qualifier.toString(), StyledString.QUALIFIER_STYLER);
-        str.append("]", StyledString.QUALIFIER_STYLER); //$NON-NLS-1$
+        result.append(" [", StyledString.QUALIFIER_STYLER); //$NON-NLS-1$
+        result.append(qualifier.toString(), StyledString.QUALIFIER_STYLER);
+        result.append("]", StyledString.QUALIFIER_STYLER); //$NON-NLS-1$
       }
     } catch (IOException | CoreException | SAXException | AppEngineException ex) {
       // ignore
     }
-    return str;
+    return result;
   }
 
   /** Returns a <em>project:service:version</em> tuple from the appengine-web descriptor. */

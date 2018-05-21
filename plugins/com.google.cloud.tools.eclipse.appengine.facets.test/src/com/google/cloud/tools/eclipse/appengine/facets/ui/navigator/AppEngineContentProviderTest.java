@@ -48,7 +48,7 @@ import org.xml.sax.SAXException;
 public class AppEngineContentProviderTest {
 
   private final MockWorkspace mockWorkspace = new MockWorkspace();
-  final private AppEngineContentProvider fixture = new AppEngineContentProvider();
+  private final AppEngineContentProvider fixture = new AppEngineContentProvider();
   private IFacetedProject facetedProject;
 
   @Before

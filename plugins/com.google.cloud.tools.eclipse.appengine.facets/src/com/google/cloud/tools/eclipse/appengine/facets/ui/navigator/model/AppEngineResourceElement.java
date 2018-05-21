@@ -22,6 +22,10 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 
+/**
+ * A representation for App Engine-specific configuration files. Amongst other things, it mplements
+ * IAdaptable to expose the configuration file to enable Eclipse's <em>Open</em> functionality.
+ */
 public abstract class AppEngineResourceElement implements IAdaptable {
   private final IFacetedProject project;
   private final IFile file;
@@ -47,9 +51,6 @@ public abstract class AppEngineResourceElement implements IAdaptable {
     return null;
   }
 
-  /**
-   * Return a stylish description suitable for use in the Project Explorer.
-   */
+  /** Return a styled description suitable for use in the Project Explorer. */
   public abstract StyledString getStyledLabel();
-
 }

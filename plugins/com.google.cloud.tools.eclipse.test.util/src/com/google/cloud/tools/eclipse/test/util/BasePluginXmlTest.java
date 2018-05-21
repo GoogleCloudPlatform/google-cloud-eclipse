@@ -103,15 +103,15 @@ public abstract class BasePluginXmlTest {
         "definition should have only an 'id' attribute", 1, definition.getAttributes().getLength());
     List<Node> expressions = getChildNodes(definition, Node.ELEMENT_NODE);
     Assert.assertEquals("definition must have only 1 subexpression", 1, expressions.size());
-    checkExpression(expressions.get(0));
+    Assert.assertTrue(expressions.get(0) instanceof Element);
+    checkExpression((Element) expressions.get(0));
     return definition;
   }
 
   /** Verify that a node is a valid expression. */
-  protected static void checkExpression(Node expression) {
-    Assert.assertTrue(expression instanceof Element);
+  protected static void checkExpression(Element expression) {
     try {
-      Expression converted = ExpressionConverter.getDefault().perform((Element) expression);
+      Expression converted = ExpressionConverter.getDefault().perform(expression);
       Assert.assertNotNull(converted);
     } catch (CoreException ex) {
       Assert.fail("failed to convert to core expression: " + ex);

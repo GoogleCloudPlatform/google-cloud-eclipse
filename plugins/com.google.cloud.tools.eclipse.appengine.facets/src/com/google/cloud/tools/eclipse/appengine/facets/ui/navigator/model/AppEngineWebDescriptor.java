@@ -38,19 +38,19 @@ public class AppEngineWebDescriptor extends AppEngineResourceElement {
 
   @Override
   public StyledString getStyledLabel() {
-    StyledString str = new StyledString("App Engine");
-    str.append(" [standard", StyledString.QUALIFIER_STYLER);
+    StyledString result = new StyledString("App Engine");
+    result.append(" [standard", StyledString.QUALIFIER_STYLER);
     try {
       StyledString qualifier = new StyledString(": ", StyledString.QUALIFIER_STYLER); //$NON-NLS-1$
       qualifier.append(
           Strings.isNullOrEmpty(descriptor.getRuntime()) ? "java7" : descriptor.getRuntime(),
           StyledString.QUALIFIER_STYLER);
       qualifier.append("]", StyledString.QUALIFIER_STYLER); //$NON-NLS-1$
-      str.append(qualifier);
+      result.append(qualifier);
     } catch (AppEngineException ex) {
       // ignored
     }
-    return str;
+    return result;
   }
 
   public AppEngineDescriptor getDescriptor() {
