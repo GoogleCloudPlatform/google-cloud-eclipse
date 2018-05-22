@@ -91,7 +91,7 @@ public class BuildPathTest {
 
   @Test
   public void testCheckLibraries() throws CoreException {
-    // Activator.listener monitors Java classpath changes and schedule concurrent jobs that call
+    // Activator.listener monitors Java classpath changes and schedules concurrent jobs that call
     // "checkLibraryList()", which is the method being tested here. Prevent concurrent updates
     // to avoid flakiness: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2758
     ISchedulingRule buildRule = project.getProject().getWorkspace().getRuleFactory().buildRule();

@@ -17,10 +17,9 @@
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
+import com.google.cloud.tools.appengine.api.deploy.AppEngineDeployment;
 import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDeployment;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.eclipse.appengine.deploy.util.CloudSdkProcessWrapper;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -62,14 +61,6 @@ public class AppEngineProjectDeployer {
       throw new OperationCanceledException();
     }
 
-    try {
-      cloudSdkProcessWrapper.setUpDeployCloudSdk(credentialFile, stdoutOutputStream);
-    } catch (CloudSdkNotFoundException ex) {
-      return StatusUtil.error(this, "Error deploying project: " + ex.getMessage(), ex);
-    }
-    
-    CloudSdk cloudSdk = cloudSdkProcessWrapper.getCloudSdk();
-
     SubMonitor progress = SubMonitor.convert(monitor, 1);
     progress.setTaskName(Messages.getString("task.name.deploy.project")); //$NON-NLS-1$
     try {
@@ -79,8 +70,9 @@ public class AppEngineProjectDeployer {
       DefaultDeployConfiguration configuration =
           DeployPreferencesConverter.toDeployConfiguration(deployPreferences);
       configuration.setDeployables(deployables);
-      CloudSdkAppEngineDeployment deployment = new CloudSdkAppEngineDeployment(cloudSdk);
       try { 
+        AppEngineDeployment deployment =
+            cloudSdkProcessWrapper.getAppEngineDeployment(credentialFile, stdoutOutputStream);
         deployment.deploy(configuration);
       } catch (AppEngineException ex) {
         return StatusUtil.error(this, "Error deploying project: " + ex.getMessage(), ex);

@@ -46,7 +46,7 @@ public class CloudSdkPreferenceResolverTest {
     CloudSdkPreferenceResolver resolver = new CloudSdkPreferenceResolver(preferences);
     CloudSdk sdk = new CloudSdk.Builder()
         .resolvers(Collections.singletonList((CloudSdkResolver) resolver)).build();
-    assertEquals("SDK should be found at invalid location", root.toPath(), sdk.getSdkPath());
+    assertEquals("SDK should be found at invalid location", root.toPath(), sdk.getPath());
     try {
       sdk.validateCloudSdk();
       fail("root directory should not validate as a valid location");

@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import com.google.cloud.tools.appengine.api.devserver.DefaultRunConfiguration;
 import com.google.cloud.tools.appengine.api.devserver.RunConfiguration;
+import com.google.cloud.tools.appengine.cloudsdk.AppEngineJavaComponentsNotInstalledException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
@@ -136,6 +137,9 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     try {
       CloudSdk cloudSdk = new CloudSdk.Builder().build();
       cloudSdk.validateCloudSdk();
+      // TODO: call cloudSdk.validateJdk() once it becomes public.
+      CloudSdkManager.validateJdk(cloudSdk);
+      cloudSdk.validateAppEngineJavaComponents();
       return Status.OK_STATUS;
     } catch (CloudSdkNotFoundException | InvalidJavaSdkException ex) {
       return StatusUtil.error(
@@ -146,6 +150,11 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       return StatusUtil.error(
           LocalAppEngineServerLaunchConfigurationDelegate.class,
           Messages.getString("cloudsdk.out.of.date"), // $NON-NLS-1$
+          ex);
+    } catch (AppEngineJavaComponentsNotInstalledException ex) {
+      return StatusUtil.error(
+          LocalAppEngineServerLaunchConfigurationDelegate.class,
+          Messages.getString("cloudsdk.no.app.engine.java.component"), // $NON-NLS-1$
           ex);
     }
   }
@@ -292,15 +301,15 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       if (adminPort >= 0) {
         devServerRunConfiguration.setAdminPort(adminPort);
       } else {
-        // adminPort = -1 perform failover if default port is busy
-        devServerRunConfiguration.setAdminPort(LocalAppEngineServerBehaviour.DEFAULT_ADMIN_PORT);
+        // perform failover if default port is busy
+
         // adminHost == null is ok as that resolves to null == INADDR_ANY
         InetAddress addr = resolveAddress(devServerRunConfiguration.getAdminHost());
-        if (org.eclipse.wst.server.core.util.SocketUtil.isPortInUse(addr,
-            devServerRunConfiguration.getAdminPort())) {
-          logger.log(Level.INFO, "default admin port " + devServerRunConfiguration.getAdminPort() //$NON-NLS-1$
-              + " in use. Picking an unused port."); //$NON-NLS-1$
+        if (org.eclipse.wst.server.core.util.SocketUtil.isPortInUse(
+            addr, LocalAppEngineServerBehaviour.DEFAULT_ADMIN_PORT)) {
           devServerRunConfiguration.setAdminPort(0);
+        } else {
+          devServerRunConfiguration.setAdminPort(LocalAppEngineServerBehaviour.DEFAULT_ADMIN_PORT);
         }
       }
     }

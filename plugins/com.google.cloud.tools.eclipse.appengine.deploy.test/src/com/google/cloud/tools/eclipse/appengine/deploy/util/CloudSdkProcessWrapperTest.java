@@ -22,8 +22,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.cloud.tools.appengine.api.deploy.AppEngineDeployment;
+import com.google.cloud.tools.appengine.api.deploy.AppEngineStandardStaging;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
-import com.google.cloud.tools.eclipse.appengine.deploy.util.CloudSdkProcessWrapper.ProcessExitRecorder;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,9 +40,9 @@ public class CloudSdkProcessWrapperTest {
   private final CloudSdkProcessWrapper wrapper = new CloudSdkProcessWrapper();
 
   @Test
-  public void testSetUpDeployCloudSdk_nullCredentialFile() throws CloudSdkNotFoundException {
+  public void testGetAppEngineDeployment_nullCredentialFile() throws CloudSdkNotFoundException {
     try {
-      wrapper.setUpDeployCloudSdk(null, null);
+      wrapper.getAppEngineDeployment(null, null);
       fail();
     } catch (NullPointerException ex) {
       assertEquals(ex.getMessage(), "credential required for deploying");
@@ -49,12 +50,13 @@ public class CloudSdkProcessWrapperTest {
   }
 
   @Test
-  public void testSetUpDeployCloudSdk_nonExistingCredentialFile() throws CloudSdkNotFoundException {
+  public void testGetAppEngineDeployment_nonExistingCredentialFile()
+      throws CloudSdkNotFoundException {
     Path credential = tempFolder.getRoot().toPath().resolve("non-existing-file");
     assertFalse(Files.exists(credential));
 
     try {
-      wrapper.setUpDeployCloudSdk(credential, null);
+      wrapper.getAppEngineDeployment(credential, null);
       fail();
     } catch (IllegalArgumentException ex) {
       assertEquals(ex.getMessage(), "non-existing credential file");
@@ -62,79 +64,60 @@ public class CloudSdkProcessWrapperTest {
   }
 
   @Test
-  public void testGetCloudSdk_beforeSetUp() {
-    try {
-      wrapper.getCloudSdk();
-      fail();
-    } catch (NullPointerException ex) {
-      assertEquals("wrapper not set up", ex.getMessage());
-    }
-  }
-
-  @Test
-  public void testGetCloudSdk_forDeploy() throws IOException, CloudSdkNotFoundException {
+  public void testGetAppEngineDeployment() throws IOException, CloudSdkNotFoundException {
     Path credential = tempFolder.newFile().toPath();
-    wrapper.setUpDeployCloudSdk(credential, null);
-    assertNotNull(wrapper.getCloudSdk());
+    AppEngineDeployment deployment = wrapper.getAppEngineDeployment(credential, null);
+    assertNotNull(deployment);
   }
 
   @Test
-  public void testGetCloudSdk_forStandardStaging() throws CloudSdkNotFoundException {
-    wrapper.setUpStandardStagingCloudSdk(null, null, null);
-    assertNotNull(wrapper.getCloudSdk());
+  public void testGetAppEngineStandardStaging() throws CloudSdkNotFoundException {
+    AppEngineStandardStaging staging = wrapper.getAppEngineStandardStaging(null, null, null);
+    assertNotNull(staging);
   }
 
   @Test
-  public void testSetUpDeployCloudSdk_cannotSetUpTwice() 
+  public void testGetAppEngineDeployment_cannotSetUpTwice()
       throws IOException, CloudSdkNotFoundException {
     Path credential = tempFolder.newFile().toPath();
-    wrapper.setUpDeployCloudSdk(credential, null);
+    wrapper.getAppEngineDeployment(credential, null);
     try {
-      wrapper.setUpDeployCloudSdk(credential, null);
+      wrapper.getAppEngineDeployment(credential, null);
       fail();
     } catch (IllegalStateException ex) {
-      assertEquals(ex.getMessage(), "CloudSdk already set up");
+      assertEquals(ex.getMessage(), "process wrapper already set up");
     }
   }
 
   @Test
-  public void testSetUpStandardStagingCloudSdk_cannotSetUpTwice() throws CloudSdkNotFoundException {
-    wrapper.setUpStandardStagingCloudSdk(null, null, null);
+  public void testGetAppEngineStandardStaging_cannotSetUpTwice() throws CloudSdkNotFoundException {
+    wrapper.getAppEngineStandardStaging(null, null, null);
     try {
-      wrapper.setUpStandardStagingCloudSdk(null, null, null);
+      wrapper.getAppEngineStandardStaging(null, null, null);
       fail();
     } catch (IllegalStateException ex) {
-      assertEquals(ex.getMessage(), "CloudSdk already set up");
+      assertEquals(ex.getMessage(), "process wrapper already set up");
     }
   }
 
   @Test
-  public void testProcessExitRecorder_onErrorExitWithNullErrorMessageCollector() throws CloudSdkNotFoundException {
-    wrapper.setUpStandardStagingCloudSdk(null, null, null);
-
-    ProcessExitRecorder recorder = wrapper.new ProcessExitRecorder();
-    recorder.onExit(15);
+  public void testProcessExitRecorder_onErrorExitWithNullErrorMessageCollector() {
+    wrapper.recordProcessExitCode(15);
 
     assertEquals(Status.ERROR, wrapper.getExitStatus().getSeverity());
     assertEquals("Process exited with error code 15", wrapper.getExitStatus().getMessage());
   }
 
   @Test
-  public void testProcessExitRecorder_onErrorExit() throws CloudSdkNotFoundException {
-    wrapper.setUpStandardStagingCloudSdk(null, null, null);
-
-    ProcessExitRecorder recorder = wrapper.new ProcessExitRecorder();
-    recorder.onExit(23);
+  public void testProcessExitRecorder_onErrorExit() {
+    wrapper.recordProcessExitCode(235);
 
     assertEquals(Status.ERROR, wrapper.getExitStatus().getSeverity());
   }
 
   @Test
-  public void testProcessExitRecorder_onOkExit() throws CloudSdkNotFoundException {
-    wrapper.setUpStandardStagingCloudSdk(null, null, null);
-
-    ProcessExitRecorder recorder = wrapper.new ProcessExitRecorder();
-    recorder.onExit(0);
+  public void testProcessExitRecorder_onOkExit() {
+    wrapper.recordProcessExitCode(0);
 
     assertTrue(wrapper.getExitStatus().isOK());
   }

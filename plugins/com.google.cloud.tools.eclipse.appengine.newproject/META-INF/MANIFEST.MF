@@ -8,7 +8,7 @@ Bundle-Vendor: %providerName
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
-Require-Bundle: com.google.cloud.tools.appengine;bundle-version="0.5.2",
+Require-Bundle: com.google.cloud.tools.appengine;bundle-version="0.6.0",
  com.google.cloud.tools.eclipse.appengine.facets,
  com.google.cloud.tools.eclipse.appengine.ui,
  javax.servlet;bundle-version="2.5.0",

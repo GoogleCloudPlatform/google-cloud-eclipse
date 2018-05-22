@@ -235,8 +235,9 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
     DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
         .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
 
-    assertNotNull(config.getPort());
-    assertEquals(9999, (int) config.getPort());
+    Integer port = config.getPort();
+    assertNotNull(port);
+    assertEquals(9999, (int) port);
     verify(launchConfiguration)
         .getAttribute(eq(LocalAppEngineServerBehaviour.SERVER_PORT_ATTRIBUTE_NAME), anyInt());
     verify(server, never()).getAttribute(anyString(), anyInt());
@@ -349,14 +350,18 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
   public void testGenerateRunConfiguration_restart_run() throws CoreException {
     DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
         .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
-    assertTrue(config.getAutomaticRestart());
+    Boolean automaticRestart = config.getAutomaticRestart();
+    assertNotNull(automaticRestart);
+    assertTrue(automaticRestart);
   }
 
   @Test
   public void testGenerateRunConfiguration_restart_debug() throws CoreException {
     DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
         .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.DEBUG_MODE);
-    assertFalse(config.getAutomaticRestart());
+    Boolean automaticRestart = config.getAutomaticRestart();
+    assertNotNull(automaticRestart);
+    assertFalse(automaticRestart);
   }
 
   // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1609

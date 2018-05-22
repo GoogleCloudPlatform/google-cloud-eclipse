@@ -184,7 +184,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
           // look in default locations; see
           // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2897
           CloudSdk sdk = new CloudSdk.Builder().build();
-          location = sdk.getSdkPath().toString();
+          location = sdk.getPath().toString();
           version = sdk.getVersion().toString();
           // ends up calling this method again
           sdkLocation.setStringValue(location);
@@ -286,7 +286,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
   private static Path getDefaultSdkLocation() {
     try {
-      return new CloudSdk.Builder().build().getSdkPath();
+      return new CloudSdk.Builder().build().getPath();
     } catch (AppEngineException ex) {
       return null;
     }
@@ -296,10 +296,11 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     try {
       CloudSdk sdk = new CloudSdk.Builder().sdkPath(location).build();
       sdk.validateCloudSdk();
+      CloudSdkManager.validateJdk(sdk);  // TODO: call sdk.validateJdk() once it becomes public.
       sdk.validateAppEngineJavaComponents();
       status = Status.OK_STATUS;
       return true;
-    } catch (CloudSdkNotFoundException ex) {
+    } catch (CloudSdkNotFoundException | InvalidJavaSdkException ex) {
       // accept a seemingly invalid location in case the SDK organization
       // has changed and the CloudSdk#validate() code is out of date
       status = new Status(IStatus.WARNING, getClass().getName(),
@@ -308,10 +309,6 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     } catch (AppEngineJavaComponentsNotInstalledException ex) {
       status = new Status(IStatus.WARNING, getClass().getName(),
           Messages.getString("AppEngineJavaComponentsNotInstalled", ex.getMessage())); //$NON-NLS-1$
-      return false;
-    } catch (InvalidJavaSdkException ex) {
-      status = new Status(IStatus.WARNING, getClass().getName(),
-          Messages.getString("JavaNotInstalled", ex.getMessage())); //$NON-NLS-1$
       return false;
     } catch (CloudSdkOutOfDateException | CloudSdkVersionFileException ex) {
       status = new Status(IStatus.ERROR, getClass().getName(),

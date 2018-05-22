@@ -22,9 +22,11 @@ import com.google.cloud.tools.appengine.api.devserver.DefaultRunConfiguration;
 import com.google.cloud.tools.appengine.api.devserver.DefaultStopConfiguration;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDevServer1;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDevServer2;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
+import com.google.cloud.tools.appengine.cloudsdk.LocalRun;
+import com.google.cloud.tools.appengine.cloudsdk.process.LegacyProcessHandler;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
+import com.google.cloud.tools.appengine.cloudsdk.process.ProcessHandler;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
 import com.google.cloud.tools.appengine.cloudsdk.serialization.CloudSdkVersion;
@@ -40,7 +42,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -239,7 +241,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
 
   @VisibleForTesting
   void checkPorts(DefaultRunConfiguration devServerRunConfiguration,
-      BiFunction<InetAddress, Integer, Boolean> portInUse) throws CoreException {
+      BiPredicate<InetAddress, Integer> portInUse) throws CoreException {
     InetAddress serverHost = InetAddress.getLoopbackAddress();
     if (devServerRunConfiguration.getHost() != null) {
       serverHost = LocalAppEngineServerLaunchConfigurationDelegate
@@ -273,14 +275,14 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
    * @throws CoreException if the port is in use
    */
   @VisibleForTesting
-  static int checkPort(InetAddress addr, int port,
-      BiFunction<InetAddress, Integer, Boolean> portInUse) throws CoreException {
+  static int checkPort(InetAddress addr, int port, BiPredicate<InetAddress, Integer> portInUse)
+      throws CoreException {
     Preconditions.checkNotNull(portInUse);
     if (port < 0 || port > 65535) {
       throw new CoreException(newErrorStatus(Messages.getString("PORT_OUT_OF_RANGE")));
     }
 
-    if (port != 0 && portInUse.apply(addr, port)) {
+    if (port != 0 && portInUse.test(addr, port)) {
       throw new CoreException(
           newErrorStatus(Messages.getString("PORT_IN_USE", String.valueOf(port))));
     }
@@ -332,7 +334,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
       Path javaHomePath, MessageConsoleStream outputStream, MessageConsoleStream errorStream)
       throws CoreException, CloudSdkNotFoundException {
 
-    BiFunction<InetAddress, Integer, Boolean> portInUse = (addr, port) -> {
+    BiPredicate<InetAddress, Integer> portInUse = (addr, port) -> {
       Preconditions.checkArgument(port >= 0, "invalid port");
       return SocketUtil.isPortInUse(addr, port);
     };
@@ -366,16 +368,20 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     // dev_appserver output goes to stderr
     cloudSdk = new CloudSdk.Builder()
         .javaHome(javaHomePath)
+        .build();
+
+    ProcessHandler processHandler = LegacyProcessHandler.builder()
         .addStdOutLineListener(stdoutListener).addStdErrLineListener(stderrListener)
         .addStdErrLineListener(serverOutputListener)
-        .startListener(localAppEngineStartListener)
-        .exitListener(localAppEngineExitListener)
+        .setStartListener(localAppEngineStartListener)
+        .setExitListener(localAppEngineExitListener)
         .async(true)
         .build();
 
+    LocalRun localRun = LocalRun.builder(cloudSdk).build();
     devServer = LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2
-        ? new CloudSdkAppEngineDevServer2(cloudSdk)
-        : new CloudSdkAppEngineDevServer1(cloudSdk);
+        ? localRun.newDevAppServer2(processHandler)
+        : localRun.newDevAppServer1(processHandler);
     moduleToUrlMap.clear();
   }
   

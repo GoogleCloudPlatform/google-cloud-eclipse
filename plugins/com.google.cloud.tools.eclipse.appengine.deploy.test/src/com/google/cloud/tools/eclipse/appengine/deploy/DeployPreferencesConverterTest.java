@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.deploy;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -87,7 +88,9 @@ public class DeployPreferencesConverterTest {
         .thenReturn(true);
     DefaultDeployConfiguration configuration =
         DeployPreferencesConverter.toDeployConfiguration(new DeployPreferences(preferences));
-    assertTrue(configuration.getPromote());
+    Boolean promote = configuration.getPromote();
+    assertNotNull(promote);
+    assertTrue(promote);
   }
 
   @Test
@@ -107,7 +110,9 @@ public class DeployPreferencesConverterTest {
         .thenReturn(true);
     DefaultDeployConfiguration configuration =
         DeployPreferencesConverter.toDeployConfiguration(new DeployPreferences(preferences));
-    assertTrue(configuration.getStopPreviousVersion());
+    Boolean stopPreviousVersion = configuration.getStopPreviousVersion();
+    assertNotNull(stopPreviousVersion);
+    assertTrue(stopPreviousVersion);
   }
 
   @Test
@@ -118,7 +123,9 @@ public class DeployPreferencesConverterTest {
         .thenReturn(false);
     DefaultDeployConfiguration configuration =
         DeployPreferencesConverter.toDeployConfiguration(new DeployPreferences(preferences));
-    assertFalse(configuration.getStopPreviousVersion());
+    Boolean stopPreviousVersion = configuration.getStopPreviousVersion();
+    assertNotNull(stopPreviousVersion);
+    assertFalse(stopPreviousVersion);
   }
 
   @Test

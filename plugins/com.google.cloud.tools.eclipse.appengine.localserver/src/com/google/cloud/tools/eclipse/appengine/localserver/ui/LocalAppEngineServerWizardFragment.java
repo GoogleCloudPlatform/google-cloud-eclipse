@@ -72,7 +72,7 @@ public class LocalAppEngineServerWizardFragment extends WizardFragment {
   private String getCloudSdkLocation() {
     try {
       CloudSdk cloudSdk = new CloudSdk.Builder().build();
-      return cloudSdk.getSdkPath().toString();
+      return cloudSdk.getPath().toString();
     } catch (AppEngineException ex) {
       return null;
     }

@@ -23,6 +23,12 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
  * Accessors for shared icons.
  */
 public class AppEngineImages {
+  public static final ImageDescriptor APPENGINE_IMAGE_DESCRIPTOR =
+      getIcon("icons/obj16/appengine.png");
+
+  public static final ImageDescriptor APPENGINE_GREY_IMAGE_DESCRIPTOR =
+      getIcon("icons/obj16/grey/appengine.png");
+
   public static ImageDescriptor appEngine(int size) {
     String imageFilePath = "icons/gae-" + size + "x" + size + ".png";
     return getIcon(imageFilePath);

@@ -9,7 +9,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.google.cloud.tools.eclipse.appengine.localserver.Activator
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
-Require-Bundle: com.google.cloud.tools.appengine;bundle-version="0.5.2",
+Require-Bundle: com.google.cloud.tools.appengine;bundle-version="0.6.0",
  com.google.cloud.tools.eclipse.appengine.ui;bundle-version="0.1.0",
  com.google.guava;bundle-version="[21.0.0,22.0.0)",
  javax.servlet;bundle-version="2.5.0",

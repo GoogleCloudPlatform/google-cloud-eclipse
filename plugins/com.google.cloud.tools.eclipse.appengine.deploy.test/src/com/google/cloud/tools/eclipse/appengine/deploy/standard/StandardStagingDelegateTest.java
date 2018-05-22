@@ -23,10 +23,11 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.cloud.tools.appengine.api.deploy.AppEngineStandardStaging;
+import com.google.cloud.tools.appengine.cloudsdk.AppCfg;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
-import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
-import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
+import com.google.cloud.tools.appengine.cloudsdk.process.LegacyProcessHandler;
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.appengine.deploy.util.CloudSdkProcessWrapper;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
@@ -66,13 +67,17 @@ public class StandardStagingDelegateTest {
     safeWorkDirectory = project.getFolder("safe-work-directory").getLocation();
     stagingDirectory = project.getFolder("staging-result").getLocation();
 
-    CloudSdk cloudSdk = new CloudSdk.Builder()
-        .addStdOutLineListener(new OutputListener())
-        .addStdErrLineListener(new OutputListener())
-        .exitListener(new ExitListener())
+    CloudSdk cloudSdk = new CloudSdk.Builder().build();
+    LegacyProcessHandler processHandler = LegacyProcessHandler.builder()
+        .addStdOutLineListener(line -> { System.out.println("    [Cloud SDK] " + line); })
+        .addStdErrLineListener(line -> { System.out.println("    [Cloud SDK] " + line); })
+        .setExitListener(exitCode -> { cloudSdkExitCode = exitCode; })
         .build();
+    AppEngineStandardStaging staging = AppCfg.builder(cloudSdk).build().newStaging(processHandler);
 
-    when(cloudSdkWrapper.getCloudSdk()).thenReturn(cloudSdk);
+    when(cloudSdkWrapper.getAppEngineStandardStaging(
+        any(Path.class), any(MessageConsoleStream.class), any(MessageConsoleStream.class)))
+        .thenReturn(staging);
   }
 
   @After
@@ -109,21 +114,7 @@ public class StandardStagingDelegateTest {
     delegate.stage(stagingDirectory, safeWorkDirectory, null, null,
         new NullProgressMonitor());
 
-    verify(cloudSdkWrapper).setUpStandardStagingCloudSdk(
+    verify(cloudSdkWrapper).getAppEngineStandardStaging(
         eq(javaHome), any(MessageConsoleStream.class), any(MessageConsoleStream.class));
-  }
-
-  private static class OutputListener implements ProcessOutputLineListener {
-    @Override
-    public void onOutputLine(String line) {
-      System.out.println("    [Cloud SDK] " + line);
-    }
-  }
-
-  private class ExitListener implements ProcessExitListener {
-    @Override
-    public void onExit(int exitCode) {
-      cloudSdkExitCode = exitCode;
-    }
   }
 }
