@@ -21,8 +21,8 @@ import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.viewers.StyledString;
-import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 
 /**
  * A model representation of the {@code appengine-web.xml}.
@@ -30,7 +30,7 @@ import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 public class AppEngineWebDescriptor extends AppEngineResourceElement {
   private final AppEngineDescriptor descriptor;
 
-  public AppEngineWebDescriptor(IFacetedProject project, IFile file,
+  public AppEngineWebDescriptor(IProject project, IFile file,
       AppEngineDescriptor descriptor) {
     super(project, file);
     this.descriptor = Preconditions.checkNotNull(descriptor);

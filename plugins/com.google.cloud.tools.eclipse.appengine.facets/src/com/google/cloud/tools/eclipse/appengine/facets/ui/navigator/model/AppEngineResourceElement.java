@@ -18,24 +18,24 @@ package com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model;
 
 import com.google.common.base.Preconditions;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.StyledString;
-import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 
 /**
  * A representation for App Engine-specific configuration files. Amongst other things, it mplements
  * IAdaptable to expose the configuration file to enable Eclipse's <em>Open</em> functionality.
  */
 public abstract class AppEngineResourceElement implements IAdaptable {
-  private final IFacetedProject project;
+  private final IProject project;
   private final IFile file;
 
-  public AppEngineResourceElement(IFacetedProject project, IFile file) {
+  public AppEngineResourceElement(IProject project, IFile file) {
     this.project = Preconditions.checkNotNull(project);
     this.file = Preconditions.checkNotNull(file);
   }
 
-  public IFacetedProject getProject() {
+  public IProject getProject() {
     return project;
   }
 

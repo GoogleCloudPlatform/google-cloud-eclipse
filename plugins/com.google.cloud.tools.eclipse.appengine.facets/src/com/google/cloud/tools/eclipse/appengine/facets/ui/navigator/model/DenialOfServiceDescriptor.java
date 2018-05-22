@@ -17,14 +17,14 @@
 package com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.viewers.StyledString;
-import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 
 /**
  * Represents a {@code dos.xml} element.
  */
 public class DenialOfServiceDescriptor extends AppEngineResourceElement {
-  public DenialOfServiceDescriptor(IFacetedProject project, IFile file) {
+  public DenialOfServiceDescriptor(IProject project, IFile file) {
     super(project, file);
   }
 
