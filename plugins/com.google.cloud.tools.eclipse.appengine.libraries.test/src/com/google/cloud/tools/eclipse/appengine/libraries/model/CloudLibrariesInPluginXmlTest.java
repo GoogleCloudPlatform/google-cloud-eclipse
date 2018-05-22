@@ -122,7 +122,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(mavenCoordinates.getArtifactId(), is("endpoints-framework"));
     
     DefaultArtifactVersion actual = new DefaultArtifactVersion(mavenCoordinates.getVersion());
-    DefaultArtifactVersion expected = new DefaultArtifactVersion("2.0.13");
+    DefaultArtifactVersion expected = new DefaultArtifactVersion("2.0.14");
     assertTrue(actual.compareTo(expected) >= 0);
  
     assertThat(mavenCoordinates.getType(), is("jar"));
