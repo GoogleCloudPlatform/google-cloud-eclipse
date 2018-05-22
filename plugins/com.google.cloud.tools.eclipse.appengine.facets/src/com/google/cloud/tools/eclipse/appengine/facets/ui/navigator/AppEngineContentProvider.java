@@ -171,10 +171,6 @@ public class AppEngineContentProvider implements ITreeContentProvider {
         if (project != null) {
           return ProjectFacetsManager.create(project);
         }
-        IResource resource = ((IAdaptable) inputElement).getAdapter(IResource.class);
-        if (resource != null) {
-          return ProjectFacetsManager.create(resource.getProject());
-        }
       }
     } catch (CoreException ex) {
       logger.log(Level.INFO, "Unable to obtain project", ex);
