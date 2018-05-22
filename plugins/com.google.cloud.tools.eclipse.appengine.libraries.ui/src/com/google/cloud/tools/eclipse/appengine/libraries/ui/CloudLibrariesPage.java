@@ -103,9 +103,11 @@ public class CloudLibrariesPage extends WizardPage
 
     Map<String, String> groups = new LinkedHashMap<>();
     if (AppEngineStandardFacet.getProjectFacetVersion(javaProject.getProject()) != null) {
-      groups.put(CloudLibraries.APP_ENGINE_GROUP, Messages.getString("appengine-title")); //$NON-NLS-1$
+      groups.put(CloudLibraries.APP_ENGINE_STANDARD_GROUP, 
+          Messages.getString("appengine-title")); //$NON-NLS-1$
     }
-    groups.put(CloudLibraries.CLIENT_APIS_GROUP, Messages.getString("clientapis-title")); //$NON-NLS-1$
+    groups.put(CloudLibraries.CLIENT_APIS_GROUP, 
+        Messages.getString("clientapis-title")); //$NON-NLS-1$
     setLibraryGroups(groups);
   }
 

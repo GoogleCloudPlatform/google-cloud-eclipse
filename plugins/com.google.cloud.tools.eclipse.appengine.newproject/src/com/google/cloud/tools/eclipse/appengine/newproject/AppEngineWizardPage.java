@@ -83,7 +83,7 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     // todo we don't need this if; can do with subclasses
     if (showLibrariesSelectorGroup) {
       appEngineLibrariesSelectorGroup =
-          new LibrarySelectorGroup(container, CloudLibraries.APP_ENGINE_GROUP,
+          new LibrarySelectorGroup(container, CloudLibraries.APP_ENGINE_STANDARD_GROUP,
               Messages.getString("app.engine.libraries.group")); //$NON-NLS-1$
     }
 
