@@ -148,7 +148,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertTrue(objectifyLibrary.isExport());
 
     List<LibraryFile> allDependencies = objectifyLibrary.getAllDependencies();
-    assertTrue(allDependencies.size() > 2);
+    assertTrue(allDependencies.size() + " dependencies", allDependencies.size() > 2);
     
     LibraryFile objectifyLibraryFile = null;
     LibraryFile guavaLibraryFile = null;
@@ -169,7 +169,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(objectifyMavenCoordinates.getArtifactId(), is("objectify"));
     DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(
         objectifyMavenCoordinates.getVersion());
-    DefaultArtifactVersion expected = new DefaultArtifactVersion("5.1.22");
+    DefaultArtifactVersion expected = new DefaultArtifactVersion("6.0.0");
     assertTrue(artifactVersion.compareTo(expected) >= 0);
     assertThat(objectifyMavenCoordinates.getType(), is("jar"));
     assertNull(objectifyMavenCoordinates.getClassifier());

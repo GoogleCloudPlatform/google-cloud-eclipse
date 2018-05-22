@@ -197,7 +197,7 @@ public final class Library {
    */
   private synchronized List<LibraryFile> resolveDependencies() {
     List<LibraryFile> transitiveDependencies = new ArrayList<>();
-    
+        
     for (LibraryFile artifact : directDependencies) {
       artifact.updateVersion();
       MavenCoordinates coordinates = artifact.getMavenCoordinates();
