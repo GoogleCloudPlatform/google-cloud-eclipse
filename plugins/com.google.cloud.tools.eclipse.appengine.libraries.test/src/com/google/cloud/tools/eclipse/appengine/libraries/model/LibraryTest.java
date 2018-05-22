@@ -97,6 +97,15 @@ public class LibraryTest {
   }
 
   @Test
+  public void testGetGroups() {
+    library.setGroup("foo,bar, baz");
+    List<String> groups = library.getGroups();
+    assertThat(groups.get(0), is("foo"));
+    assertThat(groups.get(1), is("bar"));
+    assertThat(groups.get(2), is("baz"));
+  }
+
+  @Test
   public void testSetNullSiteUri() {
     library.setSiteUri(null);
     assertNull(library.getSiteUri());

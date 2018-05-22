@@ -16,7 +16,9 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -159,10 +161,18 @@ public final class Library {
   }
 
   /**
-   * @return the collection to which this library belongs
+   * @return the first collection to which this library belongs
    */
-  public String getGroup() {
-    return group;
+  @VisibleForTesting
+  String getGroup() {
+    return getGroups().get(0);
+  }
+
+  /**
+   * @return the collections to which this library belongs
+   */
+  List<String> getGroups() {
+    return Splitter.on(',').omitEmptyStrings().trimResults().splitToList(group);
   }
 
   public String getTransport() {

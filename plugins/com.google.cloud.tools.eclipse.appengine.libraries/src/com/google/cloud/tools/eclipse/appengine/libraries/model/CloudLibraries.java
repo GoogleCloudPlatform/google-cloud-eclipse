@@ -70,7 +70,8 @@ public class CloudLibraries {
   public static List<Library> getLibraries(String group) {
     List<Library> result = new ArrayList<>();
     for (Library library : libraries.values()) {
-      if (library.getGroup().equals(group)) {
+      List<String> groups = library.getGroups();
+      if (groups.contains(group)) {
         result.add(library);
       }
     }
