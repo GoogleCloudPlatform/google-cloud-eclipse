@@ -93,7 +93,7 @@ public class LibraryTest {
   @Test
   public void testSetGroup() {
     library.setGroup("One Platform");
-    assertThat(library.getGroup(), is("One Platform"));
+    assertThat(library.getGroups().get(0), is("One Platform"));
   }
 
   @Test

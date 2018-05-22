@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import java.net.URI;
@@ -158,14 +157,6 @@ public final class Library {
    */
   void setGroup(String group) {
     this.group = group;
-  }
-
-  /**
-   * @return the first collection to which this library belongs
-   */
-  @VisibleForTesting
-  String getGroup() {
-    return getGroups().get(0);
   }
 
   /**
