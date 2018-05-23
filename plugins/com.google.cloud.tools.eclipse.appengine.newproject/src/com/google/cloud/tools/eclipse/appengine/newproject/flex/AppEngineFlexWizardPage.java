@@ -38,7 +38,7 @@ public class AppEngineFlexWizardPage extends AppEngineWizardPage {
   }
   
   @Override
-  protected String getSupportedLibraries() {
+  protected String getSupportedLibrariesGroup() {
     return CloudLibraries.APP_ENGINE_FLEXIBLE_GROUP;
   }
 

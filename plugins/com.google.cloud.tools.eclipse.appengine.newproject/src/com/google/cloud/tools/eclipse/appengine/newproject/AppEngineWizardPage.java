@@ -77,7 +77,9 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     mavenCoordinatesUi.addGroupIdModifyListener(new AutoPackageNameSetterOnGroupIdChange());
 
     // Manage APIs
-    configureLibrariesSelectorGroup(container);
+    appEngineLibrariesSelectorGroup = new LibrarySelectorGroup(container,
+        getSupportedLibrariesGroup(),
+        Messages.getString("app.engine.libraries.group")); //$NON-NLS-1$
 
     revalidate();
     // Show enter project name on opening
@@ -88,12 +90,7 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     Dialog.applyDialogFont(container);
   }
 
-  private void configureLibrariesSelectorGroup(Composite container) {
-    appEngineLibrariesSelectorGroup = new LibrarySelectorGroup(container, getSupportedLibraries(),
-        Messages.getString("app.engine.libraries.group")); //$NON-NLS-1$
-  }
-
-  protected abstract String getSupportedLibraries();
+  protected abstract String getSupportedLibrariesGroup();
 
   private void createCustomFields(Composite container) {
     Composite composite = new Composite(container, SWT.NONE);

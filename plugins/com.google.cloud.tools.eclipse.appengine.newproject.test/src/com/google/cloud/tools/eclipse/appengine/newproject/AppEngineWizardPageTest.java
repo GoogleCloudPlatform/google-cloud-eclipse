@@ -44,7 +44,7 @@ public class AppEngineWizardPageTest {
       }
 
       @Override
-      protected String getSupportedLibraries() {
+      protected String getSupportedLibrariesGroup() {
         return "";
       }
     };

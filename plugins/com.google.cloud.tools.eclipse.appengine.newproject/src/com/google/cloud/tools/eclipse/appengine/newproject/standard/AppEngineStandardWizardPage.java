@@ -53,7 +53,7 @@ public class AppEngineStandardWizardPage extends AppEngineWizardPage {
   }
   
   @Override
-  protected String getSupportedLibraries() {
+  protected String getSupportedLibrariesGroup() {
     return CloudLibraries.APP_ENGINE_STANDARD_GROUP;
   }
 
