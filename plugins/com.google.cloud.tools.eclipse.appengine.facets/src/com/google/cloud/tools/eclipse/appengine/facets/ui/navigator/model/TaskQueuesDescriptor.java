@@ -17,14 +17,14 @@
 package com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.viewers.StyledString;
-import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 
 /**
  * Represents an {@code queue.xml} element.
  */
 public class TaskQueuesDescriptor extends AppEngineResourceElement {
-  public TaskQueuesDescriptor(IFacetedProject project, IFile file) {
+  public TaskQueuesDescriptor(IProject project, IFile file) {
     super(project, file);
   }
 

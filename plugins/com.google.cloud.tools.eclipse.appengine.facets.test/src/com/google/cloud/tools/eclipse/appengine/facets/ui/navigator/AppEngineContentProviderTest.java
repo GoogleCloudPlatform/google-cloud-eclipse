@@ -54,13 +54,14 @@ public class AppEngineContentProviderTest {
 
   @Rule
   public TestProjectCreator projectCreator =
-      new TestProjectCreator()
-          .withFacets(AppEngineStandardFacet.JRE7, WebFacetUtils.WEB_25, JavaFacet.VERSION_1_7);
+      new TestProjectCreator().withFacets(JavaFacet.VERSION_1_7);
 
   private final AppEngineContentProvider fixture = new AppEngineContentProvider();
 
   @Test
   public void testGetChildren_AppEngineStandardProject() {
+    projectCreator.withFacets(AppEngineStandardFacet.JRE7, WebFacetUtils.WEB_25);
+
     createAppEngineWebXml(null);
     Object[] children = fixture.getChildren(projectCreator.getFacetedProject());
     assertNotNull(children);
@@ -77,7 +78,7 @@ public class AppEngineContentProviderTest {
       descriptor = AppEngineDescriptor.parse(contents);
     }
     AppEngineWebDescriptor webDescriptor =
-        new AppEngineWebDescriptor(projectCreator.getFacetedProject(), appEngineWebXml, descriptor);
+        new AppEngineWebDescriptor(projectCreator.getProject(), appEngineWebXml, descriptor);
 
     Object[] children = fixture.getChildren(webDescriptor);
     assertNotNull(children);
@@ -94,7 +95,7 @@ public class AppEngineContentProviderTest {
       descriptor = AppEngineDescriptor.parse(contents);
     }
     AppEngineWebDescriptor webDescriptor =
-        new AppEngineWebDescriptor(projectCreator.getFacetedProject(), appEngineWebXml, descriptor);
+        new AppEngineWebDescriptor(projectCreator.getProject(), appEngineWebXml, descriptor);
 
     Object[] children = fixture.getChildren(webDescriptor);
     assertNotNull(children);
@@ -111,7 +112,7 @@ public class AppEngineContentProviderTest {
       descriptor = AppEngineDescriptor.parse(contents);
     }
     AppEngineWebDescriptor webDescriptor =
-        new AppEngineWebDescriptor(projectCreator.getFacetedProject(), appEngineWebXml, descriptor);
+        new AppEngineWebDescriptor(projectCreator.getProject(), appEngineWebXml, descriptor);
 
     Object[] children = fixture.getChildren(webDescriptor);
     assertNotNull(children);
@@ -133,7 +134,7 @@ public class AppEngineContentProviderTest {
       descriptor = AppEngineDescriptor.parse(contents);
     }
     AppEngineWebDescriptor webDescriptor =
-        new AppEngineWebDescriptor(projectCreator.getFacetedProject(), appEngineWebXml, descriptor);
+        new AppEngineWebDescriptor(projectCreator.getProject(), appEngineWebXml, descriptor);
 
     Object[] children = fixture.getChildren(webDescriptor);
     assertNotNull(children);
@@ -155,7 +156,7 @@ public class AppEngineContentProviderTest {
       descriptor = AppEngineDescriptor.parse(contents);
     }
     AppEngineWebDescriptor webDescriptor =
-        new AppEngineWebDescriptor(projectCreator.getFacetedProject(), appEngineWebXml, descriptor);
+        new AppEngineWebDescriptor(projectCreator.getProject(), appEngineWebXml, descriptor);
 
     Object[] children = fixture.getChildren(webDescriptor);
     assertNotNull(children);
@@ -177,7 +178,7 @@ public class AppEngineContentProviderTest {
       descriptor = AppEngineDescriptor.parse(contents);
     }
     AppEngineWebDescriptor webDescriptor =
-        new AppEngineWebDescriptor(projectCreator.getFacetedProject(), appEngineWebXml, descriptor);
+        new AppEngineWebDescriptor(projectCreator.getProject(), appEngineWebXml, descriptor);
 
     Object[] children = fixture.getChildren(webDescriptor);
     assertNotNull(children);
@@ -199,7 +200,7 @@ public class AppEngineContentProviderTest {
       descriptor = AppEngineDescriptor.parse(contents);
     }
     AppEngineWebDescriptor webDescriptor =
-        new AppEngineWebDescriptor(projectCreator.getFacetedProject(), appEngineWebXml, descriptor);
+        new AppEngineWebDescriptor(projectCreator.getProject(), appEngineWebXml, descriptor);
 
     Object[] children = fixture.getChildren(webDescriptor);
     assertNotNull(children);

@@ -32,7 +32,6 @@ import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.TaskQu
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.resource.ResourceManager;
-import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.junit.Test;
 
 public class AppEngineLabelProviderTest {
@@ -149,8 +148,7 @@ public class AppEngineLabelProviderTest {
   public void testDatastoreIndexesDescriptor() {
     IFile file = mock(IFile.class);
     when(file.getName()).thenReturn("datastore-indexes.xml");
-    DatastoreIndexesDescriptor element =
-        new DatastoreIndexesDescriptor(mock(IFacetedProject.class), file);
+    DatastoreIndexesDescriptor element = new DatastoreIndexesDescriptor(mock(IProject.class), file);
     assertEquals("Datastore Indexes", fixture.getText(element));
   }
 
@@ -158,8 +156,7 @@ public class AppEngineLabelProviderTest {
   public void testDenialOfServiceDescriptor() {
     IFile file = mock(IFile.class);
     when(file.getName()).thenReturn("dos.xml");
-    DenialOfServiceDescriptor element =
-        new DenialOfServiceDescriptor(mock(IFacetedProject.class), file);
+    DenialOfServiceDescriptor element = new DenialOfServiceDescriptor(mock(IProject.class), file);
     assertEquals("Denial of Service Protection", fixture.getText(element));
   }
 
@@ -167,8 +164,7 @@ public class AppEngineLabelProviderTest {
   public void testDispatchRoutingDescriptor() {
     IFile file = mock(IFile.class);
     when(file.getName()).thenReturn("dispatch.xml");
-    DispatchRoutingDescriptor element =
-        new DispatchRoutingDescriptor(mock(IFacetedProject.class), file);
+    DispatchRoutingDescriptor element = new DispatchRoutingDescriptor(mock(IProject.class), file);
     assertEquals("Dispatch Routing Rules", fixture.getText(element));
   }
 
@@ -176,7 +172,7 @@ public class AppEngineLabelProviderTest {
   public void testTaskQueuesDescriptor() {
     IFile file = mock(IFile.class);
     when(file.getName()).thenReturn("queue.xml");
-    TaskQueuesDescriptor element = new TaskQueuesDescriptor(mock(IFacetedProject.class), file);
+    TaskQueuesDescriptor element = new TaskQueuesDescriptor(mock(IProject.class), file);
     assertEquals("Task Queue Definitions", fixture.getText(element));
   }
 }

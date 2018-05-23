@@ -17,14 +17,14 @@
 package com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.viewers.StyledString;
-import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 
 /**
  * Represents the {@code cron.xml}.
  */
 public class CronDescriptor extends AppEngineResourceElement {
-  public CronDescriptor(IFacetedProject project, IFile file) {
+  public CronDescriptor(IProject project, IFile file) {
     super(project, file);
   }
 

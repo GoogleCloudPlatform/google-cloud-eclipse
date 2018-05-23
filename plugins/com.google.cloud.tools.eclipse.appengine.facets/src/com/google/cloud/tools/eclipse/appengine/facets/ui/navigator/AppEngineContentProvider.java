@@ -80,8 +80,8 @@ public class AppEngineContentProvider implements ITreeContentProvider {
         logger.log(Level.WARNING, "Unable to parse " + path, ex);
       }
     }
-    IFacetedProject project = getProject(parentElement);
-    if (project != null && AppEngineStandardFacet.hasFacet(project)) {
+    IProject project = getProject(parentElement);
+    if (project != null && isStandard(project)) {
       IFile appEngineWebDescriptorFile =
           WebProjectUtil.findInWebInf(project.getProject(), new Path("appengine-web.xml"));
       if (appEngineWebDescriptorFile != null && appEngineWebDescriptorFile.exists()) {
@@ -100,7 +100,7 @@ public class AppEngineContentProvider implements ITreeContentProvider {
   }
 
   /** Add a {@code cron.xml} element if found */
-  private void addCron(IFacetedProject project, List<Object> contents) {
+  private void addCron(IProject project, List<Object> contents) {
     IFile cronXml = WebProjectUtil.findInWebInf(project.getProject(), new Path("cron.xml"));
     if (cronXml != null && cronXml.exists()) {
       contents.add(new CronDescriptor(project, cronXml));
@@ -108,7 +108,7 @@ public class AppEngineContentProvider implements ITreeContentProvider {
   }
 
   /** Add a {@code datastore-indexes.xml} element if found */
-  private void addDatastoreIndexes(IFacetedProject project, List<Object> contents) {
+  private void addDatastoreIndexes(IProject project, List<Object> contents) {
     IFile datastoreIndexes =
         WebProjectUtil.findInWebInf(project.getProject(), new Path("datastore-indexes.xml"));
     if (datastoreIndexes != null && datastoreIndexes.exists()) {
@@ -117,7 +117,7 @@ public class AppEngineContentProvider implements ITreeContentProvider {
   }
 
   /** Add a {@code dispatch.xml} element if found. */
-  private void addDispatch(IFacetedProject project, List<Object> contents) {
+  private void addDispatch(IProject project, List<Object> contents) {
     IFile dispatchXml = WebProjectUtil.findInWebInf(project.getProject(), new Path("dispatch.xml"));
     if (dispatchXml != null && dispatchXml.exists()) {
       contents.add(new DispatchRoutingDescriptor(project, dispatchXml));
@@ -125,7 +125,7 @@ public class AppEngineContentProvider implements ITreeContentProvider {
   }
 
   /** Add a {@code dos.xml} element if found. */
-  private void addDenialOfService(IFacetedProject project, List<Object> contents) {
+  private void addDenialOfService(IProject project, List<Object> contents) {
     IFile dosXml = WebProjectUtil.findInWebInf(project.getProject(), new Path("dos.xml"));
     if (dosXml != null && dosXml.exists()) {
       contents.add(new DenialOfServiceDescriptor(project, dosXml));
@@ -133,7 +133,7 @@ public class AppEngineContentProvider implements ITreeContentProvider {
   }
 
   /** Add a {@code queue.xml} element if found */
-  private void addTaskQueues(IFacetedProject project, List<Object> contents) {
+  private void addTaskQueues(IProject project, List<Object> contents) {
     IFile queueXml = WebProjectUtil.findInWebInf(project.getProject(), new Path("queue.xml"));
     if (queueXml != null && queueXml.exists()) {
       contents.add(new TaskQueuesDescriptor(project, queueXml));
@@ -148,32 +148,28 @@ public class AppEngineContentProvider implements ITreeContentProvider {
   /** Return {@code true} if the project is an App Engine Standard project. */
   static boolean isStandard(IProject project) {
     Preconditions.checkNotNull(project);
-    IFacetedProject facetedProject = AppEngineContentProvider.getProject(project);
-    return facetedProject != null && AppEngineStandardFacet.hasFacet(facetedProject);
+    try {
+      IFacetedProject facetedProject = ProjectFacetsManager.create(project);
+      return facetedProject != null && AppEngineStandardFacet.hasFacet(facetedProject);
+    } catch (CoreException ex) {
+      logger.log(Level.INFO, "Project is not faceted", ex);
+      return false;
+    }
   }
 
   /** Try to get a project from the given element, return {@code null} otherwise. */
-  static IFacetedProject getProject(Object inputElement) {
-    try {
-      if (inputElement instanceof IFacetedProject) {
-        return (IFacetedProject) inputElement;
-      } else if (inputElement instanceof IProject) {
-        return ProjectFacetsManager.create((IProject) inputElement);
-      } else if (inputElement instanceof IResource) {
-        return ProjectFacetsManager.create(((IResource) inputElement).getProject());
-      } else if (inputElement instanceof IAdaptable) {
-        IFacetedProject facetedProject =
-            ((IAdaptable) inputElement).getAdapter(IFacetedProject.class);
-        if (facetedProject != null) {
-          return facetedProject;
-        }
-        IProject project = ((IAdaptable) inputElement).getAdapter(IProject.class);
-        if (project != null) {
-          return ProjectFacetsManager.create(project);
-        }
+  private static IProject getProject(Object inputElement) {
+    if (inputElement instanceof IFacetedProject) {
+      return ((IFacetedProject) inputElement).getProject();
+    } else if (inputElement instanceof IProject) {
+      return (IProject) inputElement;
+    } else if (inputElement instanceof IResource) {
+      return ((IResource) inputElement).getProject();
+    } else if (inputElement instanceof IAdaptable) {
+      IProject project = ((IAdaptable) inputElement).getAdapter(IProject.class);
+      if (project != null) {
+        return project;
       }
-    } catch (CoreException ex) {
-      logger.log(Level.INFO, "Unable to obtain project", ex);
     }
     return null;
   }
