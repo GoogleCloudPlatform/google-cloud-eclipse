@@ -10,9 +10,7 @@ Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.ui;bundle-version="3.107.0",
  com.google.cloud.tools.appengine;bundle-version="0.6.0",
- org.eclipse.equinox.preferences;bundle-version="3.5.300",
  org.eclipse.equinox.common;bundle-version="3.7.0",
- org.eclipse.e4.core.contexts;bundle-version="1.4.0",
  com.google.cloud.tools.eclipse.sdk,
  com.google.cloud.tools.eclipse.preferences
 Import-Package: com.google.cloud.tools.eclipse.ui.util,
@@ -20,8 +18,5 @@ Import-Package: com.google.cloud.tools.eclipse.ui.util,
  com.google.common.annotations;version="[21.0.0,22.0.0)",
  com.google.common.base;version="[21.0.0,22.0.0)",
  org.eclipse.core.runtime.jobs,
- org.eclipse.mylyn.commons.ui.dialogs,
- org.eclipse.osgi.util;version="1.1.0",
- org.eclipse.ui.console,
- org.osgi.framework;version="1.8.0"
+ org.eclipse.mylyn.commons.ui.dialogs
 Export-Package: com.google.cloud.tools.eclipse.sdk.ui.preferences

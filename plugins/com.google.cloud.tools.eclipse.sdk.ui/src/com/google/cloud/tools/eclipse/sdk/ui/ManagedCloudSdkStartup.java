@@ -72,7 +72,7 @@ public class ManagedCloudSdkStartup implements IStartup {
       return;
     }
 
-    Job checkInstallationJob = new Job("Check Google Cloud SDK") {
+    Job checkInstallationJob = new Job(Messages.getString("CheckUpToDateJobTitle")) { //$NON-NLS-1$
       @Override
       protected IStatus run(IProgressMonitor monitor) {
         try {
@@ -80,12 +80,12 @@ public class ManagedCloudSdkStartup implements IStartup {
           ManagedCloudSdk installer = ManagedCloudSdk.newManagedSdk();
           checkInstallation(sdkManager, installer, monitor);
         } catch (UnsupportedOsException ex) {
-          logger.log(Level.FINE, "Unable to check Cloud SDK installation", ex);
+          logger.log(Level.FINE, "Unable to check Cloud SDK installation", ex); //$NON-NLS-1$
         } catch (ManagedSdkVerificationException ex) {
-          logger.log(Level.SEVERE, "Unable to check Cloud SDK installation. Possible causes include"
-              + " network connection problem or corrupt Cloud SDK installation.", ex);
+          logger.log(Level.SEVERE, "Unable to check Cloud SDK installation. Possible causes include" //$NON-NLS-1$
+              + " network connection problem or corrupt Cloud SDK installation.", ex); //$NON-NLS-1$
         } catch (ManagedSdkVersionMismatchException ex) {
-          throw new IllegalStateException("This is never thrown because we always use LATEST.", ex);
+          throw new IllegalStateException("This is never thrown because we always use LATEST.", ex); //$NON-NLS-1$
         }
         return Status.OK_STATUS;
       }
@@ -94,7 +94,7 @@ public class ManagedCloudSdkStartup implements IStartup {
     // Use a WorkbenchJob to trigger the check to ensure we start after the workbench window has
     // appeared, but perform the actual check within a normal Job so that we don't monopolize the
     // display thread.
-    Job triggerInstallationJob = new WorkbenchJob("Check Google Cloud SDK") {
+    Job triggerInstallationJob = new WorkbenchJob(Messages.getString("CheckUpToDateJobTitle")) { //$NON-NLS-1$
       @Override
       public IStatus runInUIThread(IProgressMonitor monitor) {
         checkInstallationJob.setSystem(true);
