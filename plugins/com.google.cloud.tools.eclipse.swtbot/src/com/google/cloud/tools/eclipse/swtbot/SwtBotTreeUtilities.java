@@ -37,10 +37,10 @@ public class SwtBotTreeUtilities {
 
   /**
    * Wait until the given tree has items, and return the first item.
-   * 
+   *
    * @throws TimeoutException if no items appear within the default timeout
    */
-  public static SWTBotTreeItem waitUntilTreeHasItems(SWTWorkbenchBot bot, final SWTBotTree tree) {
+  public static SWTBotTreeItem waitUntilTreeHasItems(SWTWorkbenchBot bot, SWTBotTree tree) {
     bot.waitUntil(new DefaultCondition() {
       @Override
       public String getFailureMessage() {
@@ -53,6 +53,27 @@ public class SwtBotTreeUtilities {
       }
     });
     return tree.getAllItems()[0];
+  }
+
+  /**
+   * Wait until the given tree item has items, and return the first item.
+   *
+   * @throws TimeoutException if no items appear within the default timeout
+   */
+  public static SWTBotTreeItem waitUntilTreeHasItems(SWTWorkbenchBot bot, SWTBotTreeItem treeItem) {
+    bot.waitUntil(
+        new DefaultCondition() {
+          @Override
+          public String getFailureMessage() {
+            return "Tree items never appeared";
+          }
+
+          @Override
+          public boolean test() throws Exception {
+            return treeItem.getItems().length > 0;
+          }
+        });
+    return treeItem.getItems()[0];
   }
 
   /**

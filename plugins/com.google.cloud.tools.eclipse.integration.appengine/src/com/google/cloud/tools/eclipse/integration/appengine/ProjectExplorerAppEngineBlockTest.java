@@ -57,6 +57,7 @@ public class ProjectExplorerAppEngineBlockTest extends BaseProjectTest {
     assertNotNull(selected);
     selected.expand();
 
+    SwtBotTreeUtilities.waitUntilTreeHasItems(bot, selected);
     SWTBotTreeItem appEngineNode = selected.getNode(0);
     SwtBotTreeUtilities.waitUntilTreeTextMatches(
         bot, appEngineNode, startsWith("App Engine [standard: java8]"));
@@ -69,6 +70,7 @@ public class ProjectExplorerAppEngineBlockTest extends BaseProjectTest {
     SwtBotTreeUtilities.waitUntilTreeTextMatches(
         bot, deploymentDescriptorNode, startsWith("Deployment Descriptor:"));
     deploymentDescriptorNode.expand();
+    SwtBotTreeUtilities.waitUntilTreeHasItems(bot, deploymentDescriptorNode);
     SWTBotTreeItem firstNode = deploymentDescriptorNode.getNode(0);
     SwtBotTreeUtilities.waitUntilTreeTextMatches(bot, firstNode, not(startsWith("App Engine")));
   }
