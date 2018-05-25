@@ -23,7 +23,7 @@ import java.util.EnumSet;
  */
 public enum AppEngineRuntime {
   STANDARD_JAVA_7(Messages.getString("appengine.runtimes.java7"), null), // $NON-NLS-1$
-  STANDARD_JAVA_8(Messages.getString("appengine.runtimes.java8"), "java8"); // $NON-NLS-1$$NON-NLS-2$
+  STANDARD_JAVA_8(Messages.getString("appengine.runtimes.java8"), "java8"); // $NON-NLS-1$ //$NON-NLS-2$
 
   public static final EnumSet<AppEngineRuntime> STANDARD_RUNTIMES =
       EnumSet.of(STANDARD_JAVA_7, STANDARD_JAVA_8);

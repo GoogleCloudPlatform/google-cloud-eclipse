@@ -30,8 +30,7 @@ import org.eclipse.jface.viewers.StyledString;
 public class AppEngineWebDescriptor extends AppEngineResourceElement {
   private final AppEngineDescriptor descriptor;
 
-  public AppEngineWebDescriptor(IProject project, IFile file,
-      AppEngineDescriptor descriptor) {
+  public AppEngineWebDescriptor(IProject project, IFile file, AppEngineDescriptor descriptor) {
     super(project, file);
     this.descriptor = Preconditions.checkNotNull(descriptor);
   }

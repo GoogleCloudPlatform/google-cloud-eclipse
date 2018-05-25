@@ -12,6 +12,16 @@
     <servlet-name>HelloAppEngine</servlet-name>
     <url-pattern>/hello</url-pattern>
   </servlet-mapping>
+<#if objectifyAdded??>
+  <filter>
+    <filter-name>ObjectifyFilter</filter-name>
+    <filter-class>com.googlecode.objectify.ObjectifyFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>ObjectifyFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+</#if>
 </#if>
   <welcome-file-list>
     <welcome-file>index.html</welcome-file>
