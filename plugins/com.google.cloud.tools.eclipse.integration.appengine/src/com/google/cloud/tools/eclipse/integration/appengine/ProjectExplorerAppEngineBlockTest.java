@@ -38,7 +38,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 /** Tests the App Engine content block for the Project Explorer. */
-public class AppEngineContentBlockTest extends BaseProjectTest {
+public class ProjectExplorerAppEngineBlockTest extends BaseProjectTest {
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
   @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
