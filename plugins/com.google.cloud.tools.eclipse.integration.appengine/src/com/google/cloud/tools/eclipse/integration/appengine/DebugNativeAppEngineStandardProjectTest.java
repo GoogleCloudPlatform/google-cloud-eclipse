@@ -16,8 +16,8 @@
 
 package com.google.cloud.tools.eclipse.integration.appengine;
 
-import static org.hamcrest.Matchers.*;
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -40,7 +40,6 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
-import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotStyledText;
@@ -51,14 +50,12 @@ import org.hamcrest.Matchers;
 import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.osgi.service.prefs.Preferences;
 
 /**
  * Create a native App Engine Standard project, launch in debug mode, verify working, and then
  * terminate.
  */
-@RunWith(SWTBotJunit4ClassRunner.class)
 public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
 
   private static final long TERMINATE_SERVER_TIMEOUT = 10000L;
