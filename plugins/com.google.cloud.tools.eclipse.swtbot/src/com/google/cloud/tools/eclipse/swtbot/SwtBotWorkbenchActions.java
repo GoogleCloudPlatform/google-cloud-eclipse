@@ -165,6 +165,7 @@ public final class SwtBotWorkbenchActions {
           try {
             activeWindow.getActivePage().showView(viewId);
           } catch (PartInitException ex) {
+            // viewById() will fail in calling thread
             logger.log(Level.SEVERE, "Unable to open view " + viewId, ex);
           }
         });
