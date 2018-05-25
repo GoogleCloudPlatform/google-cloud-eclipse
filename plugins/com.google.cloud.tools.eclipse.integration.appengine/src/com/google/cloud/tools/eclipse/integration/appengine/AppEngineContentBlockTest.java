@@ -19,12 +19,12 @@ package com.google.cloud.tools.eclipse.integration.appengine;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
+import com.google.cloud.tools.eclipse.swtbot.SwtBotTreeUtilities;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotWorkbenchActions;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import org.eclipse.core.resources.IProject;
@@ -58,16 +58,18 @@ public class AppEngineContentBlockTest extends BaseProjectTest {
     selected.expand();
 
     SWTBotTreeItem appEngineNode = selected.getNode(0);
-    assertEquals(appEngineNode.getText(), "App Engine [standard: java8]");
+    SwtBotTreeUtilities.waitUntilTreeTextMatches(
+        bot, appEngineNode, startsWith("App Engine [standard: java8]"));
     appEngineNode.expand();
     // no children since we have no additional config files
     assertThat(appEngineNode.getNodes(), hasSize(0));
 
     // ensure App Engine content block does not appear in Deployment Descriptor
     SWTBotTreeItem deploymentDescriptorNode = selected.getNode(1);
-    assertThat(deploymentDescriptorNode.getText(), startsWith("Deployment Descriptor:"));
+    SwtBotTreeUtilities.waitUntilTreeTextMatches(
+        bot, deploymentDescriptorNode, startsWith("Deployment Descriptor:"));
     deploymentDescriptorNode.expand();
     SWTBotTreeItem firstNode = deploymentDescriptorNode.getNode(0);
-    assertThat(firstNode.getText(), not(startsWith("App Engine")));
+    SwtBotTreeUtilities.waitUntilTreeTextMatches(bot, firstNode, not(startsWith("App Engine")));
   }
 }

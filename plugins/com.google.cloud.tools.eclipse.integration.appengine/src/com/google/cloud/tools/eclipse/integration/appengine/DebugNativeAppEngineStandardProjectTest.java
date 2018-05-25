@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.integration.appengine;
 
+import static org.hamcrest.Matchers.*;
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -149,8 +150,8 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
       }
     }
     assertNotNull(stopServerButton);
-    SwtBotTreeUtilities.waitUntilTreeContainsText(bot, allItems[0], "<terminated>",
-                                                  TERMINATE_SERVER_TIMEOUT);
+    SwtBotTreeUtilities.waitUntilTreeTextMatches(
+        bot, allItems[0], containsString("<terminated>"), TERMINATE_SERVER_TIMEOUT);
     assertNoService(new URL("http://localhost:8080/hello"));
     assertTrue("App Engine console should mark as stopped",
         consoleView.getViewReference().getContentDescription().startsWith("<stopped>"));

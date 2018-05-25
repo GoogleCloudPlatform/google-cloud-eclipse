@@ -25,6 +25,10 @@ import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.eclipse.swtbot.swt.finder.widgets.TimeoutException;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
+import org.hamcrest.StringDescription;
 
 /**
  * Utilities for manipulating trees.
@@ -71,32 +75,42 @@ public class SwtBotTreeUtilities {
   }
 
   /**
-   * Wait until the tree item contains the given text with the
-   * timeout {@link SWTBotPreferences#TIMEOUT}.
+   * Wait until the tree item contains the given text with the timeout {@link
+   * SWTBotPreferences#TIMEOUT}.
    */
-  public static void waitUntilTreeContainsText(SWTWorkbenchBot bot, final SWTBotTreeItem treeItem,
-      final String text) {
-    waitUntilTreeContainsText(bot, treeItem, text, SWTBotPreferences.TIMEOUT);
+  public static void waitUntilTreeContainsText(
+      SWTWorkbenchBot bot, SWTBotTreeItem treeItem, String text) {
+    waitUntilTreeTextMatches(bot, treeItem, Matchers.containsString(text));
   }
 
-  /**
-   * Wait until the tree item contains the given text with the timeout specified.
-   */
-  public static void waitUntilTreeContainsText(SWTWorkbenchBot bot,
-                                               final SWTBotTreeItem treeItem,
-                                               final String text,
-                                               long timeout) {
-    bot.waitUntil(new DefaultCondition() {
-      @Override
-      public boolean test() throws Exception {
-        return treeItem.getText().contains(text);
-      }
+  /** Wait until the tree item text matches with the timeout {@link SWTBotPreferences#TIMEOUT}. */
+  public static void waitUntilTreeTextMatches(
+      SWTWorkbenchBot bot, SWTBotTreeItem treeItem, Matcher<String> textMatcher) {
+    waitUntilTreeTextMatches(bot, treeItem, textMatcher, SWTBotPreferences.TIMEOUT);
+  }
 
-      @Override
-      public String getFailureMessage() {
-        return "Text never appeared";
-      }
-    }, timeout);
+  /** Wait until the tree item contains the given text with the timeout specified. */
+  public static void waitUntilTreeTextMatches(
+      SWTWorkbenchBot bot,
+      final SWTBotTreeItem treeItem,
+      final Matcher<String> textMatcher,
+      long timeout) {
+    bot.waitUntil(
+        new DefaultCondition() {
+          @Override
+          public boolean test() throws Exception {
+            return textMatcher.matches(treeItem.getText());
+          }
+
+          @Override
+          public String getFailureMessage() {
+            Description description = new StringDescription();
+            description.appendText("Text never matched: ");
+            textMatcher.describeMismatch(treeItem.getText(), description);
+            return description.toString();
+          }
+        },
+        timeout);
   }
 
   /**
