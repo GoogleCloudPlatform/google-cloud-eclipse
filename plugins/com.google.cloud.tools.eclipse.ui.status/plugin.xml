@@ -28,6 +28,13 @@
       </command>
    </extension>
    <extension
+         point="org.eclipse.ui.commandImages">
+      <image
+            commandId="com.google.cloud.tools.eclipse.ui.status.showGcpStatus"
+            icon="platform:/plugin/com.google.cloud.tools.eclipse.ui/icons/obj16/gcp.png">
+      </image>
+   </extension>
+   <extension
          point="org.eclipse.ui.startup">
       <startup
             class="com.google.cloud.tools.eclipse.ui.status.WorkbenchStartup">
