@@ -27,6 +27,7 @@ import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotTreeUtilities;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotWorkbenchActions;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
