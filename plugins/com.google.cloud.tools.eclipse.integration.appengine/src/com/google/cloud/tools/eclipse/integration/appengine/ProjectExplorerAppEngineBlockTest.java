@@ -43,7 +43,7 @@ public class ProjectExplorerAppEngineBlockTest extends BaseProjectTest {
 
   @Test
   public void testAppEngineStandardJava8() {
-    project =
+    IProject project =
         projectCreator
             .withFacets(
                 AppEngineStandardFacet.FACET.getVersion("JRE8"),
