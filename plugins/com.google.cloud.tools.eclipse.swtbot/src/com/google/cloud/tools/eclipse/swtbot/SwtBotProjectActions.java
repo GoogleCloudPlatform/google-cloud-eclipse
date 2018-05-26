@@ -227,7 +227,7 @@ public final class SwtBotProjectActions {
     // Select the root of the project tree in the explorer view
     Widget explorerWidget = explorer.getWidget();
     Tree explorerTree = bot.widget(widgetOfType(Tree.class), explorerWidget);
-    return new SWTBotTree(explorerTree).getTreeItem(projectName).select();
+    return SwtBotTreeUtilities.select(bot, new SWTBotTree(explorerTree), projectName);
   }
 
   /**

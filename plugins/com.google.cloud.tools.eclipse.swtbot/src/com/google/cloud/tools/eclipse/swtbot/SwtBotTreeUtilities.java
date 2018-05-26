@@ -70,7 +70,15 @@ public class SwtBotTreeUtilities {
 
           @Override
           public boolean test() throws Exception {
-            return treeItem.getItems().length > 0;
+            SWTBotTreeItem[] children = treeItem.getItems();
+            if (children.length == 1 && "".equals(children[0].getText())) {
+              // Work around odd bug seen only on Windows and Linux.
+              // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2569
+              treeItem.collapse();
+              treeItem.expand();
+              children = treeItem.getItems();
+            }
+            return children.length > 0;
           }
         });
     return treeItem.getItems()[0];
@@ -147,18 +155,19 @@ public class SwtBotTreeUtilities {
    *
    * except that it will collapse and re-expand intermediate nodes on timeout.
    *
+   * @return the tree item
+   * @throws WidgetNotFoundException if the tree item could not be found
    * @see <a href="https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2569">issue
    *     2569</a>
    */
-  public static void select(SWTWorkbenchBot bot, SWTBotTree tree, String... nodeNames) {
+  public static SWTBotTreeItem select(SWTWorkbenchBot bot, SWTBotTree tree, String... nodeNames) {
     Preconditions.checkArgument(nodeNames.length > 0, "no children to navigate");
     int leafIndex = nodeNames.length - 1;
     waitUntilTreeHasItems(bot, bot.tree());
 
     // special case: no intermediate nodes
     if (nodeNames.length == 1) {
-      tree.getTreeItem(nodeNames[leafIndex]).select(); // throws WNFE
-      return;
+      return tree.getTreeItem(nodeNames[leafIndex]).select(); // throws WNFE if not found
     }
 
     // try expanding the intermediate nodes at once and selecting the leaf node
@@ -166,8 +175,7 @@ public class SwtBotTreeUtilities {
       String[] intermediates = Arrays.copyOf(nodeNames, leafIndex);
       SWTBotTreeItem item = tree.expandNode(intermediates); // throws WNFE
       if (item != null) {
-        item.getNode(nodeNames[leafIndex]).select(); // throws WNFE
-        return; // success: leaf was found
+        return item.getNode(nodeNames[leafIndex]).select(); // throws WNFE if not found
       }
     } catch (WidgetNotFoundException ex) {
       // ignore: we now collapse and re-expand items
@@ -181,6 +189,6 @@ public class SwtBotTreeUtilities {
       item.collapseNode(nodeNames[i]); // throws WNFE
       item = item.expandNode(nodeNames[i]);
     }
-    item.getNode(nodeNames[leafIndex]).select(); // throws WNFE
+    return item.getNode(nodeNames[leafIndex]).select(); // throws WNFE
   }
 }
