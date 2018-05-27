@@ -292,8 +292,10 @@
      </detector>
   </extension>
   
-  <!-- cannot use com.google.cloud.tools.eclipse.appengine.onlyForStandardProjects for the trigger
-    https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/3089 -->
+  <!-- 
+    cannot use com.google.cloud.tools.eclipse.appengine.onlyForStandardProjects for the trigger
+    https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/3089
+  -->
   <extension
         point="org.eclipse.ui.navigator.navigatorContent">
      <navigatorContent
