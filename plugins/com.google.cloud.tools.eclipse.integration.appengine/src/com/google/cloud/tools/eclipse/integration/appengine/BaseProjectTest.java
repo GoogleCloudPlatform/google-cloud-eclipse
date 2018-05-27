@@ -37,7 +37,7 @@ import org.junit.runner.RunWith;
 
 /** Common infrastructure for workbench-based tests that create a single project. */
 @RunWith(SWTBotJunit4ClassRunner.class)
-public class BaseProjectTest {
+public abstract class BaseProjectTest {
   private static final Logger logger = Logger.getLogger(BaseProjectTest.class.getName());
 
   protected static SWTWorkbenchBot bot;
