@@ -54,7 +54,7 @@
         <and>
           <count value="1" />
           <iterate>
-            <reference definitionId="com.google.cloud.tools.eclipse.appengine.onlyForStandardProjects" />
+            <reference definitionId="com.google.cloud.tools.eclipse.appengine.isStandardProject" />
           </iterate>
         </and>
       </enabledWhen>
