@@ -163,7 +163,7 @@ public class SwtBotTreeUtilities {
   public static SWTBotTreeItem select(SWTWorkbenchBot bot, SWTBotTree tree, String... nodeNames) {
     Preconditions.checkArgument(nodeNames.length > 0, "no children to navigate");
     int leafIndex = nodeNames.length - 1;
-    waitUntilTreeHasItems(bot, bot.tree());
+    waitUntilTreeHasItems(bot, tree);
 
     // special case: no intermediate nodes
     if (nodeNames.length == 1) {
