@@ -20,11 +20,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.junit.BeforeClass;
-import org.junit.runner.RunWith;
 
-@RunWith(SWTBotJunit4ClassRunner.class)
 public class ProjectDependencyPublishTest extends ChildModuleWarPublishTest {
 
   @BeforeClass

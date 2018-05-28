@@ -20,11 +20,8 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.junit.BeforeClass;
-import org.junit.runner.RunWith;
 
-@RunWith(SWTBotJunit4ClassRunner.class)
 public class WebFragmentWarPublishTest extends ChildModuleWarPublishTest {
 
   @BeforeClass
