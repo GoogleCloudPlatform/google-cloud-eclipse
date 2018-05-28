@@ -37,7 +37,7 @@
    <bundle id="org.apache.commons.compress" version="0.0.0"/>
    <bundle id="jackson-core-asl" version="1.9.13"/>
    <bundle id="com.fasterxml.jackson.core.jackson-core" version="0.0.0"/>
-   <bundle id="org.yaml.snakeyaml" version="1.17"/>
+   <bundle id="org.yaml.snakeyaml" version="1.21"/>
    <bundle id="org.glassfish.javax.json" version="1.0.4"/>
    
    <!--
