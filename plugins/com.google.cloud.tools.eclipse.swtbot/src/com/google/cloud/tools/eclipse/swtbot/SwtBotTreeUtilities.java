@@ -36,7 +36,7 @@ import org.hamcrest.StringDescription;
 public class SwtBotTreeUtilities {
 
   /**
-   * Wait until the given tree has items, and return the first item.
+   * Wait until the given tree has items, then return the first item.
    *
    * @throws TimeoutException if no items appear within the default timeout
    */
