@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
+import org.eclipse.swtbot.eclipse.finder.matchers.WidgetMatcherFactory;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.finders.ContextMenuHelper;
@@ -32,6 +33,7 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
+import org.eclipse.ui.IPageLayout;
 
 /**
  * SWTBot utility methods that perform general workbench actions.
@@ -247,6 +249,18 @@ public final class SwtBotProjectActions {
       item = item.getNode(folder);
     }
     return item;
+  }
+
+  /** Collapse all projects shown in the Project Explorer. */
+  public static void collapseProjects(SWTWorkbenchBot bot) {
+    for (SWTBotView explorer :
+        bot.views(WidgetMatcherFactory.withPartId(IPageLayout.ID_PROJECT_EXPLORER))) {
+      Widget explorerWidget = explorer.getWidget();
+      Tree explorerTree = bot.widget(widgetOfType(Tree.class), explorerWidget);
+      for (SWTBotTreeItem item : new SWTBotTree(explorerTree).getAllItems()) {
+        item.collapse();
+      }
+    }
   }
 
   private SwtBotProjectActions() {}

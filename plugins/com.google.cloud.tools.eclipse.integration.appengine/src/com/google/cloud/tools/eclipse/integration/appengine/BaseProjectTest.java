@@ -59,8 +59,13 @@ public abstract class BaseProjectTest {
   @After
   public void tearDown() {
     if (project != null) {
+      // Collapse projects to avoid "No IModelProvider exists for project" errors
+      // https://bugs.eclipse.org/bugs/show_bug.cgi?id=511541
+      SwtBotProjectActions.collapseProjects(bot);
+
       // close editors, so no property changes are dispatched on delete
       bot.closeAllEditors();
+      
       // ensure there are no jobs
       SwtBotWorkbenchActions.waitForProjects(bot, project);
 
