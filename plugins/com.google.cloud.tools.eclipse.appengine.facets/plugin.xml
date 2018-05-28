@@ -208,7 +208,7 @@
   </extension>
 
   <extension point="org.eclipse.core.expressions.definitions">
-    <definition id="com.google.cloud.tools.eclipse.appengine.onlyForFlexWarProjects">
+    <definition id="com.google.cloud.tools.eclipse.appengine.isFlexWarProject">
       <adapt type="org.eclipse.core.resources.IProject">
         <test
             property="org.eclipse.wst.common.project.facet.core.projectFacet"
@@ -270,7 +270,7 @@
   </extension>
 
   <extension point="org.eclipse.core.expressions.definitions">
-    <definition id="com.google.cloud.tools.eclipse.appengine.onlyForFlexJarMavenProjects">
+    <definition id="com.google.cloud.tools.eclipse.appengine.isFlexJarMavenProject">
       <adapt type="org.eclipse.core.resources.IProject">
         <and>
           <test

@@ -50,8 +50,8 @@ public class PluginXmlTest extends BasePluginXmlTest {
     // each extension has a single definition
     String[] expectedDefinitionIds = {
       "com.google.cloud.tools.eclipse.appengine.isStandardProject",
-      "com.google.cloud.tools.eclipse.appengine.onlyForFlexWarProjects",
-      "com.google.cloud.tools.eclipse.appengine.onlyForFlexJarMavenProjects"
+      "com.google.cloud.tools.eclipse.appengine.isFlexWarProject",
+      "com.google.cloud.tools.eclipse.appengine.isFlexJarMavenProject"
     };
     for(int i = 0; i < extensions.getLength(); i++) {
       Assert.assertTrue(extensions.item(i) instanceof Element);
