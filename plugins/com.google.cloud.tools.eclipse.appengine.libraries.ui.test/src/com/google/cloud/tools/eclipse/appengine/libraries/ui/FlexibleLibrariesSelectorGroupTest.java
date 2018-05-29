@@ -51,7 +51,7 @@ public class FlexibleLibrariesSelectorGroupTest {
     librariesSelector = new LibrarySelectorGroup(
         shell, CloudLibraries.APP_ENGINE_FLEXIBLE_GROUP, "xxx"); //$NON-NLS-1$
     shell.open();
-    objectifyButton = getButton("objectify");
+    objectifyButton = getButton("objectify6");
   }
 
   @Test
@@ -65,12 +65,12 @@ public class FlexibleLibrariesSelectorGroupTest {
   }
 
   @Test
-  public void testSelectObjectifyDoesNotSelectAppEngineApiAsWell() {
+  public void testSelectObjectify() {
     objectifyButton.click();
     List<Library> selectedLibraries = getSelectedLibrariesSorted();
     assertNotNull(selectedLibraries);
     assertThat(selectedLibraries.size(), is(1));
-    assertThat(selectedLibraries.get(0).getId(), is("objectify"));
+    assertThat(selectedLibraries.get(0).getId(), is("objectify6"));
   }
 
   private SWTBotCheckBox getButton(String libraryId) {
