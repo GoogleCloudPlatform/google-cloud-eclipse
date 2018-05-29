@@ -56,6 +56,13 @@ public class FlexWarStagingDelegateTest {
     IStatus status = delegate.stage(stagingDirectory, safeWorkDirectory,
         null, null, new NullProgressMonitor());
 
+    // Diagnostic message: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/3107
+    if (!status.isOK()) {
+      System.out.println(status.getSeverity() + ": " + status.getMessage());
+      if (status.getException() != null) {
+        status.getException().printStackTrace(System.out);
+      }
+    }
     assertTrue(stagingDirectory.append("app-to-deploy.war").toFile().exists());
     assertTrue(stagingDirectory.append("app.yaml").toFile().exists());
     assertTrue(status.isOK());
