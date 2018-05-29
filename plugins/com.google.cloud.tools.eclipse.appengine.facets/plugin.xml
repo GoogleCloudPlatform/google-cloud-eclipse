@@ -293,7 +293,7 @@
   </extension>
   
   <!-- 
-    cannot use com.google.cloud.tools.eclipse.appengine.onlyForStandardProjects for the trigger
+    cannot use com.google.cloud.tools.eclipse.appengine.isStandardProject for the trigger
     https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/3089
   -->
   <extension
