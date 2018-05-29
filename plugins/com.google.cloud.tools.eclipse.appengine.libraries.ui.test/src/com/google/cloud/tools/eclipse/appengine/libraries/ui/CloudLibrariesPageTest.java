@@ -100,7 +100,7 @@ public class CloudLibrariesPageTest {
   }
 
   @Test
-  public void testAppEngineLibraries_foundOnAppEngineProject() {
+  public void testAppEngineLibraries_foundOnAppEngineStandardProject() {
     IJavaProject javaProject = plainJavaProjectCreator
         .withFacets(WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7).getJavaProject();
     page.initialize(javaProject, null);
@@ -140,7 +140,7 @@ public class CloudLibrariesPageTest {
 
     // check the page's selected libraries
     List<Library> returnedLibraries = page.getSelectedLibraries();
-    Assert.assertEquals(1, returnedLibraries.size());
+    Assert.assertEquals(2, returnedLibraries.size());
     assertThat(returnedLibraries, Matchers.hasItem(new LibraryMatcher("objectify")));
 
     // select GCS
@@ -153,7 +153,8 @@ public class CloudLibrariesPageTest {
         Matchers.hasItem(new LibraryMatcher("googlecloudstorage")));
 
     returnedLibraries = page.getSelectedLibraries();
-    Assert.assertEquals(2, returnedLibraries.size());
+    Assert.assertEquals(3, returnedLibraries.size());
+    assertThat(returnedLibraries, Matchers.hasItem(new LibraryMatcher("appengine-api")));
     assertThat(returnedLibraries, Matchers.hasItem(new LibraryMatcher("objectify")));
     assertThat(returnedLibraries, Matchers.hasItem(new LibraryMatcher("googlecloudstorage")));
 
