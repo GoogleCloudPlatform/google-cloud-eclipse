@@ -308,9 +308,6 @@
            name="%appengineNavigatorContentProvider"
            priority="high">
         <triggerPoints>
-          <reference
-                definitionId="com.google.cloud.tools.eclipse.appengine.isStandardProject">
-          </reference>
            <and>
               <instanceof
                     value="org.eclipse.core.resources.IProject">
