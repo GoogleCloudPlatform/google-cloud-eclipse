@@ -22,6 +22,8 @@ import static org.junit.Assert.assertTrue;
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexWarFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -56,16 +58,22 @@ public class FlexWarStagingDelegateTest {
     IStatus status = delegate.stage(stagingDirectory, safeWorkDirectory,
         null, null, new NullProgressMonitor());
 
-    // Diagnostic message: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/3107
-    if (!status.isOK()) {
-      System.out.println(status.getSeverity() + ": " + status.getMessage());
-      if (status.getException() != null) {
-        status.getException().printStackTrace(System.out);
-      }
-    }
+    assertTrue(getStatusAsString(status), status.isOK());
     assertTrue(stagingDirectory.append("app-to-deploy.war").toFile().exists());
     assertTrue(stagingDirectory.append("app.yaml").toFile().exists());
-    assertTrue(status.isOK());
+  }
+
+  private static String getStatusAsString(IStatus status) {
+    String stringStatus = status.getSeverity() + ": " + status.getMessage();
+    if (status.getException() != null) {
+      stringStatus += "\n==== start of IStatus exception stack trace ====\n";
+      StringWriter stringWriter = new StringWriter();
+      PrintWriter printWriter = new PrintWriter(stringWriter, true);
+      status.getException().printStackTrace(printWriter);
+      stringStatus += stringWriter.toString();
+      stringStatus += "==== end of IStatus exception stack trace ====";
+    }
+    return stringStatus;
   }
 
   @Test
