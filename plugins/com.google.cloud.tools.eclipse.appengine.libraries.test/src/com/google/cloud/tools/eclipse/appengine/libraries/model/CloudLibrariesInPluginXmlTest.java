@@ -60,7 +60,7 @@ public class CloudLibrariesInPluginXmlTest {
     Library appEngineLibrary = CloudLibraries.getLibrary(APP_ENGINE_API_LIBRARY_ID);
     assertThat(appEngineLibrary.getId(), is(APP_ENGINE_API_LIBRARY_ID));
     assertThat(appEngineLibrary.getName(), is("App Engine API"));
-    assertThat(appEngineLibrary.getGroup(), is("appengine"));
+    assertThat(appEngineLibrary.getGroups().get(0), is("appengine"));
     assertFalse(appEngineLibrary.getToolTip().isEmpty());
     assertThat(appEngineLibrary.getSiteUri(),
         is(new URI("https://cloud.google.com/appengine/docs/java/")));
@@ -104,7 +104,7 @@ public class CloudLibrariesInPluginXmlTest {
     Library endpointsLibrary = CloudLibraries.getLibrary(CLOUD_ENDPOINTS_LIBRARY_ID);
     assertThat(endpointsLibrary.getId(), is(CLOUD_ENDPOINTS_LIBRARY_ID));
     assertThat(endpointsLibrary.getName(), is("Google Cloud Endpoints"));
-    assertThat(endpointsLibrary.getGroup(), is("appengine"));
+    assertThat(endpointsLibrary.getGroups().get(0), is("appengine"));
     assertThat(endpointsLibrary.getSiteUri(), is(new URI(
         "https://cloud.google.com/endpoints/docs/frameworks/java/about-cloud-endpoints-frameworks")));
     assertTrue(endpointsLibrary.isExport());
@@ -122,7 +122,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(mavenCoordinates.getArtifactId(), is("endpoints-framework"));
     
     DefaultArtifactVersion actual = new DefaultArtifactVersion(mavenCoordinates.getVersion());
-    DefaultArtifactVersion expected = new DefaultArtifactVersion("2.0.13");
+    DefaultArtifactVersion expected = new DefaultArtifactVersion("2.0.14");
     assertTrue(actual.compareTo(expected) >= 0);
  
     assertThat(mavenCoordinates.getType(), is("jar"));
@@ -142,13 +142,13 @@ public class CloudLibrariesInPluginXmlTest {
     Library objectifyLibrary = CloudLibraries.getLibrary(OBJECTIFY_LIBRARY_ID);
     assertThat(objectifyLibrary.getId(), is(OBJECTIFY_LIBRARY_ID));
     assertThat(objectifyLibrary.getName(), is("Objectify"));
-    assertThat(objectifyLibrary.getGroup(), is("appengine"));
+    assertThat(objectifyLibrary.getGroups().get(0), is("appengine"));
     assertThat(objectifyLibrary.getSiteUri(),
         is(new URI("https://github.com/objectify/objectify/wiki")));
     assertTrue(objectifyLibrary.isExport());
 
     List<LibraryFile> allDependencies = objectifyLibrary.getAllDependencies();
-    assertTrue(allDependencies.size() > 2);
+    assertTrue(allDependencies.size() + " dependencies", allDependencies.size() > 2);
     
     LibraryFile objectifyLibraryFile = null;
     LibraryFile guavaLibraryFile = null;
@@ -169,7 +169,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(objectifyMavenCoordinates.getArtifactId(), is("objectify"));
     DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(
         objectifyMavenCoordinates.getVersion());
-    DefaultArtifactVersion expected = new DefaultArtifactVersion("5.1.22");
+    DefaultArtifactVersion expected = new DefaultArtifactVersion("6.0.0");
     assertTrue(artifactVersion.compareTo(expected) >= 0);
     assertThat(objectifyMavenCoordinates.getType(), is("jar"));
     assertNull(objectifyMavenCoordinates.getClassifier());
@@ -199,7 +199,7 @@ public class CloudLibrariesInPluginXmlTest {
     Library servletApiLibrary = CloudLibraries.getLibrary(SERVLET_API_LIBRARY_ID);
     assertThat(servletApiLibrary.getId(), is(SERVLET_API_LIBRARY_ID));
     assertThat(servletApiLibrary.getName(), is("Servlet API 2.5"));
-    assertThat(servletApiLibrary.getGroup(), is("servlet"));
+    assertThat(servletApiLibrary.getGroups().get(0), is("servlet"));
     assertThat(servletApiLibrary.getSiteUri(),
         is(new URI("http://www.oracle.com/technetwork/java/javaee/servlet/index.html")));
     assertFalse(servletApiLibrary.isExport());
@@ -229,7 +229,7 @@ public class CloudLibrariesInPluginXmlTest {
   public void testJspApiLibraryConfig() throws URISyntaxException {
     Library jspApiLibrary = CloudLibraries.getLibrary(JSP_API_LIBRARY_ID);
     assertThat(jspApiLibrary.getId(), is(JSP_API_LIBRARY_ID));
-    assertThat(jspApiLibrary.getGroup(), is("servlet"));
+    assertThat(jspApiLibrary.getGroups().get(0), is("servlet"));
     assertThat(jspApiLibrary.getName(), is("Java Server Pages API 2.1"));
     assertThat(jspApiLibrary.getSiteUri(),
         is(new URI("http://www.oracle.com/technetwork/java/javaee/jsp/index.html")));

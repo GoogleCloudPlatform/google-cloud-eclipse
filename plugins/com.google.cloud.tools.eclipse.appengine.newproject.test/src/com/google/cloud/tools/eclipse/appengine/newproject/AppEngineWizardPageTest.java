@@ -37,10 +37,15 @@ public class AppEngineWizardPageTest {
 
   @Before
   public void setUp() {
-    page = new AppEngineWizardPage(false /* no library adder UI */) {
+    page = new AppEngineWizardPage() {
       @Override
       public void setHelp(Composite container) {
         // Do nothing in tests.
+      }
+
+      @Override
+      protected String getSupportedLibrariesGroup() {
+        return "";
       }
     };
     page.createControl(shellResource.getShell());

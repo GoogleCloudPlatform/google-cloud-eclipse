@@ -36,4 +36,14 @@ public class AppEngineImagesTest {
     Assert.assertNotNull(AppEngineImages.appEngine(64));
   }
 
+  @Test
+  public void testAppEngine() {
+    Assert.assertNotNull(AppEngineImages.APPENGINE_IMAGE_DESCRIPTOR.getImageData());
+  }
+
+  @Test
+  public void testAppEngineGrey() {
+    Assert.assertNotNull(AppEngineImages.APPENGINE_GREY_IMAGE_DESCRIPTOR.getImageData());
+  }
+
 }

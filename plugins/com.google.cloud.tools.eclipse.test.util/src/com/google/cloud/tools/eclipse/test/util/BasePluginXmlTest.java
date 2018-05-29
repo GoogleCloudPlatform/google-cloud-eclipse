@@ -19,16 +19,26 @@ package com.google.cloud.tools.eclipse.test.util;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+import org.eclipse.core.expressions.Expression;
+import org.eclipse.core.expressions.ExpressionConverter;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.RegistryFactory;
@@ -58,6 +68,8 @@ public abstract class BasePluginXmlTest {
   
   private Document doc;
 
+  private final XPathFactory xpathFactory = XPathFactory.newInstance();
+
   @Before
   public void setUp() {
     doc = pluginXmlDocument.get();
@@ -65,8 +77,60 @@ public abstract class BasePluginXmlTest {
 
   protected final Document getDocument() {
     return doc;
-  } 
-  
+  }
+
+  /** Return the extensions of the given extension point. */
+  protected final NodeList getExtensions(String extensionPointId) {
+    try {
+      XPath xpath = xpathFactory.newXPath();
+      return (NodeList)
+          xpath.evaluate(
+              "//plugin/extension[@point='" + extensionPointId + "']",
+              getDocument().getDocumentElement(),
+              XPathConstants.NODESET);
+    } catch (XPathExpressionException ex) {
+      throw new AssertionError(ex.toString(), ex);
+    }
+  }
+
+  /** Verify that a node is a valid expression definition. */
+  protected static Node checkExpressionDefinition(Element definition) {
+    Assert.assertEquals("definition", definition.getNodeName());
+    String id = definition.getAttribute("id");
+    Assert.assertNotNull("definition must have an 'id' attribute", id);
+    Assert.assertFalse("invalid definition ID", Strings.isNullOrEmpty(id));
+    Assert.assertEquals(
+        "definition should have only an 'id' attribute", 1, definition.getAttributes().getLength());
+    List<Node> expressions = getChildNodes(definition, Node.ELEMENT_NODE);
+    Assert.assertEquals("definition must have only 1 subexpression", 1, expressions.size());
+    Assert.assertTrue(expressions.get(0) instanceof Element);
+    checkExpression((Element) expressions.get(0));
+    return definition;
+  }
+
+  /** Verify that a node is a valid expression. */
+  protected static void checkExpression(Element expression) {
+    try {
+      Expression converted = ExpressionConverter.getDefault().perform(expression);
+      Assert.assertNotNull(converted);
+    } catch (CoreException ex) {
+      Assert.fail("failed to convert to core expression: " + ex);
+    }
+  }
+
+  /** Return the child nodes of given type. */
+  protected static final List<Node> getChildNodes(Node parent, short nodeType) {
+    List<Node> result = new ArrayList<>();
+    NodeList children = parent.getChildNodes();
+    for (int i = 0; i < children.getLength(); i++) {
+      Node child = children.item(i);
+      if (child.getNodeType() == nodeType) {
+        result.add(child);
+      }
+    }
+    return result;
+  }
+
   @Test
   public final void testRootElementIsPlugin() {
     Assert.assertEquals("plugin", getDocument().getDocumentElement().getNodeName());

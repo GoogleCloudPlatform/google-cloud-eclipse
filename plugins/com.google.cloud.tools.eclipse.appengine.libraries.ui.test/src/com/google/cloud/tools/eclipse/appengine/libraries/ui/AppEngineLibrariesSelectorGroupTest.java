@@ -54,7 +54,8 @@ public class AppEngineLibrariesSelectorGroupTest {
   public void setUp() {
     shell = shellTestResource.getShell();
     shell.setLayout(new FillLayout());
-    librariesSelector = new LibrarySelectorGroup(shell, CloudLibraries.APP_ENGINE_GROUP, "xxx"); //$NON-NLS-1$
+    librariesSelector = new LibrarySelectorGroup(
+        shell, CloudLibraries.APP_ENGINE_STANDARD_GROUP, "xxx"); //$NON-NLS-1$
     shell.open();
     sdkButton = getButton("appengine-api");
     endpointsButton = getButton("appengine-endpoints");
@@ -104,13 +105,12 @@ public class AppEngineLibrariesSelectorGroupTest {
   }
 
   @Test
-  public void testSelectObjectifySelectsAppEngineApiAsWell() {
+  public void testSelectObjectifyDoesNotSelectAppEngineApiAsWell() {
     objectifyButton.click();
     List<Library> selectedLibraries = getSelectedLibrariesSorted();
     assertNotNull(selectedLibraries);
-    assertThat(selectedLibraries.size(), is(2));
-    assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
-    assertThat(selectedLibraries.get(1).getId(), is("objectify"));
+    assertThat(selectedLibraries.size(), is(1));
+    assertThat(selectedLibraries.get(0).getId(), is("objectify"));
   }
 
   @Test

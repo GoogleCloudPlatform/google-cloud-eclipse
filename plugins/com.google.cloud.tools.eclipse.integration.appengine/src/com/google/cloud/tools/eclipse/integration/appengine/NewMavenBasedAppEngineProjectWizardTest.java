@@ -44,19 +44,16 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
-import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * Test creation of a new project with the "Maven-Based Google App Engine Standard Java Project"
  * wizard.
  */
-@RunWith(SWTBotJunit4ClassRunner.class)
 public class NewMavenBasedAppEngineProjectWizardTest extends BaseProjectTest {
   @Rule
   public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);

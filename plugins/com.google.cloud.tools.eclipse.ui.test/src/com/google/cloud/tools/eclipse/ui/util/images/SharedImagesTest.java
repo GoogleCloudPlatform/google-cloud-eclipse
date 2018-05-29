@@ -33,8 +33,23 @@ public class SharedImagesTest {
   }
 
   @Test
+  public void testCreateGreyGcpImage() {
+    assertNotNull(SharedImages.GCP_GREY_IMAGE_DESCRIPTOR.getImageData());
+  }
+
+  @Test
+  public void testCreateGreyProjectImage() {
+    assertNotNull(SharedImages.PROJECT_GREY_IMAGE_DESCRIPTOR.getImageData());
+  }
+
+  @Test
   public void testCreateGcpWizardImage() {
     assertNotNull(SharedImages.GCP_WIZARD_IMAGE_DESCRIPTOR.getImageData());
+  }
+
+  @Test
+  public void testCreateGreyDatastoreIcon() {
+    assertNotNull(SharedImages.DATASTORE_GREY_IMAGE_DESCRIPTOR.getImageData());
   }
 
   @Test

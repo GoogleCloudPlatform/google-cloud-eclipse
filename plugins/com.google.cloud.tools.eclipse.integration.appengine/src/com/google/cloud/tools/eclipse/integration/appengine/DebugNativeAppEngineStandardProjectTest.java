@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.integration.appengine;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -39,7 +40,6 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
-import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotStyledText;
@@ -50,14 +50,12 @@ import org.hamcrest.Matchers;
 import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.osgi.service.prefs.Preferences;
 
 /**
  * Create a native App Engine Standard project, launch in debug mode, verify working, and then
  * terminate.
  */
-@RunWith(SWTBotJunit4ClassRunner.class)
 public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
 
   private static final long TERMINATE_SERVER_TIMEOUT = 10000L;
@@ -92,6 +90,8 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
     SWTBotTreeItem testProject = SwtBotProjectActions.selectProject(bot, "testapp_java8");
     assertNotNull(testProject);
     SwtBotTestingUtilities.performAndWaitForWindowChange(bot, () -> {
+      System.out.println("==== menu items of Run > Debug As ====");
+      bot.menu("Run").menu("Debug As").menuItems().forEach(System.out::println);
       bot.menu("Run").menu("Debug As").menu("1 Debug on Server").click();
     });
 
@@ -147,8 +147,8 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
       }
     }
     assertNotNull(stopServerButton);
-    SwtBotTreeUtilities.waitUntilTreeContainsText(bot, allItems[0], "<terminated>",
-                                                  TERMINATE_SERVER_TIMEOUT);
+    SwtBotTreeUtilities.waitUntilTreeTextMatches(
+        bot, allItems[0], containsString("<terminated>"), TERMINATE_SERVER_TIMEOUT);
     assertNoService(new URL("http://localhost:8080/hello"));
     assertTrue("App Engine console should mark as stopped",
         consoleView.getViewReference().getContentDescription().startsWith("<stopped>"));

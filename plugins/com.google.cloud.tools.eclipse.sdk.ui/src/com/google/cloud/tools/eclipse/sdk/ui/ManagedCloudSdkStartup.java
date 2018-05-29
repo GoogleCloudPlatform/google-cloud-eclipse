@@ -72,35 +72,36 @@ public class ManagedCloudSdkStartup implements IStartup {
       return;
     }
 
+    Job checkInstallationJob = new Job("Check Google Cloud SDK") {
+      @Override
+      protected IStatus run(IProgressMonitor monitor) {
+        try {
+          CloudSdkManager sdkManager = CloudSdkManager.getInstance();
+          ManagedCloudSdk installer = ManagedCloudSdk.newManagedSdk();
+          checkInstallation(sdkManager, installer, monitor);
+        } catch (UnsupportedOsException ex) {
+          logger.log(Level.FINE, "Unable to check Cloud SDK installation", ex);
+        } catch (ManagedSdkVerificationException ex) {
+          logger.log(Level.SEVERE, "Unable to check Cloud SDK installation. Possible causes include"
+              + " network connection problem or corrupt Cloud SDK installation.", ex);
+        } catch (ManagedSdkVersionMismatchException ex) {
+          throw new IllegalStateException("This is never thrown because we always use LATEST.", ex);
+        }
+        return Status.OK_STATUS;
+      }
+    };
+
     // Use a WorkbenchJob to trigger the check to ensure we start after the workbench window has
     // appeared, but perform the actual check within a normal Job so that we don't monopolize the
     // display thread.
-    Job triggerInstallationJob =
-        new WorkbenchJob("Check Google Cloud SDK") {
-          @Override
-          public IStatus runInUIThread(IProgressMonitor monitor) {
-            Job checkInstallationJob =
-                new Job("Check Google Cloud SDK") {
-                  @Override
-                  protected IStatus run(IProgressMonitor monitor) {
-                    try {
-                      CloudSdkManager sdkManager = CloudSdkManager.getInstance();
-                      ManagedCloudSdk installer = ManagedCloudSdk.newManagedSdk();
-                      checkInstallation(sdkManager, installer, monitor);
-                    } catch (UnsupportedOsException ex) {
-                      logger.log(Level.FINE, "Unable to check Cloud SDK installation", ex);
-                    } catch (ManagedSdkVerificationException
-                        | ManagedSdkVersionMismatchException ex) {
-                      logger.log(Level.SEVERE, "Corrupt Cloud SDK installation?", ex);
-                    }
-                    return Status.OK_STATUS;
-                  }
-                };
-            checkInstallationJob.setSystem(true);
-            checkInstallationJob.schedule(); // immediately
-            return Status.OK_STATUS;
-          }
-        };
+    Job triggerInstallationJob = new WorkbenchJob("Check Google Cloud SDK") {
+      @Override
+      public IStatus runInUIThread(IProgressMonitor monitor) {
+        checkInstallationJob.setSystem(true);
+        checkInstallationJob.schedule(); // immediately
+        return Status.OK_STATUS;
+      }
+    };
     triggerInstallationJob.setSystem(true);
     triggerInstallationJob.schedule(2000 /*ms*/);
   }

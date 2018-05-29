@@ -83,7 +83,7 @@ public class LibraryFactoryTest {
     Mockito.when(configuration.getChildren("libraryFile")).thenReturn(new IConfigurationElement[0]);
 
     Library library = LibraryFactory.create(configuration);
-    Assert.assertEquals("com.google.guava", library.getGroup());
+    Assert.assertEquals("com.google.guava", library.getGroups().get(0));
     Assert.assertEquals("1.8", library.getJavaVersion());
     Assert.assertTrue(library.isExport());
   }

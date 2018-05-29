@@ -28,7 +28,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.appengine.api.devserver.DefaultRunConfiguration;
 import java.net.InetAddress;
-import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import org.eclipse.core.runtime.CoreException;
 import org.junit.Assume;
 import org.junit.Before;
@@ -41,35 +41,31 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LocalAppEngineServerBehaviourTest {
-  @Rule
-  public TemporaryFolder tempFolder = new TemporaryFolder();
+  @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
-  @Mock
-  private BiFunction<InetAddress, Integer, Boolean> alwaysTrue;
-  @Mock
-  private BiFunction<InetAddress, Integer, Boolean> alwaysFalse;
-  @Mock
-  private BiFunction<InetAddress, Integer, Boolean> portProber;
+  @Mock private BiPredicate<InetAddress, Integer> alwaysTrue;
+  @Mock private BiPredicate<InetAddress, Integer> alwaysFalse;
+  @Mock private BiPredicate<InetAddress, Integer> portProber;
 
-  private LocalAppEngineServerBehaviour serverBehavior = new LocalAppEngineServerBehaviour();
+  private final LocalAppEngineServerBehaviour serverBehavior = new LocalAppEngineServerBehaviour();
 
   @Before
   public void setUp() {
-    when(alwaysTrue.apply(any(InetAddress.class), anyInt())).thenReturn(true);
-    when(alwaysFalse.apply(any(InetAddress.class), anyInt())).thenReturn(false);
+    when(alwaysTrue.test(any(InetAddress.class), anyInt())).thenReturn(true);
+    when(alwaysFalse.test(any(InetAddress.class), anyInt())).thenReturn(false);
   }
 
   @Test
   public void testCheckPort_port0() throws CoreException {
     // port 0 should never be checked if in use
     assertEquals(0, LocalAppEngineServerBehaviour.checkPort(null, 0, portProber));
-    verify(portProber, never()).apply(any(InetAddress.class), any(Integer.class));
+    verify(portProber, never()).test(any(InetAddress.class), any(Integer.class));
   }
 
   @Test
   public void testCheckPort_portNotInUse() throws CoreException {
     assertEquals(1, LocalAppEngineServerBehaviour.checkPort(null, 1, alwaysFalse));
-    verify(alwaysFalse).apply(any(InetAddress.class), any(Integer.class));
+    verify(alwaysFalse).test(any(InetAddress.class), any(Integer.class));
   }
 
   @Test
@@ -79,7 +75,7 @@ public class LocalAppEngineServerBehaviourTest {
       fail("Should throw CoreException");
     } catch (CoreException ex) {
       assertEquals("Port 1 is in use.", ex.getMessage());
-      verify(alwaysTrue).apply(any(InetAddress.class), any(Integer.class));
+      verify(alwaysTrue).test(any(InetAddress.class), any(Integer.class));
     }
   }
 
@@ -90,7 +86,7 @@ public class LocalAppEngineServerBehaviourTest {
       fail("Should throw CoreException");
     } catch (CoreException ex) {
       assertEquals("Port must be between 0 and 65535.", ex.getMessage());
-      verify(portProber, never()).apply(any(InetAddress.class), any(Integer.class));
+      verify(portProber, never()).test(any(InetAddress.class), any(Integer.class));
     }
   }
 
@@ -101,7 +97,7 @@ public class LocalAppEngineServerBehaviourTest {
       fail("Should throw CoreException");
     } catch (CoreException ex) {
       assertEquals("Port must be between 0 and 65535.", ex.getMessage());
-      verify(portProber, never()).apply(any(InetAddress.class), any(Integer.class));
+      verify(portProber, never()).test(any(InetAddress.class), any(Integer.class));
     }
   }
 
@@ -227,12 +223,12 @@ public class LocalAppEngineServerBehaviourTest {
 
     DefaultRunConfiguration runConfig = new DefaultRunConfiguration();
     runConfig.setAdminPort(8000);
-    when(portProber.apply(any(InetAddress.class), anyInt())).thenReturn(false);
-    when(portProber.apply(any(InetAddress.class), eq(8000))).thenReturn(true);
+    when(portProber.test(any(InetAddress.class), anyInt())).thenReturn(false);
+    when(portProber.test(any(InetAddress.class), eq(8000))).thenReturn(true);
 
     serverBehavior.checkPorts(runConfig, portProber);
     assertEquals(-1, serverBehavior.adminPort);
-    verify(portProber, never()).apply(any(InetAddress.class), eq(8000));
+    verify(portProber, never()).test(any(InetAddress.class), eq(8000));
   }
 
 }

@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -159,10 +160,10 @@ public final class Library {
   }
 
   /**
-   * @return the collection to which this library belongs
+   * @return the collections to which this library belongs
    */
-  public String getGroup() {
-    return group;
+  List<String> getGroups() {
+    return Splitter.on(',').omitEmptyStrings().trimResults().splitToList(group);
   }
 
   public String getTransport() {
@@ -197,7 +198,7 @@ public final class Library {
    */
   private synchronized List<LibraryFile> resolveDependencies() {
     List<LibraryFile> transitiveDependencies = new ArrayList<>();
-    
+        
     for (LibraryFile artifact : directDependencies) {
       artifact.updateVersion();
       MavenCoordinates coordinates = artifact.getMavenCoordinates();

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 """Copies a Kokoro-built CT4E release to a permenant location and makes it
 publicly available.
@@ -8,7 +8,7 @@ repo management. An example location:
 
     gs://kokoro-ct4e-release/prod/google-cloud-eclipse/ubuntu/jar_signing/34/20180323-215548
 
-As a final step, we need to copy such a repo to a permanet location, e.g.:
+As a final step, we need to copy such a repo to a permanent location such as:
 
     gs://cloud-tools-for-eclipse/1.6.1
 """

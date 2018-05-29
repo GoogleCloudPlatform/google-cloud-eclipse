@@ -38,9 +38,9 @@ public class PluginXmlTest extends BasePluginXmlTest {
     NodeList enabledWhen = getDocument().getElementsByTagName("enabledWhen");
     Assert.assertEquals(4, enabledWhen.getLength());
     NodeList tests = getDocument().getElementsByTagName("test");
-    Assert.assertEquals(6, tests.getLength());
+    Assert.assertEquals(2, tests.getLength());
     NodeList adapts = getDocument().getElementsByTagName("adapt");
-    Assert.assertEquals(5, adapts.getLength());
+    Assert.assertEquals(2, adapts.getLength());
 
     for (int i = 0; i < enabledWhen.getLength(); i++) {
       Element element = (Element) enabledWhen.item(i);
@@ -58,10 +58,6 @@ public class PluginXmlTest extends BasePluginXmlTest {
     Assert.assertEquals("org.eclipse.core.resources.IProject", adapt.getAttribute("type"));
 
     NodeList adaptTestNodes = adapt.getElementsByTagName("test");
-    Assert.assertEquals(1, adaptTestNodes.getLength());
-    Element adaptTestEntry1 = (Element) adaptTestNodes.item(0);
-    String adaptTestProperty = "org.eclipse.wst.common.project.facet.core.projectFacet";
-    Assert.assertEquals(adaptTestProperty, adaptTestEntry1.getAttribute("property"));
-    Assert.assertEquals(attributeValue, adaptTestEntry1.getAttribute("value"));
+    Assert.assertEquals(0, adaptTestNodes.getLength());
   }
 }

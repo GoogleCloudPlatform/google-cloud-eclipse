@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.flex;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineWizardPage;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
@@ -26,7 +27,6 @@ import org.eclipse.ui.PlatformUI;
 public class AppEngineFlexWizardPage extends AppEngineWizardPage {
 
   public AppEngineFlexWizardPage() {
-    super(false);
     setTitle(Messages.getString("app.engine.flex.project")); //$NON-NLS-1$
     setDescription(Messages.getString("create.app.engine.flex.project")); //$NON-NLS-1$
   }
@@ -35,6 +35,11 @@ public class AppEngineFlexWizardPage extends AppEngineWizardPage {
   public void setHelp(Composite container) {
     PlatformUI.getWorkbench().getHelpSystem().setHelp(container,
         "com.google.cloud.tools.eclipse.appengine.newproject.NewFlexProjectContext"); //$NON-NLS-1$
+  }
+  
+  @Override
+  protected String getSupportedLibrariesGroup() {
+    return CloudLibraries.APP_ENGINE_FLEXIBLE_GROUP;
   }
 
   @Override

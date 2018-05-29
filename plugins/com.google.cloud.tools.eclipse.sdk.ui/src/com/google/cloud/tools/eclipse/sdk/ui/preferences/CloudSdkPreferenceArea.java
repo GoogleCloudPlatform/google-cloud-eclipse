@@ -22,6 +22,7 @@ import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkVersionFileException;
+import com.google.cloud.tools.appengine.cloudsdk.InvalidJavaSdkException;
 import com.google.cloud.tools.eclipse.preferences.areas.PreferenceArea;
 import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
@@ -278,10 +279,11 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     try {
       CloudSdk sdk = new CloudSdk.Builder().sdkPath(location).build();
       sdk.validateCloudSdk();
+      CloudSdkManager.validateJdk(sdk);  // TODO: call sdk.validateJdk() once it becomes public.
       sdk.validateAppEngineJavaComponents();
       status = Status.OK_STATUS;
       return true;
-    } catch (CloudSdkNotFoundException ex) {
+    } catch (CloudSdkNotFoundException | InvalidJavaSdkException ex) {
       // accept a seemingly invalid location in case the SDK organization
       // has changed and the CloudSdk#validate() code is out of date
       status = new Status(IStatus.WARNING, getClass().getName(),

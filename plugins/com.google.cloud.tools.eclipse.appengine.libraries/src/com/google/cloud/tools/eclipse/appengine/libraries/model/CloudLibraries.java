@@ -44,8 +44,14 @@ public class CloudLibraries {
    * Library files for App Engine Standard environment applications; specifically
    * Objectify, App Engine API, and Google Cloud Endpoints.
    */
-  public static final String APP_ENGINE_GROUP = "appengine";   //$NON-NLS-1$
+  public static final String APP_ENGINE_STANDARD_GROUP = "appengine"; //$NON-NLS-1$
 
+  /**
+   * Library files for App Engine Flexible environment applications; specifically
+   * Objectify.
+   */
+  public static final String APP_ENGINE_FLEXIBLE_GROUP = "flexible"; //$NON-NLS-1$  
+  
   /**
    * Library files for the Google Cloud Client Library for Java. E.g.
    * Stackdriver Logging, Cloud Datastore, Cloud Storage, Cloud Translation, etc.
@@ -64,7 +70,8 @@ public class CloudLibraries {
   public static List<Library> getLibraries(String group) {
     List<Library> result = new ArrayList<>();
     for (Library library : libraries.values()) {
-      if (library.getGroup().equals(group)) {
+      List<String> groups = library.getGroups();
+      if (groups.contains(group)) {
         result.add(library);
       }
     }

@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.ui.LibrarySelectorGroup;
 import com.google.cloud.tools.eclipse.appengine.newproject.maven.MavenCoordinatesWizardUi;
@@ -49,7 +48,6 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
   private Text javaPackageField;
   private Text serviceNameField;
   private MavenCoordinatesWizardUi mavenCoordinatesUi;
-  private final boolean showLibrariesSelectorGroup;
 
   /** True if we should auto-generate the javaPackageField from the provided groupId */
   @VisibleForTesting
@@ -58,10 +56,9 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
   /** True if we're programmatically setting javaPackageField with an auto-generated value */
   private boolean javaPackageProgrammaticUpdate = false;
 
-  public AppEngineWizardPage(boolean showLibrariesSelectorGroup) {
+  public AppEngineWizardPage() {
     super("basicNewProjectPage"); //$NON-NLS-1$
     setImageDescriptor(AppEngineImages.appEngine(64));
-    this.showLibrariesSelectorGroup = showLibrariesSelectorGroup;
   }
 
   public abstract void setHelp(Composite container);
@@ -80,12 +77,9 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     mavenCoordinatesUi.addGroupIdModifyListener(new AutoPackageNameSetterOnGroupIdChange());
 
     // Manage APIs
-    // todo we don't need this if; can do with subclasses
-    if (showLibrariesSelectorGroup) {
-      appEngineLibrariesSelectorGroup =
-          new LibrarySelectorGroup(container, CloudLibraries.APP_ENGINE_GROUP,
-              Messages.getString("app.engine.libraries.group")); //$NON-NLS-1$
-    }
+    appEngineLibrariesSelectorGroup = new LibrarySelectorGroup(container,
+        getSupportedLibrariesGroup(),
+        Messages.getString("app.engine.libraries.group")); //$NON-NLS-1$
 
     revalidate();
     // Show enter project name on opening
@@ -95,6 +89,8 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     GridLayoutFactory.swtDefaults().generateLayout(container);
     Dialog.applyDialogFont(container);
   }
+
+  protected abstract String getSupportedLibrariesGroup();
 
   private void createCustomFields(Composite container) {
     Composite composite = new Composite(container, SWT.NONE);

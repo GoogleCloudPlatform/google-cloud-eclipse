@@ -16,8 +16,12 @@
 
 package com.google.cloud.tools.eclipse.swtbot;
 
+import static org.junit.Assert.assertNotNull;
+
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
@@ -34,6 +38,7 @@ import org.eclipse.swtbot.swt.finder.results.VoidResult;
 import org.eclipse.swtbot.swt.finder.waits.ICondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.hamcrest.Matcher;
 
@@ -41,6 +46,7 @@ import org.hamcrest.Matcher;
  * SWTBot utility methods that perform general workbench actions.
  */
 public final class SwtBotWorkbenchActions {
+  private static final Logger logger = Logger.getLogger(SwtBotWorkbenchActions.class.getName());
 
   private static final int OPEN_PREFERENCES_DIALOG_DELAY_MS = 1000;
 
@@ -149,9 +155,24 @@ public final class SwtBotWorkbenchActions {
     bot.sleep(OPEN_PREFERENCES_DIALOG_DELAY_MS);
   }
 
-  /**
-   * Close the Welcome/Intro view, if found. Usually required on the first launch.
-   */
+  /** Open the view with the given ID. */
+  public static SWTBotView openViewById(SWTWorkbenchBot bot, String viewId) {
+    UIThreadRunnable.syncExec(
+        bot.getDisplay(),
+        () -> {
+          IWorkbenchWindow activeWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+          assertNotNull(activeWindow);
+          try {
+            activeWindow.getActivePage().showView(viewId);
+          } catch (PartInitException ex) {
+            // viewById() will fail in calling thread
+            logger.log(Level.SEVERE, "Unable to open view " + viewId, ex);
+          }
+        });
+    return bot.viewById(viewId);
+  }
+  
+  /** Close the Welcome/Intro view, if found. Usually required on the first launch. */
   public static void closeWelcome(SWTWorkbenchBot bot) {
     SWTBotView activeView = bot.activeView();
     if (activeView != null && activeView.getTitle().equals("Welcome")) {

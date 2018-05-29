@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.standard;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineWizardPage;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
@@ -41,7 +42,6 @@ public class AppEngineStandardWizardPage extends AppEngineWizardPage {
   private ComboViewer runtimeField;
 
   public AppEngineStandardWizardPage() {
-    super(true);
     setTitle(Messages.getString("app.engine.standard.project")); //$NON-NLS-1$
     setDescription(Messages.getString("create.app.engine.standard.project")); //$NON-NLS-1$
   }
@@ -50,6 +50,11 @@ public class AppEngineStandardWizardPage extends AppEngineWizardPage {
   public void setHelp(Composite container) {
     PlatformUI.getWorkbench().getHelpSystem().setHelp(container,
         "com.google.cloud.tools.eclipse.appengine.newproject.NewStandardProjectContext"); //$NON-NLS-1$
+  }
+  
+  @Override
+  protected String getSupportedLibrariesGroup() {
+    return CloudLibraries.APP_ENGINE_STANDARD_GROUP;
   }
 
   @Override

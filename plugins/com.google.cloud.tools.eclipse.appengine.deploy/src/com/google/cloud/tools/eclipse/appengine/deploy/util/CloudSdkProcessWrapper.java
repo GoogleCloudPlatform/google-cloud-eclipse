@@ -44,7 +44,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.console.MessageConsoleStream;
 
 /**
- * Helper class wrapping a process induced by {@link CloudSdk} to hide the bulk of low-level work
+ * Helper class wrapping a process created by {@link CloudSdk} to hide the bulk of low-level work
  * dealing with process cancellation, process exit monitoring, error output line collection,
  * standard output collection, etc. Intended to be used exclusively by {@link
  * StandardStagingDelegate} and {@link AppEngineProjectDeployer} for their convenience.
