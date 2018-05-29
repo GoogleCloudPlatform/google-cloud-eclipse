@@ -73,4 +73,11 @@ public class CloudLibrariesTest {
     Assert.assertEquals("appengine", library.getGroups().get(0));
     Assert.assertEquals("Objectify", library.getName());
   }
+  
+  @Test
+  public void testGetLibraryObjectify6() {
+    Library library = CloudLibraries.getLibrary("objectify6");
+    Assert.assertEquals("flexible", library.getGroups().get(0));
+    Assert.assertEquals("Objectify", library.getName());
+  }
 }
