@@ -25,7 +25,7 @@ import static org.mockito.Mockito.mock;
 import com.google.cloud.tools.appengine.AppEngineDescriptor;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
-import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineWebDescriptor;
+import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineStandardProject;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.CronDescriptor;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.DatastoreIndexesDescriptor;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.DenialOfServiceDescriptor;
@@ -66,7 +66,7 @@ public class AppEngineContentProviderTest {
     Object[] children = fixture.getChildren(projectCreator.getFacetedProject());
     assertNotNull(children);
     assertEquals(1, children.length);
-    assertTrue(children[0] instanceof AppEngineWebDescriptor);
+    assertTrue(children[0] instanceof AppEngineStandardProject);
   }
 
   @Test
@@ -77,8 +77,8 @@ public class AppEngineContentProviderTest {
     try (InputStream contents = appEngineWebXml.getContents()) {
       descriptor = AppEngineDescriptor.parse(contents);
     }
-    AppEngineWebDescriptor webDescriptor =
-        new AppEngineWebDescriptor(projectCreator.getProject(), appEngineWebXml, descriptor);
+    AppEngineStandardProject webDescriptor =
+        new AppEngineStandardProject(projectCreator.getProject(), appEngineWebXml, descriptor);
 
     Object[] children = fixture.getChildren(webDescriptor);
     assertNotNull(children);
@@ -94,8 +94,8 @@ public class AppEngineContentProviderTest {
     try (InputStream contents = appEngineWebXml.getContents()) {
       descriptor = AppEngineDescriptor.parse(contents);
     }
-    AppEngineWebDescriptor webDescriptor =
-        new AppEngineWebDescriptor(projectCreator.getProject(), appEngineWebXml, descriptor);
+    AppEngineStandardProject webDescriptor =
+        new AppEngineStandardProject(projectCreator.getProject(), appEngineWebXml, descriptor);
 
     Object[] children = fixture.getChildren(webDescriptor);
     assertNotNull(children);
@@ -111,8 +111,8 @@ public class AppEngineContentProviderTest {
     try (InputStream contents = appEngineWebXml.getContents()) {
       descriptor = AppEngineDescriptor.parse(contents);
     }
-    AppEngineWebDescriptor webDescriptor =
-        new AppEngineWebDescriptor(projectCreator.getProject(), appEngineWebXml, descriptor);
+    AppEngineStandardProject webDescriptor =
+        new AppEngineStandardProject(projectCreator.getProject(), appEngineWebXml, descriptor);
 
     Object[] children = fixture.getChildren(webDescriptor);
     assertNotNull(children);
@@ -133,8 +133,8 @@ public class AppEngineContentProviderTest {
     try (InputStream contents = appEngineWebXml.getContents()) {
       descriptor = AppEngineDescriptor.parse(contents);
     }
-    AppEngineWebDescriptor webDescriptor =
-        new AppEngineWebDescriptor(projectCreator.getProject(), appEngineWebXml, descriptor);
+    AppEngineStandardProject webDescriptor =
+        new AppEngineStandardProject(projectCreator.getProject(), appEngineWebXml, descriptor);
 
     Object[] children = fixture.getChildren(webDescriptor);
     assertNotNull(children);
@@ -155,8 +155,8 @@ public class AppEngineContentProviderTest {
     try (InputStream contents = appEngineWebXml.getContents()) {
       descriptor = AppEngineDescriptor.parse(contents);
     }
-    AppEngineWebDescriptor webDescriptor =
-        new AppEngineWebDescriptor(projectCreator.getProject(), appEngineWebXml, descriptor);
+    AppEngineStandardProject webDescriptor =
+        new AppEngineStandardProject(projectCreator.getProject(), appEngineWebXml, descriptor);
 
     Object[] children = fixture.getChildren(webDescriptor);
     assertNotNull(children);
@@ -177,8 +177,8 @@ public class AppEngineContentProviderTest {
     try (InputStream contents = appEngineWebXml.getContents()) {
       descriptor = AppEngineDescriptor.parse(contents);
     }
-    AppEngineWebDescriptor webDescriptor =
-        new AppEngineWebDescriptor(projectCreator.getProject(), appEngineWebXml, descriptor);
+    AppEngineStandardProject webDescriptor =
+        new AppEngineStandardProject(projectCreator.getProject(), appEngineWebXml, descriptor);
 
     Object[] children = fixture.getChildren(webDescriptor);
     assertNotNull(children);
@@ -199,8 +199,8 @@ public class AppEngineContentProviderTest {
     try (InputStream contents = appEngineWebXml.getContents()) {
       descriptor = AppEngineDescriptor.parse(contents);
     }
-    AppEngineWebDescriptor webDescriptor =
-        new AppEngineWebDescriptor(projectCreator.getProject(), appEngineWebXml, descriptor);
+    AppEngineStandardProject webDescriptor =
+        new AppEngineStandardProject(projectCreator.getProject(), appEngineWebXml, descriptor);
 
     Object[] children = fixture.getChildren(webDescriptor);
     assertNotNull(children);
@@ -220,7 +220,7 @@ public class AppEngineContentProviderTest {
 
   @Test
   public void testHasChildren_AppEngineWebDescriptor() {
-    assertTrue(fixture.hasChildren(mock(AppEngineWebDescriptor.class)));
+    assertTrue(fixture.hasChildren(mock(AppEngineStandardProject.class)));
   }
 
   private IFile createInWebInf(IPath path, String contents) {
