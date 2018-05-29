@@ -137,7 +137,7 @@ public class ProjectContextMenuTest extends BaseProjectTest {
 
   @Test
   public void testMavenAppEngineStandardJava7() {
-    IProject project =
+    project =
         SwtBotAppEngineActions.createMavenWebAppProject(
             bot,
             "projectContextMenuJava7",
@@ -160,7 +160,7 @@ public class ProjectContextMenuTest extends BaseProjectTest {
 
   @Test
   public void testMavenAppEngineStandardJava8() {
-    IProject project =
+    project =
         SwtBotAppEngineActions.createMavenWebAppProject(
             bot,
             "projectContextMenuJava8",
