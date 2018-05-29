@@ -194,7 +194,11 @@ public class ProjectUtils {
 
   /** Fail if there are any build errors on any project in the workspace. */
   public static void failIfBuildErrors() throws CoreException {
-    failIfBuildErrors("Projects have build errors", getWorkspace().getRoot().getProjects());
+    failIfBuildErrors("Projects have build errors");
+  }
+
+  public static void failIfBuildErrors(String message) throws CoreException {
+    failIfBuildErrors(message, getWorkspace().getRoot().getProjects());
   }
 
   /** Fail if there are any build errors on the specified projects. */
