@@ -35,9 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -163,13 +161,6 @@ public class AppEngineContentProvider implements ITreeContentProvider {
       return ((IFacetedProject) inputElement).getProject();
     } else if (inputElement instanceof IProject) {
       return (IProject) inputElement;
-    } else if (inputElement instanceof IResource) {
-      return ((IResource) inputElement).getProject();
-    } else if (inputElement instanceof IAdaptable) {
-      IProject project = ((IAdaptable) inputElement).getAdapter(IProject.class);
-      if (project != null) {
-        return project;
-      }
     }
     return null;
   }

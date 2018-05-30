@@ -133,11 +133,12 @@ public class LibraryFile implements Comparable<LibraryFile> {
     }
   }
 
-  private boolean isPinned() {
+  public boolean isPinned() {
     return pinned;
   }
 
-  void setPinned(boolean pinned) {
+  @VisibleForTesting
+  public void setPinned(boolean pinned) {
     this.pinned = pinned;
   }
 

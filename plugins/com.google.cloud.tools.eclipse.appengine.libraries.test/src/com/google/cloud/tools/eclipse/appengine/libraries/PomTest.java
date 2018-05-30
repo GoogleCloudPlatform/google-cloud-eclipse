@@ -213,7 +213,8 @@ public class PomTest {
     try (InputStream contents = pomFile.getContents()) {
       Document actual = parse(contents);
       
-      NodeList dependencies = actual.getElementsByTagNameNS("http://maven.apache.org/POM/4.0.0", "dependencies");
+      NodeList dependencies =
+          actual.getElementsByTagNameNS("http://maven.apache.org/POM/4.0.0", "dependencies");
       Assert.assertEquals(2, dependencies.getLength());    
       
       Element dependency = getOnlyChild(((Element) dependencies.item(1)), "dependency");
@@ -223,6 +224,33 @@ public class PomTest {
       Assert.assertEquals("objectify", artifactId.getTextContent());
       Element version = getOnlyChild(dependency, "version");
       Assert.assertNotEquals("5.1.10", version.getTextContent());
+    }
+  }
+  
+  @Test
+  public void testPinnedDependencies() 
+      throws CoreException, ParserConfigurationException, IOException, SAXException {
+    
+    LibraryFile objectify =
+        new LibraryFile(coordinates("com.googlecode.objectify", "objectify", "5.1.10"));
+    objectify.setPinned(true);
+    Library library = newLibrary("objectify", objectify);
+    
+    List<Library> libraries = new ArrayList<>();
+    libraries.add(library);
+    
+    pom.addDependencies(libraries);
+    
+    try (InputStream contents = pomFile.getContents()) {
+      Document actual = parse(contents);
+      
+      NodeList dependencies =
+          actual.getElementsByTagNameNS("http://maven.apache.org/POM/4.0.0", "dependencies");
+      Assert.assertEquals(2, dependencies.getLength());    
+      
+      Element dependency = getOnlyChild(((Element) dependencies.item(1)), "dependency");
+      Element version = getOnlyChild(dependency, "version");
+      Assert.assertEquals("5.1.10", version.getTextContent());
     }
   }
 
@@ -237,17 +265,20 @@ public class PomTest {
     pom.addDependencies(Arrays.asList(library1, library2));
     try (InputStream contents = pomFile.getContents()) {
       Document actual = parse(contents);
-      NodeList dependenciesList = actual.getElementsByTagNameNS("http://maven.apache.org/POM/4.0.0", "dependencies");
+      NodeList dependenciesList =
+          actual.getElementsByTagNameNS("http://maven.apache.org/POM/4.0.0", "dependencies");
       Assert.assertEquals(2, dependenciesList.getLength());
       
       // first one is in dependencyManagement
       Element dependencies = (Element) dependenciesList.item(1);
-      Assert.assertEquals(2, dependencies.getElementsByTagNameNS("http://maven.apache.org/POM/4.0.0", "dependency").getLength());
+      Assert.assertEquals(2, dependencies
+          .getElementsByTagNameNS("http://maven.apache.org/POM/4.0.0", "dependency").getLength());
   
       // no dependencies should be removed
       Pom.removeUnusedDependencies(dependencies, Arrays.asList(library1, library2),
           Arrays.asList(library1, library2));
-      Assert.assertEquals(2, dependencies.getElementsByTagNameNS("http://maven.apache.org/POM/4.0.0", "dependency").getLength());
+      Assert.assertEquals(2, dependencies
+          .getElementsByTagNameNS("http://maven.apache.org/POM/4.0.0", "dependency").getLength());
     }
   }
 

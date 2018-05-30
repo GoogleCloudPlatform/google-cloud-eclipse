@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Google Inc.
+ * Copyright 2018 Google LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.ui;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -31,23 +30,18 @@ import java.util.Collections;
 import java.util.List;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotCheckBox;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-public class AppEngineLibrariesSelectorGroupTest {
+public class FlexibleLibrariesSelectorGroupTest {
 
   @Rule public ShellTestResource shellTestResource = new ShellTestResource();
 
   private Shell shell;
   private LibrarySelectorGroup librariesSelector;
-  private SWTBotCheckBox sdkButton;
-  private SWTBotCheckBox endpointsButton;
   private SWTBotCheckBox objectifyButton;
 
   @Before
@@ -55,37 +49,13 @@ public class AppEngineLibrariesSelectorGroupTest {
     shell = shellTestResource.getShell();
     shell.setLayout(new FillLayout());
     librariesSelector = new LibrarySelectorGroup(
-        shell, CloudLibraries.APP_ENGINE_STANDARD_GROUP, "xxx"); //$NON-NLS-1$
+        shell, CloudLibraries.APP_ENGINE_FLEXIBLE_GROUP, "xxx"); //$NON-NLS-1$
     shell.open();
-    sdkButton = getButton("appengine-api");
-    endpointsButton = getButton("appengine-endpoints");
-    objectifyButton = getButton("objectify");
-  }
-
-  @Test
-  public void testButtonOrder() {
-    Control container = shell.getChildren()[0];
-    assertThat(container, instanceOf(Composite.class));
-    Control groupAsControl = ((Composite) container).getChildren()[0];
-    assertThat(groupAsControl, instanceOf(Group.class));
-    Control[] buttonsAsControls = ((Group) groupAsControl).getChildren();
-    String[] expectedLibraryOrder =
-        new String[] {"appengine-api", "appengine-endpoints", "objectify"};
-    for (int i = 0; i < buttonsAsControls.length; i++) {
-      Control control = buttonsAsControls[i];
-      assertThat(control, instanceOf(Button.class));
-      Button button = (Button) control;
-      assertNotNull(button.getData());
-      assertThat(button.getData(), instanceOf(Library.class));
-      Library library = (Library) button.getData();
-      assertThat(library.getId(), is(expectedLibraryOrder[i]));
-    }
+    objectifyButton = getButton("objectify6");
   }
 
   @Test
   public void testToolTips() {
-    assertTrue(sdkButton.getToolTipText().length() > 0);
-    assertTrue(endpointsButton.getToolTipText().length() > 0);
     assertTrue(objectifyButton.getToolTipText().length() > 0);
   }
 
@@ -95,35 +65,12 @@ public class AppEngineLibrariesSelectorGroupTest {
   }
 
   @Test
-  public void testSelectEndpointsSelectsAppEngineApiAsWell() {
-    endpointsButton.click();
-    List<Library> selectedLibraries = getSelectedLibrariesSorted();
-    assertNotNull(selectedLibraries);
-    assertThat(selectedLibraries.size(), is(2));
-    assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
-    assertThat(selectedLibraries.get(1).getId(), is("appengine-endpoints"));
-  }
-
-  @Test
-  public void testSelectObjectifyDoesNotSelectAppEngineApiAsWell() {
+  public void testSelectObjectify() {
     objectifyButton.click();
     List<Library> selectedLibraries = getSelectedLibrariesSorted();
     assertNotNull(selectedLibraries);
-    assertThat(selectedLibraries.size(), is(2));
-    assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
-    assertThat(selectedLibraries.get(1).getId(), is("objectify"));
-  }
-
-  @Test
-  public void testSelectObjectifyAndEndpointsSelectsAppEngineApiAsWell() {
-    objectifyButton.click();
-    endpointsButton.click();
-    List<Library> selectedLibraries = getSelectedLibrariesSorted();
-    assertNotNull(selectedLibraries);
-    assertThat(selectedLibraries.size(), is(3));
-    assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
-    assertThat(selectedLibraries.get(1).getId(), is("appengine-endpoints"));
-    assertThat(selectedLibraries.get(2).getId(), is("objectify"));
+    assertThat(selectedLibraries.size(), is(1));
+    assertThat(selectedLibraries.get(0).getId(), is("objectify6"));
   }
 
   private SWTBotCheckBox getButton(String libraryId) {

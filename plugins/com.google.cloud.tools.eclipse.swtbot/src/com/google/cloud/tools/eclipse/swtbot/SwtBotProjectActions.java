@@ -209,11 +209,25 @@ public final class SwtBotProjectActions {
    */
   public static SWTBotTreeItem selectProject(SWTWorkbenchBot bot, String projectName) {
     SWTBotView explorer = getExplorer(bot);
+    return selectProject(bot, explorer, projectName);
+  }
 
+  /**
+   * Returns the specified project.
+   *
+   * @param projectName the name of the project to select
+   * @param explorer the explorer view, assumed to be either the Project Explorer or the Package
+   *     Explorer
+   * @return the selected tree item
+   * @throws WidgetNotFoundException if the 'Package Explorer' or 'Project Explorer' view cannot be
+   *     found or if the specified project cannot be found.
+   */
+  public static SWTBotTreeItem selectProject(
+      SWTWorkbenchBot bot, SWTBotView explorer, String projectName) {
     // Select the root of the project tree in the explorer view
     Widget explorerWidget = explorer.getWidget();
     Tree explorerTree = bot.widget(widgetOfType(Tree.class), explorerWidget);
-    return new SWTBotTree(explorerTree).getTreeItem(projectName).select();
+    return SwtBotTreeUtilities.select(bot, new SWTBotTree(explorerTree), projectName);
   }
 
   /**

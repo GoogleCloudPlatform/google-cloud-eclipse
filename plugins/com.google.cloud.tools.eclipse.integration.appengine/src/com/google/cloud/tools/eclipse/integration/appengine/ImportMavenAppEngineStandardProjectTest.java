@@ -33,7 +33,6 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
-import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
@@ -41,14 +40,12 @@ import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
 
 /**
  * Import snapshot of <a href=
  * "https://github.com/GoogleCloudPlatform/getting-started-java/tree/master/appengine-standard-java8/springboot-appengine-standard">Hello
  * Spring Boot on App Engine standard environment</a>.
  */
-@RunWith(SWTBotJunit4ClassRunner.class)
 public class ImportMavenAppEngineStandardProjectTest extends BaseProjectTest {
   @Rule
   public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);

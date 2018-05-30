@@ -230,13 +230,15 @@ class Pom {
               "http://maven.apache.org/POM/4.0.0", "artifactId");
           artifactIdElement.setTextContent(artifactId);
           dependency.appendChild(artifactIdElement);
-
+          
           if (!dependencyManaged(groupId, artifactId)) {  
             String version = coordinates.getVersion();
-            ArtifactVersion latestVersion =
-                ArtifactRetriever.DEFAULT.getBestVersion(groupId, artifactId);
-            if (latestVersion != null) {
-              version = latestVersion.toString(); 
+            if (!artifact.isPinned()) {
+              ArtifactVersion latestVersion =
+                  ArtifactRetriever.DEFAULT.getBestVersion(groupId, artifactId);
+              if (latestVersion != null) {
+                version = latestVersion.toString(); 
+              }
             }
             
             // todo latest version may not be needed anymore.

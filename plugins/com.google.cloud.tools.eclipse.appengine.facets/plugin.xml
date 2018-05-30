@@ -292,6 +292,10 @@
      </detector>
   </extension>
   
+  <!-- 
+    cannot use com.google.cloud.tools.eclipse.appengine.onlyForStandardProjects for the trigger
+    https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/3089
+  -->
   <extension
         point="org.eclipse.ui.navigator.navigatorContent">
      <navigatorContent
@@ -304,9 +308,15 @@
            name="%appengineNavigatorContentProvider"
            priority="high">
         <triggerPoints>
-          <reference
-                definitionId="com.google.cloud.tools.eclipse.appengine.onlyForStandardProjects">
-          </reference>
+           <and>
+              <instanceof
+                    value="org.eclipse.core.resources.IProject">
+              </instanceof>
+              <test
+                    property="org.eclipse.wst.common.project.facet.core.projectFacet"
+                    value="com.google.cloud.tools.eclipse.appengine.facets.standard">
+              </test>
+           </and>
         </triggerPoints>
         <possibleChildren>
            <instanceof
