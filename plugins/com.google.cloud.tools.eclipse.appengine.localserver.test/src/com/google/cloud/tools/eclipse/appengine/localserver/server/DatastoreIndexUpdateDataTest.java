@@ -27,7 +27,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -70,7 +74,16 @@ public class DatastoreIndexUpdateDataTest {
   }
 
   @Test
-  public void testNoUpdate() {
+  public void testNoUpdateWithNoFile() {
+    DatastoreIndexUpdateData update =
+        DatastoreIndexUpdateData.detect(launchConfiguration, server, defaultService);
+    assertNull(update);
+  }
+  
+  @Test
+  public void testNoUpdateWithEmptyFile() throws IOException {
+    createEmptyDatastoreIndexesAutoXml();
+    
     DatastoreIndexUpdateData update =
         DatastoreIndexUpdateData.detect(launchConfiguration, server, defaultService);
     assertNull(update);
@@ -148,5 +161,29 @@ public class DatastoreIndexUpdateDataTest {
     File datastoreIndexesAutoXml = new File(appengineGenerated, "datastore-indexes-auto.xml");
     assertTrue(appengineGenerated.mkdirs());
     assertTrue(datastoreIndexesAutoXml.createNewFile());
+    
+    try (Writer out = new OutputStreamWriter(new FileOutputStream(datastoreIndexesAutoXml),
+        StandardCharsets.UTF_8)) {
+      out.write("<datastore-indexes>");
+      out.write("<datastore-index kind='Employee' ancestor='false'>");
+      out.write("<property name='lastName' direction='asc' /></datastore-index>");
+      out.write("</datastore-index>");
+      out.write("</datastore-indexes>");
+      out.flush();
+    }
+  }
+
+  private void createEmptyDatastoreIndexesAutoXml() throws IOException {
+    File appengineGenerated = new File(webInf, "appengine-generated");
+    File datastoreIndexesAutoXml = new File(appengineGenerated, "datastore-indexes-auto.xml");
+    
+    assertTrue(appengineGenerated.mkdirs());
+    assertTrue(datastoreIndexesAutoXml.createNewFile());
+
+    try (Writer out = new OutputStreamWriter(new FileOutputStream(datastoreIndexesAutoXml),
+        StandardCharsets.UTF_8)) {
+      out.write("<datastore-indexes/>");
+      out.flush();
+    }
   }
 }
