@@ -166,7 +166,7 @@ public class DatastoreIndexUpdateDataTest {
         StandardCharsets.UTF_8)) {
       out.write("<datastore-indexes>");
       out.write("<datastore-index kind='Employee' ancestor='false'>");
-      out.write("<property name='lastName' direction='asc' /></datastore-index>");
+      out.write("<property name='lastName' direction='asc' />");
       out.write("</datastore-index>");
       out.write("</datastore-indexes>");
       out.flush();
