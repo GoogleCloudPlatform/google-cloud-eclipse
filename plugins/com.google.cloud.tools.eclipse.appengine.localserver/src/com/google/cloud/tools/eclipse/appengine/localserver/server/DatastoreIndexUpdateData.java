@@ -57,10 +57,10 @@ public class DatastoreIndexUpdateData {
     IPath deployPath = serverBehaviour.getModuleDeployDirectory(defaultService);
     IPath datastoreIndexesAutoXml =
         deployPath.append("WEB-INF/appengine-generated/datastore-indexes-auto.xml");
-    if(!indexGenerated(datastoreIndexesAutoXml)) {
+    if (!indexGenerated(datastoreIndexesAutoXml)) {
       return null;
     }
-    // the datastore-indexes-auto.xml may be generated even if the datastore-indexes.xml does not exist
+    // datastore-indexes-auto.xml may be generated even if datastore-indexes.xml does not exist
     IFile datastoreIndexesXml = WebProjectUtil.findInWebInf(defaultService.getProject(),
         new org.eclipse.core.runtime.Path("datastore-indexes.xml"));
 
