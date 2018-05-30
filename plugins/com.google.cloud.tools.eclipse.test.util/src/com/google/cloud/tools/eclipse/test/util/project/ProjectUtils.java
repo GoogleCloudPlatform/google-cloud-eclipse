@@ -152,20 +152,9 @@ public class ProjectUtils {
   }
 
   /**
-   * Waits until no error markers are found in the workspace. Returns true unless it times out
-   * after 300 seconds. Returns false if it times out.
-   * 
-   * This method does not wait for pending build and validation jobs, so it is usually required to
-   * call methods such as {@link #waitForProjects} beforehand.
-   */
-  public static boolean waitUntilNoBuildErrors() throws CoreException {
-    IProject[] projects = getWorkspace().getRoot().getProjects();
-    return waitUntilNoBuildErrors(projects);
-  }
-
-  /**
-   * Waits until no error markers are found for the projects. Returns true unless it times out after
-   * 300 seconds. Returns false if it times out.
+   * Waits until no error markers are found for the specified projects or any projects in the
+   * workspace if no project is specified. Returns true unless it times out after 300 seconds.
+   * Returns false if it times out.
    * 
    * This method does not wait for pending build and validation jobs, so it is usually required to
    * call methods such as {@link #waitForProjects} beforehand.
@@ -192,29 +181,38 @@ public class ProjectUtils {
     }
   }
 
-  /** Fail if there are any build errors on any project in the workspace. */
+  /** Fail if there are any build errors on any projects in the workspace. */
   public static void failIfBuildErrors() throws CoreException {
     failIfBuildErrors("Projects have build errors");
   }
 
-  public static void failIfBuildErrors(String message) throws CoreException {
-    failIfBuildErrors(message, getWorkspace().getRoot().getProjects());
-  }
-
-  /** Fail if there are any build errors on the specified projects. */
+  /**
+   * Fail if there are any build errors on the specified projects or any projects in the workspace
+   * if no project is specified.
+   */
   public static void failIfBuildErrors(String message, Collection<IProject> projects)
       throws CoreException {
     failIfBuildErrors(message, projects.toArray(new IProject[projects.size()]));
   }
 
-  /** Fail if there are any build errors on the specified projects. */
+  /**
+   * Fail if there are any build errors on the specified projects or any projects in the workspace
+   * if no project is specified.
+   */
   public static void failIfBuildErrors(String message, IProject... projects) throws CoreException {
     Set<String> errors = getAllBuildErrors(projects);
     assertTrue(message + "\n" + Joiner.on("\n").join(errors), errors.isEmpty());
   }
 
-  /** Return a list of all build errors on the specified projects. */
+  /**
+   * Return a list of all build errors on the specified projects or any projects in the workspace
+   * if no project is specified.
+   */
   public static Set<String> getAllBuildErrors(IProject... projects) throws CoreException {
+    if (projects.length == 0) {
+      projects = getWorkspace().getRoot().getProjects();
+    }
+
     Set<String> errors = new LinkedHashSet<>();
     for (IProject project : projects) {
       IMarker[] problems = project.findMarkers(IMarker.PROBLEM, true /* includeSubtypes */,
@@ -309,7 +307,7 @@ public class ProjectUtils {
   /** Wait for any spawned jobs and builds to complete (e.g., validation jobs). */
   public static void waitForProjects(Runnable delayTactic, IProject... projects) {
     if (projects.length == 0) {
-      projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+      projects = getWorkspace().getRoot().getProjects();
     }
     Stopwatch timer = Stopwatch.createStarted();
     try {
