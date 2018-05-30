@@ -196,11 +196,13 @@ public class CodeTemplates {
         properties, monitor);
   }
 
-  private static boolean isStandardJava7Runtime(AppEngineProjectConfig config) {
+  @VisibleForTesting
+  static boolean isStandardJava7Runtime(AppEngineProjectConfig config) {
     return Objects.equal(AppEngineRuntime.STANDARD_JAVA_7.getId(), config.getRuntimeId());
   }
 
-  private static boolean isObjectifySelected(AppEngineProjectConfig config) {
+  @VisibleForTesting
+  static boolean isObjectifySelected(AppEngineProjectConfig config) {
     Predicate<Library> isObjectify = library -> "objectify".equals(library.getId()); //$NON-NLS-1$
     List<Library> selectedLibraries = config.getAppEngineLibraries();
     return selectedLibraries.stream().anyMatch(isObjectify);
