@@ -152,10 +152,10 @@ public class ProjectUtils {
   }
 
   /**
-   * Waits until no error markers are found for the specified projects or any projects in the
-   * workspace if no project is specified. Returns true unless it times out after 300 seconds.
-   * Returns false if it times out.
-   * 
+   * Waits until no error markers are found for the specified projects. Uses all projects in the
+   * workspace if {@code project} is empty. Returns {@code true} when no error markers are found and
+   * {@code false} after time-out of 300 seconds.
+   *
    * This method does not wait for pending build and validation jobs, so it is usually required to
    * call methods such as {@link #waitForProjects} beforehand.
    */
