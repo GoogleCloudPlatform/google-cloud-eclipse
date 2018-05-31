@@ -187,8 +187,8 @@ public class ProjectUtils {
   }
 
   /**
-   * Fail if there are any build errors on the specified projects or any projects in the workspace
-   * if no project is specified.
+   * Fail if there are any build errors on the specified projects. Uses all projects in the
+   * workspace if {@code project} is empty.
    */
   public static void failIfBuildErrors(String message, Collection<IProject> projects)
       throws CoreException {
@@ -196,8 +196,8 @@ public class ProjectUtils {
   }
 
   /**
-   * Fail if there are any build errors on the specified projects or any projects in the workspace
-   * if no project is specified.
+   * Fail if there are any build errors on the specified projects. Uses all projects in the
+   * workspace if {@code project} is empty.
    */
   public static void failIfBuildErrors(String message, IProject... projects) throws CoreException {
     Set<String> errors = getAllBuildErrors(projects);
