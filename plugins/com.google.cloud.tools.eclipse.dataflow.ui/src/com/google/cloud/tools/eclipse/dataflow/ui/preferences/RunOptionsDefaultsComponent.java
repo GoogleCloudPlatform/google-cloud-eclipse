@@ -198,22 +198,22 @@ public class RunOptionsDefaultsComponent {
     browse.addSelectionListener(new FileFieldSetter(serviceAccountKey, filterExtensions));
 
     // Account selection occupies a single row
-    accountLabel.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false, 1, 1));
+    accountLabel.setLayoutData(new GridData(SWT.LEAD, SWT.CENTER, false, false, 1, 1));
     accountSelector.setLayoutData(
         new GridData(SWT.FILL, SWT.CENTER, true, false, columns - ACCOUNT_SPENT_COLUMNS, 1));
 
     // Project input occupies a single row
-    projectInputLabel.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false, 1, 1));
+    projectInputLabel.setLayoutData(new GridData(SWT.LEAD, SWT.CENTER, false, false, 1, 1));
     projectInput.getControl().setLayoutData(
         new GridData(SWT.FILL, SWT.CENTER, true, false, columns - PROJECT_INPUT_SPENT_COLUMNS, 1));
 
     // Staging Location, Combo, and Label occupy a single line
-    comboLabel.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false, 1, 1));
+    comboLabel.setLayoutData(new GridData(SWT.LEAD, SWT.CENTER, false, false, 1, 1));
     stagingLocationInput.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false,
         columns - STAGING_LOCATION_SPENT_COLUMNS, 1));
 
     // Service account key row
-    serviceAccountKeyLabel.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false, 1, 1));
+    serviceAccountKeyLabel.setLayoutData(new GridData(SWT.LEAD, SWT.CENTER, false, false, 1, 1));
     serviceAccountKey.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false,
         columns - SERVICE_ACCOUNT_KEY_SPENT_COLUMNS, 1));
 
