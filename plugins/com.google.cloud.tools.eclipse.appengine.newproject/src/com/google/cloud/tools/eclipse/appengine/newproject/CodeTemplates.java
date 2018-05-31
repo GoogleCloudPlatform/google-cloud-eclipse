@@ -113,7 +113,7 @@ public class CodeTemplates {
     Map<String, String> properties = new HashMap<>();
     properties.put("package", Strings.nullToEmpty(packageName)); //$NON-NLS-1$
 
-    boolean servlet25 = isStandardProject && selectedStandardJava7Runtime(config);
+    boolean servlet25 = isStandardProject && isStandardJava7RuntimeSelected(config);
     if (servlet25) {
       properties.put("servletVersion", "2.5"); //$NON-NLS-1$ //$NON-NLS-2$
     } else {
@@ -131,7 +131,7 @@ public class CodeTemplates {
         Templates.MOCK_HTTPSERVLETRESPONSE_TEMPLATE,
         testPackageFolder, properties, subMonitor.split(5));
 
-    if (selectedObjectify(config) && !servlet25) {
+    if (isObjectifySelected(config) && !servlet25) {
       createChildFile("ObjectifyWebFilter.java", //$NON-NLS-1$
           Templates.OBJECTIFY_WEB_FILTER_TEMPLATE,
           mainPackageFolder, properties, subMonitor.split(5));
@@ -177,11 +177,11 @@ public class CodeTemplates {
         : config.getPackageName() + "."; //$NON-NLS-1$
     properties.put("package", packageValue); //$NON-NLS-1$
 
-    if (selectedObjectify(config)) {
+    if (isObjectifySelected(config)) {
       properties.put("objectifyAdded", "true"); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
-    if (isStandardProject && selectedStandardJava7Runtime(config)) {
+    if (isStandardProject && isStandardJava7RuntimeSelected(config)) {
       properties.put("servletVersion", "2.5"); //$NON-NLS-1$ //$NON-NLS-2$
       properties.put("namespace", "http://java.sun.com/xml/ns/javaee"); //$NON-NLS-1$ //$NON-NLS-2$
       properties.put("schemaUrl", "http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -197,12 +197,12 @@ public class CodeTemplates {
   }
 
   @VisibleForTesting
-  static boolean selectedStandardJava7Runtime(AppEngineProjectConfig config) {
+  static boolean isStandardJava7RuntimeSelected(AppEngineProjectConfig config) {
     return Objects.equal(AppEngineRuntime.STANDARD_JAVA_7.getId(), config.getRuntimeId());
   }
 
   @VisibleForTesting
-  static boolean selectedObjectify(AppEngineProjectConfig config) {
+  static boolean isObjectifySelected(AppEngineProjectConfig config) {
     Predicate<Library> isObjectify = library -> "objectify".equals(library.getId()); //$NON-NLS-1$
     List<Library> selectedLibraries = config.getAppEngineLibraries();
     return selectedLibraries.stream().anyMatch(isObjectify);
@@ -245,7 +245,7 @@ public class CodeTemplates {
     properties.put("appEngineApiSdkVersion", sdkVersion); //$NON-NLS-1$
     
     if (isStandardProject) {
-      if (selectedStandardJava7Runtime(config)) {
+      if (isStandardJava7RuntimeSelected(config)) {
         properties.put("servletVersion", "2.5"); //$NON-NLS-1$ //$NON-NLS-2$
         properties.put("compilerVersion", "1.7"); //$NON-NLS-1$ //$NON-NLS-2$
       } else {

@@ -187,33 +187,33 @@ public class CodeTemplatesTest {
   }
 
   @Test
-  public void testSelectedObjectify_notSelected() {
+  public void testIsObjectifySelected_notSelected() {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
-    assertFalse(CodeTemplates.selectedObjectify(config));
+    assertFalse(CodeTemplates.isObjectifySelected(config));
   }
 
   @Test
-  public void testSelectedObjectify_selected() {
+  public void testIsObjectifySelected_selected() {
     List<Library> libraries = Arrays.asList(new Library("a-library"), new Library("objectify"));
 
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     config.setAppEngineLibraries(libraries);
 
-    assertTrue(CodeTemplates.selectedObjectify(config));
+    assertTrue(CodeTemplates.isObjectifySelected(config));
   }
 
   @Test
-  public void testSelectedStandardJava7Runtime_java7() {
+  public void testIsStandardJava7RuntimeSelected_java7() {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     config.setRuntimeId(null);  // null runtime corresponds to Java 7 runtime
-    assertTrue(CodeTemplates.selectedStandardJava7Runtime(config));
+    assertTrue(CodeTemplates.isStandardJava7RuntimeSelected(config));
   }
 
   @Test
-  public void testSelectedStandardJava7Runtime_java8() {
+  public void testIsStandardJava7RuntimeSelected_java8() {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     config.setRuntimeId("java8");
-    assertFalse(CodeTemplates.selectedStandardJava7Runtime(config));
+    assertFalse(CodeTemplates.isStandardJava7RuntimeSelected(config));
   }
 
   private boolean objectifyFilterClassExists() {
