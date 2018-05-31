@@ -193,8 +193,18 @@ public class CodeTemplatesTest {
   }
 
   @Test
-  public void testIsObjectifySelected_selected() {
+  public void testIsObjectifySelected_objectify5() {
     List<Library> libraries = Arrays.asList(new Library("a-library"), new Library("objectify"));
+
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setAppEngineLibraries(libraries);
+
+    assertTrue(CodeTemplates.isObjectifySelected(config));
+  }
+
+  @Test
+  public void testIsObjectifySelected_objectify6() {
+    List<Library> libraries = Arrays.asList(new Library("objectify6"), new Library("a-library"));
 
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     config.setAppEngineLibraries(libraries);
