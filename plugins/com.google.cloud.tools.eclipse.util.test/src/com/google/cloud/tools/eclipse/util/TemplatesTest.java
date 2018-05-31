@@ -138,6 +138,18 @@ public class TemplatesTest {
   }
 
   @Test
+  public void testCreateFileContent_web25ObjectifyFilter() throws CoreException, IOException {
+    dataMap.put("package", "com.example.");
+    dataMap.put("servletVersion", "2.5");
+    dataMap.put("namespace", "http://java.sun.com/xml/ns/javaee");
+    dataMap.put("schemaUrl", "http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd");
+    dataMap.put("objectifyAdded", "true");
+    Templates.createFileContent(fileLocation, Templates.WEB_XML_TEMPLATE, dataMap);
+
+    compareToFile("web25ObjectifyFilter.txt");
+  }
+
+  @Test
   public void testCreateFileContent_web31() throws CoreException, IOException {
     dataMap.put("package", "com.example.");
     dataMap.put("servletVersion", "3.1");
