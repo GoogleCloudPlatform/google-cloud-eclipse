@@ -187,34 +187,33 @@ public class CodeTemplatesTest {
   }
 
   @Test
-  public void testIsObjectifySelected_notSelected() {
+  public void testSelectedObjectify_notSelected() {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
-    assertFalse(CodeTemplates.isObjectifySelected(config));
+    assertFalse(CodeTemplates.selectedObjectify(config));
   }
 
   @Test
-  public void testIsObjectifySelected_selected() {
-    List<Library> libraries = Arrays.asList(
-        new Library("someLibrary"), new Library("objectify"), new Library("anotherLibrary"));
+  public void testSelectedObjectify_selected() {
+    List<Library> libraries = Arrays.asList(new Library("a-library"), new Library("objectify"));
 
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     config.setAppEngineLibraries(libraries);
 
-    assertTrue(CodeTemplates.isObjectifySelected(config));
+    assertTrue(CodeTemplates.selectedObjectify(config));
   }
 
   @Test
-  public void testIsStandardJava7Runtime_nullRuntimeIsJava7() {
+  public void testSelectedStandardJava7Runtime_java7() {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
-    config.setRuntimeId(null);
-    assertTrue(CodeTemplates.isStandardJava7Runtime(config));
+    config.setRuntimeId(null);  // null runtime corresponds to Java 7 runtime
+    assertTrue(CodeTemplates.selectedStandardJava7Runtime(config));
   }
 
   @Test
-  public void testIsStandardJava7Runtime_nonNullRuntime() {
+  public void testSelectedStandardJava7Runtime_java8() {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     config.setRuntimeId("java8");
-    assertFalse(CodeTemplates.isStandardJava7Runtime(config));
+    assertFalse(CodeTemplates.selectedStandardJava7Runtime(config));
   }
 
   private boolean objectifyFilterClassExists() {
