@@ -28,22 +28,20 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
 
-/**
- * Utility methods for handling Eclipse Core Resources.
- */
+/** Utility methods for handling Eclipse Core Resources. */
 public class ResourceUtils {
 
   /**
    * Create the components of the provided folder as required. Assumes the containing project
    * already exists.
-   * 
+   *
    * @param folder the path to be created if it does not already exist
    * @param monitor may be {@code null}
    * @throws CoreException on error
    */
   public static void createFolders(IContainer folder, IProgressMonitor monitor)
       throws CoreException {
-    
+
     IPath path = folder.getProjectRelativePath();
     IContainer current = folder.getProject();
     SubMonitor progress = SubMonitor.convert(monitor, path.segmentCount());
@@ -61,9 +59,9 @@ public class ResourceUtils {
   public static Collection<IFile> getAffectedFiles(IResourceDelta delta) throws CoreException {
     Collection<IFile> files = new ArrayList<>();
     delta.accept(
-        subdelta -> {
-          if (subdelta.getResource() instanceof IFile) {
-            files.add((IFile) subdelta.getResource());
+        _delta -> {
+          if (_delta.getResource() instanceof IFile) {
+            files.add((IFile) _delta.getResource());
             return false;
           } else {
             return true;
