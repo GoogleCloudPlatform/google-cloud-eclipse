@@ -23,9 +23,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.BiConsumer;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.Function;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -35,29 +34,33 @@ import org.eclipse.jface.viewers.StyledString;
 import org.xml.sax.SAXException;
 
 /** A model representation of the {@code appengine-web.xml}. */
-public class AppEngineStandardProject extends AppEngineResourceElement {
+public class AppEngineStandardProjectElement extends AppEngineResourceElement {
 
   /**
    * Create and populate for the given project.
    *
    * @throws AppEngineException when unable to retrieve from the appengine-web.xml
    */
-  public static AppEngineStandardProject create(IProject project) throws AppEngineException {
-    AppEngineStandardProject appEngineProject = new AppEngineStandardProject(project);
+  public static AppEngineStandardProjectElement create(IProject project) throws AppEngineException {
+    AppEngineStandardProjectElement appEngineProject = new AppEngineStandardProjectElement(project);
     appEngineProject.reloadDescriptor();
-    appEngineProject.reloadConfigurations();
+    appEngineProject.reloadConfigurationFiles();
     return appEngineProject;
   }
 
   private AppEngineDescriptor descriptor;
-  private final List<AppEngineResourceElement> configurations = new ArrayList<>();
+  /**
+   * Map of <em>base-file-name &rarr; model-element</em> pairs, sorted by the
+   * <em>base-file-name</em> (e.g., <code>dispatch.xml</code>).
+   */
+  private final Map<String, AppEngineResourceElement> configurations = new TreeMap<>();
 
-  private AppEngineStandardProject(IProject project) {
+  private AppEngineStandardProjectElement(IProject project) {
     super(project, WebProjectUtil.findInWebInf(project, new Path("appengine-web.xml")));
   }
 
   public AppEngineResourceElement[] getConfigurations() {
-    return configurations.toArray(new AppEngineResourceElement[configurations.size()]);
+    return configurations.values().toArray(new AppEngineResourceElement[configurations.size()]);
   }
 
   public String getRuntimeType() {
@@ -91,27 +94,30 @@ public class AppEngineStandardProject extends AppEngineResourceElement {
     Preconditions.checkNotNull(file);
     Preconditions.checkArgument(file.getProject() == getProject());
     try {
-      // if the appengine-web or WTP deployment assembly change, reload everything (may get entirely
-      // different files)
-      if ("appengine-web.xml".equals(file.getName())
-          || "org.eclipse.wst.common.component".equals(file.getName())) {
+      String baseName = file.getName();
+      if ("appengine-web.xml".equals(baseName)
+          || "org.eclipse.wst.common.component".equals(baseName)) {
+        // if the appengine-web or WTP deployment assembly change, reload everything:
+        // e.g., may no longer be "default", or deployment assembly changed so may
+        // may get entirely different files)
         reloadDescriptor();
-        reloadConfigurations();
-        // need to update from the project on (may no longer be "default", forexample)
+        reloadConfigurationFiles();
         return getProject();
       } else {
-        reloadConfigurations();
+        configurations.remove(baseName); // force rebuild
+        reloadConfigurationFiles();
         return this;
       }
-    } catch(AppEngineException ex) {
-      return getProject();
+    } catch (AppEngineException ex) {
+      // problem loading the appengine-web.xml file
+      return null;
     }
   }
 
   /**
    * Reload the appengine-web.xml descriptor.
    *
-   * @throws AppEngineException
+   * @throws AppEngineException if the descriptor has errors or could not be loaded
    */
   private void reloadDescriptor() throws AppEngineException {
     Preconditions.checkState(getFile() != null && getFile().exists());
@@ -120,45 +126,50 @@ public class AppEngineStandardProject extends AppEngineResourceElement {
     } catch (IOException | SAXException | CoreException ex) {
       throw new AppEngineException("Unable to load appengine descriptor from " + getFile(), ex);
     }
-    // remove all configs whose files may have been moved or removed
-    configurations.removeIf(
-        element ->
-            !element.getFile().exists()
-                || !element
-                    .getFile()
-                    .equals(
-                        WebProjectUtil.findInWebInf(
-                            getProject(), new Path(element.getFile().getName()))));
   }
-  
+
   /**
    * Reload the ancillary configuration files.
    *
-   * @throws AppEngineException
+   * @throws AppEngineException if the descriptor has errors or could not be loaded
    */
-  private void reloadConfigurations() throws AppEngineException {
+  private void reloadConfigurationFiles() throws AppEngineException {
     // ancillary config files are only taken from the default module
     if (descriptor.getServiceId() != null && !"default".equals(descriptor.getServiceId())) {
       configurations.clear();
       return;
     }
-    BiConsumer<String, Function<IFile, AppEngineResourceElement>> prober =
-        (fileName, elementCreator) -> {
-          IFile configurationFile = WebProjectUtil.findInWebInf(getProject(), new Path(fileName));
-          if (configurationFile != null && configurationFile.exists()) {
-            configurations.add(elementCreator.apply(configurationFile));
-          }
-        };
-    prober.accept("cron.xml", cronXml -> new CronDescriptor(getProject(), cronXml)); // $NON-NLS-1$
-    prober.accept(
+
+    checkConfiguration(
+        "cron.xml", resolvedFile -> new CronDescriptor(getProject(), resolvedFile)); // $NON-NLS-1$
+    checkConfiguration(
         "datastore-indexes.xml", // $NON-NLS-1$
-        cronXml -> new DatastoreIndexesDescriptor(getProject(), cronXml));
-    prober.accept(
-        "queue.xml", cronXml -> new TaskQueuesDescriptor(getProject(), cronXml)); // $NON-NLS-1$
-    prober.accept(
-        "dos.xml", cronXml -> new DenialOfServiceDescriptor(getProject(), cronXml)); // $NON-NLS-1$
-    prober.accept(
+        resolvedFile -> new DatastoreIndexesDescriptor(getProject(), resolvedFile));
+    checkConfiguration(
+        "queue.xml",
+        resolvedFile -> new TaskQueuesDescriptor(getProject(), resolvedFile)); // $NON-NLS-1$
+    checkConfiguration(
+        "dos.xml",
+        resolvedFile -> new DenialOfServiceDescriptor(getProject(), resolvedFile)); // $NON-NLS-1$
+    checkConfiguration(
         "dispatch.xml", // $NON-NLS-1$
-        cronXml -> new DispatchRoutingDescriptor(getProject(), cronXml));
+        resolvedFile -> new DispatchRoutingDescriptor(getProject(), resolvedFile));
+  }
+
+  private void checkConfiguration(
+      String fileName, Function<IFile, AppEngineResourceElement> elementCreator) {
+    configurations.compute(
+        fileName,
+        (ignored, element) -> {
+          IFile configurationFile = WebProjectUtil.findInWebInf(getProject(), new Path(fileName));
+          if (configurationFile == null || !configurationFile.exists()) {
+            // remove the element e.g., file has disappeared
+            return null;
+          } else if (element == null || !configurationFile.equals(element.getFile())) {
+            // create or recreate the element
+            return elementCreator.apply(configurationFile);
+          }
+          return element;
+        });
   }
 }

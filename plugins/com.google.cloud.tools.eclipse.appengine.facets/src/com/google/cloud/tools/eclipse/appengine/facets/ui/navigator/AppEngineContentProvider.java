@@ -18,7 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.facets.ui.navigator;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineStandardProject;
+import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineStandardProjectElement;
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -75,12 +75,12 @@ public class AppEngineContentProvider implements ITreeContentProvider {
    * not an App Engine project.
    */
   @VisibleForTesting
-  static AppEngineStandardProject loadRepresentation(IProject project) {
+  static AppEngineStandardProjectElement loadRepresentation(IProject project) {
     if (project == null || !isStandard(project)) {
       return null;
     }
     try {
-      AppEngineStandardProject appEngineProject = AppEngineStandardProject.create(project);
+      AppEngineStandardProjectElement appEngineProject = AppEngineStandardProjectElement.create(project);
       return appEngineProject;
     } catch (AppEngineException ex) {
       logger.log(Level.WARNING, "Unable to load App Engine project details for " + project, ex);
@@ -88,7 +88,7 @@ public class AppEngineContentProvider implements ITreeContentProvider {
     }
   }
 
-  private final LoadingCache<IProject, AppEngineStandardProject> mapping =
+  private final LoadingCache<IProject, AppEngineStandardProjectElement> projectMapping =
       CacheBuilder.newBuilder()
           .weakKeys()
           .build(CacheLoader.from(AppEngineContentProvider::loadRepresentation));
@@ -116,9 +116,9 @@ public class AppEngineContentProvider implements ITreeContentProvider {
     Set<Object> toBeRefreshed = new HashSet<>();
     for (IFile file : affected) {
       IProject project = file.getProject();
-      AppEngineStandardProject webElement = mapping.getIfPresent(project);
-      if (webElement != null) {
-        Object handle = webElement.resourceChanged(file);
+      AppEngineStandardProjectElement projectElement = projectMapping.getIfPresent(project);
+      if (projectElement != null) {
+        Object handle = projectElement.resourceChanged(file);
         if (handle != null) {
           toBeRefreshed.add(handle);
         }
@@ -132,12 +132,7 @@ public class AppEngineContentProvider implements ITreeContentProvider {
     viewer
         .getControl()
         .getDisplay()
-        .asyncExec(
-            () -> {
-              for (Object handle : toBeRefreshed) {
-                viewer.refresh(handle);
-              }
-            });
+        .asyncExec(() -> toBeRefreshed.forEach(handle -> viewer.refresh(handle)));
   }
 
   @Override
@@ -147,27 +142,27 @@ public class AppEngineContentProvider implements ITreeContentProvider {
 
   @Override
   public boolean hasChildren(Object element) {
-    if (element instanceof AppEngineStandardProject) {
-      return ((AppEngineStandardProject) element).getConfigurations().length > 0;
+    if (element instanceof AppEngineStandardProjectElement) {
+      return ((AppEngineStandardProjectElement) element).getConfigurations().length > 0;
     }
     IProject project = getProject(element);
     if (project == null) {
       return false;
     }
-    AppEngineStandardProject webProject = mapping.getIfPresent(project);
+    AppEngineStandardProjectElement webProject = projectMapping.getIfPresent(project);
     return webProject != null ? webProject.getConfigurations().length > 0 : true;
   }
 
   @Override
   public Object[] getChildren(Object parentElement) {
-    if (parentElement instanceof AppEngineStandardProject) {
-      return ((AppEngineStandardProject) parentElement).getConfigurations();
+    if (parentElement instanceof AppEngineStandardProjectElement) {
+      return ((AppEngineStandardProjectElement) parentElement).getConfigurations();
     }
     IProject project = getProject(parentElement);
     if (project != null) {
       try {
-        AppEngineStandardProject webElement = mapping.get(project);
-        return webElement == null ? EMPTY_ARRAY : new Object[] {webElement};
+        AppEngineStandardProjectElement projectElement = projectMapping.get(project);
+        return projectElement == null ? EMPTY_ARRAY : new Object[] {projectElement};
       } catch (ExecutionException ex) {
         logger.log(Level.WARNING, "Unable to load App Engine project " + project, ex);
       }
