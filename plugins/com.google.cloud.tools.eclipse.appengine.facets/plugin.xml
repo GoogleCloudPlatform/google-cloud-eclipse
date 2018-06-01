@@ -131,7 +131,7 @@
           </iterate>
           <not>
             <iterate>
-              <reference definitionId="com.google.cloud.tools.eclipse.appengine.onlyForStandardProjects" />
+              <reference definitionId="com.google.cloud.tools.eclipse.appengine.isStandardProject" />
             </iterate>
           </not>
         </and>
@@ -140,7 +140,7 @@
   </extension>
 
   <extension point="org.eclipse.core.expressions.definitions">
-    <definition id="com.google.cloud.tools.eclipse.appengine.onlyForStandardProjects">
+    <definition id="com.google.cloud.tools.eclipse.appengine.isStandardProject">
       <adapt type="org.eclipse.core.resources.IProject">
         <test
             property="org.eclipse.wst.common.project.facet.core.projectFacet"
@@ -208,7 +208,7 @@
   </extension>
 
   <extension point="org.eclipse.core.expressions.definitions">
-    <definition id="com.google.cloud.tools.eclipse.appengine.onlyForFlexWarProjects">
+    <definition id="com.google.cloud.tools.eclipse.appengine.isFlexWarProject">
       <adapt type="org.eclipse.core.resources.IProject">
         <test
             property="org.eclipse.wst.common.project.facet.core.projectFacet"
@@ -270,7 +270,7 @@
   </extension>
 
   <extension point="org.eclipse.core.expressions.definitions">
-    <definition id="com.google.cloud.tools.eclipse.appengine.onlyForFlexJarMavenProjects">
+    <definition id="com.google.cloud.tools.eclipse.appengine.isFlexJarMavenProject">
       <adapt type="org.eclipse.core.resources.IProject">
         <and>
           <test
@@ -293,7 +293,7 @@
   </extension>
   
   <!-- 
-    cannot use com.google.cloud.tools.eclipse.appengine.onlyForStandardProjects for the trigger
+    cannot use com.google.cloud.tools.eclipse.appengine.isStandardProject for the trigger
     https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/3089
   -->
   <extension

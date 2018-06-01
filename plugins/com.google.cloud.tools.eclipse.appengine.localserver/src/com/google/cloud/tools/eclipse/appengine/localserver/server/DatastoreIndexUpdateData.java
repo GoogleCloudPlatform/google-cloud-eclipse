@@ -18,15 +18,21 @@ package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.common.annotations.VisibleForTesting;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
-/** A simple value class to capture that updates to a module's {@code datastore-indexes.xml}. */
+/** A simple value class to capture updates to a module's {@code datastore-indexes.xml}. */
 public class DatastoreIndexUpdateData {
   private static final Logger logger = Logger.getLogger(DatastoreIndexUpdateData.class.getName());
 
@@ -49,13 +55,14 @@ public class DatastoreIndexUpdateData {
     LocalAppEngineServerBehaviour serverBehaviour = (LocalAppEngineServerBehaviour) server
         .loadAdapter(LocalAppEngineServerBehaviour.class, null);
     IPath deployPath = serverBehaviour.getModuleDeployDirectory(defaultService);
-    IPath datastoreIndexesAutoXml = deployPath.append("WEB-INF/appengine-generated/datastore-indexes-auto.xml");
-    if(!datastoreIndexesAutoXml.toFile().exists()) {
+    IPath datastoreIndexesAutoXml =
+        deployPath.append("WEB-INF/appengine-generated/datastore-indexes-auto.xml");
+    if (!indexGenerated(datastoreIndexesAutoXml)) {
       return null;
     }
-    // the datastore-indexes-auto.xml may be generated even if the datastore-indexes.xml does not exist
-    IFile datastoreIndexesXml =
-        WebProjectUtil.findInWebInf(defaultService.getProject(), new org.eclipse.core.runtime.Path("datastore-indexes.xml"));
+    // datastore-indexes-auto.xml may be generated even if datastore-indexes.xml does not exist
+    IFile datastoreIndexesXml = WebProjectUtil.findInWebInf(defaultService.getProject(),
+        new org.eclipse.core.runtime.Path("datastore-indexes.xml"));
 
     if (datastoreIndexesXml != null && datastoreIndexesXml.exists()) {
       long sourceTimestamp = datastoreIndexesXml.getLocalTimeStamp();
@@ -68,6 +75,23 @@ public class DatastoreIndexUpdateData {
 
     return new DatastoreIndexUpdateData(server, configuration, defaultService, datastoreIndexesXml,
         datastoreIndexesAutoXml);
+  }
+
+  private static boolean indexGenerated(IPath datastoreIndexesAutoXml) {
+    if (!datastoreIndexesAutoXml.toFile().exists()) { 
+      return false;
+    }
+    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    factory.setNamespaceAware(true);
+    try {
+      DocumentBuilder builder = factory.newDocumentBuilder();
+      Document doc = builder.parse(datastoreIndexesAutoXml.toFile());
+      return doc.getElementsByTagName("datastore-index").getLength() > 0;
+    } catch (ParserConfigurationException ex) {
+      return true;
+    } catch (SAXException | IOException ex) {
+      return false;
+    }
   }
 
   public final IServer server;

@@ -82,9 +82,7 @@ public class LocalAppEnginePublishOperationTest {
   @After
   public void tearDown() throws CoreException {
     if (projects != null) {
-      for (IProject project : projects.values()) {
-        project.delete(true, null);
-      }
+      serverProject.getWorkspace().delete(projects.values().toArray(new IProject[0]), true, null);
     }
     if (server != null) {
       server.delete();

@@ -23,7 +23,9 @@ import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.swtbot.MenuMatcher;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
+import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
@@ -36,6 +38,7 @@ import org.junit.rules.TemporaryFolder;
 public class ProjectContextMenuTest extends BaseProjectTest {
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
   @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
+  @Rule public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
   @Test
   public void testPlainJavaProject() {
@@ -134,7 +137,7 @@ public class ProjectContextMenuTest extends BaseProjectTest {
 
   @Test
   public void testMavenAppEngineStandardJava7() {
-    IProject project =
+    project =
         SwtBotAppEngineActions.createMavenWebAppProject(
             bot,
             "projectContextMenuJava7",
@@ -157,7 +160,7 @@ public class ProjectContextMenuTest extends BaseProjectTest {
 
   @Test
   public void testMavenAppEngineStandardJava8() {
-    IProject project =
+    project =
         SwtBotAppEngineActions.createMavenWebAppProject(
             bot,
             "projectContextMenuJava8",
