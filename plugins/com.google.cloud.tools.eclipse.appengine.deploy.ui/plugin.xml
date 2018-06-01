@@ -54,7 +54,7 @@
         <and>
           <count value="1" />
           <iterate>
-            <reference definitionId="com.google.cloud.tools.eclipse.appengine.onlyForStandardProjects" />
+            <reference definitionId="com.google.cloud.tools.eclipse.appengine.isStandardProject" />
           </iterate>
         </and>
       </enabledWhen>
@@ -98,8 +98,8 @@
           <count value="1" />
           <iterate>
             <or>
-              <reference definitionId="com.google.cloud.tools.eclipse.appengine.onlyForFlexWarProjects" />
-              <reference definitionId="com.google.cloud.tools.eclipse.appengine.onlyForFlexJarMavenProjects" />
+              <reference definitionId="com.google.cloud.tools.eclipse.appengine.isFlexWarProject" />
+              <reference definitionId="com.google.cloud.tools.eclipse.appengine.isFlexJarMavenProject" />
             </or>
           </iterate>
         </and>

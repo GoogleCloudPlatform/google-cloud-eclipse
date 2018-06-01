@@ -20,6 +20,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.WarPublisher;
+import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.ZipUtil;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
@@ -36,6 +37,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.junit.AfterClass;
 import org.junit.Rule;
@@ -45,12 +47,13 @@ import org.junit.runner.RunWith;
 @RunWith(SWTBotJunit4ClassRunner.class)
 public abstract class ChildModuleWarPublishTest {
 
-  @Rule
-  public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
+  @Rule public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
   private static final IProgressMonitor monitor = new NullProgressMonitor();
   private static Map<String, IProject> allProjects;
   private static IProject project;
+
+  private static final SWTWorkbenchBot bot = new SWTWorkbenchBot();
 
   protected abstract List<String> getExpectedChildModuleNames();
 
@@ -64,10 +67,18 @@ public abstract class ChildModuleWarPublishTest {
 
   @AfterClass
   public static void tearDown() {
-    ProjectUtils.waitForProjects(allProjects.values());
-    for (IProject project : allProjects.values()) {
+    // Collapse projects to avoid "No IModelProvider exists for project" errors
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=511541
+    SwtBotProjectActions.collapseProjects(bot);
+
+    // close editors, so no property changes are dispatched on delete
+    bot.closeAllEditors();
+
+    IProject[] projects = allProjects.values().toArray(new IProject[0]);
+    ProjectUtils.waitForProjects(projects);
+    if (projects.length > 0) {
       try {
-        project.delete(true, null);
+        projects[0].getWorkspace().delete(projects, true, null);
       } catch (CoreException | RuntimeException ex) {
         Logger.getLogger(ChildModuleWarPublishTest.class.getName()).log(Level.WARNING,
             ex.getMessage(), ex);
