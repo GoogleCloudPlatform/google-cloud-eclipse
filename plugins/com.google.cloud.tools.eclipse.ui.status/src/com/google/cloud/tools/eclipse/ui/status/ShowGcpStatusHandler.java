@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.ui.status;
 
 import com.google.cloud.tools.eclipse.ui.util.ServiceUtils;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,17 +38,25 @@ public class ShowGcpStatusHandler extends AbstractHandler implements IElementUpd
 
   private static final String BUNDLE_ID = "com.google.cloud.tools.eclipse.ui.status";
 
-  private static final ImageDescriptor IMG_OK =
+  @VisibleForTesting
+  static final ImageDescriptor IMG_OK =
       AbstractUIPlugin.imageDescriptorFromPlugin(BUNDLE_ID, "icons/gcp-ok.png");
-  private static final ImageDescriptor IMG_LOW =
+
+  @VisibleForTesting
+  static final ImageDescriptor IMG_LOW =
       AbstractUIPlugin.imageDescriptorFromPlugin(BUNDLE_ID, "icons/gcp-low.png");
-  private static final ImageDescriptor IMG_MEDIUM =
+
+  @VisibleForTesting
+  static final ImageDescriptor IMG_MEDIUM =
       AbstractUIPlugin.imageDescriptorFromPlugin(BUNDLE_ID, "icons/gcp-medium.png");
-  private static final ImageDescriptor IMG_HIGH =
+
+  @VisibleForTesting
+  static final ImageDescriptor IMG_HIGH =
       AbstractUIPlugin.imageDescriptorFromPlugin(BUNDLE_ID, "icons/gcp-high.png");
-  private static final ImageDescriptor IMG_ERROR =
-      AbstractUIPlugin.imageDescriptorFromPlugin(
-          "org.eclipse.jface", "icons/full/message_error.png");
+
+  @VisibleForTesting
+  static final ImageDescriptor IMG_ERROR =
+      AbstractUIPlugin.imageDescriptorFromPlugin(BUNDLE_ID, "icons/error.png");
 
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -65,6 +74,14 @@ public class ShowGcpStatusHandler extends AbstractHandler implements IElementUpd
   @Override
   public void updateElement(UIElement element, @SuppressWarnings("rawtypes") Map parameters) {
     GcpStatusMonitoringService service = element.getServiceLocator().getService(GcpStatusMonitoringService.class);
+    updateElement(element, parameters, service);
+  }
+
+  @VisibleForTesting
+  void updateElement(
+      UIElement element,
+      @SuppressWarnings("rawtypes") Map parameters,
+      GcpStatusMonitoringService service) {
     GcpStatus status = service.getCurrentStatus();
     element.setText("Status: " + status.summary);
     switch (status.severity) {

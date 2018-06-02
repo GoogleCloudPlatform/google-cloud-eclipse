@@ -36,6 +36,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -72,7 +73,8 @@ public class PollingStatusServiceImpl implements GcpStatusMonitoringService {
     protected IStatus run(IProgressMonitor monitor) {
       refreshStatus();
       if (active) {
-        schedule(pollTime);
+        // poll more frequently when having connection errors
+        schedule(currentStatus.severity == Severity.ERROR ? errorPollTime : pollTime);
       }
       return Status.OK_STATUS;
     }
@@ -85,8 +87,14 @@ public class PollingStatusServiceImpl implements GcpStatusMonitoringService {
 
   private Job pollingJob = new PollJob();
 
+
+  /** Normally polls every 3 minutes. */
+  private final long pollTime = TimeUnit.MINUTES.toMillis(3); // poll every 3 minutes
+
+  /** Shorter poll when encountering connection errors. */
+  private final long errorPollTime = TimeUnit.SECONDS.toMillis(30);
+
   private boolean active = false;
-  private long pollTime = 3 * 60 * 1000; // poll every 3 minutes
   private IProxyService proxyService;
   private ListenerList<Consumer<GcpStatusMonitoringService>> listeners = new ListenerList<>();
   private Gson gson = new Gson();
