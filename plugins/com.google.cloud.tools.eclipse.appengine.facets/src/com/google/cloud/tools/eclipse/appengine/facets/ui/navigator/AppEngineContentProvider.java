@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
@@ -80,7 +81,8 @@ public class AppEngineContentProvider implements ITreeContentProvider {
       return null;
     }
     try {
-      AppEngineStandardProjectElement appEngineProject = AppEngineStandardProjectElement.create(project);
+      AppEngineStandardProjectElement appEngineProject =
+          AppEngineStandardProjectElement.create(project);
       return appEngineProject;
     } catch (AppEngineException ex) {
       logger.log(Level.WARNING, "Unable to load App Engine project details for " + project, ex);
@@ -94,11 +96,18 @@ public class AppEngineContentProvider implements ITreeContentProvider {
           .build(CacheLoader.from(AppEngineContentProvider::loadRepresentation));
   private IWorkspace workspace = ResourcesPlugin.getWorkspace();
   private StructuredViewer viewer;
+  private Consumer<Collection<Object>> refresher = this::refreshElements;
   private IResourceChangeListener resourceListener;
+
+  public AppEngineContentProvider() {}
+
+  @VisibleForTesting
+  AppEngineContentProvider(Consumer<Collection<Object>> refresher) {
+    this.refresher = refresher;
+  }
 
   @Override
   public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-    this.viewer = (StructuredViewer) viewer;
     if (resourceListener == null) {
       resourceListener = this::resourceChanged;
       workspace.addResourceChangeListener(resourceListener);
@@ -106,6 +115,7 @@ public class AppEngineContentProvider implements ITreeContentProvider {
   }
 
   private void resourceChanged(IResourceChangeEvent event) {
+    // may come on any thread
     Collection<IFile> affected;
     try {
       affected = ResourceUtils.getAffectedFiles(event.getDelta());
@@ -126,13 +136,20 @@ public class AppEngineContentProvider implements ITreeContentProvider {
         toBeRefreshed.add(project);
       }
     }
-    if (toBeRefreshed.isEmpty()) {
-      return;
+    if (!toBeRefreshed.isEmpty()) {
+      refresher.accept(toBeRefreshed);
     }
-    viewer
-        .getControl()
-        .getDisplay()
-        .asyncExec(() -> toBeRefreshed.forEach(handle -> viewer.refresh(handle)));
+  }
+
+  private void refreshElements(Collection<Object> elements) {
+    if (viewer.getControl() != null
+        && !viewer.getControl().isDisposed()
+        && viewer.getControl().getDisplay() != null) {
+      viewer
+          .getControl()
+          .getDisplay()
+          .asyncExec(() -> elements.forEach(handle -> viewer.refresh(handle)));
+    }
   }
 
   @Override
@@ -143,7 +160,9 @@ public class AppEngineContentProvider implements ITreeContentProvider {
   @Override
   public boolean hasChildren(Object element) {
     if (element instanceof AppEngineStandardProjectElement) {
-      return ((AppEngineStandardProjectElement) element).getConfigurations().length > 0;
+      AppEngineStandardProjectElement projectElement = (AppEngineStandardProjectElement) element;
+      return projectElement.getConfigurations() != null
+          && projectElement.getConfigurations().length > 0;
     }
     IProject project = getProject(element);
     if (project == null) {
