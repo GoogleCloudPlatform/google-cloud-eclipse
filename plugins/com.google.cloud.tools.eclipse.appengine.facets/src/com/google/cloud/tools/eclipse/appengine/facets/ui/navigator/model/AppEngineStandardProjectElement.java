@@ -103,8 +103,14 @@ public class AppEngineStandardProjectElement extends AppEngineResourceElement {
         reloadDescriptor();
         reloadConfigurationFiles();
         return getProject();
+      } else if (configurations.containsKey(baseName)) {
+        // seen before: allow the element to possibly replace itself
+        AppEngineResourceElement oldElement = configurations.get(baseName);
+        AppEngineResourceElement newElement =
+            configurations.computeIfPresent(baseName, (ignored, element) -> element.reload());
+        return oldElement == newElement ? oldElement : this;
       } else {
-        configurations.remove(baseName); // force rebuild
+        // check if a new configuration file
         reloadConfigurationFiles();
         return this;
       }

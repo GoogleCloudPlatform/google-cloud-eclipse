@@ -23,7 +23,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -32,7 +31,6 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineResourceElement;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineStandardProjectElement;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.CronDescriptor;
@@ -41,15 +39,10 @@ import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.Denial
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.DispatchRoutingDescriptor;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.TaskQueuesDescriptor;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
-import com.google.common.base.Strings;
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.function.Consumer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
@@ -85,7 +78,7 @@ public class AppEngineContentProviderTest {
   public void testGetChildren_AppEngineStandardProject() {
     projectCreator.withFacets(AppEngineStandardFacet.JRE7, WebFacetUtils.WEB_25);
 
-    createAppEngineWebXml(null);
+    ConfigurationFileUtils.createAppEngineWebXml(projectCreator.getProject(), null);
     Object[] children = fixture.getChildren(projectCreator.getFacetedProject());
     assertNotNull(children);
     assertEquals(1, children.length);
@@ -95,7 +88,7 @@ public class AppEngineContentProviderTest {
   @Test
   public void testGetChildren_AppEngineStandardProjectElement_noService_noChildren()
       throws AppEngineException {
-    createAppEngineWebXml(null);
+    ConfigurationFileUtils.createAppEngineWebXml(projectCreator.getProject(), null);
     AppEngineStandardProjectElement projectElement =
         AppEngineStandardProjectElement.create(projectCreator.getProject());
 
@@ -107,8 +100,9 @@ public class AppEngineContentProviderTest {
   @Test
   public void testGetChildren_AppEngineStandardProjectElement_noDefault_cronIgnored()
       throws AppEngineException {
-    createAppEngineWebXml("service"); // $NON-NLS-1$
-    createEmptyCronXml();
+    ConfigurationFileUtils.createAppEngineWebXml(
+        projectCreator.getProject(), "service"); // $NON-NLS-1$
+    ConfigurationFileUtils.createEmptyCronXml(projectCreator.getProject());
     AppEngineStandardProjectElement projectElement =
         AppEngineStandardProjectElement.create(projectCreator.getProject());
 
@@ -120,8 +114,9 @@ public class AppEngineContentProviderTest {
   @Test
   public void testGetChildren_AppEngineStandardProjectElement_default_cron()
       throws AppEngineException {
-    createAppEngineWebXml("default"); // $NON-NLS-1$
-    createEmptyCronXml();
+    ConfigurationFileUtils.createAppEngineWebXml(
+        projectCreator.getProject(), "default"); // $NON-NLS-1$
+    ConfigurationFileUtils.createEmptyCronXml(projectCreator.getProject());
     AppEngineStandardProjectElement projectElement =
         AppEngineStandardProjectElement.create(projectCreator.getProject());
 
@@ -138,8 +133,9 @@ public class AppEngineContentProviderTest {
   @Test
   public void testGetChildren_AppEngineStandardProjectElement_default_dispatch()
       throws AppEngineException {
-    createAppEngineWebXml("default"); // $NON-NLS-1$
-    createEmptyDispatchXml();
+    ConfigurationFileUtils.createAppEngineWebXml(
+        projectCreator.getProject(), "default"); // $NON-NLS-1$
+    ConfigurationFileUtils.createEmptyDispatchXml(projectCreator.getProject());
     AppEngineStandardProjectElement projectElement =
         AppEngineStandardProjectElement.create(projectCreator.getProject());
 
@@ -156,8 +152,9 @@ public class AppEngineContentProviderTest {
   @Test
   public void testGetChildren_AppEngineStandardProjectElement_default_datastoreIndexes()
       throws AppEngineException {
-    createAppEngineWebXml("default"); // $NON-NLS-1$
-    createEmptyDatastoreIndexesXml();
+    ConfigurationFileUtils.createAppEngineWebXml(
+        projectCreator.getProject(), "default"); // $NON-NLS-1$
+    ConfigurationFileUtils.createEmptyDatastoreIndexesXml(projectCreator.getProject());
     AppEngineStandardProjectElement projectElement =
         AppEngineStandardProjectElement.create(projectCreator.getProject());
 
@@ -174,8 +171,9 @@ public class AppEngineContentProviderTest {
   @Test
   public void testGetChildren_AppEngineStandardProjectElement_default_denialOfService()
       throws AppEngineException {
-    createAppEngineWebXml("default"); // $NON-NLS-1$
-    createEmptyDosXml();
+    ConfigurationFileUtils.createAppEngineWebXml(
+        projectCreator.getProject(), "default"); // $NON-NLS-1$
+    ConfigurationFileUtils.createEmptyDosXml(projectCreator.getProject());
     AppEngineStandardProjectElement projectElement =
         AppEngineStandardProjectElement.create(projectCreator.getProject());
 
@@ -192,8 +190,9 @@ public class AppEngineContentProviderTest {
   @Test
   public void testGetChildren_AppEngineStandardProjectElement_default_taskQueue()
       throws AppEngineException {
-    createAppEngineWebXml("default"); // $NON-NLS-1$
-    createEmptyQueueXml();
+    ConfigurationFileUtils.createAppEngineWebXml(
+        projectCreator.getProject(), "default"); // $NON-NLS-1$
+    ConfigurationFileUtils.createEmptyQueueXml(projectCreator.getProject());
     AppEngineStandardProjectElement projectElement =
         AppEngineStandardProjectElement.create(projectCreator.getProject());
 
@@ -209,7 +208,7 @@ public class AppEngineContentProviderTest {
 
   @Test
   public void testHasChildren_AppEngineStandardProject() {
-    createAppEngineWebXml(null);
+    ConfigurationFileUtils.createAppEngineWebXml(projectCreator.getProject(), null);
     assertTrue(fixture.hasChildren(projectCreator.getProject()));
     assertTrue(fixture.hasChildren(projectCreator.getFacetedProject()));
   }
@@ -234,7 +233,7 @@ public class AppEngineContentProviderTest {
     StructuredViewer viewer = mock(StructuredViewer.class);
     fixture.inputChanged(viewer, null, null); // installs resource-changed listener
 
-    createAppEngineWebXml(null);
+    ConfigurationFileUtils.createAppEngineWebXml(projectCreator.getProject(), null);
     verify(refresher, atLeastOnce()).accept(anyObject());
     Object[] children = fixture.getChildren(projectCreator.getFacetedProject());
     assertNotNull(children);
@@ -245,7 +244,7 @@ public class AppEngineContentProviderTest {
     assertNotNull(children);
     assertEquals(0, children.length);
 
-    IFile cronXml = createEmptyCronXml();
+    IFile cronXml = ConfigurationFileUtils.createEmptyCronXml(projectCreator.getProject());
     verify(refresher, atLeastOnce()).accept(anyObject());
     children = fixture.getChildren(projectCreator.getFacetedProject());
     assertNotNull(children);
@@ -256,7 +255,7 @@ public class AppEngineContentProviderTest {
     assertEquals(1, children.length);
     assertThat(children, hasItemInArray(instanceOf(CronDescriptor.class)));
 
-    createEmptyDatastoreIndexesXml();
+    ConfigurationFileUtils.createEmptyDatastoreIndexesXml(projectCreator.getProject());
     verify(refresher, atLeastOnce()).accept(anyObject());
     children = fixture.getChildren(projectCreator.getFacetedProject());
     assertNotNull(children);
@@ -278,64 +277,5 @@ public class AppEngineContentProviderTest {
     assertNotNull(children);
     assertEquals(1, children.length);
     assertThat(children, hasItemInArray(instanceOf(DatastoreIndexesDescriptor.class)));
-  }
-
-  private IFile createInWebInf(IPath path, String contents) {
-    try {
-      // createFileInWebInf() does not overwrite files
-      IFile previous = WebProjectUtil.findInWebInf(projectCreator.getProject(), path);
-      if (previous != null && previous.exists()) {
-        previous.delete(true, null);
-      }
-      return WebProjectUtil.createFileInWebInf(
-          projectCreator.getProject(),
-          path,
-          new ByteArrayInputStream(contents.getBytes(StandardCharsets.UTF_8)),
-          null);
-    } catch (CoreException ex) {
-      fail(ex.toString());
-      /*NOTREACHED*/
-      return null;
-    }
-  }
-
-  private IFile createEmptyCronXml() {
-    return createInWebInf(
-        new Path("cron.xml"), // $NON-NLS-1$
-        "<cronentries/>"); // $NON-NLS-1$
-  }
-
-  private IFile createEmptyDispatchXml() {
-    return createInWebInf(
-        new Path("dispatch.xml"), // $NON-NLS-1$
-        "<dispatch-entries/>"); // $NON-NLS-1$
-  }
-
-  private IFile createEmptyDosXml() {
-    return createInWebInf(
-        new Path("dos.xml"), // $NON-NLS-1$
-        "<blacklistentries/>"); // $NON-NLS-1$
-  }
-
-  private IFile createEmptyQueueXml() {
-    return createInWebInf(
-        new Path("queue.xml"), // $NON-NLS-1$
-        "<queue-entries/>"); // $NON-NLS-1$
-  }
-
-  private IFile createEmptyDatastoreIndexesXml() {
-    return createInWebInf(
-        new Path("datastore-indexes.xml"), // $NON-NLS-1$
-        "<datastore-indexes/>"); // $NON-NLS-1$
-  }
-
-  private IFile createAppEngineWebXml(String serviceId) {
-    String contents =
-        Strings.isNullOrEmpty(serviceId)
-            ? "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'/>" // $NON-NLS-1$
-            : "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'><service>" // $NON-NLS-1$
-                + serviceId
-                + "</service></appengine-web-app>"; // $NON-NLS-1$
-    return createInWebInf(new Path("appengine-web.xml"), contents); // $NON-NLS-1$
   }
 }

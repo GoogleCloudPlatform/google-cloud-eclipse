@@ -54,4 +54,12 @@ public abstract class AppEngineResourceElement implements IAdaptable {
 
   /** Return a styled description suitable for use in the Project Explorer. */
   public abstract StyledString getStyledLabel();
+
+  /**
+   * Offers an opportunity to return a
+   * replacement for this instance, or {@code null} to remove.
+   */
+  public AppEngineResourceElement reload() {
+    return file.exists() ? this : null;
+  }
 }
