@@ -101,7 +101,6 @@ public class AppEngineStandardProjectElement extends AppEngineResourceElement {
         // e.g., may no longer be "default", or deployment assembly changed so may
         // may get entirely different files)
         reloadDescriptor();
-        reloadConfigurationFiles();
         return getProject();
       } else if (configurations.containsKey(baseName)) {
         // seen before: allow the element to possibly replace itself
@@ -132,6 +131,13 @@ public class AppEngineStandardProjectElement extends AppEngineResourceElement {
     } catch (IOException | SAXException | CoreException ex) {
       throw new AppEngineException("Unable to load appengine descriptor from " + getFile(), ex);
     }
+
+    // ancillary config files are only taken from the default module
+    if (descriptor.getServiceId() != null && !"default".equals(descriptor.getServiceId())) {
+      configurations.clear();
+    } else {
+      reloadConfigurationFiles();
+    }
   }
 
   /**
@@ -140,30 +146,32 @@ public class AppEngineStandardProjectElement extends AppEngineResourceElement {
    * @throws AppEngineException if the descriptor has errors or could not be loaded
    */
   private void reloadConfigurationFiles() throws AppEngineException {
-    // ancillary config files are only taken from the default module
-    if (descriptor.getServiceId() != null && !"default".equals(descriptor.getServiceId())) {
-      configurations.clear();
-      return;
-    }
-
-    checkConfiguration(
+    checkConfigurationFile(
         "cron.xml", resolvedFile -> new CronDescriptor(getProject(), resolvedFile)); // $NON-NLS-1$
-    checkConfiguration(
+    checkConfigurationFile(
         "datastore-indexes.xml", // $NON-NLS-1$
         resolvedFile -> new DatastoreIndexesDescriptor(getProject(), resolvedFile));
-    checkConfiguration(
+    checkConfigurationFile(
         "queue.xml",
         resolvedFile -> new TaskQueuesDescriptor(getProject(), resolvedFile)); // $NON-NLS-1$
-    checkConfiguration(
+    checkConfigurationFile(
         "dos.xml",
         resolvedFile -> new DenialOfServiceDescriptor(getProject(), resolvedFile)); // $NON-NLS-1$
-    checkConfiguration(
+    checkConfigurationFile(
         "dispatch.xml", // $NON-NLS-1$
         resolvedFile -> new DispatchRoutingDescriptor(getProject(), resolvedFile));
   }
 
-  private void checkConfiguration(
-      String fileName, Function<IFile, AppEngineResourceElement> elementCreator) {
+  /**
+   * Check that the current element representation corresponds to the current configuration file.
+   * Rebuild the element representation using the provided element creator, or remove it, as
+   * required.
+   *
+   * @param fileName the name of the configuration file, expected under {@code WEB-INF}
+   * @param elementFactory creates a new element from a configuration file
+   */
+  private void checkConfigurationFile(
+      String fileName, Function<IFile, AppEngineResourceElement> elementFactory) {
     configurations.compute(
         fileName,
         (ignored, element) -> {
@@ -173,7 +181,7 @@ public class AppEngineStandardProjectElement extends AppEngineResourceElement {
             return null;
           } else if (element == null || !configurationFile.equals(element.getFile())) {
             // create or recreate the element
-            return elementCreator.apply(configurationFile);
+            return elementFactory.apply(configurationFile);
           }
           return element;
         });

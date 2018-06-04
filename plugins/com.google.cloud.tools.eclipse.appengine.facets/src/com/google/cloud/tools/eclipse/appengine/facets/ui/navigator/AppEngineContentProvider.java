@@ -96,14 +96,14 @@ public class AppEngineContentProvider implements ITreeContentProvider {
           .build(CacheLoader.from(AppEngineContentProvider::loadRepresentation));
   private IWorkspace workspace = ResourcesPlugin.getWorkspace();
   private StructuredViewer viewer;
-  private Consumer<Collection<Object>> refresher = this::refreshElements;
+  private Consumer<Collection<Object>> refreshHandler = this::refreshElements;
   private IResourceChangeListener resourceListener;
 
   public AppEngineContentProvider() {}
 
   @VisibleForTesting
-  AppEngineContentProvider(Consumer<Collection<Object>> refresher) {
-    this.refresher = refresher;
+  AppEngineContentProvider(Consumer<Collection<Object>> refreshHandler) {
+    this.refreshHandler = refreshHandler;
   }
 
   @Override
@@ -137,7 +137,7 @@ public class AppEngineContentProvider implements ITreeContentProvider {
       }
     }
     if (!toBeRefreshed.isEmpty()) {
-      refresher.accept(toBeRefreshed);
+      refreshHandler.accept(toBeRefreshed);
     }
   }
 

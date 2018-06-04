@@ -61,12 +61,14 @@ public class AppEngineContentProviderTest {
   public TestProjectCreator projectCreator =
       new TestProjectCreator().withFacets(JavaFacet.VERSION_1_7);
 
-  @Mock private Consumer<Collection<Object>> refresher;
   private AppEngineContentProvider fixture;
+
+  /** Called by {@link #fixture} when elements require updating. */
+  @Mock private Consumer<Collection<Object>> refreshHandler;
 
   @Before
   public void setUp() {
-    fixture = new AppEngineContentProvider(refresher);
+    fixture = new AppEngineContentProvider(refreshHandler);
   }
 
   @After
@@ -234,7 +236,7 @@ public class AppEngineContentProviderTest {
     fixture.inputChanged(viewer, null, null); // installs resource-changed listener
 
     ConfigurationFileUtils.createAppEngineWebXml(projectCreator.getProject(), null);
-    verify(refresher, atLeastOnce()).accept(anyObject());
+    verify(refreshHandler, atLeastOnce()).accept(anyObject());
     Object[] children = fixture.getChildren(projectCreator.getFacetedProject());
     assertNotNull(children);
     assertEquals(1, children.length);
@@ -245,7 +247,7 @@ public class AppEngineContentProviderTest {
     assertEquals(0, children.length);
 
     IFile cronXml = ConfigurationFileUtils.createEmptyCronXml(projectCreator.getProject());
-    verify(refresher, atLeastOnce()).accept(anyObject());
+    verify(refreshHandler, atLeastOnce()).accept(anyObject());
     children = fixture.getChildren(projectCreator.getFacetedProject());
     assertNotNull(children);
     assertEquals(1, children.length);
@@ -256,7 +258,7 @@ public class AppEngineContentProviderTest {
     assertThat(children, hasItemInArray(instanceOf(CronDescriptor.class)));
 
     ConfigurationFileUtils.createEmptyDatastoreIndexesXml(projectCreator.getProject());
-    verify(refresher, atLeastOnce()).accept(anyObject());
+    verify(refreshHandler, atLeastOnce()).accept(anyObject());
     children = fixture.getChildren(projectCreator.getFacetedProject());
     assertNotNull(children);
     assertEquals(1, children.length);
@@ -268,7 +270,7 @@ public class AppEngineContentProviderTest {
     assertThat(children, hasItemInArray(instanceOf(DatastoreIndexesDescriptor.class)));
 
     cronXml.delete(true, null);
-    verify(refresher, atLeastOnce()).accept(anyObject());
+    verify(refreshHandler, atLeastOnce()).accept(anyObject());
     children = fixture.getChildren(projectCreator.getFacetedProject());
     assertNotNull(children);
     assertEquals(1, children.length);

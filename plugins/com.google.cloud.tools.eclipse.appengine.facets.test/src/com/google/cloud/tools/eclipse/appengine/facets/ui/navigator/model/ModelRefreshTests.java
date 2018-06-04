@@ -46,6 +46,7 @@ public class ModelRefreshTests {
               WebFacetUtils.WEB_31,
               JavaFacet.VERSION_1_8);
 
+  /** Verify that the content block is updates to current set of configuration files. */
   @Test
   public void testAppEngineStandardProjectElementCreate() throws AppEngineException {
     IFile cronXml = ConfigurationFileUtils.createEmptyCronXml(projectCreator.getProject());
@@ -73,6 +74,7 @@ public class ModelRefreshTests {
     assertEquals(queueXml, findInstance(subElements, TaskQueuesDescriptor.class).getFile());
   }
 
+  /** Verify that the content block is progressively updates as configuration files are added. */
   @Test
   public void testAppEngineStandardProjectElementStaggered() throws AppEngineException {
     AppEngineStandardProjectElement projectElement =
@@ -170,7 +172,10 @@ public class ModelRefreshTests {
     }
   }
 
-  /** A Service ID change to appengine-web.xml should toss configuration child elements */
+  /**
+   * A Service ID change from {@code default} to non-default should toss configuration child
+   * elements
+   */
   @Test
   public void testConfigurationElementsLost() throws AppEngineException {
     ConfigurationFileUtils.createEmptyCronXml(projectCreator.getProject());
@@ -197,6 +202,10 @@ public class ModelRefreshTests {
     assertEquals(0, projectElement.getConfigurations().length);
   }
 
+  /**
+   * None of our {@link AppEngineResourceElement#reload()} currently return a different instance, so
+   * a configuration file change should not result in a change.
+   */
   @Test
   public void testChildElementPreservedOnChange() throws AppEngineException {
     List<IFile> configurationFiles = new ArrayList<>();
@@ -233,7 +242,6 @@ public class ModelRefreshTests {
   }
 
   private <S, T extends S> T findInstance(S[] array, Class<T> classT) {
-    //    return Stream.of(array).filter(classT::isInstance).map(classT::cast).findAny().get();
     return classT.cast(Iterables.find(Arrays.asList(array), classT::isInstance));
   }
 }
