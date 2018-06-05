@@ -21,6 +21,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexWarFacet;
+import com.google.cloud.tools.eclipse.swtbot.SwtBotWorkbenchCaretaker;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -30,14 +31,13 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
-import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
-@RunWith(SWTBotJunit4ClassRunner.class)
 public class FlexWarStagingDelegateTest {
+
+  @Rule public SwtBotWorkbenchCaretaker janitor = new SwtBotWorkbenchCaretaker();
 
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacets(
       JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineFlexWarFacet.FACET_VERSION);
