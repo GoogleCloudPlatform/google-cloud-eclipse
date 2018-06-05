@@ -89,11 +89,15 @@ public class WebProjectUtil {
       throws CoreException {
     IFolder webInfDir = findWebInfForNewResource(project);
     IFile file = webInfDir.getFile(filePath);
-    if (overwrite || !file.exists()) {
-      SubMonitor progress = SubMonitor.convert(monitor, 2);
-      ResourceUtils.createFolders(file.getParent(), progress.newChild(1));
-      file.create(contents, true, progress.newChild(1));
+    if (file.exists() && !overwrite) {
+      return file;
     }
+    SubMonitor progress = SubMonitor.convert(monitor, 3);
+    if (overwrite) {
+      file.delete(true, progress.newChild(1));
+    }
+    ResourceUtils.createFolders(file.getParent(), progress.newChild(1));
+    file.create(contents, true, progress.newChild(1));
     return file;
   }
 

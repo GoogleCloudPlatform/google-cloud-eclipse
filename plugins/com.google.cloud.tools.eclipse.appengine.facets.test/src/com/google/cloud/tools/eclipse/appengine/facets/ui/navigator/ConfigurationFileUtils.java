@@ -16,8 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets.ui.navigator;
 
-import static org.junit.Assert.fail;
-
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.common.base.Strings;
 import java.io.ByteArrayInputStream;
@@ -69,9 +67,7 @@ public class ConfigurationFileUtils {
           new ByteArrayInputStream(contents.getBytes(StandardCharsets.UTF_8));
       return WebProjectUtil.createFileInWebInf(project, path, stream, true, null);
     } catch (CoreException ex) {
-      fail(ex.toString());
-      /*NOTREACHED*/
-      return null;
+      throw new AssertionError(ex.toString(), ex);
     }
   }
 }
