@@ -84,7 +84,8 @@ public class WebProjectUtilTest {
     IProject project = testProjectCreator.getProject();
     // default webapp location is src/main/webapp
     IFile fooTxt =
-        WebProjectUtil.createFileInWebInf(project, new Path("foo.txt"), asInputStream("foo"), null);
+        WebProjectUtil.createFileInWebInf(
+            project, new Path("foo.txt"), asInputStream("foo"), false /*overwrite*/, null);
     assertNotNull(fooTxt);
     assertTrue(fooTxt.exists());
     assertEquals("src/main/webapp/WEB-INF/foo.txt", fooTxt.getProjectRelativePath().toString());
@@ -122,7 +123,8 @@ public class WebProjectUtilTest {
 
     // should be found alongside the web.xml
     IFile fooTxt =
-        WebProjectUtil.createFileInWebInf(project, new Path("foo.txt"), asInputStream("foo"), null);
+        WebProjectUtil.createFileInWebInf(
+            project, new Path("foo.txt"), asInputStream("foo"), false /*overwrite*/, null);
     assertNotNull(fooTxt);
     assertTrue(fooTxt.exists());
     assertEquals("src/main/webapp/WEB-INF/foo.txt", fooTxt.getProjectRelativePath().toString());
@@ -166,7 +168,8 @@ public class WebProjectUtilTest {
 
     // should be found alongside the web.xml
     IFile fooTxt =
-        WebProjectUtil.createFileInWebInf(project, new Path("foo.txt"), asInputStream("foo"), null);
+        WebProjectUtil.createFileInWebInf(
+            project, new Path("foo.txt"), asInputStream("foo"), false /*overwrite*/, null);
     assertNotNull(fooTxt);
     assertTrue(fooTxt.exists());
     assertEquals("WebContent/WEB-INF/foo.txt", fooTxt.getProjectRelativePath().toString());
@@ -210,7 +213,8 @@ public class WebProjectUtilTest {
 
     // should be found alongside the web.xml
     IFile fooTxt =
-        WebProjectUtil.createFileInWebInf(project, new Path("foo.txt"), asInputStream("foo"), null);
+        WebProjectUtil.createFileInWebInf(
+            project, new Path("foo.txt"), asInputStream("foo"), false /*overwrite*/, null);
     assertNotNull(fooTxt);
     assertTrue(fooTxt.exists());
     assertEquals("web/WEB-INF/foo.txt", fooTxt.getProjectRelativePath().toString());
@@ -255,7 +259,8 @@ public class WebProjectUtilTest {
 
     // should be found alongside the web.xml
     IFile fooTxt =
-        WebProjectUtil.createFileInWebInf(project, new Path("foo.txt"), asInputStream("foo"), null);
+        WebProjectUtil.createFileInWebInf(
+            project, new Path("foo.txt"), asInputStream("foo"), false /*overwrite*/, null);
     assertNotNull(fooTxt);
     assertTrue(fooTxt.exists());
     assertEquals(webInfDir.getProjectRelativePath().append("foo.txt").toString(),
@@ -327,8 +332,8 @@ public class WebProjectUtilTest {
     importedProject = projects.values().iterator().next();
 
     IFile fooTxt =
-        WebProjectUtil.createFileInWebInf(importedProject, new Path("foo.txt"), asInputStream("foo"),
-            null);
+        WebProjectUtil.createFileInWebInf(
+            importedProject, new Path("foo.txt"), asInputStream("foo"), false /*overwrite*/, null);
 
     // foo.txt should be created in the <wb-resource> tagged with `defaultRootSource`
     assertNotNull(fooTxt);

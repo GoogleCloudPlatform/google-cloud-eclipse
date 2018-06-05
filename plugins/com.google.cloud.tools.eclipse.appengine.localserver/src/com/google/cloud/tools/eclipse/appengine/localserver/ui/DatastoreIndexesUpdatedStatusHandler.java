@@ -125,8 +125,13 @@ public class DatastoreIndexesUpdatedStatusHandler implements IStatusHandler {
       throws CoreException {
     InputStream contents =
         new ByteArrayInputStream(EMPTY_DATASTORE_INDEXES_XML.getBytes(StandardCharsets.UTF_8));
-    IFile datastoreIndexesXml = WebProjectUtil.createFileInWebInf(project,
-        new Path("datastore-indexes.xml"), contents, monitor); //$NON-NLS-1$
+    IFile datastoreIndexesXml =
+        WebProjectUtil.createFileInWebInf(
+            project,
+            new Path("datastore-indexes.xml"), //$NON-NLS-1$
+            contents,
+            false /* overwrite */,
+            monitor);
     return datastoreIndexesXml;
   }
 
