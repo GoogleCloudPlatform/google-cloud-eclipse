@@ -25,6 +25,9 @@ import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.common.base.Stopwatch;
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
@@ -49,7 +52,7 @@ public class LocalAppEnginePublishOperationTest {
   @Rule
   public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
-  private Map<String, IProject> projects;
+  private final List<IProject> projects = new ArrayList<>();
   private IProject serverProject;
   private IProject sharedProject;
   private IModule serverModule;
@@ -58,13 +61,12 @@ public class LocalAppEnginePublishOperationTest {
 
   @Before
   public void setUp() throws Exception {
-    projects = ProjectUtils.importProjects(getClass(),
-        "projects/test-submodules.zip", true /* checkBuildErrors */, null);
+    sharedProject = importProject("sox-shared");
+    serverProject = importProject("sox-server");
     assertEquals(2, projects.size());
-    serverProject = projects.get("sox-server");
-    sharedProject = projects.get("sox-shared");
+
     serverModule = ServerUtil.getModule(serverProject);
-    sharedModule = ServerUtil.getModule(serverProject);
+    sharedModule = ServerUtil.getModule(sharedProject);
 
     // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1798
     waitUntilProjectsReady();
@@ -81,12 +83,22 @@ public class LocalAppEnginePublishOperationTest {
 
   @After
   public void tearDown() throws CoreException {
-    if (projects != null) {
-      serverProject.getWorkspace().delete(projects.values().toArray(new IProject[0]), true, null);
+    if (!projects.isEmpty()) {
+      projects.get(0).getWorkspace().delete(projects.toArray(new IProject[0]), true, null);
     }
     if (server != null) {
       server.delete();
     }
+  }
+
+  private IProject importProject(String projectName) throws IOException, CoreException {
+    Map<String, IProject> imported = ProjectUtils.importProjects(getClass(),
+        "projects/" + projectName + ".zip", true /* checkBuildErrors */, null);
+    assertEquals(1, imported.size());
+    IProject project = imported.get(projectName);
+    assertNotNull(project);
+    projects.add(project);
+    return project;
   }
 
   /**
@@ -180,11 +192,11 @@ public class LocalAppEnginePublishOperationTest {
   }
 
   private void reopenProjects() throws CoreException {
-    for (IProject project : projects.values()) {
+    for (IProject project : projects) {
       project.close(null);
       project.open(null);
     }
-    ProjectUtils.waitForProjects(projects.values());
+    ProjectUtils.waitForProjects(projects);
     serverModule = ServerUtil.getModule(serverProject);
     sharedModule = ServerUtil.getModule(sharedProject);
   }
