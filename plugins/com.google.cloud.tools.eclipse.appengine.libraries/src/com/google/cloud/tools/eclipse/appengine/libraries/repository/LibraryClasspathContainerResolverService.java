@@ -27,28 +27,15 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
-import com.google.cloud.tools.eclipse.util.jobs.FuturisticJob;
-import com.google.cloud.tools.eclipse.util.jobs.PluggableJob;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
-import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.runtime.CoreException;
@@ -84,35 +71,6 @@ public class LibraryClasspathContainerResolverService
   private static final String CLASSPATH_ATTRIBUTE_SOURCE_URL =
       "com.google.cloud.tools.eclipse.appengine.libraries.sourceUrl"; // $NON-NLS-1$
 
-  /** Cached set of JDT classpath entries for Cloud Libraries. */
-  private final LoadingCache<String, IClasspathEntry[]> libraryEntries =
-      CacheBuilder.newBuilder()
-          .expireAfterAccess(10, TimeUnit.MINUTES)
-          .build(
-              new CacheLoader<String, IClasspathEntry[]>() {
-                @Override
-                public IClasspathEntry[] load(String libraryId) throws Exception {
-                  ISchedulingRule currentRule = Job.getJobManager().currentRule();
-                  Preconditions.checkNotNull(currentRule);
-                  Preconditions.checkState(currentRule.contains(MavenUtils.mavenResolvingRule()));
-                  Library library = CloudLibraries.getLibrary(libraryId);
-                  if (library == null) {
-                    throw new CoreException(
-                        StatusUtil.error(
-                            LibraryClasspathContainerResolverService.this,
-                            Messages.getString(
-                                "InvalidLibraryId", // $NON-NLS-1$
-                                libraryId)));
-                  }
-                  // linked set as order may be important
-                  LinkedHashSet<IClasspathEntry> resolved = new LinkedHashSet<>();
-                  for (LibraryFile libraryFile : library.getAllDependencies()) {
-                    IClasspathEntry entry = resolveLibraryFileAttachSourceSync(libraryFile);
-                    resolved.add(entry);
-                  }
-                  return resolved.toArray(new IClasspathEntry[resolved.size()]);
-                }
-              });
 
   private ILibraryRepositoryService repositoryService;
   private LibraryClasspathContainerSerializer serializer;
@@ -129,10 +87,8 @@ public class LibraryClasspathContainerResolverService
               Messages.getString("TaskResolveLibraries"), // $NON-NLS-1$
               getTotalWork(rawClasspath));
       for (IClasspathEntry classpathEntry : rawClasspath) {
-        if (classpathEntry
-            .getPath()
-            .segment(0)
-            .equals(LibraryClasspathContainer.CONTAINER_PATH_PREFIX)) {
+        String containerId = classpathEntry.getPath().segment(0);
+        if (containerId.equals(LibraryClasspathContainer.CONTAINER_PATH_PREFIX)) {
           IStatus resolveContainerStatus =
               resolveContainer(javaProject, classpathEntry.getPath(), subMonitor.newChild(1));
           status.add(resolveContainerStatus);
@@ -147,37 +103,21 @@ public class LibraryClasspathContainerResolverService
   }
 
   @Override
-  public ListenableFuture<IClasspathEntry[]> resolveLibraryAttachSources(String... libraryIds)
-      throws CoreException {
-    boolean allResolved = true;
-    LinkedHashSet<IClasspathEntry> entries = new LinkedHashSet<>();
-    for (String libraryId : libraryIds) {
-      IClasspathEntry[] resolved = libraryEntries.getIfPresent(libraryId);
-      if (resolved == null) {
-        allResolved = false;
-        break;
-      }
-      Collections.addAll(entries, resolved);
-    }
-    if (allResolved) {
-      // fixme can we reuse these without copying?
-      return Futures.immediateFuture(entries.toArray(new IClasspathEntry[entries.size()]));
-    }
-    String jobTitle = Messages.getString("TaskResolveArtifacts", Joiner.on(", ").join(libraryIds));
-    FuturisticJob<IClasspathEntry[]> job =
-        new PluggableJob<>(jobTitle, () -> resolveLibraries(libraryIds));
-    job.setRule(MavenUtils.mavenResolvingRule());
-    job.schedule();
-    return job.getFuture();
-  }
+  public IClasspathEntry[] resolveLibraryAttachSources(String libraryId) throws CoreException {
+    ISchedulingRule currentRule = Job.getJobManager().currentRule();
+    Preconditions.checkNotNull(currentRule);
+    Preconditions.checkState(currentRule.contains(getSchedulingRule()));
 
-  private IClasspathEntry[] resolveLibraries(String... libraryIds) throws ExecutionException {
-    Set<IClasspathEntry> result = new LinkedHashSet<>();
-    for (String libraryId : libraryIds) {
-      IClasspathEntry[] resolved = libraryEntries.get(libraryId);
-      Collections.addAll(result, resolved);
+    Library library = CloudLibraries.getLibrary(libraryId);
+    if (library == null) {
+      String message = Messages.getString("InvalidLibraryId", libraryId); // $NON-NLS-1$
+      throw new CoreException(StatusUtil.error(this, message));
     }
-    return result.toArray(new IClasspathEntry[0]);
+    List<IClasspathEntry> resolvedEntries = new ArrayList<>();
+    for (LibraryFile libraryFile : library.getAllDependencies()) {
+      resolvedEntries.add(resolveLibraryFileAttachSourceSync(libraryFile));
+    }
+    return resolvedEntries.toArray(new IClasspathEntry[0]);
   }
 
   @Override
@@ -186,6 +126,9 @@ public class LibraryClasspathContainerResolverService
 
     Preconditions.checkArgument(
         containerPath.segment(0).equals(LibraryClasspathContainer.CONTAINER_PATH_PREFIX));
+    ISchedulingRule currentRule = Job.getJobManager().currentRule();
+    Preconditions.checkNotNull(currentRule);
+    Preconditions.checkState(currentRule.contains(getSchedulingRule()));
 
     SubMonitor subMonitor = SubMonitor.convert(monitor, 19);
 
@@ -409,5 +352,10 @@ public class LibraryClasspathContainerResolverService
     if (this.repositoryService == repositoryService) {
       this.repositoryService = null;
     }
+  }
+
+  @Override
+  public ISchedulingRule getSchedulingRule() {
+    return MavenUtils.mavenResolvingRule();
   }
 }

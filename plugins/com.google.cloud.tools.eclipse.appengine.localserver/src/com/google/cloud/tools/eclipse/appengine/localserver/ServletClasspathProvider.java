@@ -19,10 +19,15 @@ package com.google.cloud.tools.eclipse.appengine.localserver;
 import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import java.util.concurrent.ExecutionException;
+import com.google.cloud.tools.eclipse.util.jobs.PluggableJob;
+import com.google.common.base.Preconditions;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.MoreExecutors;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Inject;
@@ -56,9 +61,29 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
   @Inject
   private ILibraryClasspathContainerResolverService resolverService;
 
+  /** Cached set of web-facet-version &rarr; classpath entries. */
+  private final LoadingCache<IProjectFacetVersion, IClasspathEntry[]> libraryEntries =
+      CacheBuilder.newBuilder()
+          .expireAfterAccess(10, TimeUnit.MINUTES)
+          .build(
+              new CacheLoader<IProjectFacetVersion, IClasspathEntry[]>() {
+                @Override
+                public IClasspathEntry[] load(IProjectFacetVersion webFacetVersion)
+                    throws Exception {
+                  String[] libraryIds = getApiLibraryIds(webFacetVersion);
+                  LinkedHashSet<IClasspathEntry> classpathEntries = new LinkedHashSet<>();
+                  for (String libraryId : libraryIds) {
+                    Collections.addAll(
+                        classpathEntries, resolverService.resolveLibraryAttachSources(libraryId));
+                  }
+                  return classpathEntries.toArray(new IClasspathEntry[classpathEntries.size()]);
+                }
+              });
+
   @Override
   public IClasspathEntry[] resolveClasspathContainer(IProject project, IRuntime runtime) {
-    if (project != null && MavenUtils.hasMavenNature(project)) { // Maven handles its own classpath
+    if (project != null && MavenUtils.hasMavenNature(project)) { 
+      // Maven handles its own classpath
       return NO_CLASSPATH_ENTRIES;
     }
 
@@ -71,32 +96,24 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
       logger.log(Level.WARNING, "Unable to obtain jst.web facet version", ex);
     }
 
-    try {
-      String[] apiLibraryIds = getApiLibraryIds(webFacetVersion);
-      ListenableFuture<IClasspathEntry[]> apiEntries =
-          resolverService.resolveLibraryAttachSources(apiLibraryIds);
-      // may return immediately if cached or locally available
-      if (apiEntries.isDone()) {
-        return apiEntries.get();
-      }
-      Futures.addCallback(
-          apiEntries,
-          new FutureCallback<IClasspathEntry[]>() {
-            @Override
-            public void onSuccess(IClasspathEntry[] entries) {
-              requestClasspathContainerUpdate(project, runtime, entries);
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-              logger.log(Level.WARNING, "Failed to resolve servlet APIs", t);
-            }
-          });
-    } catch (CoreException | ExecutionException ex) {
-      logger.log(Level.WARNING, "Failed to initialize libraries", ex);
-    } catch (InterruptedException ex) {
-      Thread.currentThread().interrupt();
+    IClasspathEntry[] entries = libraryEntries.getIfPresent(webFacetVersion);
+    if (entries != null) {
+      return entries;
     }
+
+    final IProjectFacetVersion dynamicWebFacetVersion = webFacetVersion;
+    PluggableJob<IClasspathEntry[]> resolveJob =
+        new PluggableJob<>(
+            "Resolving libraries for " + webFacetVersion,
+            () -> libraryEntries.get(dynamicWebFacetVersion));
+    resolveJob.onSuccess(
+        MoreExecutors.directExecutor(),
+        resolved -> requestClasspathContainerUpdate(project, runtime, resolved));
+    resolveJob.onError(
+        MoreExecutors.directExecutor(),
+        t -> logger.log(Level.WARNING, "Failed to resolve servlet APIs", t));
+    resolveJob.setRule(resolverService.getSchedulingRule());
+    resolveJob.schedule();
     return null;
   }
 
@@ -118,12 +135,24 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
      * classpath entries returned from our {@code resolveClasspathContainer()} change.
      * https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/3055#issuecomment-390242592
      */
-    requestClasspathContainerUpdate(runtime, entries);
-    resolveClasspathContainerImpl(project, runtime); // triggers update of this classpath container
+    // perform update request from a separate job to ensure not run with any currently-held locks
+    // or rules
+    PluggableJob<Void> requestUpdateJob =
+        new PluggableJob<>(
+            "Request update of server runtime classpath container",
+            () -> {
+              requestClasspathContainerUpdate(runtime, entries);
+              // triggers update of this classpath container
+              resolveClasspathContainerImpl(project, runtime);
+              return null;
+            });
+    requestUpdateJob.setSystem(true);
+    requestUpdateJob.schedule();
   }
 
   /** Return the Library IDs for the Servlet APIs for the given dynamic web facet version. */
-  private String[] getApiLibraryIds(IProjectFacetVersion dynamicWebVersion) {
+  private static String[] getApiLibraryIds(IProjectFacetVersion dynamicWebVersion) {
+    Preconditions.checkArgument(WebFacetUtils.WEB_FACET == dynamicWebVersion.getProjectFacet());
     if (WebFacetUtils.WEB_31.equals(dynamicWebVersion)
         || WebFacetUtils.WEB_30.equals(dynamicWebVersion)) {
       return new String[] {"servlet-api-3.1", "jsp-api-2.3"};

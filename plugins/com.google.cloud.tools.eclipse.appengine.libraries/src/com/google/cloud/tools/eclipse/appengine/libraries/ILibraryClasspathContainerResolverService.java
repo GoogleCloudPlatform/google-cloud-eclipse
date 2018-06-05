@@ -17,11 +17,11 @@
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
-import com.google.common.util.concurrent.ListenableFuture;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 
@@ -29,6 +29,9 @@ import org.eclipse.jdt.core.IJavaProject;
  * Service interface to resolve {@link LibraryClasspathContainer}s.
  */
 public interface ILibraryClasspathContainerResolverService {
+
+  /** Return the minimum scheduling rule required for calling to this service. */
+  ISchedulingRule getSchedulingRule();
 
   /**
    * Resolves all {@link LibraryClasspathContainer}s found on the classpath of
@@ -39,10 +42,9 @@ public interface ILibraryClasspathContainerResolverService {
 
   /**
    * Resolves the binary and source artifacts corresponding to the {@link Library} identified by
-   * <code>libraryIds</code> asynchronously and creates the {@link IClasspathEntry}s referring them.
+   * <code>libraryIds</code> synchronously and creates the {@link IClasspathEntry}s referring them.
    */
-  ListenableFuture<IClasspathEntry[]> resolveLibraryAttachSources(String... libraryIds)
-      throws CoreException;
+  IClasspathEntry[] resolveLibraryAttachSources(String libraryId) throws CoreException;
 
   /**
    * Resolves a single {@link LibraryClasspathContainer} corresponding to <code>containerPath</code>
