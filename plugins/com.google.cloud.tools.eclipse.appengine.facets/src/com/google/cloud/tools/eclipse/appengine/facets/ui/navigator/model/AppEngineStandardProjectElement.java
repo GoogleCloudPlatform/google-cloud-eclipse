@@ -101,6 +101,7 @@ public class AppEngineStandardProjectElement extends AppEngineResourceElement {
         // e.g., may no longer be "default", or deployment assembly changed so may
         // may get entirely different files)
         reloadDescriptor();
+        reloadConfigurationFiles();
         return getProject();
       } else if (configurations.containsKey(baseName)) {
         // seen before: allow the element to possibly replace itself
@@ -131,13 +132,6 @@ public class AppEngineStandardProjectElement extends AppEngineResourceElement {
     } catch (IOException | SAXException | CoreException ex) {
       throw new AppEngineException("Unable to load appengine descriptor from " + getFile(), ex);
     }
-
-    // ancillary config files are only taken from the default module
-    if (descriptor.getServiceId() != null && !"default".equals(descriptor.getServiceId())) {
-      configurations.clear();
-    } else {
-      reloadConfigurationFiles();
-    }
   }
 
   /**
@@ -146,6 +140,12 @@ public class AppEngineStandardProjectElement extends AppEngineResourceElement {
    * @throws AppEngineException if the descriptor has errors or could not be loaded
    */
   private void reloadConfigurationFiles() throws AppEngineException {
+    // ancillary config files are only taken from the default module
+    if (descriptor.getServiceId() != null && !"default".equals(descriptor.getServiceId())) {
+      configurations.clear();
+      return;
+    }
+
     checkConfigurationFile(
         "cron.xml", resolvedFile -> new CronDescriptor(getProject(), resolvedFile)); // $NON-NLS-1$
     checkConfigurationFile(
