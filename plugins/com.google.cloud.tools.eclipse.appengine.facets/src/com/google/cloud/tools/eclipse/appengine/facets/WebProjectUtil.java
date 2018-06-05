@@ -68,21 +68,28 @@ public class WebProjectUtil {
    * Create a file in the appropriate location for the project's {@code WEB-INF}. This
    * implementation respects the order and tags on the WTP virtual component model, creating the
    * file in the {@code <wb-resource>} with the {@code defaultRootSource} tag when present. This
-   * method is typically used after ensuring the file does not exist with
-   * {@link #findInWebInf(IProject, IPath)}.
-   * 
+   * method is typically used after ensuring the file does not exist with {@link
+   * #findInWebInf(IProject, IPath)}.
+   *
+   * <p>See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=448544">Eclipse bug 448544</a>
+   * for details of the {@code defaultRootSource} tag.
+   *
    * @param project the hosting project
    * @param filePath the path of the file within the project's {@code WEB-INF}
    * @param contents the content for the file
+   * @param overwrite if {@code true} then overwrite the file if it exists
    * @see #findInWebInf(IProject, IPath)
-   * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=448544">Eclipse bug 448544</a>
-   *       for details of the {@code defaultRootSource} tag
    */
-  public static IFile createFileInWebInf(IProject project, IPath filePath, InputStream contents,
-      IProgressMonitor monitor) throws CoreException {
+  public static IFile createFileInWebInf(
+      IProject project,
+      IPath filePath,
+      InputStream contents,
+      boolean overwrite,
+      IProgressMonitor monitor)
+      throws CoreException {
     IFolder webInfDir = findWebInfForNewResource(project);
     IFile file = webInfDir.getFile(filePath);
-    if (!file.exists()) {
+    if (overwrite || !file.exists()) {
       SubMonitor progress = SubMonitor.convert(monitor, 2);
       ResourceUtils.createFolders(file.getParent(), progress.newChild(1));
       file.create(contents, true, progress.newChild(1));

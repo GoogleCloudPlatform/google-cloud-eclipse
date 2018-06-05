@@ -107,7 +107,8 @@ public class AppEngineContentProvider implements ITreeContentProvider {
   }
 
   @Override
-  public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+  public void inputChanged(Viewer theViewer, Object oldInput, Object newInput) {
+    this.viewer = (StructuredViewer) theViewer;
     if (resourceListener == null) {
       resourceListener = this::resourceChanged;
       workspace.addResourceChangeListener(resourceListener);

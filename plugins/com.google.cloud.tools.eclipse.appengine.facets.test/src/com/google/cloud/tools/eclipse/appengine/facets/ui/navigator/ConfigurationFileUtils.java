@@ -28,67 +28,50 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
-/** Utility methods for creating App Engine configuration files for testing purposes. */
+/** Testing utility methods for creating App Engine configuration files for testing purposes. */
 public class ConfigurationFileUtils {
-
-  /** WebProjectUtil#createFileInWebInf() does not overwrite files. */
-  public static IFile createInWebInf(IProject project, IPath path, String contents) {
-    try {
-      IFile previous = WebProjectUtil.findInWebInf(project, path);
-      if (previous != null && previous.exists()) {
-        previous.delete(true, null);
-      }
-      return WebProjectUtil.createFileInWebInf(
-          project, path, new ByteArrayInputStream(contents.getBytes(StandardCharsets.UTF_8)), null);
-    } catch (CoreException ex) {
-      fail(ex.toString());
-      /*NOTREACHED*/
-      return null;
-    }
-  }
-
   public static IFile createEmptyCronXml(IProject project) {
-    return createInWebInf(
-        project,
-        new Path("cron.xml"), // $NON-NLS-1$
-        "<cronentries/>"); // $NON-NLS-1$
+    return createFileInWebInf(project, new Path("cron.xml"), "<cronentries/>");
   }
 
   public static IFile createEmptyDispatchXml(IProject project) {
-    return createInWebInf(
-        project,
-        new Path("dispatch.xml"), // $NON-NLS-1$
-        "<dispatch-entries/>"); // $NON-NLS-1$
+    return createFileInWebInf(project, new Path("dispatch.xml"), "<dispatch-entries/>");
   }
 
   public static IFile createEmptyDosXml(IProject project) {
-    return createInWebInf(
-        project,
-        new Path("dos.xml"), // $NON-NLS-1$
-        "<blacklistentries/>"); // $NON-NLS-1$
+    return createFileInWebInf(project, new Path("dos.xml"), "<blacklistentries/>");
   }
 
   public static IFile createEmptyQueueXml(IProject project) {
-    return createInWebInf(
-        project,
-        new Path("queue.xml"), // $NON-NLS-1$
-        "<queue-entries/>"); // $NON-NLS-1$
+    return createFileInWebInf(project, new Path("queue.xml"), "<queue-entries/>");
   }
 
   public static IFile createEmptyDatastoreIndexesXml(IProject project) {
-    return createInWebInf(
-        project,
-        new Path("datastore-indexes.xml"), // $NON-NLS-1$
-        "<datastore-indexes/>"); // $NON-NLS-1$
+    return createFileInWebInf(project, new Path("datastore-indexes.xml"), "<datastore-indexes/>");
   }
 
   public static IFile createAppEngineWebXml(IProject project, String serviceId) {
     String contents =
         Strings.isNullOrEmpty(serviceId)
-            ? "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'/>" // $NON-NLS-1$
-            : "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'><service>" // $NON-NLS-1$
+            ? "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'/>"
+            : "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
+                + "<service>"
                 + serviceId
-                + "</service></appengine-web-app>"; // $NON-NLS-1$
-    return createInWebInf(project, new Path("appengine-web.xml"), contents); // $NON-NLS-1$
+                + "</service>"
+                + "</appengine-web-app>";
+    return createFileInWebInf(project, new Path("appengine-web.xml"), contents);
+  }
+
+  // eliminate boilerplate
+  private static IFile createFileInWebInf(IProject project, IPath path, String contents) {
+    try {
+      ByteArrayInputStream stream =
+          new ByteArrayInputStream(contents.getBytes(StandardCharsets.UTF_8));
+      return WebProjectUtil.createFileInWebInf(project, path, stream, true, null);
+    } catch (CoreException ex) {
+      fail(ex.toString());
+      /*NOTREACHED*/
+      return null;
+    }
   }
 }

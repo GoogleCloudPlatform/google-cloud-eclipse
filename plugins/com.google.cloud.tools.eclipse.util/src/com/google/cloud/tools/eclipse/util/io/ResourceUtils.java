@@ -56,12 +56,12 @@ public class ResourceUtils {
     }
   }
 
-  public static Collection<IFile> getAffectedFiles(IResourceDelta delta) throws CoreException {
+  public static Collection<IFile> getAffectedFiles(IResourceDelta topDelta) throws CoreException {
     Collection<IFile> files = new ArrayList<>();
-    delta.accept(
-        _delta -> {
-          if (_delta.getResource() instanceof IFile) {
-            files.add((IFile) _delta.getResource());
+    topDelta.accept(
+        delta -> {
+          if (delta.getResource() instanceof IFile) {
+            files.add((IFile) delta.getResource());
             return false;
           } else {
             return true;

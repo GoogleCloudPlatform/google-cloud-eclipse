@@ -159,8 +159,13 @@ public class StandardFacetInstallDelegate implements IDelegate {
     }
 
     // Use the virtual component model to decide where to create the file
-    targetFile = WebProjectUtil.createFileInWebInf(project, new Path(filename),
-        new ByteArrayInputStream(new byte[0]), progress.split(2));
+    targetFile =
+        WebProjectUtil.createFileInWebInf(
+            project,
+            new Path(filename),
+            new ByteArrayInputStream(new byte[0]),
+            false /* overwrite */,
+            progress.split(2));
     String fileLocation = targetFile.getLocation().toString();
     Templates.createFileContent(fileLocation, templateName, templateParameters);
     progress.worked(4);
