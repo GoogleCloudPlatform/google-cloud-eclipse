@@ -15,4 +15,5 @@ Import-Package: com.google.cloud.tools.eclipse.appengine.facets,
  com.google.cloud.tools.eclipse.test.util.project,
  org.eclipse.core.expressions,
  org.eclipse.jst.common.project.facet.core,
- org.eclipse.jst.j2ee.web.project.facet
+ org.eclipse.jst.j2ee.web.project.facet,
+ org.eclipse.swtbot.swt.finder.junit
