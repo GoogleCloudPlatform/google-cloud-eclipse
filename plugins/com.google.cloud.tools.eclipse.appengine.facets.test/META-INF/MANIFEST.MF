@@ -9,10 +9,10 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Localization: plugin
 Comment: .appengine.localserver required for WTP server runtime definitions
 Require-Bundle: com.google.cloud.tools.eclipse.test.dependencies,
- com.google.cloud.tools.eclipse.appengine.localserver
+ com.google.cloud.tools.eclipse.appengine.localserver,
+ org.eclipse.wst.jsdt.web.core,
+ org.eclipse.jst.common.frameworks
 Import-Package: com.google.cloud.tools.eclipse.test.util,
  com.google.cloud.tools.eclipse.test.util.project,
  org.eclipse.core.resources,
- org.eclipse.wst.common.project.facet.core,
- org.eclipse.wst.jsdt.web.core.javascript,
  org.osgi.framework;version="1.8.0"

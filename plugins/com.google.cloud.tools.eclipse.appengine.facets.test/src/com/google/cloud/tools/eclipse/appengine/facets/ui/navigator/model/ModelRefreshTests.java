@@ -20,19 +20,34 @@ import static org.hamcrest.Matchers.hasItemInArray;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.ConfigurationFileUtils;
+import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import com.google.common.collect.Iterables;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
+import org.eclipse.jst.j2ee.componentcore.J2EEModuleVirtualComponent;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.eclipse.wst.common.componentcore.ComponentCore;
+import org.eclipse.wst.common.componentcore.resources.IVirtualFolder;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -239,6 +254,72 @@ public class ModelRefreshTests {
     // some label information that's changed
     Object handle = projectElement.resourceChanged(projectElement.getFile());
     assertEquals(projectElement.getProject(), handle);
+  }
+
+  /**
+   * Verify that the model is updated after altering the deployment assembly model to favour a
+   * different WEB-INF folder.
+   */
+  @Test
+  public void testRejigDeploymentAssembly() throws AppEngineException, CoreException {
+    // create the new WEB-INF location and populate it
+    final IFolder newWebRoot = projectCreator.getProject().getFolder("newWebRoot");
+    final IFolder newWebInf = newWebRoot.getFolder("WEB-INF");
+    ResourceUtils.createFolders(newWebInf, null);
+    IFile newAppEngineWebXml = newWebInf.getFile("appengine-web.xml");
+    String defaultService = "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'/>";
+    newAppEngineWebXml.create(
+        new ByteArrayInputStream(defaultService.getBytes(StandardCharsets.UTF_8)), true, null);
+    final IFile newDispatchXml = newWebInf.getFile("dispatch.xml");
+    newDispatchXml.create(new ByteArrayInputStream("<dispatch-entries/>".getBytes(StandardCharsets.UTF_8)), true, null);
+    assertTrue("error creating new dispatch.xml", newDispatchXml.exists());
+    assertTrue("error creating new appengine-web.xml", newAppEngineWebXml.exists());
+
+    // create the "old" files
+    IFile oldAppEngineWebXml =
+        ConfigurationFileUtils.createAppEngineWebXml(projectCreator.getProject(), "nondefault");
+    ConfigurationFileUtils.createEmptyCronXml(projectCreator.getProject());
+    AppEngineStandardProjectElement projectElement =
+        AppEngineStandardProjectElement.create(projectCreator.getProject());
+    // verify that the cron and new files in newWebRoot are not picked up
+    assertEquals(oldAppEngineWebXml, projectElement.getFile());
+    assertTrue(oldAppEngineWebXml.exists());
+    assertEquals("nondefault", projectElement.getDescriptor().getServiceId());
+    final AppEngineResourceElement[] oldElements = projectElement.getConfigurations();
+    assertEquals(0, oldElements.length);
+
+    final IWorkspace workspace = projectCreator.getProject().getWorkspace();
+    final Set<IFile> changed = new HashSet<>();
+    final IResourceChangeListener listener =
+        event -> {
+          try {
+            System.out.println(event.getDelta());
+            changed.addAll(ResourceUtils.getAffectedFiles(event.getDelta()));
+          } catch (CoreException ex) {
+            throw new RuntimeException(ex);
+          }
+        };
+    try {
+      workspace.addResourceChangeListener(listener);
+      
+      // link in the newWebRoot
+      IVirtualFolder webroot = ComponentCore.createComponent(projectCreator.getProject()).getRootFolder();
+      webroot.createLink(newWebRoot.getProjectRelativePath(), 0, null);
+      J2EEModuleVirtualComponent.setDefaultDeploymentDescriptorFolder(
+          webroot, newWebRoot.getProjectRelativePath(), null);
+      ProjectUtils.waitForProjects(projectCreator.getProject());
+    } finally {
+      workspace.removeResourceChangeListener(listener);
+    }
+    assertEquals(1, changed.size());
+    projectElement.resourceChanged(Iterables.getOnlyElement(changed));
+
+    assertEquals(newAppEngineWebXml, projectElement.getFile());
+    assertNull(projectElement.getDescriptor().getServiceId());
+    final AppEngineResourceElement[] newElements = projectElement.getConfigurations();
+    assertEquals(1, newElements.length);
+    assertThat(newElements, hasItemInArray(instanceOf(DispatchRoutingDescriptor.class)));
+    assertEquals(newDispatchXml, newElements[0].getFile());
   }
 
   private <S, T extends S> T findInstance(S[] array, Class<T> classT) {
