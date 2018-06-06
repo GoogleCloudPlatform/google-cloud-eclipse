@@ -105,8 +105,9 @@ public class LibraryClasspathContainerResolverService
   @Override
   public IClasspathEntry[] resolveLibraryAttachSources(String libraryId) throws CoreException {
     ISchedulingRule currentRule = Job.getJobManager().currentRule();
-    Preconditions.checkNotNull(currentRule);
-    Preconditions.checkState(currentRule.contains(getSchedulingRule()));
+    Preconditions.checkState(
+        currentRule == null || currentRule.contains(getSchedulingRule()),
+        "current scheduling rule is insufficient");
 
     Library library = CloudLibraries.getLibrary(libraryId);
     if (library == null) {
@@ -127,8 +128,9 @@ public class LibraryClasspathContainerResolverService
     Preconditions.checkArgument(
         containerPath.segment(0).equals(LibraryClasspathContainer.CONTAINER_PATH_PREFIX));
     ISchedulingRule currentRule = Job.getJobManager().currentRule();
-    Preconditions.checkNotNull(currentRule);
-    Preconditions.checkState(currentRule.contains(getSchedulingRule()));
+    Preconditions.checkState(
+        currentRule == null || currentRule.contains(getSchedulingRule()),
+        "current scheduling rule is insufficient");
 
     SubMonitor subMonitor = SubMonitor.convert(monitor, 19);
 
