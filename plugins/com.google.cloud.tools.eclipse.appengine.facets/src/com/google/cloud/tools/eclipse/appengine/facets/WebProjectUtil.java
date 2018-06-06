@@ -26,6 +26,7 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -89,15 +90,13 @@ public class WebProjectUtil {
       throws CoreException {
     IFolder webInfDir = findWebInfForNewResource(project);
     IFile file = webInfDir.getFile(filePath);
-    if (file.exists() && !overwrite) {
-      return file;
+    SubMonitor progress = SubMonitor.convert(monitor, 2);
+    if (!file.exists()) {
+      ResourceUtils.createFolders(file.getParent(), progress.newChild(1));
+      file.create(contents, true, progress.newChild(1));
+    } else if (overwrite) {
+      file.setContents(contents, IResource.FORCE | IResource.KEEP_HISTORY, progress.newChild(2));
     }
-    SubMonitor progress = SubMonitor.convert(monitor, 3);
-    if (overwrite) {
-      file.delete(true, progress.newChild(1));
-    }
-    ResourceUtils.createFolders(file.getParent(), progress.newChild(1));
-    file.create(contents, true, progress.newChild(1));
     return file;
   }
 
