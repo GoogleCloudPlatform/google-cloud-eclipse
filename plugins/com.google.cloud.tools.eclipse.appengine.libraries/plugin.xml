@@ -18,7 +18,7 @@
         <mavenCoordinates
               artifactId="appengine-api-1.0-sdk"
               groupId="com.google.appengine" 
-              version="1.9.63" />
+              version="1.9.64" />
         <exclusionFilter pattern="com/google/appengine/repackaged/**" />
         <exclusionFilter pattern="com/google/appengine/labs/repackaged/**" />
         <inclusionFilter pattern="com/google/apphosting/api/**" />

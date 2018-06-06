@@ -81,7 +81,7 @@ public class GcpProjectQueryJob extends Job {
       return Status.OK_STATUS;
     } catch (ProjectRepositoryException ex) {
       return StatusUtil.error(this,
-          Messages.getString("projectselector.retrieveproject.error.message"), ex);
+          Messages.getString("projectselector.retrieveproject.error.message", ex.getMessage()), ex);
     }
   }
 }

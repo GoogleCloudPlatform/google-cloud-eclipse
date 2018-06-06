@@ -243,7 +243,7 @@ public class CodeTemplates {
     String sdkVersion = getCurrentVersion(
         "com.google.appengine", //$NON-NLS-1$
         "appengine-api-1.0-sdk", //$NON-NLS-1$
-        "1.9.63"); //$NON-NLS-1$
+        "1.9.64"); //$NON-NLS-1$
     properties.put("appEngineApiSdkVersion", sdkVersion); //$NON-NLS-1$
     
     if (isStandardProject) {
