@@ -20,13 +20,12 @@ import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathConta
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 import com.google.cloud.tools.eclipse.util.jobs.PluggableJob;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.MoreExecutors;
-import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -58,11 +57,18 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
 
   private static final Logger logger = Logger.getLogger(ServletClasspathProvider.class.getName());
 
-  @Inject
-  private ILibraryClasspathContainerResolverService resolverService;
+  @Inject private ILibraryClasspathContainerResolverService resolverService;
+
+  public ServletClasspathProvider() {}
+
+  @VisibleForTesting
+  ServletClasspathProvider(ILibraryClasspathContainerResolverService resolver) {
+    this.resolverService = resolver;
+  }
 
   /** Cached set of web-facet-version &rarr; classpath entries. */
-  private final LoadingCache<IProjectFacetVersion, IClasspathEntry[]> libraryEntries =
+  @VisibleForTesting
+  final LoadingCache<IProjectFacetVersion, IClasspathEntry[]> libraryEntries =
       CacheBuilder.newBuilder()
           .expireAfterAccess(10, TimeUnit.MINUTES)
           .build(
@@ -71,12 +77,7 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
                 public IClasspathEntry[] load(IProjectFacetVersion webFacetVersion)
                     throws Exception {
                   String[] libraryIds = getApiLibraryIds(webFacetVersion);
-                  LinkedHashSet<IClasspathEntry> classpathEntries = new LinkedHashSet<>();
-                  for (String libraryId : libraryIds) {
-                    Collections.addAll(
-                        classpathEntries, resolverService.resolveLibraryAttachSources(libraryId));
-                  }
-                  return classpathEntries.toArray(new IClasspathEntry[classpathEntries.size()]);
+                  return resolverService.resolveLibrariesAttachSources(libraryIds);
                 }
               });
 
@@ -111,14 +112,15 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
         resolved -> requestClasspathContainerUpdate(project, runtime, resolved));
     resolveJob.onError(
         MoreExecutors.directExecutor(),
-        t -> logger.log(Level.WARNING, "Failed to resolve servlet APIs", t));
+        exception -> logger.log(Level.WARNING, "Failed to resolve servlet APIs", exception));
     resolveJob.setRule(resolverService.getSchedulingRule());
     resolveJob.schedule();
     return null;
   }
 
   /** Request that a project's Server Runtime classpath container be updated. */
-  private void requestClasspathContainerUpdate(
+  @VisibleForTesting
+  protected void requestClasspathContainerUpdate(
       IProject project, IRuntime runtime, IClasspathEntry[] entries) {
     /*
      * The deceptively-named {@code requestClasspathContainerUpdate()} on our superclass
@@ -151,7 +153,8 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
   }
 
   /** Return the Library IDs for the Servlet APIs for the given dynamic web facet version. */
-  private static String[] getApiLibraryIds(IProjectFacetVersion dynamicWebVersion) {
+  @VisibleForTesting
+  static String[] getApiLibraryIds(IProjectFacetVersion dynamicWebVersion) {
     Preconditions.checkArgument(WebFacetUtils.WEB_FACET == dynamicWebVersion.getProjectFacet());
     if (WebFacetUtils.WEB_31.equals(dynamicWebVersion)
         || WebFacetUtils.WEB_30.equals(dynamicWebVersion)) {

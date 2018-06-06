@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
@@ -103,20 +104,23 @@ public class LibraryClasspathContainerResolverService
   }
 
   @Override
-  public IClasspathEntry[] resolveLibraryAttachSources(String libraryId) throws CoreException {
+  public IClasspathEntry[] resolveLibrariesAttachSources(String... libraryIds)
+      throws CoreException {
     ISchedulingRule currentRule = Job.getJobManager().currentRule();
     Preconditions.checkState(
         currentRule == null || currentRule.contains(getSchedulingRule()),
         "current scheduling rule is insufficient");
 
-    Library library = CloudLibraries.getLibrary(libraryId);
-    if (library == null) {
-      String message = Messages.getString("InvalidLibraryId", libraryId); // $NON-NLS-1$
-      throw new CoreException(StatusUtil.error(this, message));
-    }
-    List<IClasspathEntry> resolvedEntries = new ArrayList<>();
-    for (LibraryFile libraryFile : library.getAllDependencies()) {
-      resolvedEntries.add(resolveLibraryFileAttachSourceSync(libraryFile));
+    LinkedHashSet<IClasspathEntry> resolvedEntries = new LinkedHashSet<>();
+    for (String libraryId : libraryIds) {
+      Library library = CloudLibraries.getLibrary(libraryId);
+      if (library == null) {
+        String message = Messages.getString("InvalidLibraryId", libraryId); // $NON-NLS-1$
+        throw new CoreException(StatusUtil.error(this, message));
+      }
+      for (LibraryFile libraryFile : library.getAllDependencies()) {
+        resolvedEntries.add(resolveLibraryFileAttachSourceSync(libraryFile));
+      }
     }
     return resolvedEntries.toArray(new IClasspathEntry[0]);
   }

@@ -30,21 +30,26 @@ import org.eclipse.jdt.core.IJavaProject;
  */
 public interface ILibraryClasspathContainerResolverService {
 
-  /** Return the minimum scheduling rule required for calling to this service. */
+  /**
+   * Return the minimum scheduling rule required for calls to this service. The service will obtain
+   * the rule when there is no current scheduling rule.
+   */
   ISchedulingRule getSchedulingRule();
 
   /**
-   * Resolves all {@link LibraryClasspathContainer}s found on the classpath of
-   * <code>javaProject</code>. Source attachment for the resolved libraries will happen
-   * asynchronously.
+   * Resolves all {@link LibraryClasspathContainer}s found on the classpath of <code>javaProject
+   * </code>. Source attachment for the resolved libraries will happen asynchronously. If callers
+   * are operating under a scheduling rule, it must at least contain {@link #getSchedulingRule()}.
    */
   IStatus resolveAll(IJavaProject javaProject, IProgressMonitor monitor);
 
   /**
-   * Resolves the binary and source artifacts corresponding to the {@link Library} identified by
-   * <code>libraryIds</code> synchronously and creates the {@link IClasspathEntry}s referring them.
+   * Resolves the binary and source artifacts corresponding to the {@link Library libraries}
+   * identified by <code>libraryIds</code> synchronously and creates the {@link IClasspathEntry}s
+   * referring them. If callers are operating under a scheduling rule, it should at least contain
+   * {@link #getSchedulingRule()}.
    */
-  IClasspathEntry[] resolveLibraryAttachSources(String libraryId) throws CoreException;
+  IClasspathEntry[] resolveLibrariesAttachSources(String... libraryIds) throws CoreException;
 
   /**
    * Resolves a single {@link LibraryClasspathContainer} corresponding to <code>containerPath</code>
