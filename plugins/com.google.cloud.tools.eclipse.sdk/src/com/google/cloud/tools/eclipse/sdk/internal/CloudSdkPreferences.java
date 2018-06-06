@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.sdk.internal;
 
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
-import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import java.util.logging.Level;
@@ -79,9 +78,7 @@ public final class CloudSdkPreferences extends AbstractPreferenceInitializer {
 
   @Override
   public void initializeDefaultPreferences() {
-    if (CloudSdkManager.getInstance().isManagedSdkFeatureEnabled()) {
-      initializeDefaultPreferences(getPreferenceStore());
-    }
+    initializeDefaultPreferences(getPreferenceStore());
   }
 
   @VisibleForTesting

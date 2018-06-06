@@ -20,10 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -90,8 +87,6 @@ public class CloudSdkPreferenceAreaTest {
 
   @Test
   public void testVersion() throws IOException {
-    when(cloudSdkManager.isManagedSdkFeatureEnabled()).thenReturn(true);
-
     Path mockSdk = MockSdkGenerator.createMockSdk("1.23.4");
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn(mockSdk.toString());
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)).thenReturn("MANUAL");
@@ -135,20 +130,7 @@ public class CloudSdkPreferenceAreaTest {
   }
 
   @Test
-  public void testUi_noSdkManagementFeature() {
-    when(cloudSdkManager.isManagedSdkFeatureEnabled()).thenReturn(false);
-    when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("");
-    createPreferenceArea();
-
-    assertNull(chooseSdk);
-    assertNotNull(sdkLocation);
-    assertTrue(sdkLocation.isEnabled());
-    assertNotNull(sdkVersion);
-  }
-
-  @Test
   public void testUi_sdkManagementFeature() {
-    when(cloudSdkManager.isManagedSdkFeatureEnabled()).thenReturn(true);
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
 
@@ -160,7 +142,6 @@ public class CloudSdkPreferenceAreaTest {
   // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2897
   @Test
   public void testSearchSdkIfSdkLocationIsEmpty() {
-    when(cloudSdkManager.isManagedSdkFeatureEnabled()).thenReturn(true);
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("");
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)).thenReturn("MANUAL");
     
@@ -173,7 +154,6 @@ public class CloudSdkPreferenceAreaTest {
 
   @Test
   public void testControlStates_automaticSdk() {
-    when(cloudSdkManager.isManagedSdkFeatureEnabled()).thenReturn(true);
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)).thenReturn("AUTOMATIC");
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
@@ -184,7 +164,6 @@ public class CloudSdkPreferenceAreaTest {
 
   @Test
   public void testControlStates_manualSdk() {
-    when(cloudSdkManager.isManagedSdkFeatureEnabled()).thenReturn(true);
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)).thenReturn("MANUAL");
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
@@ -195,7 +174,6 @@ public class CloudSdkPreferenceAreaTest {
 
   @Test
   public void testPerformApply_preferencesSaved() {
-    when(cloudSdkManager.isManagedSdkFeatureEnabled()).thenReturn(true);
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)).thenReturn("AUTOMATIC");
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("");
     createPreferenceArea();
@@ -209,7 +187,6 @@ public class CloudSdkPreferenceAreaTest {
 
   @Test
   public void testValidationStatus_switchManagementOption() {
-    when(cloudSdkManager.isManagedSdkFeatureEnabled()).thenReturn(true);
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)).thenReturn("MANUAL");
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH))
         .thenReturn("/non-existing/directory");
@@ -227,8 +204,6 @@ public class CloudSdkPreferenceAreaTest {
 
   @Test
   public void testApply_automatic() {
-    doReturn(true).when(cloudSdkManager).isManagedSdkFeatureEnabled();
-
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)).thenReturn("MANUAL");
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH))
         .thenReturn("/non-existing/directory");
@@ -239,21 +214,11 @@ public class CloudSdkPreferenceAreaTest {
 
     area.performApply();
     verify(cloudSdkManager).installManagedSdkAsync();
-    verify(cloudSdkManager, atLeastOnce()).isManagedSdkFeatureEnabled();
     verifyNoMoreInteractions(cloudSdkManager);
   }
 
   @Test
-  public void testUpdateSdk_notVisible() {
-    createPreferenceArea();
-    assertNotNull(updateSdkButton);
-    assertFalse(updateSdkButton.getVisible()); // isVisible checks parent
-  }
-
-  @Test
   public void testUpdateSdk_manualSdkDisabled() {
-    doReturn(true).when(cloudSdkManager).isManagedSdkFeatureEnabled();
-
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)).thenReturn("MANUAL");
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH)).thenReturn("/non-existent");
 
@@ -265,8 +230,6 @@ public class CloudSdkPreferenceAreaTest {
 
   @Test
   public void testUpdateSdk_autoSdkEnabled() {
-    doReturn(true).when(cloudSdkManager).isManagedSdkFeatureEnabled();
-
     when(preferences.getString(CloudSdkPreferences.CLOUD_SDK_MANAGEMENT)).thenReturn("AUTOMATIC");
 
     createPreferenceArea();

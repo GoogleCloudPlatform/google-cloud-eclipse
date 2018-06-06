@@ -16,8 +16,11 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.util.MappedNamespaceContext;
@@ -31,7 +34,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import javax.xml.parsers.DocumentBuilder;
@@ -96,6 +102,49 @@ public class CodeTemplatesTest {
   }
 
   @Test
+  public void testMaterializeAppEngineStandardFiles_noObjectifyWithJava7()
+      throws CoreException, ParserConfigurationException, SAXException, IOException {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
+    assertFalse(objectifyFilterClassExists());
+    validateObjectifyFilterConfigInWebXml(false);
+  }
+
+  @Test
+  public void testMaterializeAppEngineStandardFiles_objectifyWithJava7()
+      throws CoreException, ParserConfigurationException, SAXException, IOException {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setAppEngineLibraries(Collections.singleton(new Library("objectify")));
+
+    CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
+    assertFalse(objectifyFilterClassExists());
+    validateObjectifyFilterConfigInWebXml(true);
+  }
+
+  @Test
+  public void testMaterializeAppEngineStandardFiles_noObjectifyWithJava8()
+      throws CoreException, ParserConfigurationException, SAXException, IOException {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setRuntimeId(AppEngineRuntime.STANDARD_JAVA_8.getId());
+
+    CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
+    assertFalse(objectifyFilterClassExists());
+    validateObjectifyFilterConfigInWebXml(false);
+  }
+
+  @Test
+  public void testMaterializeAppEngineStandardFiles_objectifyWithJava8()
+      throws CoreException, ParserConfigurationException, SAXException, IOException {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setRuntimeId(AppEngineRuntime.STANDARD_JAVA_8.getId());
+    config.setAppEngineLibraries(Collections.singleton(new Library("objectify")));
+
+    CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
+    assertTrue(objectifyFilterClassExists());
+    validateObjectifyFilterConfigInWebXml(false);
+  }
+
+  @Test
   public void testMaterializeAppEngineStandardFiles_noPomXml() throws CoreException {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
@@ -135,6 +184,71 @@ public class CodeTemplatesTest {
     config.setUseMaven("my.project.group.id", "my-project-artifact-id", "98.76.54");
     CodeTemplates.materializeAppEngineFlexFiles(project, config, monitor);
     validateFlexPomXml();
+  }
+
+  @Test
+  public void testIsObjectifySelected_notSelected() {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    assertFalse(CodeTemplates.isObjectifySelected(config));
+  }
+
+  @Test
+  public void testIsObjectifySelected_objectify5() {
+    List<Library> libraries = Arrays.asList(new Library("a-library"), new Library("objectify"));
+
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setAppEngineLibraries(libraries);
+
+    assertTrue(CodeTemplates.isObjectifySelected(config));
+  }
+
+  @Test
+  public void testIsObjectifySelected_objectify6() {
+    List<Library> libraries = Arrays.asList(new Library("objectify6"), new Library("a-library"));
+
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setAppEngineLibraries(libraries);
+
+    assertTrue(CodeTemplates.isObjectifySelected(config));
+  }
+
+  @Test
+  public void testIsStandardJava7RuntimeSelected_java7() {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setRuntimeId(null);  // null runtime corresponds to Java 7 runtime
+    assertTrue(CodeTemplates.isStandardJava7RuntimeSelected(config));
+  }
+
+  @Test
+  public void testIsStandardJava7RuntimeSelected_java8() {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setRuntimeId("java8");
+    assertFalse(CodeTemplates.isStandardJava7RuntimeSelected(config));
+  }
+
+  private boolean objectifyFilterClassExists() {
+    return project.getFile("src/main/java/ObjectifyWebFilter.java").exists();
+  }
+
+  private void validateObjectifyFilterConfigInWebXml(boolean configExpected)
+      throws ParserConfigurationException, SAXException, IOException, CoreException {
+    IFile webXml = project.getFile("src/main/webapp/WEB-INF/web.xml");
+    Element root = buildDocument(webXml).getDocumentElement();
+
+    NodeList filterNames =
+        root.getElementsByTagNameNS("http://java.sun.com/xml/ns/javaee", "filter-name");
+    if (configExpected) {
+      assertEquals(2, filterNames.getLength());
+      assertEquals("ObjectifyFilter", filterNames.item(0).getTextContent());
+      assertEquals("ObjectifyFilter", filterNames.item(1).getTextContent());
+
+      NodeList filterClass =
+          root.getElementsByTagNameNS("http://java.sun.com/xml/ns/javaee", "filter-class");
+      assertEquals(
+          "com.googlecode.objectify.ObjectifyFilter", filterClass.item(0).getTextContent());
+    } else {
+      assertEquals(0, filterNames.getLength());
+    }
   }
 
   private void validateNonConfigFiles(IFile mostImportant,

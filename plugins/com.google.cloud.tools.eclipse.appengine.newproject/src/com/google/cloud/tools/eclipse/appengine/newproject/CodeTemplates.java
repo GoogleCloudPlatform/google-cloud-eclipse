@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
 import com.google.cloud.tools.eclipse.util.Templates;
@@ -25,7 +26,9 @@ import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -100,7 +103,7 @@ public class CodeTemplates {
 
   private static IFile createJavaSourceFiles(IProject project, AppEngineProjectConfig config,
       boolean isStandardProject, IProgressMonitor monitor) throws CoreException {
-    SubMonitor subMonitor = SubMonitor.convert(monitor, 15);
+    SubMonitor subMonitor = SubMonitor.convert(monitor, 20);
 
     String packageName = config.getPackageName();
     String packagePath = packageName.replace('.', '/');
@@ -109,8 +112,9 @@ public class CodeTemplates {
 
     Map<String, String> properties = new HashMap<>();
     properties.put("package", Strings.nullToEmpty(packageName)); //$NON-NLS-1$
-    if (isStandardProject
-        && Objects.equal(AppEngineRuntime.STANDARD_JAVA_7.getId(), config.getRuntimeId())) {
+
+    boolean servlet25 = isStandardProject && isStandardJava7RuntimeSelected(config);
+    if (servlet25) {
       properties.put("servletVersion", "2.5"); //$NON-NLS-1$ //$NON-NLS-2$
     } else {
       properties.put("servletVersion", "3.1"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -118,14 +122,20 @@ public class CodeTemplates {
 
     IFile hello = createChildFile("HelloAppEngine.java", //$NON-NLS-1$
         Templates.HELLO_APPENGINE_TEMPLATE,
-        mainPackageFolder, properties, subMonitor.newChild(5));
+        mainPackageFolder, properties, subMonitor.split(5));
 
     createChildFile("HelloAppEngineTest.java", //$NON-NLS-1$
-        Templates.HELLO_APPENGINE_TEST_TEMPLATE, testPackageFolder,
-        properties, subMonitor.newChild(5));
+        Templates.HELLO_APPENGINE_TEST_TEMPLATE,
+        testPackageFolder, properties, subMonitor.split(5));
     createChildFile("MockHttpServletResponse.java", //$NON-NLS-1$
         Templates.MOCK_HTTPSERVLETRESPONSE_TEMPLATE,
-        testPackageFolder, properties, subMonitor.newChild(5));
+        testPackageFolder, properties, subMonitor.split(5));
+
+    if (isObjectifySelected(config) && !servlet25) {
+      createChildFile("ObjectifyWebFilter.java", //$NON-NLS-1$
+          Templates.OBJECTIFY_WEB_FILTER_TEMPLATE,
+          mainPackageFolder, properties, subMonitor.split(5));
+    }
 
     return hello;
   }
@@ -165,10 +175,13 @@ public class CodeTemplates {
     String packageValue = config.getPackageName().isEmpty()
         ? ""  //$NON-NLS-1$
         : config.getPackageName() + "."; //$NON-NLS-1$
-    properties.put("package", packageValue);  //$NON-NLS-1$
+    properties.put("package", packageValue); //$NON-NLS-1$
 
-    if (isStandardProject
-        && Objects.equal(AppEngineRuntime.STANDARD_JAVA_7.getId(), config.getRuntimeId())) {
+    if (isObjectifySelected(config)) {
+      properties.put("objectifyAdded", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+    }
+
+    if (isStandardProject && isStandardJava7RuntimeSelected(config)) {
       properties.put("servletVersion", "2.5"); //$NON-NLS-1$ //$NON-NLS-2$
       properties.put("namespace", "http://java.sun.com/xml/ns/javaee"); //$NON-NLS-1$ //$NON-NLS-2$
       properties.put("schemaUrl", "http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -181,6 +194,20 @@ public class CodeTemplates {
     IFolder webInf = project.getFolder("src/main/webapp/WEB-INF"); //$NON-NLS-1$
     createChildFile("web.xml", Templates.WEB_XML_TEMPLATE, webInf, //$NON-NLS-1$
         properties, monitor);
+  }
+
+  @VisibleForTesting
+  static boolean isStandardJava7RuntimeSelected(AppEngineProjectConfig config) {
+    return Objects.equal(AppEngineRuntime.STANDARD_JAVA_7.getId(), config.getRuntimeId());
+  }
+
+  @VisibleForTesting
+  static boolean isObjectifySelected(AppEngineProjectConfig config) {
+    Predicate<Library> isObjectify = library ->
+        ("objectify".equals(library.getId()) //$NON-NLS-1$
+            || "objectify6".equals(library.getId())); //$NON-NLS-1$
+    List<Library> selectedLibraries = config.getAppEngineLibraries();
+    return selectedLibraries.stream().anyMatch(isObjectify);
   }
 
   private static void createWebContents(IProject project, IProgressMonitor monitor)
@@ -220,7 +247,7 @@ public class CodeTemplates {
     properties.put("appEngineApiSdkVersion", sdkVersion); //$NON-NLS-1$
     
     if (isStandardProject) {
-      if (Objects.equal(AppEngineRuntime.STANDARD_JAVA_7.getId(), config.getRuntimeId())) {
+      if (isStandardJava7RuntimeSelected(config)) {
         properties.put("servletVersion", "2.5"); //$NON-NLS-1$ //$NON-NLS-2$
         properties.put("compilerVersion", "1.7"); //$NON-NLS-1$ //$NON-NLS-2$
       } else {

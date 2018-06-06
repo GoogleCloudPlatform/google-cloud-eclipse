@@ -71,7 +71,7 @@ public class CloudSdkStagingHelper {
   public static void stageFlexible(IPath appEngineDirectory, IPath deployArtifact,
       IPath stagingDirectory, IProgressMonitor monitor) throws AppEngineException {
     if (monitor.isCanceled()) {
-      throw new OperationCanceledException("canceled early");
+      throw new OperationCanceledException("canceled early"); //$NON-NLS-1$
     }
 
     SubMonitor progress = SubMonitor.convert(monitor, 1);

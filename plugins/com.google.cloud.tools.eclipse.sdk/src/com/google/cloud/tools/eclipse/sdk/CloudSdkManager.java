@@ -28,55 +28,31 @@ import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.Supplier;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.ui.console.MessageConsoleStream;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
 
 public class CloudSdkManager {
-
-  private static final String OPTION_MANAGED_CLOUD_SDK =
-      "com.google.cloud.tools.eclipse.sdk/enable.managed.cloud.sdk";
 
   private static CloudSdkManager instance;
 
   // readers = using SDK, writers = modifying SDK
   private final ReadWriteLock modifyLock;
 
-  private final Supplier<Boolean> managedSdkFeatureTester;
-
   public static synchronized CloudSdkManager getInstance() {
     if (instance == null) {
-      instance = new CloudSdkManager(
-          new ReentrantReadWriteLock(), CloudSdkManager::getManagedCloudSdkDebugOption);
+      instance = new CloudSdkManager(new ReentrantReadWriteLock());
     }
     return instance;
   }
 
   @VisibleForTesting
-  CloudSdkManager(ReadWriteLock modifyLock, Supplier<Boolean> managedSdkFeatureTester) {
+  CloudSdkManager(ReadWriteLock modifyLock) {
     this.modifyLock = modifyLock;
-    this.managedSdkFeatureTester = managedSdkFeatureTester;
-  }
-
-  public boolean isManagedSdkFeatureEnabled() {
-    return managedSdkFeatureTester.get();
-  }
-
-  private static boolean getManagedCloudSdkDebugOption() {
-    BundleContext context = FrameworkUtil.getBundle(CloudSdkManager.class).getBundleContext();
-    DebugOptions debugOptions = context.getService(context.getServiceReference(DebugOptions.class));
-    if (debugOptions != null) {
-      return debugOptions.getBooleanOption(OPTION_MANAGED_CLOUD_SDK, true);
-    }
-    return true;
   }
 
   /**
@@ -115,13 +91,11 @@ public class CloudSdkManager {
    * SDK.
    */
   public void installManagedSdkAsync() {
-    if (isManagedSdkFeatureEnabled()) {
-      if (CloudSdkPreferences.isAutoManaging()) {
-        // Keep installation failure as ERROR so that failures are reported
-        Job installJob = new CloudSdkInstallJob(null /* no console output */, modifyLock);
-        installJob.setUser(false);
-        installJob.schedule();
-      }
+    if (CloudSdkPreferences.isAutoManaging()) {
+      // Keep installation failure as ERROR so that failures are reported
+      Job installJob = new CloudSdkInstallJob(null /* no console output */, modifyLock);
+      installJob.setUser(false);
+      installJob.schedule();
     }
   }
 
@@ -134,25 +108,23 @@ public class CloudSdkManager {
    * @param monitor the progress monitor that can also be used to cancel the installation
    */
   public IStatus installManagedSdk(MessageConsoleStream consoleStream, IProgressMonitor monitor) {
-    if (isManagedSdkFeatureEnabled()) {
-      if (CloudSdkPreferences.isAutoManaging()) {
-        // We don't check if the Cloud SDK installed but always schedule the install job; such check
-        // may pass while the SDK is being installed and in an incomplete state.
-        // Mark installation failure as non-ERROR to avoid job failure reporting dialogs from the
-        // overly helpful Eclipse UI ProgressManager
-        CloudSdkInstallJob installJob = new CloudSdkInstallJob(
-            consoleStream, modifyLock, IStatus.WARNING);
+    if (CloudSdkPreferences.isAutoManaging()) {
+      // We don't check if the Cloud SDK installed but always schedule the install job; such check
+      // may pass while the SDK is being installed and in an incomplete state.
+      // Mark installation failure as non-ERROR to avoid job failure reporting dialogs from the
+      // overly helpful Eclipse UI ProgressManager
+      CloudSdkInstallJob installJob = new CloudSdkInstallJob(
+          consoleStream, modifyLock, IStatus.WARNING);
 
-        IStatus result = runInstallJob(consoleStream, installJob, monitor);
-        if (!result.isOK()) {
-          // recast result as an IStatus.ERROR
-          return new Status(
-              IStatus.ERROR,
-              result.getPlugin(),
-              result.getCode(),
-              result.getMessage(),
-              result.getException());
-        }
+      IStatus result = runInstallJob(consoleStream, installJob, monitor);
+      if (!result.isOK()) {
+        // recast result as an IStatus.ERROR
+        return new Status(
+            IStatus.ERROR,
+            result.getPlugin(),
+            result.getCode(),
+            result.getMessage(),
+            result.getException());
       }
     }
     return Status.OK_STATUS;
@@ -163,13 +135,11 @@ public class CloudSdkManager {
    * the SDK.
    */
   public void updateManagedSdkAsync() {
-    if (isManagedSdkFeatureEnabled()) {
-      if (CloudSdkPreferences.isAutoManaging()) {
-        // Keep installation failure as ERROR so that failures are reported
-        Job updateJob = new CloudSdkUpdateJob(null /* create new message console */, modifyLock);
-        updateJob.setUser(false);
-        updateJob.schedule();
-      }
+    if (CloudSdkPreferences.isAutoManaging()) {
+      // Keep installation failure as ERROR so that failures are reported
+      Job updateJob = new CloudSdkUpdateJob(null /* create new message console */, modifyLock);
+      updateJob.setUser(false);
+      updateJob.schedule();
     }
   }
 

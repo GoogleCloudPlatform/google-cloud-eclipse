@@ -1,4 +1,0 @@
-# Set true for development. To be loaded in a hosted debug Eclipse instance,
-# open the "gcloud-eclipse-tools" run configuration, go to the "Tracing" tab,
-# and check "Enable tracing" and "com.google.cloud.tools.eclipse.sdk".
-com.google.cloud.tools.eclipse.sdk/enable.managed.cloud.sdk=false

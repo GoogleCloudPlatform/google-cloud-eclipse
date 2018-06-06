@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.Supplier;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -47,22 +46,11 @@ public class CloudSdkManagerTest {
   @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
   private final ReadWriteLock modifyLock = new ReentrantReadWriteLock();
-  private final Supplier<Boolean> alwaysEnabled = () -> true;
-  private final CloudSdkManager fixture = new CloudSdkManager(modifyLock, alwaysEnabled);
+  private final CloudSdkManager fixture = new CloudSdkManager(modifyLock);
 
   @After
   public void tearDown() {
     assertTrue("write lock not available", modifyLock.writeLock().tryLock());
-  }
-
-  @Test
-  public void testManagedSdkOption() {
-    assertTrue(CloudSdkManager.getInstance().isManagedSdkFeatureEnabled());
-  }
-
-  @Test
-  public void testManagedSdkOption_featureForced() {
-    assertTrue(fixture.isManagedSdkFeatureEnabled());
   }
 
   @Test

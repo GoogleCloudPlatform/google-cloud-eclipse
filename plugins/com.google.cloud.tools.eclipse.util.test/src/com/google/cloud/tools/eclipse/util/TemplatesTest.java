@@ -44,7 +44,7 @@ public class TemplatesTest {
 
   @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
-  private IProgressMonitor monitor = new NullProgressMonitor();
+  private final IProgressMonitor monitor = new NullProgressMonitor();
   private IProject project;
   private String fileLocation;
   private final Map<String, String> dataMap = new HashMap<>();
@@ -66,9 +66,7 @@ public class TemplatesTest {
 
   @Test
   public void testCreateFileContent_appengineWebXml() throws CoreException, IOException {
-    Templates.createFileContent(fileLocation,
-        Templates.APPENGINE_WEB_XML_TEMPLATE,
-        dataMap);
+    Templates.createFileContent(fileLocation, Templates.APPENGINE_WEB_XML_TEMPLATE, dataMap);
 
     compareToFile("appengineWebXml.txt");
   }
@@ -77,9 +75,7 @@ public class TemplatesTest {
   public void testCreateFileContent_appengineWebXmlWithService()
       throws CoreException, IOException {
     dataMap.put("service", "foobar");
-    Templates.createFileContent(fileLocation,
-        Templates.APPENGINE_WEB_XML_TEMPLATE,
-        dataMap);
+    Templates.createFileContent(fileLocation, Templates.APPENGINE_WEB_XML_TEMPLATE, dataMap);
 
     compareToFile("appengineWebXmlWithService.txt");
   }
@@ -88,9 +84,7 @@ public class TemplatesTest {
   public void testCreateFileContent_appengineWebXmlWithRuntime()
       throws CoreException, IOException {
     dataMap.put("runtime", "java8");
-    Templates.createFileContent(fileLocation,
-        Templates.APPENGINE_WEB_XML_TEMPLATE,
-        dataMap);
+    Templates.createFileContent(fileLocation, Templates.APPENGINE_WEB_XML_TEMPLATE, dataMap);
 
     compareToFile("appEngineWebXmlWithRuntime.txt");
   }
@@ -100,9 +94,7 @@ public class TemplatesTest {
   public void testCreateFileContent_appYamlWithService()
       throws CoreException, IOException {
     dataMap.put("service", "foobar");
-    Templates.createFileContent(fileLocation,
-        Templates.APP_YAML_TEMPLATE,
-        dataMap);
+    Templates.createFileContent(fileLocation, Templates.APP_YAML_TEMPLATE, dataMap);
 
     compareToFile("appYamlWithService.txt");
   }
@@ -111,8 +103,7 @@ public class TemplatesTest {
   public void testCreateFileContent_helloAppEngineWithPackage() throws CoreException, IOException {
     dataMap.put("package", "com.example");
     dataMap.put("servletVersion", "2.5");
-    Templates.createFileContent(fileLocation,
-        Templates.HELLO_APPENGINE_TEMPLATE, dataMap);
+    Templates.createFileContent(fileLocation, Templates.HELLO_APPENGINE_TEMPLATE, dataMap);
 
     compareToFile("helloAppEngineWithPackage.txt");
   }
@@ -122,8 +113,7 @@ public class TemplatesTest {
       throws CoreException, IOException {
     dataMap.put("package", "");
     dataMap.put("servletVersion", "2.5");
-    Templates.createFileContent(fileLocation,
-        Templates.HELLO_APPENGINE_TEMPLATE, dataMap);
+    Templates.createFileContent(fileLocation, Templates.HELLO_APPENGINE_TEMPLATE, dataMap);
 
     compareToFile("helloAppEngineWithoutPackage.txt");
   }
@@ -142,10 +132,21 @@ public class TemplatesTest {
     dataMap.put("servletVersion", "2.5");
     dataMap.put("namespace", "http://java.sun.com/xml/ns/javaee");
     dataMap.put("schemaUrl", "http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd");
-    Templates.createFileContent(fileLocation,
-        Templates.WEB_XML_TEMPLATE, dataMap);
+    Templates.createFileContent(fileLocation, Templates.WEB_XML_TEMPLATE, dataMap);
 
     compareToFile("web25.txt");
+  }
+
+  @Test
+  public void testCreateFileContent_web25ObjectifyFilter() throws CoreException, IOException {
+    dataMap.put("package", "com.example.");
+    dataMap.put("servletVersion", "2.5");
+    dataMap.put("namespace", "http://java.sun.com/xml/ns/javaee");
+    dataMap.put("schemaUrl", "http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd");
+    dataMap.put("objectifyAdded", "true");
+    Templates.createFileContent(fileLocation, Templates.WEB_XML_TEMPLATE, dataMap);
+
+    compareToFile("web25ObjectifyFilter.txt");
   }
 
   @Test
@@ -154,6 +155,18 @@ public class TemplatesTest {
     dataMap.put("servletVersion", "3.1");
     dataMap.put("namespace", "http://xmlns.jcp.org/xml/ns/javaee");
     dataMap.put("schemaUrl", "http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd");
+    Templates.createFileContent(fileLocation, Templates.WEB_XML_TEMPLATE, dataMap);
+
+    compareToFile("web31.txt");
+  }
+
+  @Test
+  public void testCreateFileContent_noObjectifyFilterForWeb31() throws CoreException, IOException {
+    dataMap.put("package", "com.example.");
+    dataMap.put("servletVersion", "3.1");
+    dataMap.put("namespace", "http://xmlns.jcp.org/xml/ns/javaee");
+    dataMap.put("schemaUrl", "http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd");
+    dataMap.put("objectifyAdded", "true");
     Templates.createFileContent(fileLocation, Templates.WEB_XML_TEMPLATE, dataMap);
 
     compareToFile("web31.txt");
@@ -175,6 +188,24 @@ public class TemplatesTest {
     Templates.createFileContent(fileLocation, Templates.LOGGING_PROPERTIES_TEMPLATE, dataMap);
 
     compareToFile("loggingProperties.txt");
+  }
+
+  @Test
+  public void testCreateFileContent_objectifyWebFilterWithPackage()
+      throws CoreException, IOException {
+    dataMap.put("package", "com.example");
+    Templates.createFileContent(fileLocation, Templates.OBJECTIFY_WEB_FILTER_TEMPLATE, dataMap);
+
+    compareToFile("objectifyWebFilterWithPackage.txt");
+  }
+
+  @Test
+  public void testCreateFileContent_objectifyWebFilterWithoutPackage()
+      throws CoreException, IOException {
+    dataMap.put("package", "");
+    Templates.createFileContent(fileLocation, Templates.OBJECTIFY_WEB_FILTER_TEMPLATE, dataMap);
+
+    compareToFile("objectifyWebFilterWithoutPackage.txt");
   }
 
   private static InputStream getDataFile(String fileName) throws IOException {
