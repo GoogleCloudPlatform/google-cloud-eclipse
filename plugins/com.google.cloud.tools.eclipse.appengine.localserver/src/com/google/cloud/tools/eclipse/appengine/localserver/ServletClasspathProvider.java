@@ -105,7 +105,7 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
 
     final IProjectFacetVersion dynamicWebFacetVersion = webFacetVersion;
     // $NON-NLS-1$ since it's a system job
-    Job resolveJob = new Job("Resolving libraries for " + webFacetVersion) { //$NON-NLS-1$
+    Job resolveJob = new Job("Resolving libraries for " + webFacetVersion) { // $NON-NLS-1$
           @Override
           protected IStatus run(IProgressMonitor monitor) {
             try {
@@ -115,6 +115,11 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
               logger.log(Level.WARNING, "Failed to resolve servlet APIs", ex);
             }
             return Status.OK_STATUS;
+          }
+
+          @Override
+          public boolean belongsTo(Object family) {
+            return family == ServletClasspathProvider.this || super.belongsTo(family);
           }
         };
     resolveJob.setSystem(true);
@@ -144,13 +149,18 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
      */
     // Perform update request in a separate job to ensure it's run without any additional locks
     // or rules. $NON-NLS-1$ since it's a system job
-    Job requestUpdateJob = new Job("Update server runtime classpath container") { //$NON-NLS-1$
+    Job requestUpdateJob = new Job("Update server runtime classpath container") { // $NON-NLS-1$
           @Override
           public IStatus run(IProgressMonitor monitor) {
             requestClasspathContainerUpdate(runtime, entries);
             // triggers update of this classpath container
             resolveClasspathContainerImpl(project, runtime);
             return Status.OK_STATUS;
+          }
+
+          @Override
+          public boolean belongsTo(Object family) {
+            return family == ServletClasspathProvider.this || super.belongsTo(family);
           }
         };
     requestUpdateJob.setSystem(true);

@@ -28,11 +28,9 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
-import com.google.cloud.tools.eclipse.util.jobs.PluggableJob;
 import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
@@ -51,6 +49,8 @@ public class ServletClasspathProviderTest {
       new TestProjectCreator().withFacets(WebFacetUtils.WEB_31, JavaFacet.VERSION_1_8);
 
   @Mock public ILibraryClasspathContainerResolverService resolver;
+
+  private ServletClasspathProvider fixture;
 
   @Test
   public void testApiLibraryIds_web31() {
@@ -83,7 +83,7 @@ public class ServletClasspathProviderTest {
             org.mockito.Matchers.<String>anyVararg()); // just any() in Mockito 2.1
 
     AtomicReference<IClasspathEntry[]> requestedUpdate = new AtomicReference<>(null);
-    ServletClasspathProvider fixture =
+    fixture =
         new ServletClasspathProvider(resolver) {
           @Override
           protected void requestClasspathContainerUpdate(
@@ -95,7 +95,7 @@ public class ServletClasspathProviderTest {
     IClasspathEntry[] result =
         fixture.resolveClasspathContainer(projectCreator.getProject(), runtime);
     assertNull(result); // since not cached
-    waitForPluggableJobs();
+    waitForJobs();
     verify(resolver).getSchedulingRule(); // for background job
     verify(resolver).resolveLibrariesAttachSources("servlet-api-3.1", "jsp-api-2.3");
     assertNotNull(requestedUpdate.get());
@@ -110,7 +110,7 @@ public class ServletClasspathProviderTest {
     IClasspathEntry[] entries = new IClasspathEntry[0];
 
     AtomicReference<IClasspathEntry[]> requestedUpdate = new AtomicReference<>(null);
-    ServletClasspathProvider fixture =
+    fixture =
         new ServletClasspathProvider(resolver) {
           @Override
           protected void requestClasspathContainerUpdate(
@@ -127,12 +127,7 @@ public class ServletClasspathProviderTest {
     verifyNoMoreInteractions(resolver);
   }
 
-  private void waitForPluggableJobs() throws InterruptedException {
-    IJobManager jobManager = Job.getJobManager();
-    for (Job job : jobManager.find(null)) {
-      if (job instanceof PluggableJob) {
-        job.join();
-      }
-    }
+  private void waitForJobs() throws InterruptedException {
+    Job.getJobManager().join(fixture, null);
   }
 }
