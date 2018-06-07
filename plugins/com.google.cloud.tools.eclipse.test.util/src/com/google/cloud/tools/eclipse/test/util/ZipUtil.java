@@ -49,12 +49,20 @@ public class ZipUtil {
     } else if (!destination.isDirectory()) {
       return StatusUtil.error(ZipUtil.class, "Destination is not a directory: " + destination);
     }
+
     try (ZipFile zipFile = new ZipFile(zip)) {
+      String canonicalDestination = destination.getCanonicalPath();
+
       progress.setWorkRemaining(zipFile.size());
       for (Enumeration<? extends ZipEntry> entries = zipFile.entries(); entries.hasMoreElements()
           && !progress.isCanceled();) {
         ZipEntry entry = entries.nextElement();
         File entryLocation = new File(destination, entry.getName());
+        if (!entryLocation.getCanonicalPath().startsWith(canonicalDestination + File.separator)) {
+          return StatusUtil.error(
+              ZipUtil.class, "Blocked unzipping file outside the destination: " + entry.getName());
+        }
+
         if (entry.isDirectory()) {
           if (!entryLocation.exists()) {
             if (!entryLocation.mkdirs()) {
