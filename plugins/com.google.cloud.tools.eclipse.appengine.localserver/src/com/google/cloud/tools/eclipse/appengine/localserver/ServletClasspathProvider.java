@@ -19,19 +19,22 @@ package com.google.cloud.tools.eclipse.appengine.localserver;
 import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
-import com.google.cloud.tools.eclipse.util.jobs.PluggableJob;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.util.concurrent.MoreExecutors;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Inject;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.jst.server.core.RuntimeClasspathProviderDelegate;
@@ -43,14 +46,12 @@ import org.eclipse.wst.server.core.IRuntime;
 /**
  * Supply Java servlet container classes, specifically servlet-api.jar, jsp-api.jar, and
  * appengine-api-1.0-sdk.jar to non-Maven projects.
- * <p>
- * The jars are resolved using {@link ILibraryRepositoryService}.
+ *
+ * <p>The jars are resolved using {@link ILibraryRepositoryService}.
  */
 public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
 
-  /**
-   * The default Servlet API supported by the App Engine Java 7 runtime.
-   */
+  /** The default Servlet API supported by the App Engine Java 7 runtime. */
   private static final IProjectFacetVersion DEFAULT_DYNAMIC_WEB_VERSION = WebFacetUtils.WEB_25;
 
   private static final IClasspathEntry[] NO_CLASSPATH_ENTRIES = {};
@@ -83,7 +84,7 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
 
   @Override
   public IClasspathEntry[] resolveClasspathContainer(IProject project, IRuntime runtime) {
-    if (project != null && MavenUtils.hasMavenNature(project)) { 
+    if (project != null && MavenUtils.hasMavenNature(project)) {
       // Maven handles its own classpath
       return NO_CLASSPATH_ENTRIES;
     }
@@ -103,16 +104,20 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
     }
 
     final IProjectFacetVersion dynamicWebFacetVersion = webFacetVersion;
-    PluggableJob<IClasspathEntry[]> resolveJob =
-        new PluggableJob<>(
-            "Resolving libraries for " + webFacetVersion,
-            () -> libraryEntries.get(dynamicWebFacetVersion));
-    resolveJob.onSuccess(
-        MoreExecutors.directExecutor(),
-        resolved -> requestClasspathContainerUpdate(project, runtime, resolved));
-    resolveJob.onError(
-        MoreExecutors.directExecutor(),
-        exception -> logger.log(Level.WARNING, "Failed to resolve servlet APIs", exception));
+    // $NON-NLS-1$ since it's a system job
+    Job resolveJob = new Job("Resolving libraries for " + webFacetVersion) { //$NON-NLS-1$
+          @Override
+          protected IStatus run(IProgressMonitor monitor) {
+            try {
+              IClasspathEntry[] resolved = libraryEntries.get(dynamicWebFacetVersion);
+              requestClasspathContainerUpdate(project, runtime, resolved);
+            } catch (ExecutionException ex) {
+              logger.log(Level.WARNING, "Failed to resolve servlet APIs", ex);
+            }
+            return Status.OK_STATUS;
+          }
+        };
+    resolveJob.setSystem(true);
     resolveJob.setRule(resolverService.getSchedulingRule());
     resolveJob.schedule();
     return null;
@@ -137,17 +142,17 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
      * classpath entries returned from our {@code resolveClasspathContainer()} change.
      * https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/3055#issuecomment-390242592
      */
-    // perform update request from a separate job to ensure not run with any currently-held locks
-    // or rules
-    PluggableJob<Void> requestUpdateJob =
-        new PluggableJob<>(
-            "Request update of server runtime classpath container",
-            () -> {
-              requestClasspathContainerUpdate(runtime, entries);
-              // triggers update of this classpath container
-              resolveClasspathContainerImpl(project, runtime);
-              return null;
-            });
+    // Perform update request in a separate job to ensure it's run without any additional locks
+    // or rules. $NON-NLS-1$ since it's a system job
+    Job requestUpdateJob = new Job("Update server runtime classpath container") { //$NON-NLS-1$
+          @Override
+          public IStatus run(IProgressMonitor monitor) {
+            requestClasspathContainerUpdate(runtime, entries);
+            // triggers update of this classpath container
+            resolveClasspathContainerImpl(project, runtime);
+            return Status.OK_STATUS;
+          }
+        };
     requestUpdateJob.setSystem(true);
     requestUpdateJob.schedule();
   }
