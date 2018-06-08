@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.appengine.localserver;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -76,12 +75,14 @@ public class ServletClasspathProviderTest {
   @Test
   public void testUncached_callsResolver() throws CoreException, InterruptedException {
     IRuntime runtime = mock(IRuntime.class);
-    IClasspathEntry entry = mock(IClasspathEntry.class);
-    doReturn(new IClasspathEntry[] {entry})
+    IClasspathEntry servletApi = mock(IClasspathEntry.class);
+    IClasspathEntry jspApi = mock(IClasspathEntry.class);
+    IClasspathEntry[] servletClasspath = new IClasspathEntry[] {servletApi, jspApi};
+    doReturn(servletClasspath)
         .when(resolver)
-        .resolveLibrariesAttachSources(
-            org.mockito.Matchers.<String>anyVararg()); // just any() in Mockito 2.1
+        .resolveLibrariesAttachSources("servlet-api-3.1", "jsp-api-2.3");
 
+    // subclass ServletClasspathProvider to ignore the actual update request
     AtomicReference<IClasspathEntry[]> requestedUpdate = new AtomicReference<>(null);
     fixture =
         new ServletClasspathProvider(resolver) {
@@ -99,8 +100,7 @@ public class ServletClasspathProviderTest {
     verify(resolver).getSchedulingRule(); // for background job
     verify(resolver).resolveLibrariesAttachSources("servlet-api-3.1", "jsp-api-2.3");
     assertNotNull(requestedUpdate.get());
-    assertEquals(1, requestedUpdate.get().length);
-    assertSame(requestedUpdate.get()[0], entry);
+    assertSame(servletClasspath, requestedUpdate.get());
     verifyNoMoreInteractions(resolver);
   }
 
