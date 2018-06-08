@@ -1,4 +1,4 @@
-[![unstable](http://badges.github.io/stability-badges/dist/unstable.svg)](http://github.com/badges/stability-badges)
+[![unstable](http://badges.github.io/stability-badges/dist/stable.svg)](http://github.com/badges/stability-badges)
 [![Build Status](https://travis-ci.org/GoogleCloudPlatform/google-cloud-eclipse.svg?branch=master)](https://travis-ci.org/GoogleCloudPlatform/google-cloud-eclipse)
 
 
