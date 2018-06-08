@@ -20,7 +20,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -100,7 +100,7 @@ public class ServletClasspathProviderTest {
     verify(resolver).resolveLibrariesAttachSources("servlet-api-3.1", "jsp-api-2.3");
     assertNotNull(requestedUpdate.get());
     assertEquals(1, requestedUpdate.get().length);
-    assertTrue(requestedUpdate.get()[0] == entry);
+    assertSame(requestedUpdate.get()[0], entry);
     verifyNoMoreInteractions(resolver);
   }
 
@@ -122,7 +122,7 @@ public class ServletClasspathProviderTest {
 
     IClasspathEntry[] result =
         fixture.resolveClasspathContainer(projectCreator.getProject(), runtime);
-    assertTrue(entries == result);
+    assertSame(entries, result);
     assertNull(requestedUpdate.get());
     verifyNoMoreInteractions(resolver);
   }
