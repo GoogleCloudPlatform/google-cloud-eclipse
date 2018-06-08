@@ -104,8 +104,7 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
     }
 
     final IProjectFacetVersion dynamicWebFacetVersion = webFacetVersion;
-    // $NON-NLS-1$ since it's a system job
-    Job resolveJob = new Job("Resolving libraries for " + webFacetVersion) { // $NON-NLS-1$
+    Job resolveJob = new Job("Resolving libraries for " + webFacetVersion) { //$NON-NLS-1$
           @Override
           protected IStatus run(IProgressMonitor monitor) {
             try {
@@ -147,9 +146,9 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
      * classpath entries returned from our {@code resolveClasspathContainer()} change.
      * https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/3055#issuecomment-390242592
      */
-    // Perform update request in a separate job to ensure it's run without any additional locks
-    // or rules. $NON-NLS-1$ since it's a system job
-    Job requestUpdateJob = new Job("Update server runtime classpath container") { // $NON-NLS-1$
+    // Perform update request in a separate job to ensure it's run without holding any additional
+    // locks or rules.
+    Job requestUpdateJob = new Job("Update server runtime classpath container") { //$NON-NLS-1$
           @Override
           public IStatus run(IProgressMonitor monitor) {
             requestClasspathContainerUpdate(runtime, entries);
