@@ -17,7 +17,18 @@
     <module>neon</module>
     <module>oxygen</module>
     <module>photon</module>
-    <module>ide-target-platform</module>
   </modules>
 
+  <profiles>
+    <profile>
+      <!--
+        create a copy of the build target platform, suitable for setting
+        as an Eclipse Target Platform
+      -->
+      <id>ide-target-platform</id>
+      <modules>
+        <module>ide-target-platform</module>
+      </modules>
+    </profile>
+  </profiles>
 </project>

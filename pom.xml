@@ -33,6 +33,7 @@
     <module>features</module>
     <module>plugins</module>
     <module>third_party</module>
+    <module>eclipse</module>
   </modules>
 
   <properties>
@@ -409,9 +410,6 @@
          <jettyMaxVersion>9.4</jettyMaxVersion>
       </properties>
       <!-- build against a known target platform -->
-      <modules>
-        <module>eclipse/neon</module>
-      </modules>
       <build>
         <plugins>
           <plugin>
@@ -445,9 +443,6 @@
          <jettyMaxVersion>9.5</jettyMaxVersion>
       </properties>
       <!-- build against a known target platform -->
-      <modules>
-        <module>eclipse/oxygen</module>
-      </modules>
       <build>
         <plugins>
           <plugin>
@@ -479,9 +474,6 @@
          <jettyMaxVersion>9.5</jettyMaxVersion>
       </properties>
       <!-- build against a known target platform -->
-      <modules>
-        <module>eclipse/photon</module>
-      </modules>
       <build>
         <plugins>
           <plugin>
@@ -499,17 +491,6 @@
           </plugin>
         </plugins>
       </build>
-    </profile>
-
-    <profile>
-      <!--
-        create a copy of the build target platform, suitable for setting
-        as an Eclipse Target Platform
-      -->
-      <id>ide-target-platform</id>
-      <modules>
-        <module>eclipse/ide-target-platform</module>
-      </modules>
     </profile>
 
     <!--

@@ -18,6 +18,10 @@ Maven for building Eclipse bundles and features.
 
 1. The [Google Cloud SDK](https://cloud.google.com/sdk/); install
   this somewhere on your file system.
+  
+  An alternative is to install _Cloud Tools for Eclipse_ into your Eclipse IDE and use its option to automatically install the _Cloud SDK_.
+
+1. JDK 8
 
 1. The [Eclipse IDE](https://www.eclipse.org/downloads/eclipse-packages/).
   It's easiest to use the _Eclipse IDE for Java EE Developers_ package. You must use
@@ -36,14 +40,12 @@ Maven for building Eclipse bundles and features.
      for _Dependency_ and install.
 
   3. The [Google Java Format plugin for Eclipse](https://github.com/google/google-java-format/).
-     Download the [latest version](https://github.com/google/google-java-format/releases/).
+     Download the [latest version](https://github.com/google/google-java-format/releases/)
      and place the jar into your Eclipse installation's `dropins/` directory
      (on MacOS this may be in `Eclipse.app/Contents/Eclipse/dropins/`).
 
 1. Maven 3.5.0 or later.  Although m2eclipse is bundled with its own Maven install,
    Maven is necessary to test command-line builds.
-
-1. JDK 8
 
 1. git (optional: you can use EGit from within Eclipse instead)
 
@@ -181,7 +183,8 @@ target platform whenever dependencies are updated.
      contains the project.
 
   1. Under `Projects:` the `pom.xml` files representing modules should be
-     displayed. Make sure that all of them are selected, and click `Finish`.
+     displayed. Make sure that all of them are selected _except_ the sub-directories under `eclipse`, and click `Finish`.
+     - The subprojects under the `eclipse` directory define target platforms for the Tycho build. It's easier to edit the files from the `eclipse-setup` project.
 
   1. Maven may prompt you to install several additional plugin connector plugins from
   [Tycho](https://eclipse.org/tycho/) if they are not already installed. Click
@@ -194,7 +197,7 @@ target platform whenever dependencies are updated.
   1. There should be no errors in the `Markers` or `Problems` views in Eclipse.
     However you may see several low-priority warnings.
 
-      1. You may see Maven-related errors like _"plugin execution not
+      - You may see Maven-related errors like _"plugin execution not
          covered by lifecycle configuration"_.
          If so, right-click on the problem and select
          _Quick Fix_ > _Discover new m2e connectors_
