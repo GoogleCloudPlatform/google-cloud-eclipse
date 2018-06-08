@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 import unittest
 from copy_repo_to_final_location import _IsVersionString
