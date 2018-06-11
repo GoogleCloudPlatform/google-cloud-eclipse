@@ -303,14 +303,18 @@ public class AnalyticsPingManager {
     }
 
     try {
+      Shell activeShell = Display.getCurrent().getActiveShell();
+      if (activeShell != null) {
+        return activeShell;
+      }
       IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
       if (window != null) {
         return window.getShell();
       }
+      return null;
     } catch (IllegalStateException ise) {  // getWorkbench() might throw this.
-      // Fall through.
+      return null;
     }
-    return Display.getCurrent().getActiveShell();
   }
 
   private static void flushPreferences(IEclipsePreferences preferences) {
