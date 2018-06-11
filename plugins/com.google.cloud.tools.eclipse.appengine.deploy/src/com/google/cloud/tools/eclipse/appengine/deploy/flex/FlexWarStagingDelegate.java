@@ -18,11 +18,13 @@ package com.google.cloud.tools.eclipse.appengine.deploy.flex;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.appengine.deploy.WarPublisher;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Preconditions;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 /**
@@ -49,7 +51,10 @@ public class FlexWarStagingDelegate extends FlexStagingDelegate {
       throws CoreException {
     IPath war = safeWorkDirectory.append("app-to-deploy.war");
     IPath tempDirectory = safeWorkDirectory.append("temp");
-    WarPublisher.publishWar(project, war, tempDirectory, monitor);
+    IStatus[] statuses = WarPublisher.publishWar(project, war, tempDirectory, monitor);
+    if (statuses.length != 0) {
+      throw new CoreException(StatusUtil.multi(this, "problem publishing WAR", statuses));
+    }
     return war;
   }
 

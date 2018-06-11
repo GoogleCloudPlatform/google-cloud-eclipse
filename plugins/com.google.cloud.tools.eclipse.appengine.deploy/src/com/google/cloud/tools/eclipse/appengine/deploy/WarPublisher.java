@@ -28,6 +28,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
@@ -65,7 +66,7 @@ public class WarPublisher {
     PublishUtil.publishFull(resources, destination, subMonitor.newChild(90));
   }
 
-  public static void publishWar(IProject project, IPath destination, IPath safeWorkDirectory,
+  public static IStatus[] publishWar(IProject project, IPath destination, IPath safeWorkDirectory,
       IProgressMonitor monitor) throws CoreException {
     Preconditions.checkNotNull(project, "project is null"); //$NON-NLS-1$
     Preconditions.checkNotNull(destination, "destination is null"); //$NON-NLS-1$
@@ -80,7 +81,10 @@ public class WarPublisher {
 
     IModuleResource[] resources =
         flattenResources(project, safeWorkDirectory, subMonitor.newChild(10));
-    PublishUtil.publishZip(resources, destination, subMonitor.newChild(90));
+    if (resources.length == 0) {
+      logger.log(Level.WARNING, "no resource to publish");
+    }
+    return PublishUtil.publishZip(resources, destination, subMonitor.newChild(90));
   }
 
   private static IModuleResource[] flattenResources(IProject project, IPath safeWorkDirectory,
