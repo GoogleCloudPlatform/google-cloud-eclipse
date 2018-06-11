@@ -37,6 +37,15 @@ public class AnalyticsEvents {
   public static final String APP_ENGINE_NEW_PROJECT_WIZARD_COMPLETE =
       "appengine.new.project.wizard.complete";
 
+  public static final String CLOUD_SDK_INSTALL_SUCCESS = "cloud.sdk.install.success";
+  public static final String CLOUD_SDK_COMPONENT_INSTALL_SUCCESS =
+      "cloud.sdk.component.install.success";
+  public static final String CLOUD_SDK_INSTALL_CANCELED = "cloud.sdk.install.canceled";
+  public static final String CLOUD_SDK_INSTALL_FAILURE = "cloud.sdk.install.failure";
+  public static final String CLOUD_SDK_UPDATE_SUCCESS = "cloud.sdk.update.success";
+  public static final String CLOUD_SDK_UPDATE_CANCELED = "cloud.sdk.update.canceled";
+  public static final String CLOUD_SDK_UPDATE_FAILURE = "cloud.sdk.update.failure";
+
   // Metadata keys
   public static final String APP_ENGINE_LOCAL_SERVER_MODE = "mode";
   public static final String APP_ENGINE_NEW_PROJECT_WIZARD_TYPE = "type";
@@ -45,6 +54,7 @@ public class AnalyticsEvents {
   public static final String APP_ENGINE_DEPLOY_FLEXIBLE = "flex";
   public static final String DATAFLOW_RUN_RUNNER = "runner";
   public static final String CLOUD_SDK_MANAGEMENT = "cloud.sdk.management";
+  public static final String CLOUD_SDK_FAILURE_CAUSE = "cloud.sdk.failure.cause";
 
   public static final String PROJECT_TYPE = "project.type";
   public static final String LIBRARY_IDS = "library.ids";

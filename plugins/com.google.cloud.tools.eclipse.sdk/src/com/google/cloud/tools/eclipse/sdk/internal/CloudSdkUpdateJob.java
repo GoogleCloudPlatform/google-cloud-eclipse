@@ -20,6 +20,8 @@ import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkVersionFileException;
 import com.google.cloud.tools.eclipse.sdk.MessageConsoleWriterListener;
 import com.google.cloud.tools.eclipse.sdk.Messages;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.cloud.tools.managedcloudsdk.ManagedCloudSdk;
 import com.google.cloud.tools.managedcloudsdk.ManagedSdkVerificationException;
@@ -58,8 +60,10 @@ public class CloudSdkUpdateJob extends CloudSdkModifyJob {
     try {
       ManagedCloudSdk managedSdk = getManagedCloudSdk();
       if (!managedSdk.isInstalled()) {
+        AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.CLOUD_SDK_UPDATE_FAILURE,
+            AnalyticsEvents.CLOUD_SDK_FAILURE_CAUSE, "sdk_not_installed"); //$NON-NLS-1$
         logger.info("Google Cloud SDK is not installed"); //$NON-NLS-1$
-        return StatusUtil.create(getFailureSeverity(), 
+        return StatusUtil.create(getFailureSeverity(),
             this, Messages.getString("cloud.sdk.not.installed")); //$NON-NLS-1$
       } else if (!managedSdk.isUpToDate()) {
         subTask(subMonitor, Messages.getString("updating.cloud.sdk")); //$NON-NLS-1$
@@ -73,6 +77,7 @@ public class CloudSdkUpdateJob extends CloudSdkModifyJob {
                 + oldVersion
                 + " to " //$NON-NLS-1$
                 + newVersion);
+        AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.CLOUD_SDK_UPDATE_SUCCESS);
       } else {
         logger.info(
             "Managed Google Cloud SDK remains at version " + getVersion(managedSdk.getSdkHome()));
@@ -80,16 +85,23 @@ public class CloudSdkUpdateJob extends CloudSdkModifyJob {
       return Status.OK_STATUS;
 
     } catch (InterruptedException ex) {
+      AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.CLOUD_SDK_UPDATE_CANCELED);
       return Status.CANCEL_STATUS;
     } catch (ManagedSdkVerificationException | CommandExecutionException | CommandExitException ex) {
+      AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.CLOUD_SDK_UPDATE_FAILURE,
+          AnalyticsEvents.CLOUD_SDK_FAILURE_CAUSE, ex.getClass().getName());
       logger.log(Level.WARNING, "Could not update Cloud SDK", ex); //$NON-NLS-1$
       String message = Messages.getString("installing.cloud.sdk.failed"); //$NON-NLS-1$
       return StatusUtil.create(getFailureSeverity(), this, message, ex);
     } catch (UnsupportedOsException ex) {
+      AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.CLOUD_SDK_UPDATE_FAILURE,
+          AnalyticsEvents.CLOUD_SDK_FAILURE_CAUSE, ex.getClass().getName());
       logger.log(Level.WARNING, "Could not update Cloud SDK", ex); // $NON-NLS-1$
       String message = Messages.getString("unsupported.os.installation"); //$NON-NLS-1$
       return StatusUtil.create(getFailureSeverity(), this, message, ex);
     } catch (CloudSdkVersionFileException | CloudSdkNotFoundException ex) {
+      AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.CLOUD_SDK_UPDATE_FAILURE,
+          AnalyticsEvents.CLOUD_SDK_FAILURE_CAUSE, ex.getClass().getName());
       logger.log(Level.WARNING, "Cloud SDK not found where expected", ex); // $NON-NLS-1$
       String message = Messages.getString("corrupt.cloud.sdk"); //$NON-NLS-1$
       return StatusUtil.create(getFailureSeverity(), this, message, ex);
