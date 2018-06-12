@@ -18,8 +18,8 @@ package com.google.cloud.tools.eclipse.appengine.deploy;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.api.deploy.AppEngineStandardStaging;
-import com.google.cloud.tools.appengine.api.deploy.DefaultStageFlexibleConfiguration;
 import com.google.cloud.tools.appengine.api.deploy.DefaultStageStandardConfiguration;
+import com.google.cloud.tools.appengine.api.deploy.StageFlexibleConfiguration;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineFlexibleStaging;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -77,13 +77,13 @@ public class CloudSdkStagingHelper {
     SubMonitor progress = SubMonitor.convert(monitor, 1);
     progress.setTaskName(Messages.getString("task.name.stage.project")); //$NON-NLS-1$
 
-    DefaultStageFlexibleConfiguration stagingConfig = new DefaultStageFlexibleConfiguration();
+    StageFlexibleConfiguration.Builder stagingConfig = new StageFlexibleConfiguration.Builder();
     stagingConfig.setAppEngineDirectory(appEngineDirectory.toFile());
     stagingConfig.setArtifact(deployArtifact.toFile());
     stagingConfig.setStagingDirectory(stagingDirectory.toFile());
 
     CloudSdkAppEngineFlexibleStaging staging = new CloudSdkAppEngineFlexibleStaging();
-    staging.stageFlexible(stagingConfig);
+    staging.stageFlexible(stagingConfig.build());
 
     progress.worked(1);
   }
