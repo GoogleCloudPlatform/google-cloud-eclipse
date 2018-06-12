@@ -49,14 +49,17 @@ public class ManagedCloudSdkStartupTest {
   }
 
   @Test
-  public void testInstallIfNotInstalled()
+  public void testNotifiedIfNotInstalled()
       throws ManagedSdkVerificationException, ManagedSdkVersionMismatchException {
     doReturn(false).when(installation).isInstalled();
-    
+    doReturn(false).when(installation).isUpToDate();
+
     ManagedCloudSdkStartup startup = new ManagedCloudSdkStartup(workbench);
     startup.checkInstallation(sdkManager, installation, null);
-    verify(sdkManager).installManagedSdkAsync();
     verify(installation).isInstalled();
+    // indirectly check that the user was notified of the update
+    verify(workbench).getDisplay();
+    verify(display).asyncExec(any(Runnable.class));
     verifyNoMoreInteractions(sdkManager, installation, workbench, display);
   }
 
@@ -65,7 +68,7 @@ public class ManagedCloudSdkStartupTest {
       throws ManagedSdkVerificationException, ManagedSdkVersionMismatchException {
     doReturn(true).when(installation).isInstalled();
     doReturn(false).when(installation).isUpToDate();
-    
+
     ManagedCloudSdkStartup startup = new ManagedCloudSdkStartup(workbench);
     startup.checkInstallation(sdkManager, installation, null);
     verify(installation).isInstalled();

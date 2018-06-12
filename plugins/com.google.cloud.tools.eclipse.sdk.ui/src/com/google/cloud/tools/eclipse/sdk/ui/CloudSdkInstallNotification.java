@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.sdk.ui;
 
-import com.google.cloud.tools.appengine.cloudsdk.serialization.CloudSdkVersion;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.cloud.tools.eclipse.ui.util.images.SharedImages;
 import com.google.common.annotations.VisibleForTesting;
@@ -33,43 +32,44 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.IWorkbench;
 
-/** A notification that a new version of the Cloud SDK is available. */
-public class CloudSdkUpdateNotification extends AbstractNotificationPopup {
-  private static final Logger logger = Logger.getLogger(CloudSdkUpdateNotification.class.getName());
+/**
+ * Notifies the user that the Cloud SDK will be installed. The installation will proceed unless the
+ * user explicitly cancels the update.
+ */
+public class CloudSdkInstallNotification extends AbstractNotificationPopup {
+  private static final Logger logger =
+      Logger.getLogger(CloudSdkInstallNotification.class.getName());
 
   /**
-   * Asynchronously shows a notification that an update is available.
+   * Asynchronously shows a notification that installation is about to proceed.
    *
-   * @param updateTrigger the action to take when selected; assumed to be short-lived
+   * @param installTrigger the action to take when selected; assumed to be short-lived
    */
-  public static void showNotification(
-      IWorkbench workbench, CloudSdkVersion currentVersion, Runnable updateTrigger) {
+  public static void showNotification(IWorkbench workbench, Runnable installTrigger) {
     workbench
         .getDisplay()
         .asyncExec(
             () -> {
-              CloudSdkUpdateNotification popup =
-                  new CloudSdkUpdateNotification(workbench, currentVersion, updateTrigger);
+              CloudSdkInstallNotification popup =
+                  new CloudSdkInstallNotification(workbench, installTrigger);
               popup.open(); // doesn't wait
             });
   }
 
+  @VisibleForTesting boolean shouldInstall = true;
   private IWorkbench workbench;
-  private CloudSdkVersion sdkVersion;
-  private Runnable updateRunnable;
+  private Runnable installRunnable;
 
   @VisibleForTesting
-  CloudSdkUpdateNotification(
-      IWorkbench workbench, CloudSdkVersion sdkVersion, Runnable updateRunnable) {
+  CloudSdkInstallNotification(IWorkbench workbench, Runnable installRunnable) {
     super(workbench.getDisplay());
     this.workbench = workbench;
-    this.sdkVersion = sdkVersion;
-    this.updateRunnable = updateRunnable;
+    this.installRunnable = installRunnable;
   }
 
   @Override
   protected String getPopupShellTitle() {
-    return Messages.getString("CloudSdkUpdateNotificationTitle");
+    return Messages.getString("CloudSdkInstallNotificationTitle");
   }
 
   @Override
@@ -80,7 +80,7 @@ public class CloudSdkUpdateNotification extends AbstractNotificationPopup {
   @Override
   protected void createContentArea(Composite parent) {
     Link message = new Link(parent, SWT.WRAP);
-    message.setText(Messages.getString("CloudSdkUpdateNotificationMessage", sdkVersion));
+    message.setText(Messages.getString("CloudSdkInstallNotificationMessage"));
     message.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     message.addSelectionListener(
         new SelectionAdapter() {
@@ -91,10 +91,12 @@ public class CloudSdkUpdateNotification extends AbstractNotificationPopup {
         });
   }
 
+  /** React to the user selecting a link within the notification. */
   @VisibleForTesting
   void linkSelected(String linkText) {
-    if ("update".equals(linkText)) {
-      updateRunnable.run();
+    if ("skip".equals(linkText)) {
+      shouldInstall = false;
+      close();
     } else if (linkText != null && linkText.startsWith("http")) {
       IStatus status = WorkbenchUtil.openInBrowser(workbench, linkText);
       if (!status.isOK()) {
@@ -103,5 +105,13 @@ public class CloudSdkUpdateNotification extends AbstractNotificationPopup {
     } else {
       logger.warning("Unknown selection event: " + linkText);
     }
+  }
+
+  @Override
+  public boolean close() {
+    if (shouldInstall) {
+      installRunnable.run();
+    }
+    return super.close();
   }
 }
