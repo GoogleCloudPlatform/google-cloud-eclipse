@@ -58,18 +58,6 @@ public class CloudSdkInstallNotificationTest {
   }
 
   @Test
-  public void testTriggeredOnFade() {
-    Runnable trigger = mock(Runnable.class);
-    CloudSdkInstallNotification notification = new CloudSdkInstallNotification(workbench, trigger);
-    // simulate fade away
-    notification.open();
-    notification.getShell().setAlpha(0);
-    assertTrue(notification.shouldInstall);
-    notification.close();
-    verify(trigger).run();
-  }
-
-  @Test
   public void testTriggerOnCloseButton() {
     Runnable trigger = mock(Runnable.class);
     CloudSdkInstallNotification notification = new CloudSdkInstallNotification(workbench, trigger);
