@@ -34,6 +34,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class CloudSdkInstallNotificationTest {
   @Mock private IWorkbench workbench;
+  Runnable trigger = mock(Runnable.class);
 
   @Before
   public void setUp() {
@@ -42,28 +43,36 @@ public class CloudSdkInstallNotificationTest {
 
   @Test
   public void testDefaults() {
-    Runnable trigger = mock(Runnable.class);
     CloudSdkInstallNotification notification = new CloudSdkInstallNotification(workbench, trigger);
     assertTrue(notification.shouldInstall);
   }
 
   @Test
-  public void testNotTriggeredOnSkipLink() {
-    Runnable trigger = mock(Runnable.class);
-    CloudSdkInstallNotification notification = new CloudSdkInstallNotification(workbench, trigger);
-    notification.linkSelected("skip");
-    assertFalse(notification.shouldInstall);
-    notification.close();
-    verify(trigger, never()).run();
-  }
-
-  @Test
   public void testTriggerOnCloseButton() {
-    Runnable trigger = mock(Runnable.class);
     CloudSdkInstallNotification notification = new CloudSdkInstallNotification(workbench, trigger);
     notification.open();
     assertTrue(notification.shouldInstall);
     notification.close();
     verify(trigger).run();
+  }
+
+  @Test
+  public void testTriggeredOnFade() {
+    CloudSdkInstallNotification notification = new CloudSdkInstallNotification(workbench, trigger);
+    // simulate fade away
+    notification.open();
+    notification.getShell().setAlpha(0);
+    assertTrue(notification.shouldInstall);
+    notification.close();
+    verify(trigger).run();
+  }
+
+  @Test
+  public void testNotTriggeredOnSkipLink() {
+    CloudSdkInstallNotification notification = new CloudSdkInstallNotification(workbench, trigger);
+    notification.linkSelected("skip");
+    assertFalse(notification.shouldInstall);
+    notification.close();
+    verify(trigger, never()).run();
   }
 }
