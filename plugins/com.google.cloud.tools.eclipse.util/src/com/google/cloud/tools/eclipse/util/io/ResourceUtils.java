@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.util.io;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -57,6 +58,10 @@ public class ResourceUtils {
   }
 
   public static Collection<IFile> getAffectedFiles(IResourceDelta topDelta) throws CoreException {
+    if (topDelta == null) {
+      return Collections.emptyList();
+    }
+
     Collection<IFile> files = new ArrayList<>();
     topDelta.accept(
         delta -> {
