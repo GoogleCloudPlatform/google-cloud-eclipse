@@ -77,7 +77,7 @@ public class AppEngineContentProvider implements ITreeContentProvider {
    */
   @VisibleForTesting
   static AppEngineStandardProjectElement loadRepresentation(IProject project) {
-    if (project == null || !isStandard(project)) {
+    if (project == null || !project.exists() || !isStandard(project)) {
       return null;
     }
     try {
@@ -127,6 +127,10 @@ public class AppEngineContentProvider implements ITreeContentProvider {
     Set<Object> toBeRefreshed = new HashSet<>();
     for (IFile file : affected) {
       IProject project = file.getProject();
+      if (!project.exists()) {
+        projectMapping.invalidate(project);
+        continue; // the explorer will update itself
+      }
       AppEngineStandardProjectElement projectElement = projectMapping.getIfPresent(project);
       if (projectElement != null) {
         Object handle = projectElement.resourceChanged(file);
