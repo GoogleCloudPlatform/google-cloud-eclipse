@@ -87,8 +87,8 @@ public class ManagedCloudSdkStartup implements IStartup {
               logger.log(
                   Level.SEVERE,
                   "Unable to check Cloud SDK installation. Possible causes include" //$NON-NLS-1$
-                      + " network connection problem or corrupt Cloud SDK installation.",
-                  ex); //$NON-NLS-1$
+                      + " network connection problem or corrupt Cloud SDK installation.", //$NON-NLS-1$
+                  ex);
             } catch (ManagedSdkVersionMismatchException ex) {
               throw new IllegalStateException(
                   "This is never thrown because we always use LATEST.", ex); // $NON-NLS-1$
