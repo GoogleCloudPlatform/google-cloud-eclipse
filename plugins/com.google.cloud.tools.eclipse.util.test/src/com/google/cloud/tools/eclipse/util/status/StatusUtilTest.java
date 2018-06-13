@@ -180,24 +180,22 @@ public class StatusUtilTest {
   
   @Test
   public void testMulti_noError() {
-    MultiStatus error = StatusUtil.multi(StatusUtil.class, "test status msg");
-    assertThat(error.getPlugin(), is("com.google.cloud.tools.eclipse.util"));
-    assertThat(error.getMessage(), is("test status msg"));
+    MultiStatus status = StatusUtil.multi(StatusUtil.class, "test OK msg");
+    verifyStatus(status, IStatus.OK, "test OK msg");
   }
 
   @Test
   public void testMulti_withError() {
     Throwable exception = new RuntimeException();
-    MultiStatus error = StatusUtil.multi(StatusUtil.class, "test status msg", exception);
-    assertThat(error.getPlugin(), is("com.google.cloud.tools.eclipse.util"));
-    assertThat(error.getMessage(), is("test status msg"));
-    assertThat(error.getException(), is(sameInstance(exception)));
+    MultiStatus status = StatusUtil.multi(StatusUtil.class, "test OK msg", exception);
+    verifyStatus(status, IStatus.OK, "test OK msg");
+    assertThat(status.getException(), is(sameInstance(exception)));
   }
 
   @Test
   public void testFilter_normalStatus() {
-    IStatus error = StatusUtil.error(StatusUtil.class, "test error msg");
-    assertThat(StatusUtil.filter(error), is(sameInstance(error)));
+    IStatus status = StatusUtil.error(StatusUtil.class, "test error msg");
+    assertThat(StatusUtil.filter(status), is(sameInstance(status)));
   }
 
   @Test
