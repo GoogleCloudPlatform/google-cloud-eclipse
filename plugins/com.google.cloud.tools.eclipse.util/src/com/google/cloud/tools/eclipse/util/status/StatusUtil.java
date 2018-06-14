@@ -77,7 +77,7 @@ public class StatusUtil {
   public static MultiStatus multi(Object origin, String message, IStatus[] statuses) {
     MultiStatus multiStatus = multi(origin, message);
     for (IStatus status : statuses) {
-      multiStatus.merge(status);
+      multiStatus.add(status);
     }
     return multiStatus;
   }
