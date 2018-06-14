@@ -94,10 +94,13 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
     try {
       IFacetedProject facetedProject = ProjectFacetsManager.create(project);
       webFacetVersion = facetedProject.getInstalledVersion(WebFacetUtils.WEB_FACET);
+      if (webFacetVersion == null) {
+        // may occur when the project is in the midst of being updated
+        return NO_CLASSPATH_ENTRIES;
+      }
     } catch (CoreException ex) {
       logger.log(Level.WARNING, "Unable to obtain jst.web facet version", ex);
     }
-
     IClasspathEntry[] entries = libraryEntries.getIfPresent(webFacetVersion);
     if (entries != null) {
       return entries;

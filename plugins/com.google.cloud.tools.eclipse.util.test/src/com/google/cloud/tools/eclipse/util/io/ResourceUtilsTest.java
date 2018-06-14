@@ -22,7 +22,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -68,12 +67,9 @@ public class ResourceUtilsTest {
 
   @Test
   public void testGetAffectedFiles_null() throws CoreException {
-    try {
-      ResourceUtils.getAffectedFiles(null);
-      fail();
-    } catch (NullPointerException ex) {
-      /* expected */
-    }
+    Collection<IFile> files = ResourceUtils.getAffectedFiles(null);
+    assertNotNull(files);
+    assertEquals(0, files.size());
   }
 
   @Test
@@ -85,7 +81,7 @@ public class ResourceUtilsTest {
   }
 
   @Test
-  public void testGetAffectedDelta_changedFile() throws CoreException {
+  public void testGetAffectedFiles_changedFile() throws CoreException {
     IFile file = mock(IFile.class, "/filename");
 
     IResourceDelta delta = mockDelta();
@@ -100,7 +96,7 @@ public class ResourceUtilsTest {
   }
 
   @Test
-  public void testGetAffectedDelta_projectFolderFiles() throws CoreException {
+  public void testGetAffectedFiles_projectFolderFiles() throws CoreException {
     @SuppressWarnings("hiding") // nothing to delete
     IProject project = mock(IProject.class, "/project");
 

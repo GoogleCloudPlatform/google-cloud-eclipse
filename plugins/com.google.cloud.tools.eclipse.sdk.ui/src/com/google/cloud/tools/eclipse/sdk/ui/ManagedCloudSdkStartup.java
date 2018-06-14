@@ -41,15 +41,9 @@ import org.eclipse.ui.progress.WorkbenchJob;
 
 /**
  * A simple startup task for triggering events relating to the managed Google Cloud SDK, when
- * enabled. If the Google Cloud SDK is not installed, then we silently trigger installation of the
- * Google Cloud SDK. Otherwise we check if the managed installation is up-to-date and if not, notify
- * the user of the update.
- *
- * <p>earlyStartup() is called on a non-UI worker thread and runs before the Eclipse Workbench is
- * actually rendered. Since installing the SDK takes some time, we launch a WorkspaceJob to wait
- * until the workbench is actually up and running, especially so we don't slow down startup. Our use
- * of a wait and WorkbenchJob also ensures that our job doesn't start if the user realizes they made
- * a mistake and quickly exits.
+ * enabled. If the Google Cloud SDK is not installed then, after notifying the user, we trigger
+ * installation of the Google Cloud SDK. Otherwise we check if the managed installation is
+ * up-to-date and if not, notify the user of the update.
  */
 public class ManagedCloudSdkStartup implements IStartup {
   private static final Logger logger = Logger.getLogger(ManagedCloudSdkStartup.class.getName());
@@ -67,34 +61,46 @@ public class ManagedCloudSdkStartup implements IStartup {
 
   @Override
   public void earlyStartup() {
-    // TODO: notify the user of updates for manual installs too
     if (!CloudSdkPreferences.isAutoManaging()) {
+      // TODO: notify the user of updates for manual installs too
       return;
     }
 
-    Job checkInstallationJob = new Job("Check Google Cloud SDK") {
-      @Override
-      protected IStatus run(IProgressMonitor monitor) {
-        try {
-          CloudSdkManager sdkManager = CloudSdkManager.getInstance();
-          ManagedCloudSdk installer = ManagedCloudSdk.newManagedSdk();
-          checkInstallation(sdkManager, installer, monitor);
-        } catch (UnsupportedOsException ex) {
-          logger.log(Level.FINE, "Unable to check Cloud SDK installation", ex);
-        } catch (ManagedSdkVerificationException ex) {
-          logger.log(Level.SEVERE, "Unable to check Cloud SDK installation. Possible causes include"
-              + " network connection problem or corrupt Cloud SDK installation.", ex);
-        } catch (ManagedSdkVersionMismatchException ex) {
-          throw new IllegalStateException("This is never thrown because we always use LATEST.", ex);
-        }
-        return Status.OK_STATUS;
-      }
-    };
+    /*
+     * earlyStartup() is called on a non-UI worker thread and runs before the Eclipse Workbench is
+     * actually rendered. Since installing the SDK takes some time, we launch a WorkspaceJob to wait
+     * until the workbench is actually up and running, especially so we don't slow down startup. Our use
+     * of a wait and WorkbenchJob also ensures that our job doesn't start if the user realizes they made
+     * a mistake and quickly exits.
+     */
+
+    Job checkInstallationJob = new Job(Messages.getString("CheckUpToDateJobTitle")) { // $NON-NLS-1$
+          @Override
+          protected IStatus run(IProgressMonitor monitor) {
+            try {
+              CloudSdkManager sdkManager = CloudSdkManager.getInstance();
+              ManagedCloudSdk installer = ManagedCloudSdk.newManagedSdk();
+              checkInstallation(sdkManager, installer, monitor);
+            } catch (UnsupportedOsException ex) {
+              logger.log(Level.FINE, "Unable to check Cloud SDK installation", ex); // $NON-NLS-1$
+            } catch (ManagedSdkVerificationException ex) {
+              logger.log(
+                  Level.SEVERE,
+                  "Unable to check Cloud SDK installation. Possible causes include" //$NON-NLS-1$
+                      + " network connection problem or corrupt Cloud SDK installation.", //$NON-NLS-1$
+                  ex);
+            } catch (ManagedSdkVersionMismatchException ex) {
+              throw new IllegalStateException(
+                  "This is never thrown because we always use LATEST.", ex); // $NON-NLS-1$
+            }
+            return Status.OK_STATUS;
+          }
+        };
 
     // Use a WorkbenchJob to trigger the check to ensure we start after the workbench window has
     // appeared, but perform the actual check within a normal Job so that we don't monopolize the
     // display thread.
-    Job triggerInstallationJob = new WorkbenchJob("Check Google Cloud SDK") {
+    Job triggerInstallationJob = new WorkbenchJob(Messages.getString("CheckUpToDateJobTitle")) { //$NON-NLS-1$
       @Override
       public IStatus runInUIThread(IProgressMonitor monitor) {
         checkInstallationJob.setSystem(true);
@@ -111,7 +117,7 @@ public class ManagedCloudSdkStartup implements IStartup {
       CloudSdkManager manager, ManagedCloudSdk installation, IProgressMonitor monitor)
       throws ManagedSdkVerificationException, ManagedSdkVersionMismatchException {
     if (!installation.isInstalled()) {
-      manager.installManagedSdkAsync();
+      CloudSdkInstallNotification.showNotification(workbench, manager::installManagedSdkAsync);
     } else if (!installation.isUpToDate()) {
       CloudSdkVersion currentVersion = getVersion(installation.getSdkHome());
       CloudSdkUpdateNotification.showNotification(
