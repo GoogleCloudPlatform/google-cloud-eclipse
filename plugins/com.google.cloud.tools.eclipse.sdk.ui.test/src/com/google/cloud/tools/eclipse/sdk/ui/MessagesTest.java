@@ -40,7 +40,7 @@ public class MessagesTest {
             + " <a href=\"https://cloud.google.com/sdk/\">Google Cloud SDK</a> with the"
             + " <a href=\"https://cloud.google.com/sdk/docs/managing-components\">App Engine Java components</a>."
             + " Installation will begin momentarily, or <a href=\"skip\">skip for now</a>.",
-        Messages.getString("CloudSdkInstallNotificationMessage", new CloudSdkVersion("1.9.0")));
+        Messages.getString("CloudSdkInstallNotificationMessage"));
   }
 
   @Test

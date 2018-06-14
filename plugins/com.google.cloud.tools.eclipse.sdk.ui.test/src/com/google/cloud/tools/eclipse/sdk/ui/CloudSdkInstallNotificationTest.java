@@ -34,7 +34,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class CloudSdkInstallNotificationTest {
   @Mock private IWorkbench workbench;
-  Runnable trigger = mock(Runnable.class);
+  @Mock Runnable trigger;
 
   @Before
   public void setUp() {
