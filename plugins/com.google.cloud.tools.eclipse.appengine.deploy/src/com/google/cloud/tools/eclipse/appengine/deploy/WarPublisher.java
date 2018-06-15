@@ -49,7 +49,7 @@ public class WarPublisher {
 
   public static final Logger logger = Logger.getLogger(WarPublisher.class.getName());
 
-  public static void publishExploded(IProject project, IPath destination,
+  public static IStatus[] publishExploded(IProject project, IPath destination,
       IPath safeWorkDirectory, IProgressMonitor monitor) throws CoreException {
     Preconditions.checkNotNull(project, "project is null"); //$NON-NLS-1$
     Preconditions.checkNotNull(destination, "destination is null"); //$NON-NLS-1$
@@ -64,7 +64,12 @@ public class WarPublisher {
 
     IModuleResource[] resources =
         flattenResources(project, safeWorkDirectory, subMonitor.newChild(10));
-    PublishUtil.publishFull(resources, destination, subMonitor.newChild(90));
+    if (resources.length == 0) {
+      IStatus error = StatusUtil.error(WarPublisher.class, project.getName()
+          + " has no resource to publish"); //$NON-NLS-1$
+      return new IStatus[] {error};
+    }
+    return PublishUtil.publishFull(resources, destination, subMonitor.newChild(90));
   }
 
   public static IStatus[] publishWar(IProject project, IPath destination, IPath safeWorkDirectory,
@@ -83,8 +88,9 @@ public class WarPublisher {
     IModuleResource[] resources =
         flattenResources(project, safeWorkDirectory, subMonitor.newChild(10));
     if (resources.length == 0) {
-      StatusUtil.error(WarPublisher.class, project.getName()
+      IStatus error = StatusUtil.error(WarPublisher.class, project.getName()
           + " has no resource to publish"); //$NON-NLS-1$
+      return new IStatus[] {error};
     }
     return PublishUtil.publishZip(resources, destination, subMonitor.newChild(90));
   }
