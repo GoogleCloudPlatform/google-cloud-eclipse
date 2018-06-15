@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Preconditions;
 import java.io.File;
 import java.util.ArrayList;
@@ -59,7 +60,7 @@ public class WarPublisher {
     }
 
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
-    subMonitor.setTaskName(Messages.getString("task.name.publish.war"));
+    subMonitor.setTaskName(Messages.getString("task.name.publish.war")); //$NON-NLS-1$
 
     IModuleResource[] resources =
         flattenResources(project, safeWorkDirectory, subMonitor.newChild(10));
@@ -77,12 +78,13 @@ public class WarPublisher {
     }
 
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
-    subMonitor.setTaskName(Messages.getString("task.name.publish.war"));
+    subMonitor.setTaskName(Messages.getString("task.name.publish.war")); //$NON-NLS-1$
 
     IModuleResource[] resources =
         flattenResources(project, safeWorkDirectory, subMonitor.newChild(10));
     if (resources.length == 0) {
-      logger.log(Level.WARNING, "no resource to publish");
+      StatusUtil.error(WarPublisher.class, project.getName()
+          + " has no resource to publish"); //$NON-NLS-1$
     }
     return PublishUtil.publishZip(resources, destination, subMonitor.newChild(90));
   }
@@ -109,8 +111,9 @@ public class WarPublisher {
         IUtilityModule utilityModule =
             (IUtilityModule) child.loadAdapter(IUtilityModule.class, monitor);
         if (childDelegate == null || (j2eeModule == null && utilityModule == null)) {
-          logger.log(Level.WARNING, "child modules other than J2EE module or utility module are "
-              + "not supported: module=" + child + ", moduleType=" + child.getModuleType());
+          logger.log(Level.WARNING, "child modules other than J2EE module or utility" //$NON-NLS-1$
+              + " module are not supported: module=" + child //$NON-NLS-1$
+              + ", moduleType=" + child.getModuleType()); //$NON-NLS-1$
           continue;
         }
 
