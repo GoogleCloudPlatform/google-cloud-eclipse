@@ -33,7 +33,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class CloudSdkInstallNotificationTest {
   @Mock private IWorkbench workbench;
-  @Mock Runnable trigger;
+  @Mock private Runnable trigger;
 
   @Before
   public void setUp() {
