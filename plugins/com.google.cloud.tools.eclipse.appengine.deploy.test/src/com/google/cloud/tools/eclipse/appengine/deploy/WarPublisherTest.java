@@ -132,8 +132,7 @@ public class WarPublisherTest {
   @Test
   public void testPublishExploded_noResource() throws CoreException {
     IProject project = projectCreator.getProject();
-    IStatus[] result =
-        WarPublisher.publishExploded(project, new Path("/"), new Path("/"), monitor);
+    IStatus[] result = WarPublisher.publishExploded(project, new Path("/"), new Path("/"), monitor);
     assertEquals(1, result.length);
     assertThat(result[0].getMessage(), Matchers.endsWith(" has no resource to publish"));
   }
