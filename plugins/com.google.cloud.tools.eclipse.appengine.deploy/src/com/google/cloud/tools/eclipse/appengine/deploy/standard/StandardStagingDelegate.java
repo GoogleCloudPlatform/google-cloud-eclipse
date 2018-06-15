@@ -67,7 +67,11 @@ public class StandardStagingDelegate implements StagingDelegate {
 
       IPath explodedWar = safeWorkDirectory.append("exploded-war");
       IPath tempDirectory = safeWorkDirectory.append("temp");
-      WarPublisher.publishExploded(project, explodedWar, tempDirectory, subMonitor.newChild(40));
+      IStatus[] statuses = WarPublisher.publishExploded(
+          project, explodedWar, tempDirectory, subMonitor.newChild(40));
+      if (statuses.length != 0) {
+        return StatusUtil.multi(this, "problem publishing WAR", statuses);
+      }
       CloudSdkStagingHelper.stageStandard(explodedWar, stagingDirectory,
           appEngineStandardStaging, subMonitor.newChild(60));
 

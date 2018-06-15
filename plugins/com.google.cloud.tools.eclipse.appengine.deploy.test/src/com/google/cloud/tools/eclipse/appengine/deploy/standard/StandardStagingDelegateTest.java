@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -36,12 +37,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.ui.console.MessageConsoleStream;
+import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,8 +53,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class StandardStagingDelegateTest {
 
-  @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacets(
-      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
+  @Rule public TestProjectCreator projectCreator =
+      new TestProjectCreator().withFacets(JavaFacet.VERSION_1_7);
 
   @Mock private CloudSdkProcessWrapper cloudSdkWrapper;
 
@@ -61,9 +63,9 @@ public class StandardStagingDelegateTest {
   private IPath safeWorkDirectory;
   private IPath stagingDirectory;
 
-  @Before
-  public void setUp() throws CloudSdkNotFoundException {
-    project = projectCreator.getProject();
+  private void setUpProject(IProjectFacetVersion... facetVersions)
+      throws CloudSdkNotFoundException {
+    project = projectCreator.withFacets(facetVersions).getProject();
     safeWorkDirectory = project.getFolder("safe-work-directory").getLocation();
     stagingDirectory = project.getFolder("staging-result").getLocation();
 
@@ -86,7 +88,8 @@ public class StandardStagingDelegateTest {
   }
 
   @Test
-  public void testStage() {
+  public void testStage() throws CloudSdkNotFoundException {
+    setUpProject(WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
     StagingDelegate delegate = new StandardStagingDelegate(project, null, cloudSdkWrapper);
     delegate.stage(stagingDirectory, safeWorkDirectory, null, null,
         new NullProgressMonitor());
@@ -98,7 +101,8 @@ public class StandardStagingDelegateTest {
   }
 
   @Test
-  public void testGetOptionalConfigurationFilesDirectory() {
+  public void testGetOptionalConfigurationFilesDirectory() throws CloudSdkNotFoundException {
+    setUpProject(WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
     StagingDelegate delegate = new StandardStagingDelegate(project, null, cloudSdkWrapper);
     delegate.stage(stagingDirectory, safeWorkDirectory, null, null,
         new NullProgressMonitor());
@@ -109,6 +113,7 @@ public class StandardStagingDelegateTest {
 
   @Test
   public void testSetJavaHome() throws CloudSdkNotFoundException {
+    setUpProject(WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
     Path javaHome = Paths.get("/some/path");
     StagingDelegate delegate = new StandardStagingDelegate(project, javaHome, cloudSdkWrapper);
     delegate.stage(stagingDirectory, safeWorkDirectory, null, null,
@@ -116,5 +121,17 @@ public class StandardStagingDelegateTest {
 
     verify(cloudSdkWrapper).getAppEngineStandardStaging(
         eq(javaHome), any(MessageConsoleStream.class), any(MessageConsoleStream.class));
+  }
+
+  @Test
+  public void testStage_errorStatusReported() throws CloudSdkNotFoundException {
+    setUpProject();
+    StagingDelegate delegate = new StandardStagingDelegate(project, null, cloudSdkWrapper);
+    IStatus status = delegate.stage(stagingDirectory, safeWorkDirectory,
+        null, null, new NullProgressMonitor());
+
+    assertFalse(status.isOK());
+    assertEquals("problem publishing WAR", status.getMessage());
+    cloudSdkExitCode = 0;  // Make the Cloud SDK check in tearDown() happy.
   }
 }

@@ -45,7 +45,7 @@ public class FlexWarStagingDelegateTest {
   private IPath stagingDirectory;
   private IPath appEngineDirectory;
 
-  public void setUpProject(IProjectFacetVersion... facetVersions) {
+  private void setUpProject(IProjectFacetVersion... facetVersions) {
     project = projectCreator.withFacets(facetVersions).getProject();
     safeWorkDirectory = project.getFolder("safe-work-directory").getLocation();
     stagingDirectory = project.getFolder("staging-result").getLocation();
