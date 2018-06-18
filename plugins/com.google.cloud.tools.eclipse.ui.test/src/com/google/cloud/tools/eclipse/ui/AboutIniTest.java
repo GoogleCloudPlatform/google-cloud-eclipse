@@ -18,8 +18,10 @@ package com.google.cloud.tools.eclipse.ui;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.test.util.EclipseProperties;
+import java.io.File;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -31,7 +33,8 @@ public class AboutIniTest {
   @Test
   public void testgetFeatureImage() {
     assertNotNull(aboutIni.get("featureImage"));
-    assertEquals("icons/gcp-32x32.png", aboutIni.get("featureImage"));
+    assertEquals("icons/about/gcp.png", aboutIni.get("featureImage"));
+    assertTrue(new File("../com.google.cloud.tools.eclipse.ui/icons/about/gcp.png").exists());
   }
 
   public void testAboutText() {
