@@ -25,6 +25,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Multimap;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -33,6 +35,7 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
@@ -42,9 +45,34 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.wst.common.componentcore.ComponentCore;
+import org.eclipse.wst.common.componentcore.resources.IVirtualFile;
+import org.eclipse.wst.common.componentcore.resources.IVirtualFolder;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
+/**
+ * Provides a simple model for representing major configuration elements of an App Engine project
+ * intended for use with the Eclipse Common Navigator framework, as used in the Project Explorer.
+ *
+ * <p>To avoid unnecessary refreshes, this content provider strives to return the same objects
+ * between calls to {@link #getChildren(Object)}. The difficulty here is that
+ *
+ * <p>An App Engine service is defined principally by an {@code appengine-web.xml} / {@code
+ * app.yaml}. The {@code default} service also provides a number of ancilliary configuration files
+ * ({@code cron.xml}, {@code datastore-indexes.xml}, {@code dispatch.xml}, {@code queue.xml}). These
+ * files are found under the {@code WEB-INF} directory. A change to one of these files may require
+ * reconfiguring the associated model. For example, changing the Service ID in the {@code
+ * appengine-web.xml}, such that a service is no longer the default service, would require removing
+ * all traces of the ancilliary configuration files.
+ *
+ * <p>WTP uses a virtual layout to map the project files and folders into a WAR layout (c.f., {@link
+ * ComponentCore}, {@link IVirtualFolder}, {@link IVirtualFile}; referenced in the UI as a
+ * Deployment Assembly). Multiple {@link IFolder project folders} can be mapped to a {@link
+ * IVirtualFolder virtual folder}. The virtual layout could be reconfigured such that a different
+ * {@code appengine-web.xml} file is used — or the {@code appengine-web.xml} will no longer appear
+ * in {@code WEB-INF}!
+ */
 public class AppEngineContentProvider implements ITreeContentProvider {
   private static final Logger logger = Logger.getLogger(AppEngineContentProvider.class.getName());
   private static final Object[] EMPTY_ARRAY = new Object[0];
@@ -115,9 +143,12 @@ public class AppEngineContentProvider implements ITreeContentProvider {
     }
   }
 
+  /**
+   * One or more resources changed in the workspace. See if we need to invalidate and/or refresh any
+   * model elements. <b>Note:</b> calls may come on any thread.
+   */
   private void resourceChanged(IResourceChangeEvent event) {
-    // may come on any thread
-    Collection<IFile> affected;
+    Multimap<IProject, IFile> affected;
     try {
       affected = ResourceUtils.getAffectedFiles(event.getDelta());
     } catch (CoreException ex) {
@@ -125,19 +156,27 @@ public class AppEngineContentProvider implements ITreeContentProvider {
       return;
     }
     Set<Object> toBeRefreshed = new HashSet<>();
-    for (IFile file : affected) {
-      IProject project = file.getProject();
+    for (IProject project : affected.keySet()) {
       if (!project.exists()) {
         projectMapping.invalidate(project);
-        continue; // the explorer will update itself
+        continue; // the explorer will update itself to remove the project
       }
+      // check if we've already created a model for this project
       AppEngineStandardProjectElement projectElement = projectMapping.getIfPresent(project);
+      Collection<IFile> files = affected.get(project);
       if (projectElement != null) {
-        Object handle = projectElement.resourceChanged(file);
-        if (handle != null) {
-          toBeRefreshed.add(handle);
+        // check if the model is still valid given this change (e.g., perhaps the appengine-web.xml
+        // has been removed or disappeared due to virtual layout change)
+        if (!projectElement.isValid(files)) {
+          projectMapping.invalidate(project);
+          toBeRefreshed.add(project);
+        } else {
+          // allow the model to update itself from the change
+          toBeRefreshed.addAll(projectElement.resourcesChanged(files));
         }
-      } else if ("appengine-web.xml".equals(file.getName())) {
+      } else if (Iterables.any(
+          files, file -> file != null && "appengine-web.xml".equals(file.getName()))) {
+        // file may have been newly introduced
         toBeRefreshed.add(project);
       }
     }

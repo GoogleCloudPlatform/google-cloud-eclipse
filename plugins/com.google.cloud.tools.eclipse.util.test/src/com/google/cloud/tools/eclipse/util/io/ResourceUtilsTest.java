@@ -27,7 +27,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Collection;
+import com.google.common.collect.Multimap;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -67,7 +67,7 @@ public class ResourceUtilsTest {
 
   @Test
   public void testGetAffectedFiles_null() throws CoreException {
-    Collection<IFile> files = ResourceUtils.getAffectedFiles(null);
+    Multimap<IProject, IFile> files = ResourceUtils.getAffectedFiles(null);
     assertNotNull(files);
     assertEquals(0, files.size());
   }
@@ -75,13 +75,14 @@ public class ResourceUtilsTest {
   @Test
   public void testGetAffectedFiles_emptyDelta() throws CoreException {
     IResourceDelta delta = mockDelta();
-    Collection<IFile> files = ResourceUtils.getAffectedFiles(delta);
+    Multimap<IProject, IFile> files = ResourceUtils.getAffectedFiles(delta);
     assertNotNull(files);
     assertEquals(0, files.size());
   }
 
   @Test
   public void testGetAffectedFiles_changedFile() throws CoreException {
+    IProject project = mock(IProject.class, "project");
     IFile file = mock(IFile.class, "/filename");
 
     IResourceDelta delta = mockDelta();
@@ -89,10 +90,11 @@ public class ResourceUtilsTest {
     when(delta.getKind()).thenReturn(IResourceDelta.CHANGED);
     when(delta.getFlags()).thenReturn(IResourceDelta.CONTENT);
 
-    Collection<IFile> files = ResourceUtils.getAffectedFiles(delta);
+    Multimap<IProject, IFile> files = ResourceUtils.getAffectedFiles(delta);
     assertNotNull(files);
     assertEquals(1, files.size());
-    assertThat(files, hasItem(file));
+    assertTrue(files.containsKey(project));
+    assertThat(files.get(project), hasItem(file));
   }
 
   @Test
@@ -135,11 +137,12 @@ public class ResourceUtilsTest {
     when(projectDelta.getFlags()).thenReturn(IResourceDelta.CONTENT);
     when(projectDelta.getAffectedChildren()).thenReturn(new IResourceDelta[] {folderDelta});
 
-    Collection<IFile> files = ResourceUtils.getAffectedFiles(projectDelta);
+    Multimap<IProject, IFile> files = ResourceUtils.getAffectedFiles(projectDelta);
     assertNotNull(files);
     assertEquals(2, files.size());
-    assertThat(files, hasItem(file1));
-    assertThat(files, hasItem(file2));
+    assertTrue(files.containsKey(project));
+    assertThat(files.get(project), hasItem(file1));
+    assertThat(files.get(project), hasItem(file2));
   }
 
   private static IResourceDelta mockDelta() throws CoreException {

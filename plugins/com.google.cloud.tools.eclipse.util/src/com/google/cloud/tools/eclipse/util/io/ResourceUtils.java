@@ -16,12 +16,12 @@
 
 package com.google.cloud.tools.eclipse.util.io;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -57,16 +57,18 @@ public class ResourceUtils {
     }
   }
 
-  public static Collection<IFile> getAffectedFiles(IResourceDelta topDelta) throws CoreException {
+  public static Multimap<IProject, IFile> getAffectedFiles(IResourceDelta topDelta)
+      throws CoreException {
+    Multimap<IProject, IFile> files = HashMultimap.create();
     if (topDelta == null) {
-      return Collections.emptyList();
+      return files;
     }
 
-    Collection<IFile> files = new ArrayList<>();
     topDelta.accept(
         delta -> {
           if (delta.getResource() instanceof IFile) {
-            files.add((IFile) delta.getResource());
+            IFile file = (IFile) delta.getResource();
+            files.put(file.getProject(), file);
             return false;
           } else {
             return true;
