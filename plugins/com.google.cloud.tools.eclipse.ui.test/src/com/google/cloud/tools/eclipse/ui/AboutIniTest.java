@@ -25,13 +25,13 @@ import java.io.File;
 import org.junit.Rule;
 import org.junit.Test;
 
-/** Verify that */
+/** Verify that the requirements for a branding feature plugin are met. */
 public class AboutIniTest {
   @Rule public final EclipseProperties aboutIni = new EclipseProperties("about.ini");
   @Rule public final EclipseProperties aboutProperties = new EclipseProperties("about.properties");
 
   @Test
-  public void testgetFeatureImage() {
+  public void testFeatureImage() {
     assertNotNull(aboutIni.get("featureImage"));
     assertEquals("icons/about/gcp.png", aboutIni.get("featureImage"));
     assertTrue(new File("../com.google.cloud.tools.eclipse.ui/icons/about/gcp.png").exists());
