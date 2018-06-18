@@ -4,7 +4,7 @@ set "JAVA_HOME=C:\Program Files\Java\jdk1.8.0_152"
 
 rem To speed up build, download and unpack an M2 repo cache.
 pushd %USERPROFILE%
-call gsutil.cmd -q cp "gs://ct4e-m2-repositories/m2-oxygen.tar" .
+call gsutil.cmd -q cp "gs://ct4e-m2-repositories-for-kokoro/m2-oxygen.tar" .
 @echo on
 tar xf m2-oxygen.tar && del m2-oxygen.tar
 popd
@@ -17,10 +17,8 @@ call gcloud.cmd components update --quiet
 call gcloud.cmd components install app-engine-java --quiet
 @echo on
 
-mvn -V -B --settings kokoro\windows\m2-settings.xml ^
-    -N io.takari:maven:wrapper -Dmaven=3.5.0
-call mvnw.cmd -V -B --settings kokoro\windows\m2-settings.xml ^
-              --fail-at-end -Ptravis verify
+mvn -V -B -N io.takari:maven:wrapper -Dmaven=3.5.0
+call mvnw.cmd -V -B --fail-at-end -Ptravis verify
 set MAVEN_BUILD_EXIT=%ERRORLEVEL%
 @echo on
 
