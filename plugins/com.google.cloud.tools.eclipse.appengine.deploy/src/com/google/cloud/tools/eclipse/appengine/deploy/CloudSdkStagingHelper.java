@@ -20,6 +20,7 @@ import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.api.deploy.AppEngineStandardStaging;
 import com.google.cloud.tools.appengine.api.deploy.DefaultStageFlexibleConfiguration;
 import com.google.cloud.tools.appengine.api.deploy.DefaultStageStandardConfiguration;
+import com.google.cloud.tools.appengine.api.deploy.StageStandardConfiguration;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineFlexibleStaging;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -50,11 +51,13 @@ public class CloudSdkStagingHelper {
     SubMonitor progress = SubMonitor.convert(monitor, 1);
     progress.setTaskName(Messages.getString("task.name.stage.project")); //$NON-NLS-1$
 
-    DefaultStageStandardConfiguration stagingConfig = new DefaultStageStandardConfiguration();
-    stagingConfig.setSourceDirectory(explodedWarDirectory.toFile());
-    stagingConfig.setStagingDirectory(stagingDirectory.toFile());
-    stagingConfig.setEnableJarSplitting(true);
-    stagingConfig.setDisableUpdateCheck(true);
+    StageStandardConfiguration stagingConfig =
+        new DefaultStageStandardConfiguration.Builder()
+            .setSourceDirectory(explodedWarDirectory.toFile())
+            .setStagingDirectory(stagingDirectory.toFile())
+            .setEnableJarSplitting(true)
+            .setDisableUpdateCheck(true)
+            .build();
 
     appEngineStandardStaging.stageStandard(stagingConfig);
 
@@ -77,10 +80,12 @@ public class CloudSdkStagingHelper {
     SubMonitor progress = SubMonitor.convert(monitor, 1);
     progress.setTaskName(Messages.getString("task.name.stage.project")); //$NON-NLS-1$
 
-    DefaultStageFlexibleConfiguration stagingConfig = new DefaultStageFlexibleConfiguration();
-    stagingConfig.setAppEngineDirectory(appEngineDirectory.toFile());
-    stagingConfig.setArtifact(deployArtifact.toFile());
-    stagingConfig.setStagingDirectory(stagingDirectory.toFile());
+    DefaultStageFlexibleConfiguration stagingConfig =
+        new DefaultStageFlexibleConfiguration.Builder()
+            .setAppEngineDirectory(appEngineDirectory.toFile())
+            .setArtifact(deployArtifact.toFile())
+            .setStagingDirectory(stagingDirectory.toFile())
+            .build();
 
     CloudSdkAppEngineFlexibleStaging staging = new CloudSdkAppEngineFlexibleStaging();
     staging.stageFlexible(stagingConfig);

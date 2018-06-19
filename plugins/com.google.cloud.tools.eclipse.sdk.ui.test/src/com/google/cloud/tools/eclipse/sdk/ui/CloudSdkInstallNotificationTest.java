@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.sdk.ui;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,7 +33,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class CloudSdkInstallNotificationTest {
   @Mock private IWorkbench workbench;
-  Runnable trigger = mock(Runnable.class);
+  @Mock private Runnable trigger;
 
   @Before
   public void setUp() {
