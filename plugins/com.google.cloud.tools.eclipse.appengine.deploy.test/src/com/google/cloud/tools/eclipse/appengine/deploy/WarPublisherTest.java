@@ -134,7 +134,7 @@ public class WarPublisherTest {
     IProject project = projectCreator.getProject();
     IStatus[] result = WarPublisher.publishExploded(project, new Path("/"), new Path("/"), monitor);
     assertEquals(1, result.length);
-    assertThat(result[0].getMessage(), Matchers.endsWith(" has no resource to publish"));
+    assertThat(result[0].getMessage(), Matchers.endsWith(" has no resources to publish"));
   }
 
   @Test
@@ -142,6 +142,6 @@ public class WarPublisherTest {
     IProject project = projectCreator.getProject();
     IStatus[] result = WarPublisher.publishWar(project, new Path("/"), new Path("/"), monitor);
     assertEquals(1, result.length);
-    assertThat(result[0].getMessage(), Matchers.endsWith(" has no resource to publish"));
+    assertThat(result[0].getMessage(), Matchers.endsWith(" has no resources to publish"));
   }
 }
