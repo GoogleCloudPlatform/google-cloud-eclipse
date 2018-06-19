@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 /**
@@ -53,7 +54,10 @@ public class FlexWarStagingDelegate extends FlexStagingDelegate {
     IPath tempDirectory = safeWorkDirectory.append("temp");
     IStatus[] statuses = WarPublisher.publishWar(project, war, tempDirectory, monitor);
     if (statuses.length != 0) {
-      throw new CoreException(StatusUtil.multi(this, "problem publishing WAR", statuses));
+      MultiStatus multiStatus = StatusUtil.multi(this, "problem publishing WAR", statuses);
+      if (!multiStatus.isOK()) {
+        throw new CoreException(multiStatus);
+      }
     }
     return war;
   }

@@ -66,7 +66,7 @@ public class WarPublisher {
         flattenResources(project, safeWorkDirectory, subMonitor.newChild(10));
     if (resources.length == 0) {
       IStatus error = StatusUtil.error(WarPublisher.class, project.getName()
-          + " has no resource to publish"); //$NON-NLS-1$
+          + " has no resources to publish"); //$NON-NLS-1$
       return new IStatus[] {error};
     }
     return PublishUtil.publishFull(resources, destination, subMonitor.newChild(90));
@@ -89,7 +89,7 @@ public class WarPublisher {
         flattenResources(project, safeWorkDirectory, subMonitor.newChild(10));
     if (resources.length == 0) {
       IStatus error = StatusUtil.error(WarPublisher.class, project.getName()
-          + " has no resource to publish"); //$NON-NLS-1$
+          + " has no resources to publish"); //$NON-NLS-1$
       return new IStatus[] {error};
     }
     return PublishUtil.publishZip(resources, destination, subMonitor.newChild(90));

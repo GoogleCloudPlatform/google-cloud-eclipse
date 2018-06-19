@@ -231,7 +231,7 @@ public class StatusUtilTest {
   @Test
   public void testMulti_statusList() {
     IStatus someChild = StatusUtil.multi(this, "child OK status msg");
-    IStatus[] statuses = { Status.OK_STATUS, Status.CANCEL_STATUS, someChild };
+    IStatus[] statuses = {Status.OK_STATUS, Status.CANCEL_STATUS, someChild};
     MultiStatus multi = StatusUtil.multi(StatusUtil.class, "test multi-status msg", statuses);
     verifyStatus(multi, IStatus.CANCEL, "test multi-status msg");
 

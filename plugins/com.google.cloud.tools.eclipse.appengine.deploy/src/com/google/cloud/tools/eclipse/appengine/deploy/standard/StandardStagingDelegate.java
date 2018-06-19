@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.ui.console.MessageConsoleStream;
@@ -70,7 +71,10 @@ public class StandardStagingDelegate implements StagingDelegate {
       IStatus[] statuses = WarPublisher.publishExploded(
           project, explodedWar, tempDirectory, subMonitor.newChild(40));
       if (statuses.length != 0) {
-        return StatusUtil.multi(this, "problem publishing WAR", statuses);
+        MultiStatus multiStatus = StatusUtil.multi(this, "problem publishing WAR", statuses);
+        if (!multiStatus.isOK()) {
+          return multiStatus;
+        }
       }
       CloudSdkStagingHelper.stageStandard(explodedWar, stagingDirectory,
           appEngineStandardStaging, subMonitor.newChild(60));
