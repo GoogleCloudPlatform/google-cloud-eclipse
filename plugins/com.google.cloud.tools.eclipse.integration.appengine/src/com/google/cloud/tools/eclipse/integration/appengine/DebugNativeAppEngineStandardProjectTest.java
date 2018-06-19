@@ -30,6 +30,7 @@ import com.google.cloud.tools.eclipse.swtbot.SwtBotTestingUtilities;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotTreeUtilities;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.JavaRuntimeUtils;
+import com.google.common.collect.Iterables;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -41,6 +42,7 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
+import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotStyledText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotToolbarButton;
@@ -89,11 +91,25 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
 
     SWTBotTreeItem testProject = SwtBotProjectActions.selectProject(bot, "testapp_java8");
     assertNotNull(testProject);
-    SwtBotTestingUtilities.performAndWaitForWindowChange(bot, () -> {
-      System.out.println("==== menu items of Run > Debug As ====");
-      bot.menu("Run").menu("Debug As").menuItems().forEach(System.out::println);
-      bot.menu("Run").menu("Debug As").menu("1 Debug on Server").click();
-    });
+    SwtBotTestingUtilities.performAndWaitForWindowChange(
+        bot,
+        () -> {
+          bot.waitUntil(
+              new DefaultCondition() {
+                @Override
+                public boolean test() throws Exception {
+                  return Iterables.any(
+                      bot.menu("Run").menu("Debug As").menuItems(),
+                      text -> "1 Debug on Server".equals(text));
+                }
+
+                @Override
+                public String getFailureMessage() {
+                  return "'Debug on Server' never appeared";
+                }
+              });
+          bot.menu("Run").menu("Debug As").menu("1 Debug on Server").click();
+        });
 
     SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
 
