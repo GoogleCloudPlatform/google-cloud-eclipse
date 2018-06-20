@@ -181,7 +181,7 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
     ArtifactVersion artifactVersion;
     if (Strings.isNullOrEmpty(archetypeVersion)) {
       // TODO: Configure the creator with a targeted Major Version
-      artifactVersion = defaultArchetypeVersions(template, majorVersion);
+      artifactVersion = defaultArchetypeVersion(template, majorVersion);
     } else {
       artifactVersion = new DefaultArtifactVersion(archetypeVersion);
     }
@@ -205,7 +205,7 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
     }
   }
 
-  private ArtifactVersion defaultArchetypeVersions(DataflowProjectArchetype template,
+  private ArtifactVersion defaultArchetypeVersion(DataflowProjectArchetype template,
       MajorVersion version) {
     checkArgument(template.getSdkVersions().contains(majorVersion));
 

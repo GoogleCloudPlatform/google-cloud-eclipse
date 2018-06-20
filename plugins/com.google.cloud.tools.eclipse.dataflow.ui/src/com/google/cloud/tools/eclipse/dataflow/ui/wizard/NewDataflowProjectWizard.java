@@ -63,8 +63,8 @@ public class NewDataflowProjectWizard extends Wizard implements INewWizard {
       return true;
     } catch (InvocationTargetException | InterruptedException ex) {
       String message = "Error encountered when trying to create project"; //$NON-NLS-1$
-      StatusUtil.setErrorStatus(this, message, ex);
       DataflowUiPlugin.logError(ex, message);
+      StatusUtil.setErrorStatus(this, message, ex);
       return false;
     }
   }
