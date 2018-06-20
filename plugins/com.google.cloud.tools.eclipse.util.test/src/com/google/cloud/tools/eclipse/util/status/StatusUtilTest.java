@@ -25,6 +25,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 import org.eclipse.core.runtime.IStatus;
@@ -168,17 +169,35 @@ public class StatusUtilTest {
   }
 
   @Test
-  public void testMerge_nullStatus() {
-    IStatus originalStatus = StatusUtil.info(this, "testing");
-    IStatus status = StatusUtil.merge(null, originalStatus);
-    Assert.assertSame(originalStatus, status);
-  }
-  
-  @Test
   public void testErrorMessage_ExceptionWithoutMessage() {
     RuntimeException ex = mock(RuntimeException.class);
     IStatus status = StatusUtil.setErrorStatus(this, "test message from StatusUtilTest", ex);
     Assert.assertEquals("test message from StatusUtilTest", status.getMessage());
+  }
+
+  @Test
+  public void testErrorMessage_invocationTargetException() {
+    RuntimeException cause = mock(RuntimeException.class);
+    when(cause.getMessage()).thenReturn("from cause");
+    InvocationTargetException ex = mock(InvocationTargetException.class);
+    when(ex.getCause()).thenReturn(cause);
+    IStatus status = StatusUtil.setErrorStatus(this, "test message from StatusUtilTest", ex);
+    Assert.assertEquals("test message from StatusUtilTest: from cause", status.getMessage());
+  }
+
+  @Test
+  public void testErrorMessage_invocationTargetExceptionWithNullCause() {
+    InvocationTargetException ex = mock(InvocationTargetException.class);
+    when(ex.getMessage()).thenReturn("no cause");
+    IStatus status = StatusUtil.setErrorStatus(this, "test message from StatusUtilTest", ex);
+    Assert.assertEquals("test message from StatusUtilTest: no cause", status.getMessage());
+  }
+
+  @Test
+  public void testMerge_nullStatus() {
+    IStatus originalStatus = StatusUtil.info(this, "testing");
+    IStatus status = StatusUtil.merge(null, originalStatus);
+    Assert.assertSame(originalStatus, status);
   }
   
   @Test

@@ -16,6 +16,8 @@
 
 package com.google.cloud.tools.eclipse.util.status;
 
+import com.google.common.base.Strings;
+import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
@@ -120,11 +122,16 @@ public class StatusUtil {
     return setErrorStatus(origin, message +  ": " + status.getMessage(), status.getException());
   }
 
-  public static IStatus setErrorStatus(Object origin, String message, Throwable ex) {
-    if (ex != null && ex.getMessage() != null && !ex.getMessage().isEmpty()) {
-      message += ": " + ex.getMessage();
+  public static IStatus setErrorStatus(Object origin, String message, Throwable exception) {
+    Throwable targetException = exception;
+    if (exception instanceof InvocationTargetException && exception.getCause() != null) {
+      targetException = targetException.getCause();
     }
-    IStatus status = error(origin, message, ex);
+
+    if (targetException != null && !Strings.isNullOrEmpty(targetException.getMessage())) {
+      message += ": " + targetException.getMessage();
+    }
+    IStatus status = error(origin, message, targetException);
     StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.LOG);
     return status;
   }
