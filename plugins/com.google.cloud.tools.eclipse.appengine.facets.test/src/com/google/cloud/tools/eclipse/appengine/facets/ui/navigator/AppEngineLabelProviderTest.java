@@ -150,7 +150,8 @@ public class AppEngineLabelProviderTest {
     IFile file = mock(IFile.class);
     when(file.getName()).thenReturn("cron.xml");
     when(file.exists()).thenReturn(true);
-    CronDescriptor element = new CronDescriptor(mock(IProject.class), file);
+    when(file.getProject()).thenReturn(mock(IProject.class));
+    CronDescriptor element = new CronDescriptor(file);
     assertEquals("Scheduled Tasks", fixture.getText(element));
   }
 
@@ -159,7 +160,8 @@ public class AppEngineLabelProviderTest {
     IFile file = mock(IFile.class);
     when(file.getName()).thenReturn("datastore-indexes.xml");
     when(file.exists()).thenReturn(true);
-    DatastoreIndexesDescriptor element = new DatastoreIndexesDescriptor(mock(IProject.class), file);
+    when(file.getProject()).thenReturn(mock(IProject.class));
+    DatastoreIndexesDescriptor element = new DatastoreIndexesDescriptor(file);
     assertEquals("Datastore Indexes", fixture.getText(element));
   }
 
@@ -168,7 +170,8 @@ public class AppEngineLabelProviderTest {
     IFile file = mock(IFile.class);
     when(file.getName()).thenReturn("dos.xml");
     when(file.exists()).thenReturn(true);
-    DenialOfServiceDescriptor element = new DenialOfServiceDescriptor(mock(IProject.class), file);
+    when(file.getProject()).thenReturn(mock(IProject.class));
+    DenialOfServiceDescriptor element = new DenialOfServiceDescriptor(file);
     assertEquals("Denial of Service Protection", fixture.getText(element));
   }
 
@@ -177,7 +180,8 @@ public class AppEngineLabelProviderTest {
     IFile file = mock(IFile.class);
     when(file.getName()).thenReturn("dispatch.xml");
     when(file.exists()).thenReturn(true);
-    DispatchRoutingDescriptor element = new DispatchRoutingDescriptor(mock(IProject.class), file);
+    when(file.getProject()).thenReturn(mock(IProject.class));
+    DispatchRoutingDescriptor element = new DispatchRoutingDescriptor(file);
     assertEquals("Dispatch Routing Rules", fixture.getText(element));
   }
 
@@ -186,7 +190,8 @@ public class AppEngineLabelProviderTest {
     IFile file = mock(IFile.class);
     when(file.getName()).thenReturn("queue.xml");
     when(file.exists()).thenReturn(true);
-    TaskQueuesDescriptor element = new TaskQueuesDescriptor(mock(IProject.class), file);
+    when(file.getProject()).thenReturn(mock(IProject.class));
+    TaskQueuesDescriptor element = new TaskQueuesDescriptor(file);
     assertEquals("Task Queue Definitions", fixture.getText(element));
   }
 }

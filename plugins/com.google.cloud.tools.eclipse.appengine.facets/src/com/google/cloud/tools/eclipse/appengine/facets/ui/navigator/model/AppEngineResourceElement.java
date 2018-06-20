@@ -44,6 +44,7 @@ public abstract class AppEngineResourceElement implements IAdaptable {
     return file;
   }
 
+  /** Adapts to {@link IFile} to allow double-clicking to open the corresponding file. */
   @Override
   public <T> T getAdapter(Class<T> adapter) {
     if (adapter.isInstance(file)) {
@@ -56,8 +57,8 @@ public abstract class AppEngineResourceElement implements IAdaptable {
   public abstract StyledString getStyledLabel();
 
   /**
-   * Offers an opportunity to return a
-   * replacement for this instance, or {@code null} to remove.
+   * Triggers a reload of any data from the source file. Offers an opportunity to provide a
+   * replacement instance, or {@code null} to remove.
    */
   public AppEngineResourceElement reload() {
     return file.exists() ? this : null;

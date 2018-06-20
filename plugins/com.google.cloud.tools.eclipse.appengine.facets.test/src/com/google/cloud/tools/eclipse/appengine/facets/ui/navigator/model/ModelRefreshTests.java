@@ -30,6 +30,7 @@ import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -52,6 +53,7 @@ import org.eclipse.jst.j2ee.componentcore.J2EEModuleVirtualComponent;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.componentcore.ComponentCore;
 import org.eclipse.wst.common.componentcore.resources.IVirtualFolder;
+import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -214,8 +216,7 @@ public class ModelRefreshTests {
     assertThat(subElements, hasItemInArray(instanceOf(TaskQueuesDescriptor.class)));
 
     // a change, but should have no effect
-    IFile appEngineWebXml =
-        ConfigurationFileUtils.createAppEngineWebXml(project, "non-default");
+    IFile appEngineWebXml = ConfigurationFileUtils.createAppEngineWebXml(project, "non-default");
     projectElement.resourcesChanged(Collections.singleton(appEngineWebXml));
 
     // check that all configuration elements are gone
@@ -229,16 +230,15 @@ public class ModelRefreshTests {
   @Test
   public void testChildElementPreservedOnChange() throws AppEngineException {
     List<IFile> configurationFiles = new ArrayList<>();
-    configurationFiles.add(ConfigurationFileUtils.createEmptyCronXml(projectCreator.getProject()));
-    configurationFiles.add(
-        ConfigurationFileUtils.createEmptyDatastoreIndexesXml(projectCreator.getProject()));
-    configurationFiles.add(
-        ConfigurationFileUtils.createEmptyDispatchXml(projectCreator.getProject()));
-    configurationFiles.add(ConfigurationFileUtils.createEmptyDosXml(projectCreator.getProject()));
-    configurationFiles.add(ConfigurationFileUtils.createEmptyQueueXml(projectCreator.getProject()));
+    IProject project = projectCreator.getProject();
+    configurationFiles.add(ConfigurationFileUtils.createEmptyCronXml(project));
+    configurationFiles.add(ConfigurationFileUtils.createEmptyDatastoreIndexesXml(project));
+    configurationFiles.add(ConfigurationFileUtils.createEmptyDispatchXml(project));
+    configurationFiles.add(ConfigurationFileUtils.createEmptyDosXml(project));
+    configurationFiles.add(ConfigurationFileUtils.createEmptyQueueXml(project));
 
     AppEngineStandardProjectElement projectElement =
-        AppEngineStandardProjectElement.create(projectCreator.getProject());
+        AppEngineStandardProjectElement.create(project);
     final AppEngineResourceElement[] subElements = projectElement.getConfigurations();
 
     for (IFile configurationFile : configurationFiles) {
@@ -246,23 +246,17 @@ public class ModelRefreshTests {
           projectElement.resourcesChanged(Collections.singleton(configurationFile));
       assertEquals(1, handles.size());
       AppEngineResourceElement[] newSubElements = projectElement.getConfigurations();
-      assertEquals(subElements.length, newSubElements.length);
-      for (AppEngineResourceElement element : subElements) {
-        assertThat(newSubElements, hasItemInArray(element));
-      }
-      Object descriptor =
-          Iterables.find(
-              Arrays.asList(subElements),
-              element -> element != null && configurationFile.equals(element.getFile()));
-      assertEquals(Iterables.getOnlyElement(handles), descriptor);
+      Set<Object> difference =
+          Sets.symmetricDifference(Sets.newHashSet(subElements), Sets.newHashSet(newSubElements));
+      assertThat("all elements should have been preserved", difference, Matchers.hasSize(0));
+      assertThat(subElements, hasItemInArray(Iterables.getOnlyElement(handles)));
     }
 
-    // reloading the project element should return the project itself, as there may be
-    // some label information that's changed
+    // reloading the project element should return the project element
     Collection<Object> handles =
         projectElement.resourcesChanged(Collections.singleton(projectElement.getFile()));
     assertEquals(1, handles.size());
-    assertEquals(projectElement.getProject(), Iterables.getOnlyElement(handles));
+    assertEquals(projectElement, Iterables.getOnlyElement(handles));
   }
 
   /**
@@ -285,7 +279,10 @@ public class ModelRefreshTests {
     final IFolder newWebInf = newWebRoot.getFolder("WEB-INF");
     ResourceUtils.createFolders(newWebInf, null);
     final IFile newDispatchXml = newWebInf.getFile("dispatch.xml");
-    newDispatchXml.create(new ByteArrayInputStream("<dispatch-entries/>".getBytes(StandardCharsets.UTF_8)), true, null);
+    newDispatchXml.create(
+        new ByteArrayInputStream("<dispatch-entries/>".getBytes(StandardCharsets.UTF_8)),
+        true,
+        null);
     assertTrue("error creating new dispatch.xml", newDispatchXml.exists());
 
     // now link in the new WEB-INF into the overlay
@@ -305,8 +302,10 @@ public class ModelRefreshTests {
     assertEquals(
         project.getFile(".settings/org.eclipse.wst.common.component"),
         Iterables.getOnlyElement(changed));
-    assertTrue(projectElement.isValid(changed));    // is still valid
-    projectElement.resourcesChanged(changed);
+    Collection<Object> changedElements = projectElement.resourcesChanged(changed);
+    assertEquals(1, changedElements.size());
+    assertThat(
+        Iterables.getOnlyElement(changedElements), instanceOf(DispatchRoutingDescriptor.class));
 
     final AppEngineResourceElement[] newElements = projectElement.getConfigurations();
     assertEquals(2, newElements.length);

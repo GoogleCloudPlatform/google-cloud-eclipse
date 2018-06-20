@@ -17,15 +17,14 @@
 package com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.viewers.StyledString;
 
 /**
  * Represents an {@code queue.xml} element.
  */
 public class TaskQueuesDescriptor extends AppEngineResourceElement {
-  public TaskQueuesDescriptor(IProject project, IFile file) {
-    super(project, file);
+  public TaskQueuesDescriptor(IFile file) {
+    super(file.getProject(), file);
   }
 
   @Override

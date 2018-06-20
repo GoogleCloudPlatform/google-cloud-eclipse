@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.facets.ui.navigator;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineResourceElement;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineStandardProjectElement;
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import com.google.common.annotations.VisibleForTesting;
@@ -161,22 +162,26 @@ public class AppEngineContentProvider implements ITreeContentProvider {
         projectMapping.invalidate(project);
         continue; // the explorer will update itself to remove the project
       }
+      Collection<IFile> projectFiles = affected.get(project);
       // check if we've already created a model for this project
       AppEngineStandardProjectElement projectElement = projectMapping.getIfPresent(project);
-      Collection<IFile> files = affected.get(project);
       if (projectElement != null) {
-        // check if the model is still valid given this change (e.g., perhaps the appengine-web.xml
-        // has been removed or disappeared due to virtual layout change)
-        if (!projectElement.isValid(files)) {
+        try {
+          Collection<Object> changedElements = projectElement.resourcesChanged(projectFiles);
+          if (changedElements.contains(project)) {
+            toBeRefreshed.add(projectElement);
+          } else {
+            toBeRefreshed.add(changedElements);
+          }
+        } catch (AppEngineException ex) {
+          // model is not valid given this change (e.g., perhaps the appengine-web.xml
+          // has been removed or disappeared due to virtual layout change)
           projectMapping.invalidate(project);
           toBeRefreshed.add(project);
-        } else {
-          // allow the model to update itself from the change
-          toBeRefreshed.addAll(projectElement.resourcesChanged(files));
         }
       } else if (Iterables.any(
-          files, file -> file != null && "appengine-web.xml".equals(file.getName()))) {
-        // file may have been newly introduced
+          projectFiles, file -> file != null && "appengine-web.xml".equals(file.getName()))) {
+        // trigger refresh of project since descriptor file may have been newly introduced
         toBeRefreshed.add(project);
       }
     }
@@ -235,6 +240,12 @@ public class AppEngineContentProvider implements ITreeContentProvider {
 
   @Override
   public Object getParent(Object element) {
+    if (element instanceof AppEngineStandardProjectElement) {
+      return ((AppEngineStandardProjectElement) element).getProject();
+    } else if (element instanceof AppEngineResourceElement) {
+      IProject project = ((AppEngineResourceElement) element).getProject();
+      return projectMapping.getIfPresent(project);
+    }
     return null;
   }
 

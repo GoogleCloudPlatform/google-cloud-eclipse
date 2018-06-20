@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.viewers.StyledString;
 
 /**
@@ -25,8 +24,8 @@ import org.eclipse.jface.viewers.StyledString;
  */
 public class DatastoreIndexesDescriptor extends AppEngineResourceElement {
 
-  public DatastoreIndexesDescriptor(IProject project, IFile datastoreIndexes) {
-    super(project, datastoreIndexes);
+  public DatastoreIndexesDescriptor(IFile datastoreIndexes) {
+    super(datastoreIndexes.getProject(), datastoreIndexes);
   }
 
   @Override

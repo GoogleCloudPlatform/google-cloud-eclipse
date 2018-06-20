@@ -17,15 +17,14 @@
 package com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.viewers.StyledString;
 
 /**
  * Represents a {@code dispatch.xml} element.
  */
 public class DispatchRoutingDescriptor extends AppEngineResourceElement {
-  public DispatchRoutingDescriptor(IProject project, IFile file) {
-    super(project, file);
+  public DispatchRoutingDescriptor(IFile file) {
+    super(file.getProject(), file);
   }
 
   @Override
