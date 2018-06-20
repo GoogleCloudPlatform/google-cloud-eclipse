@@ -16,12 +16,15 @@
 
 package com.google.cloud.tools.eclipse.swtbot;
 
+import com.google.common.collect.Iterables;
+import java.util.function.Supplier;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotStyledText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTable;
@@ -171,6 +174,23 @@ public class SwtBotTestingUtilities {
           @Override
           public String getFailureMessage() {
             return matcher.toString();
+          }
+        });
+  }
+
+  /** Wait until a menu contains a matching item. */
+  public static void waitUntilMenuHasItem(
+      SWTBot bot, Supplier<SWTBotMenu> menuSupplier, Matcher<String> matcher) {
+    bot.waitUntil(
+        new DefaultCondition() {
+          @Override
+          public boolean test() throws Exception {
+            return Iterables.any(menuSupplier.get().menuItems(), matcher::matches);
+          }
+
+          @Override
+          public String getFailureMessage() {
+            return "Never matched menu with " + matcher.toString();
           }
         });
   }
