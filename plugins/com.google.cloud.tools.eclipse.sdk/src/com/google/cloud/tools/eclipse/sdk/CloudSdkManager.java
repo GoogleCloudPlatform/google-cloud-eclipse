@@ -16,15 +16,11 @@
 
 package com.google.cloud.tools.eclipse.sdk;
 
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.appengine.cloudsdk.InvalidJavaSdkException;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkInstallJob;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkModifyJob;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkUpdateJob;
 import com.google.common.annotations.VisibleForTesting;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -160,17 +156,6 @@ public class CloudSdkManager {
       installJob.cancel();
       // Could wait to verify job termination, but doesn't seem necessary.
       return Status.CANCEL_STATUS;
-    }
-  }
-
-  // TODO(chanseok): remove after CloudSdk.validateJdk() becomes public (code duplicate).
-  public static void validateJdk(CloudSdk sdk) throws InvalidJavaSdkException {
-    boolean isWindows = System.getProperty("os.name").contains("Windows");
-    Path javaHome = sdk.getJavaHomePath();
-    Path executable = javaHome.toAbsolutePath().resolve(isWindows ? "bin/java.exe" : "bin/java");
-    if (!Files.exists(executable)) {
-      throw new InvalidJavaSdkException(
-          "Invalid Java SDK. " + executable.toString() + " does not exist.");
     }
   }
 }

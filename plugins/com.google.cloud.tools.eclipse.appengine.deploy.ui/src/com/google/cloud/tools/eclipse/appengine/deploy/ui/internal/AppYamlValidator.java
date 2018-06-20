@@ -16,10 +16,12 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.internal;
 
+import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
 import com.google.cloud.tools.project.AppYaml;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.io.MoreFiles;
 import java.io.File;
 import java.io.IOException;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -29,8 +31,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Text;
-import org.yaml.snakeyaml.parser.ParserException;
-import org.yaml.snakeyaml.scanner.ScannerException;
 
 /**
  * Checks an {@code app.yaml} path and the specified runtime in it.
@@ -88,7 +88,7 @@ public class AppYamlValidator extends FixedMultiValidator {
   @VisibleForTesting
   static IStatus validateRuntime(File appYamlFile) {
     try {
-      AppYaml appYaml = new AppYaml(appYamlFile.toPath());
+      AppYaml appYaml = AppYaml.parse(MoreFiles.asByteSource(appYamlFile.toPath()).openBufferedStream());
       String runtime = appYaml.getRuntime();
 
       if ("custom".equals(runtime)) {
@@ -99,7 +99,7 @@ public class AppYamlValidator extends FixedMultiValidator {
       } else {
         return ValidationStatus.ok();
       }
-    } catch (ScannerException | ParserException ex) {
+    } catch (AppEngineException ex) {
       return ValidationStatus.error(Messages.getString("error.app.yaml.malformed"));
     } catch (IOException ex) {
       return ValidationStatus.error(

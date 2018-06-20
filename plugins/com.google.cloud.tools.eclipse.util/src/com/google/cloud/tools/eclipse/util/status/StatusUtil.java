@@ -74,6 +74,14 @@ public class StatusUtil {
     return new MultiStatus(getBundleId(origin), 0, message, error);
   }
 
+  public static MultiStatus multi(Object origin, String message, IStatus[] statuses) {
+    MultiStatus multiStatus = multi(origin, message);
+    for (IStatus status : statuses) {
+      multiStatus.add(status);
+    }
+    return multiStatus;
+  }
+
   private static String getBundleId(Object origin) {
     Class<?> clazz = null;
     if (origin == null) {

@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Preconditions;
 import java.io.File;
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
@@ -47,7 +49,7 @@ public class WarPublisher {
 
   public static final Logger logger = Logger.getLogger(WarPublisher.class.getName());
 
-  public static void publishExploded(IProject project, IPath destination,
+  public static IStatus[] publishExploded(IProject project, IPath destination,
       IPath safeWorkDirectory, IProgressMonitor monitor) throws CoreException {
     Preconditions.checkNotNull(project, "project is null"); //$NON-NLS-1$
     Preconditions.checkNotNull(destination, "destination is null"); //$NON-NLS-1$
@@ -58,14 +60,19 @@ public class WarPublisher {
     }
 
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
-    subMonitor.setTaskName(Messages.getString("task.name.publish.war"));
+    subMonitor.setTaskName(Messages.getString("task.name.publish.war")); //$NON-NLS-1$
 
     IModuleResource[] resources =
         flattenResources(project, safeWorkDirectory, subMonitor.newChild(10));
-    PublishUtil.publishFull(resources, destination, subMonitor.newChild(90));
+    if (resources.length == 0) {
+      IStatus error = StatusUtil.error(WarPublisher.class, project.getName()
+          + " has no resources to publish"); //$NON-NLS-1$
+      return new IStatus[] {error};
+    }
+    return PublishUtil.publishFull(resources, destination, subMonitor.newChild(90));
   }
 
-  public static void publishWar(IProject project, IPath destination, IPath safeWorkDirectory,
+  public static IStatus[] publishWar(IProject project, IPath destination, IPath safeWorkDirectory,
       IProgressMonitor monitor) throws CoreException {
     Preconditions.checkNotNull(project, "project is null"); //$NON-NLS-1$
     Preconditions.checkNotNull(destination, "destination is null"); //$NON-NLS-1$
@@ -76,11 +83,16 @@ public class WarPublisher {
     }
 
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
-    subMonitor.setTaskName(Messages.getString("task.name.publish.war"));
+    subMonitor.setTaskName(Messages.getString("task.name.publish.war")); //$NON-NLS-1$
 
     IModuleResource[] resources =
         flattenResources(project, safeWorkDirectory, subMonitor.newChild(10));
-    PublishUtil.publishZip(resources, destination, subMonitor.newChild(90));
+    if (resources.length == 0) {
+      IStatus error = StatusUtil.error(WarPublisher.class, project.getName()
+          + " has no resources to publish"); //$NON-NLS-1$
+      return new IStatus[] {error};
+    }
+    return PublishUtil.publishZip(resources, destination, subMonitor.newChild(90));
   }
 
   private static IModuleResource[] flattenResources(IProject project, IPath safeWorkDirectory,
@@ -105,8 +117,9 @@ public class WarPublisher {
         IUtilityModule utilityModule =
             (IUtilityModule) child.loadAdapter(IUtilityModule.class, monitor);
         if (childDelegate == null || (j2eeModule == null && utilityModule == null)) {
-          logger.log(Level.WARNING, "child modules other than J2EE module or utility module are "
-              + "not supported: module=" + child + ", moduleType=" + child.getModuleType());
+          logger.log(Level.WARNING, "child modules other than J2EE module or utility" //$NON-NLS-1$
+              + " module are not supported: module=" + child //$NON-NLS-1$
+              + ", moduleType=" + child.getModuleType()); //$NON-NLS-1$
           continue;
         }
 

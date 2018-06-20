@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.util.status;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertEquals;
@@ -24,6 +25,8 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+import java.util.List;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
@@ -216,6 +219,27 @@ public class StatusUtilTest {
   public void testFilter_okMultiStatus() {
     IStatus multi = StatusUtil.multi(StatusUtil.class, "test multi msg"); //$NON-NLS-1$
     assertThat(StatusUtil.filter(multi), is(Status.OK_STATUS));
+  }
+
+  @Test
+  public void testMulti_emptyStatusList() {
+    MultiStatus multi = StatusUtil.multi(StatusUtil.class, "test multi-status msg", new IStatus[0]);
+    verifyStatus(multi, IStatus.OK, "test multi-status msg");
+    assertEquals(0, multi.getChildren().length);
+  }
+
+  @Test
+  public void testMulti_statusList() {
+    IStatus someChild = StatusUtil.multi(this, "child OK status msg");
+    IStatus[] statuses = {Status.OK_STATUS, Status.CANCEL_STATUS, someChild};
+    MultiStatus multi = StatusUtil.multi(StatusUtil.class, "test multi-status msg", statuses);
+    verifyStatus(multi, IStatus.CANCEL, "test multi-status msg");
+
+    List<IStatus> children = Arrays.asList(multi.getChildren());
+    assertEquals(3, children.size());
+    assertThat(children, hasItem(Status.OK_STATUS));
+    assertThat(children, hasItem(Status.CANCEL_STATUS));
+    assertThat(children, hasItem(someChild));
   }
 
 }

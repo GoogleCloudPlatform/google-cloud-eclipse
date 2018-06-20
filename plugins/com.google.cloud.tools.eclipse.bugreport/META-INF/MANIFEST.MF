@@ -8,9 +8,9 @@ Bundle-Vendor: %providerName
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
-Import-Package: com.google.cloud.tools.appengine.api;version="0.6.0",
- com.google.cloud.tools.appengine.cloudsdk;version="0.6.0",
- com.google.cloud.tools.appengine.cloudsdk.serialization;version="0.6.0",
+Import-Package: com.google.cloud.tools.appengine.api;version="0.6.3",
+ com.google.cloud.tools.appengine.cloudsdk;version="0.6.3",
+ com.google.cloud.tools.appengine.cloudsdk.serialization;version="0.6.3",
  com.google.cloud.tools.eclipse.sdk.internal,
  com.google.cloud.tools.eclipse.util,
  com.google.common.annotations;version="[21.0.0,22.0.0)",

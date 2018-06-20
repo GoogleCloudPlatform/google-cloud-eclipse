@@ -4,7 +4,7 @@
 
 This project provides an Eclipse plugin for building, debugging, and deploying Google Cloud Platform applications.
 
-[End user documentation and installation instructions can be found on cloud.google.com.](https://cloud.google.com/eclipse/docs/)
+[End user documentation and installation instructions can be found on cloud.google.com.](https://cloud.google.com/eclipse/docs/?utm_source=github&utm_medium=google-cloud-eclipse&utm_campaign=ToolsforEclipse)
 
 _TL;DR_: `mvn package` should
 generate a p2-accessible repository in `gcp-repo/target/repository`.

@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.deploy;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
@@ -31,10 +32,12 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,7 +50,7 @@ public class WarPublisherTest {
   @Mock private IProgressMonitor monitor;
 
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator()
-      .withFacets(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
+      .withFacets(JavaFacet.VERSION_1_7);
 
   @Test
   public void testWriteProjectToStageDir_nullProject() throws CoreException {
@@ -102,10 +105,12 @@ public class WarPublisherTest {
 
   @Test
   public void testPublishExploded() throws CoreException {
-    IProject project = projectCreator.getProject();
+    IProject project = projectCreator.withFacets(WebFacetUtils.WEB_25).getProject();
     IFolder exploded = project.getFolder("exploded-war");
     IPath tempDirectory = project.getFolder("temp").getLocation();
-    WarPublisher.publishExploded(project, exploded.getLocation(), tempDirectory, monitor);
+    IStatus[] result =
+        WarPublisher.publishExploded(project, exploded.getLocation(), tempDirectory, monitor);
+    assertEquals(0, result.length);
 
     exploded.refreshLocal(IResource.DEPTH_INFINITE, monitor);
     assertTrue(exploded.getFile("META-INF/MANIFEST.MF").exists());
@@ -114,12 +119,29 @@ public class WarPublisherTest {
 
   @Test
   public void testPublishWar() throws CoreException {
-    IProject project = projectCreator.getProject();
+    IProject project = projectCreator.withFacets(WebFacetUtils.WEB_25).getProject();
     IFile war = project.getFile("my-app.war");
     IPath tempDirectory = project.getFolder("temp").getLocation();
-    WarPublisher.publishWar(project, war.getLocation(), tempDirectory, monitor);
+    IStatus[] result = WarPublisher.publishWar(project, war.getLocation(), tempDirectory, monitor);
+    assertEquals(0, result.length);
 
     war.refreshLocal(IResource.DEPTH_ZERO, monitor);
     assertTrue(war.exists());
+  }
+
+  @Test
+  public void testPublishExploded_noResource() throws CoreException {
+    IProject project = projectCreator.getProject();
+    IStatus[] result = WarPublisher.publishExploded(project, new Path("/"), new Path("/"), monitor);
+    assertEquals(1, result.length);
+    assertThat(result[0].getMessage(), Matchers.endsWith(" has no resources to publish"));
+  }
+
+  @Test
+  public void testPublishWar_noResource() throws CoreException {
+    IProject project = projectCreator.getProject();
+    IStatus[] result = WarPublisher.publishWar(project, new Path("/"), new Path("/"), monitor);
+    assertEquals(1, result.length);
+    assertThat(result[0].getMessage(), Matchers.endsWith(" has no resources to publish"));
   }
 }
