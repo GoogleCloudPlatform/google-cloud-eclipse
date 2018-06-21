@@ -24,7 +24,7 @@ import org.eclipse.jface.viewers.StyledString;
  */
 public class CronDescriptor extends AppEngineResourceElement {
   public CronDescriptor(IFile file) {
-    super(file.getProject(), file);
+    super(file);
   }
 
   @Override

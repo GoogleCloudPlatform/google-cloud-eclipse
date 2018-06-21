@@ -25,7 +25,7 @@ import org.eclipse.jface.viewers.StyledString;
 public class DatastoreIndexesDescriptor extends AppEngineResourceElement {
 
   public DatastoreIndexesDescriptor(IFile datastoreIndexes) {
-    super(datastoreIndexes.getProject(), datastoreIndexes);
+    super(datastoreIndexes);
   }
 
   @Override

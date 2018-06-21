@@ -24,7 +24,7 @@ import org.eclipse.jface.viewers.StyledString;
  */
 public class DispatchRoutingDescriptor extends AppEngineResourceElement {
   public DispatchRoutingDescriptor(IFile file) {
-    super(file.getProject(), file);
+    super(file);
   }
 
   @Override

@@ -35,6 +35,7 @@ import java.util.function.Function;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.viewers.StyledString;
@@ -46,7 +47,7 @@ import org.xml.sax.SAXException;
  * ID. This element manages model elements representations of the various App Engine configuration
  * files.
  */
-public class AppEngineStandardProjectElement {
+public class AppEngineStandardProjectElement implements IAdaptable {
 
   /** Special project file that describes the virtual folder layout used for building WARs. */
   private static final IPath WTP_COMPONENT_PATH =
@@ -131,6 +132,15 @@ public class AppEngineStandardProjectElement {
     return descriptorFile;
   }
 
+  /** Adapts to {@link IFile} to allow double-clicking to open the corresponding file. */
+  @Override
+  public <T> T getAdapter(Class<T> adapter) {
+    if (adapter.isInstance(descriptorFile)) {
+      return adapter.cast(descriptorFile);
+    }
+    return null;
+  }
+
   /** Return the configuration file models. */
   public AppEngineResourceElement[] getConfigurations() {
     return configurations.values().toArray(new AppEngineResourceElement[configurations.size()]);
@@ -191,8 +201,8 @@ public class AppEngineStandardProjectElement {
     for (IFile file : changedFiles) {
       String baseName = file.getName();
       AppEngineResourceElement element = configurations.compute(baseName, this::updateElement);
-      // if null then was deleted, so we return this project element
-      changed.add(element == null ? this : element);
+      // if not the same element, must refresh project element
+      changed.add(element == null ? element : this);
     }
     return changed;
   }

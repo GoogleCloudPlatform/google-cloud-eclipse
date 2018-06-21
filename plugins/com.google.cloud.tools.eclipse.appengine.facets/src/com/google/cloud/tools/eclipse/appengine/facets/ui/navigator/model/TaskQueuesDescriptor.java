@@ -24,7 +24,7 @@ import org.eclipse.jface.viewers.StyledString;
  */
 public class TaskQueuesDescriptor extends AppEngineResourceElement {
   public TaskQueuesDescriptor(IFile file) {
-    super(file.getProject(), file);
+    super(file);
   }
 
   @Override

@@ -24,7 +24,7 @@ import org.eclipse.jface.viewers.StyledString;
  */
 public class DenialOfServiceDescriptor extends AppEngineResourceElement {
   public DenialOfServiceDescriptor(IFile file) {
-    super(file.getProject(), file);
+    super(file);
   }
 
   @Override

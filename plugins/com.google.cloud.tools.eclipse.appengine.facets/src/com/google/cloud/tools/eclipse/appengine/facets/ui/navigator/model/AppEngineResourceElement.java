@@ -30,10 +30,10 @@ public abstract class AppEngineResourceElement implements IAdaptable {
   private final IProject project;
   private final IFile file;
 
-  public AppEngineResourceElement(IProject project, IFile file) {
-    this.project = Preconditions.checkNotNull(project);
+  public AppEngineResourceElement(IFile file) {
     this.file = Preconditions.checkNotNull(file);
     Preconditions.checkState(file.exists());
+    this.project = file.getProject();
   }
 
   public IProject getProject() {

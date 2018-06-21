@@ -125,10 +125,11 @@ public class AppEngineLabelProvider extends LabelProvider implements IStyledLabe
     } else if (element instanceof DatastoreIndexesDescriptor) {
       return resources.createImage(SharedImages.DATASTORE_GREY_IMAGE_DESCRIPTOR);
     } else if (element instanceof AppEngineResourceElement) {
-      // todo CronDescriptor should be a timer/clock?
-      // todo DenialOfServiceDescriptor should be a do-not-enter?
-      // todo DispatchRoutingDescriptor should be a path fork?
-      // todo TaskQueuesDescriptor
+      // todo Get better images for these resource elements
+      // CronDescriptor could be a timer/clock?
+      // DenialOfServiceDescriptor could be a do-not-enter?
+      // DispatchRoutingDescriptor could be a path fork?
+      // TaskQueuesDescriptor could be a tree-like branch?
       return resources.createImage(AppEngineImages.APPENGINE_GREY_IMAGE_DESCRIPTOR);
     }
     return null;

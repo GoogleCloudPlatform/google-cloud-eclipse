@@ -57,22 +57,22 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
  * intended for use with the Eclipse Common Navigator framework, as used in the Project Explorer.
  *
  * <p>To avoid unnecessary refreshes, this content provider strives to return the same objects
- * between calls to {@link #getChildren(Object)}. The difficulty here is that
+ * between calls to {@link #getChildren(Object)}.
  *
- * <p>An App Engine service is defined principally by an {@code appengine-web.xml} / {@code
- * app.yaml}. The {@code default} service also provides a number of ancilliary configuration files
- * ({@code cron.xml}, {@code datastore-indexes.xml}, {@code dispatch.xml}, {@code queue.xml}). These
- * files are found under the {@code WEB-INF} directory. A change to one of these files may require
- * reconfiguring the associated model. For example, changing the Service ID in the {@code
- * appengine-web.xml}, such that a service is no longer the default service, would require removing
- * all traces of the ancilliary configuration files.
+ * <p>An App Engine service is defined by an {@code appengine-web.xml} / {@code app.yaml}. The
+ * {@code default} service may also carry a number of ancilliary configuration files ({@code
+ * cron.xml}, {@code datastore-indexes.xml}, {@code dispatch.xml}, {@code queue.xml}). These files
+ * are found under the {@code WEB-INF} directory. A change to one of these files may require
+ * reconfiguring the associated model. Changing the Service ID in the {@code appengine-web.xml} such
+ * that a service is no longer the {@code default} service would require removing all traces of the
+ * ancilliary configuration files.
  *
  * <p>WTP uses a virtual layout to map the project files and folders into a WAR layout (c.f., {@link
  * ComponentCore}, {@link IVirtualFolder}, {@link IVirtualFile}; referenced in the UI as a
  * Deployment Assembly). Multiple {@link IFolder project folders} can be mapped to a {@link
  * IVirtualFolder virtual folder}. The virtual layout could be reconfigured such that a different
- * {@code appengine-web.xml} file is used — or the {@code appengine-web.xml} will no longer appear
- * in {@code WEB-INF}!
+ * {@code appengine-web.xml} file is used — or the {@code appengine-web.xml} may no longer appear in
+ * {@code WEB-INF}!
  */
 public class AppEngineContentProvider implements ITreeContentProvider {
   private static final Logger logger = Logger.getLogger(AppEngineContentProvider.class.getName());
@@ -101,28 +101,32 @@ public class AppEngineContentProvider implements ITreeContentProvider {
   }
 
   /**
-   * Load a representation of an App Engine project from the given project. Return {@code null} if
-   * not an App Engine project.
+   * Load a representation of an App Engine project from the given project.
+   *
+   * @throws AppEngineException if not an App Engine project
    */
   @VisibleForTesting
-  static AppEngineStandardProjectElement loadRepresentation(IProject project) {
+  static AppEngineStandardProjectElement loadRepresentation(IProject project)
+      throws AppEngineException {
+    Preconditions.checkNotNull(project);
     if (project == null || !project.exists() || !isStandard(project)) {
-      return null;
+      throw new AppEngineException("Not an App Engine project");
     }
-    try {
       AppEngineStandardProjectElement appEngineProject =
           AppEngineStandardProjectElement.create(project);
       return appEngineProject;
-    } catch (AppEngineException ex) {
-      logger.log(Level.WARNING, "Unable to load App Engine project details for " + project, ex);
-      return null;
-    }
   }
 
   private final LoadingCache<IProject, AppEngineStandardProjectElement> projectMapping =
       CacheBuilder.newBuilder()
           .weakKeys()
-          .build(CacheLoader.from(AppEngineContentProvider::loadRepresentation));
+          .build(
+              new CacheLoader<IProject, AppEngineStandardProjectElement>() {
+                @Override
+                public AppEngineStandardProjectElement load(IProject key) throws Exception {
+                  return AppEngineContentProvider.loadRepresentation(key);
+                }
+              });
   private IWorkspace workspace = ResourcesPlugin.getWorkspace();
   private StructuredViewer viewer;
   private Consumer<Collection<Object>> refreshHandler = this::refreshElements;
@@ -146,7 +150,8 @@ public class AppEngineContentProvider implements ITreeContentProvider {
 
   /**
    * One or more resources changed in the workspace. See if we need to invalidate and/or refresh any
-   * model elements. <b>Note:</b> calls may come on any thread.
+   * model elements, and then request that they be updated in the UI. <b>Note:</b> calls may come on
+   * any thread.
    */
   private void resourceChanged(IResourceChangeEvent event) {
     Multimap<IProject, IFile> affected;
@@ -167,12 +172,10 @@ public class AppEngineContentProvider implements ITreeContentProvider {
       AppEngineStandardProjectElement projectElement = projectMapping.getIfPresent(project);
       if (projectElement != null) {
         try {
+          // Note: our validators reset any problem markers on appengine-web.xml changes,
+          // which triggers a refresh of our project label
           Collection<Object> changedElements = projectElement.resourcesChanged(projectFiles);
-          if (changedElements.contains(project)) {
-            toBeRefreshed.add(projectElement);
-          } else {
-            toBeRefreshed.add(changedElements);
-          }
+          toBeRefreshed.addAll(changedElements);
         } catch (AppEngineException ex) {
           // model is not valid given this change (e.g., perhaps the appengine-web.xml
           // has been removed or disappeared due to virtual layout change)

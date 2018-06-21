@@ -17,16 +17,40 @@
 package com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.cloud.tools.appengine.api.AppEngineException;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.util.Collections;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jst.common.project.facet.core.JavaFacet;
+import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.junit.Rule;
 import org.junit.Test;
 
 public class AppEngineStandardProjectElementTest {
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
+
+  @Test
+  public void testGetAdapter() throws AppEngineException {
+    projectCreator.withFacets(
+        AppEngineStandardFacet.FACET.getVersion("JRE8"),
+        WebFacetUtils.WEB_31,
+        JavaFacet.VERSION_1_8);
+    IProject project = projectCreator.getProject();
+
+    AppEngineStandardProjectElement projectElement =
+        AppEngineStandardProjectElement.create(project);
+    assertNotNull(projectElement);
+    assertNotNull(projectElement.getAdapter(IFile.class));
+  }
+
   @Test
   public void testHasLayoutChanged_normalFile() {
     IFile file = mock(IFile.class);
