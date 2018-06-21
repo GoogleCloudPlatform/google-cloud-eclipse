@@ -84,6 +84,7 @@ public class ResourceUtilsTest {
   public void testGetAffectedFiles_changedFile() throws CoreException {
     IProject project = mock(IProject.class, "project");
     IFile file = mock(IFile.class, "/filename");
+    when(file.getProject()).thenReturn(project);
 
     IResourceDelta delta = mockDelta();
     when(delta.getResource()).thenReturn(file);
