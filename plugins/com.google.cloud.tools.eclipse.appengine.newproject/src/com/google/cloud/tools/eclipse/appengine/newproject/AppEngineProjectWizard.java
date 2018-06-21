@@ -68,11 +68,9 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
       IFile file = runnable.getMostImportant();
       WorkbenchUtil.openInEditor(workbench, file);
       return true;
-    } catch (InterruptedException ex) {
-      return false;
-    } catch (InvocationTargetException ex) {
+    } catch (InterruptedException | InvocationTargetException ex) {
       String message = Messages.getString("project.creation.failed"); //$NON-NLS-1$
-      StatusUtil.setErrorStatus(this, message, ex.getCause());
+      StatusUtil.setErrorStatus(this, message, ex);
       return false;
     }
   }

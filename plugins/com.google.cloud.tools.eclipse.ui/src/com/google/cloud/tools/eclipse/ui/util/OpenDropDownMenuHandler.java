@@ -49,7 +49,7 @@ import org.eclipse.ui.menus.IMenuService;
  *                style=&quot;pulldown&quot;
  *                commandId=&quot;com.google.cloud.tools.eclipse.ui.util.showPopup&quot;
  *                id=&quot;com.google.cloud.tools.eclipse.ui.actions&quot;
- *                icon=&quot;xxx.png&quot; /&gt;
+ *                icon=&quot;image.png&quot; /&gt;
  *       &lt;/toolbar&gt;
  *    &lt;/menuContribution&gt;
  *    &lt;menuContribution locationURI=&quot;menu:com.google.cloud.tools.eclipse.ui.actions&quot;&gt;

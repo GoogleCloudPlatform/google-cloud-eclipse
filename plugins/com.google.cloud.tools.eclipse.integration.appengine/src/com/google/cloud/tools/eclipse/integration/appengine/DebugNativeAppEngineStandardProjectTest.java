@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.integration.appengine;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.endsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -89,11 +90,13 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
 
     SWTBotTreeItem testProject = SwtBotProjectActions.selectProject(bot, "testapp_java8");
     assertNotNull(testProject);
-    SwtBotTestingUtilities.performAndWaitForWindowChange(bot, () -> {
-      System.out.println("==== menu items of Run > Debug As ====");
-      bot.menu("Run").menu("Debug As").menuItems().forEach(System.out::println);
-      bot.menu("Run").menu("Debug As").menu("1 Debug on Server").click();
-    });
+    SwtBotTestingUtilities.waitUntilMenuHasItem(
+        bot, () -> bot.menu("Run").menu("Debug As"), endsWith("Debug on Server"));
+    SwtBotTestingUtilities.performAndWaitForWindowChange(
+        bot,
+        () -> {
+          bot.menu("Run").menu("Debug As").menu("1 Debug on Server").click();
+        });
 
     SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
 

@@ -23,6 +23,7 @@ import com.google.cloud.tools.eclipse.dataflow.ui.page.NewDataflowProjectWizardD
 import com.google.cloud.tools.eclipse.dataflow.ui.page.NewDataflowProjectWizardLandingPage;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.lang.reflect.InvocationTargetException;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -59,13 +60,13 @@ public class NewDataflowProjectWizard extends Wizard implements INewWizard {
     }
     try {
       getContainer().run(true, true, creator);
+      return true;
     } catch (InvocationTargetException | InterruptedException ex) {
-      // TODO: handle
-      DataflowUiPlugin.logError(ex, 
-          "Error encountered when trying to create project"); //$NON-NLS-1$
+      String message = "Error encountered when trying to create project"; //$NON-NLS-1$
+      DataflowUiPlugin.logError(ex, message);
+      StatusUtil.setErrorStatus(this, message, ex);
       return false;
     }
-    return true;
   }
 
   @Override

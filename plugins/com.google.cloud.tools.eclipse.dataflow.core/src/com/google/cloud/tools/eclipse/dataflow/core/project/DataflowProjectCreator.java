@@ -24,19 +24,17 @@ import com.google.cloud.tools.eclipse.dataflow.core.preferences.WritableDataflow
 import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
 import com.google.cloud.tools.eclipse.util.JavaPackageValidator;
 import com.google.cloud.tools.eclipse.util.MavenCoordinatesValidator;
-import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
@@ -44,8 +42,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
@@ -85,7 +81,8 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
   private String defaultStagingLocation;
   private String defaultServiceAccountKey;
 
-  private DataflowProjectCreator(IProjectConfigurationManager projectConfigurationManager) {
+  @VisibleForTesting
+  DataflowProjectCreator(IProjectConfigurationManager projectConfigurationManager) {
     this.projectConfigurationManager = projectConfigurationManager;
 
     template = DataflowProjectArchetype.STARTER_POM_WITH_PIPELINE;
@@ -181,58 +178,34 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
       location = org.eclipse.core.filesystem.URIUtil.toPath(projectLocation);
     }
 
-    Set<ArtifactVersion> archetypeVersions;
+    ArtifactVersion artifactVersion;
     if (Strings.isNullOrEmpty(archetypeVersion)) {
       // TODO: Configure the creator with a targeted Major Version
-      archetypeVersions = defaultArchetypeVersions(template, majorVersion);
+      artifactVersion = defaultArchetypeVersion(template, majorVersion);
     } else {
-      archetypeVersions =
-          Collections.<ArtifactVersion>singleton(new DefaultArtifactVersion(archetypeVersion));
+      artifactVersion = new DefaultArtifactVersion(archetypeVersion);
     }
+    archetype.setVersion(artifactVersion.toString());
 
-    List<IProject> projects = Collections.emptyList();
-    List<CoreException> failures = new ArrayList<>();
-    MultiStatus status = new MultiStatus(DataflowCorePlugin.PLUGIN_ID, 38, 
-        "Creating dataflow maven archetypes", null);
+    checkCancelled(progress);
+    try {
+      List<IProject> projects = projectConfigurationManager.createArchetypeProjects(
+          // TODO: Get the version string from the user as well.
+          location, archetype, mavenGroupId, mavenArtifactId, "0.0.1-SNAPSHOT", packageString,
+          archetypeProperties, projectImportConfiguration, progress.split(4));
 
-    for (ArtifactVersion attemptedVersion : archetypeVersions) {
-      checkCancelled(progress);
-      // TODO: See if this can be done without using the toString method
-      archetype.setVersion(attemptedVersion.toString());
-      try {
-        projects = projectConfigurationManager.createArchetypeProjects(location, archetype,
-            // TODO: Get the version string from the user as well.
-            mavenGroupId, mavenArtifactId, "0.0.1-SNAPSHOT", packageString, archetypeProperties,
-            projectImportConfiguration, progress.newChild(4));
-        break;
-      } catch (CoreException ex) {
-        IStatus child = StatusUtil.error(this, ex.getMessage(), ex);
-        status.merge(child);
-        failures.add(ex);
-      }
-    }
-    if (projects.isEmpty()) { // failures only matter if no version succeeded
-      StatusUtil.setErrorStatus(this, "Error loading dataflow archetypes", status);
-      for (CoreException failure : failures) {
-        DataflowCorePlugin.logError(failure, "CoreException while creating new Dataflow Project");
-      }
-    } else {
-      SubMonitor natureMonitor = SubMonitor.convert(progress.newChild(1), projects.size());
+      SubMonitor subMonitor = SubMonitor.convert(progress.split(1), projects.size());
       for (IProject project : projects) {
-        try {
-          DataflowJavaProjectNature.addDataflowJavaNatureToProject(
-              project, natureMonitor.newChild(1));
-          setPreferences(project);
-        } catch (CoreException e) {
-          DataflowCorePlugin.logError(e,
-              "CoreException while adding Dataflow Nature to created project %s", project.getName());
-        }
+        DataflowJavaProjectNature.addDataflowJavaNatureToProject(project, subMonitor.split(1));
+        setPreferences(project);
       }
+    } catch (CoreException ex) {
+      DataflowCorePlugin.logError(ex, "CoreException while creating new Dataflow Project");
+      throw new InvocationTargetException(ex);
     }
-    monitor.done();
   }
 
-  private Set<ArtifactVersion> defaultArchetypeVersions(DataflowProjectArchetype template,
+  private ArtifactVersion defaultArchetypeVersion(DataflowProjectArchetype template,
       MajorVersion version) {
     checkArgument(template.getSdkVersions().contains(majorVersion));
 
@@ -240,8 +213,7 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
     ArtifactVersion latestArchetype = ArtifactRetriever.DEFAULT.getLatestReleaseVersion(
         DataflowMavenCoordinates.GROUP_ID, artifactId, majorVersion.getVersionRange());
 
-    return Collections.singleton(
-        latestArchetype == null ? version.getInitialVersion() : latestArchetype);
+    return latestArchetype == null ? version.getInitialVersion() : latestArchetype;
   }
 
   private void setPreferences(IProject project) {

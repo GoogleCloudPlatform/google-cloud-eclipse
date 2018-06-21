@@ -137,8 +137,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     try {
       CloudSdk cloudSdk = new CloudSdk.Builder().build();
       cloudSdk.validateCloudSdk();
-      // TODO: call cloudSdk.validateJdk() once it becomes public.
-      CloudSdkManager.validateJdk(cloudSdk);
+      cloudSdk.validateJdk();
       cloudSdk.validateAppEngineJavaComponents();
       return Status.OK_STATUS;
     } catch (CloudSdkNotFoundException | InvalidJavaSdkException ex) {

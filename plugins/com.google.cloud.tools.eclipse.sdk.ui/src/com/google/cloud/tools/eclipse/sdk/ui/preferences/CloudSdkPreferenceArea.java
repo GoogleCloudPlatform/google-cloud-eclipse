@@ -279,7 +279,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     try {
       CloudSdk sdk = new CloudSdk.Builder().sdkPath(location).build();
       sdk.validateCloudSdk();
-      CloudSdkManager.validateJdk(sdk);  // TODO: call sdk.validateJdk() once it becomes public.
+      sdk.validateJdk();
       sdk.validateAppEngineJavaComponents();
       status = Status.OK_STATUS;
       return true;
