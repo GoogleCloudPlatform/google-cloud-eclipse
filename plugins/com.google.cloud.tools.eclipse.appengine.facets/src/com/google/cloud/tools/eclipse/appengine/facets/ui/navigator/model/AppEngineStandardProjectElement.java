@@ -26,10 +26,7 @@ import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Function;
 import org.eclipse.core.resources.IFile;
@@ -169,13 +166,12 @@ public class AppEngineStandardProjectElement implements IAdaptable {
   }
 
   /**
-   * Handle a change to given resource (added, removed, or changed), and return the model objects
-   * that were changed.
+   * Handle a change to given resource (added, removed, or changed). Return {@code true} if there
+   * were changes.
    *
    * @throws AppEngineException when some error occurred parsing or interpreting some relevant file
    */
-  public Collection<Object> resourcesChanged(Collection<IFile> changedFiles)
-      throws AppEngineException {
+  public boolean resourcesChanged(Collection<IFile> changedFiles) throws AppEngineException {
     Preconditions.checkNotNull(changedFiles);
     Preconditions.checkNotNull(descriptorFile);
 
@@ -186,25 +182,42 @@ public class AppEngineStandardProjectElement implements IAdaptable {
     if (changedFiles.contains(descriptorFile) || hasNewDescriptor) {
       // reload everything: e.g., may no longer be "default"
       reload();
-      return Collections.singleton(this);
+      return true;
     } else if (!descriptorFile.exists()) {
       // if our descriptor was removed then we're no longer an App Engine project
       throw new AppEngineException(descriptorFile.getName() + " no longer exists");
-    } else if (layoutChanged) {
+    }
+    if (!isDefaultService()) {
+      // only the default service carries ancilliary configuration files
+      return false;
+    }
+    if (layoutChanged) {
       // new config file may have become available
       return reloadConfigurationFiles();
     }
 
     // reload any existing configuration file models if the corresponding file has changed
     // but track if any previously-absent configuration files have been seen
-    Set<Object> changed = new HashSet<>();
+    boolean changes = false;
     for (IFile file : changedFiles) {
       String baseName = file.getName();
-      AppEngineResourceElement element = configurations.compute(baseName, this::updateElement);
-      // if not the same element, must refresh project element
-      changed.add(element == null ? element : this);
+      AppEngineResourceElement previousElement = configurations.get(baseName);
+      if (previousElement != null) {
+        configurations.compute(baseName, this::updateElement);
+        changes = true;
+      }
     }
-    return changed;
+    return changes;
+  }
+
+  /** Return {@code true} if this is the default service. */
+  private boolean isDefaultService() {
+    try {
+      return descriptor.getServiceId() == null || "default".equals(descriptor.getServiceId());
+    } catch (AppEngineException ex) {
+      // ignore
+      return false;
+    }
   }
 
   /**
@@ -224,25 +237,24 @@ public class AppEngineStandardProjectElement implements IAdaptable {
   }
 
   /**
-   * Reload the ancillary configuration files. Returns changed or new elements.
+   * Reload the ancillary configuration files. Returns {@code true} if there were changes.
    *
    * @throws AppEngineException if the descriptor has errors or could not be loaded
    */
-  private Collection<Object> reloadConfigurationFiles() throws AppEngineException {
+  private boolean reloadConfigurationFiles() throws AppEngineException {
     // ancillary config files are only taken from the default module
-    if (descriptor.getServiceId() != null && !"default".equals(descriptor.getServiceId())) {
+    if (!isDefaultService()) {
+      boolean wasEmpty = configurations.isEmpty();
       configurations.clear();
-      return Collections.singleton(this);
+      return !wasEmpty;
     }
 
-    Set<Object> changed = new HashSet<>();
+    boolean changed = false;
     // check for all configuration files
     for (String baseName : elementFactories.keySet()) {
       AppEngineResourceElement previous = configurations.get(baseName);
       AppEngineResourceElement created = configurations.compute(baseName, this::updateElement);
-      if (created != previous) {
-        changed.add(created);
-      }
+      changed |= created != previous;
     }
     return changed;
   }

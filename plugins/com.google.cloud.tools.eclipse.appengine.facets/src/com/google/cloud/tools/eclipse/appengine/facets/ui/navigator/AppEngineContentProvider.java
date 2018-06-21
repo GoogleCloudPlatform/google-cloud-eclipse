@@ -32,7 +32,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
@@ -46,6 +46,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.wst.common.componentcore.ComponentCore;
 import org.eclipse.wst.common.componentcore.resources.IVirtualFile;
 import org.eclipse.wst.common.componentcore.resources.IVirtualFolder;
@@ -112,9 +113,9 @@ public class AppEngineContentProvider implements ITreeContentProvider {
     if (project == null || !project.exists() || !isStandard(project)) {
       throw new AppEngineException("Not an App Engine project");
     }
-      AppEngineStandardProjectElement appEngineProject =
-          AppEngineStandardProjectElement.create(project);
-      return appEngineProject;
+    AppEngineStandardProjectElement appEngineProject =
+        AppEngineStandardProjectElement.create(project);
+    return appEngineProject;
   }
 
   private final LoadingCache<IProject, AppEngineStandardProjectElement> projectMapping =
@@ -129,13 +130,13 @@ public class AppEngineContentProvider implements ITreeContentProvider {
               });
   private IWorkspace workspace = ResourcesPlugin.getWorkspace();
   private StructuredViewer viewer;
-  private Consumer<Collection<Object>> refreshHandler = this::refreshElements;
+  private BiConsumer<Collection<Object>, Collection<Object>> refreshHandler = this::refreshElements;
   private IResourceChangeListener resourceListener;
 
   public AppEngineContentProvider() {}
 
   @VisibleForTesting
-  AppEngineContentProvider(Consumer<Collection<Object>> refreshHandler) {
+  AppEngineContentProvider(BiConsumer<Collection<Object>, Collection<Object>> refreshHandler) {
     this.refreshHandler = refreshHandler;
   }
 
@@ -161,7 +162,8 @@ public class AppEngineContentProvider implements ITreeContentProvider {
       logger.log(Level.WARNING, "Could not determine affected files from resource delta", ex);
       return;
     }
-    Set<Object> toBeRefreshed = new HashSet<>();
+    Set<Object> toBeRefreshed = new HashSet<>(); // require structural changes
+    Set<Object> toBeUpdated = new HashSet<>(); // require label updates
     for (IProject project : affected.keySet()) {
       if (!project.exists()) {
         projectMapping.invalidate(project);
@@ -172,10 +174,13 @@ public class AppEngineContentProvider implements ITreeContentProvider {
       AppEngineStandardProjectElement projectElement = projectMapping.getIfPresent(project);
       if (projectElement != null) {
         try {
-          // Note: our validators reset any problem markers on appengine-web.xml changes,
-          // which triggers a refresh of our project label
-          Collection<Object> changedElements = projectElement.resourcesChanged(projectFiles);
-          toBeRefreshed.addAll(changedElements);
+          if (projectElement.resourcesChanged(projectFiles)) {
+            toBeRefreshed.add(projectElement);
+          }
+          // label may need changing
+          if (projectFiles.contains(projectElement.getFile())) {
+            toBeUpdated.add(project);
+          }
         } catch (AppEngineException ex) {
           // model is not valid given this change (e.g., perhaps the appengine-web.xml
           // has been removed or disappeared due to virtual layout change)
@@ -188,20 +193,27 @@ public class AppEngineContentProvider implements ITreeContentProvider {
         toBeRefreshed.add(project);
       }
     }
-    if (!toBeRefreshed.isEmpty()) {
-      refreshHandler.accept(toBeRefreshed);
+    if (!toBeRefreshed.isEmpty() || !toBeUpdated.isEmpty()) {
+      // no point updating an element scheduled to be refreshed
+      toBeUpdated.removeIf(toBeRefreshed::contains);
+      refreshHandler.accept(toBeRefreshed, toBeUpdated);
     }
   }
 
-  private void refreshElements(Collection<Object> elements) {
-    if (viewer.getControl() != null
-        && !viewer.getControl().isDisposed()
-        && viewer.getControl().getDisplay() != null) {
-      viewer
-          .getControl()
-          .getDisplay()
-          .asyncExec(() -> elements.forEach(handle -> viewer.refresh(handle)));
+  private void refreshElements(Collection<Object> toBeRefreshed, Collection<Object> toBeUpdated) {
+    Control control = viewer.getControl();
+    if (control == null || control.isDisposed()) {
+      return;
     }
+    control
+        .getDisplay()
+        .asyncExec(
+            () -> {
+              if (!control.isDisposed()) {
+                toBeRefreshed.forEach(handle -> viewer.refresh(handle));
+                toBeUpdated.forEach(handle -> viewer.update(handle, null));
+              }
+            });
   }
 
   @Override
@@ -235,7 +247,7 @@ public class AppEngineContentProvider implements ITreeContentProvider {
         AppEngineStandardProjectElement projectElement = projectMapping.get(project);
         return projectElement == null ? EMPTY_ARRAY : new Object[] {projectElement};
       } catch (ExecutionException ex) {
-        logger.log(Level.WARNING, "Unable to load App Engine project " + project, ex);
+        logger.log(Level.FINE, "Unable to load App Engine project " + project, ex);
       }
     }
     return EMPTY_ARRAY;

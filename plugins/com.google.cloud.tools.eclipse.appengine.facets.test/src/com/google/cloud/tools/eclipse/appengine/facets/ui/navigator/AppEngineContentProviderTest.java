@@ -41,7 +41,7 @@ import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.Dispat
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.TaskQueuesDescriptor;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.util.Collection;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -66,7 +66,7 @@ public class AppEngineContentProviderTest {
   private AppEngineContentProvider fixture;
 
   /** Called by {@link #fixture} when elements require updating. */
-  @Mock private Consumer<Collection<Object>> refreshHandler;
+  @Mock private BiConsumer<Collection<Object>, Collection<Object>> refreshHandler;
 
   @Before
   public void setUp() {
@@ -246,7 +246,7 @@ public class AppEngineContentProviderTest {
 
     IProject project = projectCreator.getProject();
     ConfigurationFileUtils.createAppEngineWebXml(project, null);
-    verify(refreshHandler, atLeastOnce()).accept(anyObject());
+    verify(refreshHandler, atLeastOnce()).accept(anyObject(), anyObject());
     Object[] children = fixture.getChildren(project);
     assertNotNull(children);
     assertEquals(1, children.length);
@@ -257,7 +257,7 @@ public class AppEngineContentProviderTest {
     assertEquals(0, children.length);
 
     IFile cronXml = ConfigurationFileUtils.createEmptyCronXml(project);
-    verify(refreshHandler, atLeastOnce()).accept(anyObject());
+    verify(refreshHandler, atLeastOnce()).accept(anyObject(), anyObject());
     children = fixture.getChildren(project);
     assertNotNull(children);
     assertEquals(1, children.length);
@@ -268,7 +268,7 @@ public class AppEngineContentProviderTest {
     assertThat(children, hasItemInArray(instanceOf(CronDescriptor.class)));
 
     ConfigurationFileUtils.createEmptyDatastoreIndexesXml(project);
-    verify(refreshHandler, atLeastOnce()).accept(anyObject());
+    verify(refreshHandler, atLeastOnce()).accept(anyObject(), anyObject());
     children = fixture.getChildren(project);
     assertNotNull(children);
     assertEquals(1, children.length);
@@ -280,7 +280,7 @@ public class AppEngineContentProviderTest {
     assertThat(children, hasItemInArray(instanceOf(DatastoreIndexesDescriptor.class)));
 
     cronXml.delete(true, null);
-    verify(refreshHandler, atLeastOnce()).accept(anyObject());
+    verify(refreshHandler, atLeastOnce()).accept(anyObject(), anyObject());
     children = fixture.getChildren(project);
     assertNotNull(children);
     assertEquals(1, children.length);
@@ -296,7 +296,7 @@ public class AppEngineContentProviderTest {
     projectCreator.withFacets(AppEngineStandardFacet.JRE7, WebFacetUtils.WEB_25);
     IProject project = projectCreator.getProject();
     ConfigurationFileUtils.createAppEngineWebXml(project, "default"); // $NON-NLS-1$
-    IFile queueXml = ConfigurationFileUtils.createEmptyQueueXml(project);
+    ConfigurationFileUtils.createEmptyQueueXml(project);
 
     // must populate the model via the AppEngineContentProvider
     Object[] children = fixture.getChildren(project);
