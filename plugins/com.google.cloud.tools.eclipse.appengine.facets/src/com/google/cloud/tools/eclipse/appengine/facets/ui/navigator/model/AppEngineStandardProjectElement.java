@@ -166,8 +166,8 @@ public class AppEngineStandardProjectElement implements IAdaptable {
   }
 
   /**
-   * Handle a change to given resource (added, removed, or changed). Return {@code true} if there
-   * were changes.
+   * Update to the set of resource modifications in this project (added, removed, or changed).
+   * Return {@code true} if there were changes.
    *
    * @throws AppEngineException when some error occurred parsing or interpreting some relevant file
    */
@@ -175,39 +175,51 @@ public class AppEngineStandardProjectElement implements IAdaptable {
     Preconditions.checkNotNull(changedFiles);
     Preconditions.checkNotNull(descriptorFile);
 
-    boolean layoutChanged = hasLayoutChanged(changedFiles);
+    boolean layoutChanged = hasLayoutChanged(changedFiles); // files may be newly exposed or removed
     boolean hasNewDescriptor =
         layoutChanged && !descriptorFile.equals(findAppEngineDescriptor(project));
-    // virtual layout may have changed or a new descriptor may have been added
+    
     if (changedFiles.contains(descriptorFile) || hasNewDescriptor) {
       // reload everything: e.g., may no longer be "default"
       reload();
       return true;
     } else if (!descriptorFile.exists()) {
-      // if our descriptor was removed then we're no longer an App Engine project
+      // if our descriptor was removed then we're not really an App Engine project
       throw new AppEngineException(descriptorFile.getName() + " no longer exists");
     }
+
+    // So descriptor hasn't changed.  Check if we're the default service
     if (!isDefaultService()) {
       // only the default service carries ancilliary configuration files
       return false;
     }
     if (layoutChanged) {
-      // new config file may have become available
+      // reload as new configuration files may have become available or previous
+      // configuration files may have disappeared
       return reloadConfigurationFiles();
     }
 
-    // reload any existing configuration file models if the corresponding file has changed
-    // but track if any previously-absent configuration files have been seen
-    boolean changes = false;
+    // Since the layout hasn't changed then (1) reload any changed configuration file models,
+    // (2) remove any deleted models, and (3) add models for new files
+    boolean changed = false;
     for (IFile file : changedFiles) {
       String baseName = file.getName();
-      AppEngineResourceElement previousElement = configurations.get(baseName);
-      if (previousElement != null) {
-        configurations.compute(baseName, this::updateElement);
-        changes = true;
+      AppEngineResourceElement previous = configurations.get(baseName);
+      if (previous != null) {
+        // Since first file resolved wins check if this file was (and thus remains) the winner
+        if (file.equals(previous.getFile())) {
+          // Case 1 and 2: reload() returns null if underlying file no longer exists
+          configurations.compute(baseName, (ignored, element) -> element.reload());
+          changed = true;
+        }
+      } else if (elementFactories.containsKey(baseName)) {
+        // hasn't been seen, and file has a recognized configuration file name
+        AppEngineResourceElement current = configurations.compute(baseName, this::updateElement);
+        // updateElement() returns null if file not resolved
+        changed |= current != null;
       }
     }
-    return changes;
+    return changed;
   }
 
   /** Return {@code true} if this is the default service. */
@@ -250,7 +262,7 @@ public class AppEngineStandardProjectElement implements IAdaptable {
     }
 
     boolean changed = false;
-    // check for all configuration files
+    // check and re-resolve all configuration files
     for (String baseName : elementFactories.keySet()) {
       AppEngineResourceElement previous = configurations.get(baseName);
       AppEngineResourceElement created = configurations.compute(baseName, this::updateElement);

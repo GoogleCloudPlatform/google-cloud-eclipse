@@ -162,8 +162,12 @@ public class AppEngineContentProvider implements ITreeContentProvider {
       logger.log(Level.WARNING, "Could not determine affected files from resource delta", ex);
       return;
     }
-    Set<Object> toBeRefreshed = new HashSet<>(); // require structural changes
-    Set<Object> toBeUpdated = new HashSet<>(); // require label updates
+    
+    // Track elements requiring a refresh (which refreshes all children) vs update (just the
+    // element's label) as refreshing a big project tree could be painful
+    Set<Object> toBeRefreshed = new HashSet<>();
+    Set<Object> toBeUpdated = new HashSet<>();
+    
     for (IProject project : affected.keySet()) {
       if (!project.exists()) {
         projectMapping.invalidate(project);
@@ -175,9 +179,11 @@ public class AppEngineContentProvider implements ITreeContentProvider {
       if (projectElement != null) {
         try {
           if (projectElement.resourcesChanged(projectFiles)) {
+            // something changed in the App Engine content block
             toBeRefreshed.add(projectElement);
           }
-          // label may need changing
+          // Check for changes to our App Engine descriptor: the descriptor is used in the
+          // project labels and so the label may need changing
           if (projectFiles.contains(projectElement.getFile())) {
             toBeUpdated.add(project);
           }
@@ -189,13 +195,12 @@ public class AppEngineContentProvider implements ITreeContentProvider {
         }
       } else if (Iterables.any(
           projectFiles, file -> file != null && "appengine-web.xml".equals(file.getName()))) {
-        // trigger refresh of project since descriptor file may have been newly introduced
+        // If we reached here, the project is unknown.  So trigger refresh of project since
+        // descriptor file appears to have been newly introduced
         toBeRefreshed.add(project);
       }
     }
     if (!toBeRefreshed.isEmpty() || !toBeUpdated.isEmpty()) {
-      // no point updating an element scheduled to be refreshed
-      toBeUpdated.removeIf(toBeRefreshed::contains);
       refreshHandler.accept(toBeRefreshed, toBeUpdated);
     }
   }
@@ -247,7 +252,8 @@ public class AppEngineContentProvider implements ITreeContentProvider {
         AppEngineStandardProjectElement projectElement = projectMapping.get(project);
         return projectElement == null ? EMPTY_ARRAY : new Object[] {projectElement};
       } catch (ExecutionException ex) {
-        logger.log(Level.FINE, "Unable to load App Engine project " + project, ex);
+        // ignore: either not an App Engine project or some validation problem in
+        // the appengine-web.xml that will be reported via Problems view
       }
     }
     return EMPTY_ARRAY;
