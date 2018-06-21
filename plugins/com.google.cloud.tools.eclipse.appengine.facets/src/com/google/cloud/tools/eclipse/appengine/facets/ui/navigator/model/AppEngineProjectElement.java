@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model;
 import com.google.cloud.tools.appengine.AppEngineDescriptor;
 import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
+import com.google.cloud.tools.project.AppYaml;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -40,10 +41,11 @@ import org.xml.sax.SAXException;
 
 /**
  * A model representation of an App Engine project. App Engine projects always have a descriptor
- * (e.g., {@code appengine-web.xml}) that may provide their environment, runtime type, and Service
- * ID. This element manages model representations of the various App Engine configuration files.
+ * ({@code app.yaml} or {@code appengine-web.xml}) that may provide their App Engine environment
+ * type (standard or flexible), runtime type, and Service ID. This element manages model elements
+ * representations of the various App Engine configuration files.
  */
-public class AppEngineStandardProjectElement implements IAdaptable {
+public class AppEngineProjectElement implements IAdaptable {
 
   /** Special project file that describes the virtual folder layout used for building WARs. */
   private static final IPath WTP_COMPONENT_PATH =
@@ -56,6 +58,11 @@ public class AppEngineStandardProjectElement implements IAdaptable {
   /** Factories to create model elements for the various App Engine configuration files. */
   private static final Map<String, Function<IFile, AppEngineResourceElement>> elementFactories =
       new ImmutableMap.Builder<String, Function<IFile, AppEngineResourceElement>>()
+          .put("cron.yaml", file -> new CronDescriptor(file)) // $NON-NLS-1$
+          .put("index.yaml", file -> new DatastoreIndexesDescriptor(file)) // $NON-NLS-1$
+          .put("queue.yaml", file -> new TaskQueuesDescriptor(file)) // $NON-NLS-1$
+          .put("dos.yaml", file -> new DenialOfServiceDescriptor(file)) // $NON-NLS-1$
+          .put("dispatch.yaml", file -> new DispatchRoutingDescriptor(file)) // $NON-NLS-1$
           .put("cron.xml", file -> new CronDescriptor(file)) // $NON-NLS-1$
           .put("datastore-indexes.xml", file -> new DatastoreIndexesDescriptor(file)) // $NON-NLS-1$
           .put("queue.xml", file -> new TaskQueuesDescriptor(file)) // $NON-NLS-1$
@@ -68,23 +75,36 @@ public class AppEngineStandardProjectElement implements IAdaptable {
    *
    * @throws AppEngineException when unable to parse the descriptor file ({@code appengine-web.xml})
    */
-  public static AppEngineStandardProjectElement create(IProject project) throws AppEngineException {
-    AppEngineStandardProjectElement appEngineProject = new AppEngineStandardProjectElement(project);
+  public static AppEngineProjectElement create(IProject project) throws AppEngineException {
+    AppEngineProjectElement appEngineProject = new AppEngineProjectElement(project);
     appEngineProject.reload();
     return appEngineProject;
   }
 
   /**
-   * Find the App Engine descriptor ({@code appengine-web.xml}) for this project.
+   * Find the App Engine descriptor ({@code app.yaml} or {@code appengine-web.xml}) for this
+   * project.
    *
    * @throws AppEngineException if the descriptor cannot be found
    */
   private static IFile findAppEngineDescriptor(IProject project) throws AppEngineException {
+    // Which of app.yaml or appengine-web.xml should win?
+
     IFile descriptorFile = WebProjectUtil.findInWebInf(project, new Path("appengine-web.xml"));
-    if (descriptorFile == null || !descriptorFile.exists()) {
-      throw new AppEngineException("appengine-web.xml not found");
+    if (descriptorFile != null && descriptorFile.exists()) {
+      return descriptorFile;
     }
-    return descriptorFile;
+
+    // We don't have a well-defined story for where app.yaml lives, so first look for WEB-INF
+    descriptorFile = WebProjectUtil.findInWebInf(project, new Path("app.yaml"));
+    if (descriptorFile != null && descriptorFile.exists()) {
+      return descriptorFile;
+    }
+    descriptorFile = project.getFile(new Path("src/main/appengine/app.yaml"));
+    if (descriptorFile != null && descriptorFile.exists()) {
+      return descriptorFile;
+    }
+    throw new AppEngineException("App Engine descriptor not found");
   }
 
   /** Return {@code true} if the changed files may result in a different virtual layout. */
@@ -109,12 +129,20 @@ public class AppEngineStandardProjectElement implements IAdaptable {
    */
   private IFile descriptorFile;
 
-  private AppEngineDescriptor descriptor;
+  private String projectId;
+  private String projectVersion;
+  private String serviceId;
+
+  /** Return the App Engine environment type (e.g., standard, flexible). */
+  private String environmentType;
+
+  /** Return the App Engine runtime (e.g., java7, java8). */
+  private String runtime;
 
   /** Map of <em>base-file-name &rarr; model-element</em> pairs. */
   private final Map<String, AppEngineResourceElement> configurations = new TreeMap<>();
 
-  private AppEngineStandardProjectElement(IProject project) throws AppEngineException {
+  private AppEngineProjectElement(IProject project) throws AppEngineException {
     this.project = project;
     this.descriptorFile = findAppEngineDescriptor(project);
   }
@@ -143,25 +171,47 @@ public class AppEngineStandardProjectElement implements IAdaptable {
     return configurations.values().toArray(new AppEngineResourceElement[configurations.size()]);
   }
 
-  public String getRuntimeType() {
-    try {
-      String runtime = descriptor.getRuntime();
-      return "standard: " + (Strings.isNullOrEmpty(runtime) ? "java7" : runtime);
-    } catch (AppEngineException ex) {
-      return null;
-    }
+  /** Return the GCP Project ID, or {@code null} if not specified. */
+  public String getProjectId() {
+    return projectId;
   }
 
-  public AppEngineDescriptor getDescriptor() {
-    return descriptor;
+  /** Return the GCP Project Version, or {@code null} if not specified. */
+  public String getProjectVersion() {
+    return projectVersion;
+  }
+
+  /**
+   * Return the App Engine Service ID, or {@code null} if not specified (which is {@code
+   * "default"}).
+   */
+  public String getServiceId() {
+    return serviceId;
+  }
+
+  /**
+   * Return the App Engine environment type, or {@code null} if not specified (which is {@code
+   * standard}).
+   */
+  public String getEnvironmentType() {
+    return environmentType;
+  }
+
+  /** Return the App Engine runtime type, or {@code null} if not specified. */
+  public String getRuntime() {
+    return runtime;
   }
 
   public StyledString getStyledLabel() {
     StyledString result = new StyledString("App Engine");
-    String qualifier = getRuntimeType();
-    if (qualifier != null) {
-      result.append(" [" + qualifier + "]", StyledString.QUALIFIER_STYLER);
-    }
+    result.append(" [", StyledString.QUALIFIER_STYLER);
+    result.append(
+        environmentType == null ? "standard" : environmentType, StyledString.QUALIFIER_STYLER);
+    result.append(": ", StyledString.QUALIFIER_STYLER);
+    result.append(
+        Strings.isNullOrEmpty(runtime) ? "java7" : runtime, StyledString.QUALIFIER_STYLER);
+    result.append("]", StyledString.QUALIFIER_STYLER);
+    result.append(" - " + descriptorFile.getName(), StyledString.DECORATIONS_STYLER);
     return result;
   }
 
@@ -178,7 +228,7 @@ public class AppEngineStandardProjectElement implements IAdaptable {
     boolean layoutChanged = hasLayoutChanged(changedFiles); // files may be newly exposed or removed
     boolean hasNewDescriptor =
         layoutChanged && !descriptorFile.equals(findAppEngineDescriptor(project));
-    
+
     if (changedFiles.contains(descriptorFile) || hasNewDescriptor) {
       // reload everything: e.g., may no longer be "default"
       reload();
@@ -226,12 +276,7 @@ public class AppEngineStandardProjectElement implements IAdaptable {
 
   /** Return {@code true} if this is the default service. */
   private boolean isDefaultService() {
-    try {
-      return descriptor.getServiceId() == null || "default".equals(descriptor.getServiceId());
-    } catch (AppEngineException ex) {
-      // ignore
-      return false;
-    }
+    return serviceId == null || "default".equals(serviceId);
   }
 
   /**
@@ -242,8 +287,27 @@ public class AppEngineStandardProjectElement implements IAdaptable {
   private void reload() throws AppEngineException {
     descriptorFile = findAppEngineDescriptor(project);
     try (InputStream input = descriptorFile.getContents()) {
-      descriptor = AppEngineDescriptor.parse(input);
+      if ("app.yaml".equals(getDescriptorFile().getName())) {
+        AppYaml descriptor = AppYaml.parse(input);
+        projectId = descriptor.getProjectId();
+        projectVersion = descriptor.getProjectVersion();
+        serviceId = descriptor.getServiceId();
+        environmentType = descriptor.getEnvironmentType();
+        runtime = descriptor.getRuntime();
+      } else {
+        AppEngineDescriptor descriptor = AppEngineDescriptor.parse(input);
+        projectId = descriptor.getProjectId();
+        projectVersion = descriptor.getProjectVersion();
+        serviceId = descriptor.getServiceId();
+        environmentType = null;
+        runtime = descriptor.getRuntime();
+      }
     } catch (IOException | SAXException | CoreException ex) {
+      projectId = null;
+      projectVersion = null;
+      serviceId = null;
+      environmentType = null;
+      runtime = null;
       configurations.clear();
       throw new AppEngineException(
           "Unable to load appengine descriptor from " + descriptorFile, ex);

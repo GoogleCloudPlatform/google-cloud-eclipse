@@ -29,6 +29,7 @@ public class TaskQueuesDescriptor extends AppEngineResourceElement {
 
   @Override
   public StyledString getStyledLabel() {
-    return new StyledString("Task Queue Definitions");
+    return new StyledString("Task Queue Definitions")
+        .append(" - " + getFile().getName(), StyledString.DECORATIONS_STYLER);
   }
 }

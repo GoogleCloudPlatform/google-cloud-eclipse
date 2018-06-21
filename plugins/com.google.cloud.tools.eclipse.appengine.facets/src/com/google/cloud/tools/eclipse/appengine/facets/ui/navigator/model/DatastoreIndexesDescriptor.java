@@ -30,7 +30,8 @@ public class DatastoreIndexesDescriptor extends AppEngineResourceElement {
 
   @Override
   public StyledString getStyledLabel() {
-    return new StyledString("Datastore Indexes");
+    return new StyledString("Datastore Indexes")
+        .append(" - " + getFile().getName(), StyledString.DECORATIONS_STYLER);
   }
 
 }

@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -23,6 +24,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexWarFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.util.Collections;
@@ -34,8 +36,34 @@ import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.junit.Rule;
 import org.junit.Test;
 
-public class AppEngineStandardProjectElementTest {
+public class AppEngineProjectElementTest {
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
+
+  @Test
+  public void testCreation_appEngineStandardJava8() throws AppEngineException {
+    projectCreator.withFacets(
+        AppEngineStandardFacet.FACET.getVersion("JRE8"),
+        WebFacetUtils.WEB_31,
+        JavaFacet.VERSION_1_8);
+    IProject project = projectCreator.getProject();
+
+    AppEngineProjectElement projectElement = AppEngineProjectElement.create(project);
+    assertNotNull(projectElement);
+    assertNotNull(projectElement.getDescriptorFile());
+    assertEquals("appengine-web.xml", projectElement.getDescriptorFile().getName());
+  }
+
+  @Test
+  public void testCreation_appEngineFlexibleWar() throws AppEngineException {
+    projectCreator.withFacets(
+        AppEngineFlexWarFacet.FACET_VERSION, WebFacetUtils.WEB_31, JavaFacet.VERSION_1_8);
+    IProject project = projectCreator.getProject();
+
+    AppEngineProjectElement projectElement = AppEngineProjectElement.create(project);
+    assertNotNull(projectElement);
+    assertNotNull(projectElement.getDescriptorFile());
+    assertEquals("app.yaml", projectElement.getDescriptorFile().getName());
+  }
 
   @Test
   public void testGetAdapter() throws AppEngineException {
@@ -45,8 +73,8 @@ public class AppEngineStandardProjectElementTest {
         JavaFacet.VERSION_1_7);
     IProject project = projectCreator.getProject();
 
-    AppEngineStandardProjectElement projectElement =
-        AppEngineStandardProjectElement.create(project);
+    AppEngineProjectElement projectElement =
+        AppEngineProjectElement.create(project);
     assertNotNull(projectElement);
     assertNotNull(projectElement.getAdapter(IFile.class));
   }
@@ -55,7 +83,7 @@ public class AppEngineStandardProjectElementTest {
   public void testHasLayoutChanged_normalFile() {
     IFile file = mock(IFile.class);
     when(file.getProjectRelativePath()).thenReturn(new Path("foo"));
-    assertFalse(AppEngineStandardProjectElement.hasLayoutChanged(Collections.singleton(file)));
+    assertFalse(AppEngineProjectElement.hasLayoutChanged(Collections.singleton(file)));
   }
 
   @Test
@@ -63,14 +91,14 @@ public class AppEngineStandardProjectElementTest {
     IFile file = mock(IFile.class);
     // not in .settings
     when(file.getProjectRelativePath()).thenReturn(new Path("org.eclipse.wst.common.component"));
-    assertFalse(AppEngineStandardProjectElement.hasLayoutChanged(Collections.singleton(file)));
+    assertFalse(AppEngineProjectElement.hasLayoutChanged(Collections.singleton(file)));
   }
 
   @Test
   public void testHasLayoutChanged_settingsFile() {
     IFile file = mock(IFile.class);
     when(file.getProjectRelativePath()).thenReturn(new Path(".settings/foo"));
-    assertFalse(AppEngineStandardProjectElement.hasLayoutChanged(Collections.singleton(file)));
+    assertFalse(AppEngineProjectElement.hasLayoutChanged(Collections.singleton(file)));
   }
 
   @Test
@@ -78,7 +106,7 @@ public class AppEngineStandardProjectElementTest {
     IFile file = mock(IFile.class);
     when(file.getProjectRelativePath())
         .thenReturn(new Path(".settings/org.eclipse.wst.common.component"));
-    assertTrue(AppEngineStandardProjectElement.hasLayoutChanged(Collections.singleton(file)));
+    assertTrue(AppEngineProjectElement.hasLayoutChanged(Collections.singleton(file)));
   }
 
   @Test
@@ -86,6 +114,6 @@ public class AppEngineStandardProjectElementTest {
     IFile file = mock(IFile.class);
     when(file.getProjectRelativePath())
         .thenReturn(new Path(".settings/org.eclipse.wst.common.project.facet.core.xml"));
-    assertTrue(AppEngineStandardProjectElement.hasLayoutChanged(Collections.singleton(file)));
+    assertTrue(AppEngineProjectElement.hasLayoutChanged(Collections.singleton(file)));
   }
 }

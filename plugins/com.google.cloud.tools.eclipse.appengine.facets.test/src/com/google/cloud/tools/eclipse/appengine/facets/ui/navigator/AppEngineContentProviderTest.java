@@ -32,19 +32,25 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
+import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineProjectElement;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineResourceElement;
-import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineStandardProjectElement;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.CronDescriptor;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.DatastoreIndexesDescriptor;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.DenialOfServiceDescriptor;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.DispatchRoutingDescriptor;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.TaskQueuesDescriptor;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import com.google.common.io.ByteSource;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.function.BiConsumer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
@@ -93,15 +99,15 @@ public class AppEngineContentProviderTest {
     Object[] children = fixture.getChildren(projectCreator.getFacetedProject());
     assertNotNull(children);
     assertEquals(1, children.length);
-    assertTrue(children[0] instanceof AppEngineStandardProjectElement);
+    assertTrue(children[0] instanceof AppEngineProjectElement);
   }
 
   @Test
   public void testGetChildren_appEngineStandardProjectElement_noService_noChildren()
       throws AppEngineException {
     ConfigurationFileUtils.createAppEngineWebXml(projectCreator.getProject(), null);
-    AppEngineStandardProjectElement projectElement =
-        AppEngineStandardProjectElement.create(projectCreator.getProject());
+    AppEngineProjectElement projectElement =
+        AppEngineProjectElement.create(projectCreator.getProject());
 
     Object[] children = fixture.getChildren(projectElement);
     assertNotNull(children);
@@ -114,8 +120,8 @@ public class AppEngineContentProviderTest {
     ConfigurationFileUtils.createAppEngineWebXml(
         projectCreator.getProject(), "service"); // $NON-NLS-1$
     ConfigurationFileUtils.createEmptyCronXml(projectCreator.getProject());
-    AppEngineStandardProjectElement projectElement =
-        AppEngineStandardProjectElement.create(projectCreator.getProject());
+    AppEngineProjectElement projectElement =
+        AppEngineProjectElement.create(projectCreator.getProject());
 
     Object[] children = fixture.getChildren(projectElement);
     assertNotNull(children);
@@ -128,8 +134,8 @@ public class AppEngineContentProviderTest {
     ConfigurationFileUtils.createAppEngineWebXml(
         projectCreator.getProject(), "default"); // $NON-NLS-1$
     ConfigurationFileUtils.createEmptyCronXml(projectCreator.getProject());
-    AppEngineStandardProjectElement projectElement =
-        AppEngineStandardProjectElement.create(projectCreator.getProject());
+    AppEngineProjectElement projectElement =
+        AppEngineProjectElement.create(projectCreator.getProject());
 
     Object[] children = fixture.getChildren(projectElement);
     assertNotNull(children);
@@ -147,8 +153,8 @@ public class AppEngineContentProviderTest {
     ConfigurationFileUtils.createAppEngineWebXml(
         projectCreator.getProject(), "default"); // $NON-NLS-1$
     ConfigurationFileUtils.createEmptyDispatchXml(projectCreator.getProject());
-    AppEngineStandardProjectElement projectElement =
-        AppEngineStandardProjectElement.create(projectCreator.getProject());
+    AppEngineProjectElement projectElement =
+        AppEngineProjectElement.create(projectCreator.getProject());
 
     Object[] children = fixture.getChildren(projectElement);
     assertNotNull(children);
@@ -166,8 +172,8 @@ public class AppEngineContentProviderTest {
     ConfigurationFileUtils.createAppEngineWebXml(
         projectCreator.getProject(), "default"); // $NON-NLS-1$
     ConfigurationFileUtils.createEmptyDatastoreIndexesXml(projectCreator.getProject());
-    AppEngineStandardProjectElement projectElement =
-        AppEngineStandardProjectElement.create(projectCreator.getProject());
+    AppEngineProjectElement projectElement =
+        AppEngineProjectElement.create(projectCreator.getProject());
 
     Object[] children = fixture.getChildren(projectElement);
     assertNotNull(children);
@@ -185,8 +191,8 @@ public class AppEngineContentProviderTest {
     ConfigurationFileUtils.createAppEngineWebXml(
         projectCreator.getProject(), "default"); // $NON-NLS-1$
     ConfigurationFileUtils.createEmptyDosXml(projectCreator.getProject());
-    AppEngineStandardProjectElement projectElement =
-        AppEngineStandardProjectElement.create(projectCreator.getProject());
+    AppEngineProjectElement projectElement =
+        AppEngineProjectElement.create(projectCreator.getProject());
 
     Object[] children = fixture.getChildren(projectElement);
     assertNotNull(children);
@@ -204,8 +210,8 @@ public class AppEngineContentProviderTest {
     ConfigurationFileUtils.createAppEngineWebXml(
         projectCreator.getProject(), "default"); // $NON-NLS-1$
     ConfigurationFileUtils.createEmptyQueueXml(projectCreator.getProject());
-    AppEngineStandardProjectElement projectElement =
-        AppEngineStandardProjectElement.create(projectCreator.getProject());
+    AppEngineProjectElement projectElement =
+        AppEngineProjectElement.create(projectCreator.getProject());
 
     Object[] children = fixture.getChildren(projectElement);
     assertNotNull(children);
@@ -226,20 +232,20 @@ public class AppEngineContentProviderTest {
 
   @Test
   public void testHasChildren_appEngineStandardProjectElement_noConfigs() {
-    AppEngineStandardProjectElement projectElement = mock(AppEngineStandardProjectElement.class);
+    AppEngineProjectElement projectElement = mock(AppEngineProjectElement.class);
     when(projectElement.getConfigurations()).thenReturn(new AppEngineResourceElement[0]);
     assertFalse(fixture.hasChildren(projectElement));
   }
 
   @Test
   public void testHasChildren_appEngineStandardProjectElement_withConfigs() {
-    AppEngineStandardProjectElement projectElement = mock(AppEngineStandardProjectElement.class);
+    AppEngineProjectElement projectElement = mock(AppEngineProjectElement.class);
     when(projectElement.getConfigurations()).thenReturn(new AppEngineResourceElement[1]);
     assertTrue(fixture.hasChildren(projectElement));
   }
 
   @Test
-  public void testDynamicChanges() throws CoreException {
+  public void testDynamicChanges_appEngineStandardJava7() throws CoreException {
     projectCreator.withFacets(AppEngineStandardFacet.JRE7, WebFacetUtils.WEB_25);
     StructuredViewer viewer = mock(StructuredViewer.class);
     fixture.inputChanged(viewer, null, null); // installs resource-changed listener
@@ -250,8 +256,8 @@ public class AppEngineContentProviderTest {
     Object[] children = fixture.getChildren(project);
     assertNotNull(children);
     assertEquals(1, children.length);
-    assertTrue(children[0] instanceof AppEngineStandardProjectElement);
-    AppEngineStandardProjectElement projectElement = (AppEngineStandardProjectElement) children[0];
+    assertTrue(children[0] instanceof AppEngineProjectElement);
+    AppEngineProjectElement projectElement = (AppEngineProjectElement) children[0];
     children = fixture.getChildren(projectElement);
     assertNotNull(children);
     assertEquals(0, children.length);
@@ -292,6 +298,66 @@ public class AppEngineContentProviderTest {
   }
 
   @Test
+  public void testDynamicChanges_appYaml() throws CoreException, IOException {
+    projectCreator.withFacets(AppEngineStandardFacet.JRE7, WebFacetUtils.WEB_25);
+    IProject project = projectCreator.getProject();
+
+    StructuredViewer viewer = mock(StructuredViewer.class);
+    fixture.inputChanged(viewer, null, null); // installs resource-changed listener
+
+    ByteArrayInputStream stream =
+        new ByteArrayInputStream("runtime: java\n".getBytes(StandardCharsets.UTF_8));
+    WebProjectUtil.createFileInWebInf(project, new Path("app.yaml"), stream, true, null);
+
+    verify(refreshHandler, atLeastOnce()).accept(anyObject(), anyObject());
+    Object[] children = fixture.getChildren(projectCreator.getFacetedProject());
+    assertNotNull(children);
+    assertEquals(1, children.length);
+    assertTrue(children[0] instanceof AppEngineProjectElement);
+    AppEngineProjectElement projectElement = (AppEngineProjectElement) children[0];
+    children = fixture.getChildren(projectElement);
+    assertNotNull(children);
+    assertEquals(0, children.length);
+
+    IFile cronYaml =
+        WebProjectUtil.createFileInWebInf(
+            project, new Path("cron.yaml"), ByteSource.empty().openStream(), true, null);
+    verify(refreshHandler, atLeastOnce()).accept(anyObject(), anyObject());
+    children = fixture.getChildren(projectCreator.getFacetedProject());
+    assertNotNull(children);
+    assertEquals(1, children.length);
+    assertTrue(children[0] == projectElement);
+    children = fixture.getChildren(projectElement);
+    assertNotNull(children);
+    assertEquals(1, children.length);
+    assertThat(children, hasItemInArray(instanceOf(CronDescriptor.class)));
+
+    WebProjectUtil.createFileInWebInf(
+        project, new Path("index.yaml"), ByteSource.empty().openStream(), true, null);
+    verify(refreshHandler, atLeastOnce()).accept(anyObject(), anyObject());
+    children = fixture.getChildren(projectCreator.getFacetedProject());
+    assertNotNull(children);
+    assertEquals(1, children.length);
+    assertTrue(children[0] == projectElement);
+    children = fixture.getChildren(projectElement);
+    assertNotNull(children);
+    assertEquals(2, children.length);
+    assertThat(children, hasItemInArray(instanceOf(CronDescriptor.class)));
+    assertThat(children, hasItemInArray(instanceOf(DatastoreIndexesDescriptor.class)));
+
+    cronYaml.delete(true, null);
+    verify(refreshHandler, atLeastOnce()).accept(anyObject(), anyObject());
+    children = fixture.getChildren(projectCreator.getFacetedProject());
+    assertNotNull(children);
+    assertEquals(1, children.length);
+    assertTrue(children[0] == projectElement);
+    children = fixture.getChildren(projectElement);
+    assertNotNull(children);
+    assertEquals(1, children.length);
+    assertThat(children, hasItemInArray(instanceOf(DatastoreIndexesDescriptor.class)));
+  }
+
+  @Test
   public void testGetParent() {
     projectCreator.withFacets(AppEngineStandardFacet.JRE7, WebFacetUtils.WEB_25);
     IProject project = projectCreator.getProject();
@@ -301,7 +367,7 @@ public class AppEngineContentProviderTest {
     // must populate the model via the AppEngineContentProvider
     Object[] children = fixture.getChildren(project);
     assertEquals(1, children.length);
-    AppEngineStandardProjectElement projectElement = (AppEngineStandardProjectElement) children[0];
+    AppEngineProjectElement projectElement = (AppEngineProjectElement) children[0];
     children = fixture.getChildren(projectElement);
     assertEquals(1, children.length);
     TaskQueuesDescriptor queueDescriptor = (TaskQueuesDescriptor) children[0];
