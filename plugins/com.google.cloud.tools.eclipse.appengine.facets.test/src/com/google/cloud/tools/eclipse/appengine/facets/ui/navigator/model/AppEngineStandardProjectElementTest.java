@@ -40,9 +40,9 @@ public class AppEngineStandardProjectElementTest {
   @Test
   public void testGetAdapter() throws AppEngineException {
     projectCreator.withFacets(
-        AppEngineStandardFacet.FACET.getVersion("JRE8"),
-        WebFacetUtils.WEB_31,
-        JavaFacet.VERSION_1_8);
+        AppEngineStandardFacet.JRE7,
+        WebFacetUtils.WEB_25,
+        JavaFacet.VERSION_1_7);
     IProject project = projectCreator.getProject();
 
     AppEngineStandardProjectElement projectElement =
