@@ -28,17 +28,15 @@ import org.eclipse.jface.viewers.StyledString;
  * functionality.
  */
 public abstract class AppEngineResourceElement implements IAdaptable {
-  private final IProject project;
   private final IFile file;
 
   public AppEngineResourceElement(IFile file) {
     this.file = Preconditions.checkNotNull(file);
     Preconditions.checkState(file.exists());
-    this.project = file.getProject();
   }
 
   public IProject getProject() {
-    return project;
+    return file.getProject();
   }
 
   public IFile getFile() {

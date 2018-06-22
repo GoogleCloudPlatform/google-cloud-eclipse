@@ -40,7 +40,7 @@ import org.xml.sax.SAXException;
 
 /**
  * A model representation of an App Engine project. App Engine projects always have a descriptor
- * (e.g., {@code appengine-web.xml}) that may provides their environment, runtime type, and Service
+ * (e.g., {@code appengine-web.xml}) that may provide their environment, runtime type, and Service
  * ID. This element manages model representations of the various App Engine configuration files.
  */
 public class AppEngineStandardProjectElement implements IAdaptable {
@@ -138,7 +138,7 @@ public class AppEngineStandardProjectElement implements IAdaptable {
     return null;
   }
 
-  /** Return the configuration file models. */
+  /** Return the configuration file models. Never {@code null}. */
   public AppEngineResourceElement[] getConfigurations() {
     return configurations.values().toArray(new AppEngineResourceElement[configurations.size()]);
   }

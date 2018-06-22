@@ -130,7 +130,7 @@ public class AppEngineContentProvider implements ITreeContentProvider {
                 }
               });
 
-  private IWorkspace workspace = ResourcesPlugin.getWorkspace();
+  private final IWorkspace workspace = ResourcesPlugin.getWorkspace();
   private StructuredViewer viewer;
 
   /**
@@ -241,8 +241,7 @@ public class AppEngineContentProvider implements ITreeContentProvider {
   public boolean hasChildren(Object element) {
     if (element instanceof AppEngineStandardProjectElement) {
       AppEngineStandardProjectElement projectElement = (AppEngineStandardProjectElement) element;
-      return projectElement.getConfigurations() != null
-          && projectElement.getConfigurations().length > 0;
+      return projectElement.getConfigurations().length > 0;
     } else if (element instanceof AppEngineResourceElement) {
       // none of our descriptor models have children
       return false;
