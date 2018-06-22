@@ -195,7 +195,7 @@ public class AppEngineContentProvider implements ITreeContentProvider {
           // Check if the App Engine descriptor changed: the information in the descriptor is used
           // in the project labels (the parent of the App Engine content block) and so the label may
           // need changing
-          if (projectFiles.contains(projectElement.getFile())) {
+          if (projectFiles.contains(projectElement.getDescriptorFile())) {
             toBeUpdated.add(project);
           }
         } catch (AppEngineException ex) {

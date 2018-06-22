@@ -247,7 +247,7 @@ public class ModelRefreshTests {
 
     AppEngineStandardProjectElement projectElement =
         AppEngineStandardProjectElement.create(project);
-    files.add(projectElement.getFile());
+    files.add(projectElement.getDescriptorFile());
     final AppEngineResourceElement[] subElements = projectElement.getConfigurations();
 
     for (IFile file : files) {

@@ -125,7 +125,7 @@ public class AppEngineStandardProjectElement implements IAdaptable {
   }
 
   /** Return the descriptor file. */
-  public IFile getFile() {
+  public IFile getDescriptorFile() {
     return descriptorFile;
   }
 
