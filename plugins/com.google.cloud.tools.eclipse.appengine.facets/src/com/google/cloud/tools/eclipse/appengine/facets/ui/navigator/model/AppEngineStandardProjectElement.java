@@ -41,8 +41,7 @@ import org.xml.sax.SAXException;
 /**
  * A model representation of an App Engine project. App Engine projects always have a descriptor
  * (e.g., {@code appengine-web.xml}) that may provides their environment, runtime type, and Service
- * ID. This element manages model elements representations of the various App Engine configuration
- * files.
+ * ID. This element manages model representations of the various App Engine configuration files.
  */
 public class AppEngineStandardProjectElement implements IAdaptable {
 
@@ -54,6 +53,7 @@ public class AppEngineStandardProjectElement implements IAdaptable {
   private static final IPath WTP_FACETS_PATH =
       new Path(".settings/org.eclipse.wst.common.project.facet.core.xml"); // $NON-NLS-1$
 
+  /** Factories to create model elements for the various App Engine configuration files. */
   private static final Map<String, Function<IFile, AppEngineResourceElement>> elementFactories =
       new ImmutableMap.Builder<String, Function<IFile, AppEngineResourceElement>>()
           .put("cron.xml", file -> new CronDescriptor(file)) // $NON-NLS-1$
@@ -103,15 +103,15 @@ public class AppEngineStandardProjectElement implements IAdaptable {
 
   private final IProject project;
 
-  /** The App Engine descriptor file; may change. */
+  /**
+   * The App Engine descriptor file; may change due to layout changes but should never be {@code
+   * null}.
+   */
   private IFile descriptorFile;
 
   private AppEngineDescriptor descriptor;
 
-  /**
-   * Map of <em>base-file-name &rarr; model-element</em> pairs, sorted by the
-   * <em>base-file-name</em> (e.g., <code>dispatch.xml</code>).
-   */
+  /** Map of <em>base-file-name &rarr; model-element</em> pairs. */
   private final Map<String, AppEngineResourceElement> configurations = new TreeMap<>();
 
   private AppEngineStandardProjectElement(IProject project) throws AppEngineException {
@@ -187,20 +187,22 @@ public class AppEngineStandardProjectElement implements IAdaptable {
       // if our descriptor was removed then we're not really an App Engine project
       throw new AppEngineException(descriptorFile.getName() + " no longer exists");
     }
+    // So descriptor is unchanged.
 
-    // So descriptor hasn't changed.  Check if we're the default service
     if (!isDefaultService()) {
-      // only the default service carries ancilliary configuration files
+      // Only the default service carries ancilliary configuration files
+      Preconditions.checkState(configurations.isEmpty());
       return false;
-    }
-    if (layoutChanged) {
-      // reload as new configuration files may have become available or previous
+    } else if (layoutChanged) {
+      // Reload as new configuration files may have become available or previous
       // configuration files may have disappeared
       return reloadConfigurationFiles();
     }
 
-    // Since the layout hasn't changed then (1) reload any changed configuration file models,
-    // (2) remove any deleted models, and (3) add models for new files
+    // Since this is called on any file change to the project (e.g., to a java or text file),
+    // we walk the files and see if they may correspond to an App Engine configuration file to
+    // avoid unnecessary work. Since the layout hasn't changed then (1) reload any changed
+    // configuration file models, (2) remove any deleted models, and (3) add models for new files.
     boolean changed = false;
     for (IFile file : changedFiles) {
       String baseName = file.getName();
@@ -213,7 +215,7 @@ public class AppEngineStandardProjectElement implements IAdaptable {
           changed = true;
         }
       } else if (elementFactories.containsKey(baseName)) {
-        // hasn't been seen, and file has a recognized configuration file name
+        // Case 3: file has a recognized configuration file name
         AppEngineResourceElement current = configurations.compute(baseName, this::updateElement);
         // updateElement() returns null if file not resolved
         changed |= current != null;
@@ -242,6 +244,7 @@ public class AppEngineStandardProjectElement implements IAdaptable {
     try (InputStream input = descriptorFile.getContents()) {
       descriptor = AppEngineDescriptor.parse(input);
     } catch (IOException | SAXException | CoreException ex) {
+      configurations.clear();
       throw new AppEngineException(
           "Unable to load appengine descriptor from " + descriptorFile, ex);
     }
@@ -271,6 +274,10 @@ public class AppEngineStandardProjectElement implements IAdaptable {
     return changed;
   }
 
+  /**
+   * Update a possibly-existing configuration file element. Return the replacement element or {@code
+   * null} if the configuration file no longer exists.
+   */
   private AppEngineResourceElement updateElement(
       String baseName, AppEngineResourceElement element) {
     Preconditions.checkArgument(elementFactories.containsKey(baseName));

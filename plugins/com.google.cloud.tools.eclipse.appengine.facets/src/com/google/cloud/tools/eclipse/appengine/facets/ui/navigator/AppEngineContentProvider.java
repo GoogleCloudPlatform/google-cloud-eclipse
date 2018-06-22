@@ -118,6 +118,7 @@ public class AppEngineContentProvider implements ITreeContentProvider {
     return appEngineProject;
   }
 
+  /** Cached representation of App Engine projects. */
   private final LoadingCache<IProject, AppEngineStandardProjectElement> projectMapping =
       CacheBuilder.newBuilder()
           .weakKeys()
@@ -128,9 +129,17 @@ public class AppEngineContentProvider implements ITreeContentProvider {
                   return AppEngineContentProvider.loadRepresentation(key);
                 }
               });
+
   private IWorkspace workspace = ResourcesPlugin.getWorkspace();
   private StructuredViewer viewer;
+
+  /**
+   * Called with a list of elements to be {@link StructuredViewer#refresh(Object) refreshed} (due to
+   * structural changes) and those to be {@link StructuredViewer#update(Object, String[]) updated}
+   * (just label changes).
+   */
   private BiConsumer<Collection<Object>, Collection<Object>> refreshHandler = this::refreshElements;
+
   private IResourceChangeListener resourceListener;
 
   public AppEngineContentProvider() {}
@@ -151,8 +160,9 @@ public class AppEngineContentProvider implements ITreeContentProvider {
 
   /**
    * One or more resources changed in the workspace. See if we need to invalidate and/or refresh any
-   * model elements, and then request that they be updated in the UI. <b>Note:</b> calls may come on
-   * any thread.
+   * model elements, and then request that they be updated in the UI. Refreshing the project will
+   * result in a call to our {@link #getChildren(Object)} and thus populate the content block (if
+   * applicable). <b>Note:</b> calls may come on any thread.
    */
   private void resourceChanged(IResourceChangeEvent event) {
     Multimap<IProject, IFile> affected;
@@ -162,9 +172,9 @@ public class AppEngineContentProvider implements ITreeContentProvider {
       logger.log(Level.WARNING, "Could not determine affected files from resource delta", ex);
       return;
     }
-    
+
     // Track elements requiring a refresh (which refreshes all children) vs update (just the
-    // element's label) as refreshing a big project tree could be painful
+    // element's label) as refreshing a big project tree can be time-consuming and wasteful.
     Set<Object> toBeRefreshed = new HashSet<>();
     Set<Object> toBeUpdated = new HashSet<>();
     
@@ -174,29 +184,30 @@ public class AppEngineContentProvider implements ITreeContentProvider {
         continue; // the explorer will update itself to remove the project
       }
       Collection<IFile> projectFiles = affected.get(project);
-      // check if we've already created a model for this project
+      // Do we have a model for this project?  If so, then update it.
       AppEngineStandardProjectElement projectElement = projectMapping.getIfPresent(project);
       if (projectElement != null) {
         try {
           if (projectElement.resourcesChanged(projectFiles)) {
-            // something changed in the App Engine content block
+            // there was a change in the App Engine content block
             toBeRefreshed.add(projectElement);
           }
-          // Check for changes to our App Engine descriptor: the descriptor is used in the
-          // project labels and so the label may need changing
+          // Check if the App Engine descriptor changed: the information in the descriptor is used
+          // in the project labels (the parent of the App Engine content block) and so the label may
+          // need changing
           if (projectFiles.contains(projectElement.getFile())) {
             toBeUpdated.add(project);
           }
         } catch (AppEngineException ex) {
-          // model is not valid given this change (e.g., perhaps the appengine-web.xml
+          // model is no longer valid given this change (e.g., perhaps the appengine-web.xml
           // has been removed or disappeared due to virtual layout change)
           projectMapping.invalidate(project);
           toBeRefreshed.add(project);
         }
       } else if (Iterables.any(
           projectFiles, file -> file != null && "appengine-web.xml".equals(file.getName()))) {
-        // If we reached here, the project is unknown.  So trigger refresh of project since
-        // descriptor file appears to have been newly introduced
+        // We have no project model (wasn't an App Engine project previously) but it seems to
+        // contain an App Engine descriptor.  So trigger refresh of project.
         toBeRefreshed.add(project);
       }
     }
@@ -232,6 +243,9 @@ public class AppEngineContentProvider implements ITreeContentProvider {
       AppEngineStandardProjectElement projectElement = (AppEngineStandardProjectElement) element;
       return projectElement.getConfigurations() != null
           && projectElement.getConfigurations().length > 0;
+    } else if (element instanceof AppEngineResourceElement) {
+      // none of our descriptor models have children
+      return false;
     }
     IProject project = getProject(element);
     if (project == null) {
@@ -252,8 +266,8 @@ public class AppEngineContentProvider implements ITreeContentProvider {
         AppEngineStandardProjectElement projectElement = projectMapping.get(project);
         return projectElement == null ? EMPTY_ARRAY : new Object[] {projectElement};
       } catch (ExecutionException ex) {
-        // ignore: either not an App Engine project or some validation problem in
-        // the appengine-web.xml that will be reported via Problems view
+        // ignore: either not an App Engine project, or load failed due to a validation problem
+        // in the appengine-web.xml that will be reported via Problems view
       }
     }
     return EMPTY_ARRAY;

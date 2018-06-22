@@ -23,8 +23,9 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.StyledString;
 
 /**
- * A representation for App Engine-specific configuration files. Amongst other things, it mplements
- * IAdaptable to expose the configuration file to enable Eclipse's <em>Open</em> functionality.
+ * A model representation of specific App Engine configuration files. Amongst other things, it
+ * implements IAdaptable to expose the configuration file to enable Eclipse's <em>Open</em>
+ * functionality.
  */
 public abstract class AppEngineResourceElement implements IAdaptable {
   private final IProject project;
