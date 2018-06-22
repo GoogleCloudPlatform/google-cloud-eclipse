@@ -327,9 +327,14 @@
               class="com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.AppEngineActionProvider"
               id="com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.actions">
            <enablement>
-              <instanceof
-                    value="com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineResourceElement">
-              </instanceof>
+              <or>
+                 <instanceof
+                       value="com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineResourceElement">
+                 </instanceof>
+                 <instanceof
+                       value="com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineStandardProjectElement">
+                 </instanceof>
+              </or>
            </enablement>
         </actionProvider>
      </navigatorContent>
