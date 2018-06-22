@@ -59,7 +59,7 @@ public class AppEngineStandardProjectElementTest {
   }
 
   @Test
-  public void testHasLayoutChanged_otherCmponentsFile() {
+  public void testHasLayoutChanged_otherComponentsFile() {
     IFile file = mock(IFile.class);
     // not in .settings
     when(file.getProjectRelativePath()).thenReturn(new Path("org.eclipse.wst.common.component"));
