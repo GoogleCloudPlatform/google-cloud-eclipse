@@ -110,7 +110,7 @@ public class AppEngineContentProvider implements ITreeContentProvider {
   static AppEngineStandardProjectElement loadRepresentation(IProject project)
       throws AppEngineException {
     Preconditions.checkNotNull(project);
-    if (project == null || !project.exists() || !isStandard(project)) {
+    if (!project.exists() || !isStandard(project)) {
       throw new AppEngineException("Not an App Engine project");
     }
     AppEngineStandardProjectElement appEngineProject =
