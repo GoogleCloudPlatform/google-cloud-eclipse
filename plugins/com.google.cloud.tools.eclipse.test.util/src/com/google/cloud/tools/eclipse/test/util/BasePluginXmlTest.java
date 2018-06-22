@@ -79,18 +79,36 @@ public abstract class BasePluginXmlTest {
     return doc;
   }
 
-  /** Return the extensions of the given extension point. */
-  protected final NodeList getExtensions(String extensionPointId) {
+  /** Pull out the selected nodes from the given root. */
+  protected NodeList findNodes(String xpathExpression, Element root) {
     try {
       XPath xpath = xpathFactory.newXPath();
-      return (NodeList)
-          xpath.evaluate(
-              "//plugin/extension[@point='" + extensionPointId + "']",
-              getDocument().getDocumentElement(),
-              XPathConstants.NODESET);
+      return (NodeList) xpath.evaluate(xpathExpression, root, XPathConstants.NODESET);
     } catch (XPathExpressionException ex) {
       throw new AssertionError(ex.toString(), ex);
     }
+  }
+
+  /** Pull out the selected nodes from the document. */
+  protected NodeList findNodes(String xpathExpression) {
+    return findNodes(xpathExpression, getDocument().getDocumentElement());
+  }
+
+  /** Return the single element matching the expression. */
+  protected Element findElement(String xpathExpression, Element root) {
+    NodeList list = findNodes(xpathExpression, root);
+    assertEquals(1, list.getLength());
+    return (Element) list.item(0);
+  }
+
+  /** Return the single element matching the expression. */
+  protected Element findElement(String xpathExpression) {
+    return findElement(xpathExpression, getDocument().getDocumentElement());
+  }
+
+  /** Return the extensions of the given extension point. */
+  protected final NodeList getExtensions(String extensionPointId) {
+    return findNodes("//plugin/extension[@point='" + extensionPointId + "']");
   }
 
   /** Verify that a node is a valid expression definition. */
@@ -109,12 +127,13 @@ public abstract class BasePluginXmlTest {
   }
 
   /** Verify that a node is a valid expression. */
-  protected static void checkExpression(Element expression) {
+  protected static Expression checkExpression(Element expression) {
     try {
       Expression converted = ExpressionConverter.getDefault().perform(expression);
       Assert.assertNotNull(converted);
+      return converted;
     } catch (CoreException ex) {
-      Assert.fail("failed to convert to core expression: " + ex);
+      throw new AssertionError("failed to convert to core expression", ex);
     }
   }
 
