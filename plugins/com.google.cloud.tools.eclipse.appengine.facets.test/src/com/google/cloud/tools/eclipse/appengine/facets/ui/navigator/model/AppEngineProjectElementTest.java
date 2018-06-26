@@ -40,11 +40,9 @@ public class AppEngineProjectElementTest {
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
 
   @Test
-  public void testCreation_appEngineStandardJava8() throws AppEngineException {
+  public void testCreation_appEngineStandardJava7() throws AppEngineException {
     projectCreator.withFacets(
-        AppEngineStandardFacet.FACET.getVersion("JRE8"),
-        WebFacetUtils.WEB_31,
-        JavaFacet.VERSION_1_8);
+        AppEngineStandardFacet.JRE7, WebFacetUtils.WEB_25, JavaFacet.VERSION_1_7);
     IProject project = projectCreator.getProject();
 
     AppEngineProjectElement projectElement = AppEngineProjectElement.create(project);
