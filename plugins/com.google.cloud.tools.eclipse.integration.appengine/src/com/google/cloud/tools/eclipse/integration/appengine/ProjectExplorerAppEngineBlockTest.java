@@ -66,9 +66,8 @@ public class ProjectExplorerAppEngineBlockTest extends BaseProjectTest {
     assertThat(appEngineNode.getNodes(), hasSize(0));
 
     // ensure App Engine content block does not appear in Deployment Descriptor
-    SWTBotTreeItem deploymentDescriptorNode = selected.getNode(1);
-    SwtBotTreeUtilities.waitUntilTreeTextMatches(
-        bot, deploymentDescriptorNode, startsWith("Deployment Descriptor:"));
+    SWTBotTreeItem deploymentDescriptorNode =
+        SwtBotTreeUtilities.getMatchingNode(bot, selected, startsWith("Deployment Descriptor:"));
     deploymentDescriptorNode.expand();
     SwtBotTreeUtilities.waitUntilTreeHasItems(bot, deploymentDescriptorNode);
     SWTBotTreeItem firstNode = deploymentDescriptorNode.getNode(0);

@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.swtbot;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
 import java.util.Arrays;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
@@ -82,6 +83,41 @@ public class SwtBotTreeUtilities {
           }
         });
     return treeItem.getItems()[0];
+  }
+
+  /**
+   * Wait until the given tree item has a matching item, and return the item.
+   *
+   * @throws TimeoutException if no items appear within the default timeout
+   */
+  public static SWTBotTreeItem getMatchingNode(
+      SWTWorkbenchBot bot, SWTBotTreeItem parentItem, Matcher<String> childMatcher) {
+    bot.waitUntil(
+        new DefaultCondition() {
+          @Override
+          public String getFailureMessage() {
+            return "Child item never appeared";
+          }
+
+          @Override
+          public boolean test() throws Exception {
+            SWTBotTreeItem[] children = parentItem.getItems();
+            if (children.length == 1 && "".equals(children[0].getText())) {
+              // Work around odd bug seen only on Windows and Linux.
+              // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2569
+              parentItem.collapse();
+              parentItem.expand();
+              children = parentItem.getItems();
+            }
+            return Iterables.any(parentItem.getNodes(), childMatcher::matches);
+          }
+        });
+    for (SWTBotTreeItem child : parentItem.getItems()) {
+      if (childMatcher.matches(child.getText())) {
+        return child;
+      }
+    }
+    throw new AssertionError("Child no longer present!");
   }
 
   /**
