@@ -45,20 +45,20 @@ public class AppEngineConfigurationUtil {
    * Create an App Engine configuration file in the appropriate location for the project.
    *
    * @param project the hosting project
-   * @param baseName the file name
+   * @param relativePath the file name
    * @param contents the content for the file
    * @param overwrite if {@code true} then overwrite the file if it exists
    */
   public static IFile createConfigurationFile(
       IProject project,
-      String baseName,
+      IPath relativePath,
       InputStream contents,
       boolean overwrite,
       IProgressMonitor monitor)
       throws CoreException {
     IFolder appengineFolder = project.getFolder(DEFAULT_CONFIGURATION_FILE_LOCATION);
     if (appengineFolder != null && appengineFolder.exists()) {
-      IFile destination = appengineFolder.getFile(baseName);
+      IFile destination = appengineFolder.getFile(relativePath);
       if (!destination.exists()) {
         IContainer parent = destination.getParent();
         ResourceUtils.createFolders(parent, monitor);
@@ -68,8 +68,7 @@ public class AppEngineConfigurationUtil {
       }
       return destination;
     }
-    return WebProjectUtil.createFileInWebInf(
-        project, new Path(baseName), contents, overwrite, monitor);
+    return WebProjectUtil.createFileInWebInf(project, relativePath, contents, overwrite, monitor);
   }
 
   /**
@@ -79,13 +78,15 @@ public class AppEngineConfigurationUtil {
    *
    * @return the file location or {@code null} if not found
    */
-  public static IFile findConfigurationFile(IProject project, String baseName) {
+  public static IFile findConfigurationFile(IProject project, IPath relativePath) {
     IFolder appengineFolder = project.getFolder(DEFAULT_CONFIGURATION_FILE_LOCATION);
-    IFile destination = appengineFolder.getFile(baseName);
-    if (destination.exists()) {
-      return destination;
+    if (appengineFolder != null && appengineFolder.exists()) {
+      IFile destination = appengineFolder.getFile(relativePath);
+      if (destination.exists()) {
+        return destination;
+      }
     }
-    return WebProjectUtil.findInWebInf(project, new Path(baseName));
+    return WebProjectUtil.findInWebInf(project, relativePath);
   }
 
   private AppEngineConfigurationUtil() {} // not intended to be instantiated

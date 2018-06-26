@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model;
 import com.google.cloud.tools.appengine.AppEngineDescriptor;
 import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineConfigurationUtil;
-import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.project.AppYaml;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -91,17 +90,14 @@ public class AppEngineProjectElement implements IAdaptable {
   private static IFile findAppEngineDescriptor(IProject project) throws AppEngineException {
     // Which of app.yaml or appengine-web.xml should win?
 
-    IFile descriptorFile = WebProjectUtil.findInWebInf(project, new Path("appengine-web.xml"));
+    IFile descriptorFile =
+        AppEngineConfigurationUtil.findConfigurationFile(project, new Path("appengine-web.xml"));
     if (descriptorFile != null && descriptorFile.exists()) {
       return descriptorFile;
     }
 
-    // We don't have a well-defined story for where app.yaml lives, so first look for WEB-INF
-    descriptorFile = WebProjectUtil.findInWebInf(project, new Path("app.yaml"));
-    if (descriptorFile != null && descriptorFile.exists()) {
-      return descriptorFile;
-    }
-    descriptorFile = project.getFile(new Path("src/main/appengine/app.yaml"));
+    descriptorFile =
+        AppEngineConfigurationUtil.findConfigurationFile(project, new Path("app.yaml"));
     if (descriptorFile != null && descriptorFile.exists()) {
       return descriptorFile;
     }
@@ -349,7 +345,8 @@ public class AppEngineProjectElement implements IAdaptable {
     // Check that each model element, if present, corresponds to the current configuration file.
     // Rebuild the element representation using the provided element creator, or remove
     // it, as required.
-    IFile configurationFile = AppEngineConfigurationUtil.findConfigurationFile(project, baseName);
+    IFile configurationFile =
+        AppEngineConfigurationUtil.findConfigurationFile(project, new Path(baseName));
     if (configurationFile == null || !configurationFile.exists()) {
       // remove the element e.g., file has disappeared
       return null;

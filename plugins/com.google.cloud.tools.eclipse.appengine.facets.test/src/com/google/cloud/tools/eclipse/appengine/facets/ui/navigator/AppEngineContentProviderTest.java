@@ -50,6 +50,7 @@ import java.util.function.BiConsumer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
@@ -306,7 +307,8 @@ public class AppEngineContentProviderTest {
 
     ByteArrayInputStream stream =
         new ByteArrayInputStream("runtime: java\n".getBytes(StandardCharsets.UTF_8));
-    AppEngineConfigurationUtil.createConfigurationFile(project, "app.yaml", stream, true, null);
+    AppEngineConfigurationUtil.createConfigurationFile(
+        project, new Path("app.yaml"), stream, true, null);
 
     verify(refreshHandler, atLeastOnce()).accept(anyObject(), anyObject());
     Object[] children = fixture.getChildren(projectCreator.getFacetedProject());
@@ -320,7 +322,7 @@ public class AppEngineContentProviderTest {
 
     IFile cronYaml =
         AppEngineConfigurationUtil.createConfigurationFile(
-            project, "cron.yaml", ByteSource.empty().openStream(), true, null);
+            project, new Path("cron.yaml"), ByteSource.empty().openStream(), true, null);
     verify(refreshHandler, atLeastOnce()).accept(anyObject(), anyObject());
     children = fixture.getChildren(projectCreator.getFacetedProject());
     assertNotNull(children);
@@ -332,7 +334,7 @@ public class AppEngineContentProviderTest {
     assertThat(children, hasItemInArray(instanceOf(CronDescriptor.class)));
 
     AppEngineConfigurationUtil.createConfigurationFile(
-        project, "index.yaml", ByteSource.empty().openStream(), true, null);
+        project, new Path("index.yaml"), ByteSource.empty().openStream(), true, null);
     verify(refreshHandler, atLeastOnce()).accept(anyObject(), anyObject());
     children = fixture.getChildren(projectCreator.getFacetedProject());
     assertNotNull(children);

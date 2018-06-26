@@ -18,8 +18,8 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineConfigurationUtil;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.io.ByteArrayInputStream;
@@ -43,7 +43,7 @@ public class AppEngineWebXmlValidationTest {
   public void testStagingElementsInAppEngineWebXml() throws CoreException {
     IProject project = projectCreator.getProject();
     IFile appEngineWebXml =
-        WebProjectUtil.findInWebInf(project, new Path("appengine-web.xml"));
+        AppEngineConfigurationUtil.findConfigurationFile(project, new Path("appengine-web.xml"));
     assertTrue(appEngineWebXml.exists());
 
     String contents = "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>\n"

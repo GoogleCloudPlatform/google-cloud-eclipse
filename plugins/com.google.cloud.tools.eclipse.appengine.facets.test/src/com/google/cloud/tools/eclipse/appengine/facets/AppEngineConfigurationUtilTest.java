@@ -42,7 +42,11 @@ public class AppEngineConfigurationUtilTest {
   public void testCreateConfigurationFile_noAppEngineDir() throws CoreException, IOException {
     IFile file =
         AppEngineConfigurationUtil.createConfigurationFile(
-            projectCreator.getProject(), "index.yaml", ByteSource.empty().openStream(), true, null);
+            projectCreator.getProject(),
+            new Path("index.yaml"),
+            ByteSource.empty().openStream(),
+            true,
+            null);
     assertEquals(new Path("WebContent/WEB-INF/index.yaml"), file.getProjectRelativePath());
   }
 
@@ -53,7 +57,7 @@ public class AppEngineConfigurationUtilTest {
     ResourceUtils.createFolders(srcMainAppengine, null);
     IFile file =
         AppEngineConfigurationUtil.createConfigurationFile(
-            project, "index.yaml", ByteSource.empty().openStream(), true, null);
+            project, new Path("index.yaml"), ByteSource.empty().openStream(), true, null);
     assertEquals(new Path("src/main/appengine/index.yaml"), file.getProjectRelativePath());
   }
 
@@ -67,7 +71,8 @@ public class AppEngineConfigurationUtilTest {
     IFile original = project.getFile(new Path("WebContent/WEB-INF/index.yaml"));
     original.create(ByteSource.empty().openStream(), true, null);
 
-    IFile resolved = AppEngineConfigurationUtil.findConfigurationFile(project, "index.yaml");
+    IFile resolved =
+        AppEngineConfigurationUtil.findConfigurationFile(project, new Path("index.yaml"));
     assertEquals(original, resolved);
   }
 
@@ -84,7 +89,8 @@ public class AppEngineConfigurationUtilTest {
     IFile original = project.getFile("src/main/appengine/index.yaml");
     original.create(ByteSource.empty().openStream(), true, null);
 
-    IFile resolved = AppEngineConfigurationUtil.findConfigurationFile(project, "index.yaml");
+    IFile resolved =
+        AppEngineConfigurationUtil.findConfigurationFile(project, new Path("index.yaml"));
     assertEquals(original, resolved);
   }
 }

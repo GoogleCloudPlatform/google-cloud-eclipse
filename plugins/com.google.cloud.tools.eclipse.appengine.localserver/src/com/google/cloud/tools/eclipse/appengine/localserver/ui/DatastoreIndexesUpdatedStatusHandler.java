@@ -17,7 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
 import com.google.api.client.util.Preconditions;
-import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineConfigurationUtil;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.appengine.localserver.server.DatastoreIndexUpdateData;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
@@ -126,9 +126,9 @@ public class DatastoreIndexesUpdatedStatusHandler implements IStatusHandler {
     InputStream contents =
         new ByteArrayInputStream(EMPTY_DATASTORE_INDEXES_XML.getBytes(StandardCharsets.UTF_8));
     IFile datastoreIndexesXml =
-        WebProjectUtil.createFileInWebInf(
+        AppEngineConfigurationUtil.createConfigurationFile(
             project,
-            new Path("datastore-indexes.xml"), //$NON-NLS-1$
+            new Path("datastore-indexes.xml"), // $NON-NLS-1$
             contents,
             false /* overwrite */,
             monitor);
