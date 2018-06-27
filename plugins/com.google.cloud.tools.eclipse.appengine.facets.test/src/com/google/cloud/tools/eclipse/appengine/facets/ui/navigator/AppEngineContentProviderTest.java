@@ -364,7 +364,7 @@ public class AppEngineContentProviderTest {
    * {@code app.yaml} for the {@link AppEngineProjectElement}.
    */
   @Test
-  public void testDynamicChanges_appEngineWebXml_appYaml() throws CoreException, IOException {
+  public void testDynamicChanges_appEngineWebXml_appYaml() throws CoreException {
     projectCreator.withFacets(AppEngineStandardFacet.JRE7, WebFacetUtils.WEB_25);
     IProject project = projectCreator.getProject();
 
