@@ -114,4 +114,25 @@ public class AppEngineProjectElementTest {
         .thenReturn(new Path(".settings/org.eclipse.wst.common.project.facet.core.xml"));
     assertTrue(AppEngineProjectElement.hasLayoutChanged(Collections.singleton(file)));
   }
+
+  @Test
+  public void testHasAppEngineDescriptor_normalFile() {
+    IFile file = mock(IFile.class);
+    when(file.getName()).thenReturn("org.eclipse.wst.common.project.facet.core.xml");
+    assertFalse(AppEngineProjectElement.hasAppEngineDescriptor(Collections.singleton(file)));
+  }
+
+  @Test
+  public void testHasAppEngineDescriptor_appEngineWebXml() {
+    IFile file = mock(IFile.class);
+    when(file.getName()).thenReturn("appengine-web.xml");
+    assertTrue(AppEngineProjectElement.hasAppEngineDescriptor(Collections.singleton(file)));
+  }
+
+  @Test
+  public void testHasAppEngineDescriptor_appYaml() {
+    IFile file = mock(IFile.class);
+    when(file.getName()).thenReturn("app.yaml");
+    assertTrue(AppEngineProjectElement.hasAppEngineDescriptor(Collections.singleton(file)));
+  }
 }

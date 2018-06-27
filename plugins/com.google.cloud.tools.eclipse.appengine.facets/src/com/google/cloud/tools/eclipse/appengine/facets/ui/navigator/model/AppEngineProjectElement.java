@@ -24,6 +24,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
@@ -55,6 +57,10 @@ public class AppEngineProjectElement implements IAdaptable {
   private static final IPath WTP_FACETS_PATH =
       new Path(".settings/org.eclipse.wst.common.project.facet.core.xml"); // $NON-NLS-1$
 
+  /** Special project file that records the project's facets. */
+  private static final ImmutableSet<String> APPENGINE_DESCRIPTOR_FILENAMES =
+      ImmutableSet.of("appengine-web.xml", "app.yaml"); //$NON-NLS-1$ //$NON-NLS-2$
+  
   /** Factories to create model elements for the various App Engine configuration files. */
   private static final Map<String, Function<IFile, AppEngineResourceElement>> elementFactories =
       new ImmutableMap.Builder<String, Function<IFile, AppEngineResourceElement>>()
@@ -107,6 +113,7 @@ public class AppEngineProjectElement implements IAdaptable {
   /** Return {@code true} if the changed files may result in a different virtual layout. */
   @VisibleForTesting
   static boolean hasLayoutChanged(Collection<IFile> changedFiles) {
+    Preconditions.checkNotNull(changedFiles);
     // the virtual layout may have been reconfigured, or no longer an App Engine project
     for (IFile changed : changedFiles) {
       IPath projectRelativePath = changed.getProjectRelativePath();
@@ -116,6 +123,18 @@ public class AppEngineProjectElement implements IAdaptable {
       }
     }
     return false;
+  }
+
+  /**
+   * Return {@code true} if the list of changed files includes an App Engine descriptor. This file
+   * may not necessarily be the resolved descriptor.
+   */
+  @VisibleForTesting
+  static boolean hasAppEngineDescriptor(Collection<IFile> changedFiles) {
+    Preconditions.checkNotNull(changedFiles);
+    return Iterables.any(
+        changedFiles,
+        file -> file != null && APPENGINE_DESCRIPTOR_FILENAMES.contains(file.getName()));
   }
 
   private final IProject project;
@@ -224,7 +243,8 @@ public class AppEngineProjectElement implements IAdaptable {
 
     boolean layoutChanged = hasLayoutChanged(changedFiles); // files may be newly exposed or removed
     boolean hasNewDescriptor =
-        layoutChanged && !descriptorFile.equals(findAppEngineDescriptor(project));
+        (layoutChanged || hasAppEngineDescriptor(changedFiles))
+            && !descriptorFile.equals(findAppEngineDescriptor(project));
 
     if (changedFiles.contains(descriptorFile) || hasNewDescriptor) {
       // reload everything: e.g., may no longer be "default"
@@ -284,7 +304,7 @@ public class AppEngineProjectElement implements IAdaptable {
   private void reload() throws AppEngineException {
     descriptorFile = findAppEngineDescriptor(project);
     try (InputStream input = descriptorFile.getContents()) {
-      if ("app.yaml".equals(getDescriptorFile().getName())) {
+      if ("app.yaml".equals(descriptorFile.getName())) {
         AppYaml descriptor = AppYaml.parse(input);
         projectId = descriptor.getProjectId();
         projectVersion = descriptor.getProjectVersion();

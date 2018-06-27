@@ -28,6 +28,7 @@ import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
@@ -311,7 +312,7 @@ public class AppEngineContentProviderTest {
         project, new Path("app.yaml"), stream, true, null);
 
     verify(refreshHandler, atLeastOnce()).accept(anyObject(), anyObject());
-    Object[] children = fixture.getChildren(projectCreator.getFacetedProject());
+    Object[] children = fixture.getChildren(project);
     assertNotNull(children);
     assertEquals(1, children.length);
     assertTrue(children[0] instanceof AppEngineProjectElement);
@@ -324,7 +325,7 @@ public class AppEngineContentProviderTest {
         AppEngineConfigurationUtil.createConfigurationFile(
             project, new Path("cron.yaml"), ByteSource.empty().openStream(), true, null);
     verify(refreshHandler, atLeastOnce()).accept(anyObject(), anyObject());
-    children = fixture.getChildren(projectCreator.getFacetedProject());
+    children = fixture.getChildren(project);
     assertNotNull(children);
     assertEquals(1, children.length);
     assertTrue(children[0] == projectElement);
@@ -336,7 +337,7 @@ public class AppEngineContentProviderTest {
     AppEngineConfigurationUtil.createConfigurationFile(
         project, new Path("index.yaml"), ByteSource.empty().openStream(), true, null);
     verify(refreshHandler, atLeastOnce()).accept(anyObject(), anyObject());
-    children = fixture.getChildren(projectCreator.getFacetedProject());
+    children = fixture.getChildren(project);
     assertNotNull(children);
     assertEquals(1, children.length);
     assertTrue(children[0] == projectElement);
@@ -348,7 +349,7 @@ public class AppEngineContentProviderTest {
 
     cronYaml.delete(true, null);
     verify(refreshHandler, atLeastOnce()).accept(anyObject(), anyObject());
-    children = fixture.getChildren(projectCreator.getFacetedProject());
+    children = fixture.getChildren(project);
     assertNotNull(children);
     assertEquals(1, children.length);
     assertTrue(children[0] == projectElement);
@@ -356,6 +357,61 @@ public class AppEngineContentProviderTest {
     assertNotNull(children);
     assertEquals(1, children.length);
     assertThat(children, hasItemInArray(instanceOf(DatastoreIndexesDescriptor.class)));
+  }
+
+  /**
+   * Test that creating that a newly-created {@code appengine-web.xml} "overrides" the previous
+   * {@code app.yaml} for the {@link AppEngineProjectElement}.
+   */
+  @Test
+  public void testDynamicChanges_appEngineWebXml_appYaml() throws CoreException, IOException {
+    projectCreator.withFacets(AppEngineStandardFacet.JRE7, WebFacetUtils.WEB_25);
+    IProject project = projectCreator.getProject();
+
+    StructuredViewer viewer = mock(StructuredViewer.class);
+    fixture.inputChanged(viewer, null, null); // installs resource-changed listener
+
+    IFile appEngineWebXml =
+        AppEngineConfigurationUtil.findConfigurationFile(project, new Path("appengine-web.xml"));
+    assertTrue(appEngineWebXml != null && appEngineWebXml.exists());
+    Object[] children = fixture.getChildren(project);
+    assertNotNull(children);
+    assertEquals(1, children.length);
+    assertTrue(children[0] instanceof AppEngineProjectElement);
+    final AppEngineProjectElement projectElement = (AppEngineProjectElement) children[0];
+    assertEquals(appEngineWebXml, projectElement.getDescriptorFile());
+
+    // appengine-web.xml should still win
+    ByteArrayInputStream stream =
+        new ByteArrayInputStream("runtime: java\n".getBytes(StandardCharsets.UTF_8));
+    IFile appYaml =
+        AppEngineConfigurationUtil.createConfigurationFile(
+            project, new Path("app.yaml"), stream, true, null);
+    verifyZeroInteractions(refreshHandler); // appengine-web.xml still wins
+    children = fixture.getChildren(project);
+    assertNotNull(children);
+    assertEquals(1, children.length);
+    assertSame("the project element instance shouldn't change", projectElement, children[0]);
+    assertEquals(
+        "appengine.web.xml should still win", appEngineWebXml, projectElement.getDescriptorFile());
+
+    // app.yaml should now win
+    appEngineWebXml.delete(true, null);
+    verify(refreshHandler, atLeastOnce()).accept(anyObject(), anyObject());
+    children = fixture.getChildren(project);
+    assertNotNull(children);
+    assertEquals(1, children.length);
+    assertSame("the project element instance shouldn't change", projectElement, children[0]);
+    assertEquals("app.yaml should win", appYaml, projectElement.getDescriptorFile());
+
+    // appengine-web.xml should win again
+    appEngineWebXml = ConfigurationFileUtils.createAppEngineWebXml(project, null);
+    verify(refreshHandler, atLeastOnce()).accept(anyObject(), anyObject());
+    children = fixture.getChildren(project);
+    assertNotNull(children);
+    assertEquals(1, children.length);
+    assertSame("the project element instance shouldn't change", projectElement, children[0]);
+    assertEquals("back to appengine-web.xml", appEngineWebXml, projectElement.getDescriptorFile());
   }
 
   @Test
