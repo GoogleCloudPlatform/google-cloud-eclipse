@@ -31,7 +31,7 @@ location "http://download.eclipse.org/releases/oxygen/" {
 }
 
 // WTP SDKs aren't exposed through the main release links
-location "http://download.eclipse.org/webtools/downloads/drops/R3.9.2/R-3.9.2-20171201000141/repository" {
+location "http://download.eclipse.org/webtools/downloads/drops/R3.9.3/R-3.9.3-20180302093744/repository" {
     org.eclipse.jst.web_sdk.feature.feature.group
     org.eclipse.jst.server_sdk.feature.feature.group
     org.eclipse.jst.common.fproj.enablement.jdt.sdk.feature.group
