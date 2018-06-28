@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde?>
 <!-- generated with https://github.com/mbarbero/fr.obeo.releng.targetplatform -->
-<target name="GCP for Eclipse Oxygen" sequenceNumber="1528482234">
+<target name="GCP for Eclipse Oxygen" sequenceNumber="1530156745">
   <locations>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
       <unit id="org.eclipse.sdk.feature.group" version="4.7.3.v20180330-0919"/>
@@ -21,21 +21,21 @@
       <repository location="http://download.eclipse.org/releases/oxygen/"/>
     </location>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
-      <unit id="org.eclipse.jst.web_sdk.feature.feature.group" version="3.8.0.v201711302141"/>
+      <unit id="org.eclipse.jst.web_sdk.feature.feature.group" version="3.8.0.v201802152012"/>
       <unit id="org.eclipse.jst.server_sdk.feature.feature.group" version="3.4.300.v201709251835"/>
       <unit id="org.eclipse.jst.common.fproj.enablement.jdt.sdk.feature.group" version="3.8.0.v201710021614"/>
       <unit id="org.eclipse.wst.common.fproj.sdk.feature.group" version="3.7.1.v201707201954"/>
-      <unit id="org.eclipse.wst.web_sdk.feature.feature.group" version="3.9.1.v201711152154"/>
-      <unit id="org.eclipse.jst.enterprise_sdk.feature.feature.group" version="3.8.1.v201711302141"/>
+      <unit id="org.eclipse.wst.web_sdk.feature.feature.group" version="3.9.2.v201802281510"/>
+      <unit id="org.eclipse.jst.enterprise_sdk.feature.feature.group" version="3.8.1.v201802121827"/>
       <unit id="org.eclipse.wst.server_adapters.sdk.feature.feature.group" version="3.2.600.v201711302104"/>
-      <repository location="http://download.eclipse.org/webtools/downloads/drops/R3.9.2/R-3.9.2-20171201000141/repository"/>
+      <repository location="http://download.eclipse.org/webtools/downloads/drops/R3.9.3/R-3.9.3-20180302093744/repository"/>
     </location>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
       <unit id="eu.openanalytics.editor.docker.feature.group" version="1.0.0.201506222127"/>
       <repository location="http://docker-editor.openanalytics.eu/update/"/>
     </location>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
-      <unit id="org.eclipse.linuxtools.docker.feature.feature.group" version="3.2.1.201803061555"/>
+      <unit id="org.eclipse.linuxtools.docker.feature.feature.group" version="4.0.0.201806122135"/>
       <repository location="http://download.eclipse.org/linuxtools/update-docker"/>
     </location>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
@@ -54,8 +54,8 @@
       <repository location="http://dadacoalition.org/yedit/"/>
     </location>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
-      <unit id="org.eclipse.swtbot.eclipse.feature.group" version="2.7.0.201806051340"/>
-      <repository location="http://download.eclipse.org/technology/swtbot/milestones/photon-rc3/"/>
+      <unit id="org.eclipse.swtbot.eclipse.feature.group" version="2.7.0.201806111355"/>
+      <repository location="http://download.eclipse.org/technology/swtbot/milestones/photon-rc4/"/>
     </location>
   </locations>
 </target>
