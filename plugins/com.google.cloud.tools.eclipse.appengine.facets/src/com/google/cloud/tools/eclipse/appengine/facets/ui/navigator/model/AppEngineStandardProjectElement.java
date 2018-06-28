@@ -116,7 +116,7 @@ public class AppEngineStandardProjectElement implements IAdaptable {
 
   private AppEngineStandardProjectElement(IProject project) throws AppEngineException {
     this.project = project;
-    this.descriptorFile = findAppEngineDescriptor(project);
+    descriptorFile = findAppEngineDescriptor(project);
   }
 
   /** Return the project. */
@@ -143,7 +143,7 @@ public class AppEngineStandardProjectElement implements IAdaptable {
     return configurations.values().toArray(new AppEngineResourceElement[configurations.size()]);
   }
 
-  public String getRuntimeType() {
+  private String getRuntimeType() {
     try {
       String runtime = descriptor.getRuntime();
       return "standard: " + (Strings.isNullOrEmpty(runtime) ? "java7" : runtime);

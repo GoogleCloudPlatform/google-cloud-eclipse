@@ -39,6 +39,7 @@ import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.Datast
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.DenialOfServiceDescriptor;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.DispatchRoutingDescriptor;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.TaskQueuesDescriptor;
+import com.google.cloud.tools.eclipse.test.util.project.ConfigurationFileUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.util.Collection;
 import java.util.function.BiConsumer;

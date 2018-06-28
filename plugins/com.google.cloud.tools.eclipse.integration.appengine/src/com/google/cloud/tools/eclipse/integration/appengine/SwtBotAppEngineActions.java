@@ -191,7 +191,7 @@ public class SwtBotAppEngineActions {
   }
 
   /**
-   * Spin until the given project actually exists and is facetd.
+   * Spin until the given project actually exists and is faceted.
    *
    * @return the project
    */

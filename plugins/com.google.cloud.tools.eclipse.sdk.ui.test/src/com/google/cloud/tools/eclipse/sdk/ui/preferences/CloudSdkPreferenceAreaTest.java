@@ -115,7 +115,6 @@ public class CloudSdkPreferenceAreaTest {
     assertTrue(area.getStatus().isOK());
   }
 
-  // TODO(chanseok): can become "@Before setUp()" once we remove the managed SDK debug feature flag.
   private void createPreferenceArea() {
     shell = shellResource.getShell();
     area = new CloudSdkPreferenceArea(cloudSdkManager);
