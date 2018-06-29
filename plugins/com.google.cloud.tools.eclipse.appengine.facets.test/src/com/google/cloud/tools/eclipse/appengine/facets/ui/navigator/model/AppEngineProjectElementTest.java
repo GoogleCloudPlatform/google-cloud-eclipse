@@ -24,12 +24,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineConfigurationUtil;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexWarFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.util.Collections;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
@@ -61,6 +63,61 @@ public class AppEngineProjectElementTest {
     assertNotNull(projectElement);
     assertNotNull(projectElement.getDescriptorFile());
     assertEquals("app.yaml", projectElement.getDescriptorFile().getName());
+  }
+
+  @Test
+  public void testEnvironmentRuntime_xml_noRuntime() throws CoreException, AppEngineException {
+    IProject project = projectCreator.getProject();
+    String contents = "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'/>";
+    AppEngineConfigurationUtil.createConfigurationFile(
+        project, new Path("appengine-web.xml"), contents, true, null);
+
+    AppEngineProjectElement projectElement = AppEngineProjectElement.create(project);
+    assertNotNull(projectElement);
+    assertEquals("standard", projectElement.getEnvironmentType());
+    assertEquals("java7", projectElement.getRuntime());
+  }
+
+  @Test
+  public void testEnvironmentRuntime_xml_java8Runtime() throws CoreException, AppEngineException {
+    IProject project = projectCreator.getProject();
+    String contents =
+        "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
+            + "<runtime>java8</runtime>"
+            + "</appengine-web-app>";
+    AppEngineConfigurationUtil.createConfigurationFile(
+        project, new Path("appengine-web.xml"), contents, true, null);
+
+    AppEngineProjectElement projectElement = AppEngineProjectElement.create(project);
+    assertNotNull(projectElement);
+    assertEquals("standard", projectElement.getEnvironmentType());
+    assertEquals("java8", projectElement.getRuntime());
+  }
+
+  @Test
+  public void testEnvironmentRuntime_yaml_python27() throws CoreException, AppEngineException {
+    IProject project = projectCreator.getProject();
+    String contents = "runtime: python27";
+    AppEngineConfigurationUtil.createConfigurationFile(
+        project, new Path("app.yaml"), contents, true, null);
+
+    AppEngineProjectElement projectElement = AppEngineProjectElement.create(project);
+    assertNotNull(projectElement);
+    assertEquals("standard", projectElement.getEnvironmentType());
+    assertEquals("python27", projectElement.getRuntime());
+  }
+
+  @Test
+  public void testEnvironmentRuntime_yaml_python27_flex() throws CoreException, AppEngineException {
+    IProject project = projectCreator.getProject();
+    String contents = "runtime: python27\nenv: flex";
+    AppEngineConfigurationUtil.createConfigurationFile(
+        project, new Path("app.yaml"), contents, true, null);
+
+    AppEngineProjectElement projectElement = AppEngineProjectElement.create(project);
+    assertNotNull(projectElement);
+    assertEquals("flex", projectElement.getEnvironmentType());
+    assertEquals("python27", projectElement.getRuntime());
   }
 
   @Test
