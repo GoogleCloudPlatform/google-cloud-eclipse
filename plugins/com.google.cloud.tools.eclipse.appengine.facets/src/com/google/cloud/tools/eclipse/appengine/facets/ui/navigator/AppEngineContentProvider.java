@@ -28,9 +28,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -209,7 +207,7 @@ public class AppEngineContentProvider implements ITreeContentProvider {
           projectMapping.invalidate(project);
           toBeRefreshed.add(project);
         }
-      } else if (anyMatch(projectFiles, Sets.newHashSet("appengine-web.xml", "app.yaml"))) {
+      } else if (AppEngineProjectElement.hasAppEngineDescriptor(projectFiles)) {
         // We have no project model (wasn't an App Engine project previously) but it seems to
         // contain an App Engine descriptor.  So trigger refresh of project.
         toBeRefreshed.add(project);
@@ -218,11 +216,6 @@ public class AppEngineContentProvider implements ITreeContentProvider {
     if (!toBeRefreshed.isEmpty() || !toBeUpdated.isEmpty()) {
       refreshHandler.accept(toBeRefreshed, toBeUpdated);
     }
-  }
-
-  /** Return true if any file's {@link IFile#getName() base name} is in matches. */
-  private static boolean anyMatch(Collection<IFile> files, Set<String> names) {
-    return Iterables.any(files, file -> file != null && names.contains(file.getName()));
   }
 
   private void refreshElements(Collection<Object> toBeRefreshed, Collection<Object> toBeUpdated) {

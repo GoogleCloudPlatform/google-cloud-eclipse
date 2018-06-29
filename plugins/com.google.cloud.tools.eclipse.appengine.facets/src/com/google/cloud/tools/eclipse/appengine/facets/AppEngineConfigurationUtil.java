@@ -17,7 +17,9 @@
 package com.google.cloud.tools.eclipse.appengine.facets;
 
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -45,7 +47,26 @@ public class AppEngineConfigurationUtil {
    * Create an App Engine configuration file in the appropriate location for the project.
    *
    * @param project the hosting project
-   * @param relativePath the file name
+   * @param relativePath the path of the file relative to the configuration location
+   * @param contents the content for the file
+   * @param overwrite if {@code true} then overwrite the file if it exists
+   */
+  public static IFile createConfigurationFile(
+      IProject project,
+      IPath relativePath,
+      String contents,
+      boolean overwrite,
+      IProgressMonitor monitor)
+      throws CoreException {
+    InputStream bytes = new ByteArrayInputStream(contents.getBytes(StandardCharsets.UTF_8));
+    return createConfigurationFile(project, relativePath, bytes, overwrite, monitor);
+  }
+
+  /**
+   * Create an App Engine configuration file in the appropriate location for the project.
+   *
+   * @param project the hosting project
+   * @param relativePath the path of the file relative to the configuration location
    * @param contents the content for the file
    * @param overwrite if {@code true} then overwrite the file if it exists
    */

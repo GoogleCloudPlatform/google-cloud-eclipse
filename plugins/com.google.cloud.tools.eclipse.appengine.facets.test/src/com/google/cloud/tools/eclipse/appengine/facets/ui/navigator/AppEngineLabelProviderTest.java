@@ -20,7 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,22 +32,14 @@ import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.Dispat
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.TaskQueuesDescriptor;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.jface.resource.DeviceResourceDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ResourceManager;
-import org.junit.Before;
 import org.junit.Test;
 
 public class AppEngineLabelProviderTest {
   private final ResourceManager resourceManager = mock(ResourceManager.class);
   private final AppEngineLabelProvider fixture = new AppEngineLabelProvider(resourceManager);
-
-  @Before
-  public void setUp() {
-    // Many of ResourceManager's methods are final; we check getImage() methods
-    // by verifying that create() is called
-    doReturn(null).when(resourceManager).create(any(DeviceResourceDescriptor.class));
-  }
+  private final AppEngineProjectElement programElement = mock(AppEngineProjectElement.class);
 
   @Test
   public void testProjectText_noAppEngineWebXml() {
@@ -61,50 +52,62 @@ public class AppEngineLabelProviderTest {
 
   @Test
   public void testAppEngineVersionTuple_nulls() {
-    String result = AppEngineLabelProvider.getVersionTuple(null, null, null);
+    String result = AppEngineLabelProvider.getVersionTuple(programElement);
     assertNotNull(result);
     assertEquals(0, result.length());
   }
 
   @Test
   public void testAppEngineVersionTuple_project() {
-    String result = AppEngineLabelProvider.getVersionTuple("project", null, null);
+    when(programElement.getProjectId()).thenReturn("project");
+    String result = AppEngineLabelProvider.getVersionTuple(programElement);
     assertEquals("project", result);
   }
 
   @Test
   public void testAppEngineVersionTuple_version() {
-    String result = AppEngineLabelProvider.getVersionTuple(null, "version", null);
+    when(programElement.getProjectVersion()).thenReturn("version");
+    String result = AppEngineLabelProvider.getVersionTuple(programElement);
     assertEquals("version", result);
   }
 
   @Test
   public void testAppEngineVersionTuple_service() {
-    String result = AppEngineLabelProvider.getVersionTuple(null, null, "service");
+    when(programElement.getServiceId()).thenReturn("service");
+    String result = AppEngineLabelProvider.getVersionTuple(programElement);
     assertEquals("service", result);
   }
 
   @Test
   public void testAppEngineVersionTuple_project_version() {
-    String result = AppEngineLabelProvider.getVersionTuple("project", "version", null);
+    when(programElement.getProjectId()).thenReturn("project");
+    when(programElement.getProjectVersion()).thenReturn("version");
+    String result = AppEngineLabelProvider.getVersionTuple(programElement);
     assertEquals("project:version", result);
   }
 
   @Test
   public void testAppEngineVersionTuple_project_service() {
-    String result = AppEngineLabelProvider.getVersionTuple("project", null, "service");
+    when(programElement.getProjectId()).thenReturn("project");
+    when(programElement.getServiceId()).thenReturn("service");
+    String result = AppEngineLabelProvider.getVersionTuple(programElement);
     assertEquals("project:service", result);
   }
 
   @Test
   public void testAppEngineVersionTuple_version_service() {
-    String result = AppEngineLabelProvider.getVersionTuple(null, "version", "service");
+    when(programElement.getProjectVersion()).thenReturn("version");
+    when(programElement.getServiceId()).thenReturn("service");
+    String result = AppEngineLabelProvider.getVersionTuple(programElement);
     assertEquals("service:version", result);
   }
 
   @Test
   public void testAppEngineVersionTuple_project_version_service() {
-    String result = AppEngineLabelProvider.getVersionTuple("project", "version", "service");
+    when(programElement.getProjectId()).thenReturn("project");
+    when(programElement.getProjectVersion()).thenReturn("version");
+    when(programElement.getServiceId()).thenReturn("service");
+    String result = AppEngineLabelProvider.getVersionTuple(programElement);
     assertEquals("project:service:version", result);
   }
 

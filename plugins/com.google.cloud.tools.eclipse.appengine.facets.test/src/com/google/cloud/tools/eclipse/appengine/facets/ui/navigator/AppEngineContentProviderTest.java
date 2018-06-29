@@ -360,8 +360,8 @@ public class AppEngineContentProviderTest {
   }
 
   /**
-   * Test that creating that a newly-created {@code appengine-web.xml} "overrides" the previous
-   * {@code app.yaml} for the {@link AppEngineProjectElement}.
+   * Test that a newly-created {@code appengine-web.xml} replaces the {@code app.yaml} for the
+   * {@link AppEngineProjectElement}.
    */
   @Test
   public void testDynamicChanges_appEngineWebXml_appYaml() throws CoreException {

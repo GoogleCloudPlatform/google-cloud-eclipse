@@ -69,7 +69,7 @@ public class ModelRefreshTests {
 
   /** Verify that the content block is configured for initial configuration files. */
   @Test
-  public void testAppEngineStandardProjectElementCreate_initial() throws AppEngineException {
+  public void testAppEngineProjectElementCreate_initial() throws AppEngineException {
     IProject project = projectCreator.getProject();
     IFile cronXml = ConfigurationFileUtils.createEmptyCronXml(project);
     IFile datastoreIndexesXml =
@@ -103,7 +103,7 @@ public class ModelRefreshTests {
 
   /** Verify that the content block is progressively updated as configuration files are added. */
   @Test
-  public void testAppEngineStandardProjectElementCreate_staggered() throws AppEngineException {
+  public void testAppEngineProjectElementCreate_staggered() throws AppEngineException {
     IProject project = projectCreator.getProject();
     AppEngineProjectElement projectElement =
         AppEngineProjectElement.create(project);

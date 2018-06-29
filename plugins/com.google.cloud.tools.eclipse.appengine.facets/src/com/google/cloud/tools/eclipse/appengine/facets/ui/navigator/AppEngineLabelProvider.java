@@ -68,11 +68,7 @@ public class AppEngineLabelProvider extends LabelProvider implements IStyledLabe
     try {
       AppEngineProjectElement projectElement = AppEngineContentProvider.loadRepresentation(project);
       StyledString result = new StyledString(project.getName());
-      String qualifier =
-          getVersionTuple(
-              projectElement.getProjectId(),
-              projectElement.getProjectVersion(),
-              projectElement.getServiceId());
+      String qualifier = getVersionTuple(projectElement);
       if (qualifier.length() > 0) {
         result.append(" [", StyledString.QUALIFIER_STYLER); //$NON-NLS-1$
         result.append(qualifier.toString(), StyledString.QUALIFIER_STYLER);
@@ -87,17 +83,23 @@ public class AppEngineLabelProvider extends LabelProvider implements IStyledLabe
 
   /** Returns a <em>project:service:version</em> tuple from the App Engine descriptor. */
   @VisibleForTesting
-  static String getVersionTuple(String projectId, String projectVersion, String serviceId) {
+  static String getVersionTuple(AppEngineProjectElement projectElement) {
     StringBuilder qualifier = new StringBuilder();
+
+    String projectId = projectElement.getProjectId();
     if (!Strings.isNullOrEmpty(projectId)) {
       qualifier.append(projectId);
     }
+
+    String serviceId = projectElement.getServiceId();
     if (!Strings.isNullOrEmpty(serviceId)) {
       if (qualifier.length() > 0) {
         qualifier.append(':');
       }
       qualifier.append(serviceId);
     }
+
+    String projectVersion = projectElement.getProjectVersion();
     if (!Strings.isNullOrEmpty(projectVersion)) {
       if (qualifier.length() > 0) {
         qualifier.append(':');

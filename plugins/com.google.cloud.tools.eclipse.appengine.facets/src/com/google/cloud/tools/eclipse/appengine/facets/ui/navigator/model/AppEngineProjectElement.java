@@ -129,8 +129,7 @@ public class AppEngineProjectElement implements IAdaptable {
    * Return {@code true} if the list of changed files includes an App Engine descriptor. This file
    * may not necessarily be the resolved descriptor.
    */
-  @VisibleForTesting
-  static boolean hasAppEngineDescriptor(Collection<IFile> changedFiles) {
+  public static boolean hasAppEngineDescriptor(Collection<IFile> changedFiles) {
     Preconditions.checkNotNull(changedFiles);
     return Iterables.any(
         changedFiles,
@@ -149,10 +148,16 @@ public class AppEngineProjectElement implements IAdaptable {
   private String projectVersion;
   private String serviceId;
 
-  /** Return the App Engine environment type (e.g., standard, flexible). */
+  /**
+   * The value of the App Engine environment type (i.e., {@code standard} or {@code flex}). This
+   * usually corresponds to the {@code env:} value.
+   */
   private String environmentType;
 
-  /** Return the App Engine runtime (e.g., java7, java8). */
+  /**
+   * Return the App Engine runtime (e.g., java7, java8). This usually corresponds to the {@code
+   * <runtime>} or {@code runtime:} value.
+   */
   private String runtime;
 
   /** Map of <em>base-file-name &rarr; model-element</em> pairs. */
@@ -205,15 +210,15 @@ public class AppEngineProjectElement implements IAdaptable {
     return serviceId;
   }
 
-  /**
-   * Return the App Engine environment type, or {@code null} if not specified (which is {@code
-   * standard}).
-   */
+  /** Return the App Engine environment type: {@code standard} or {@code flex}. */
   public String getEnvironmentType() {
     return environmentType;
   }
 
-  /** Return the App Engine runtime type, or {@code null} if not specified. */
+  /**
+   * Return the App Engine runtime type, which may depend on the {@link #getEnvironmentType()
+   * environment type}.
+   */
   public String getRuntime() {
     return runtime;
   }
@@ -221,11 +226,9 @@ public class AppEngineProjectElement implements IAdaptable {
   public StyledString getStyledLabel() {
     StyledString result = new StyledString("App Engine");
     result.append(" [", StyledString.QUALIFIER_STYLER);
-    result.append(
-        environmentType == null ? "standard" : environmentType, StyledString.QUALIFIER_STYLER);
+    result.append(getEnvironmentType(), StyledString.QUALIFIER_STYLER);
     result.append(": ", StyledString.QUALIFIER_STYLER);
-    result.append(
-        Strings.isNullOrEmpty(runtime) ? "java7" : runtime, StyledString.QUALIFIER_STYLER);
+    result.append(getRuntime(), StyledString.QUALIFIER_STYLER);
     result.append("]", StyledString.QUALIFIER_STYLER);
     result.append(" - " + descriptorFile.getName(), StyledString.DECORATIONS_STYLER);
     return result;
@@ -309,15 +312,23 @@ public class AppEngineProjectElement implements IAdaptable {
         projectId = descriptor.getProjectId();
         projectVersion = descriptor.getProjectVersion();
         serviceId = descriptor.getServiceId();
-        environmentType = descriptor.getEnvironmentType();
+        // flex always has `env: flex`; we ignore Managed VM
+        environmentType =
+            Strings.isNullOrEmpty(descriptor.getEnvironmentType())
+                ? "standard"
+                : descriptor.getEnvironmentType();
         runtime = descriptor.getRuntime();
+        if (Strings.isNullOrEmpty(runtime)) {
+          throw new AppEngineException("missing runtime: element");
+        }
       } else {
         AppEngineDescriptor descriptor = AppEngineDescriptor.parse(input);
         projectId = descriptor.getProjectId();
         projectVersion = descriptor.getProjectVersion();
         serviceId = descriptor.getServiceId();
-        environmentType = null;
-        runtime = descriptor.getRuntime();
+        environmentType = "standard";
+        runtime =
+            Strings.isNullOrEmpty(descriptor.getRuntime()) ? "java7" : descriptor.getRuntime();
       }
     } catch (IOException | SAXException | CoreException ex) {
       projectId = null;

@@ -16,13 +16,18 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import com.google.common.io.ByteSource;
+import com.google.common.io.ByteStreams;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -37,6 +42,33 @@ public class AppEngineConfigurationUtilTest {
   @Rule
   public TestProjectCreator projectCreator =
       new TestProjectCreator().withFacets(WebFacetUtils.WEB_31, JavaFacet.VERSION_1_8);
+
+  @Test
+  public void testCreateConfigurationFile_byteContent() throws CoreException, IOException {
+    IFile file =
+        AppEngineConfigurationUtil.createConfigurationFile(
+            projectCreator.getProject(),
+            new Path("example.txt"),
+            new ByteArrayInputStream(new byte[] {0, 1, 2, 3}),
+            true,
+            null);
+    try (InputStream input = file.getContents()) {
+      byte[] contents = ByteStreams.toByteArray(input);
+      assertArrayEquals(new byte[] {0, 1, 2, 3}, contents);
+    }
+  }
+
+  @Test
+  public void testCreateConfigurationFile_charContent() throws CoreException, IOException {
+    String original = "\u1f64c this is a test \u00b5";
+    IFile file =
+        AppEngineConfigurationUtil.createConfigurationFile(
+            projectCreator.getProject(), new Path("example.txt"), original, true, null);
+    try (InputStream input = file.getContents()) {
+      String contents = new String(ByteStreams.toByteArray(input), StandardCharsets.UTF_8);
+      assertEquals(original, contents);
+    }
+  }
 
   @Test
   public void testCreateConfigurationFile_noAppEngineDir() throws CoreException, IOException {
