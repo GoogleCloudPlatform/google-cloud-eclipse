@@ -144,8 +144,12 @@ public class StandardFacetInstallDelegate implements IDelegate {
     if (appEngineRuntime instanceof String) {
       parameters.put("runtime", (String) appEngineRuntime);
     }
-    createFileInWebInf(project, "appengine-web.xml", Templates.APPENGINE_WEB_XML_TEMPLATE,
-        parameters, progress.split(5));
+    createAppEngineConfigurationFile(
+        project,
+        "appengine-web.xml",
+        Templates.APPENGINE_WEB_XML_TEMPLATE,
+        parameters,
+        progress.split(5));
   }
 
   /** Creates a file in the WEB-INF folder if it doesn't exist. */
@@ -161,6 +165,36 @@ public class StandardFacetInstallDelegate implements IDelegate {
     // Use the virtual component model to decide where to create the file
     targetFile =
         WebProjectUtil.createFileInWebInf(
+            project,
+            new Path(filename),
+            new ByteArrayInputStream(new byte[0]),
+            false /* overwrite */,
+            progress.split(2));
+    String fileLocation = targetFile.getLocation().toString();
+    Templates.createFileContent(fileLocation, templateName, templateParameters);
+    progress.worked(4);
+    targetFile.refreshLocal(IFile.DEPTH_ZERO, progress.split(1));
+  }
+
+  /** Creates an App Engine configuration file in the appropriate folder, if it doesn't exist. */
+  private void createAppEngineConfigurationFile(
+      IProject project,
+      String filename,
+      String templateName,
+      Map<String, String> templateParameters,
+      IProgressMonitor monitor)
+      throws CoreException {
+    SubMonitor progress = SubMonitor.convert(monitor, 7);
+
+    IFile targetFile =
+        AppEngineConfigurationUtil.findConfigurationFile(project, new Path(filename));
+    if (targetFile != null && targetFile.exists()) {
+      return;
+    }
+
+    // todo Templates should provide content as an InputStream
+    targetFile =
+        AppEngineConfigurationUtil.createConfigurationFile(
             project,
             new Path(filename),
             new ByteArrayInputStream(new byte[0]),

@@ -24,8 +24,8 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.appengine.AppEngineDescriptor;
 import com.google.cloud.tools.appengine.api.AppEngineException;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineConfigurationUtil;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.eclipse.appengine.facets.convert.AppEngineStandardProjectConvertJob;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
@@ -389,7 +389,8 @@ public class ConversionTests {
   private void assertJava8Runtime(IFacetedProject project)
       throws IOException, SAXException, CoreException, AppEngineException {
     IFile appengineWebXml =
-        WebProjectUtil.findInWebInf(project.getProject(), new Path("appengine-web.xml"));
+        AppEngineConfigurationUtil.findConfigurationFile(
+            project.getProject(), new Path("appengine-web.xml"));
     assertNotNull("appengine-web.xml is missing", appengineWebXml);
     assertTrue("appengine-web.xml does not exist", appengineWebXml.exists());
     try (InputStream contents = appengineWebXml.getContents()) {
@@ -409,7 +410,8 @@ public class ConversionTests {
   private void assertNoJava8Runtime(IFacetedProject project)
       throws IOException, SAXException, CoreException, AppEngineException {
     IFile appengineWebXml =
-        WebProjectUtil.findInWebInf(project.getProject(), new Path("appengine-web.xml"));
+        AppEngineConfigurationUtil.findConfigurationFile(
+            project.getProject(), new Path("appengine-web.xml"));
     assertNotNull("appengine-web.xml is missing", appengineWebXml);
     assertTrue("appengine-web.xml does not exist", appengineWebXml.exists());
     try (InputStream contents = appengineWebXml.getContents()) {

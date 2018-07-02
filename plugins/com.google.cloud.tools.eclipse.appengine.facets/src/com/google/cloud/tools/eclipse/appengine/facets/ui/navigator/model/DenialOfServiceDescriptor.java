@@ -29,6 +29,7 @@ public class DenialOfServiceDescriptor extends AppEngineResourceElement {
 
   @Override
   public StyledString getStyledLabel() {
-    return new StyledString("Denial of Service Protection");
+    return new StyledString("Denial of Service Protection")
+        .append(" - " + getFile().getName(), StyledString.DECORATIONS_STYLER);
   }
 }

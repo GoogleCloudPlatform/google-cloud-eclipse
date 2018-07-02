@@ -29,6 +29,7 @@ public class CronDescriptor extends AppEngineResourceElement {
 
   @Override
   public StyledString getStyledLabel() {
-    return new StyledString("Scheduled Tasks");
+    return new StyledString("Scheduled Tasks")
+        .append(" - " + getFile().getName(), StyledString.DECORATIONS_STYLER);
   }
 }

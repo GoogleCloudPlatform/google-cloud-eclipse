@@ -24,8 +24,8 @@ import static org.junit.Assert.fail;
 
 import com.google.cloud.tools.appengine.AppEngineDescriptor;
 import com.google.cloud.tools.appengine.api.AppEngineException;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineConfigurationUtil;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.io.IOException;
@@ -124,7 +124,8 @@ public class AppEngineStandardFacetVersionChangeTest {
   private static AppEngineDescriptor parseDescriptor(IFacetedProject project)
       throws IOException, CoreException, SAXException {
     IFile descriptorFile =
-        WebProjectUtil.findInWebInf(project.getProject(), new Path("appengine-web.xml"));
+        AppEngineConfigurationUtil.findConfigurationFile(
+            project.getProject(), new Path("appengine-web.xml"));
     assertNotNull("appengine-web.xml not found", descriptorFile);
     assertTrue("appengine-web.xml does not exist", descriptorFile.exists());
 

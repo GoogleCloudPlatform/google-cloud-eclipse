@@ -57,7 +57,8 @@ public class AppEngineStandardJre7ProjectFacetDetector extends ProjectFacetDetec
     }
 
     IFile appEngineWebXml =
-        WebProjectUtil.findInWebInf(workingCopy.getProject(), new Path("appengine-web.xml"));
+        AppEngineConfigurationUtil.findConfigurationFile(
+            workingCopy.getProject(), new Path("appengine-web.xml"));
     progress.worked(1);
     if (appEngineWebXml == null || !appEngineWebXml.exists()) {
       logger.fine("skipping " + projectName + ": cannot find appengine-web.xml");
