@@ -27,7 +27,6 @@ import static org.junit.Assert.assertTrue;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.hamcrest.Matchers;
 import org.junit.Test;
@@ -200,7 +199,7 @@ public class CloudLibrariesInPluginXmlTest {
     Library objectifyLibrary = CloudLibraries.getLibrary("objectify6");
     assertThat(objectifyLibrary.getId(), is("objectify6"));
     assertThat(objectifyLibrary.getName(), is("Objectify"));
-    assertThat(objectifyLibrary.getGroups().get(0), is("flexible"));
+    assertThat(objectifyLibrary.getGroups().get(0), is("non-appengine-standard"));
     assertThat(objectifyLibrary.getSiteUri(),
         is(new URI("https://github.com/objectify/objectify/wiki")));
     assertTrue(objectifyLibrary.isExport());

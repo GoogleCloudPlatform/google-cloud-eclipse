@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexWarFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
@@ -115,6 +116,33 @@ public class CloudLibrariesPageTest {
     page.createControl(shellTestResource.getShell());
     assertThat(page.libraryGroups, 
         Matchers.not(Matchers.hasKey(CloudLibraries.APP_ENGINE_STANDARD_GROUP)));
+  }
+
+  @Test
+  public void testNonAppEngineLibraries_foundOnPlainJavaProject() {
+    IJavaProject javaProject = plainJavaProjectCreator.getJavaProject();
+    page.initialize(javaProject, null);
+    page.createControl(shellTestResource.getShell());
+    assertThat(page.libraryGroups, Matchers.hasKey(CloudLibraries.NON_APP_ENGINE_STANDARD_GROUP));
+  }
+
+  @Test
+  public void testNonAppEngineLibraries_foundOnAppEngineFlexProject() {
+    IJavaProject javaProject = plainJavaProjectCreator
+        .withFacets(WebFacetUtils.WEB_31, AppEngineFlexWarFacet.FACET_VERSION).getJavaProject();
+    page.initialize(javaProject, null);
+    page.createControl(shellTestResource.getShell());
+    assertThat(page.libraryGroups, Matchers.hasKey(CloudLibraries.NON_APP_ENGINE_STANDARD_GROUP));
+  }
+
+  @Test
+  public void testNonAppEngineLibraries_missingOnAppEngineStandardProject() {
+    IJavaProject javaProject = plainJavaProjectCreator
+        .withFacets(WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7).getJavaProject();
+    page.initialize(javaProject, null);
+    page.createControl(shellTestResource.getShell());
+    assertThat(page.libraryGroups,
+        Matchers.not(Matchers.hasKey(CloudLibraries.NON_APP_ENGINE_STANDARD_GROUP)));
   }
 
   @Test
