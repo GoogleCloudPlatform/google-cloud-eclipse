@@ -64,7 +64,7 @@
     
     <library
           id="objectify6"
-          group="flexible"
+          group="non-appengine"
           name="Objectify"
           tooltip="%objectify.tooltip"
           dependencies="include"

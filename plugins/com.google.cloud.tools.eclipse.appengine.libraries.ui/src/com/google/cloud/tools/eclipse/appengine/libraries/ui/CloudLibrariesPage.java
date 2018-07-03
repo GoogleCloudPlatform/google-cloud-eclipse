@@ -92,7 +92,7 @@ public class CloudLibrariesPage extends WizardPage
 
   @Override
   public void initialize(IJavaProject javaProject, IClasspathEntry[] currentEntries) {
-    this.project = javaProject;
+    project = javaProject;
     isMavenProject = MavenUtils.hasMavenNature(javaProject.getProject());
 
     // As we don't support multiple containers, we pretend to edit the existing container if
@@ -105,6 +105,9 @@ public class CloudLibrariesPage extends WizardPage
     if (AppEngineStandardFacet.getProjectFacetVersion(javaProject.getProject()) != null) {
       groups.put(CloudLibraries.APP_ENGINE_STANDARD_GROUP, 
           Messages.getString("appengine-title")); //$NON-NLS-1$
+    } else {
+      groups.put(CloudLibraries.NON_APP_ENGINE_STANDARD_GROUP,
+          Messages.getString("non-appengine-title")); //$NON-NLS-1$
     }
     groups.put(CloudLibraries.CLIENT_APIS_GROUP, 
         Messages.getString("clientapis-title")); //$NON-NLS-1$

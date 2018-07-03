@@ -39,7 +39,7 @@ public class AppEngineFlexWizardPage extends AppEngineWizardPage {
   
   @Override
   protected String getSupportedLibrariesGroup() {
-    return CloudLibraries.APP_ENGINE_FLEXIBLE_GROUP;
+    return CloudLibraries.NON_APP_ENGINE_STANDARD_GROUP;
   }
 
   @Override

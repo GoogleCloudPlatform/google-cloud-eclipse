@@ -49,7 +49,7 @@ public class FlexibleLibrariesSelectorGroupTest {
     shell = shellTestResource.getShell();
     shell.setLayout(new FillLayout());
     librariesSelector = new LibrarySelectorGroup(
-        shell, CloudLibraries.APP_ENGINE_FLEXIBLE_GROUP, "xxx"); //$NON-NLS-1$
+        shell, CloudLibraries.NON_APP_ENGINE_STANDARD_GROUP, "xxx"); //$NON-NLS-1$
     shell.open();
     objectifyButton = getButton("objectify6");
   }
