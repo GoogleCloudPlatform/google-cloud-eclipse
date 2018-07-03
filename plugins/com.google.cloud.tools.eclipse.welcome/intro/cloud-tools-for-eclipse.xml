@@ -6,7 +6,7 @@
             label="Google Cloud Tools for Eclipse"
             style-id="content-link"
             url="https://cloud.google.com/eclipse/docs/">
-        <text>Learn more about Google Cloud Tools for Eclipse.</text>
+        <text>Learn how to create, build, run, debug, and deploy App Engine and Cloud Dataflow applications from Eclipse.</text>
       </link>
     </group>
   </extensionContent>
