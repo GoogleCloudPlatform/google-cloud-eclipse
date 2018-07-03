@@ -230,8 +230,8 @@ public class CodeTemplates {
     
     String bomVersion = getCurrentVersion(
         "com.google.cloud", //$NON-NLS-1$
-        "google-cloud", //$NON-NLS-1$
-        "0.47.0-alpha"); //$NON-NLS-1$
+        "google-cloud-bom", //$NON-NLS-1$
+        "0.53.0-alpha"); //$NON-NLS-1$
     properties.put("googleCloudJavaBomVersion", bomVersion); //$NON-NLS-1$
     
     String mavenPluginVersion = getCurrentVersion(

@@ -408,7 +408,7 @@ public class CodeTemplatesTest {
         root,
         XPathConstants.STRING));
     Assert.assertTrue(
-        bomVersion.compareTo(new DefaultArtifactVersion("0.42.0-alpha")) >= 0);
+        bomVersion.compareTo(new DefaultArtifactVersion("0.53.0-alpha")) >= 0);
 
     String scope = (String) xpath.evaluate(
         "string(./m:dependencyManagement/m:dependencies/m:dependency/m:scope)",
