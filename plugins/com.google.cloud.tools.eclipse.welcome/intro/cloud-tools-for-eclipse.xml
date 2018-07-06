@@ -12,13 +12,19 @@
   </extensionContent>
 
   <extensionContent path="tutorials/@" style="css/intro.css">
-    <group style-id="content-group">
+    <group style-id="content-group" label="Google Cloud Tools for Eclipse">
       <link id="cloud-tools-for-eclipse-tutorial-link"
-            label="Google Cloud Tools for Eclipse"
+            label="App Engine Standard Environment"
             style-id="content-link"
             url="https://cloud.google.com/eclipse/docs/creating-new-webapp">
         <text>Learn how to build, run, debug, and deploy App Engine standard environment applications with Eclipse.</text>
       </link>
+      <link id="cloud-tools-for-eclipse-flexible-link"
+            label="App Engine Flexible Environment"
+            style-id="content-link"
+            url="https://cloud.google.com/eclipse/docs/create-flex-app">
+        <text>Learn how to build, run, debug, and deploy App Engine flexible environment applications with Eclipse.</text>
+      </link>      
     </group>
   </extensionContent>
 
