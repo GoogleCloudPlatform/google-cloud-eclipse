@@ -28,7 +28,7 @@
             label="Google Cloud Tools for Eclipse"
             style-id="content-link"
             url="https://cloud.google.com/eclipse/docs/release-notes">
-        <text>Announcements about new and updated features, bug fixes, known issues, and deprecated functionality.</text>
+        <text>Review new and updated features, bug fixes, known issues, and deprecated functionality</text>
       </link>
     </group>
   </extensionContent>
