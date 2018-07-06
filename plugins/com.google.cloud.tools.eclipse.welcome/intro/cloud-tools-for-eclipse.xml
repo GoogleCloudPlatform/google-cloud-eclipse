@@ -14,7 +14,7 @@
   <extensionContent path="tutorials/@" style="css/intro.css">
     <group style-id="content-group">
       <link id="cloud-tools-for-eclipse-tutorial-link"
-            label="Google Cloud Tools for Eclipse Tutorial"
+            label="Google Cloud Tools for Eclipse"
             style-id="content-link"
             url="https://cloud.google.com/eclipse/docs/creating-new-webapp">
         <text>Learn how to build, run, debug, and deploy App Engine standard environment applications with Eclipse.</text>
