@@ -17,20 +17,20 @@
             label="App Engine Standard Environment"
             style-id="content-link"
             url="https://cloud.google.com/eclipse/docs/creating-new-webapp">
-        <text>Learn how to build, run, debug, and deploy App Engine standard environment applications with Eclipse.</text>
+        <text>Learn how to build, run, debug, and deploy App Engine standard environment applications with Eclipse</text>
       </link>
       <link id="cloud-tools-for-eclipse-flexible-link"
             label="App Engine Flexible Environment"
             style-id="content-link"
             url="https://cloud.google.com/eclipse/docs/create-flex-app">
-        <text>Learn how to build, run, debug, and deploy App Engine flexible environment applications with Eclipse.</text>
+        <text>Learn how to build, run, debug, and deploy App Engine flexible environment applications with Eclipse</text>
       </link>
       <link id="cloud-tools-for-eclipse-dataflow-link"
             label="Cloud Dataflow"
             style-id="content-link"
             url="https://cloud.google.com/eclipse/docs/quickstart-dataflow">
-        <text>Learn how to build, run, and deploy Cloud Dataflow pipelines with Eclipse.</text>
-      </link>    
+        <text>Learn how to build, run, and deploy Cloud Dataflow pipelines with Eclipse</text>
+      </link>
     </group>
   </extensionContent>
 
