@@ -50,8 +50,8 @@
       <link id="cloud-tools-for-eclipse-migration-link"
             label="Migration from the Google Plugin for Eclipse (GPE)"
             style-id="content-link"
-            url="https://cloud.google.com/eclipse/docs/converting">
-        <text>Learn how to migrate to Google Cloud Tools for Eclipse from the Google Plugin for Eclipse.</text>
+            url="https://cloud.google.com/eclipse/docs/migrating-gpe">
+        <text>Learn how to migrate to Google Cloud Tools for Eclipse from the Google Plugin for Eclipse</text>
       </link>
     </group>
   </extensionContent>
