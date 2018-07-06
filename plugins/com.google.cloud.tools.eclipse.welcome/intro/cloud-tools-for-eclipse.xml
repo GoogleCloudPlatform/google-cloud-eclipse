@@ -16,8 +16,8 @@
       <link id="cloud-tools-for-eclipse-tutorial-link"
             label="Google Cloud Tools for Eclipse Tutorial"
             style-id="content-link"
-            url="https://cloud.google.com/eclipse/docs/quickstart">
-        <text>Read the Google Cloud Tools for Eclipse tutorial to learn how to build App Engine applications with Eclipse.</text>
+            url="https://cloud.google.com/eclipse/docs/creating-new-webapp">
+        <text>Learn how to build, run, debug, and deploy App Engine standard environment applications with Eclipse.</text>
       </link>
     </group>
   </extensionContent>
@@ -25,7 +25,7 @@
   <extensionContent path="whatsnew/@" style="css/intro.css">
     <group style-id="content-group">
       <link id="cloud-tools-for-eclipse-whatsnew-link"
-            label="Google Cloud Tools for Eclipse Release Notes"
+            label="Google Cloud Tools for Eclipse"
             style-id="content-link"
             url="https://cloud.google.com/eclipse/docs/release-notes">
         <text>Announcements about new and updated features, bug fixes, known issues, and deprecated functionality.</text>
