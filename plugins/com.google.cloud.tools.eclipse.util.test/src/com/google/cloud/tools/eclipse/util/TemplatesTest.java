@@ -208,6 +208,24 @@ public class TemplatesTest {
     compareToFile("objectifyWebFilterWithoutPackage.txt");
   }
 
+  @Test
+  public void testCreateFileContent_objectifyWebListenerWithPackage()
+      throws CoreException, IOException {
+    dataMap.put("package", "com.example");
+    Templates.createFileContent(fileLocation, Templates.OBJECTIFY_WEB_LISTENER_TEMPLATE, dataMap);
+
+    compareToFile("objectifyWebListenerWithPackage.txt");
+  }
+
+  @Test
+  public void testCreateFileContent_objectifyWebListenerWithoutPackage()
+      throws CoreException, IOException {
+    dataMap.put("package", "");
+    Templates.createFileContent(fileLocation, Templates.OBJECTIFY_WEB_LISTENER_TEMPLATE, dataMap);
+
+    compareToFile("objectifyWebListenerWithoutPackage.txt");
+  }
+
   private static InputStream getDataFile(String fileName) throws IOException {
     Bundle bundle = FrameworkUtil.getBundle(TemplatesTest.class);
     URL expectedFileUrl = bundle.getResource("/testData/templates/appengine/" + fileName);

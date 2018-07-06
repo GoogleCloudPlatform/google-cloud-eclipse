@@ -145,6 +145,36 @@ public class CodeTemplatesTest {
   }
 
   @Test
+  public void testMaterializeAppEngineStandardFiles_noObjectifyListenerWithObjectify5()
+      throws CoreException {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setRuntimeId(AppEngineRuntime.STANDARD_JAVA_8.getId());
+    config.setAppEngineLibraries(Collections.singleton(new Library("objectify")));
+
+    CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
+    assertFalse(objectifyListenerClassExists());
+  }
+
+  @Test
+  public void testMaterializeAppEnginFlexFiles_noObjectifyListener()
+      throws CoreException {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+
+    CodeTemplates.materializeAppEngineFlexFiles(project, config, monitor);
+    assertFalse(objectifyListenerClassExists());
+  }
+
+  @Test
+  public void testMaterializeAppEngineFlexFiles_objectifyListenerWithObjectify6()
+      throws CoreException {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setAppEngineLibraries(Collections.singleton(new Library("objectify6")));
+
+    CodeTemplates.materializeAppEngineFlexFiles(project, config, monitor);
+    assertTrue(objectifyListenerClassExists());
+  }
+
+  @Test
   public void testMaterializeAppEngineStandardFiles_noPomXml() throws CoreException {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
@@ -213,6 +243,32 @@ public class CodeTemplatesTest {
   }
 
   @Test
+  public void testIsObjectify6Selected_notSelected() {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    assertFalse(CodeTemplates.isObjectify6Selected(config));
+  }
+
+  @Test
+  public void testIsObjectify6Selected_objectify5() {
+    List<Library> libraries = Arrays.asList(new Library("a-library"), new Library("objectify"));
+
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setAppEngineLibraries(libraries);
+
+    assertFalse(CodeTemplates.isObjectify6Selected(config));
+  }
+
+  @Test
+  public void testIsObjectify6Selected_objectify6() {
+    List<Library> libraries = Arrays.asList(new Library("objectify6"), new Library("a-library"));
+
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setAppEngineLibraries(libraries);
+
+    assertTrue(CodeTemplates.isObjectify6Selected(config));
+  }
+
+  @Test
   public void testIsStandardJava7RuntimeSelected_java7() {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     config.setRuntimeId(null);  // null runtime corresponds to Java 7 runtime
@@ -224,6 +280,10 @@ public class CodeTemplatesTest {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     config.setRuntimeId("java8");
     assertFalse(CodeTemplates.isStandardJava7RuntimeSelected(config));
+  }
+
+  private boolean objectifyListenerClassExists() {
+    return project.getFile("src/main/java/ObjectifyWebListener.java").exists();
   }
 
   private boolean objectifyFilterClassExists() {

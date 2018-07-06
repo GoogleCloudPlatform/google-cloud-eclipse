@@ -47,6 +47,7 @@ public class Templates {
   public static final String POM_XML_FLEX_TEMPLATE = "pom.xml.flex.ftl";
   public static final String LOGGING_PROPERTIES_TEMPLATE = "logging.properties.ftl";
   public static final String OBJECTIFY_WEB_FILTER_TEMPLATE = "ObjectifyWebFilter.java.ftl";
+  public static final String OBJECTIFY_WEB_LISTENER_TEMPLATE = "ObjectifyWebListener.java.ftl";
 
   private static Configuration configuration;
 
