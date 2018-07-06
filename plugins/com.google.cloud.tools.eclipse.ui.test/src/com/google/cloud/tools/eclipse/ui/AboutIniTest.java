@@ -37,6 +37,7 @@ public class AboutIniTest {
     assertTrue(new File("../com.google.cloud.tools.eclipse.ui/icons/about/gcp.png").exists());
   }
 
+  @Test
   public void testAboutText() {
     assertNotNull(aboutIni.get("aboutText"));
     assertEquals("%blurb", aboutIni.get("aboutText"));
