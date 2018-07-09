@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <introContent>
-  <extensionContent path="overview/@" style="css/intro.css">
+  <extensionContent id="com.google.cloud.tools.eclipse.overview" name="Cloud Tools for Eclipse Overview"
+      path="overview/@" style="css/intro.css">
     <group style-id="content-group">
       <link id="cloud-tools-for-eclipse-link"
             label="Google Cloud Tools for Eclipse"
@@ -11,7 +12,8 @@
     </group>
   </extensionContent>
 
-  <extensionContent path="tutorials/@" style="css/intro.css">
+  <extensionContent id="com.google.cloud.tools.eclipse.tutorials" name="Cloud Tools for Eclipse Tutorials"
+      path="tutorials/@" style="css/intro.css">
     <group style-id="content-group" label="Google Cloud Tools for Eclipse">
       <link id="cloud-tools-for-eclipse-tutorial-link"
             label="App Engine Standard Environment"
@@ -34,7 +36,8 @@
     </group>
   </extensionContent>
 
-  <extensionContent path="whatsnew/@" style="css/intro.css">
+  <extensionContent id="com.google.cloud.tools.eclipse.whatsnew" name="What's New in Cloud Tools for Eclipse"
+      path="whatsnew/@" style="css/intro.css">
     <group style-id="content-group">
       <link id="cloud-tools-for-eclipse-whatsnew-link"
             label="Google Cloud Tools for Eclipse"
@@ -45,7 +48,8 @@
     </group>
   </extensionContent>
 
-  <extensionContent path="migrate/@" style="css/intro.css">
+  <extensionContent id="com.google.cloud.tools.eclipse.migration" name="Migrating to Cloud Tools for Eclipse"
+      path="migrate/@" style="css/intro.css">
     <group style-id="content-group">
       <link id="cloud-tools-for-eclipse-migration-link"
             label="Migration from the Google Plugin for Eclipse (GPE)"
