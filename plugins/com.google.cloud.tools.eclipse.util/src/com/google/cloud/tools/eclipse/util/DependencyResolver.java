@@ -83,7 +83,7 @@ public class DependencyResolver {
     CollectRequest collectRequest = new CollectRequest();
     collectRequest.setRoot(new Dependency(artifact, JavaScopes.RUNTIME));
     collectRequest.setRepositories(centralRepository(system));
-    DependencyRequest request = new DependencyRequest(collectRequest, filter);    
+    DependencyRequest request = new DependencyRequest(collectRequest, filter);
     
     // ensure checksum errors result in failure
     DefaultRepositorySystemSession session =

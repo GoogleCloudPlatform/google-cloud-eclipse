@@ -148,7 +148,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertTrue(objectifyLibrary.isExport());
 
     List<LibraryFile> allDependencies = objectifyLibrary.getAllDependencies();
-    assertTrue(allDependencies.size() + " dependencies", allDependencies.size() > 2);
+    assertEquals(2, allDependencies.size());
     
     LibraryFile objectifyLibraryFile = null;
     LibraryFile guavaLibraryFile = null;
