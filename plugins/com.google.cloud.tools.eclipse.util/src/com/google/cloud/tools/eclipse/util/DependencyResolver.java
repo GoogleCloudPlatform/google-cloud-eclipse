@@ -34,6 +34,7 @@ import org.eclipse.aether.resolution.ArtifactDescriptorRequest;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.util.artifact.JavaScopes;
+import org.eclipse.aether.util.filter.AndDependencyFilter;
 import org.eclipse.aether.util.filter.DependencyFilterUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -71,7 +72,10 @@ public class DependencyResolver {
       IProgressMonitor monitor)
       throws CoreException {
     SubMonitor progress = SubMonitor.convert(monitor);
-    DependencyFilter filter = DependencyFilterUtils.classpathFilter(JavaScopes.RUNTIME);
+    DependencyFilter filter =
+        new AndDependencyFilter(DependencyFilterUtils.classpathFilter(JavaScopes.RUNTIME),
+            new NonOptionalDependencyFilter());
+    
     // todo we'd prefer not to depend on m2e here
 
     String coords = groupId + ":" + artifactId + ":" + version;
@@ -79,8 +83,8 @@ public class DependencyResolver {
     CollectRequest collectRequest = new CollectRequest();
     collectRequest.setRoot(new Dependency(artifact, JavaScopes.RUNTIME));
     collectRequest.setRepositories(centralRepository(system));
-    DependencyRequest request = new DependencyRequest(collectRequest, filter);
-
+    DependencyRequest request = new DependencyRequest(collectRequest, filter);    
+    
     // ensure checksum errors result in failure
     DefaultRepositorySystemSession session =
         new DefaultRepositorySystemSession(context.getRepositorySession());
@@ -150,6 +154,7 @@ public class DependencyResolver {
     try {
       List<Dependency> managedDependencies =
           system.readArtifactDescriptor(session, request).getManagedDependencies();
+      
       return managedDependencies;
     } catch (RepositoryException ex) {
       IStatus status = StatusUtil.error(DependencyResolver.class, ex.getMessage(), ex);

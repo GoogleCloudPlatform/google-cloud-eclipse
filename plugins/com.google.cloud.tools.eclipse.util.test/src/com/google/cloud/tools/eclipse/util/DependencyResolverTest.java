@@ -69,6 +69,15 @@ public class DependencyResolverTest {
     Assert.assertTrue(actual.contains("com.fasterxml.jackson.core:jackson-core:2.1.3"));
   }
 
+  @Test
+  public void testOptionalDependeciesNotIncluded() throws CoreException {
+    Collection<Artifact> dependencies = DependencyResolver.getTransitiveDependencies(
+        "com.googlecode.objectify", "objectify", "5.1.22", monitor);
+    for (Artifact artifact : dependencies) {
+      Assert.assertNotEquals("joda-money", artifact.getArtifactId()); 
+    }
+  }
+
   /**
    * Easier to check for inclusion by Maven coordinates.
    */
