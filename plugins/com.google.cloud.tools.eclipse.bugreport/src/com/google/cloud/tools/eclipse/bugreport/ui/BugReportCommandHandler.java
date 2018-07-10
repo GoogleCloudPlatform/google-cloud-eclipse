@@ -36,7 +36,7 @@ public class BugReportCommandHandler extends AbstractHandler {
 
   // should be kept up to date with .github/ISSUE_TEMPLATE.md
   private static final String BODY_TEMPLATE =
-      "<!--"
+      "<!--\n"
           + "Before reporting a possible bug:\n\n"
           + "1. Please ensure you are running the latest version of CT4E with _Help > Check for Updates_\n"
           + "2. If the problem occurs when you deploy or after the application has been deployed, "
