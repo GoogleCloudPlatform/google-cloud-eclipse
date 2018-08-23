@@ -467,6 +467,40 @@
       </build>
     </profile>
 
+    <profile>
+      <id>build-eclipse-2018-09</id>
+      <activation>
+        <property>
+          <name>eclipse.target</name> <value>2018-09</value>
+        </property>
+      </activation>
+      <properties>
+         <jettyMinVersion>9.4</jettyMinVersion>
+         <jettyMaxVersion>9.5</jettyMaxVersion>
+      </properties>
+      <!-- build against a known target platform -->
+      <modules>
+        <module>eclipse/eclipse-2018-09</module>
+      </modules>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>target-platform-configuration</artifactId>
+            <configuration>
+            <target>
+              <artifact>
+                <groupId>com.google.cloud.tools.eclipse</groupId>
+                <artifactId>gcp-eclipse-2018-09</artifactId>
+                <version>4.9.0-SNAPSHOT</version>
+              </artifact>
+            </target>
+           </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
     <!--
       The following profiles work to prevent Java 9'isms
       using Maven and Tycho's support for toolchains.
