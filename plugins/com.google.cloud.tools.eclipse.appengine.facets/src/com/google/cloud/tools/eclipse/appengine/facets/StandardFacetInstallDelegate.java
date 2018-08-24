@@ -33,13 +33,10 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jst.j2ee.refactor.listeners.J2EEElementChangedListener;
 import org.eclipse.wst.common.project.facet.core.IDelegate;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
-import org.eclipse.wst.common.project.facet.core.IProjectFacet;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 public class StandardFacetInstallDelegate implements IDelegate {
-  private static final String JSDT_FACET_ID = "wst.jsdt.web";
-  private static final int MAX_JSDT_CHECK_RETRIES = 100;
 
   @Override
   public void execute(IProject project,
@@ -78,20 +75,6 @@ public class StandardFacetInstallDelegate implements IDelegate {
     @Override
     public boolean belongsTo(Object family) {
       return J2EEElementChangedListener.PROJECT_COMPONENT_UPDATE_JOB_FAMILY.equals(family);
-    }
-
-    private void waitUntilJsdtIsFixedFacet(IProgressMonitor monitor) throws InterruptedException {
-      try {
-        IProjectFacet jsdtFacet = ProjectFacetsManager.getProjectFacet(JSDT_FACET_ID);
-        for (int times = 0; !monitor.isCanceled() && times < MAX_JSDT_CHECK_RETRIES; times++) {
-          if (facetedProject.isFixedProjectFacet(jsdtFacet)) {
-            return;
-          }
-          Thread.sleep(100 /* ms */);
-        }
-      } catch (IllegalArgumentException ex) {
-        // JSDT facet itself doesn't exist. (Should not really happen.) Ignore and fall through.
-      }
     }
 
     @Override
