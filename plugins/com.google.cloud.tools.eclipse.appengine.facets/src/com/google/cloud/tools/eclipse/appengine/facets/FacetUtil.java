@@ -35,7 +35,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.common.project.facet.core.JavaFacetInstallConfig;
 import org.eclipse.jst.j2ee.project.facet.IJ2EEFacetInstallDataModelProperties;
@@ -216,13 +215,7 @@ public class FacetUtil {
    * @throws CoreException if anything goes wrong while applying facet actions
    */
   public void install(IProgressMonitor monitor) throws CoreException {
-    SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
-
-    // Workaround deadlock bug described in Eclipse bug (https://bugs.eclipse.org/511793).
-    // There are graph update jobs triggered by the completion of the CreateProjectOperation
-    // above (from resource notifications) and from other resource changes from modifying the
-    // project facets. So we force the dependency graph to defer updates
-    facetedProject.modify(facetInstallSet, subMonitor.newChild(90));
+    facetedProject.modify(facetInstallSet, monitor);
   }
 
   /**
