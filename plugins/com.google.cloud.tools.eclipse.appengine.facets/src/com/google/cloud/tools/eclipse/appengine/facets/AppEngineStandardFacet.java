@@ -32,14 +32,11 @@ import java.util.logging.Logger;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.ILock;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
-import org.eclipse.wst.common.componentcore.internal.builder.DependencyGraphImpl;
-import org.eclipse.wst.common.componentcore.internal.builder.IDependencyGraph;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IFacetedProjectBase;
 import org.eclipse.wst.common.project.facet.core.IFacetedProjectWorkingCopy;
@@ -51,7 +48,6 @@ import org.eclipse.wst.server.core.IRuntimeType;
 import org.eclipse.wst.server.core.IRuntimeWorkingCopy;
 import org.eclipse.wst.server.core.ServerCore;
 
-@SuppressWarnings("restriction") // For DependencyGraphImpl and IDependencyGraph
 public class AppEngineStandardFacet {
   private static final Logger logger = Logger.getLogger(AppEngineStandardFacet.class.getName());
 
@@ -343,19 +339,7 @@ public class AppEngineStandardFacet {
       }
 
 
-      // Workaround deadlock bug described in Eclipse bug (https://bugs.eclipse.org/511793).
-      // There are graph update jobs triggered by the completion of the CreateProjectOperation
-      // above (from resource notifications) and from other resource changes from modifying the
-      // project facets. So we force the dependency graph to defer updates.
       try {
-        IDependencyGraph.INSTANCE.preUpdate();
-        try {
-          Job.getJobManager().join(DependencyGraphImpl.GRAPH_UPDATE_JOB_FAMILY,
-              progress.newChild(10));
-        } catch (OperationCanceledException | InterruptedException ex) {
-          logger.log(Level.WARNING, "Exception waiting for WTP Graph Update job", ex);
-        }
-
         org.eclipse.wst.server.core.IRuntime[] appEngineRuntimes = getAppEngineRuntimes();
         if (appEngineRuntimes.length > 0) {
           IRuntime appEngineFacetRuntime = null;
@@ -394,8 +378,6 @@ public class AppEngineStandardFacet {
         }
       } catch (CoreException ex) {
         logger.log(Level.SEVERE, "Exception occurred when installing App Engine Runtime", ex);
-      } finally {
-        IDependencyGraph.INSTANCE.postUpdate();
       }
     } finally {
       lock.release();
