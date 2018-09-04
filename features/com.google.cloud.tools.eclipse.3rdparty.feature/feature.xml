@@ -24,12 +24,6 @@
          name="YEdit"
          optional="true"/>
          
-   <includes
-         id="eu.openanalytics.editor.docker"
-         version="0.0.0"
-         name="Docker Editor"
-         optional="true"/>
-         
 <!--
    <includes
          id="org.eclipse.linuxtools.docker.feature"

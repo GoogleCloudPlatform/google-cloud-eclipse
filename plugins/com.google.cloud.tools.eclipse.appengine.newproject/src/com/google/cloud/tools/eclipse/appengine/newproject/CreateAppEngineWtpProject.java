@@ -44,7 +44,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
@@ -60,8 +59,6 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.ide.undo.CreateProjectOperation;
-import org.eclipse.wst.common.componentcore.internal.builder.DependencyGraphImpl;
-import org.eclipse.wst.common.componentcore.internal.builder.IDependencyGraph;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
@@ -192,22 +189,9 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
       throws CoreException {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 30);
 
-    // Workaround deadlock bug described in Eclipse bug (https://bugs.eclipse.org/511793).
-    try {
-      IDependencyGraph.INSTANCE.preUpdate();
-      try {
-        Job.getJobManager().join(DependencyGraphImpl.GRAPH_UPDATE_JOB_FAMILY,
-            subMonitor.newChild(8));
-      } catch (OperationCanceledException | InterruptedException ex) {
-        logger.log(Level.WARNING, "Exception waiting for WTP Graph Update job", ex);
-      }
-
-      ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
-      MavenPlugin.getProjectConfigurationManager().enableMavenNature(newProject,
-          resolverConfiguration, subMonitor.newChild(20));
-    } finally {
-      IDependencyGraph.INSTANCE.postUpdate();
-    }
+    ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
+    MavenPlugin.getProjectConfigurationManager().enableMavenNature(newProject,
+        resolverConfiguration, subMonitor.newChild(20));
 
     // M2E will cleverly set "target/<artifact ID>-<version>/WEB-INF/classes" as a new Java output
     // folder; delete the default old folder.

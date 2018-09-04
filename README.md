@@ -30,7 +30,7 @@ Maven for building Eclipse bundles and features.
 
   1. The [M2Eclipse plugin](http://www.eclipse.org/m2e/) (also called m2e) is
      required to import the projects into Eclipse.  M2Eclipse is included in
-     [several packages](https://www.eclipse.org/downloads/compare.php?release=neon),
+     [several packages](https://www.eclipse.org/downloads/compare.php?release=photon),
      such as the _Eclipse IDE for Java EE Developers_ package.
 
   2. The [m2e connector for maven-dependency-plugin](https://github.com/ianbrandt/m2e-maven-dependency-plugin)
@@ -66,9 +66,9 @@ The tests need to find the Google Cloud SDK.  You can either:
 
 By default, the build is targeted against Eclipse Oxygen / 4.7.
 You can explicitly set the `eclipse.target` property to
-`neon` (4.6).
+`photon` (4.8).
 ```
-$ mvn -Declipse.target=neon package
+$ mvn -Declipse.target=oxygen package
 ```
 
 ### Adding a new bundle/fragment
@@ -250,7 +250,6 @@ features being built against. We currently maintain three target platforms,
 targeting the latest version of the current, previous, and next releases.
 This is currently:
 
-  - Eclipse Neon (4.6): [`eclipse/neon/gcp-eclipse-neon.target`](eclipse/neon/gcp-eclipse-neon.target)
   - Eclipse Oxygen (4.7): [`eclipse/oxygen/gcp-eclipse-oxygen.target`](eclipse/oxygen/gcp-eclipse-oxygen.target)
   - Eclipse Photon (4.8): [`eclipse/photon/gcp-eclipse-photon.target`](eclipse/photon/gcp-eclipse-photon.target)
 

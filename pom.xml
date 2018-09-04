@@ -33,7 +33,6 @@
     <module>features</module>
     <module>plugins</module>
     <module>third_party</module>
-    <module>eclipse</module>
   </modules>
 
   <properties>
@@ -41,7 +40,7 @@
     <tycho-extras.version>1.0.0</tycho-extras.version>
     <product.version.qualifier.suffix/>  <!-- 0-length string by default -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <eclipse.target>oxygen</eclipse.target>
+    <eclipse.target>photon</eclipse.target> <!-- the default build -->
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
 
@@ -399,43 +398,10 @@
     </profile>
 
     <profile>
-      <id>build-eclipse-neon</id>
-      <activation>
-        <property>
-          <name>eclipse.target</name> <value>neon</value>
-        </property>
-      </activation>
-      <properties>
-         <jettyMinVersion>9.3</jettyMinVersion>
-         <jettyMaxVersion>9.4</jettyMaxVersion>
-      </properties>
-      <!-- build against a known target platform -->
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.eclipse.tycho</groupId>
-            <artifactId>target-platform-configuration</artifactId>
-            <configuration>
-            <target>
-              <artifact>
-                <groupId>com.google.cloud.tools.eclipse</groupId>
-                <artifactId>gcp-eclipse-neon</artifactId>
-                <version>4.6.0-SNAPSHOT</version>
-              </artifact>
-            </target>
-           </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-
-    <profile>
       <id>build-eclipse-oxygen</id>
       <activation>
-        <!-- Default target if no eclipse.target specified. -->
         <property>
-          <name>!eclipse.target</name>
-          <!-- when no longer the default: <name>eclipse.target</name> <value>oxygen</value> -->
+          <name>eclipse.target</name> <value>oxygen</value>
         </property>
       </activation>
       <properties>
@@ -443,6 +409,9 @@
          <jettyMaxVersion>9.5</jettyMaxVersion>
       </properties>
       <!-- build against a known target platform -->
+      <modules>
+        <module>eclipse/oxygen</module>
+      </modules>
       <build>
         <plugins>
           <plugin>
@@ -465,8 +434,10 @@
     <profile>
       <id>build-eclipse-photon</id>
       <activation>
+        <!-- Default target if no eclipse.target specified. -->
         <property>
-          <name>eclipse.target</name> <value>photon</value>
+          <name>!eclipse.target</name>
+          <!-- when no longer the default: <name>eclipse.target</name> <value>photon</value> -->
         </property>
       </activation>
       <properties>
@@ -474,6 +445,9 @@
          <jettyMaxVersion>9.5</jettyMaxVersion>
       </properties>
       <!-- build against a known target platform -->
+      <modules>
+        <module>eclipse/photon</module>
+      </modules>
       <build>
         <plugins>
           <plugin>
@@ -485,6 +459,40 @@
                 <groupId>com.google.cloud.tools.eclipse</groupId>
                 <artifactId>gcp-eclipse-photon</artifactId>
                 <version>4.8.0-SNAPSHOT</version>
+              </artifact>
+            </target>
+           </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>build-eclipse-2018-09</id>
+      <activation>
+        <property>
+          <name>eclipse.target</name> <value>2018-09</value>
+        </property>
+      </activation>
+      <properties>
+         <jettyMinVersion>9.4</jettyMinVersion>
+         <jettyMaxVersion>9.5</jettyMaxVersion>
+      </properties>
+      <!-- build against a known target platform -->
+      <modules>
+        <module>eclipse/eclipse-2018-09</module>
+      </modules>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>target-platform-configuration</artifactId>
+            <configuration>
+            <target>
+              <artifact>
+                <groupId>com.google.cloud.tools.eclipse</groupId>
+                <artifactId>gcp-eclipse-2018-09</artifactId>
+                <version>4.9.0-SNAPSHOT</version>
               </artifact>
             </target>
            </configuration>

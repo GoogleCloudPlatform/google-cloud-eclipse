@@ -43,10 +43,6 @@ location "http://download.eclipse.org/webtools/downloads/drops/R3.10.0/R-3.10.0-
     org.eclipse.wst.server_adapters.sdk.feature.feature.group
 }
 
-location "http://docker-editor.openanalytics.eu/update/" {
-	  eu.openanalytics.editor.docker.feature.group
-}
-
 location "http://download.eclipse.org/linuxtools/update-docker" {
     org.eclipse.linuxtools.docker.feature.feature.group
 }

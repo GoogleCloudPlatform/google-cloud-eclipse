@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde?>
 <!-- generated with https://github.com/mbarbero/fr.obeo.releng.targetplatform -->
-<target name="GCP for Eclipse Oxygen" sequenceNumber="1530156745">
+<target name="GCP for Eclipse Oxygen" sequenceNumber="1535036447">
   <locations>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
       <unit id="org.eclipse.sdk.feature.group" version="4.7.3.v20180330-0919"/>
@@ -29,10 +29,6 @@
       <unit id="org.eclipse.jst.enterprise_sdk.feature.feature.group" version="3.8.1.v201802121827"/>
       <unit id="org.eclipse.wst.server_adapters.sdk.feature.feature.group" version="3.2.600.v201711302104"/>
       <repository location="http://download.eclipse.org/webtools/downloads/drops/R3.9.3/R-3.9.3-20180302093744/repository"/>
-    </location>
-    <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
-      <unit id="eu.openanalytics.editor.docker.feature.group" version="1.0.0.201506222127"/>
-      <repository location="http://docker-editor.openanalytics.eu/update/"/>
     </location>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
       <unit id="org.eclipse.linuxtools.docker.feature.feature.group" version="4.0.0.201806122135"/>

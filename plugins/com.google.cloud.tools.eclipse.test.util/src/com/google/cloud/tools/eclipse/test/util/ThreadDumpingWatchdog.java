@@ -213,23 +213,24 @@ public class ThreadDumpingWatchdog extends TestWatcher {
       return;
     }
 
-    Arrays.sort(jobs, new Ordering<Job>() {
-      @Override
-      public int compare(Job j1, Job j2) {
-        Preconditions.checkNotNull(j1);
-        Preconditions.checkNotNull(j2);
-        //@formatter:off
-        return ComparisonChain.start()
-            .compareTrueFirst(j1.isBlocking(), j2.isBlocking())
-            .compare(j2.getState(), j1.getState()) // descending order so RUNNING is first
-            .compare(j1.getPriority(), j2.getPriority())
-            .compareTrueFirst(j1.isUser(), j2.isUser())
-            .compareTrueFirst(j1.isSystem(), j2.isSystem())
-            .compare(j1.getRule(), j2.getRule(), Ordering.usingToString().nullsLast())
-            .result();
-        //@formatter:on
-      }
-    });
+    Arrays.sort(
+        jobs,
+        new Ordering<Job>() {
+          @Override
+          public int compare(Job j1, Job j2) {
+            Preconditions.checkNotNull(j1);
+            Preconditions.checkNotNull(j2);
+            return ComparisonChain.start()
+                .compareTrueFirst(j1.isBlocking(), j2.isBlocking())
+                .compare(j2.getState(), j1.getState()) // descending order so RUNNING is first
+                .compare(j1.getPriority(), j2.getPriority())
+                .compareTrueFirst(j1.isUser(), j2.isUser())
+                .compareTrueFirst(j1.isSystem(), j2.isSystem())
+                .compare(j1.getRule(), j2.getRule(), Ordering.usingToString().nullsLast())
+                .compare(j1.getName(), j2.getName())
+                .result();
+          }
+        });
 
     sb.append("\n").append(linePrefix).append(jobs.length + " jobs:");
     for (int index = 0; index < jobs.length; index++) {
@@ -284,23 +285,23 @@ public class ThreadDumpingWatchdog extends TestWatcher {
       System.err.println("Unable to fetch blocking-job: " + ex);
     }
     sb.append("\n").append(linePrefix);
-    //@formatter:off
-    sb.append(String.format("  %s%s{pri=%d%s%s%s%s} %s (%s)%s",
-        status,
-        (job.isBlocking() ? "<BLOCKING>" : ""),
-        job.getPriority(),
-        (job.isSystem() ? ",system" : ""),
-        (job.isUser() ? ",user" : ""),
-        (job.getRule() != null ? ",rule=" + job.getRule() : ""),
-        (thread != null ? ",thr=" + thread : ""),
-        job,
-        job.getClass().getName(),
-        (job.getJobGroup() != null ? " [group=" + job.getJobGroup() + "]" : "")));
+    sb.append(
+        String.format(
+            "  %s%s{pri=%d%s%s%s%s} %s (%s)%s",
+            status,
+            (job.isBlocking() ? "<BLOCKING>" : ""),
+            job.getPriority(),
+            (job.isSystem() ? ",system" : ""),
+            (job.isUser() ? ",user" : ""),
+            (job.getRule() != null ? ",rule=" + job.getRule() : ""),
+            (thread != null ? ",thr=" + thread : ""),
+            job,
+            job.getClass().getName(),
+            (job.getJobGroup() != null ? " [group=" + job.getJobGroup() + "]" : "")));
     if (blockingJob != null) {
       sb.append("\n").append(linePrefix)
           .append(String.format("    - blocked by: %s (%s)", blockingJob, blockingJob.getClass()));
     }
-    //@formatter:on
   }
 
   /**
@@ -330,6 +331,17 @@ public class ThreadDumpingWatchdog extends TestWatcher {
               .equals(lockClassName)) {
         return true;
       }
+      // Equinox thread pool (org.eclipse.equinox.internal.util.impl.tpt.timer.TimerImpl)
+      // "[Timer] - Main Queue Handler" [17] TIMED_WAITING on java.lang.Object@3695edd5
+      if (threadName.equals("[Timer] - Main Queue Handler")
+          && "java.lang.Object".equals(lockClassName)) {
+        return true;
+      }
+      // Jobs Manager: may also be WAITING too
+      // "Worker-JM" [18] TIMED_WAITING on java.util.ArrayList@148b3683
+      if (threadName.equals("Worker-JM") && "java.util.ArrayList".equals(lockClassName)) {
+        return true;
+      }
     }
     if (tinfo.getThreadState() == State.WAITING && tinfo.getLockInfo() != null) {
       String lockClassName = tinfo.getLockInfo().getClassName();
@@ -344,9 +356,9 @@ public class ThreadDumpingWatchdog extends TestWatcher {
           && "java.lang.ref.ReferenceQueue$Lock".equals(lockClassName)) {
         return true;
       }
+      // Jobs Manager: may also be TIMED_WAITING
       // "Worker-JM" [28] WAITING on java.util.ArrayList@46ce31f9
-      if ("Worker-JM".equals(threadName)
-          && "java.util.ArrayList".equals(lockClassName)) {
+      if ("Worker-JM".equals(threadName) && "java.util.ArrayList".equals(lockClassName)) {
         return true;
       }
       // "SCR Component Actor" [27] WAITING on java.util.LinkedList@787d08c3
@@ -354,20 +366,40 @@ public class ThreadDumpingWatchdog extends TestWatcher {
           && "java.util.LinkedList".equals(lockClassName)) {
         return true;
       }
-      // "Bundle File Closer" [21] WAITING on org.eclipse.osgi.framework.eventmgr.EventManager$EventThread@76faf029
-      // "Refresh Thread: Equinox Container: 0a1c2f36-c9b6-4aea-8192-af1c5847a0f2" [19] WAITING on
-      // org.eclipse.osgi.framework.eventmgr.EventManager$EventThread@9d34d50
-      // "Start Level: Equinox Container: 0a1c2f36-c9b6-4aea-8192-af1c5847a0f2" [20] WAITING on
-      // org.eclipse.osgi.framework.eventmgr.EventManager$EventThread@3e25e294
-      // "Framework Event Dispatcher:
-      // org.eclipse.osgi.internal.framework.EquinoxEventPublisher@2aa5fe93" [18] WAITING on
-      // org.eclipse.osgi.framework.eventmgr.EventManager$EventThread@19f867b9
+      /*
+       * "Bundle File Closer" [21] WAITING on org.eclipse.osgi.framework.eventmgr.EventManager$EventThread@76faf029
+       * "Refresh Thread: Equinox Container: 0a1c2f36-c9b6-4aea-8192-af1c5847a0f2" [19] WAITING on org.eclipse.osgi.framework.eventmgr.EventManager$EventThread@9d34d50
+       * "Start Level: Equinox Container: 0a1c2f36-c9b6-4aea-8192-af1c5847a0f2" [20] WAITING on org.eclipse.osgi.framework.eventmgr.EventManager$EventThread@3e25e294
+       * "Framework Event Dispatcher: org.eclipse.osgi.internal.framework.EquinoxEventPublisher@2aa5fe93" [18] WAITING on org.eclipse.osgi.framework.eventmgr.EventManager$EventThread@19f867b9
+       * "EventAdmin Async Event Dispatcher Thread" [27] WAITING on org.eclipse.osgi.framework.eventmgr.EventManager$EventThread@2d764890
+       */
       if (("Bundle File Closer".equals(threadName)
-          || threadName.startsWith("Refresh Thread: Equinox Container: ")
-          || threadName.startsWith("Start Level: Equinox Container: ")
-          || threadName.startsWith(
-              "Framework Event Dispatcher: org.eclipse.osgi.internal.framework.EquinoxEventPublisher"))
+              || threadName.startsWith("Refresh Thread: Equinox Container: ")
+              || threadName.startsWith("Start Level: Equinox Container: ")
+              || threadName.startsWith(
+                  "Framework Event Dispatcher: org.eclipse.osgi.internal.framework.EquinoxEventPublisher")
+              || "EventAdmin Async Event Dispatcher Thread".equals(threadName))
           && "org.eclipse.osgi.framework.eventmgr.EventManager$EventThread".equals(lockClassName)) {
+        return true;
+      }
+      // "[ThreadPool Manager] - Idle Thread" [79] WAITING on
+      // org.eclipse.equinox.internal.util.impl.tpt.threadpool.Executor@c64bde4
+      if ("[ThreadPool Manager] - Idle Thread".equals(threadName)
+          && "org.eclipse.equinox.internal.util.impl.tpt.threadpool.Executor"
+              .equals(lockClassName)) {
+        return true;
+      }
+      // "Java indexing" [31] WAITING on
+      // org.eclipse.jdt.internal.core.search.indexing.IndexManager@55fc50f7
+      if ("Java indexing".equals(threadName)
+          && "org.eclipse.jdt.internal.core.search.indexing.IndexManager".equals(lockClassName)) {
+        return true;
+      }
+      // "JavaScript indexing" [48] WAITING on
+      // org.eclipse.wst.jsdt.internal.core.search.indexing.IndexManager@4d59b7df
+      if ("JavaScript indexing".equals(threadName)
+          && "org.eclipse.wst.jsdt.internal.core.search.indexing.IndexManager"
+              .equals(lockClassName)) {
         return true;
       }
     }

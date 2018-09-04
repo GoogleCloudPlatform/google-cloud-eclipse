@@ -14,9 +14,9 @@
   <packaging>pom</packaging>
 
   <modules>
-    <module>neon</module>
     <module>oxygen</module>
     <module>photon</module>
+    <module>eclipse-2018-09</module>
   </modules>
 
   <profiles>

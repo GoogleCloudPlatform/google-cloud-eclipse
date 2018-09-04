@@ -1,17 +1,18 @@
-/*
- * Target Platform Definition created using Mikael Barbero's TPD editor
+/* 
+ * Target Platform Definition created using Mikael Barbero's TPD editor 
  * <https://github.com/mbarbero/fr.obeo.releng.targetplatform/>
- *
+ * 
  * If you make changes to this file, either:
- *
+ * 
  *    * Right-click in the editor and choose 'Create Target Definition File'
  *      to update the corresponding .target file.
  *    * Right-click in the editor and choose 'Set as Target Platform'
  *      to update your IDE's target platform (regenerates the .target too)
  */
-target "GCP for Eclipse Neon" with source requirements
+target "GCP for Eclipse 2018-09" with source requirements
 
-location "http://download.eclipse.org/releases/neon/" {
+// Eclipse 2018-09 M2 (composite at http://download.eclipse.org/releases/2018-09/)
+location "http://download.eclipse.org/releases/2018-09/201808101000/" {
 	org.eclipse.sdk.feature.group
 	org.eclipse.jdt.feature.group
 	org.eclipse.m2e.feature.feature.group
@@ -31,8 +32,8 @@ location "http://download.eclipse.org/releases/neon/" {
 }
 
 // WTP SDKs aren't exposed through the main release links
-// 2018/06/27: WTP has archived Neon and prior
-location "http://archive.eclipse.org/webtools/downloads/drops/R3.8/R3.8.2/R-3.8.2-20170308000057/repository" {
+// (composite at http://download.eclipse.org/webtools/repository/photon)
+location "http://download.eclipse.org/webtools/downloads/drops/R3.11.0/S-3.11.0.M2-20180803074505/repository" {
     org.eclipse.jst.web_sdk.feature.feature.group
     org.eclipse.jst.server_sdk.feature.feature.group
     org.eclipse.jst.common.fproj.enablement.jdt.sdk.feature.group
@@ -42,12 +43,7 @@ location "http://archive.eclipse.org/webtools/downloads/drops/R3.8/R3.8.2/R-3.8.
     org.eclipse.wst.server_adapters.sdk.feature.feature.group
 }
 
-location "http://docker-editor.openanalytics.eu/update/" {
-    eu.openanalytics.editor.docker.feature.group
-}
-
-// Pick up Neon-compatible 2.3.0
-location "http://download.eclipse.org/linuxtools/update-docker-neon3respinb" {
+location "http://download.eclipse.org/linuxtools/update-docker" {
     org.eclipse.linuxtools.docker.feature.feature.group
 }
 

@@ -16,11 +16,12 @@ install:
 jdk: oraclejdk8
 env:
   matrix:
-    # ECLIPSE_TARGET is the targeted platform: oxygen is the default target
+    # ECLIPSE_TARGET is the targeted platform: photon is the default target
+    # We run jacoco on photon
     # JAVA_RUNTIME specifies the execution runtime for tests; must match an <id> in .travisci/toolchains.xml
-    - JAVA_RUNTIME=JavaSE-1.8 ECLIPSE_TARGET=neon
+    - JAVA_RUNTIME=JavaSE-1.8 ECLIPSE_TARGET=oxygen
     - JAVA_RUNTIME=JavaSE-1.8 MAVEN_FLAGS=-Pjacoco
-    - JAVA_RUNTIME=JavaSE-1.8 ECLIPSE_TARGET=photon MAVEN_FLAGS=-Pjacoco
+    - JAVA_RUNTIME=JavaSE-1.8 ECLIPSE_TARGET=2018-09
   global:
     - CLOUD_SDK_HOME=$HOME/google-cloud-sdk
     - PATH=$CLOUD_SDK_HOME/bin:$PATH

@@ -10,7 +10,7 @@ not with Cloud Tools for Eclipse.
 -->
 - Cloud Tools for Eclipse version:
 - Google Cloud SDK version: <!-- run `gcloud version` -->
-- Eclipse version: <!-- e.g, 4.5.2.v20160212-1500 or Neon.3 -->
+- Eclipse version: <!-- e.g, Photon -->
 - OS:
 - Java version:
 
