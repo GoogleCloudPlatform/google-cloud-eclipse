@@ -15,7 +15,7 @@ Require-Bundle: org.eclipse.ui;bundle-version="3.107.0",
  com.google.cloud.tools.eclipse.sdk,
  com.google.cloud.tools.eclipse.preferences,
  com.google.cloud.tools.appengine
-Import-Package: com.google.cloud.tools.appengine;bundle-version="0.6.3",
+Import-Package: com.google.cloud.tools.appengine;bundle-version="0.6.6",
  com.google.cloud.tools.eclipse.ui.util,
  com.google.cloud.tools.eclipse.ui.util.images,
  com.google.common.annotations;version="[24.1.1,26.0.0)",
