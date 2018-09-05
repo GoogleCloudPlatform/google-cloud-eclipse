@@ -213,27 +213,27 @@ target platform whenever dependencies are updated.
 
   1. Set variables required for launch:
 
-    1. Go to the second tab for `Arguments`
+      1. Go to the second tab for `Arguments`
 
-    1. Click the `Variables...` button for `VM argument:`
+      1. Click the `Variables...` button for `VM argument:`
 
-    1. Click the `Edit variables...` button
+      1. Click the `Edit variables...` button
 
-    1. Click `New...`
+      1. Click `New...`
 
-    1. Set the name to `oauth_id`, and the value to the value you want to use
+      1. Set the name to `oauth_id`, and the value to the value you want to use
     (description optional)
 
-    1. Click `OK`, the variable will appear in the list
+      1. Click `OK`, the variable will appear in the list
 
-    1. Repeat steps 6-8 but use `oauth_secret` as the name and use the
+      1. Repeat steps 6-8 but use `oauth_secret` as the name and use the
     corresponding value
 
-    1. Click `OK` to close the edit variables dialog
+      1. Click `OK` to close the edit variables dialog
 
-    1. Click `Cancel` to close the variable selection dialog
+      1. Click `Cancel` to close the variable selection dialog
 
-    1. Click `Apply` to apply the changes to the run config
+      1. Click `Apply` to apply the changes to the run config
 
   1. From the `Run` menu, select `Run History > gcloud-eclipse-tools`
 
