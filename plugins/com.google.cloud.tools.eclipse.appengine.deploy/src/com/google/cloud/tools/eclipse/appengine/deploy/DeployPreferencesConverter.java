@@ -24,7 +24,7 @@ public class DeployPreferencesConverter {
   public static DefaultDeployConfiguration toDeployConfiguration(DeployPreferences preferences) {
     DefaultDeployConfiguration configuration = new DefaultDeployConfiguration();
 
-    configuration.setProject(preferences.getProjectId());
+    configuration.setProjectId(preferences.getProjectId());
 
     String bucketName = preferences.getBucket();
     if (!Strings.isNullOrEmpty(bucketName)) {
