@@ -64,11 +64,11 @@ The tests need to find the Google Cloud SDK.  You can either:
 
 ### Changing the Eclipse Platform compilation and testing target
 
-By default, the build is targeted against Eclipse Oxygen / 4.7.
+By default, the build is targeted against Eclipse Photon / 4.8.
 You can explicitly set the `eclipse.target` property to
-`photon` (4.8).
+`oxygen` (4.y).
 ```
-$ mvn -Declipse.target=photon package
+$ mvn -Declipse.target=oxygen package
 ```
 
 ### Adding a new bundle/fragment
