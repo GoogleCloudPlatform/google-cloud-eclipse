@@ -82,7 +82,7 @@ public class CloudSdkProcessWrapper {
         .build();
 
     // Gcloud sends structured deploy result (in JSON format) to stdout, so prepare to capture that.
-    stdOutCaptor = StringBuilderProcessOutputLineListenr.newListenerWithNewlines();
+    stdOutCaptor = StringBuilderProcessOutputLineListener.newListenerWithNewlines();
     // Gcloud sends structured gcloud logs (in JSON format) to stderr, so prepare to capture them.
     gcloudErrorMessageCollector = new GcloudStructuredLogErrorMessageCollector();
 
