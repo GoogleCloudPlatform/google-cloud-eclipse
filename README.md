@@ -68,7 +68,7 @@ By default, the build is targeted against Eclipse Oxygen / 4.7.
 You can explicitly set the `eclipse.target` property to
 `photon` (4.8).
 ```
-$ mvn -Declipse.target=oxygen package
+$ mvn -Declipse.target=photon package
 ```
 
 ### Adding a new bundle/fragment
