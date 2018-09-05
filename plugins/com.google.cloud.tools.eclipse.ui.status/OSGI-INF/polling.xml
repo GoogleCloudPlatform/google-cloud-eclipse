@@ -3,6 +3,6 @@
    <service>
       <provide interface="com.google.cloud.tools.eclipse.ui.status.GcpStatusMonitoringService"/>
    </service>
-   <reference bind="setProxyService" cardinality="0..1" interface="IProxyService" name="ProxyService" policy="dynamic" unbind="unsetProxyService"/>
+   <reference bind="setProxyService" cardinality="0..1" interface="org.eclipse.core.net.proxy.IProxyService" name="ProxyService" policy="dynamic" unbind="unsetProxyService"/>
    <implementation class="com.google.cloud.tools.eclipse.ui.status.PollingStatusServiceImpl"/>
 </scr:component>
