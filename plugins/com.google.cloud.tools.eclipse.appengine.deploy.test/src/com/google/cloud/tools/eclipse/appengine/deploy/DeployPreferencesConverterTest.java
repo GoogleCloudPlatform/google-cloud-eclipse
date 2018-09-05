@@ -45,7 +45,7 @@ public class DeployPreferencesConverterTest {
         .thenReturn("projectid");
     DefaultDeployConfiguration configuration =
         DeployPreferencesConverter.toDeployConfiguration(new DeployPreferences(preferences));
-    assertThat(configuration.getProject(), is("projectid"));
+    assertThat(configuration.getProjectId(), is("projectid"));
   }
 
   @Test
