@@ -11,8 +11,8 @@
  */
 target "GCP for Eclipse 2018-09" with source requirements
 
-// Eclipse 2018-09 M2 (composite at http://download.eclipse.org/releases/2018-09/)
-location "http://download.eclipse.org/releases/2018-09/201808101000/" {
+// Eclipse 2018-09 M3 (composite at http://download.eclipse.org/releases/2018-09/)
+location "http://download.eclipse.org/releases/2018-09/201809071000/" {
 	org.eclipse.sdk.feature.group
 	org.eclipse.jdt.feature.group
 	org.eclipse.m2e.feature.feature.group
