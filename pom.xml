@@ -517,7 +517,7 @@
       -->
       <id>building-with-minimum-java-runtime-</id>
       <activation>
-        <property><name>toolchain.java.runtime</name><value>JavaSE-1.9</value></property>
+        <property><name>toolchain.java.runtime</name><value>JavaSE-11</value></property>
       </activation>
       <properties>
          <tycho.toolchains>BREE</tycho.toolchains>
@@ -527,7 +527,7 @@
       <!--
           We use tycho-surefire-plugin's default `useJDK=SYSTEM`
           mode to run tests using the configured Maven toolchain.  So
-          specifying toolchain.java.runtime=JavaSE-1.9 will lead to test
+          specifying toolchain.java.runtime=JavaSE-9 will lead to test
           failures should we attempt to load bundles with BREE=JavaSE-1.8
           or that contains Java 8 code.  Same applies with Java 9.
       -->

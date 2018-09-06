@@ -314,16 +314,16 @@ See [`eclipse/settings/`](eclipse/settings/README.md) for details.
 
 _Note: this section is only relevant for configuring CI builds_
 
-We use Tycho's support for Maven Toolchains to ensure that Java 8
+We use Tycho's support for Maven Toolchains to ensure that Java 9+
 features do not creep into the code.  This support is enabled by
 compiling with the [`useJDK=BREE`](https://eclipse.org/tycho/sitedocs/tycho-compiler-plugin/compile-mojo.html)
-setting that ensures bundles are compiled with a JDK that matches
-the bundle's `Bundle-RequiredExecutionEnvironment`, but configuring
-`tycho-surefire` to run the tests using the configured toolchain
+setting that ensures bundles are *compiled* with a JDK that matches
+the bundle's `Bundle-RequiredExecutionEnvironment`, but ensuring
+`tycho-surefire` runs the tests using the current toolchain
 (the default for
 [`useJDK=SYSTEM`](https://eclipse.org/tycho/sitedocs/tycho-surefire/tycho-surefire-plugin/test-mojo.html#useJDK)).
-These settings
-require configuring [Maven's toolchains](https://maven.apache.org/guides/mini/guide-using-toolchains.html)
+These settings require configuring
+[Maven's toolchains](https://maven.apache.org/guides/mini/guide-using-toolchains.html)
 to point to appropriate JRE installations.  Tycho further requires
 that a toolchain defines an `id` for the specified _Execution
 Environment_ identifier.  For example, a `~/.m2/toolchains.xml` to

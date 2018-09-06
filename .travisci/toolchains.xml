@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="UTF8"?>
 <toolchains>
-  <!-- JDK toolchains on Travis-CI `trusty` -->
+  <!--
+    JDK toolchains on Travis-CI
+    See https://docs.travis-ci.com/user/common-build-problems/#troubleshooting-locally-in-a-docker-image
+    for details on inspecting the docker images
+  -->
+  <toolchain>
+    <type>jdk</type>
+    <provides>
+      <id>JavaSE-11</id>
+      <version>11</version>
+      <vendor>openjdk</vendor>
+    </provides>
+    <configuration>
+      <jdkHome>/usr/lib/jvm/java-11-openjdk</jdkHome>
+    </configuration>
+  </toolchain>
   <toolchain>
     <type>jdk</type>
     <provides>

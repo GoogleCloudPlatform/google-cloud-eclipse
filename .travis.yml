@@ -12,16 +12,24 @@ install:
   - mvn -B -N io.takari:maven:wrapper -Dmaven=3.5.0
   # download and install Cloud SDK (may be cached)
   - build/install-cloudsdk.sh 190.0.1 $HOME
-# Tycho ≥ 0.26 requires Java 8
-jdk: oraclejdk8
+# ECLIPSE_TARGET is the targeted platform: photon is the default target
+# We run jacoco on photon
+# JAVA_RUNTIME specifies the execution runtime for tests; must match an <id> in .travisci/toolchains.xml
+matrix:
+  include:
+    - name: "Java 8 + Oxygen"
+      jdk: oraclejdk8
+      env: JAVA_RUNTIME=JavaSE-1.8 ECLIPSE_TARGET=oxygen
+    - name: "Java 8 + Photon"
+      jdk: oraclejdk8
+      env: JAVA_RUNTIME=JavaSE-1.8 MAVEN_FLAGS=-Pjacoco
+    - name: "Java 8 + Eclipse 2018-09"
+      jdk: oraclejdk8
+      env: JAVA_RUNTIME=JavaSE-1.8 ECLIPSE_TARGET=2018-09
+    - name: "Java 11 + Eclipse 2018-09"
+      jdk: openjdk11
+      env: JAVA_RUNTIME=JavaSE-1.8 ECLIPSE_TARGET=2018-09
 env:
-  matrix:
-    # ECLIPSE_TARGET is the targeted platform: photon is the default target
-    # We run jacoco on photon
-    # JAVA_RUNTIME specifies the execution runtime for tests; must match an <id> in .travisci/toolchains.xml
-    - JAVA_RUNTIME=JavaSE-1.8 ECLIPSE_TARGET=oxygen
-    - JAVA_RUNTIME=JavaSE-1.8 MAVEN_FLAGS=-Pjacoco
-    - JAVA_RUNTIME=JavaSE-1.8 ECLIPSE_TARGET=2018-09
   global:
     - CLOUD_SDK_HOME=$HOME/google-cloud-sdk
     - PATH=$CLOUD_SDK_HOME/bin:$PATH
