@@ -6,6 +6,7 @@
     for details on inspecting the docker images
   -->
   <toolchain>
+    <!-- travis' `openjdk11` uses their install-jdk.sh script, which installs as $HOME/<jdkId> -->
     <type>jdk</type>
     <provides>
       <id>JavaSE-11</id>
@@ -13,7 +14,7 @@
       <vendor>openjdk</vendor>
     </provides>
     <configuration>
-      <jdkHome>/usr/lib/jvm/java-11-openjdk</jdkHome>
+      <jdkHome>/home/travis/openjdk11</jdkHome>
     </configuration>
   </toolchain>
   <toolchain>

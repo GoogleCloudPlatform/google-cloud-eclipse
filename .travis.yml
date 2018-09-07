@@ -16,16 +16,16 @@ install:
 # We run jacoco on photon
 matrix:
   include:
-    - name: "Java 8 + Oxygen"
+    - name: "Eclipse Oxygen (4.7) on Java 8"
       jdk: oraclejdk8
       env: ECLIPSE_TARGET=oxygen
-    - name: "Java 8 + Photon"
+    - name: "Eclipse Photon (4.8) on Java 8"
       jdk: oraclejdk8
       env: MAVEN_FLAGS=-Pjacoco
-    - name: "Java 8 + Eclipse 2018-09"
+    - name: "Eclipse 2018-09 (4.9) on Java 8"
       jdk: oraclejdk8
       env: ECLIPSE_TARGET=2018-09
-    - name: "Java 11 + Eclipse 2018-09"
+    - name: "Eclipse 2018-09 (4.9) on Java 11"
       jdk: openjdk11
       env: ECLIPSE_TARGET=2018-09
 env:
