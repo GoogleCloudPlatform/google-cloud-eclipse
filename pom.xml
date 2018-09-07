@@ -36,8 +36,8 @@
   </modules>
 
   <properties>
-    <tycho.version>1.1.0</tycho.version>
-    <tycho-extras.version>1.0.0</tycho-extras.version>
+    <tycho.version>1.2.0</tycho.version>
+    <tycho-extras.version>1.2.0</tycho-extras.version>
     <product.version.qualifier.suffix/>  <!-- 0-length string by default -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <eclipse.target>photon</eclipse.target> <!-- the default build -->
@@ -58,11 +58,12 @@
     <jacoco.agentArgLine/>
 
     <!--
-      `SYSTEM` means build using the default JDK.
+      `SYSTEM` means build using the current JDK.
       `BREE` means find an appropriate JDK using Maven Toolchains matching
       the Bundle-RequiredExecutionEnvironment. See `README.md` for details.
     -->
     <tycho.toolchains>SYSTEM</tycho.toolchains>
+    <toolchains-jvm-flags/>
 
     <!-- OS-specific JVM flags, empty for the default case but redefined below -->
     <os-jvm-flags/>
@@ -325,7 +326,7 @@
               -Xms40m -Xmx1G -XX:MaxPermSize=512m
               -Djava.awt.headless=true
               -Dlogback.configurationFile=platform:/plugin/com.google.cloud.tools.eclipse.test.dependencies/logback.xml
-              ${os-jvm-flags}
+              ${os-jvm-flags} ${toolchains-jvm-flags}
             </argLine>
             <bundleStartLevel>
               <bundle>
@@ -506,58 +507,22 @@
       using Maven and Tycho's support for toolchains.
     -->
     <profile>
-       <!-- 
-          We can only use tycho-compiler-plugin's `useJDK=BREE`
-          mode when we're building with our minimum supported Java
-          runtime environment (currently JavaSE-1.9).  `BREE` mode
-          builds each bundle against a JDK that matches its
-          Bundle-RequiredExecutionEnvironment, but results in
-          compile-time resolving errors on Eclipse 4.6/Neon
-          and later which require Java 8.
+       <!--
+          When building with a later JDK (i.e., JDK 11) than our
+          minimum supported platform (currently JavaSE-1.8/jdk8) then
+          use Tycho's useJDK=BREE mode to compile bundles using their
+          corresponding `Bundle-RequiredExecutionEnvironment` to catch
+          inadvertent use of incompatible language features.  We still
+          run tests with the current JRE to catch any JVM-specificisms.
       -->
-      <id>building-with-minimum-java-runtime-</id>
+      <id>building-with-bree</id>
       <activation>
-        <property><name>toolchain.java.runtime</name><value>JavaSE-11</value></property>
+        <jdk>[9,)</jdk> <!-- we require Java 1.8 -->
       </activation>
       <properties>
          <tycho.toolchains>BREE</tycho.toolchains>
+         <!-- <toolchains-jvm-flags>__add-modules=ALL-SYSTEM</toolchains-jvm-flags> -->
       </properties>
-    </profile>
-    <profile>
-      <!--
-          We use tycho-surefire-plugin's default `useJDK=SYSTEM`
-          mode to run tests using the configured Maven toolchain.  So
-          specifying toolchain.java.runtime=JavaSE-9 will lead to test
-          failures should we attempt to load bundles with BREE=JavaSE-1.8
-          or that contains Java 8 code.  Same applies with Java 9.
-      -->
-      <id>testing-with-java-runtime</id>
-      <activation>
-        <property><name>toolchain.java.runtime</name></property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-toolchains-plugin</artifactId>
-            <executions>
-              <execution>
-                <phase>validate</phase>
-                <goals>
-                  <goal>toolchain</goal>
-                </goals>
-              </execution>
-            </executions>
-            <configuration>
-              <toolchains>
-                <jdk>
-                  <id>${toolchain.java.runtime}</id>
-                </jdk>
-              </toolchains>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
     </profile>
 
     <profile>

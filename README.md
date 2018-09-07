@@ -310,47 +310,75 @@ require the `.feature.group` suffix.
 
 See [`eclipse/settings/`](eclipse/settings/README.md) for details.
 
-### Configuring Maven/Tycho Toolchains for CI Builds
+### Configuring Maven/Tycho Toolchains for new JDK releases
 
-_Note: this section is only relevant for configuring CI builds_
+Now that OpenJDK is moving to a 6-month release cycle...
 
-We use Tycho's support for Maven Toolchains to ensure that Java 9+
-features do not creep into the code.  This support is enabled by
-compiling with the [`useJDK=BREE`](https://eclipse.org/tycho/sitedocs/tycho-compiler-plugin/compile-mojo.html)
-setting that ensures bundles are *compiled* with a JDK that matches
-the bundle's `Bundle-RequiredExecutionEnvironment`, but ensuring
-`tycho-surefire` runs the tests using the current toolchain
+We use Tycho's support for Maven Toolchains to ensure that new
+language features do not creep into the code.  Tycho's support is
+automatically enabled in the build when compiling with a newer JDK
+than our minimium supported platform.  When using such a JDK, currently
+anything later than JDK 8, we configure the Tycho compiler plugin to
+use the [`useJDK=BREE`](https://eclipse.org/tycho/sitedocs/tycho-compiler-plugin/compile-mojo.html)
+setting to ensure bundles are *compiled* with a JDK that matches
+the bundle's `Bundle-RequiredExecutionEnvironment`.  However we leave
+`tycho-surefire` to run the tests using the current toolchain
 (the default for
-[`useJDK=SYSTEM`](https://eclipse.org/tycho/sitedocs/tycho-surefire/tycho-surefire-plugin/test-mojo.html#useJDK)).
+[`useJDK=SYSTEM`](https://eclipse.org/tycho/sitedocs/tycho-surefire/tycho-surefire-plugin/test-mojo.html#useJDK))
+so as to catch any non-backwards compatible changes.
+
 These settings require configuring
 [Maven's toolchains](https://maven.apache.org/guides/mini/guide-using-toolchains.html)
 to point to appropriate JRE installations.  Tycho further requires
 that a toolchain defines an `id` for the specified _Execution
 Environment_ identifier.  For example, a `~/.m2/toolchains.xml` to
-configure Maven for a Java 8 toolchain on a Mac might be:
+configure Maven on macOS for Java 7, 8, and 11 toolchains might be:
 
 ```
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF8"?>
 <toolchains>
   <toolchain>
     <type>jdk</type>
     <provides>
-      <id>JavaSE-1.8</id> <!-- the Execution Environment -->
+      <id>JavaSE-11</id>
+      <version>11</version>
+      <vendor>openjdk</vendor>
+    </provides>
+    <configuration>
+      <jdkHome>/Library/Java/JavaVirtualMachines/jdk-11.jdk/Contents/Home</jdkHome>
+    </configuration>
+  </toolchain>
+  <toolchain>
+    <type>jdk</type>
+    <provides>
+      <id>JavaSE-1.8</id>
       <version>1.8</version>
       <vendor>oracle</vendor>
     </provides>
     <configuration>
-      <jdkHome>/Library/Java/JavaVirtualMachines/jdk1.8.0_155.jdk/Contents/Home/jre</jdkHome>
+      <jdkHome>/Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home/jre</jdkHome>
+    </configuration>
+  </toolchain>
+  <toolchain>
+    <type>jdk</type>
+    <provides>
+      <id>JavaSE-1.7</id>
+      <version>1.7</version>
+      <vendor>oracle</vendor>
+    </provides>
+    <configuration>
+      <jdkHome>/Library/Java/JavaVirtualMachines/jdk1.7.0_80.jdk/Contents/Home/jre</jdkHome>
     </configuration>
   </toolchain>
 </toolchains>
 ```
 
-Note that _jdkHome_ above specifies the `jre/` directory: Tycho sets
-the default boot classpath to _jdkHome_`/lib/*`, _jdkHome_`/lib/ext/*`,
-and _jdkHome_`/lib/endorsed/*`.  For many JDKs, including Oracle's JDK
-and the OpenJDK, those directories are actually found in the `jre/`
-directory.  Compilation errors such as `java.lang.String` not found
-and `java.lang.Exception` not found
-indicate a misconfigured _jdkHome_.
+Note that _jdkHome_ for `JavaSE-1.7` and `JavaSE-1.8` specifies the
+`jre/` directory: Tycho sets the default boot classpath to
+_jdkHome_`/lib/*`, _jdkHome_`/lib/ext/*`, and _jdkHome_`/lib/endorsed/*`.
+For many JDKs, including Oracle's JDK and the OpenJDK *prior to Java 9*, those
+directories are actually found in the `jre/` directory.  Compilation
+errors such as `java.lang.String` not found and `java.lang.Exception`
+not found indicate a misconfigured _jdkHome_.  With the introduction of
+_Java modules_ with Java 9, there is no longer a separate JRE distribution.
 
