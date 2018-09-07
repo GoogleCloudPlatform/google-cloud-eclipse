@@ -14,21 +14,20 @@ install:
   - build/install-cloudsdk.sh 190.0.1 $HOME
 # ECLIPSE_TARGET is the targeted platform: photon is the default target
 # We run jacoco on photon
-# JAVA_RUNTIME specifies the execution runtime for tests; must match an <id> in .travisci/toolchains.xml
 matrix:
   include:
     - name: "Java 8 + Oxygen"
       jdk: oraclejdk8
-      env: JAVA_RUNTIME=JavaSE-1.8 ECLIPSE_TARGET=oxygen
+      env: ECLIPSE_TARGET=oxygen
     - name: "Java 8 + Photon"
       jdk: oraclejdk8
-      env: JAVA_RUNTIME=JavaSE-1.8 MAVEN_FLAGS=-Pjacoco
+      env: MAVEN_FLAGS=-Pjacoco
     - name: "Java 8 + Eclipse 2018-09"
       jdk: oraclejdk8
-      env: JAVA_RUNTIME=JavaSE-1.8 ECLIPSE_TARGET=2018-09
+      env: ECLIPSE_TARGET=2018-09
     - name: "Java 11 + Eclipse 2018-09"
       jdk: openjdk11
-      env: JAVA_RUNTIME=JavaSE-1.8 ECLIPSE_TARGET=2018-09
+      env: ECLIPSE_TARGET=2018-09
 env:
   global:
     - CLOUD_SDK_HOME=$HOME/google-cloud-sdk
@@ -48,7 +47,6 @@ script: ./mvnw -V -B --fail-at-end verify ${MAVEN_FLAGS}
      -Ptravis -Perrorprone
      ${ECLIPSE_TARGET:+-Declipse.target=${ECLIPSE_TARGET}}
      --toolchains=.travisci/toolchains.xml
-     -Dtoolchain.java.runtime=${JAVA_RUNTIME}
 cache:
   directories:
    - $HOME/.m2

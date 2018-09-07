@@ -63,7 +63,6 @@
       the Bundle-RequiredExecutionEnvironment. See `README.md` for details.
     -->
     <tycho.toolchains>SYSTEM</tycho.toolchains>
-    <toolchains-jvm-flags/>
 
     <!-- OS-specific JVM flags, empty for the default case but redefined below -->
     <os-jvm-flags/>
@@ -326,7 +325,7 @@
               -Xms40m -Xmx1G -XX:MaxPermSize=512m
               -Djava.awt.headless=true
               -Dlogback.configurationFile=platform:/plugin/com.google.cloud.tools.eclipse.test.dependencies/logback.xml
-              ${os-jvm-flags} ${toolchains-jvm-flags}
+              ${os-jvm-flags}
             </argLine>
             <bundleStartLevel>
               <bundle>
@@ -521,7 +520,6 @@
       </activation>
       <properties>
          <tycho.toolchains>BREE</tycho.toolchains>
-         <!-- <toolchains-jvm-flags>__add-modules=ALL-SYSTEM</toolchains-jvm-flags> -->
       </properties>
     </profile>
 
