@@ -36,6 +36,9 @@
   </modules>
 
   <properties>
+    <!-- Execution environment supported by Cloud Tools for Eclipse -->
+    <requiredExecutionEnvironment>JavaSE-1.8</requiredExecutionEnvironment>
+
     <tycho.version>1.2.0</tycho.version>
     <tycho-extras.version>1.2.0</tycho-extras.version>
     <product.version.qualifier.suffix/>  <!-- 0-length string by default -->
@@ -508,7 +511,7 @@
     <profile>
        <!--
           When building with a later JDK (i.e., JDK 11) than our
-          minimum supported platform (currently JavaSE-1.8/jdk8) then
+          minimum supported platform (`requiredExecutionEnvironment`) then
           use Tycho's useJDK=BREE mode to compile bundles using their
           corresponding `Bundle-RequiredExecutionEnvironment` to catch
           inadvertent use of incompatible language features.  We still
@@ -516,7 +519,7 @@
       -->
       <id>building-with-bree</id>
       <activation>
-        <jdk>[9,)</jdk> <!-- we require Java 1.8 -->
+        <jdk>[9,)</jdk> <!-- kept in sync with `requiredExecutionEnvironment` -->
       </activation>
       <properties>
          <tycho.toolchains>BREE</tycho.toolchains>

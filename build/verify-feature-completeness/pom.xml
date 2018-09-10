@@ -69,6 +69,7 @@
             -repository ${eclipse.repoUrl},${gcp.repoUrl}
             -installIUs ${installIUs}
           </appArgLine>
+          <executionEnvironment>${requiredExecutionEnvironment}</executionEnvironment>
           <repositories>
             <repository>
               <id>eclipse</id>
