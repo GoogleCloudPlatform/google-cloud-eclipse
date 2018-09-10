@@ -27,7 +27,7 @@ matrix:
       env: ECLIPSE_TARGET=2018-09 MAVEN_FLAGS='-Perrorprone'
     - name: "Eclipse 2018-09 (4.9) on Java 11"
       jdk: openjdk11
-      env: ECLIPSE_TARGET=2018-09
+      env: ECLIPSE_TARGET=2018-09 MAVEN_FLAGS='--toolchains=.travisci/toolchains.xml'
 env:
   global:
     - CLOUD_SDK_HOME=$HOME/google-cloud-sdk
@@ -46,7 +46,6 @@ before_script:
 script: ./mvnw -V -B --fail-at-end verify ${MAVEN_FLAGS}
      -Ptravis
      ${ECLIPSE_TARGET:+-Declipse.target=${ECLIPSE_TARGET}}
-     --toolchains=.travisci/toolchains.xml
 cache:
   directories:
    - $HOME/.m2
