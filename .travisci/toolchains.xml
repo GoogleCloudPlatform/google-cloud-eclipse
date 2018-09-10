@@ -6,15 +6,14 @@
     for details on inspecting the docker images
   -->
   <toolchain>
-    <!-- travis' `openjdk11` uses their install-jdk.sh script, which installs as $HOME/<jdkId> -->
     <type>jdk</type>
     <provides>
-      <id>JavaSE-11</id>
-      <version>11</version>
-      <vendor>openjdk</vendor>
+      <id>JavaSE-1.7</id>
+      <version>1.7</version>
+      <vendor>oracle</vendor>
     </provides>
     <configuration>
-      <jdkHome>/home/travis/openjdk11</jdkHome>
+      <jdkHome>/usr/lib/jvm/java-7-openjdk-amd64/jre</jdkHome>
     </configuration>
   </toolchain>
   <toolchain>
@@ -29,14 +28,15 @@
     </configuration>
   </toolchain>
   <toolchain>
+    <!-- travis' `openjdk11` uses their install-jdk.sh script, which installs as $HOME/<jdkId> -->
     <type>jdk</type>
     <provides>
-      <id>JavaSE-1.7</id>
-      <version>1.7</version>
-      <vendor>oracle</vendor>
+      <id>JavaSE-11</id>
+      <version>11</version>
+      <vendor>openjdk</vendor>
     </provides>
     <configuration>
-      <jdkHome>/usr/lib/jvm/java-7-openjdk-amd64/jre</jdkHome>
+      <jdkHome>/home/travis/openjdk11</jdkHome>
     </configuration>
   </toolchain>
 </toolchains>
