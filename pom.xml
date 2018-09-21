@@ -39,8 +39,8 @@
     <!-- Execution environment supported by Cloud Tools for Eclipse -->
     <requiredExecutionEnvironment>JavaSE-1.8</requiredExecutionEnvironment>
 
-    <tycho.version>1.2.0</tycho.version>
-    <tycho-extras.version>1.2.0</tycho-extras.version>
+    <tycho.version>1.1.0</tycho.version>
+    <tycho-extras.version>1.1.0</tycho-extras.version>
     <product.version.qualifier.suffix/>  <!-- 0-length string by default -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <eclipse.target>photon</eclipse.target> <!-- the default build -->
