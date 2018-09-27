@@ -4,11 +4,11 @@
 #
 
 # Fail on any error.
-set -e
+set -o errexit
 # Display commands being run.
-set -x
+set -o xtrace
 
-gsutil -q cp "gs://ct4e-m2-repositories-for-kokoro/m2-oxygen.tar" - \
+gsutil -q cp "gs://ct4e-m2-repositories-for-kokoro/m2-cache.tar" - \
   | tar -C "${HOME}" -xf -
 
 export CLOUDSDK_CORE_DISABLE_USAGE_REPORTING=true

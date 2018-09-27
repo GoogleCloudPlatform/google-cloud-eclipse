@@ -4,9 +4,9 @@
 #
 
 # Fail on any error.
-set -e
+set -o errexit
 # Display commands being run.
-set -x
+set -o xtrace
 
 echo "KOKORO_GFILE_DIR: ${KOKORO_GFILE_DIR}"
 ls -l "${KOKORO_GFILE_DIR}"
