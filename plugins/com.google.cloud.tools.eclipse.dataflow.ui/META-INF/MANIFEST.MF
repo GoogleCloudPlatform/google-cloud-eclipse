@@ -12,8 +12,8 @@ Bundle-Localization: plugin
 Export-Package: com.google.cloud.tools.eclipse.dataflow.ui.page,
  com.google.cloud.tools.eclipse.dataflow.ui.util,
  com.google.cloud.tools.eclipse.dataflow.ui.wizard
-Import-Package: com.google.api.client.auth.oauth2;version="[1.23.0,1.24.0)",
- com.google.api.client.googleapis.json;version="[1.23.0,1.24.0)",
+Import-Package: com.google.api.client.auth.oauth2;version="[1.25.0,1.26.0)",
+ com.google.api.client.googleapis.json;version="[1.25.0,1.26.0)",
  com.google.cloud.tools.eclipse.dataflow.core.launcher,
  com.google.cloud.tools.eclipse.dataflow.core.launcher.options,
  com.google.cloud.tools.eclipse.dataflow.core.natures,

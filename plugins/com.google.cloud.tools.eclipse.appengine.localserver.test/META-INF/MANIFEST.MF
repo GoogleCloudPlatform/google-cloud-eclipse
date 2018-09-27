@@ -12,7 +12,7 @@ Import-Package: com.google.cloud.tools.eclipse.swtbot,
  com.google.cloud.tools.eclipse.test.util,
  com.google.cloud.tools.eclipse.test.util.project,
  com.google.cloud.tools.eclipse.test.util.ui,
- com.google.cloud.tools.login;version="0.1.0",
+ com.google.cloud.tools.login;version="0.2.2",
  org.eclipse.jst.j2ee.web.project.facet,
  org.eclipse.swtbot.eclipse.finder,
  org.eclipse.swtbot.swt.finder.widgets
