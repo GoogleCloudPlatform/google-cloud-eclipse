@@ -33,12 +33,15 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.junit.Assume;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(SWTBotJunit4ClassRunner.class)
 public class FlexMavenPackagedProjectStagingDelegateTest {
 
+  // flaking on Photon: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/pull/3256
+  @Ignore
   @Test
   public void testStage_springBoot() throws IOException, CoreException {
     Assume.assumeTrue("Only for JavaSE-8", JavaRuntimeUtils.hasJavaSE8());
