@@ -285,13 +285,13 @@ public abstract class BasePluginXmlTest {
   @Test
   public final void testGoogleApisImportVersions() throws IOException {
     checkDependencyDirectives(
-        "Import-Package", "com.google.api.", "version=\"[1.23.0,1.24.0)\"");
+        "Import-Package", "com.google.api.", "version=\"[1.25.0,1.26.0)\"");
   }
 
   @Test
   public final void testGoogleApisExportVersions() throws IOException {
     checkDependencyDirectives(
-        "Export-Package", "com.google.api.", "version=\"1.23.0\"");
+        "Export-Package", "com.google.api.", "version=\"1.25.0\"");
   }
 
   private void checkDependencyDirectives(
