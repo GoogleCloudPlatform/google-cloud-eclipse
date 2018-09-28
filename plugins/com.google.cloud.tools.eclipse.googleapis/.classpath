@@ -3,24 +3,24 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src/"/>
-	<classpathentry exported="true" kind="lib" path="lib/google-api-client-1.23.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/google-api-services-appengine-v1-rev35-1.23.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/google-api-services-bigquery-v2-rev362-1.23.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/google-api-services-cloudresourcemanager-v1-rev455-1.23.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/google-api-services-compute-v1-rev160-1.23.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/google-api-services-dataflow-v1b3-rev219-1.23.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/google-api-services-datastore-v1-rev34-1.23.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/google-api-services-iam-v1-rev222-1.23.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/google-api-services-oauth2-v2-rev131-1.23.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/google-api-services-pubsub-v1-rev363-1.23.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/google-api-services-servicemanagement-v1-rev368-1.23.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/google-api-services-storage-v1-rev115-1.23.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/google-http-client-1.23.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/google-http-client-jackson-1.23.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/google-http-client-jackson2-1.23.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/google-oauth-client-1.23.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/google-oauth-client-java6-1.23.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/google-oauth-client-jetty-1.23.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/plugins-login-common-0.1.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-client-1.25.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-services-appengine-v1-rev80-1.25.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-services-bigquery-v2-rev405-1.25.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-services-cloudresourcemanager-v1-rev507-1.25.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-services-compute-v1-rev198-1.25.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-services-dataflow-v1b3-rev259-1.25.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-services-datastore-v1-rev63-1.25.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-services-iam-v1-rev261-1.25.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-services-oauth2-v2-rev141-1.25.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-services-pubsub-v1-rev403-1.25.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-services-servicemanagement-v1-rev412-1.25.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-services-storage-v1-rev138-1.25.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-http-client-1.25.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-http-client-jackson-1.25.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-http-client-jackson2-1.25.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-oauth-client-1.25.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-oauth-client-java6-1.25.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-oauth-client-jetty-1.25.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/plugins-login-common-0.2.2.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
