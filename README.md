@@ -149,7 +149,7 @@ target platform whenever dependencies are updated.
 
   0. As described above, you must first build the target platform with Maven:
 
-     `$ mvn -Pide-target-platform package`
+     `$ (cd eclipse; mvn -Pide-target-platform package)`
 
   1. Open the `Preferences` dialog, go to `Plug-in Development` > `Target Platform`.
 
@@ -284,7 +284,7 @@ Both the `.tpd` and `.target` files should be committed.
 The IDE Target Platform needs to be rebuilt at the command line
 and reimported into Eclipse when dependency versions are changed:
 
-1. `mvn -Pide-target-platform package`
+1. `(cd eclipse; mvn -Pide-target-platform package)`
 2. Preferences > Plug-in Development > Target Platforms
 3. Select your target ("GCP IDE Target Platform") and click Edit
 4. Select the location and click Reload to cause any cached info to be discarded.
