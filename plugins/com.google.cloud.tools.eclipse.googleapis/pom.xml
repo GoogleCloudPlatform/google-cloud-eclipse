@@ -115,11 +115,6 @@
       <artifactId>google-oauth-client-java6</artifactId>
       <version>1.25.0</version>
     </dependency>
-    <dependency>
-      <groupId>com.google.cloud.tools.login</groupId>
-      <artifactId>plugins-login-common</artifactId>
-      <version>0.2.2</version>
-    </dependency>
   </dependencies>
 
   <build>
@@ -142,7 +137,6 @@
                 com.google.apis,
                 com.google.oauth-client,
                 com.google.http-client,
-                com.google.cloud.tools.login,
               </includeGroupIds>
               <outputDirectory>lib</outputDirectory>
             </configuration>

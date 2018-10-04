@@ -61,6 +61,13 @@
          unpack="false"/>
 
    <plugin
+         id="com.google.cloud.tools.login.plugins-login-common"
+         download-size="0"
+         install-size="0"
+         version="0.2.2"
+         unpack="false"/>
+
+   <plugin
          id="jackson-core-asl"
          download-size="0"
          install-size="0"

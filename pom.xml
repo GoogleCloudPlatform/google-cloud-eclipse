@@ -96,6 +96,13 @@
       <version>2.8.2</version>
     </dependency>
     <dependency>
+      <!-- bundle: com.google.cloud.tools.login.plugins-login-common -->
+      <groupId>com.google.cloud.tools.login</groupId>
+      <artifactId>plugins-login-common</artifactId>
+      <version>0.2.2</version>
+    </dependency>
+    
+    <dependency>
       <!-- bundle: com.google.cloud.tools.appengine -->
       <groupId>com.google.cloud.tools</groupId>
       <artifactId>appengine-plugins-core</artifactId>
