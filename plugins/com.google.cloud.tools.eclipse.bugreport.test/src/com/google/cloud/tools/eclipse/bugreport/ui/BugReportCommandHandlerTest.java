@@ -67,7 +67,7 @@ public class BugReportCommandHandlerTest {
     String javaVersion = matcher.group("javaVersion");
 
     assertTrue(Pattern.compile("^\\d+\\.\\d+\\.\\d+").matcher(toolVersion).find());
-    assertThat(javaVersion, anyOf(startsWith("1.7."), startsWith("1.8."), is("11")));
+    assertThat(javaVersion, anyOf(startsWith("1.7."), startsWith("1.8."), is("11"), startsWith("11.")));
     assertThat(os, anyOf(startsWith("Linux"), startsWith("Mac"), startsWith("Windows")));
     assertTrue(Pattern.compile("^\\d+\\.\\d+").matcher(eclipseVersion).find());
     new CloudSdkVersion(gcloudVersion); // throws IllegalArgumentException if invalid
