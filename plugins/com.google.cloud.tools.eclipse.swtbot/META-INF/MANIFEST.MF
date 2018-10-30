@@ -20,6 +20,6 @@ Export-Package: com.google.cloud.tools.eclipse.swtbot;
    org.eclipse.swtbot.eclipse.finder,
    org.eclipse.swtbot.eclipse.finder.widgets,
    org.eclipse.swtbot.swt.finder"
-Import-Package: com.google.common.base;version="[25.1.0,26.0.0)",
- com.google.common.collect;version="[25.1.0,26.0.0)",
+Import-Package: com.google.common.base;version="[26.0.0,27.0.0)",
+ com.google.common.collect;version="[26.0.0,27.0.0)",
  org.eclipse.wst.validation
