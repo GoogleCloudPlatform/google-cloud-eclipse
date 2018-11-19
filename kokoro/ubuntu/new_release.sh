@@ -12,6 +12,10 @@ gsutil -q cp "gs://ct4e-m2-repositories-for-kokoro/m2-cache.tar" - \
   | tar -C "${HOME}" -xf -
 
 export CLOUDSDK_CORE_DISABLE_USAGE_REPORTING=true
+# Workaround for https://issuetracker.google.com/119096137, until gcloud in
+# the Kokoro base image gets updated to make the issue obsolete.
+gcloud components remove container-builder-local
+
 gcloud components update --quiet
 gcloud components install app-engine-java --quiet
 
