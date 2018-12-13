@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.appengine.standard.java8;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.appengine.AppEngineDescriptor;
@@ -424,7 +423,7 @@ public class ConversionTests {
       AppEngineDescriptor descriptor = AppEngineDescriptor
           .parse(new ByteArrayInputStream(appEngineWebContent.getBytes(StandardCharsets.UTF_8)));
       assertFalse("should not have <runtime>java8</runtime>", descriptor.isJava8());
-      assertNull("should not have a <runtime>", descriptor.getRuntime());
+      assertEquals("should report runtime=java7", "java7", descriptor.getRuntime());
     }
   }
 

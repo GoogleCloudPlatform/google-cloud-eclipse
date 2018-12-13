@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.appengine.standard.java8;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -138,7 +137,7 @@ public class AppEngineStandardFacetVersionChangeTest {
       throws IOException, CoreException, SAXException, AppEngineException {
     AppEngineDescriptor descriptor = parseDescriptor(project);
     assertNotNull(descriptor);
-    assertNull("should have no <runtime> element", descriptor.getRuntime());
+    assertEquals("should report java7 runtime", "java7", descriptor.getRuntime());
   }
 
   private static void assertDescriptorRuntimeIsJre8(IFacetedProject project)
