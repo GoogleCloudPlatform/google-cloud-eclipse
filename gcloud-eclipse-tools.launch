@@ -6,7 +6,6 @@
 <booleanAttribute key="automaticValidate" value="false"/>
 <stringAttribute key="bad_container_name" value="/trunk/gcloud-eclipse-tools-launcher"/>
 <stringAttribute key="bootstrap" value=""/>
-<stringAttribute key="checked" value="com.google.cloud.tools.eclipse.sdk"/>
 <booleanAttribute key="clearConfig" value="true"/>
 <booleanAttribute key="clearws" value="true"/>
 <booleanAttribute key="clearwslog" value="false"/>
@@ -29,7 +28,6 @@
 <stringAttribute key="templateConfig" value="${target_home}/configuration/config.ini"/>
 <booleanAttribute key="tracing" value="true"/>
 <mapAttribute key="tracingOptions">
-<mapEntry key="com.google.cloud.tools.eclipse.sdk/enable.managed.cloud.sdk" value="true"/>
 <mapEntry key="com.ibm.datatools.core.ui/debug" value="true"/>
 <mapEntry key="com.ibm.datatools.core.ui/editor/log" value="true"/>
 <mapEntry key="com.ibm.datatools.core.ui/modelExplorer/log" value="true"/>
