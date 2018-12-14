@@ -60,7 +60,7 @@ public class StandardFacetInstallDelegateTest {
 
     try (InputStream in = appengineWebXml.getContents(true)) {
       AppEngineDescriptor descriptor = AppEngineDescriptor.parse(in);
-      // AppEngineDescriptor now treats an empty runtime as java7 as of 0.6.
+      // AppEngineDescriptor treats an empty runtime as java7 as of 0.6.
       assertEquals("java7", descriptor.getRuntime());
     }
   }
