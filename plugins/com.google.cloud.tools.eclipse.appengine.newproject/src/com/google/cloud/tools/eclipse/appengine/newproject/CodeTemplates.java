@@ -232,6 +232,9 @@ public class CodeTemplates {
         "1.3.2"); //$NON-NLS-1$
     properties.put("mavenPluginVersion", mavenPluginVersion); //$NON-NLS-1$
 
+    properties.put("servletVersion", "3.1");
+    properties.put("compilerVersion", "1.8");
+
     if (isStandardProject) {
       String sdkVersion = getCurrentVersion(
           "com.google.appengine", //$NON-NLS-1$

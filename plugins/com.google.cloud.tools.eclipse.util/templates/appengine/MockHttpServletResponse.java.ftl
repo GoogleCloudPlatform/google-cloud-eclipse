@@ -44,9 +44,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
   public StringWriter getWriterContent() {
     return writerContent;
   }
-  
+
   // anything below is the default generated implementation
-  
+
   @Override
   public void flushBuffer() throws IOException {
   }
@@ -173,15 +173,15 @@ public class MockHttpServletResponse implements HttpServletResponse {
   @Override
   public void setStatus(int arg0, String arg1) {
   }
-  
+
   // Servlet API 3.0 and 3.1 methods
-  public void setContentLengthLong(long length) {  
+  public void setContentLengthLong(long length) {
   }
 
   public int getStatus() {
     return 0;
   }
-  
+
   public String getHeader(String name) {
     return null;
   }
@@ -189,7 +189,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
   public Collection<String> getHeaders(String name) {
     return null;
   }
-  
+
   public Collection<String> getHeaderNames() {
     return null;
   }
