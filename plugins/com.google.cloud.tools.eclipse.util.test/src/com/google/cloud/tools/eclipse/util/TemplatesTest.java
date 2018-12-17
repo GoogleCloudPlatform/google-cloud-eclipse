@@ -117,11 +117,54 @@ public class TemplatesTest {
   }
 
   @Test
+  public void testCreateFileContent_helloAppEngineWithPackageServlet25()
+      throws CoreException, IOException {
+    dataMap.put("package", "com.example");
+    dataMap.put("servletVersion", "2.5");
+    Templates.createFileContent(fileLocation, Templates.HELLO_APPENGINE_TEMPLATE, dataMap);
+
+    compareToFile("helloAppEngineWithPackageServlet25.txt");
+  }
+
+  @Test
+  public void testCreateFileContent_helloAppEngineWithoutPackageSerlvet25()
+      throws CoreException, IOException {
+    dataMap.put("package", "");
+    dataMap.put("servletVersion", "2.5");
+    Templates.createFileContent(fileLocation, Templates.HELLO_APPENGINE_TEMPLATE, dataMap);
+
+    compareToFile("helloAppEngineWithoutPackageServlet25.txt");
+  }
+
+  @Test
   public void testCreateFileContent_index() throws CoreException, IOException {
     Templates.createFileContent(
         fileLocation, Templates.INDEX_HTML_TEMPLATE, Collections.emptyMap());
 
     compareToFile("index.txt");
+  }
+
+  @Test
+  public void testCreateFileContent_web25() throws CoreException, IOException {
+    dataMap.put("package", "com.example.");
+    dataMap.put("servletVersion", "2.5");
+    dataMap.put("namespace", "http://java.sun.com/xml/ns/javaee");
+    dataMap.put("schemaUrl", "http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd");
+    Templates.createFileContent(fileLocation, Templates.WEB_XML_TEMPLATE, dataMap);
+
+     compareToFile("web25.txt");
+  }
+
+  @Test
+  public void testCreateFileContent_web25ObjectifyFilter() throws CoreException, IOException {
+    dataMap.put("package", "com.example.");
+    dataMap.put("servletVersion", "2.5");
+    dataMap.put("namespace", "http://java.sun.com/xml/ns/javaee");
+    dataMap.put("schemaUrl", "http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd");
+    dataMap.put("objectifyAdded", "true");
+    Templates.createFileContent(fileLocation, Templates.WEB_XML_TEMPLATE, dataMap);
+
+     compareToFile("web25ObjectifyFilter.txt");
   }
 
   @Test
@@ -141,6 +184,7 @@ public class TemplatesTest {
     dataMap.put("servletVersion", "3.1");
     dataMap.put("namespace", "http://xmlns.jcp.org/xml/ns/javaee");
     dataMap.put("schemaUrl", "http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd");
+    dataMap.put("objectifyAdded", "true"); // should have no effect
     Templates.createFileContent(fileLocation, Templates.WEB_XML_TEMPLATE, dataMap);
 
     compareToFile("web31.txt");

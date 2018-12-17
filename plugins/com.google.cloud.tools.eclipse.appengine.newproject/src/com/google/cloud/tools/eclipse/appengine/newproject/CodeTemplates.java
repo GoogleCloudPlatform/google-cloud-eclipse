@@ -111,6 +111,8 @@ public class CodeTemplates {
     Map<String, String> properties = new HashMap<>();
     properties.put("package", Strings.nullToEmpty(packageName)); //$NON-NLS-1$
 
+    properties.put("servletVersion", "3.1"); //$NON-NLS-1$ //$NON-NLS-2$
+
     IFile hello = createChildFile("HelloAppEngine.java", //$NON-NLS-1$
         Templates.HELLO_APPENGINE_TEMPLATE,
         mainPackageFolder, properties, subMonitor.split(5));
@@ -122,7 +124,8 @@ public class CodeTemplates {
         Templates.MOCK_HTTPSERVLETRESPONSE_TEMPLATE,
         testPackageFolder, properties, subMonitor.split(5));
 
-    if (isObjectifySelected(config)) {
+    boolean servlet25 = false;
+    if (!servlet25 && isObjectifySelected(config)) {
       createChildFile("ObjectifyWebFilter.java", //$NON-NLS-1$
           Templates.OBJECTIFY_WEB_FILTER_TEMPLATE,
           mainPackageFolder, properties, subMonitor.split(5));
@@ -177,9 +180,20 @@ public class CodeTemplates {
         : config.getPackageName() + "."; //$NON-NLS-1$
     properties.put("package", packageValue); //$NON-NLS-1$
 
-    properties.put("servletVersion", "3.1"); //$NON-NLS-1$ //$NON-NLS-2$
-    properties.put("namespace", "http://xmlns.jcp.org/xml/ns/javaee"); //$NON-NLS-1$ //$NON-NLS-2$
-    properties.put("schemaUrl", "http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"); //$NON-NLS-1$ //$NON-NLS-2$
+    boolean servlet25 = false;
+    if (servlet25) {
+      if (isObjectifySelected(config)) {
+        properties.put("objectifyAdded", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+      }
+
+      properties.put("servletVersion", "2.5"); //$NON-NLS-1$ //$NON-NLS-2$
+      properties.put("namespace", "http://java.sun.com/xml/ns/javaee"); //$NON-NLS-1$ //$NON-NLS-2$
+      properties.put("schemaUrl", "http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"); //$NON-NLS-1$ //$NON-NLS-2$
+    } else {
+      properties.put("servletVersion", "3.1"); //$NON-NLS-1$ //$NON-NLS-2$
+      properties.put("namespace", "http://xmlns.jcp.org/xml/ns/javaee"); //$NON-NLS-1$ //$NON-NLS-2$
+      properties.put("schemaUrl", "http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"); //$NON-NLS-1$ //$NON-NLS-2$
+    }
 
     IFolder webInf = project.getFolder("src/main/webapp/WEB-INF"); //$NON-NLS-1$
     createChildFile("web.xml", Templates.WEB_XML_TEMPLATE, webInf, //$NON-NLS-1$
@@ -239,7 +253,7 @@ public class CodeTemplates {
       String sdkVersion = getCurrentVersion(
           "com.google.appengine", //$NON-NLS-1$
           "appengine-api-1.0-sdk", //$NON-NLS-1$
-          "1.9.64"); //$NON-NLS-1$
+          "1.9.70"); //$NON-NLS-1$
       properties.put("appEngineApiSdkVersion", sdkVersion); //$NON-NLS-1$
     }
 

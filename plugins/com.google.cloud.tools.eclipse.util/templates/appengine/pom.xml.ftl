@@ -36,7 +36,20 @@
 
   <dependencies>
     <!-- Compile/runtime dependencies -->
-<#if servletVersion == "3.1">
+<#if servletVersion == "2.5">
+     <dependency>
+       <groupId>javax.servlet</groupId>
+       <artifactId>servlet-api</artifactId>
+       <version>2.5</version>
+       <scope>provided</scope>
+     </dependency>
+     <dependency>
+       <groupId>javax.servlet.jsp</groupId>
+       <artifactId>jsp-api</artifactId>
+       <version>2.1</version>
+       <scope>provided</scope>
+     </dependency>
+<#else>
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
@@ -49,12 +62,12 @@
       <version>2.3.1</version>
       <scope>provided</scope>
     </dependency>
+</#if>
     <dependency>
       <groupId>jstl</groupId>
       <artifactId>jstl</artifactId>
       <version>1.2</version>
     </dependency>
-</#if>
     <!-- Test Dependencies -->
     <dependency>
       <groupId>junit</groupId>
