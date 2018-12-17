@@ -89,8 +89,8 @@ class ElementProblem {
   }
   
   /**
-   * BannedElements are equal if they represent the same marker type (marker ID),
-   * have the same location within a document, and will display the same message.
+   * ElementProblems are equal if they represent the same marker type (marker ID),
+   * have the same location within a document, and display the same message.
    */
   @Override
   public boolean equals(Object object) {

@@ -76,9 +76,9 @@ public class XmlValidator extends AbstractValidator implements IExecutableExtens
       if (document != null) {
         ArrayList<ElementProblem> blacklist = helper.checkForElements(resource, document);
         String encoding = (String) document.getDocumentElement().getUserData("encoding");
-        Map<ElementProblem, Integer> bannedElementOffsetMap =
+        Map<ElementProblem, Integer> problemOffsetMap =
             ValidationUtils.getOffsetMap(bytes, blacklist, encoding);
-        for (Map.Entry<ElementProblem, Integer> entry : bannedElementOffsetMap.entrySet()) {
+        for (Map.Entry<ElementProblem, Integer> entry : problemOffsetMap.entrySet()) {
           createMarker(resource, entry.getKey());
         }
       }

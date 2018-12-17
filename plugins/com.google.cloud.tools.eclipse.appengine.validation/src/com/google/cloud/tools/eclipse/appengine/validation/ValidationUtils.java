@@ -41,7 +41,7 @@ public class ValidationUtils {
    */
   public static Map<ElementProblem, Integer> getOffsetMap(byte[] bytes,
       ArrayList<ElementProblem> blacklist, String encoding) {
-    Map<ElementProblem, Integer> bannedElementOffsetMap = new HashMap<>();
+    Map<ElementProblem, Integer> elementProblemOffsetMap = new HashMap<>();
     for (ElementProblem element : blacklist) {
       ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
       try (BufferedReader reader =
@@ -52,12 +52,12 @@ public class ValidationUtils {
           charOffset += line.length() + 1;
         }
         int start = charOffset + element.getStart().getColumnNumber() - 1;
-        bannedElementOffsetMap.put(element, start);
+        elementProblemOffsetMap.put(element, start);
       } catch (IOException ex) {
         logger.log(Level.SEVERE, ex.getMessage());
       }
     }
-    return bannedElementOffsetMap;
+    return elementProblemOffsetMap;
   }
 
   static String convertStreamToString(InputStream stream, String charset) throws IOException {

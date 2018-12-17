@@ -89,7 +89,7 @@ public class ValidationUtilsTest {
     blacklist.clear();
     byte[] bytes = MIXED_XML_WITH_PROJECT_ID.getBytes(StandardCharsets.UTF_8);
     DocumentLocation start = new DocumentLocation(3, 13);
-    ElementProblem bannedElement = new ElementProblem(
+    ElementProblem problem = new ElementProblem(
         "application", 
         "", 
         IMarker.SEVERITY_WARNING, 
@@ -97,10 +97,10 @@ public class ValidationUtilsTest {
         start, 
         1, 
         null);
-    blacklist.add(bannedElement);
+    blacklist.add(problem);
     Map<ElementProblem, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist, "UTF-8");
     assertEquals(1, map.size());
-    int offset = map.get(bannedElement);
+    int offset = map.get(problem);
     assertEquals(21, offset);
   }
   

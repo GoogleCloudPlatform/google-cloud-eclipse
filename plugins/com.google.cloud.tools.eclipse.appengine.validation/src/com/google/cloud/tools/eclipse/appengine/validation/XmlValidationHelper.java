@@ -23,7 +23,7 @@ import org.w3c.dom.Document;
 interface XmlValidationHelper {
 
   /**
-   * Searches the {@link Document} for banned elements and returns them
+   * Searches the {@link Document} for element problems and returns them
    * as a list of {@link ElementProblem}s.
    */
   ArrayList<ElementProblem> checkForElements(IResource resource, Document document);

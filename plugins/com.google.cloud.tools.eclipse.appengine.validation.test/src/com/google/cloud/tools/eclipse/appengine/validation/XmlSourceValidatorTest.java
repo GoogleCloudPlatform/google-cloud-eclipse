@@ -106,7 +106,7 @@ public class XmlSourceValidatorTest {
   }
 
   @Test
-  public void testValidate_noBannedElements() throws IOException {
+  public void testValidate_noProblemElements() throws IOException {
     XmlSourceValidator validator = new XmlSourceValidator();
     validator.setHelper(new AppEngineWebXmlValidator());
     byte[] xml = "<test></test>".getBytes(StandardCharsets.UTF_8);

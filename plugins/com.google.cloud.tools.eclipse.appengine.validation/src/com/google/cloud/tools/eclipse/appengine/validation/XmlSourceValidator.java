@@ -91,9 +91,9 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
       if (document != null) {
         ArrayList<ElementProblem> blacklist = helper.checkForElements(source, document);
         String encoding = (String) document.getDocumentElement().getUserData("encoding");
-        Map<ElementProblem, Integer> bannedElementOffsetMap =
+        Map<ElementProblem, Integer> problemOffsetMap =
             ValidationUtils.getOffsetMap(bytes, blacklist, encoding);
-        for (Map.Entry<ElementProblem, Integer> entry : bannedElementOffsetMap.entrySet()) {
+        for (Map.Entry<ElementProblem, Integer> entry : problemOffsetMap.entrySet()) {
           createMessage(reporter, entry.getKey(), entry.getValue());
         }
       }

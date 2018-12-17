@@ -29,7 +29,7 @@ import org.junit.Test;
 public class ElementProblemTest {
 
   @Test
-  public void testBannedElementConstructor_nullElementName() {
+  public void testElementProblemConstructor_nullElementName() {
     try {
       new ElementProblem(null);
       fail();
@@ -39,7 +39,7 @@ public class ElementProblemTest {
   }
 
   @Test
-  public void testBannedElementConstructor_nullLocation() {
+  public void testElementProblemConstructor_nullLocation() {
     try {
       new ElementProblem(
           "test",
