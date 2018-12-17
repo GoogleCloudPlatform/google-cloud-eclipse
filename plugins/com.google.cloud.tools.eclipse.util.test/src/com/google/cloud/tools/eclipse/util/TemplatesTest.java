@@ -152,7 +152,7 @@ public class TemplatesTest {
     dataMap.put("schemaUrl", "http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd");
     Templates.createFileContent(fileLocation, Templates.WEB_XML_TEMPLATE, dataMap);
 
-     compareToFile("web25.txt");
+    compareToFile("web25.txt");
   }
 
   @Test
@@ -164,7 +164,7 @@ public class TemplatesTest {
     dataMap.put("objectifyAdded", "true");
     Templates.createFileContent(fileLocation, Templates.WEB_XML_TEMPLATE, dataMap);
 
-     compareToFile("web25ObjectifyFilter.txt");
+    compareToFile("web25ObjectifyFilter.txt");
   }
 
   @Test
