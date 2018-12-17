@@ -118,8 +118,8 @@ public class TemplatesTest {
 
   @Test
   public void testCreateFileContent_index() throws CoreException, IOException {
-    Templates.createFileContent(fileLocation,
-        Templates.INDEX_HTML_TEMPLATE, Collections.<String, String>emptyMap());
+    Templates.createFileContent(
+        fileLocation, Templates.INDEX_HTML_TEMPLATE, Collections.emptyMap());
 
     compareToFile("index.txt");
   }
