@@ -34,6 +34,18 @@ public class AppEngineWebXmlValidator implements XmlValidationHelper {
   @Override
   public ArrayList<ElementProblem> checkForProblems(IResource resource, Document document) {
     ArrayList<ElementProblem> problems = new ArrayList<>();
+
+    List<ElementProblem> blacklistProblems = checkBlacklistedElements(document);
+    problems.addAll(blacklistProblems);
+    
+    List<ElementProblem> runtimeProblems = checkRuntime(document);
+    problems.addAll(runtimeProblems);
+    
+    return problems;
+  }
+
+  private List<ElementProblem> checkBlacklistedElements(Document document) {   
+    ArrayList<ElementProblem> problems = new ArrayList<>();
     ArrayList<String> blacklistedElements = AppEngineWebBlacklist.getBlacklistElements();
     for (String elementName : blacklistedElements) {
       NodeList nodeList =
@@ -48,16 +60,13 @@ public class AppEngineWebXmlValidator implements XmlValidationHelper {
         problems.add(problem);
       }
     }
-    
-    List<ElementProblem> runtimeProblems = checkRuntime(document);
-    
-    problems.addAll(runtimeProblems);
-    
     return problems;
   }
 
+  /**
+   * Check for obsolete runtimes.
+   */
   private List<ElementProblem> checkRuntime(Document document) {
-    
     ArrayList<ElementProblem> problems = new ArrayList<>();
     NodeList nodeList =
         document.getElementsByTagNameNS("http://appengine.google.com/ns/1.0", "runtime");
