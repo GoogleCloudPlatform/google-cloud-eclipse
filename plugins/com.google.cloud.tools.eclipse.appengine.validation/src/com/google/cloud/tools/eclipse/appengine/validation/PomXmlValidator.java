@@ -37,7 +37,7 @@ public class PomXmlValidator implements XmlValidationHelper {
    * sibling has the value "appengine-maven-plugin" or "gcloud-maven-plugin".
    */
   @Override
-  public ArrayList<ElementProblem> checkForElements(IResource resource, Document document) {
+  public ArrayList<ElementProblem> checkForProblems(IResource resource, Document document) {
     ArrayList<ElementProblem> blacklist = new ArrayList<>();
     try {
       XPath xPath = FACTORY.newXPath();

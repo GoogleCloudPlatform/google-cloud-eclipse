@@ -74,7 +74,7 @@ public class XmlValidator extends AbstractValidator implements IExecutableExtens
       deleteMarkers(resource);
       Document document = PositionalXmlScanner.parse(bytes);
       if (document != null) {
-        ArrayList<ElementProblem> blacklist = helper.checkForElements(resource, document);
+        ArrayList<ElementProblem> blacklist = helper.checkForProblems(resource, document);
         String encoding = (String) document.getDocumentElement().getUserData("encoding");
         Map<ElementProblem, Integer> problemOffsetMap =
             ValidationUtils.getOffsetMap(bytes, blacklist, encoding);

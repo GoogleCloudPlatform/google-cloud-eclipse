@@ -28,7 +28,7 @@ import org.w3c.dom.NodeList;
 public class AppEngineWebXmlValidator implements XmlValidationHelper {
 
   @Override
-  public ArrayList<ElementProblem> checkForElements(IResource resource, Document document) {
+  public ArrayList<ElementProblem> checkForProblems(IResource resource, Document document) {
     ArrayList<ElementProblem> blacklist = new ArrayList<>();
     ArrayList<String> blacklistedElements = AppEngineWebBlacklist.getBlacklistElements();
     for (String elementName : blacklistedElements) {

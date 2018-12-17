@@ -74,7 +74,7 @@ public class WebXmlValidator implements XmlValidationHelper {
   }
 
   @Override
-  public ArrayList<ElementProblem> checkForElements(IResource resource, Document document) {
+  public ArrayList<ElementProblem> checkForProblems(IResource resource, Document document) {
     this.document = document;
     this.resource = resource;
     blacklist = new ArrayList<>();
