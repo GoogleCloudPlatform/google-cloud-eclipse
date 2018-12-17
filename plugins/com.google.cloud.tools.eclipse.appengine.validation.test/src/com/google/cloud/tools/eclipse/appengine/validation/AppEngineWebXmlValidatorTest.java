@@ -60,7 +60,7 @@ public class AppEngineWebXmlValidatorTest {
         document.createElementNS("http://appengine.google.com/ns/1.0", "runtime");
     element.setUserData("location", new DocumentLocation(3, 15), null);
     document.appendChild(element);
-    Node java7 = document.createTextNode("java");
+    Node java7 = document.createTextNode("java7");
     element.appendChild(java7);
     
     ArrayList<ElementProblem> blacklist = validator.checkForProblems(null, document);
