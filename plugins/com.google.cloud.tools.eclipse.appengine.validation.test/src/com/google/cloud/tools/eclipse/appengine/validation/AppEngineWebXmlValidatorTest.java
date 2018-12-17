@@ -22,27 +22,66 @@ import java.util.ArrayList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 public class AppEngineWebXmlValidatorTest {
   
-  @Test
-  public void testCheckForElements() throws ParserConfigurationException {
+  private Document document;
+  private AppEngineWebXmlValidator validator = new AppEngineWebXmlValidator();
+
+  @Before
+  public void setUp() throws ParserConfigurationException {
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
     DocumentBuilder documentBuilder  = builderFactory.newDocumentBuilder();
-    Document document = documentBuilder.newDocument();
     
+    document = documentBuilder.newDocument();
+  }
+  
+  @Test
+  public void testCheckForApplication() {
     Element element =
         document.createElementNS("http://appengine.google.com/ns/1.0", "application");
     element.setUserData("location", new DocumentLocation(3, 15), null);
     document.appendChild(element);
     
-    AppEngineWebXmlValidator validator = new AppEngineWebXmlValidator();
     ArrayList<ElementProblem> blacklist = validator.checkForProblems(null, document);
     assertEquals(1, blacklist.size());
     String markerId = "com.google.cloud.tools.eclipse.appengine.validation.applicationMarker";
     assertEquals(markerId, blacklist.get(0).getMarkerId());
   }
+  
+  @Test
+  public void testCheckForJava7() {
+    Element element =
+        document.createElementNS("http://appengine.google.com/ns/1.0", "runtime");
+    element.setUserData("location", new DocumentLocation(3, 15), null);
+    document.appendChild(element);
+    Node java7 = document.createTextNode("java");
+    element.appendChild(java7);
+    
+    ArrayList<ElementProblem> blacklist = validator.checkForProblems(null, document);
+    assertEquals(1, blacklist.size());
+    String markerId = "com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker";
+    assertEquals(markerId, blacklist.get(0).getMarkerId());
+  }  
+
+  @Test
+  public void testCheckForJava6() {
+    Element element =
+        document.createElementNS("http://appengine.google.com/ns/1.0", "runtime");
+    element.setUserData("location", new DocumentLocation(3, 15), null);
+    document.appendChild(element);
+    Node java6 = document.createTextNode("java"); // sic; java, not java6
+    element.appendChild(java6);
+    
+    ArrayList<ElementProblem> blacklist = validator.checkForProblems(null, document);
+    assertEquals(1, blacklist.size());
+    String markerId = "com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker";
+    assertEquals(markerId, blacklist.get(0).getMarkerId());
+  }
+  
 }

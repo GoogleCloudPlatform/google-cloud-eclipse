@@ -176,11 +176,19 @@
     </markerResolutionGenerator>
   </extension>
   
-    <extension
+  <extension
       point="org.eclipse.ui.ide.markerResolution">
     <markerResolutionGenerator
       class="com.google.cloud.tools.eclipse.appengine.validation.AppEngineWebMarkerResolutionGenerator"
       markerType="com.google.cloud.tools.eclipse.appengine.validation.applicationMarker">
+    </markerResolutionGenerator>
+  </extension>
+  
+  <extension
+      point="org.eclipse.ui.ide.markerResolution">
+    <markerResolutionGenerator
+      class="com.google.cloud.tools.eclipse.appengine.validation.AppEngineWebMarkerResolutionGenerator"
+      markerType="com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker">
     </markerResolutionGenerator>
   </extension>
   

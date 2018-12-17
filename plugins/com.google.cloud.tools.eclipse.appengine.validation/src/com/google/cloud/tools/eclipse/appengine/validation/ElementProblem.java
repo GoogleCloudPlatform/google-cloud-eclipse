@@ -25,7 +25,7 @@ import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 import com.google.common.base.Preconditions;
 
 /**
- * A blacklisted element that will receive a problem marker. 
+ * An element that will receive a problem marker. 
  */
 class ElementProblem {
 

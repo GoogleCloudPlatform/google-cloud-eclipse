@@ -17,8 +17,12 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import java.util.ArrayList;
+import java.util.List;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -29,7 +33,7 @@ public class AppEngineWebXmlValidator implements XmlValidationHelper {
 
   @Override
   public ArrayList<ElementProblem> checkForProblems(IResource resource, Document document) {
-    ArrayList<ElementProblem> blacklist = new ArrayList<>();
+    ArrayList<ElementProblem> problems = new ArrayList<>();
     ArrayList<String> blacklistedElements = AppEngineWebBlacklist.getBlacklistElements();
     for (String elementName : blacklistedElements) {
       NodeList nodeList =
@@ -37,13 +41,48 @@ public class AppEngineWebXmlValidator implements XmlValidationHelper {
       for (int i = 0; i < nodeList.getLength(); i++) {
         Node node = nodeList.item(i);
         DocumentLocation userData = (DocumentLocation) node.getUserData("location");
-        AppEngineBlacklistElement element = new AppEngineBlacklistElement(
+        AppEngineBlacklistElement problem = new AppEngineBlacklistElement(
             elementName,
             userData,
             node.getTextContent().length());
-        blacklist.add(element);
+        problems.add(problem);
       }
     }
-    return blacklist;
+    
+    List<ElementProblem> runtimeProblems = checkRuntime(document);
+    
+    problems.addAll(runtimeProblems);
+    
+    return problems;
+  }
+
+  private List<ElementProblem> checkRuntime(Document document) {
+    
+    ArrayList<ElementProblem> problems = new ArrayList<>();
+    NodeList nodeList =
+        document.getElementsByTagNameNS("http://appengine.google.com/ns/1.0", "runtime");
+    for (int i = 0; i < nodeList.getLength(); i++) {
+      Element runtimeElement = (Element) nodeList.item(i);
+      String runtime = runtimeElement.getTextContent();
+      if ("java".equals(runtime)) {
+        DocumentLocation userData = (DocumentLocation) runtimeElement.getUserData("location");
+        ElementProblem problem = new ElementProblem("Java 6 runtime no longer supported", 
+            "com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker",
+            IMarker.SEVERITY_WARNING,
+            IMessage.NORMAL_SEVERITY,
+            userData, runtime.length(), null);
+        problems.add(problem);
+      } else if ("java7".equals(runtime)) {
+        DocumentLocation userData = (DocumentLocation) runtimeElement.getUserData("location");
+        ElementProblem problem = new ElementProblem("Java 7 runtime no longer supported", 
+            "com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker",
+            IMarker.SEVERITY_WARNING,
+            IMessage.NORMAL_SEVERITY,
+            userData, runtime.length(), null);
+        problems.add(problem);
+      }
+    }
+    
+    return problems;
   }
 }
