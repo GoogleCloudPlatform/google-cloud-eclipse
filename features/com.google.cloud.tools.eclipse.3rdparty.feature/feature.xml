@@ -50,7 +50,7 @@
          id="com.google.guava"
          download-size="0"
          install-size="0"
-         version="25.1.0.jre"
+         version="26.0.0.jre"
          unpack="false"/>
 
    <plugin

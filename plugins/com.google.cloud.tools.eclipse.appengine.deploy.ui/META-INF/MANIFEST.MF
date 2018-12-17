@@ -8,7 +8,7 @@ Bundle-Vendor: %providerName
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
-Require-Bundle: com.google.cloud.tools.appengine;bundle-version="0.6.6",
+Require-Bundle: com.google.cloud.tools.appengine;bundle-version="[0.6.8,0.7.0)",
  org.eclipse.ui.workbench,
  org.eclipse.core.commands
 Import-Package: com.google.api.client.auth.oauth2;version="[1.25.0,1.26.0)",
@@ -34,12 +34,12 @@ Import-Package: com.google.api.client.auth.oauth2;version="[1.25.0,1.26.0)",
  com.google.cloud.tools.eclipse.util.service,
  com.google.cloud.tools.eclipse.util.status,
  com.google.cloud.tools.login;version="0.2.2",
- com.google.common.annotations;version="[25.1.0,26.0.0)",
- com.google.common.base;version="[25.1.0,26.0.0)",
- com.google.common.collect;version="[25.1.0,26.0.0)",
- com.google.common.escape;version="[25.1.0,26.0.0)",
- com.google.common.io;version="[25.1.0,26.0.0)",
- com.google.common.net;version="[25.1.0,26.0.0)",
+ com.google.common.annotations;version="[26.0.0,27.0.0)",
+ com.google.common.base;version="[26.0.0,27.0.0)",
+ com.google.common.collect;version="[26.0.0,27.0.0)",
+ com.google.common.escape;version="[26.0.0,27.0.0)",
+ com.google.common.io;version="[26.0.0,27.0.0)",
+ com.google.common.net;version="[26.0.0,27.0.0)",
  javax.inject;version="1.0.0",
  org.eclipse.core.databinding,
  org.eclipse.core.databinding.beans,

@@ -8,13 +8,13 @@ Bundle-Vendor: %providerName
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
-Require-Bundle: com.google.cloud.tools.appengine;bundle-version="0.6.6"
+Require-Bundle: com.google.cloud.tools.appengine;bundle-version="[0.6.8,0.7.0)"
 Import-Package: com.google.cloud.tools.eclipse.ui.util,
  com.google.cloud.tools.eclipse.usagetracker,
  com.google.cloud.tools.eclipse.util.jobs,
  com.google.cloud.tools.eclipse.util.status,
- com.google.common.annotations;version="[25.1.0,26.0.0)",
- com.google.common.base;version="[25.1.0,26.0.0)",
+ com.google.common.annotations;version="[26.0.0,27.0.0)",
+ com.google.common.base;version="[26.0.0,27.0.0)",
  org.eclipse.core.runtime;version="3.5.0",
  org.eclipse.core.runtime.jobs,
  org.eclipse.core.runtime.preferences,

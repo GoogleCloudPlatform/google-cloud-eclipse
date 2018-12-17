@@ -99,7 +99,7 @@
       <!-- bundle: com.google.cloud.tools.appengine -->
       <groupId>com.google.cloud.tools</groupId>
       <artifactId>appengine-plugins-core</artifactId>
-      <version>0.6.6</version>
+      <version>0.6.8</version>
     </dependency>
     <dependency>
       <!--
@@ -108,13 +108,13 @@
       -->
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
-      <version>1.17</version>
+      <version>1.18</version>
     </dependency>
     <dependency>
       <!-- bundle: com.google.guava -->
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>25.1-jre</version>
+      <version>26.0-jre</version>
     </dependency>
     <dependency>
       <!-- bundle: jackson-core-asl -->

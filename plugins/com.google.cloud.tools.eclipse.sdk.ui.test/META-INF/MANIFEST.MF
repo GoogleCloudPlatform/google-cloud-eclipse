@@ -8,7 +8,7 @@ Bundle-Vendor: %providerName
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Localization: plugin
 Require-Bundle: com.google.cloud.tools.eclipse.test.dependencies
-Import-Package: com.google.cloud.tools.appengine.cloudsdk.serialization;version="0.6.6",
+Import-Package: com.google.cloud.tools.appengine.cloudsdk.serialization;version="[0.6.8,0.7.0)",
  com.google.cloud.tools.eclipse.test.util,
  com.google.cloud.tools.eclipse.test.util.ui,
  org.eclipse.swtbot.swt.finder.widgets

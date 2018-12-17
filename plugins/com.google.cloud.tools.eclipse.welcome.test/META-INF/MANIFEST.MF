@@ -9,4 +9,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Localization: plugin
 Require-Bundle: com.google.cloud.tools.eclipse.test.dependencies
 Import-Package: com.google.cloud.tools.eclipse.test.util,
- com.google.common.base;version="[25.1.0,26.0.0)"
+ com.google.common.base;version="[26.0.0,27.0.0)"
