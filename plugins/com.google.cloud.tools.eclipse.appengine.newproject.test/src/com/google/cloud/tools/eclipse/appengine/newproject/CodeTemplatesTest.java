@@ -98,7 +98,7 @@ public class CodeTemplatesTest {
 
     CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
     assertFalse(objectifyFilterClassExists());
-    validateNoFilterConfigInWebXml();
+    validateObjectifyFilterConfigInWebXml(false);
   }
 
   @Test
@@ -110,7 +110,7 @@ public class CodeTemplatesTest {
 
     CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
     assertTrue(objectifyFilterClassExists());
-    validateNoFilterConfigInWebXml();
+    validateObjectifyFilterConfigInWebXml(false);
   }
 
   @Test
@@ -245,17 +245,25 @@ public class CodeTemplatesTest {
     return project.getFile("src/main/java/ObjectifyWebFilter.java").exists();
   }
 
-  private void validateNoFilterConfigInWebXml()
+  private void validateObjectifyFilterConfigInWebXml(boolean configExpected)
       throws ParserConfigurationException, SAXException, IOException, CoreException {
     IFile webXml = project.getFile("src/main/webapp/WEB-INF/web.xml");
     Element root = buildDocument(webXml).getDocumentElement();
 
     NodeList filterNames =
         root.getElementsByTagNameNS("http://java.sun.com/xml/ns/javaee", "filter-name");
-    assertEquals(0, filterNames.getLength());
-    NodeList filterClass =
-        root.getElementsByTagNameNS("http://java.sun.com/xml/ns/javaee", "filter-class");
-    assertEquals(0, filterClass.getLength());
+    if (configExpected) {
+      assertEquals(2, filterNames.getLength());
+      assertEquals("ObjectifyFilter", filterNames.item(0).getTextContent());
+      assertEquals("ObjectifyFilter", filterNames.item(1).getTextContent());
+
+      NodeList filterClass =
+          root.getElementsByTagNameNS("http://java.sun.com/xml/ns/javaee", "filter-class");
+      assertEquals(
+          "com.googlecode.objectify.ObjectifyFilter", filterClass.item(0).getTextContent());
+    } else {
+      assertEquals(0, filterNames.getLength());
+    }
   }
 
   private void validateNonConfigFiles(IFile mostImportant,
