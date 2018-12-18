@@ -25,7 +25,7 @@ class RuntimeProblem extends ElementProblem {
     super(message, "com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker",
         IMarker.SEVERITY_WARNING,
         IMessage.NORMAL_SEVERITY,
-        start, length, null);
+        start, length, new UpgradeRuntimeQuickAssistProcessor());
   }
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2017 Google Inc.
+ * Copyright 2018 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,12 +17,12 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 /**
- * Quick fix to remove application element from appengine-web.xml in source editor.
+ * Changes runtime element to java8.
  */
-public class ApplicationSourceQuickFix extends XsltSourceQuickFix {
-  
-  public ApplicationSourceQuickFix() {
-    super("/xslt/removeApplication.xsl", Messages.getString("remove.application.element"));
+class UpgradeRuntimeQuickFix extends XsltSourceQuickFix {
+
+  UpgradeRuntimeQuickFix() {
+    super("/xslt/upgradeRuntime.xsl", Messages.getString("upgrade.runtime.element"));
   }
-  
+
 }

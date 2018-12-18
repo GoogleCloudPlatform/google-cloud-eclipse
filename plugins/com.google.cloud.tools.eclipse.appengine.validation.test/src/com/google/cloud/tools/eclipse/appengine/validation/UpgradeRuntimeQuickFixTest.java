@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Google Inc.
+ * Copyright 2018 Google LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,15 +43,14 @@ import org.eclipse.ui.PlatformUI;
 import org.junit.Rule;
 import org.junit.Test;
 
-public class XsltSourceQuickFixTest {
+public class UpgradeRuntimeQuickFixTest {
 
-  private static final String BLACKLIST_MARKER =
-      "com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker";
+  private static final String MARKER =
+      "com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker";
 
-  private static final String APPLICATION_XML =
+  private static final String APPENGINE_WEB_APP =
       "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
-      + "<application>"
-      + "</application>"
+      + "<runtime>java7</runtime>"
       + "</appengine-web-app>";
 
   @Rule
@@ -63,10 +62,9 @@ public class XsltSourceQuickFixTest {
 
   @Test
   public void testApply() throws CoreException {
-
     IProject project = appEngineStandardProject.getProject();
     IFile file = project.getFile("appengine-web.xml");
-    file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), IFile.FORCE, null);
+    file.create(ValidationTestUtils.stringToInputStream(APPENGINE_WEB_APP), IFile.FORCE, null);
 
     IWorkbench workbench = PlatformUI.getWorkbench();
     IEditorPart editorPart = WorkbenchUtil.openInEditor(workbench, file);
@@ -75,27 +73,20 @@ public class XsltSourceQuickFixTest {
       // spin the event loop
     }
 
-    String preContents = viewer.getDocument().get();
-    assertThat(preContents, containsString("application"));
-
-    IMarker[] markers = ProjectUtils.waitUntilMarkersFound(file, BLACKLIST_MARKER,
+    IMarker[] markers = ProjectUtils.waitUntilMarkersFound(file, MARKER,
         true /* includeSubtypes */, IResource.DEPTH_ZERO);
     assertEquals(1, markers.length);
 
-    XsltSourceQuickFix quickFix = new XsltSourceQuickFix("/xslt/removeApplication.xsl",
-        Messages.getString("remove.application.element"));
+    XsltSourceQuickFix quickFix = new UpgradeRuntimeQuickFix();
     quickFix.apply(viewer, 'a', 0, 0);
 
     IDocument document = viewer.getDocument();
     String contents = document.get();
-    assertThat(contents, not(containsString("application")));
-    assertThat(contents, not(containsString("?><appengine")));
+    assertThat(contents, not(containsString("java7")));
+    assertThat(contents, containsString("<runtime>java8</runtime>"));
 
     // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1527
     editorPart.doSave(new NullProgressMonitor());
-
-    ProjectUtils.waitUntilNoMarkersFound(file, BLACKLIST_MARKER, true /* includeSubtypes */,
-        IResource.DEPTH_ZERO);
   }
 
 }
