@@ -43,7 +43,7 @@ import org.eclipse.ui.PlatformUI;
 import org.junit.Rule;
 import org.junit.Test;
 
-public class XsltSourceQuickFixTest {
+public class ApplicationSourceQuickFixTest {
 
   private static final String BLACKLIST_MARKER =
       "com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker";
@@ -82,8 +82,7 @@ public class XsltSourceQuickFixTest {
         true /* includeSubtypes */, IResource.DEPTH_ZERO);
     assertEquals(1, markers.length);
 
-    XsltSourceQuickFix quickFix = new XsltSourceQuickFix("/xslt/removeApplication.xsl",
-        Messages.getString("remove.application.element"));
+    XsltSourceQuickFix quickFix = new ApplicationSourceQuickFix();
     quickFix.apply(viewer, 'a', 0, 0);
 
     IDocument document = viewer.getDocument();

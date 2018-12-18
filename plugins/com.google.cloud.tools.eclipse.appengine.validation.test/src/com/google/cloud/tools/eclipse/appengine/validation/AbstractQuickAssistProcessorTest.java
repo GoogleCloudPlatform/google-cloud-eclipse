@@ -39,4 +39,12 @@ public class AbstractQuickAssistProcessorTest {
     assertEquals(VersionSourceQuickFix.class.getName(), fixes[0].getClass().getName());
   }
   
+  @Test
+  public void testComputeRuntimeUpgradeQuickAssistProposals() {
+    AbstractQuickAssistProcessor processor = new UpgradeRuntimeQuickAssistProcessor();
+    ICompletionProposal[] fixes =  processor.computeQuickAssistProposals(null);
+    assertEquals(1, fixes.length);
+    assertEquals(UpgradeRuntimeQuickFix.class.getName(), fixes[0].getClass().getName());
+  }
+  
 }
