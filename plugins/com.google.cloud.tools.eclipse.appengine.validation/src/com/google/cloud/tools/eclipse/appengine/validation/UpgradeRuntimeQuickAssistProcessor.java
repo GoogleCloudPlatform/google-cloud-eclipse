@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
-public class UpgradeRuntimeQuickAssistProcessor extends AbstractQuickAssistProcessor {
+class UpgradeRuntimeQuickAssistProcessor extends AbstractQuickAssistProcessor {
 
   UpgradeRuntimeQuickAssistProcessor() {
     super(new UpgradeRuntimeQuickFix());
