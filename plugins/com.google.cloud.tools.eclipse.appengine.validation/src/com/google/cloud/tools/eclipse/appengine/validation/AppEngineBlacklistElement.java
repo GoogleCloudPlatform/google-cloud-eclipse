@@ -22,10 +22,9 @@ import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 /**
  * A blacklisted element that will receive an App Engine blacklist marker. 
  */
-public class AppEngineBlacklistElement extends ElementProblem {
+class AppEngineBlacklistElement extends ElementProblem {
   
-  public AppEngineBlacklistElement(String elementName,
-      DocumentLocation start, int length) {
+  AppEngineBlacklistElement(String elementName, DocumentLocation start, int length) {
     super(
       AppEngineWebBlacklist.getBlacklistElementMessage(elementName),
       AppEngineWebBlacklist.getMarkerId(elementName),

@@ -21,12 +21,11 @@ import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 
 class RuntimeProblem extends ElementProblem {
 
-  RuntimeProblem(String message, 
-      DocumentLocation userData, int length) {
+  RuntimeProblem(String message, DocumentLocation start, int length) {
     super(message, "com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker",
         IMarker.SEVERITY_WARNING,
         IMessage.NORMAL_SEVERITY,
-        userData, length, null);
+        start, length, null);
   }
 
 }
