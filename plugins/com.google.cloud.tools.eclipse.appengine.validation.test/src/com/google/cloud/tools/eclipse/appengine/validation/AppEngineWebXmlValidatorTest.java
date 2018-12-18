@@ -18,7 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
+import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -55,7 +55,7 @@ public class AppEngineWebXmlValidatorTest {
         document.createElementNS("http://appengine.google.com/ns/1.0", "runtime");
     root.appendChild(runtime);
     
-    ArrayList<ElementProblem> blacklist = validator.checkForProblems(null, document);
+    List<ElementProblem> blacklist = validator.checkForProblems(null, document);
     assertEquals(1, blacklist.size());
     String markerId = "com.google.cloud.tools.eclipse.appengine.validation.applicationMarker";
     assertEquals(markerId, blacklist.get(0).getMarkerId());
@@ -67,7 +67,7 @@ public class AppEngineWebXmlValidatorTest {
         document.createElementNS("http://appengine.google.com/ns/1.0", "appengine-web-app");
     document.appendChild(element);
     
-    ArrayList<ElementProblem> problems = validator.checkForProblems(null, document);
+    List<ElementProblem> problems = validator.checkForProblems(null, document);
     assertEquals(1, problems.size());
     String markerId = "com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker";
     assertEquals(markerId, problems.get(0).getMarkerId());
@@ -82,7 +82,7 @@ public class AppEngineWebXmlValidatorTest {
     Node java7 = document.createTextNode("java7");
     runtime.appendChild(java7);
     
-    ArrayList<ElementProblem> problems = validator.checkForProblems(null, document);
+    List<ElementProblem> problems = validator.checkForProblems(null, document);
     assertEquals(1, problems.size());
     String markerId = "com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker";
     assertEquals(markerId, problems.get(0).getMarkerId());
@@ -97,7 +97,7 @@ public class AppEngineWebXmlValidatorTest {
     Node java6 = document.createTextNode("java"); // sic; java, not java6
     element.appendChild(java6);
     
-    ArrayList<ElementProblem> problems = validator.checkForProblems(null, document);
+    List<ElementProblem> problems = validator.checkForProblems(null, document);
     assertEquals(1, problems.size());
     String markerId = "com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker";
     assertEquals(markerId, problems.get(0).getMarkerId());

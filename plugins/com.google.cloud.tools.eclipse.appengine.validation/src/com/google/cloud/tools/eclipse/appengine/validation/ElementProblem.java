@@ -72,7 +72,7 @@ class ElementProblem {
    */
   ElementProblem(String message, String markerId) {
     this(message, markerId,
-        IMarker.SEVERITY_WARNING, IMessage.NORMAL_SEVERITY, new DocumentLocation(0, 0), 0, null);
+        IMarker.SEVERITY_WARNING, IMessage.NORMAL_SEVERITY, new DocumentLocation(0, 0), 1, null);
   }
 
   String getMessage() {
