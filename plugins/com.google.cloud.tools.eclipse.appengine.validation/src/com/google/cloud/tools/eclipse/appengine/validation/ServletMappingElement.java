@@ -23,7 +23,7 @@ import org.eclipse.wst.validation.internal.provisional.core.IMessage;
  * A <servlet-name> element within parent <servlet-mapping> whose value has not
  * been defined.
  */
-public class ServletMappingElement extends BannedElement {
+public class ServletMappingElement extends ElementProblem {
 
   private static final String MARKERID = 
       "com.google.cloud.tools.eclipse.appengine.validation.undefinedServletMappingMarker";

@@ -41,7 +41,7 @@ import org.junit.Test;
 
 public class XmlValidatorTest {
 
-  private static final String XML_NO_BANNED_ELEMENTS = "<test></test>";
+  private static final String XML_NO_PROBLEM_ELEMENTS = "<test></test>";
   private static final String XML =
       "<application xmlns='http://appengine.google.com/ns/1.0'></application>";
   private static final String BAD_XML = "<";
@@ -115,12 +115,12 @@ public class XmlValidatorTest {
   }
 
   @Test
-  public void testValidate_noBannedElements() throws IOException, CoreException {
+  public void testValidate_noProblemElements() throws IOException, CoreException {
     XmlValidator validator = new XmlValidator();
     validator.setHelper(new AppEngineWebXmlValidator());
 
     IFile file = createBogusProjectFile();
-    byte[] bytes = XML_NO_BANNED_ELEMENTS.getBytes(StandardCharsets.UTF_8);
+    byte[] bytes = XML_NO_PROBLEM_ELEMENTS.getBytes(StandardCharsets.UTF_8);
     validator.validate(file, bytes);
 
     IMarker[] markers = file.findMarkers(APPLICATION_MARKER, true, IResource.DEPTH_ZERO);
@@ -128,7 +128,7 @@ public class XmlValidatorTest {
   }
 
   @Test
-  public void testValidate_withBannedElements() throws IOException, CoreException {
+  public void testValidate_withProblemElements() throws IOException, CoreException {
     XmlValidator validator = new XmlValidator();
     validator.setHelper(new AppEngineWebXmlValidator());
 
@@ -165,7 +165,7 @@ public class XmlValidatorTest {
   public void testCreateMarker() throws CoreException {
     IFile file = createBogusProjectFile();
     String message = "Project ID should be specified at deploy time.";
-    BannedElement element = new BannedElement(message);
+    ElementProblem element = new ElementProblem(message);
     XmlValidator.createMarker(file, element);
     IMarker[] markers = file.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
     ArrayAssertions.assertSize(1, markers);

@@ -74,7 +74,7 @@ public class WebXmlValidatorTest {
     element.setUserData("location", new DocumentLocation(1, 1), null);
     document.appendChild(element);
 
-    ArrayList<BannedElement> blacklist = validator.checkForElements(resource, document);
+    ArrayList<ElementProblem> blacklist = validator.checkForProblems(resource, document);
 
     assertEquals(1, blacklist.size());
     String markerId = "com.google.cloud.tools.eclipse.appengine.validation.servletMarker";
@@ -93,7 +93,7 @@ public class WebXmlValidatorTest {
     element.setUserData("location", new DocumentLocation(1, 1), null);
     document.appendChild(element);
 
-    ArrayList<BannedElement> blacklist = validator.checkForElements(resource, document);
+    ArrayList<ElementProblem> blacklist = validator.checkForProblems(resource, document);
     assertEquals(0, blacklist.size());
   }
 
@@ -127,7 +127,7 @@ public class WebXmlValidatorTest {
 
     document.appendChild(webApp);
 
-    ArrayList<BannedElement> blacklist = validator.checkForElements(resource, document);
+    ArrayList<ElementProblem> blacklist = validator.checkForProblems(resource, document);
     assertEquals(1, blacklist.size());
   }
 

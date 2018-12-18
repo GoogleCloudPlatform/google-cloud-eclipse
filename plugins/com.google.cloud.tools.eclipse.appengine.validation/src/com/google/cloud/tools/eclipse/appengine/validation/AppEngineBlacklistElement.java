@@ -22,7 +22,7 @@ import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 /**
  * A blacklisted element that will receive an App Engine blacklist marker. 
  */
-public class AppEngineBlacklistElement extends BannedElement {
+public class AppEngineBlacklistElement extends ElementProblem {
   
   public AppEngineBlacklistElement(String elementName,
       DocumentLocation start, int length) {

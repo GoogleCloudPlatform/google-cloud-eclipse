@@ -60,7 +60,7 @@ public class WebXmlValidator implements XmlValidationHelper {
   private static final XPathFactory FACTORY = XPathFactory.newInstance();
   private Document document;
   private IResource resource;
-  private ArrayList<BannedElement> blacklist;
+  private ArrayList<ElementProblem> blacklist;
 
   private final BiPredicate<IProject, String> servletApiSupportChecker;
 
@@ -74,7 +74,7 @@ public class WebXmlValidator implements XmlValidationHelper {
   }
 
   @Override
-  public ArrayList<BannedElement> checkForElements(IResource resource, Document document) {
+  public ArrayList<ElementProblem> checkForProblems(IResource resource, Document document) {
     this.document = document;
     this.resource = resource;
     blacklist = new ArrayList<>();
@@ -99,7 +99,7 @@ public class WebXmlValidator implements XmlValidationHelper {
         // Check that web.xml version is compatible with our supported Dynamic Web Project versions
         if (!servletApiSupportChecker.test(resource.getProject(), version)) {
           DocumentLocation location = (DocumentLocation) webApp.getUserData("location");
-          BannedElement element = new JavaServletElement(location, 0);
+          ElementProblem element = new JavaServletElement(location, 0);
           blacklist.add(element);
         }
       }
@@ -117,7 +117,7 @@ public class WebXmlValidator implements XmlValidationHelper {
       IJavaProject project = getJavaProject(resource);
       if (project != null && !classExists(project, servletClassName)) {
         DocumentLocation location = (DocumentLocation) servletClassNode.getUserData("location");
-        BannedElement element =
+        ElementProblem element =
             new UndefinedServletElement(servletClassName, location, servletClassName.length());
         blacklist.add(element);
       }
@@ -152,7 +152,7 @@ public class WebXmlValidator implements XmlValidationHelper {
         String textContent = servletMapping.getTextContent();
         if (!servletNames.contains(textContent)) {
           DocumentLocation location = (DocumentLocation) servletMapping.getUserData("location");
-          BannedElement element =
+          ElementProblem element =
               new ServletMappingElement(textContent, location, textContent.length());
           blacklist.add(element);
         }
@@ -178,7 +178,7 @@ public class WebXmlValidator implements XmlValidationHelper {
             String jspName = jspNode.getTextContent();
             if (!resolveJsp(root, jspName)) {
               DocumentLocation location = (DocumentLocation) jspNode.getUserData("location");
-              BannedElement element = new JspFileElement(jspName, location, jspName.length());
+              ElementProblem element = new JspFileElement(jspName, location, jspName.length());
               blacklist.add(element);
             }
           }

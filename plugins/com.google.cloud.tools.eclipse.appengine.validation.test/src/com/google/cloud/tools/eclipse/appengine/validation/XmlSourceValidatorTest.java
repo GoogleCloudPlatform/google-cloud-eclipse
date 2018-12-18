@@ -106,7 +106,7 @@ public class XmlSourceValidatorTest {
   }
 
   @Test
-  public void testValidate_noBannedElements() throws IOException {
+  public void testValidate_noProblemElements() throws IOException {
     XmlSourceValidator validator = new XmlSourceValidator();
     validator.setHelper(new AppEngineWebXmlValidator());
     byte[] xml = "<test></test>".getBytes(StandardCharsets.UTF_8);
@@ -138,7 +138,7 @@ public class XmlSourceValidatorTest {
   public void testCreateMessage() {
     XmlSourceValidator validator = new XmlSourceValidator();
     validator.setHelper(new AppEngineWebXmlValidator());
-    BannedElement element =
+    ElementProblem element =
         new AppEngineBlacklistElement("application", new DocumentLocation(5, 17), 0);
     validator.createMessage(reporter, element, 0);
     List<IMessage> messages = reporter.getMessages();

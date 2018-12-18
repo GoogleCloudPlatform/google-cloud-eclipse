@@ -26,12 +26,12 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 import org.junit.Test;
 
-public class BannedElementTest {
+public class ElementProblemTest {
 
   @Test
-  public void testBannedElementConstructor_nullElementName() {
+  public void testElementProblemConstructor_nullElementName() {
     try {
-      new BannedElement(null);
+      new ElementProblem(null);
       fail();
     } catch (NullPointerException ex) {
       assertNotNull(ex.getMessage());
@@ -39,9 +39,9 @@ public class BannedElementTest {
   }
 
   @Test
-  public void testBannedElementConstructor_nullLocation() {
+  public void testElementProblemConstructor_nullLocation() {
     try {
-      new BannedElement(
+      new ElementProblem(
           "test",
           "org.eclipse.core.resources.problemmarker",
           IMarker.SEVERITY_WARNING,
@@ -58,16 +58,15 @@ public class BannedElementTest {
   @SuppressWarnings("unlikely-arg-type")
   @Test
   public void testEquals() {
-    BannedElement element1 = new BannedElement("message");
-    BannedElement element1_copy = element1;
-    assertTrue(element1.equals(element1_copy));
+    ElementProblem element1 = new ElementProblem("message");
+    assertEquals(element1, element1);
     
-    BannedElement element2 = new BannedElement("message");
+    ElementProblem element2 = new ElementProblem("message");
     assertTrue(element1.equals(element2));
     assertTrue(element2.equals(element1));
     
-    BannedElement element3 =
-        new BannedElement(
+    ElementProblem element3 =
+        new ElementProblem(
           "message", 
           "markerId_1", 
           IMarker.SEVERITY_WARNING, 
@@ -75,8 +74,8 @@ public class BannedElementTest {
           new DocumentLocation(1, 1),
           20,
           null);
-    BannedElement element4 =
-        new BannedElement(
+    ElementProblem element4 =
+        new ElementProblem(
           "message",
           "markerId_2",
           IMarker.SEVERITY_WARNING, 
@@ -86,8 +85,8 @@ public class BannedElementTest {
           null);
     assertFalse(element3.equals(element4));
     
-    BannedElement element5 =
-        new BannedElement(
+    ElementProblem element5 =
+        new ElementProblem(
           "message",
           "markerId", 
           IMarker.SEVERITY_WARNING, 
@@ -95,8 +94,8 @@ public class BannedElementTest {
           new DocumentLocation(1, 1),
           20, 
           null);
-    BannedElement element6 =
-        new BannedElement("message",
+    ElementProblem element6 =
+        new ElementProblem("message",
           "markerId", 
           IMarker.SEVERITY_WARNING, 
           IMessage.NORMAL_SEVERITY, 
@@ -105,16 +104,16 @@ public class BannedElementTest {
           null);
     assertFalse(element5.equals(element6));
     
-    BannedElement element7 =
-        new BannedElement("message_1",
+    ElementProblem element7 =
+        new ElementProblem("message_1",
           "markerId", 
           IMarker.SEVERITY_WARNING, 
           IMessage.NORMAL_SEVERITY, 
           new DocumentLocation(1, 1), 
           20,
           null);
-    BannedElement element8 =
-        new BannedElement("message_2", 
+    ElementProblem element8 =
+        new ElementProblem("message_2", 
           "markerId", 
           IMarker.SEVERITY_WARNING, 
           IMessage.NORMAL_SEVERITY, 
@@ -129,8 +128,8 @@ public class BannedElementTest {
   
   @Test
   public void testHashCode() {
-    BannedElement element1 = new BannedElement("message");
-    BannedElement element2 = new BannedElement("message");
+    ElementProblem element1 = new ElementProblem("message");
+    ElementProblem element2 = new ElementProblem("message");
     assertEquals(element1.hashCode(), element2.hashCode());
   }
 

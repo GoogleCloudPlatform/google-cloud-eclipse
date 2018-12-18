@@ -1,11 +1,11 @@
 /*
- * Copyright 2016 Google Inc.
+ * Copyright 2018 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,15 +16,10 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.compiler.CompilationParticipant;
+class UpgradeRuntimeQuickAssistProcessor extends AbstractQuickAssistProcessor {
 
-// see JavaCompilationParticipant.java in old plugin
-public class JreWhitelistChecker extends CompilationParticipant {
-
-  @Override
-  public boolean isActive(IJavaProject project) {
-    return false;
+  UpgradeRuntimeQuickAssistProcessor() {
+    super(new UpgradeRuntimeQuickFix());
   }
-  
+
 }

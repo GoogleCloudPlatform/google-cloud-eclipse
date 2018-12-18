@@ -101,7 +101,7 @@ public class WebXmlValidatorPluginJspTest {
 
     IFile webXml = project.getFile("WebContent/WEB-INF/web.xml");
     WebXmlValidator validator = new WebXmlValidator();
-    ArrayList<BannedElement> blacklist = validator.checkForElements(webXml, document);
+    ArrayList<ElementProblem> blacklist = validator.checkForProblems(webXml, document);
 
     assertEquals(1, blacklist.size());
     String markerId = "com.google.cloud.tools.eclipse.appengine.validation.jspFileMarker";

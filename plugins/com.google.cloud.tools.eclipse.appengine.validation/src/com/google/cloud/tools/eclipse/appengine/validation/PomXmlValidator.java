@@ -37,8 +37,8 @@ public class PomXmlValidator implements XmlValidationHelper {
    * sibling has the value "appengine-maven-plugin" or "gcloud-maven-plugin".
    */
   @Override
-  public ArrayList<BannedElement> checkForElements(IResource resource, Document document) {
-    ArrayList<BannedElement> blacklist = new ArrayList<>();
+  public ArrayList<ElementProblem> checkForProblems(IResource resource, Document document) {
+    ArrayList<ElementProblem> blacklist = new ArrayList<>();
     try {
       XPath xPath = FACTORY.newXPath();
       NamespaceContext nsContext =
@@ -52,7 +52,7 @@ public class PomXmlValidator implements XmlValidationHelper {
       for (int i = 0; i < groupIdElements.getLength(); i++) {
         Node child = groupIdElements.item(i);
         DocumentLocation location = (DocumentLocation) child.getUserData("location");
-        BannedElement element = new MavenPluginElement(location, child.getTextContent().length());
+        ElementProblem element = new MavenPluginElement(location, child.getTextContent().length());
         blacklist.add(element);
       }
     } catch (XPathExpressionException ex) {

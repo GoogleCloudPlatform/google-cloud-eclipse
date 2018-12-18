@@ -1,18 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-
-  <extension
-      id="appEngineWhitelist"
-      name="%extension.name"
-      point="org.eclipse.jdt.core.compilationParticipant">
-     <compilationParticipant
-         createsProblems="true"
-         class="com.google.cloud.tools.eclipse.appengine.validation.JreWhitelistChecker"
-         id="APT"
-         requiredSourceLevel="1.5">
-     </compilationParticipant>
-  </extension>
   
   <extension 
       id="blacklistedClass" 
@@ -188,11 +176,19 @@
     </markerResolutionGenerator>
   </extension>
   
-    <extension
+  <extension
       point="org.eclipse.ui.ide.markerResolution">
     <markerResolutionGenerator
       class="com.google.cloud.tools.eclipse.appengine.validation.AppEngineWebMarkerResolutionGenerator"
       markerType="com.google.cloud.tools.eclipse.appengine.validation.applicationMarker">
+    </markerResolutionGenerator>
+  </extension>
+  
+  <extension
+      point="org.eclipse.ui.ide.markerResolution">
+    <markerResolutionGenerator
+      class="com.google.cloud.tools.eclipse.appengine.validation.AppEngineWebMarkerResolutionGenerator"
+      markerType="com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker">
     </markerResolutionGenerator>
   </extension>
   

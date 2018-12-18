@@ -60,7 +60,7 @@ public class PomXmlValidatorTest {
     document.appendChild(build);
   
     PomXmlValidator validator = new PomXmlValidator();
-    ArrayList<BannedElement> blacklist = validator.checkForElements(null, document);
+    ArrayList<ElementProblem> blacklist = validator.checkForProblems(null, document);
     assertEquals(1, blacklist.size());
     String markerId = "com.google.cloud.tools.eclipse.appengine.validation.mavenPluginMarker";
     assertEquals(markerId, blacklist.get(0).getMarkerId());
@@ -88,7 +88,7 @@ public class PomXmlValidatorTest {
     document.appendChild(plugin);
     
     PomXmlValidator validator = new PomXmlValidator();
-    ArrayList<BannedElement> blacklist = validator.checkForElements(null, document);
+    ArrayList<ElementProblem> blacklist = validator.checkForProblems(null, document);
     
     assertEquals(0, blacklist.size());
   }
@@ -150,7 +150,7 @@ public class PomXmlValidatorTest {
     document.appendChild(rootPlugin);
     
     PomXmlValidator validator = new PomXmlValidator();
-    ArrayList<BannedElement> blacklist = validator.checkForElements(null, document);
+    ArrayList<ElementProblem> blacklist = validator.checkForProblems(null, document);
     
     assertEquals(1, blacklist.size());
     String markerId = "com.google.cloud.tools.eclipse.appengine.validation.mavenPluginMarker";

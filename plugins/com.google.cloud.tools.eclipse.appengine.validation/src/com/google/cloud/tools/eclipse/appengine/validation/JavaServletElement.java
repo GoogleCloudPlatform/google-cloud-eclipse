@@ -22,7 +22,7 @@ import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 /**
  * A blacklisted java servlet element that will receive a servlet marker. 
  */
-public class JavaServletElement extends BannedElement {
+public class JavaServletElement extends ElementProblem {
 
   private static final String MESSAGE = Messages.getString("web.xml.version");
   private static final String MARKERID = 

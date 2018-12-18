@@ -83,17 +83,17 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
 
   /**
    * Adds an {@link IMessage} to the XML file for every
-   * {@link BannedElement} found in the file.
+   * {@link ElementProblem} found in the file.
    */
   void validate(IReporter reporter, IFile source, byte[] bytes) throws IOException {
     try {
       Document document = PositionalXmlScanner.parse(bytes);
       if (document != null) {
-        ArrayList<BannedElement> blacklist = helper.checkForElements(source, document);
+        ArrayList<ElementProblem> blacklist = helper.checkForProblems(source, document);
         String encoding = (String) document.getDocumentElement().getUserData("encoding");
-        Map<BannedElement, Integer> bannedElementOffsetMap =
+        Map<ElementProblem, Integer> problemOffsetMap =
             ValidationUtils.getOffsetMap(bytes, blacklist, encoding);
-        for (Map.Entry<BannedElement, Integer> entry : bannedElementOffsetMap.entrySet()) {
+        for (Map.Entry<ElementProblem, Integer> entry : problemOffsetMap.entrySet()) {
           createMessage(reporter, entry.getKey(), entry.getValue());
         }
       }
@@ -138,9 +138,9 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
   }
 
   /**
-   * Creates a message from a given {@link BannedElement}.
+   * Creates a message from a given {@link ElementProblem}.
    */
-  void createMessage(IReporter reporter, BannedElement element, int elementOffset) {
+  void createMessage(IReporter reporter, ElementProblem element, int elementOffset) {
     IMessage message = new LocalizedMessage(element.getIMessageSeverity(), element.getMessage());
     message.setTargetObject(this);
     message.setMarkerId(element.getMarkerId());

@@ -53,14 +53,14 @@ public class ValidationUtilsTest {
       LINE_WITH_WHITESPACE + PROJECT_ID;
   
   private DocumentLocation location = new DocumentLocation(2, 13);
-  private BannedElement element =
+  private ElementProblem element =
       new AppEngineBlacklistElement("application", location, 3);
-  private ArrayList<BannedElement> blacklist = new ArrayList<>(Arrays.asList(element));
+  private ArrayList<ElementProblem> blacklist = new ArrayList<>(Arrays.asList(element));
   
   @Test
   public void testGetOffsetMap_unixXml() {
     byte[] bytes = UNIX_XML_WITH_PROJECT_ID.getBytes(StandardCharsets.UTF_8);
-    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist, "UTF-8");
+    Map<ElementProblem, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist, "UTF-8");
     assertEquals(1, map.size());
     int offset = map.get(element);
     assertEquals(20, offset);
@@ -69,7 +69,7 @@ public class ValidationUtilsTest {
   @Test
   public void testGetOffsetMap_macXml() {
     byte[] bytes = MAC_XML_WITH_PROJECT_ID.getBytes(StandardCharsets.ISO_8859_1);
-    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist, "ISO_8859_1");
+    Map<ElementProblem, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist, "ISO_8859_1");
     assertEquals(1, map.size());
     int offset = map.get(element);
     assertEquals(20, offset);
@@ -78,7 +78,7 @@ public class ValidationUtilsTest {
   @Test
   public void testGetOffsetMap_windowsXml() throws IOException {
     byte[] bytes = WINDOWS_XML_WITH_PROJECT_ID.getBytes("CP1252");
-    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist, "CP1252");
+    Map<ElementProblem, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist, "CP1252");
     assertEquals(1, map.size());
     int offset = map.get(element);
     assertEquals(20, offset);
@@ -89,7 +89,7 @@ public class ValidationUtilsTest {
     blacklist.clear();
     byte[] bytes = MIXED_XML_WITH_PROJECT_ID.getBytes(StandardCharsets.UTF_8);
     DocumentLocation start = new DocumentLocation(3, 13);
-    BannedElement bannedElement = new BannedElement(
+    ElementProblem problem = new ElementProblem(
         "application", 
         "", 
         IMarker.SEVERITY_WARNING, 
@@ -97,17 +97,17 @@ public class ValidationUtilsTest {
         start, 
         1, 
         null);
-    blacklist.add(bannedElement);
-    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist, "UTF-8");
+    blacklist.add(problem);
+    Map<ElementProblem, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist, "UTF-8");
     assertEquals(1, map.size());
-    int offset = map.get(bannedElement);
+    int offset = map.get(problem);
     assertEquals(21, offset);
   }
   
   @Test
   public void testGetOffsetMap_lineWithWhitespace() {
     byte[] bytes = XML_WITH_PROJECT_ID_WHITESPACE.getBytes(StandardCharsets.UTF_8);
-    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist, "UTF-8");
+    Map<ElementProblem, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist, "UTF-8");
     assertEquals(1, map.size());
     int offset = map.get(element);
     assertEquals(14, offset);
@@ -117,14 +117,14 @@ public class ValidationUtilsTest {
   public void testGetOffsetMap_orderedElements() {
     DocumentLocation applicationLocation = new DocumentLocation(2, 14);
     DocumentLocation versionLocation = new DocumentLocation(1, 10);
-    BannedElement application =
+    ElementProblem application =
         new AppEngineBlacklistElement("application", applicationLocation, 0);
-    BannedElement version = new AppEngineBlacklistElement("version", versionLocation, 0);
+    ElementProblem version = new AppEngineBlacklistElement("version", versionLocation, 0);
     blacklist = new ArrayList<>(Arrays.asList(application, version));
     
     String xml = "<version>   </version>\n\n<application>   </application>";
     byte[] bytes = xml.getBytes(StandardCharsets.UTF_8);
-    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist, "UTF-8");
+    Map<ElementProblem, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist, "UTF-8");
     
     assertEquals(2, map.size());
     assertEquals(36, (int) map.get(application));
