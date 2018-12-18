@@ -58,31 +58,30 @@ public class StandardDeployCommandHandler extends DeployCommandHandler {
   }
 
   private boolean checkAppEngineRuntimeCompatibility(Shell shell, IProject project) {
-    IFacetedProject facetedProject = null;
     try {
-      facetedProject = ProjectFacetsManager.create(project);
+      IFacetedProject facetedProject = ProjectFacetsManager.create(project);
+      if (facetedProject == null) {
+        return false;
+      }
+      if (AppEngineStandardFacet.usesObsoleteRuntime(facetedProject)) {
+        String[] buttonLabels =
+            new String[] {Messages.getString("deploy.button"), IDialogConstants.CANCEL_LABEL};
+        String message = Messages.getString("obsolete.runtime.proceed", project.getName());
+        MessageDialog dialog =
+            new MessageDialog(
+                shell,
+                Messages.getString("obsolete.runtime.title"),
+                null,
+                message,
+                MessageDialog.QUESTION,
+                0,
+                buttonLabels);
+        return dialog.open() == 0;
+      }
     } catch(CoreException ex) {
       logger.log(Level.WARNING, "Unable to check project use of obsolete App Engine runtime", ex);
     }
-    if (facetedProject == null) {
-      return false;
-    }
-    if(AppEngineStandardFacet.usesObsoleteRuntime(facetedProject)) {
-      String[] buttonLabels =
-          new String[] {Messages.getString("deploy.button"), IDialogConstants.CANCEL_LABEL};
-      String message = Messages.getString("obsolete.runtime.proceed", project.getName());
-      MessageDialog dialog =
-          new MessageDialog(
-              shell,
-              Messages.getString("obsolete.runtime.title"),
-              null,
-              message,
-              MessageDialog.QUESTION,
-              0,
-              buttonLabels);
-      return dialog.open() == 0;
-    }
-    return true;
+    return false;
   }
 
   protected boolean checkJspConfiguration(Shell shell, IProject project) throws CoreException {
