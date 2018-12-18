@@ -80,6 +80,7 @@ class ElementProblem {
   int getIMarkerSeverity() {
     return iMarkerSeverity;
   }
+
   int getIMessageSeverity() {
     return iMessageSeverity;
   }

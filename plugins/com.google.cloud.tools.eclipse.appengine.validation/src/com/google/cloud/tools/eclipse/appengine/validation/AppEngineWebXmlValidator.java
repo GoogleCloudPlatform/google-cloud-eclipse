@@ -79,7 +79,7 @@ public class AppEngineWebXmlValidator implements XmlValidationHelper {
             "com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker",
             IMarker.SEVERITY_WARNING,
             IMessage.NORMAL_SEVERITY,
-            userData, runtime.length(), null);
+            userData, runtime.length(), new UpgradeRuntimeQuickAssistProcessor());
         problems.add(problem);
       } else if ("java7".equals(runtime)) {
         DocumentLocation userData = (DocumentLocation) runtimeElement.getUserData("location");
@@ -87,7 +87,7 @@ public class AppEngineWebXmlValidator implements XmlValidationHelper {
             "com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker",
             IMarker.SEVERITY_WARNING,
             IMessage.NORMAL_SEVERITY,
-            userData, runtime.length(), null);
+            userData, runtime.length(), new UpgradeRuntimeQuickAssistProcessor());
         problems.add(problem);
       }
     }
