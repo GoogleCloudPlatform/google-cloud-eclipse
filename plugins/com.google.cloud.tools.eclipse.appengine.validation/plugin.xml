@@ -185,6 +185,14 @@
   </extension>
   
   <extension
+      id="runtimeMarker"
+      name="%appengine.runtime.marker"
+      point="org.eclipse.core.resources.markers">
+    <super type="com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker" />
+    <persistent value="true" />
+  </extension>  
+  
+  <extension
       point="org.eclipse.ui.ide.markerResolution">
     <markerResolutionGenerator
       class="com.google.cloud.tools.eclipse.appengine.validation.AppEngineWebMarkerResolutionGenerator"
