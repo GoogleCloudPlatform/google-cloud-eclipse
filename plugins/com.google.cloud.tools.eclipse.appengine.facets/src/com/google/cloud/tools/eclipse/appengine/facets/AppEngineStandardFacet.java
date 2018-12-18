@@ -115,9 +115,10 @@ public class AppEngineStandardFacet {
   @VisibleForTesting
   public static boolean usesObsoleteRuntime(IProjectFacetVersion facetVersion) {
     Object obsoleteProperty = facetVersion.getProperty("appengine.runtime.obsolete");
-    return obsoleteProperty instanceof String
-        ? Boolean.parseBoolean((String) obsoleteProperty)
-        : Boolean.TRUE == obsoleteProperty;
+    if (obsoleteProperty instanceof String) {
+      return Boolean.parseBoolean((String) obsoleteProperty);
+    }
+    return Boolean.TRUE == obsoleteProperty;
   }
 
 
