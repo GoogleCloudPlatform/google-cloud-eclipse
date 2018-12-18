@@ -73,12 +73,12 @@ public class AppEngineWebXmlValidator implements XmlValidationHelper {
       String runtime = runtimeElement.getTextContent();
       if ("java".equals(runtime)) {
         DocumentLocation userData = (DocumentLocation) runtimeElement.getUserData("location");
-        ElementProblem problem = new RuntimeProblem("Java 6 runtime no longer supported", 
+        ElementProblem problem = new ObsoleteRuntime("Java 6 runtime no longer supported", 
             userData, runtime.length());
         problems.add(problem);
       } else if ("java7".equals(runtime)) {
         DocumentLocation userData = (DocumentLocation) runtimeElement.getUserData("location");
-        ElementProblem problem = new RuntimeProblem("Java 7 runtime no longer supported", 
+        ElementProblem problem = new ObsoleteRuntime("Java 7 runtime no longer supported", 
             userData, runtime.length());
         problems.add(problem);
       }

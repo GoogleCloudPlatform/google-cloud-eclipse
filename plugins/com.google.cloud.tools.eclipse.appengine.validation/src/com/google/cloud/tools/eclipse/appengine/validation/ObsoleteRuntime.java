@@ -19,9 +19,9 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 
-class RuntimeProblem extends ElementProblem {
+class ObsoleteRuntime extends ElementProblem {
 
-  RuntimeProblem(String message, DocumentLocation start, int length) {
+  ObsoleteRuntime(String message, DocumentLocation start, int length) {
     super(message, "com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker",
         IMarker.SEVERITY_WARNING,
         IMessage.NORMAL_SEVERITY,
