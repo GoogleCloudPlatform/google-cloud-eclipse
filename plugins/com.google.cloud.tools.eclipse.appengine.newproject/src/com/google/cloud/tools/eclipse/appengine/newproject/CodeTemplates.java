@@ -111,7 +111,12 @@ public class CodeTemplates {
     Map<String, String> properties = new HashMap<>();
     properties.put("package", Strings.nullToEmpty(packageName)); //$NON-NLS-1$
 
-    properties.put("servletVersion", "3.1"); //$NON-NLS-1$ //$NON-NLS-2$
+    boolean servlet25 = isServlet25Selected(config);
+    if (servlet25) {
+      properties.put("servletVersion", "2.5"); //$NON-NLS-1$ //$NON-NLS-2$
+    } else {
+      properties.put("servletVersion", "3.1"); //$NON-NLS-1$ //$NON-NLS-2$
+    }
 
     IFile hello = createChildFile("HelloAppEngine.java", //$NON-NLS-1$
         Templates.HELLO_APPENGINE_TEMPLATE,
@@ -124,7 +129,6 @@ public class CodeTemplates {
         Templates.MOCK_HTTPSERVLETRESPONSE_TEMPLATE,
         testPackageFolder, properties, subMonitor.split(5));
 
-    boolean servlet25 = false;
     if (!servlet25 && isObjectifySelected(config)) {
       createChildFile("ObjectifyWebFilter.java", //$NON-NLS-1$
           Templates.OBJECTIFY_WEB_FILTER_TEMPLATE,
@@ -180,8 +184,7 @@ public class CodeTemplates {
         : config.getPackageName() + "."; //$NON-NLS-1$
     properties.put("package", packageValue); //$NON-NLS-1$
 
-    boolean servlet25 = false;
-    if (servlet25) {
+    if (isServlet25Selected(config)) {
       if (isObjectifySelected(config)) {
         properties.put("objectifyAdded", "true"); //$NON-NLS-1$ //$NON-NLS-2$
       }
@@ -198,6 +201,11 @@ public class CodeTemplates {
     IFolder webInf = project.getFolder("src/main/webapp/WEB-INF"); //$NON-NLS-1$
     createChildFile("web.xml", Templates.WEB_XML_TEMPLATE, webInf, //$NON-NLS-1$
         properties, monitor);
+  }
+
+  @VisibleForTesting
+  static boolean isServlet25Selected(AppEngineProjectConfig config) {
+    return false;
   }
 
   @VisibleForTesting
@@ -246,8 +254,12 @@ public class CodeTemplates {
         "1.3.2"); //$NON-NLS-1$
     properties.put("mavenPluginVersion", mavenPluginVersion); //$NON-NLS-1$
 
-    properties.put("servletVersion", "3.1");
-    properties.put("compilerVersion", "1.8");
+    if (isServlet25Selected(config)) {
+      properties.put("servletVersion", "2.5"); //$NON-NLS-1$ //$NON-NLS-2$
+    } else {
+      properties.put("servletVersion", "3.1"); //$NON-NLS-1$ //$NON-NLS-2$
+    }
+    properties.put("compilerVersion", "1.8"); //$NON-NLS-1$ //$NON-NLS-2$
 
     if (isStandardProject) {
       String sdkVersion = getCurrentVersion(

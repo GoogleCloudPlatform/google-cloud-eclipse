@@ -237,6 +237,12 @@ public class CodeTemplatesTest {
     assertTrue(CodeTemplates.isObjectify6Selected(config));
   }
 
+  @Test
+  public void testIsServlet25Selected() {
+    assertFalse(CodeTemplates.isServlet25Selected(null));
+    assertFalse(CodeTemplates.isServlet25Selected(new AppEngineProjectConfig()));
+  }
+
   private boolean objectifyListenerClassExists() {
     return project.getFile("src/main/java/ObjectifyWebListener.java").exists();
   }
