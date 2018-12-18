@@ -188,7 +188,8 @@
       id="runtimeMarker"
       name="%appengine.runtime.marker"
       point="org.eclipse.core.resources.markers">
-    <super type="com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker" />
+    <super type="org.eclipse.core.resources.problemmarker" />
+    <super type="org.eclipse.core.resources.textmarker" />
     <persistent value="true" />
   </extension>  
   
