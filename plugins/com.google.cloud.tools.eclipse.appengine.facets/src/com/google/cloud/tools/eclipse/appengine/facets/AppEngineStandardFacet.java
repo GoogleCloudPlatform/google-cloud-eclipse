@@ -100,6 +100,28 @@ public class AppEngineStandardFacet {
   }
 
   /**
+   * Return true if the project uses an obsolete App Engine Standard facet. Returns false if there
+   * is no App Engine Standard facet or if the version is not marked as obsolete.
+   *
+   * @param facetedProject should not be null
+   * @return true if project uses an obselete App Engine Standard facet and false otherwise
+   */
+  public static boolean usesObsoleteRuntime(IFacetedProject facetedProject) {
+    Preconditions.checkNotNull(facetedProject);
+    IProjectFacetVersion facetVersion = facetedProject.getProjectFacetVersion(FACET);
+    return facetVersion != null && usesObsoleteRuntime(facetVersion);
+  }
+
+  @VisibleForTesting
+  public static boolean usesObsoleteRuntime(IProjectFacetVersion facetVersion) {
+    Object obsoleteProperty = facetVersion.getProperty("appengine.runtime.obsolete");
+    return obsoleteProperty instanceof String
+        ? Boolean.parseBoolean((String) obsoleteProperty)
+        : Boolean.TRUE == obsoleteProperty;
+  }
+
+
+  /**
    * Return the App Engine standard facet for the given project, or {@code null} if none.
    */
   public static IProjectFacetVersion getProjectFacetVersion(IProject project) {

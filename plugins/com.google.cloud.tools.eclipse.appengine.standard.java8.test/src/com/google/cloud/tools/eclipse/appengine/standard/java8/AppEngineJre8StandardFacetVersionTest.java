@@ -18,6 +18,8 @@ package com.google.cloud.tools.eclipse.appengine.standard.java8;
 
 import static org.junit.Assert.assertEquals;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import org.junit.Assert;
 import org.junit.Test;
 
 /** Tests of the AppEngineStandardFacet JRE8 facet version definition. */
@@ -34,5 +36,12 @@ public class AppEngineJre8StandardFacetVersionTest {
         "java8",
         AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8.getProperty(
             "appengine.runtime"));
+  }
+
+  @Test
+  public void testNotObsolete() {
+    Assert.assertFalse(
+        AppEngineStandardFacet.usesObsoleteRuntime(
+            AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8));
   }
 }

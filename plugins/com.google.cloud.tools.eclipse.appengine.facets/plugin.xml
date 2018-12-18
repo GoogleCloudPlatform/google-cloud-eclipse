@@ -24,6 +24,10 @@
              </requires>
           </and>
         </constraint>
+       <property
+             name="appengine.runtime.obsolete"
+             value="true">
+       </property>
     </project-facet-version>
   </extension>
 
