@@ -33,6 +33,9 @@ public class AppEngineWebMarkerResolutionGenerator implements IMarkerResolutionG
   private static final Logger logger =
       Logger.getLogger(AppEngineWebMarkerResolutionGenerator.class.getName());
   
+  
+  // TODO do we need to add runtime quick fixes here? If so we need to separate
+  // the obsolete runtime and missing runtime marker types
   @Override
   public IMarkerResolution[] getResolutions(IMarker marker) {
     IMarkerResolution[] markerResolutions = new IMarkerResolution[1];
