@@ -63,7 +63,9 @@ public class StandardDeployCommandHandler extends DeployCommandHandler {
       if (facetedProject == null) {
         return false;
       }
-      if (AppEngineStandardFacet.usesObsoleteRuntime(facetedProject)) {
+
+      if (AppEngineStandardFacet.usesObsoleteRuntime(facetedProject)
+          && !getDeployPreferences(project).allowObsoleteRuntime()) {
         String[] buttonLabels =
             new String[] {Messages.getString("deploy.button"), IDialogConstants.CANCEL_LABEL};
         String message = Messages.getString("obsolete.runtime.proceed", project.getName());
@@ -81,7 +83,7 @@ public class StandardDeployCommandHandler extends DeployCommandHandler {
     } catch(CoreException ex) {
       logger.log(Level.WARNING, "Unable to check project use of obsolete App Engine runtime", ex);
     }
-    return false;
+    return true;
   }
 
   protected boolean checkJspConfiguration(Shell shell, IProject project) throws CoreException {
