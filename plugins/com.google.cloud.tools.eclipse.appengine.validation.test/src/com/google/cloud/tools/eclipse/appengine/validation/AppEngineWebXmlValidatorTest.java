@@ -63,10 +63,10 @@ public class AppEngineWebXmlValidatorTest {
     Node java7 = document.createTextNode("java7");
     element.appendChild(java7);
     
-    ArrayList<ElementProblem> blacklist = validator.checkForProblems(null, document);
-    assertEquals(1, blacklist.size());
+    ArrayList<ElementProblem> problems = validator.checkForProblems(null, document);
+    assertEquals(1, problems.size());
     String markerId = "com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker";
-    assertEquals(markerId, blacklist.get(0).getMarkerId());
+    assertEquals(markerId, problems.get(0).getMarkerId());
   }  
 
   @Test
@@ -78,10 +78,10 @@ public class AppEngineWebXmlValidatorTest {
     Node java6 = document.createTextNode("java"); // sic; java, not java6
     element.appendChild(java6);
     
-    ArrayList<ElementProblem> blacklist = validator.checkForProblems(null, document);
-    assertEquals(1, blacklist.size());
+    ArrayList<ElementProblem> problems = validator.checkForProblems(null, document);
+    assertEquals(1, problems.size());
     String markerId = "com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker";
-    assertEquals(markerId, blacklist.get(0).getMarkerId());
+    assertEquals(markerId, problems.get(0).getMarkerId());
   }
   
 }
