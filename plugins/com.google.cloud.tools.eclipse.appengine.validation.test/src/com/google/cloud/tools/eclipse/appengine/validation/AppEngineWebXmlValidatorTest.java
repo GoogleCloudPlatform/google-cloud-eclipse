@@ -43,25 +43,44 @@ public class AppEngineWebXmlValidatorTest {
   
   @Test
   public void testCheckForApplication() {
+    Element root =
+        document.createElementNS("http://appengine.google.com/ns/1.0", "appengine-web-app");
+    document.appendChild(root);
+ 
     Element element =
         document.createElementNS("http://appengine.google.com/ns/1.0", "application");
     element.setUserData("location", new DocumentLocation(3, 15), null);
-    document.appendChild(element);
+    root.appendChild(element);
+    Element runtime =
+        document.createElementNS("http://appengine.google.com/ns/1.0", "runtime");
+    root.appendChild(runtime);
     
     ArrayList<ElementProblem> blacklist = validator.checkForProblems(null, document);
     assertEquals(1, blacklist.size());
     String markerId = "com.google.cloud.tools.eclipse.appengine.validation.applicationMarker";
     assertEquals(markerId, blacklist.get(0).getMarkerId());
   }
+
+  @Test
+  public void testCheckForNoRuntime() {
+    Element element =
+        document.createElementNS("http://appengine.google.com/ns/1.0", "appengine-web-app");
+    document.appendChild(element);
+    
+    ArrayList<ElementProblem> problems = validator.checkForProblems(null, document);
+    assertEquals(1, problems.size());
+    String markerId = "com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker";
+    assertEquals(markerId, problems.get(0).getMarkerId());
+  }  
   
   @Test
   public void testCheckForJava7() {
-    Element element =
+    Element runtime =
         document.createElementNS("http://appengine.google.com/ns/1.0", "runtime");
-    element.setUserData("location", new DocumentLocation(3, 15), null);
-    document.appendChild(element);
+    runtime.setUserData("location", new DocumentLocation(3, 15), null);
+    document.appendChild(runtime);
     Node java7 = document.createTextNode("java7");
-    element.appendChild(java7);
+    runtime.appendChild(java7);
     
     ArrayList<ElementProblem> problems = validator.checkForProblems(null, document);
     assertEquals(1, problems.size());

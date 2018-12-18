@@ -83,6 +83,12 @@ public class AppEngineWebXmlValidator implements XmlValidationHelper {
         problems.add(problem);
       }
     }
+    
+    if (nodeList.getLength() == 0) {
+      ElementProblem problem = new MissingRuntime();
+      problems.add(problem);
+    }
+    
     return problems;
   }
 }
