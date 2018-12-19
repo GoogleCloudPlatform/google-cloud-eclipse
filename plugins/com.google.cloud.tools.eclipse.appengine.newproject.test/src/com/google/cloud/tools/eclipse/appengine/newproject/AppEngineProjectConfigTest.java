@@ -62,6 +62,9 @@ public class AppEngineProjectConfigTest {
     Assert.assertNull(config.getRuntime());
     config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8);
     Assert.assertEquals(AppEngineRuntime.STANDARD_JAVA_8, config.getRuntime());
+
+    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8_SERVLET_25);
+    Assert.assertEquals(AppEngineRuntime.STANDARD_JAVA_8_SERVLET_25, config.getRuntime());
   }
 
   @Test
