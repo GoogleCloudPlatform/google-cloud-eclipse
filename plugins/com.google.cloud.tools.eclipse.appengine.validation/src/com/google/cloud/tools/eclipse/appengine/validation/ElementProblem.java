@@ -21,7 +21,6 @@ import java.util.Objects;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.jface.text.quickassist.IQuickAssistProcessor;
 import org.eclipse.wst.validation.internal.provisional.core.IMessage;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
 /**
@@ -56,16 +55,6 @@ class ElementProblem {
     this.processor = processor;
   }
 
-  /**
-   * A problem with no specific location in the document such as an element
-   * that should be present but isn't.
-   */
-  @VisibleForTesting
-  ElementProblem(String message) {
-    this(message, "org.eclipse.core.resources.problemmarker",
-        IMarker.SEVERITY_WARNING, IMessage.NORMAL_SEVERITY, new DocumentLocation(0, 0), 0, null);
-  }
-  
   /**
    * A problem with no specific location in the document such as an element
    * that should be present but isn't.

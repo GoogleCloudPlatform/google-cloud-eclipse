@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -31,7 +32,7 @@ public class ElementProblemTest {
   @Test
   public void testElementProblemConstructor_nullElementName() {
     try {
-      new ElementProblem(null);
+      new ElementProblem(null, "foo");
       fail();
     } catch (NullPointerException ex) {
       assertNotNull(ex.getMessage());
@@ -58,10 +59,10 @@ public class ElementProblemTest {
   @SuppressWarnings("unlikely-arg-type")
   @Test
   public void testEquals() {
-    ElementProblem element1 = new ElementProblem("message");
+    ElementProblem element1 = new ElementProblem("message", "marker");
     assertEquals(element1, element1);
     
-    ElementProblem element2 = new ElementProblem("message");
+    ElementProblem element2 = new ElementProblem("message", "marker");
     assertTrue(element1.equals(element2));
     assertTrue(element2.equals(element1));
     
@@ -128,9 +129,11 @@ public class ElementProblemTest {
   
   @Test
   public void testHashCode() {
-    ElementProblem element1 = new ElementProblem("message");
-    ElementProblem element2 = new ElementProblem("message");
+    ElementProblem element1 = new ElementProblem("message", "marker");
+    ElementProblem element2 = new ElementProblem("message", "marker");
+    ElementProblem element3 = new ElementProblem("message", "marker2");
     assertEquals(element1.hashCode(), element2.hashCode());
+    assertNotEquals(element1.hashCode(), element3.hashCode());
   }
 
 }

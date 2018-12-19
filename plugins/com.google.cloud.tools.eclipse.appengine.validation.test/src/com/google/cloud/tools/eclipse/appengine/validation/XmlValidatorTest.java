@@ -167,7 +167,7 @@ public class XmlValidatorTest {
   public void testCreateMarker() throws CoreException {
     IFile file = createBogusProjectFile();
     String message = "Project ID should be specified at deploy time.";
-    ElementProblem element = new ElementProblem(message);
+    ElementProblem element = new ElementProblem(message, "id");
     XmlValidator.createMarker(file, element);
     IMarker[] markers = file.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
     ArrayAssertions.assertSize(1, markers);
