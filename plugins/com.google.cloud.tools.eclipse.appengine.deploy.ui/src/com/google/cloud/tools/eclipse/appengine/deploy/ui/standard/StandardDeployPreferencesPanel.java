@@ -22,6 +22,7 @@ import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
@@ -43,6 +44,16 @@ public class StandardDeployPreferencesPanel extends AppEngineDeployPreferencesPa
         Messages.getString("tooltip.deploy.config.files.standard"));
     setupCheckBoxDataBinding(
         includeOptionalConfigurationFilesButton, "includeOptionalConfigurationFiles");
+  }
+
+  @Override
+  protected void populateAdvancedSection(Composite parent) {
+    super.populateAdvancedSection(parent);
+
+    Button checkBox = new Button(parent, SWT.CHECK);
+    checkBox.setText(Messages.getString("deploy.allowObsoleteRuntime.text"));
+    checkBox.setToolTipText(Messages.getString("deploy.allowObsoleteRuntime.tooltip"));
+    setupCheckBoxDataBinding(checkBox, "allowObsoleteRuntime");
   }
 
   @Override

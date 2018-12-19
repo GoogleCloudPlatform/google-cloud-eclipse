@@ -159,11 +159,11 @@ public class DeployPreferencesTest {
   @Test
   public void testAllowObsoleteRuntime() {
     assertFalse(DeployPreferences.DEFAULT_ALLOW_OBSOLETE_RUNTIME);
-    assertFalse(preferences.allowObsoleteRuntime());
+    assertFalse(preferences.getAllowObsoleteRuntime());
     preferences.setAllowObsoleteRuntime(true);
-    assertTrue(preferences.allowObsoleteRuntime());
+    assertTrue(preferences.getAllowObsoleteRuntime());
     preferences.setAllowObsoleteRuntime(false);
-    assertFalse(preferences.allowObsoleteRuntime());
+    assertFalse(preferences.getAllowObsoleteRuntime());
   }
 
   @Test
@@ -178,7 +178,7 @@ public class DeployPreferencesTest {
     assertThat(preferences.getBucket(), isEmptyString());
     assertTrue(preferences.isStopPreviousVersion());
     assertTrue(preferences.isIncludeOptionalConfigurationFiles());
-    assertFalse(preferences.allowObsoleteRuntime());
+    assertFalse(preferences.getAllowObsoleteRuntime());
   }
 
   @Test

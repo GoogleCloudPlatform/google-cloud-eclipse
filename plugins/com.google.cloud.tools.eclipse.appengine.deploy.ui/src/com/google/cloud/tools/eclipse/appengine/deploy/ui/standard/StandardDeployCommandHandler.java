@@ -65,7 +65,7 @@ public class StandardDeployCommandHandler extends DeployCommandHandler {
       }
 
       if (AppEngineStandardFacet.usesObsoleteRuntime(facetedProject)
-          && !getDeployPreferences(project).allowObsoleteRuntime()) {
+          && !getDeployPreferences(project).getAllowObsoleteRuntime()) {
         String[] buttonLabels =
             new String[] {Messages.getString("deploy.button"), IDialogConstants.CANCEL_LABEL};
         String message = Messages.getString("obsolete.runtime.proceed", project.getName());

@@ -165,7 +165,7 @@ public class DeployPreferences {
   }
 
   /** Return {@code true} if this project can deploy to an obsolete runtime. */
-  public boolean allowObsoleteRuntime() {
+  public boolean getAllowObsoleteRuntime() {
     return allowObsoleteRuntime;
   }
 

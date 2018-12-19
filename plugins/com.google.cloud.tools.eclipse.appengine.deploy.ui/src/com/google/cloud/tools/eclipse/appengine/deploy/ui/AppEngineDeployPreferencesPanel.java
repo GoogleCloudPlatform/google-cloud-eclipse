@@ -444,17 +444,24 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     return checkBox;
   }
 
-  private void createAdvancedSection() {
+  protected void createAdvancedSection() {
     createExpandableComposite();
-    final Composite bucketComposite = createBucketSection(expandableComposite);
+    Composite advancedSection = new Composite(expandableComposite, SWT.NONE);
+    populateAdvancedSection(advancedSection);
+    GridLayoutFactory.swtDefaults().applyTo(advancedSection);
 
-    expandableComposite.setClient(bucketComposite);
+    expandableComposite.setClient(advancedSection);
     expandableComposite.addExpansionListener(new ExpansionAdapter() {
       @Override
       public void expansionStateChanged(ExpansionEvent event) {
         layoutChangedHandler.run();
       }
     });
+  }
+
+  /** Populate the "Advanced" twistie section. */
+  protected void populateAdvancedSection(Composite advancedSection) {
+    createBucketSection(advancedSection);
   }
 
   private void createExpandableComposite() {
