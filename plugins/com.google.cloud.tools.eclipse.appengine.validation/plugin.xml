@@ -2,16 +2,6 @@
 <?eclipse version="3.4"?>
 <plugin>
   
-  <!-- todo this doesn't seem to be used any more -->
-  <extension 
-      id="blacklistedClass" 
-      name="App Engine Whitelist Marker"
-      point="org.eclipse.core.resources.markers">
-    <super type="org.eclipse.core.resources.problemmarker" />
-    <super type="org.eclipse.core.resources.textmarker" />
-    <persistent value="true" />
-  </extension>
-  
   <extension 
       name="%appengine.web"
       point="org.eclipse.wst.validation.validatorV2" 
