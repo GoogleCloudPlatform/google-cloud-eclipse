@@ -79,8 +79,16 @@
           </repositories>
           <dependencies>
             <dependency>
+              <artifactId>org.eclipse.e4.rcp</artifactId>
+              <type>eclipse-feature</type>
+            </dependency>
+            <dependency>
               <artifactId>org.eclipse.equinox.p2.core.feature</artifactId>
               <type>eclipse-feature</type>
+            </dependency>
+            <dependency>
+              <artifactId>org.eclipse.equinox.p2.director.app</artifactId>
+              <type>eclipse-plugin</type>
             </dependency>
           </dependencies>
         </configuration>
