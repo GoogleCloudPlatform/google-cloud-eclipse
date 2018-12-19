@@ -28,7 +28,8 @@ public enum AppEngineRuntime {
       Messages.getString("appengine.runtimes.java8.servlet25"), //$NON-NLS-1$
       "java8"); //$NON-NLS-1$
 
-  public static final EnumSet<AppEngineRuntime> STANDARD_RUNTIMES = EnumSet.of(STANDARD_JAVA_8);
+  public static final EnumSet<AppEngineRuntime> STANDARD_RUNTIMES =
+      EnumSet.of(STANDARD_JAVA_8, STANDARD_JAVA_8_SERVLET_25);
 
   private final String label;
   private final String runtimeId;

@@ -206,7 +206,7 @@ public class CodeTemplates {
 
   @VisibleForTesting
   static boolean isServlet25Selected(AppEngineProjectConfig config) {
-    return false;
+    return config.getRuntime() == AppEngineRuntime.STANDARD_JAVA_8_SERVLET_25;
   }
 
   @VisibleForTesting

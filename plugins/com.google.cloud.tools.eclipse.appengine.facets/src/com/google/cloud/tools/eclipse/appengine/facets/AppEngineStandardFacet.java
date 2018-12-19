@@ -194,8 +194,8 @@ public class AppEngineStandardFacet {
    * @param monitor the progress monitor
    * @throws CoreException if anything goes wrong during install
    */
-  public static void installAppEngineFacet(final IFacetedProject facetedProject,
-      final boolean installDependentFacets, final IProgressMonitor monitor) throws CoreException {
+  public static void installAppEngineFacet(IFacetedProject facetedProject,
+      boolean installDependentFacets, IProgressMonitor monitor) throws CoreException {
     ILock lock = acquireLock(facetedProject.getProject());
     try {
       SubMonitor subMonitor = SubMonitor.convert(monitor, 100);

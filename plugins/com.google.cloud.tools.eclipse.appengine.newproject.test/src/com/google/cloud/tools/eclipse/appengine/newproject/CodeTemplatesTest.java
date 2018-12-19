@@ -86,7 +86,7 @@ public class CodeTemplatesTest {
     IFile mostImportant = CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
     validateNonConfigFiles(mostImportant, "http://xmlns.jcp.org/xml/ns/javaee",
         "http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd", "3.1");
-    validateAppEngineWebXml(AppEngineRuntime.STANDARD_JAVA_8);
+    validateAppEngineWebXml(config.getRuntime());
     validateLoggingProperties();
   }
 
@@ -98,6 +98,7 @@ public class CodeTemplatesTest {
 
     CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
     assertFalse(objectifyFilterClassExists());
+    assertFalse(objectifyListenerClassExists());
     validateObjectifyFilterConfigInWebXml(false);
   }
 
@@ -106,22 +107,49 @@ public class CodeTemplatesTest {
       throws CoreException, ParserConfigurationException, SAXException, IOException {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8);
-    config.setAppEngineLibraries(Collections.singleton(new Library("objectify")));
+    config.setAppEngineLibraries(Collections.singleton(new Library("objectify"))); // Objectify 5
 
     CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
     assertTrue(objectifyFilterClassExists());
+    assertFalse(objectifyListenerClassExists()); // listener added only for Objectify 6
     validateObjectifyFilterConfigInWebXml(false);
   }
 
   @Test
-  public void testMaterializeAppEngineStandardFiles_noObjectifyListenerWithObjectify5()
-      throws CoreException {
+  public void testMaterializeAppEngineStandardFiles_java8Servlet25()
+      throws CoreException, ParserConfigurationException, SAXException, IOException {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
-    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8);
+    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8_SERVLET_25);
+    IFile mostImportant = CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
+    validateNonConfigFiles(mostImportant, "http://java.sun.com/xml/ns/javaee",
+        "http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd", "2.5");
+    validateAppEngineWebXml(config.getRuntime());
+    validateLoggingProperties();
+  }
+
+  @Test
+  public void testMaterializeAppEngineStandardFiles_noObjectifyWithJava8Servlet25()
+      throws CoreException, ParserConfigurationException, SAXException, IOException {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8_SERVLET_25);
+
+    CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
+    assertFalse(objectifyFilterClassExists());
+    assertFalse(objectifyListenerClassExists());
+    validateObjectifyFilterConfigInWebXml(false);
+  }
+
+  @Test
+  public void testMaterializeAppEngineStandardFiles_objectifyWithJava8Servlet25()
+      throws CoreException, ParserConfigurationException, SAXException, IOException {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8_SERVLET_25);
     config.setAppEngineLibraries(Collections.singleton(new Library("objectify")));
 
     CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
+    assertFalse(objectifyFilterClassExists());
     assertFalse(objectifyListenerClassExists());
+    validateObjectifyFilterConfigInWebXml(true);
   }
 
   @Test
@@ -238,9 +266,22 @@ public class CodeTemplatesTest {
   }
 
   @Test
-  public void testIsServlet25Selected() {
-    assertFalse(CodeTemplates.isServlet25Selected(null));
+  public void testIsServlet25Selected_nullRuntime() {
     assertFalse(CodeTemplates.isServlet25Selected(new AppEngineProjectConfig()));
+  }
+
+  @Test
+  public void testIsServlet25Selected_java8Runtime() {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8);
+    assertFalse(CodeTemplates.isServlet25Selected(config));
+  }
+
+  @Test
+  public void testIsServlet25Selected_java8Servlet25Runtime() {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8_SERVLET_25);
+    assertTrue(CodeTemplates.isServlet25Selected(config));
   }
 
   private boolean objectifyListenerClassExists() {
