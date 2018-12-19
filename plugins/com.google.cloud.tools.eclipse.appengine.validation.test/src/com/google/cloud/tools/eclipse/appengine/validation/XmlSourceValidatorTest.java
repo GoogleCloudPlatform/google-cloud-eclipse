@@ -42,6 +42,7 @@ import org.eclipse.wst.sse.ui.internal.reconcile.validator.IncrementalReporter;
 import org.eclipse.wst.validation.internal.core.ValidationException;
 import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 import org.eclipse.wst.validation.internal.provisional.core.IValidationContext;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -109,9 +110,14 @@ public class XmlSourceValidatorTest {
   public void testValidate_noProblemElements() throws IOException {
     XmlSourceValidator validator = new XmlSourceValidator();
     validator.setHelper(new AppEngineWebXmlValidator());
-    byte[] xml = "<test></test>".getBytes(StandardCharsets.UTF_8);
+    byte[] xml = ("<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
+        + "<runtime>java8</runtime>"
+        + "</appengine-web-app>").getBytes(StandardCharsets.UTF_8);
     validator.validate(reporter, null, xml);
-    assertTrue(reporter.getMessages().isEmpty());
+    List<IMessage> messages = reporter.getMessages();
+    if (!messages.isEmpty()) {
+      Assert.fail(messages.get(0).getText());
+    }
   }
 
   @Test
