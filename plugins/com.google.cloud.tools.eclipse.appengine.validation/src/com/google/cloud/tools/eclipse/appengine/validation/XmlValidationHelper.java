@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
-import java.util.ArrayList;
+import java.util.List;
 import org.eclipse.core.resources.IResource;
 import org.w3c.dom.Document;
 
@@ -26,6 +26,6 @@ interface XmlValidationHelper {
    * Searches the {@link Document} for element problems and returns them
    * as a list of {@link ElementProblem}s.
    */
-  ArrayList<ElementProblem> checkForProblems(IResource resource, Document document);
+  List<ElementProblem> checkForProblems(IResource resource, Document document);
 
 }

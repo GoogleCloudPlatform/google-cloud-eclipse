@@ -30,7 +30,7 @@ import org.w3c.dom.NodeList;
 public class AppEngineWebXmlValidator implements XmlValidationHelper {
 
   @Override
-  public ArrayList<ElementProblem> checkForProblems(IResource resource, Document document) {
+  public List<ElementProblem> checkForProblems(IResource resource, Document document) {
     ArrayList<ElementProblem> problems = new ArrayList<>();
 
     List<ElementProblem> blacklistProblems = checkBlacklistedElements(document);
