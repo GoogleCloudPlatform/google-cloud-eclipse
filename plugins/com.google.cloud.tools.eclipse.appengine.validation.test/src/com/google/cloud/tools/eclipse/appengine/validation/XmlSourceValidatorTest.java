@@ -50,8 +50,8 @@ public class XmlSourceValidatorTest {
 
   private static final String APPLICATION_XML =
       "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
-      + "<application>"
-      + "</application>"
+      + "<application></application>"
+      + "<runtime>java8</runtime>"
       + "</appengine-web-app>";
 
   private final IncrementalReporter reporter = new IncrementalReporter(null);
