@@ -20,6 +20,7 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.ui.LibrarySelectorGroup;
 import com.google.cloud.tools.eclipse.appengine.newproject.maven.MavenCoordinatesWizardUi;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.util.JavaPackageValidator;
 import com.google.cloud.tools.eclipse.util.MavenCoordinatesValidator;
 import com.google.cloud.tools.project.ServiceNameValidator;
@@ -112,7 +113,7 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     // default: do nothing; used by subclasses
   }
 
-  public String getRuntimeId() {
+  public AppEngineRuntime getRuntime() {
     return null;
   }
 

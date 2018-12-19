@@ -82,7 +82,7 @@ public class CodeTemplatesTest {
   public void testMaterializeAppEngineStandardFiles_java8()
       throws CoreException, ParserConfigurationException, SAXException, IOException {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
-    config.setRuntimeId(AppEngineRuntime.STANDARD_JAVA_8.getId());
+    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8);
     IFile mostImportant = CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
     validateNonConfigFiles(mostImportant, "http://xmlns.jcp.org/xml/ns/javaee",
         "http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd", "3.1");
@@ -94,7 +94,7 @@ public class CodeTemplatesTest {
   public void testMaterializeAppEngineStandardFiles_noObjectifyWithJava8()
       throws CoreException, ParserConfigurationException, SAXException, IOException {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
-    config.setRuntimeId(AppEngineRuntime.STANDARD_JAVA_8.getId());
+    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8);
 
     CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
     assertFalse(objectifyFilterClassExists());
@@ -105,7 +105,7 @@ public class CodeTemplatesTest {
   public void testMaterializeAppEngineStandardFiles_objectifyWithJava8()
       throws CoreException, ParserConfigurationException, SAXException, IOException {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
-    config.setRuntimeId(AppEngineRuntime.STANDARD_JAVA_8.getId());
+    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8);
     config.setAppEngineLibraries(Collections.singleton(new Library("objectify")));
 
     CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
@@ -117,7 +117,7 @@ public class CodeTemplatesTest {
   public void testMaterializeAppEngineStandardFiles_noObjectifyListenerWithObjectify5()
       throws CoreException {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
-    config.setRuntimeId(AppEngineRuntime.STANDARD_JAVA_8.getId());
+    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8);
     config.setAppEngineLibraries(Collections.singleton(new Library("objectify")));
 
     CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
@@ -330,12 +330,12 @@ public class CodeTemplatesTest {
 
     NodeList runtimeElements = doc.getDocumentElement().getElementsByTagNameNS(
         "http://appengine.google.com/ns/1.0", "runtime");
-    if (runtime.getId() == null) {
+    if (runtime.getRuntimeId() == null) {
       Assert.assertEquals("should not have a <runtime> element", 0, runtimeElements.getLength());
     } else {
       Assert.assertEquals("should have exactly 1 <runtime> element", 1,
           runtimeElements.getLength());
-      Assert.assertEquals(runtime.getId(), runtimeElements.item(0).getTextContent());
+      Assert.assertEquals(runtime.getRuntimeId(), runtimeElements.item(0).getTextContent());
     }
   }
 

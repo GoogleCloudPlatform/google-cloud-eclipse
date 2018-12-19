@@ -23,23 +23,26 @@ import java.util.EnumSet;
  */
 public enum AppEngineRuntime {
   STANDARD_JAVA_8(
-      Messages.getString("appengine.runtimes.java8"), "java8"); //$NON-NLS-1$ //$NON-NLS-2$
+      Messages.getString("appengine.runtimes.java8"), "java8"), //$NON-NLS-1$ //$NON-NLS-2$
+  STANDARD_JAVA_8_SERVLET_25(
+      Messages.getString("appengine.runtimes.java8.servlet25"), //$NON-NLS-1$
+      "java8"); //$NON-NLS-1$
 
   public static final EnumSet<AppEngineRuntime> STANDARD_RUNTIMES = EnumSet.of(STANDARD_JAVA_8);
 
   private final String label;
-  private final String id;
+  private final String runtimeId;
 
-  private AppEngineRuntime(String label, String id) {
+  private AppEngineRuntime(String label, String runtimeId) {
     this.label = label;
-    this.id = id;
+    this.runtimeId = runtimeId;
   }
 
   public String getLabel() {
     return label;
   }
 
-  public String getId() {
-    return id;
+  public String getRuntimeId() {
+    return runtimeId;
   }
 }

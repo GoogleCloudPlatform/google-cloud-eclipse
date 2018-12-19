@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
 import com.google.cloud.tools.eclipse.util.Templates;
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
@@ -154,11 +155,11 @@ public class CodeTemplates {
       if (!Strings.isNullOrEmpty(service)) {
         properties.put("service", service);  //$NON-NLS-1$
       }
-      String runtime = config.getRuntimeId();
-      if (Strings.isNullOrEmpty(runtime)) {
+      AppEngineRuntime runtime = config.getRuntime();
+      if (runtime == null) {
         properties.put("runtime", "java8"); //$NON-NLS-1$ //$NON-NLS-2$
       } else {
-        properties.put("runtime", runtime); //$NON-NLS-1$
+        properties.put("runtime", runtime.getRuntimeId()); //$NON-NLS-1$
       }
 
       IFolder webInf = project.getFolder("src/main/webapp/WEB-INF"); //$NON-NLS-1$

@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,7 +34,7 @@ public class AppEngineProjectConfig {
   private IProject project;
   private List<Library> appEngineLibraries = Collections.emptyList();
   private String serviceName;
-  private String runtimeId;
+  private AppEngineRuntime runtime;
 
   private boolean useMaven;
   private String mavenGroupId;
@@ -83,12 +84,12 @@ public class AppEngineProjectConfig {
     this.serviceName = serviceName;
   }
 
-  String getRuntimeId() {
-    return runtimeId;
+  AppEngineRuntime getRuntime() {
+    return runtime;
   }
 
-  void setRuntimeId(String runtimeId) {
-    this.runtimeId = runtimeId;
+  void setRuntime(AppEngineRuntime runtime) {
+    this.runtime = runtime;
   }
 
   void setUseMaven(String mavenGroupId, String mavenArtifactId, String mavenVersion) {
