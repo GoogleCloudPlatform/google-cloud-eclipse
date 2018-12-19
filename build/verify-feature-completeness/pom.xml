@@ -79,44 +79,8 @@
           </repositories>
           <dependencies>
             <dependency>
-              <artifactId>org.eclipse.equinox.p2.transport.ecf</artifactId>
-              <type>eclipse-plugin</type>
-            </dependency>
-            <dependency>
-              <artifactId>org.eclipse.equinox.p2.repository</artifactId>
-              <type>eclipse-plugin</type>
-            </dependency>
-            <dependency>
-              <artifactId>org.eclipse.equinox.p2.touchpoint.natives</artifactId>
-              <type>eclipse-plugin</type>
-            </dependency>
-            <dependency>
-              <artifactId>org.eclipse.equinox.p2.touchpoint.eclipse</artifactId>
-              <type>eclipse-plugin</type>
-            </dependency>
-            <dependency>
-              <artifactId>org.eclipse.equinox.p2.artifact.repository</artifactId>
-              <type>eclipse-plugin</type>
-            </dependency>
-            <dependency>
-              <artifactId>org.eclipse.equinox.p2.director.app</artifactId>
-              <type>eclipse-plugin</type>
-            </dependency>
-            <dependency>
-              <artifactId>org.eclipse.equinox.simpleconfigurator</artifactId>
-              <type>eclipse-plugin</type>
-            </dependency>
-            <dependency>
-              <artifactId>org.eclipse.osgi.compatibility.state</artifactId>
-              <type>eclipse-plugin</type>
-            </dependency>
-            <dependency>
-              <artifactId>org.eclipse.equinox.ds</artifactId>
-              <type>eclipse-plugin</type>
-            </dependency>
-            <dependency>
-              <artifactId>org.eclipse.core.net</artifactId>
-              <type>eclipse-plugin</type>
+              <artifactId>org.eclipse.equinox.p2.core.feature</artifactId>
+              <type>eclipse-feature</type>
             </dependency>
           </dependencies>
         </configuration>
