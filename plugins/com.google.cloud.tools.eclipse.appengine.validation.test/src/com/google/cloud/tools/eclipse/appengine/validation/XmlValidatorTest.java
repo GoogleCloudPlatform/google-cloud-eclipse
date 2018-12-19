@@ -43,7 +43,8 @@ public class XmlValidatorTest {
 
   private static final String XML_NO_PROBLEM_ELEMENTS = "<test></test>";
   private static final String XML =
-      "<application xmlns='http://appengine.google.com/ns/1.0'></application>";
+      "<application xmlns='http://appengine.google.com/ns/1.0'>"
+      + "<runtime>java8</runtime></application>";
   private static final String BAD_XML = "<";
   private static final String APPLICATION_MARKER =
       "com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker";
@@ -88,7 +89,7 @@ public class XmlValidatorTest {
     XmlValidator validator = new XmlValidator();
     validator.setHelper(new AppEngineWebXmlValidator());
 
-    // This method should not apply any markers for malformed XML
+    // This method should not apply any markers for invalid XML
     IFile file = createBogusProjectFile();
     byte[] badXml = BAD_XML.getBytes(StandardCharsets.UTF_8);
     validator.validate(file, badXml);
@@ -146,6 +147,7 @@ public class XmlValidatorTest {
   @Test
   public void testXsdValidation_appengineWebXml() throws CoreException {
     String xml = "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
+        + "<runtime>java8</runtime>"
         + "<foo></foo>"
         + "</appengine-web-app>";
     IProject project = appEngineStandardProjectCreator.getProject();
