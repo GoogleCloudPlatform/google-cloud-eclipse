@@ -8,7 +8,7 @@
             runtimeTypes="com.google.cloud.tools.eclipse.appengine.standard.runtime">
          <moduleType
                types="jst.web"
-               versions="[2.5-3.1]">
+               versions="3.0,3.1">
          </moduleType>
       </runtimeModuleType>
    </extension>
