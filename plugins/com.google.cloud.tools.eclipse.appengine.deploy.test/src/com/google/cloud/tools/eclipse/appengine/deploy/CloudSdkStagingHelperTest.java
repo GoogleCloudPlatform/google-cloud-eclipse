@@ -69,7 +69,6 @@ public class CloudSdkStagingHelperTest {
 
   @Mock private IProgressMonitor monitor;
 
-  private IPath sourceDirectory;
   private IPath stagingDirectory;
   private IProject project;
 
@@ -77,7 +76,6 @@ public class CloudSdkStagingHelperTest {
   public void setUp() {
     project = projectCreator.getProject();
     stagingDirectory = new Path(tempFolder.getRoot().toString());
-    sourceDirectory = new Path(tempFolder.getRoot().toString());
   }
 
   @Test

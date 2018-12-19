@@ -21,7 +21,9 @@ import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineConfigurationUtil;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.FacetUtil;
+import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -107,8 +109,9 @@ public class AppEngineStandardJre8ProjectFacetDetector extends ProjectFacetDetec
     }
   }
 
-  private IProjectFacetVersion getWebFacetVersionToInstall(IProject project) {
-    IFile webXml = AppEngineConfigurationUtil.findConfigurationFile(project, new Path("web.xml"));
+  @VisibleForTesting
+  static IProjectFacetVersion getWebFacetVersionToInstall(IProject project) {
+    IFile webXml = WebProjectUtil.findInWebInf(project, new Path("web.xml"));
     if (webXml == null) {
       return WebFacetUtils.WEB_31;
     }
