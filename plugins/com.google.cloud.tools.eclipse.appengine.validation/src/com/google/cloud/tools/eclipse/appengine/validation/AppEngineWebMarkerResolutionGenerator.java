@@ -33,8 +33,6 @@ public class AppEngineWebMarkerResolutionGenerator implements IMarkerResolutionG
   private static final Logger logger =
       Logger.getLogger(AppEngineWebMarkerResolutionGenerator.class.getName());
    
-  // TODO do we need to add runtime quick fixes here? If so we need to separate
-  // the obsolete runtime and missing runtime marker types
   @Override
   public IMarkerResolution[] getResolutions(IMarker marker) {
     IMarkerResolution[] markerResolutions = new IMarkerResolution[1];
@@ -47,6 +45,12 @@ public class AppEngineWebMarkerResolutionGenerator implements IMarkerResolutionG
           .equals(marker.getType())) {
         IMarkerResolution fix = new VersionQuickFix();
         markerResolutions[0] = fix;
+      } else if ("com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker"
+          .equals(marker.getType())) {
+        IMarkerResolution fix = new UpgradeRuntimeQuickFix();
+        markerResolutions[0] = fix;
+      } else {
+        return new IMarkerResolution[0];
       }
     } catch (CoreException ex) {
       logger.log(Level.SEVERE, ex.getMessage());

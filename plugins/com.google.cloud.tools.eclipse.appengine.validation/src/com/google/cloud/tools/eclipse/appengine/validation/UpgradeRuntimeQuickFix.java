@@ -19,7 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 /**
  * Changes runtime element to java8.
  */
-class UpgradeRuntimeQuickFix extends XsltSourceQuickFix {
+class UpgradeRuntimeQuickFix extends XsltQuickFix {
 
   UpgradeRuntimeQuickFix() {
     super("/xslt/upgradeRuntime.xsl", Messages.getString("upgrade.runtime.element"));
