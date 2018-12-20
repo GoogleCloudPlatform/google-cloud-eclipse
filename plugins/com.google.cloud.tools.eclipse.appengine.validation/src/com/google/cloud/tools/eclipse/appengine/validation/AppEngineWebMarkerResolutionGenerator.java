@@ -37,7 +37,7 @@ public class AppEngineWebMarkerResolutionGenerator implements IMarkerResolutionG
   @Override
   public IMarkerResolution[] getResolutions(IMarker marker) {
     
-	ArrayList<IMarkerResolution> resolutions = new ArrayList<>();
+    ArrayList<IMarkerResolution> resolutions = new ArrayList<>();
     try {
       if ("com.google.cloud.tools.eclipse.appengine.validation.applicationMarker"
           .equals(marker.getType())) {
