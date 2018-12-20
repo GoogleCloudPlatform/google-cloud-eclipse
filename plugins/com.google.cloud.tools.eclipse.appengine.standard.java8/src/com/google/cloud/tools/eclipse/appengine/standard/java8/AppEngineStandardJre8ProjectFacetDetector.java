@@ -117,7 +117,7 @@ public class AppEngineStandardJre8ProjectFacetDetector extends ProjectFacetDetec
     }
 
     try (InputStream in = webXml.getContents()) {
-      String servletVersion = buildDomDocument(webXml).getDocumentElement().getAttribute("version");
+      String servletVersion = buildDomDocument(in).getDocumentElement().getAttribute("version");
       if ("2.5".equals(servletVersion)) {
         return WebFacetUtils.WEB_25;
       }
@@ -127,10 +127,10 @@ public class AppEngineStandardJre8ProjectFacetDetector extends ProjectFacetDetec
     return WebFacetUtils.WEB_31;
   }
 
-  private static Document buildDomDocument(IFile xml)
-      throws SAXException, IOException, ParserConfigurationException, CoreException {
+  private static Document buildDomDocument(InputStream in)
+      throws SAXException, IOException, ParserConfigurationException {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     factory.setNamespaceAware(true);
-    return factory.newDocumentBuilder().parse(xml.getContents());
+    return factory.newDocumentBuilder().parse(in);
   }
 }
