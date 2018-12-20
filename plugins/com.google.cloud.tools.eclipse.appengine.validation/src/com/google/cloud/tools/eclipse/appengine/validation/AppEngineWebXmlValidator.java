@@ -85,7 +85,9 @@ public class AppEngineWebXmlValidator implements XmlValidationHelper {
     }
     
     if (nodeList.getLength() == 0) {
-      ElementProblem problem = new MissingRuntime();
+      DocumentLocation location = new DocumentLocation(1, 1);
+      ElementProblem problem = new ObsoleteRuntime("Java 7 runtime no longer supported", 
+          location, 1);
       problems.add(problem);
     }
     

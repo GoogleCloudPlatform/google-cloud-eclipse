@@ -48,11 +48,6 @@ public class UpgradeRuntimeQuickFixTest {
   private static final String MARKER =
       "com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker";
 
-  private static final String APPENGINE_WEB_APP =
-      "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
-      + "<runtime>java7</runtime>"
-      + "</appengine-web-app>";
-
   @Rule
   public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
@@ -61,10 +56,33 @@ public class UpgradeRuntimeQuickFixTest {
       JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
 
   @Test
-  public void testApply() throws CoreException {
+  public void testConvertJava7() throws CoreException {
+    String appengineWebAppJava7 =
+        "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
+        + "<runtime>java7</runtime>"
+        + "</appengine-web-app>";
+    
+    checkUpgrade(appengineWebAppJava7);
+  }
+  
+  @Test
+  public void testAddMissingRuntime() throws CoreException {
+    String appengineWebAppJava7 =
+        "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
+        + "</appengine-web-app>";
+    
+    checkUpgrade(appengineWebAppJava7);
+  }
+
+  /**
+   * @param appengineWebAppJava7
+   * @throws CoreException
+   */
+  private void checkUpgrade(String appengineWebAppJava7) throws CoreException {
     IProject project = appEngineStandardProject.getProject();
     IFile file = project.getFile("appengine-web.xml");
-    file.create(ValidationTestUtils.stringToInputStream(APPENGINE_WEB_APP), IFile.FORCE, null);
+    
+    file.create(ValidationTestUtils.stringToInputStream(appengineWebAppJava7), IFile.FORCE, null);
 
     IWorkbench workbench = PlatformUI.getWorkbench();
     IEditorPart editorPart = WorkbenchUtil.openInEditor(workbench, file);

@@ -20,6 +20,15 @@
     </xsl:copy>
   </xsl:template>
 
+  <!-- add missing runtime element -->
+  <xsl:template match="appengine:appengine-web-app">
+    <xsl:copy>
+      <xsl:apply-templates select="node()|@*"/>
+      <xsl:if test="not(appengine:runtime)"><runtime>java8</runtime></xsl:if>
+    </xsl:copy>
+  </xsl:template>
+
+  <!-- upgrade existing runtime element -->
   <xsl:template match="appengine:runtime"><runtime>java8</runtime></xsl:template>
 
 </xsl:stylesheet>
