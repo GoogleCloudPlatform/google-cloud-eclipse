@@ -95,7 +95,7 @@ public class UpgradeRuntimeQuickFixTest {
         true /* includeSubtypes */, IResource.DEPTH_ZERO);
     assertEquals(1, markers.length);
 
-    XsltSourceQuickFix quickFix = new UpgradeRuntimeQuickFix();
+    XsltSourceQuickFix quickFix = new UpgradeRuntimeSourceQuickFix();
     quickFix.apply(viewer, 'a', 0, 0);
 
     IDocument document = viewer.getDocument();
