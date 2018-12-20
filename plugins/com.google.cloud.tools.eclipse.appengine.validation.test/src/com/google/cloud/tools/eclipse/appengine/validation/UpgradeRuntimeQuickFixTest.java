@@ -74,10 +74,6 @@ public class UpgradeRuntimeQuickFixTest {
     checkUpgrade(appengineWebAppJava7);
   }
 
-  /**
-   * @param appengineWebAppJava7
-   * @throws CoreException
-   */
   private void checkUpgrade(String appengineWebAppJava7) throws CoreException {
     IProject project = appEngineStandardProject.getProject();
     IFile file = project.getFile("appengine-web.xml");
