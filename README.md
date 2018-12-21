@@ -52,6 +52,11 @@ Maven for building Eclipse bundles and features.
 1. Clone the project to a local directory using `git clone
    https://github.com/GoogleCloudPlatform/google-cloud-eclipse.git`.
 
+## Running Tests
+
+If all you want is to run tests, just do `mvn verify`.
+
+However, the integration tests will interfere with your display, disrupt your using your computer, and likely fail if you touch the screen while the integration tests are running. A nice solution on \*nix systems is to do `xvfb-run mvn verify`. `xvfb-run` will use a virtual display, and you and the tests will not be disrupted.
 
 ## Configuring Maven/Tycho Builds
 
