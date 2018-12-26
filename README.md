@@ -241,9 +241,7 @@ target platform whenever dependencies are updated.
 
       1. Click `Apply` to apply the changes to the run config
 
-  1. From the `Run` menu, select `Run History > gcloud-eclipse-tools`
-
-  1. A new instance of Eclipse launches with the plugin installed.
+  1. From the `Run` menu, select `Run History > gcloud-eclipse-tools`. A new instance of Eclipse launches with the plugin installed.
 
 
 # Updating Target Platforms
