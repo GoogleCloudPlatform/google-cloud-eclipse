@@ -20,9 +20,9 @@ Maven for building Eclipse bundles and features.
   
    - An alternative is to install _Cloud Tools for Eclipse_ into your Eclipse IDE and use its option to automatically install the _Cloud SDK_.
 
-1. JDK 8
+2. JDK 8
 
-1. The [Eclipse IDE](https://www.eclipse.org/downloads/eclipse-packages/).
+3. The [Eclipse IDE](https://www.eclipse.org/downloads/eclipse-packages/).
    It's easiest to use the _Eclipse IDE for Java EE Developers_ package. You must use
    Eclipse 4.7 (Oxygen) or later.  We use _target platforms_ to support building
    for earlier versions of Eclipse.  You also need the following:
@@ -43,12 +43,12 @@ Maven for building Eclipse bundles and features.
       and place the jar into your Eclipse installation's `dropins/` directory
       (on MacOS this may be in `Eclipse.app/Contents/Eclipse/dropins/`).
 
-1. Maven 3.5.0 or later.  Although m2eclipse is bundled with its own Maven install,
+4. Maven 3.5.0 or later.  Although m2eclipse is bundled with its own Maven install,
    Maven is necessary to test command-line builds.
 
-1. git (optional: you can use EGit from within Eclipse instead)
+5. git (optional: you can use EGit from within Eclipse instead)
 
-1. Clone the project to a local directory using `git clone
+6. Clone the project to a local directory using `git clone
    https://github.com/GoogleCloudPlatform/google-cloud-eclipse.git`.
 
 ## Running Tests
@@ -64,7 +64,7 @@ The plugin is built using Maven/Tycho and targeted to Java 8.
 The tests need to find the Google Cloud SDK.  You can either:
 
   1. Place the _SDK_`/bin` directory on your `PATH`
-  1. Set `GOOGLE_CLOUD_SDK_HOME` to point to your SDK
+  2. Set `GOOGLE_CLOUD_SDK_HOME` to point to your SDK
 
 ### Changing the Eclipse Platform compilation and testing target
 
@@ -126,28 +126,28 @@ target platform whenever dependencies are updated.
 
    1. Select `Window/Preferences` (on Mac `Eclipse/Preferences`).
 
-   1. Under `Java/Installed JREs` click `Add`.
+   2. Under `Java/Installed JREs` click `Add`.
 
-   1. Select Standard VM and click `Next`.
+   3. Select Standard VM and click `Next`.
 
-   1. Select the folder that contains the JDK 8 installation by clicking
+   4. Select the folder that contains the JDK 8 installation by clicking
       `Directory`.
 
-   1. Click `Finish`.
+   5. Click `Finish`.
 
-   1. Select `Java/Installed JREs/Execution Environments` page.
+   6. Select `Java/Installed JREs/Execution Environments` page.
 
-   1. Click on `JavaSE-1.8` in the list on the left under `Execution
+   7. Click on `JavaSE-1.8` in the list on the left under `Execution
       Environments:`.
 
-   1. The JDK just added should show up in the list on the right along with other
+   8. The JDK just added should show up in the list on the right along with other
       installed JDKs/JREs. Set the checkbox next to the JDK 8 added in the
       previous steps to mark it as compatible with the `JavaSE-1.8` execution
       environment.
 
-   1. Click `OK`.
+   9. Click `OK`.
 
-1. Set up the Target Platform: you will need to repeat this process whenever
+2. Set up the Target Platform: you will need to repeat this process whenever
    items are changed in the target platform, such as a new release of the
    `appengine-plugins-core`.
 
@@ -155,52 +155,52 @@ target platform whenever dependencies are updated.
 
       `$ (cd eclipse; mvn -Pide-target-platform package)`
 
-   1. Open the `Preferences` dialog, go to `Plug-in Development` > `Target Platform`.
+   2. Open the `Preferences` dialog, go to `Plug-in Development` > `Target Platform`.
 
-   1. Click `Add...` > `Nothing` to create a new Target Platform.
+   3. Click `Add...` > `Nothing` to create a new Target Platform.
 
-   1. Name it `GCP IDE Target Platform`.
+   4. Name it `GCP IDE Target Platform`.
 
-   1. Select `Add` > `Software Site`.
+   5. Select `Add` > `Software Site`.
 
-   1. Select the `Add...` button (found beside the `Work with:` field) and then select `Local`
+   6. Select the `Add...` button (found beside the `Work with:` field) and then select `Local`
       to find a local repository. Navigate to `.../eclipse/ide-target-platform/target/repository`,
       and click `OK`.
 
-   1. Once the main content populates, check the `Uncategorized` item to pull in all items. Click `Finish`.
+   7. Once the main content populates, check the `Uncategorized` item to pull in all items. Click `Finish`.
 
-   1. Click `Finish` to complete the new target platform definition.
+   8. Click `Finish` to complete the new target platform definition.
 
-   1. Select your new target platform (instead of Running Platform) in the `Target Platform` preferences.
+   9. Select your new target platform (instead of Running Platform) in the `Target Platform` preferences.
 
-   1. Click `Apply and Finish` to load this new target platform.
+   10. Click `Apply and Finish` to load this new target platform.
 
-   1. Eclipse will load the target.
+   11. Eclipse will load the target.
 
-1. Import the projects
+3. Import the projects.
 
    1. Select `File/Import...` menu in Eclipse.
 
-   1. Select `Existing Maven Projects` from the list.
+   2. Select `Existing Maven Projects` from the list.
 
-   1. Click `Browse...` and select the directory that
+   3. Click `Browse...` and select the directory that
       contains the project.
 
-   1. Under `Projects:` the `pom.xml` files representing modules should be
+   4. Under `Projects:` the `pom.xml` files representing modules should be
       displayed. Make sure that all of them are selected _except_ the sub-directories under `eclipse`, and click `Finish`.
 
       - The subprojects under the `eclipse` directory define target platforms for the Tycho build. It's easier to edit the files from the `eclipse-setup` project.
 
-   1. Maven may prompt you to install several additional plugin connector plugins from
+   5. Maven may prompt you to install several additional plugin connector plugins from
       [Tycho](https://eclipse.org/tycho/) if they are not already installed. Click
       `Finish` to install them. If Eclipse prompts you to install any other
       plugins, do so.
 
-   1. Restart Eclipse when prompted.
+   6. Restart Eclipse when prompted.
 
-1. Check the imported projects:
+4. Check the imported projects.
 
-   1. There should be no errors in the `Markers` or `Problems` views in Eclipse.
+   - There should be no errors in the `Markers` or `Problems` views in Eclipse.
       However you may see several low-priority warnings.
 
       - You may see Maven-related errors like _"plugin execution not
@@ -210,38 +210,38 @@ target platform whenever dependencies are updated.
 	and follow the process to install the recommended plugin
 	connectors.
 
-1. Create and initialize a launch configuration:
+5. Create and initialize a launch configuration:
 
    1. Right-click the `gcloud-eclipse-tools.launch` file under the
       `google-cloud-eclipse` module in the `Package Explorer`.
 
-   1. Select `Run As` > `Run Configurations...`
+   2. Select `Run As` > `Run Configurations...`
 
-   1. Set variables required for launch:
+   3. Set variables required for launch:
 
       1. Go to the second tab for `Arguments`
 
-      1. Click the `Variables...` button for `VM argument:`
+      2. Click the `Variables...` button for `VM argument:`
 
-      1. Click the `Edit variables...` button
+      3. Click the `Edit variables...` button
 
-      1. Click `New...`
+      4. Click `New...`
 
-      1. Set the name to `oauth_id`, and the value to the value you want to use
+      5. Set the name to `oauth_id`, and the value to the value you want to use
         (description optional)
 
-      1. Click `OK`, the variable will appear in the list
+      6. Click `OK`, the variable will appear in the list
 
-      1. Repeat steps 6-8 but use `oauth_secret` as the name and use the
+      7. Repeat steps 6-8 but use `oauth_secret` as the name and use the
          corresponding value
 
-      1. Click `OK` to close the edit variables dialog
+      8. Click `OK` to close the edit variables dialog
 
-      1. Click `Cancel` to close the variable selection dialog
+      9. Click `Cancel` to close the variable selection dialog
 
-      1. Click `Apply` to apply the changes to the run config
+      10. Click `Apply` to apply the changes to the run config
 
-  1. From the `Run` menu, select `Run History > gcloud-eclipse-tools`. A new instance of Eclipse launches with the plugin installed.
+   4. From the `Run` menu, select `Run History > gcloud-eclipse-tools`. A new instance of Eclipse launches with the plugin installed.
 
 
 # Updating Target Platforms
