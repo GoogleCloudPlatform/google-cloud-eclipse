@@ -273,14 +273,14 @@ The process is:
       - Use _Help > Install New Software_ and specify `http://download.eclipse.org/cbi/tpd/3.0.0-SNAPSHOT/`
         as the location.
       - Restart Eclipse when prompted
-   1. Open the `.tpd` file in Eclipse.
-   1. Make any necessary changes and save.
+   2. Open the `.tpd` file in Eclipse.
+   3. Make any necessary changes and save.
       - Note that the TPDs specify artifacts using their _p2 identifiers_.
         Bundles are specified using their OSGi Bundle Symbolic Name (e.g.,
         `org.eclipse.core.runtime`).
         Features are specified using their Feature ID suffixed with `.feature.group`
         (e.g., `org.eclipse.rcp.feature.group`).
-   1. Select the file in the Package Explorer, right-click, and choose _Create Target Definition File_
+   4. Select the file in the Package Explorer, right-click, and choose _Create Target Definition File_
       to update the corresponding .target file.
 
 Both the `.tpd` and `.target` files should be committed.
@@ -291,11 +291,11 @@ The IDE Target Platform needs to be rebuilt at the command line
 and reimported into Eclipse when dependency versions are changed:
 
 1. `(cd eclipse; mvn -Pide-target-platform package)`
-1. Preferences > Plug-in Development > Target Platforms
-1. Select your target ("GCP IDE Target Platform") and click Edit
-1. Select the location and click Reload to cause any cached info to be discarded.
-1. Click Edit and then select Uncategorized.
-1. Finish / OK until done.
+2. Preferences > Plug-in Development > Target Platforms
+3. Select your target ("GCP IDE Target Platform") and click Edit
+4. Select the location and click Reload to cause any cached info to be discarded.
+5. Click Edit and then select Uncategorized.
+6. Finish / OK until done.
 
 ### Updating the Eclipse IDE Target Platforms
 
