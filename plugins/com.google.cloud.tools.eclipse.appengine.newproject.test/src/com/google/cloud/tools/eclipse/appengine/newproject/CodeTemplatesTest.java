@@ -184,7 +184,7 @@ public class CodeTemplatesTest {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     config.setUseMaven("my.project.group.id", "my-project-artifact-id", "98.76.54");
     CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
-    validateStandardPomXml();
+    validatePom();
   }
 
   @Test
@@ -210,7 +210,7 @@ public class CodeTemplatesTest {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     config.setUseMaven("my.project.group.id", "my-project-artifact-id", "98.76.54");
     CodeTemplates.materializeAppEngineFlexFiles(project, config, monitor);
-    validateFlexPomXml();
+    validatePom();
   }
 
   @Test
@@ -405,19 +405,6 @@ public class CodeTemplatesTest {
     }
   }
 
-  private void validateStandardPomXml() throws ParserConfigurationException, SAXException,
-      IOException, CoreException, XPathExpressionException {
-    Element root = validatePom();
-    
-    String sdkVersion = root
-        .getElementsByTagNameNS("http://maven.apache.org/POM/4.0.0", "appengine.api.sdk.version")
-        .item(0).getTextContent();
-    DefaultArtifactVersion sdkArtifactVersion =
-        new DefaultArtifactVersion(sdkVersion);
-    DefaultArtifactVersion expectedSdk = new DefaultArtifactVersion("1.9.62");
-    Assert.assertTrue(sdkVersion, sdkArtifactVersion.compareTo(expectedSdk) >= 0);    
-  }
-
   private Element validatePom() throws ParserConfigurationException, SAXException, IOException,
       CoreException, XPathExpressionException {
     IFile pomXml = project.getFile("pom.xml");
@@ -485,11 +472,6 @@ public class CodeTemplatesTest {
     Assert.assertEquals("pom", type);
     
     return root;
-  }
-
-  private void validateFlexPomXml() throws ParserConfigurationException, SAXException, IOException,
-      CoreException, XPathExpressionException {
-    validatePom();
   }
 
   private Document buildDocument(IFile xml)

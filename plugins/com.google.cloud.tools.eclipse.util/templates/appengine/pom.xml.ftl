@@ -12,9 +12,6 @@
 
   <properties>
     <appengine.maven.plugin.version>${mavenPluginVersion}</appengine.maven.plugin.version>
-<#if appEngineApiSdkVersion??>
-    <appengine.api.sdk.version>${appEngineApiSdkVersion}</appengine.api.sdk.version>
-</#if>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.compiler.source>${compilerVersion}</maven.compiler.source>

@@ -262,14 +262,6 @@ public class CodeTemplates {
     }
     properties.put("compilerVersion", "1.8"); //$NON-NLS-1$ //$NON-NLS-2$
 
-    if (isStandardProject) {
-      String sdkVersion = getCurrentVersion(
-          "com.google.appengine", //$NON-NLS-1$
-          "appengine-api-1.0-sdk", //$NON-NLS-1$
-          "1.9.70"); //$NON-NLS-1$
-      properties.put("appEngineApiSdkVersion", sdkVersion); //$NON-NLS-1$
-    }
-
     createChildFile(
         "pom.xml", Templates.POM_XML_TEMPLATE, project, properties, monitor);  //$NON-NLS-1$
   }
