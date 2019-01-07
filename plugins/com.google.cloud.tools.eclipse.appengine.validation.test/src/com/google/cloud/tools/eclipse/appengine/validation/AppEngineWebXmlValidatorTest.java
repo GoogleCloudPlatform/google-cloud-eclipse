@@ -31,7 +31,7 @@ import org.w3c.dom.Node;
 public class AppEngineWebXmlValidatorTest {
   
   private Document document;
-  private AppEngineWebXmlValidator validator = new AppEngineWebXmlValidator();
+  private final AppEngineWebXmlValidator validator = new AppEngineWebXmlValidator();
 
   @Before
   public void setUp() throws ParserConfigurationException {

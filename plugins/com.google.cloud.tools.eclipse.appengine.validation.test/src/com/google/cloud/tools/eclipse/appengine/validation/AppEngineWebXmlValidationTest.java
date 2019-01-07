@@ -40,7 +40,7 @@ public class AppEngineWebXmlValidationTest {
       JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
 
   @Test
-  public void testStagingElementsInAppEngineWebXml() throws CoreException {
+  public void testValidElementsInAppEngineWebXml() throws CoreException {
     IProject project = projectCreator.getProject();
     IFile appEngineWebXml =
         AppEngineConfigurationUtil.findConfigurationFile(project, new Path("appengine-web.xml"));
@@ -50,6 +50,9 @@ public class AppEngineWebXmlValidationTest {
         + "  <staging>\n"
         + "    <enable-jar-classes>true</enable-jar-classes>\n"
         + "  </staging>\n"
+        + "  <automatic-scaling>\n"
+        + "    <min-instances>0</min-instances>\n"
+        + "  </automatic-scaling>\n"
         + "</appengine-web-app>";
     InputStream in = new ByteArrayInputStream(contents.getBytes(StandardCharsets.UTF_8));
     appEngineWebXml.setContents(in, true, false, null);
