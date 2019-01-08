@@ -60,11 +60,14 @@ public class AppEngineWebXmlValidator implements XmlValidationHelper {
     }
     return problems;
   }
+  
+
 
   /**
    * Check for obsolete runtimes.
    */
   private static List<ElementProblem> checkRuntime(Document document) {
+    System.err.println("Checking runtime");
     ArrayList<ElementProblem> problems = new ArrayList<>();
     NodeList nodeList =
         document.getElementsByTagNameNS("http://appengine.google.com/ns/1.0", "runtime");
@@ -85,9 +88,10 @@ public class AppEngineWebXmlValidator implements XmlValidationHelper {
     }
     
     if (nodeList.getLength() == 0) {
-      DocumentLocation location = new DocumentLocation(1, 1);
+      DocumentLocation userData =
+          (DocumentLocation) document.getDocumentElement().getUserData("location");
       ElementProblem problem = new ObsoleteRuntime("Java 7 runtime no longer supported", 
-          location, 1);
+          userData, 1);
       problems.add(problem);
     }
     

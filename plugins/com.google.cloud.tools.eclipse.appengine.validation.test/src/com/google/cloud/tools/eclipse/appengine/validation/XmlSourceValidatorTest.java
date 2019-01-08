@@ -107,13 +107,18 @@ public class XmlSourceValidatorTest {
   }
 
   @Test
-  public void testValidate_noProblemElements() throws IOException {
+  public void testValidate_noProblemElements() throws IOException, CoreException {
     XmlSourceValidator validator = new XmlSourceValidator();
     validator.setHelper(new AppEngineWebXmlValidator());
-    byte[] xml = ("<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
+    String xml = "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
         + "<runtime>java8</runtime>"
-        + "</appengine-web-app>").getBytes(StandardCharsets.UTF_8);
-    validator.validate(reporter, null, xml);
+        + "</appengine-web-app>";
+    
+    IProject project = appEngineStandardProject.getProject();
+    IFile file = project.getFile("testdata.xml");
+    file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), 0, null);
+    
+    validator.validate(reporter, file, xml.getBytes(StandardCharsets.UTF_8));
     List<IMessage> messages = reporter.getMessages();
     if (!messages.isEmpty()) {
       Assert.fail(messages.get(0).getText());
@@ -121,7 +126,7 @@ public class XmlSourceValidatorTest {
   }
 
   @Test
-  public void testValidate() throws IOException {
+  public void testValidate() throws IOException, CoreException {
     XmlSourceValidator validator = new XmlSourceValidator();
     validator.setHelper(new WebXmlValidator());
     String xml = "<web-app xmlns='http://xmlns.jcp.org/xml/ns/javaee' version='3.1'></web-app>";

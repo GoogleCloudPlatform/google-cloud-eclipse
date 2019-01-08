@@ -41,6 +41,7 @@ class AppEngineWebBlacklist {
   private static final ImmutableMap<String, AbstractQuickAssistProcessor> QUICK_ASSIST_PROCESSORS =
       ImmutableMap.of(
           "application", new ApplicationQuickAssistProcessor(),
+          "runtime", new UpgradeRuntimeQuickAssistProcessor(),
           "version", new VersionQuickAssistProcessor());
   
   static boolean contains(String elementName) {

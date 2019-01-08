@@ -25,7 +25,7 @@ class ObsoleteRuntime extends ElementProblem {
     super(message, "com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker",
         IMarker.SEVERITY_WARNING,
         IMessage.NORMAL_SEVERITY,
-        start, length, new UpgradeRuntimeQuickAssistProcessor());
+        start, length, AppEngineWebBlacklist.getQuickAssistProcessor("runtime"));
   }
 
 }

@@ -84,9 +84,12 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
   /**
    * Adds an {@link IMessage} to the XML file for every
    * {@link ElementProblem} found in the file.
+   * @throws CoreException 
    */
-  void validate(IReporter reporter, IFile source, byte[] bytes) throws IOException {
+  @VisibleForTesting
+  void validate(IReporter reporter, IFile source, byte[] bytes) throws IOException, CoreException {
     try {
+      XmlValidator.deleteMarkers(source);
       Document document = PositionalXmlScanner.parse(bytes);
       if (document != null) {
         List<ElementProblem> blacklist = helper.checkForProblems(source, document);
