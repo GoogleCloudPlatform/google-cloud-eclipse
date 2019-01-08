@@ -78,6 +78,7 @@ public class XsltQuickFix implements IMarkerResolution {
       } else {
         Xslt.transformInPlace(file, xslPath);
       }
+      marker.delete();
     } catch (IOException | TransformerException | CoreException ex) {
       logger.log(Level.SEVERE, ex.getMessage());
     }

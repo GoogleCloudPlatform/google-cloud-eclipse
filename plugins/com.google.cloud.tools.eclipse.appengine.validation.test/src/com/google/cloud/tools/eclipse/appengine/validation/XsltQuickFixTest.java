@@ -37,10 +37,10 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -82,12 +82,13 @@ public class XsltQuickFixTest {
       SAXException, CoreException {
     file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), IFile.FORCE, null);
 
-    IMarker marker = Mockito.mock(IMarker.class);
-    Mockito.when(marker.getResource()).thenReturn(file);
+    IMarker marker =
+        file.createMarker("com.google.cloud.tools.eclipse.appengine.validation.applicationMarker");
 
     XsltQuickFix fix = new XsltQuickFix("/xslt/removeApplication.xsl",
         Messages.getString("remove.application.element"));
     fix.run(marker);
+    Assert.assertFalse(marker.exists());
 
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
     builderFactory.setNamespaceAware(true);
@@ -101,13 +102,15 @@ public class XsltQuickFixTest {
       SAXException, CoreException {
     file.create(ValidationTestUtils.stringToInputStream(
         VERSION_XML), IFile.FORCE, null);
-    IMarker marker = Mockito.mock(IMarker.class);
-    Mockito.when(marker.getResource()).thenReturn(file);
+    IMarker marker =
+        file.createMarker("com.google.cloud.tools.eclipse.appengine.validation.versionMarker");
 
     XsltQuickFix fix = new XsltQuickFix("/xslt/removeVersion.xsl",
         Messages.getString("remove.version.element"));
     fix.run(marker);
 
+    Assert.assertFalse(marker.exists());
+    
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
     builderFactory.setNamespaceAware(true);
     DocumentBuilder builder = builderFactory.newDocumentBuilder();
@@ -129,12 +132,15 @@ public class XsltQuickFixTest {
     String preContents = preDocument.get();
     assertTrue(preContents.contains("application"));
 
-    IMarker marker = Mockito.mock(IMarker.class);
-    Mockito.when(marker.getResource()).thenReturn(file);
+    IMarker marker =
+        file.createMarker("com.google.cloud.tools.eclipse.appengine.validation.applicationMarker");
+
     XsltQuickFix fix = new XsltQuickFix("/xslt/removeApplication.xsl",
         Messages.getString("remove.application.element"));
     fix.run(marker);
 
+    Assert.assertFalse(marker.exists());
+    
     IDocument document = XsltQuickFix.getCurrentDocument(file);
     String contents = document.get();
     assertFalse(contents.contains("application"));
