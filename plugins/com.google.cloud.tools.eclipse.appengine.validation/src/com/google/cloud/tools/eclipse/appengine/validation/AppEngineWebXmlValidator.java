@@ -60,14 +60,11 @@ public class AppEngineWebXmlValidator implements XmlValidationHelper {
     }
     return problems;
   }
-  
-
 
   /**
    * Check for obsolete runtimes.
    */
   private static List<ElementProblem> checkRuntime(Document document) {
-    System.err.println("Checking runtime");
     ArrayList<ElementProblem> problems = new ArrayList<>();
     NodeList nodeList =
         document.getElementsByTagNameNS("http://appengine.google.com/ns/1.0", "runtime");
