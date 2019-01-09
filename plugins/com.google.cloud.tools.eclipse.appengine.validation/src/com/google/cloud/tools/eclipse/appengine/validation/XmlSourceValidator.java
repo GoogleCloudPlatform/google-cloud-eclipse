@@ -89,7 +89,6 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
   @VisibleForTesting
   void validate(IReporter reporter, IFile source, byte[] bytes) throws IOException, CoreException {
     try {
-      XmlValidator.deleteMarkers(source);
       Document document = PositionalXmlScanner.parse(bytes);
       if (document != null) {
         List<ElementProblem> blacklist = helper.checkForProblems(source, document);
