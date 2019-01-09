@@ -17,7 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 /**
- * Provides quick fixes to remove the version element from appengine-web.xml.
+ * Provides a quick fix to remove the {@code version} element from appengine-web.xml.
  */
 public class VersionQuickAssistProcessor extends AbstractQuickAssistProcessor {
 
