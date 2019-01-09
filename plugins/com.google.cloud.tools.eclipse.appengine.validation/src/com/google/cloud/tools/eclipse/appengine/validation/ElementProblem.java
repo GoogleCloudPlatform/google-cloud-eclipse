@@ -38,7 +38,7 @@ class ElementProblem {
 
   /**
    * @param length the length of the marker underline. Length == 0 results in a
-   *        marker in the vertical ruler and no underline
+   *        marker in the vertical ruler and no underline.
    */
   ElementProblem(String message, String markerId, int iMarkerSeverity, int iMessageSeverity,
       DocumentLocation start, int length, IQuickAssistProcessor processor) {
