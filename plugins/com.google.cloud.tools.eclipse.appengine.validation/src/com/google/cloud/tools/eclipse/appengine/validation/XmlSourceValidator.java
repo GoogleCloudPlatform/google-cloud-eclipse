@@ -84,10 +84,9 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
   /**
    * Adds an {@link IMessage} to the XML file for every
    * {@link ElementProblem} found in the file.
-   * @throws CoreException 
    */
   @VisibleForTesting
-  void validate(IReporter reporter, IFile source, byte[] bytes) throws IOException, CoreException {
+  void validate(IReporter reporter, IFile source, byte[] bytes) throws IOException {
     try {
       Document document = PositionalXmlScanner.parse(bytes);
       if (document != null) {

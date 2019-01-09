@@ -116,7 +116,8 @@ public class XmlSourceValidatorTest {
     
     IProject project = appEngineStandardProject.getProject();
     IFile file = project.getFile("testdata.xml");
-    file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), 0, null);
+    
+    file.create(ValidationTestUtils.stringToInputStream(xml), 0, null);
     
     validator.validate(reporter, file, xml.getBytes(StandardCharsets.UTF_8));
     List<IMessage> messages = reporter.getMessages();
@@ -126,7 +127,7 @@ public class XmlSourceValidatorTest {
   }
 
   @Test
-  public void testValidate() throws IOException, CoreException {
+  public void testValidate() throws IOException {
     XmlSourceValidator validator = new XmlSourceValidator();
     validator.setHelper(new WebXmlValidator());
     String xml = "<web-app xmlns='http://xmlns.jcp.org/xml/ns/javaee' version='3.1'></web-app>";
