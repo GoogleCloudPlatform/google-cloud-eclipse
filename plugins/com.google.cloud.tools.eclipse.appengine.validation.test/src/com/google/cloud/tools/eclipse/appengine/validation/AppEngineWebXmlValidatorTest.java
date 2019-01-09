@@ -67,7 +67,10 @@ public class AppEngineWebXmlValidatorTest {
         document.createElementNS("http://appengine.google.com/ns/1.0", "appengine-web-app");
     document.appendChild(element);
     
-    List<ElementProblem> problems = validator.checkForProblems(null, document);
+    DocumentLocation location = new DocumentLocation(2, 1);
+    document.getDocumentElement().setUserData("location", location, null);
+    
+    List<ElementProblem> problems = validator.checkForProblems(null , document);
     assertEquals(1, problems.size());
     String markerId = "com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker";
     assertEquals(markerId, problems.get(0).getMarkerId());
