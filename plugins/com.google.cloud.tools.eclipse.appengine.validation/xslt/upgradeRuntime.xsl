@@ -24,7 +24,7 @@
   <xsl:template match="appengine:appengine-web-app">
     <xsl:copy>
       <xsl:apply-templates select="node()|@*"/>
-      <xsl:if test="not(appengine:runtime)">  <runtime>java8</runtime><xsl:text>
+      <xsl:if test="not(appengine:runtime)"><xsl:text>  </xsl:text><runtime>java8</runtime><xsl:text>
 </xsl:text></xsl:if>
     </xsl:copy>
   </xsl:template>

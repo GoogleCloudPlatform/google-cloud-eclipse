@@ -59,7 +59,7 @@ public class UpgradeRuntimeQuickFixTest {
   public void testConvertJava7() throws CoreException {
     String appengineWebAppJava7 =
         "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
-        + "<runtime>java7</runtime>"
+        + "  <runtime>java7</runtime>"
         + "</appengine-web-app>";
     
     checkUpgrade(appengineWebAppJava7);
@@ -97,7 +97,7 @@ public class UpgradeRuntimeQuickFixTest {
     IDocument document = viewer.getDocument();
     String contents = document.get();
     assertThat(contents, not(containsString("java7")));
-    assertThat(contents, containsString("<runtime>java8</runtime>"));
+    assertThat(contents, containsString("  <runtime>java8</runtime>"));
 
     // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1527
     editorPart.doSave(new NullProgressMonitor());
