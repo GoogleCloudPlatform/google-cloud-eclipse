@@ -21,7 +21,7 @@ class DocumentLocation {
   private final int lineNumber;
   private final int columnNumber;
   
-  public DocumentLocation(int lineNumber, int columnNumber) {
+  DocumentLocation(int lineNumber, int columnNumber) {
     this.lineNumber = lineNumber;
     this.columnNumber = columnNumber;
   }

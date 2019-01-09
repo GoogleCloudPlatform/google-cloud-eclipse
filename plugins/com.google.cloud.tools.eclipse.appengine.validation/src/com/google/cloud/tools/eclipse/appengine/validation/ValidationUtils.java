@@ -31,7 +31,7 @@ import java.util.logging.Logger;
 /**
  * Utility methods for validating XML files.
  */
-public class ValidationUtils {
+class ValidationUtils {
 
   private static final Logger logger = Logger.getLogger(ValidationUtils.class.getName());
 
@@ -39,7 +39,7 @@ public class ValidationUtils {
    * Creates a {@link Map} of {@link ElementProblem}s and their respective document-relative
    * character offsets.
    */
-  public static Map<ElementProblem, Integer> getOffsetMap(byte[] bytes,
+  static Map<ElementProblem, Integer> getOffsetMap(byte[] bytes,
       List<ElementProblem> blacklist, String encoding) {
     Map<ElementProblem, Integer> elementProblemOffsetMap = new HashMap<>();
     for (ElementProblem element : blacklist) {

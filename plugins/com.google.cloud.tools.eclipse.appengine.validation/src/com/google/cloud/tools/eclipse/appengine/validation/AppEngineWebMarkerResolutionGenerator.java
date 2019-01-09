@@ -29,7 +29,7 @@ import org.eclipse.ui.IMarkerResolutionGenerator;
  * Returns possible resolutions for given resource marker. Quick Fix resolutions
  * are available in the Problems view.
  */
-public class AppEngineWebMarkerResolutionGenerator implements IMarkerResolutionGenerator {
+class AppEngineWebMarkerResolutionGenerator implements IMarkerResolutionGenerator {
 
   private static final Logger logger =
       Logger.getLogger(AppEngineWebMarkerResolutionGenerator.class.getName());

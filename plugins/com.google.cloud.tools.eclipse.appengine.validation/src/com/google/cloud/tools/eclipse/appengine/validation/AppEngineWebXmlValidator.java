@@ -27,7 +27,7 @@ import org.w3c.dom.NodeList;
 /**
  * Validator for appengine-web.xml
  */
-public class AppEngineWebXmlValidator implements XmlValidationHelper {
+class AppEngineWebXmlValidator implements XmlValidationHelper {
 
   @Override
   public List<ElementProblem> checkForProblems(IResource resource, Document document) {
