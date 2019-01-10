@@ -74,10 +74,10 @@ public class XmlValidator extends AbstractValidator implements IExecutableExtens
       deleteMarkers(resource);
       Document document = PositionalXmlScanner.parse(bytes);
       if (document != null) {
-        List<ElementProblem> blacklist = helper.checkForProblems(resource, document);
+        List<ElementProblem> problems = helper.checkForProblems(resource, document);
         String encoding = (String) document.getDocumentElement().getUserData("encoding");
         Map<ElementProblem, Integer> problemOffsetMap =
-            ValidationUtils.getOffsetMap(bytes, blacklist, encoding);
+            ValidationUtils.getOffsetMap(bytes, problems, encoding);
         for (Map.Entry<ElementProblem, Integer> entry : problemOffsetMap.entrySet()) {
           createMarker(resource, entry.getKey());
         }
@@ -128,13 +128,14 @@ public class XmlValidator extends AbstractValidator implements IExecutableExtens
   /**
    * Creates a marker from a given {@link ElementProblem}
    */
-  static void createMarker(IResource resource, ElementProblem element)
+  static void createMarker(IResource resource, ElementProblem problem)
       throws CoreException {
-    IMarker marker = resource.createMarker(element.getMarkerId());
-    marker.setAttribute(IMarker.SEVERITY, element.getIMarkerSeverity());
-    marker.setAttribute(IMarker.MESSAGE, element.getMessage());
-    marker.setAttribute(IMarker.LOCATION, "line " + element.getStart().getLineNumber());
-    marker.setAttribute(IMarker.LINE_NUMBER, element.getStart().getLineNumber());
+    IMarker marker = resource.createMarker(problem.getMarkerId());
+    marker.setAttribute(IMarker.SEVERITY, problem.getIMarkerSeverity());
+    marker.setAttribute(IMarker.MESSAGE, problem.getMessage());
+    int lineNumber = problem.getStart().getLineNumber();
+    marker.setAttribute(IMarker.LOCATION, "line " + lineNumber);
+    marker.setAttribute(IMarker.LINE_NUMBER, lineNumber);
   }
 
 }

@@ -113,12 +113,12 @@ public class AppEngineWebXmlValidator implements XmlValidationHelper {
     DocumentLocation location = (DocumentLocation) runtimeElement.getUserData("location");
     // extend over the start-tag and end-tag
     int tagLength = runtimeElement.getNodeName().length() + 2;
-    location = expandLocation(location, tagLength);
+    DocumentLocation expandedLocation = expandLocation(location, tagLength);
     int length = addTagLength(runtimeElement, tagLength);
     
     String runtimeName = "java".equals(runtime) ? "Java 6" : "Java 7";
     ElementProblem problem = new ObsoleteRuntime(runtimeName + " runtime no longer supported", 
-        location, length);
+        expandedLocation, length);
     return problem;
   }
 }

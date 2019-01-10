@@ -86,8 +86,7 @@ public class AppEngineWebXmlValidatorTest {
     
     assertEquals(2, problem.getStart().getLineNumber());
     assertEquals(0, problem.getStart().getColumnNumber());
-    assertEquals(19, problem.getLength());    
-
+    assertEquals(19, problem.getLength());
   }  
   
   @Test

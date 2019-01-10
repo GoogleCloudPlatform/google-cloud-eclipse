@@ -90,10 +90,10 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
     try {
       Document document = PositionalXmlScanner.parse(bytes);
       if (document != null) {
-        List<ElementProblem> blacklist = helper.checkForProblems(source, document);
+        List<ElementProblem> problems = helper.checkForProblems(source, document);
         String encoding = (String) document.getDocumentElement().getUserData("encoding");
         Map<ElementProblem, Integer> problemOffsetMap =
-            ValidationUtils.getOffsetMap(bytes, blacklist, encoding);
+            ValidationUtils.getOffsetMap(bytes, problems, encoding);
         for (Map.Entry<ElementProblem, Integer> entry : problemOffsetMap.entrySet()) {
           createMessage(reporter, entry.getKey(), entry.getValue());
         }
@@ -141,14 +141,15 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
   /**
    * Creates a message from a given {@link ElementProblem}.
    */
-  void createMessage(IReporter reporter, ElementProblem element, int elementOffset) {
-    IMessage message = new LocalizedMessage(element.getIMessageSeverity(), element.getMessage());
+  void createMessage(IReporter reporter, ElementProblem problem, int offset) {
+    IMessage message = new LocalizedMessage(problem.getIMessageSeverity(), problem.getMessage());
     message.setTargetObject(this);
-    message.setMarkerId(element.getMarkerId());
-    message.setLineNo(element.getStart().getLineNumber());
-    message.setOffset(elementOffset);
-    message.setLength(element.getLength());
-    message.setAttribute(IQuickAssistProcessor.class.getName(), element.getQuickAssistProcessor());
+    message.setMarkerId(problem.getMarkerId());
+    int lineNumber = problem.getStart().getLineNumber();
+    message.setLineNo(lineNumber);
+    message.setOffset(offset);
+    message.setLength(problem.getLength());
+    message.setAttribute(IQuickAssistProcessor.class.getName(), problem.getQuickAssistProcessor());
     reporter.addMessage(this, message);
   }
 
