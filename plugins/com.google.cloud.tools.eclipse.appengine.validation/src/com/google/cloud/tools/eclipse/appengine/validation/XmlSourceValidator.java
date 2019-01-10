@@ -141,14 +141,9 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
   /**
    * Creates a message from a given {@link ElementProblem}.
    */
-<<<<<<< HEAD
+  @VisibleForTesting
   void createMessage(IReporter reporter, ElementProblem problem, int offset) {
     IMessage message = new LocalizedMessage(problem.getIMessageSeverity(), problem.getMessage());
-=======
-  @VisibleForTesting
-  void createMessage(IReporter reporter, ElementProblem element, int elementOffset) {
-    IMessage message = new LocalizedMessage(element.getIMessageSeverity(), element.getMessage());
->>>>>>> master
     message.setTargetObject(this);
     message.setMarkerId(problem.getMarkerId());
     // TODO offset by line
