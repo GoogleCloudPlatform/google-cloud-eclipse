@@ -21,7 +21,6 @@ location "http://download.eclipse.org/releases/oxygen/" {
     org.eclipse.m2e.wtp.feature.feature.group
     org.eclipse.m2e.wtp.sdk.feature.feature.group
     org.eclipse.mylyn.commons.feature.group
-    //org.eclipse.jpt.jpa.feature.feature.group
 
     org.eclipse.epp.logging.aeri.feature.feature.group
     org.eclipse.epp.logging.aeri.feature.source.feature.group
