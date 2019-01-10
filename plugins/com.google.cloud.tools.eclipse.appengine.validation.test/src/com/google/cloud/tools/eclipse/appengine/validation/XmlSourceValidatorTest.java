@@ -151,7 +151,7 @@ public class XmlSourceValidatorTest {
     XmlSourceValidator validator = new XmlSourceValidator();
     validator.setHelper(new AppEngineWebXmlValidator());
     ElementProblem element =
-        new AppEngineBlacklistElement("application", new DocumentLocation(5, 17), 0);
+        new AppEngineDeprecatedElement("application", new DocumentLocation(5, 17), 0);
     validator.createMessage(reporter, element, 0);
     List<IMessage> messages = reporter.getMessages();
     assertEquals(1, messages.size());

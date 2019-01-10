@@ -24,9 +24,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
-class AppEngineWebBlacklist {
+class AppEngineWebProblems {
   
-  private static final ImmutableMap<String, List<String>> BLACKLIST =
+  private static final ImmutableMap<String, List<String>> DEPRECATED_ELEMENTS =
       ImmutableMap.of(
           "application",
           Arrays.asList(Messages.getString("application.element"), 
@@ -45,24 +45,24 @@ class AppEngineWebBlacklist {
           "version", new VersionQuickAssistProcessor());
   
   static boolean contains(String elementName) {
-    return BLACKLIST.containsKey(elementName);
+    return DEPRECATED_ELEMENTS.containsKey(elementName);
   }
   
-  static String getBlacklistElementMessage(String element) {
-    Preconditions.checkNotNull(element, "element is null");
-    if (!BLACKLIST.containsKey(element)) {
-      throw new IllegalArgumentException("element not in blacklist");
+  static String getDeprecatedElementMessage(String elementName) {
+    Preconditions.checkNotNull(elementName, "elementName is null");
+    if (!DEPRECATED_ELEMENTS.containsKey(elementName)) {
+      throw new IllegalArgumentException(elementName + " is not deprecated");
     }
-    List<String> values = BLACKLIST.get(element);
+    List<String> values = DEPRECATED_ELEMENTS.get(elementName);
     return values.get(0); 
   }
   
   static String getMarkerId(String element) {
     Preconditions.checkNotNull(element, "element is null");
-    if (!BLACKLIST.containsKey(element)) {
-      throw new IllegalArgumentException("element not in blacklist");
+    if (!DEPRECATED_ELEMENTS.containsKey(element)) {
+      throw new IllegalArgumentException(element + " is not deprecated");
     }
-    List<String> values = BLACKLIST.get(element);
+    List<String> values = DEPRECATED_ELEMENTS.get(element);
     return values.get(1);
   }
   
@@ -71,8 +71,8 @@ class AppEngineWebBlacklist {
     return QUICK_ASSIST_PROCESSORS.get(element);
   }
   
-  static ArrayList<String> getBlacklistElements() {
-    return Lists.newArrayList(BLACKLIST.keySet());
+  static ArrayList<String> getDeprecatedElements() {
+    return Lists.newArrayList(DEPRECATED_ELEMENTS.keySet());
   }
 
 }

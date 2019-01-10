@@ -60,7 +60,7 @@ public class WebXmlValidator implements XmlValidationHelper {
   private static final XPathFactory FACTORY = XPathFactory.newInstance();
   private Document document;
   private IResource resource;
-  private ArrayList<ElementProblem> blacklist;
+  private ArrayList<ElementProblem> problems;
 
   private final BiPredicate<IProject, String> servletApiSupportChecker;
 
@@ -77,12 +77,12 @@ public class WebXmlValidator implements XmlValidationHelper {
   public ArrayList<ElementProblem> checkForProblems(IResource resource, Document document) {
     this.document = document;
     this.resource = resource;
-    blacklist = new ArrayList<>();
+    problems = new ArrayList<>();
     validateServletVersion();
     validateServletClass();
     validateServletMapping();
     validateJsp();
-    return blacklist;
+    return problems;
   }
 
   /**
@@ -100,7 +100,7 @@ public class WebXmlValidator implements XmlValidationHelper {
         if (!servletApiSupportChecker.test(resource.getProject(), version)) {
           DocumentLocation location = (DocumentLocation) webApp.getUserData("location");
           ElementProblem element = new JavaServletElement(location, 0);
-          blacklist.add(element);
+          problems.add(element);
         }
       }
     }
@@ -119,14 +119,14 @@ public class WebXmlValidator implements XmlValidationHelper {
         DocumentLocation location = (DocumentLocation) servletClassNode.getUserData("location");
         ElementProblem element =
             new UndefinedServletElement(servletClassName, location, servletClassName.length());
-        blacklist.add(element);
+        problems.add(element);
       }
     }
   }
 
   /**
    * Adds all defined servlet names to a set, then adds a
-   * {@link ServletMappingElement} to the blacklist for all
+   * {@link ServletMappingElement} to the problems list for all
    * <servlet-mapping> elements whose <servlet-name> is undefined.
    */
   private void validateServletMapping() {
@@ -154,7 +154,7 @@ public class WebXmlValidator implements XmlValidationHelper {
           DocumentLocation location = (DocumentLocation) servletMapping.getUserData("location");
           ElementProblem element =
               new ServletMappingElement(textContent, location, textContent.length());
-          blacklist.add(element);
+          problems.add(element);
         }
       }
     } catch (XPathExpressionException ex) {
@@ -179,7 +179,7 @@ public class WebXmlValidator implements XmlValidationHelper {
             if (!resolveJsp(root, jspName)) {
               DocumentLocation location = (DocumentLocation) jspNode.getUserData("location");
               ElementProblem element = new JspFileElement(jspName, location, jspName.length());
-              blacklist.add(element);
+              problems.add(element);
             }
           }
         }

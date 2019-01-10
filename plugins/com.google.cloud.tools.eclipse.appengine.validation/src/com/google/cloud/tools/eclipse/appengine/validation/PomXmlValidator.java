@@ -38,7 +38,7 @@ public class PomXmlValidator implements XmlValidationHelper {
    */
   @Override
   public ArrayList<ElementProblem> checkForProblems(IResource resource, Document document) {
-    ArrayList<ElementProblem> blacklist = new ArrayList<>();
+    ArrayList<ElementProblem> problems = new ArrayList<>();
     try {
       XPath xPath = FACTORY.newXPath();
       NamespaceContext nsContext =
@@ -53,11 +53,11 @@ public class PomXmlValidator implements XmlValidationHelper {
         Node child = groupIdElements.item(i);
         DocumentLocation location = (DocumentLocation) child.getUserData("location");
         ElementProblem element = new MavenPluginElement(location, child.getTextContent().length());
-        blacklist.add(element);
+        problems.add(element);
       }
     } catch (XPathExpressionException ex) {
       throw new RuntimeException("Invalid XPath expression");
     }
-    return blacklist;
+    return problems;
   }
 }

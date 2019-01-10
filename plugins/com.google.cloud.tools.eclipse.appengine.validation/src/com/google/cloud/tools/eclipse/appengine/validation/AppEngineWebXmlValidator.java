@@ -33,8 +33,8 @@ class AppEngineWebXmlValidator implements XmlValidationHelper {
   public List<ElementProblem> checkForProblems(IResource resource, Document document) {
     ArrayList<ElementProblem> problems = new ArrayList<>();
 
-    List<ElementProblem> blacklistProblems = checkBlacklistedElements(document);
-    problems.addAll(blacklistProblems);
+    List<ElementProblem> deprecatedProblems = checkDeprecatedElements(document);
+    problems.addAll(deprecatedProblems);
     
     List<ElementProblem> runtimeProblems = checkRuntime(document);
     problems.addAll(runtimeProblems);
@@ -42,10 +42,10 @@ class AppEngineWebXmlValidator implements XmlValidationHelper {
     return problems;
   }
 
-  private static List<ElementProblem> checkBlacklistedElements(Document document) {   
+  private static List<ElementProblem> checkDeprecatedElements(Document document) {   
     ArrayList<ElementProblem> problems = new ArrayList<>();
-    ArrayList<String> blacklistedElements = AppEngineWebBlacklist.getBlacklistElements();
-    for (String elementName : blacklistedElements) {
+    ArrayList<String> deprecatedElements = AppEngineWebProblems.getDeprecatedElements();
+    for (String elementName : deprecatedElements) {
       NodeList nodeList =
           document.getElementsByTagNameNS("http://appengine.google.com/ns/1.0", elementName);
       for (int i = 0; i < nodeList.getLength(); i++) {
@@ -57,7 +57,7 @@ class AppEngineWebXmlValidator implements XmlValidationHelper {
         location = expandLocation(location, tagLength);
         int length = addTagLength(node, tagLength);
         
-        AppEngineBlacklistElement problem = new AppEngineBlacklistElement(
+        AppEngineDeprecatedElement problem = new AppEngineDeprecatedElement(
             elementName,
             location,
             length);

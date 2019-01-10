@@ -20,7 +20,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 
 /**
- * A blacklisted java servlet element that will receive a servlet marker. 
+ * A deprecated Java servlet element that will receive a servlet marker. 
  */
 public class JavaServletElement extends ElementProblem {
 

@@ -22,17 +22,17 @@ import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 /**
  * An element that will receive an App Engine configuration error marker. 
  */
-class AppEngineBlacklistElement extends ElementProblem {
+class AppEngineDeprecatedElement extends ElementProblem {
   
-  AppEngineBlacklistElement(String elementName, DocumentLocation start, int length) {
+  AppEngineDeprecatedElement(String elementName, DocumentLocation start, int length) {
     super(
-      AppEngineWebBlacklist.getBlacklistElementMessage(elementName),
-      AppEngineWebBlacklist.getMarkerId(elementName),
+      AppEngineWebProblems.getDeprecatedElementMessage(elementName),
+      AppEngineWebProblems.getMarkerId(elementName),
       IMarker.SEVERITY_WARNING,
       IMessage.NORMAL_SEVERITY,
       start,
       length,
-      AppEngineWebBlacklist.getQuickAssistProcessor(elementName));
+      AppEngineWebProblems.getQuickAssistProcessor(elementName));
   }
   
 }

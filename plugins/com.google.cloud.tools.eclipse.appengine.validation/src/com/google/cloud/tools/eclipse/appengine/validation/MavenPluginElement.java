@@ -20,7 +20,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 
 /**
- * A blacklisted group ID element that will receive an App Engine Maven plugin marker. 
+ * A deprecated group ID element that will receive an App Engine Maven plugin marker. 
  */
 public class MavenPluginElement extends ElementProblem {
 

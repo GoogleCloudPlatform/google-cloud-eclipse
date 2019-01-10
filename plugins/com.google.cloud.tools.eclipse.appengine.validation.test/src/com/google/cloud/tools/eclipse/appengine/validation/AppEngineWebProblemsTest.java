@@ -25,48 +25,48 @@ import java.util.ArrayList;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class AppEngineWebBlacklistTest {
+public class AppEngineWebProblemsTest {
   
   @Test
   public void testBlacklisted() {
-    Assert.assertTrue(AppEngineWebBlacklist.contains("application"));
+    Assert.assertTrue(AppEngineWebProblems.contains("application"));
   }
  
   @Test
   public void testContains() {
-    assertFalse(AppEngineWebBlacklist.contains("foo"));
+    assertFalse(AppEngineWebProblems.contains("foo"));
   }
   
   @Test
   public void testContains_nullArg() {
-    assertFalse(AppEngineWebBlacklist.contains(null));
+    assertFalse(AppEngineWebProblems.contains(null));
   }
   
   @Test(expected = NullPointerException.class)
   public void testGetBlacklistElementMessage_nullArg() {
-    AppEngineWebBlacklist.getBlacklistElementMessage(null);
+    AppEngineWebProblems.getDeprecatedElementMessage(null);
   }
   
   @Test(expected = IllegalArgumentException.class)
   public void testGetBlacklistElementMessage_elementNotInBlacklist() {
-    AppEngineWebBlacklist.getBlacklistElementMessage("test");
+    AppEngineWebProblems.getDeprecatedElementMessage("test");
   }
   
   @Test
   public void testGetBlacklistElementMessage() {
     assertEquals("Project ID should be specified at deploy time",
-      AppEngineWebBlacklist.getBlacklistElementMessage("application"));
+      AppEngineWebProblems.getDeprecatedElementMessage("application"));
   }
   
   @Test
   public void testGetQuickAssistProcessor() {
     assertEquals(VersionQuickAssistProcessor.class.getName(),
-        AppEngineWebBlacklist.getQuickAssistProcessor("version").getClass().getName());
+        AppEngineWebProblems.getQuickAssistProcessor("version").getClass().getName());
   }
   
   @Test
   public void testGetBlacklistElements() {
-    ArrayList<String> elements = AppEngineWebBlacklist.getBlacklistElements();
+    ArrayList<String> elements = AppEngineWebProblems.getDeprecatedElements();
     assertEquals(2, elements.size());
     assertTrue("application".equals(elements.get(0)) ^ "application".equals(elements.get(1)));
     assertTrue("version".equals(elements.get(0)) ^ "version".equals(elements.get(1)));
