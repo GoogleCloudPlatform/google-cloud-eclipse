@@ -319,7 +319,7 @@
             </environmentVariables>
             <argLine>${jacoco.agentArgLine} -Dmaven.artifact.threads=1
               -Dorg.eclipse.swtbot.search.timeout=${org.eclipse.swtbot.search.timeout}
-              -Xms40m -Xmx1G -XX:MaxPermSize=512m
+              -Xms40m -Xmx1G
               -Djava.awt.headless=true
               -Dlogback.configurationFile=platform:/plugin/com.google.cloud.tools.eclipse.test.dependencies/logback.xml
               ${os-jvm-flags}
