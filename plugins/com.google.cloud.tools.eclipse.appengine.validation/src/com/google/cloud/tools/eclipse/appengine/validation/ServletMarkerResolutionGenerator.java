@@ -24,7 +24,7 @@ import org.eclipse.ui.IMarkerResolutionGenerator;
  * Returns possible resolutions for given resource marker. Quick Fix resolutions
  * are available in the Problems view.
  */
-class ServletMarkerResolutionGenerator implements IMarkerResolutionGenerator {
+public class ServletMarkerResolutionGenerator implements IMarkerResolutionGenerator {
 
   @Override
   public IMarkerResolution[] getResolutions(IMarker marker) {
