@@ -50,11 +50,19 @@ public class AppEngineWebXmlValidator implements XmlValidationHelper {
           document.getElementsByTagNameNS("http://appengine.google.com/ns/1.0", elementName);
       for (int i = 0; i < nodeList.getLength(); i++) {
         Node node = nodeList.item(i);
-        DocumentLocation userData = (DocumentLocation) node.getUserData("location");
+        DocumentLocation location = (DocumentLocation) node.getUserData("location");
+        // extend over the start-tag and end-tag
+        int tagLength = node.getNodeName().length() + 2;
+        int column = location.getColumnNumber() - tagLength;
+        if (column < 0) {
+          column = 0;
+        }
+        location = new DocumentLocation(location.getLineNumber(), column);
+        int length = node.getTextContent().length() + 2 * tagLength + 1;
         AppEngineBlacklistElement problem = new AppEngineBlacklistElement(
             elementName,
-            userData,
-            node.getTextContent().length());
+            location,
+            length);
         problems.add(problem);
       }
     }

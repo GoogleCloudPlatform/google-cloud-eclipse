@@ -47,18 +47,23 @@ public class AppEngineWebXmlValidatorTest {
         document.createElementNS("http://appengine.google.com/ns/1.0", "appengine-web-app");
     document.appendChild(root);
  
-    Element element =
+    Element application =
         document.createElementNS("http://appengine.google.com/ns/1.0", "application");
-    element.setUserData("location", new DocumentLocation(3, 15), null);
-    root.appendChild(element);
+    application.setUserData("location", new DocumentLocation(0, 25), null);
+    root.appendChild(application);
     Element runtime =
         document.createElementNS("http://appengine.google.com/ns/1.0", "runtime");
     root.appendChild(runtime);
     
-    List<ElementProblem> blacklist = validator.checkForProblems(null, document);
-    assertEquals(1, blacklist.size());
+    List<ElementProblem> problems = validator.checkForProblems(null, document);
+    assertEquals(1, problems.size());
     String markerId = "com.google.cloud.tools.eclipse.appengine.validation.applicationMarker";
-    assertEquals(markerId, blacklist.get(0).getMarkerId());
+    ElementProblem problem = problems.get(0);
+    assertEquals(markerId, problem.getMarkerId());
+    
+    assertEquals(0, problem.getStart().getLineNumber());
+    assertEquals(12, problem.getStart().getColumnNumber());
+    assertEquals(27, problem.getLength());    
   }
 
   @Test
