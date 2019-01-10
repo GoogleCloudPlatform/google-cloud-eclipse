@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde?>
 <!-- generated with https://github.com/eclipse-cbi/targetplatform-dsl -->
-<target name="GCP for Eclipse 2018-09" sequenceNumber="1544818598">
+<target name="GCP for Eclipse 2018-09" sequenceNumber="1547139029">
   <locations>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
       <unit id="org.eclipse.sdk.feature.group" version="4.9.0.v20180906-1121"/>
@@ -11,7 +11,6 @@
       <unit id="org.eclipse.m2e.wtp.feature.feature.group" version="1.4.0.20180606-2005"/>
       <unit id="org.eclipse.m2e.wtp.sdk.feature.feature.group" version="1.4.0.20180606-2005"/>
       <unit id="org.eclipse.mylyn.commons.feature.group" version="3.24.2.v20180904-2231"/>
-      <unit id="org.eclipse.jpt.jpa.feature.feature.group" version="3.5.101.v201807122215"/>
       <unit id="org.eclipse.epp.logging.aeri.feature.feature.group" version="2.0.7.v20180504-0806"/>
       <unit id="org.eclipse.epp.logging.aeri.feature.source.feature.group" version="2.0.7.v20180504-0806"/>
       <unit id="org.eclipse.jetty.http" version="9.4.11.v20180605"/>
