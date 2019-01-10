@@ -51,14 +51,12 @@ public class AppEngineWebXmlValidator implements XmlValidationHelper {
       for (int i = 0; i < nodeList.getLength(); i++) {
         Node node = nodeList.item(i);
         DocumentLocation location = (DocumentLocation) node.getUserData("location");
+        
         // extend over the start-tag and end-tag
         int tagLength = node.getNodeName().length() + 2;
-        int column = location.getColumnNumber() - tagLength;
-        if (column < 0) {
-          column = 0;
-        }
-        location = new DocumentLocation(location.getLineNumber(), column);
-        int length = node.getTextContent().length() + 2 * tagLength + 1;
+        location = expandLocation(location, tagLength);
+        int length = addTagLength(node, tagLength);
+        
         AppEngineBlacklistElement problem = new AppEngineBlacklistElement(
             elementName,
             location,
@@ -67,6 +65,19 @@ public class AppEngineWebXmlValidator implements XmlValidationHelper {
       }
     }
     return problems;
+  }
+
+  private static int addTagLength(Node node, int tagLength) {
+    return node.getTextContent().length() + 2 * tagLength + 1;
+  }
+
+  private static DocumentLocation expandLocation(DocumentLocation location, int tagLength) {
+    int column = location.getColumnNumber() - tagLength;
+    if (column < 0) {
+      column = 0;
+    }
+    location = new DocumentLocation(location.getLineNumber(), column);
+    return location;
   }
 
   /**
@@ -79,17 +90,11 @@ public class AppEngineWebXmlValidator implements XmlValidationHelper {
     for (int i = 0; i < nodeList.getLength(); i++) {
       Element runtimeElement = (Element) nodeList.item(i);
       String runtime = runtimeElement.getTextContent();
-      if ("java".equals(runtime)) {
-        DocumentLocation userData = (DocumentLocation) runtimeElement.getUserData("location");
-        ElementProblem problem = new ObsoleteRuntime("Java 6 runtime no longer supported", 
-            userData, runtime.length());
-        problems.add(problem);
-      } else if ("java7".equals(runtime)) {
-        DocumentLocation userData = (DocumentLocation) runtimeElement.getUserData("location");
-        ElementProblem problem = new ObsoleteRuntime("Java 7 runtime no longer supported", 
-            userData, runtime.length());
+      if ("java".equals(runtime) || "java7".equals(runtime)) {
+        ElementProblem problem = makeRuntimeProblem(runtimeElement, runtime);
         problems.add(problem);
       }
+      // else java8 is not a problem
     }
     
     if (nodeList.getLength() == 0) {
@@ -101,5 +106,18 @@ public class AppEngineWebXmlValidator implements XmlValidationHelper {
     }
     
     return problems;
+  }
+
+  private static ElementProblem makeRuntimeProblem(Element runtimeElement, String runtime) {
+    DocumentLocation location = (DocumentLocation) runtimeElement.getUserData("location");
+    // extend over the start-tag and end-tag
+    int tagLength = runtimeElement.getNodeName().length() + 2;
+    location = expandLocation(location, tagLength);
+    int length = addTagLength(runtimeElement, tagLength);
+    
+    String runtimeName = "java".equals(runtime) ? "Java 6" : "Java 7";
+    ElementProblem problem = new ObsoleteRuntime(runtimeName + " runtime no longer supported", 
+        location, length);
+    return problem;
   }
 }

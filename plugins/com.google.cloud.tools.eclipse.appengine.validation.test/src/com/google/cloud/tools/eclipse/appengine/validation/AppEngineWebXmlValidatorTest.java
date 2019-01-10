@@ -32,6 +32,10 @@ public class AppEngineWebXmlValidatorTest {
   
   private Document document;
   private final AppEngineWebXmlValidator validator = new AppEngineWebXmlValidator();
+  
+  // TODO we need to move these into a standard location
+  private static final String RUNTIME_MARKER_ID =
+      "com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker";
 
   @Before
   public void setUp() throws ParserConfigurationException {
@@ -77,23 +81,27 @@ public class AppEngineWebXmlValidatorTest {
     
     List<ElementProblem> problems = validator.checkForProblems(null , document);
     assertEquals(1, problems.size());
-    String markerId = "com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker";
-    assertEquals(markerId, problems.get(0).getMarkerId());
+    ElementProblem problem = problems.get(0);
+    assertEquals(RUNTIME_MARKER_ID, problem.getMarkerId());
   }  
   
   @Test
   public void testCheckForJava7() {
     Element runtime =
         document.createElementNS("http://appengine.google.com/ns/1.0", "runtime");
-    runtime.setUserData("location", new DocumentLocation(3, 15), null);
+    runtime.setUserData("location", new DocumentLocation(0, 25), null);
     document.appendChild(runtime);
     Node java7 = document.createTextNode("java7");
     runtime.appendChild(java7);
     
     List<ElementProblem> problems = validator.checkForProblems(null, document);
     assertEquals(1, problems.size());
-    String markerId = "com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker";
-    assertEquals(markerId, problems.get(0).getMarkerId());
+    ElementProblem problem = problems.get(0);
+    assertEquals(RUNTIME_MARKER_ID, problem.getMarkerId());
+    
+    assertEquals(0, problem.getStart().getLineNumber());
+    assertEquals(16, problem.getStart().getColumnNumber());
+    assertEquals(24, problem.getLength());    
   }  
 
   @Test
@@ -107,8 +115,7 @@ public class AppEngineWebXmlValidatorTest {
     
     List<ElementProblem> problems = validator.checkForProblems(null, document);
     assertEquals(1, problems.size());
-    String markerId = "com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker";
-    assertEquals(markerId, problems.get(0).getMarkerId());
+    assertEquals(RUNTIME_MARKER_ID, problems.get(0).getMarkerId());
   }
   
 }
