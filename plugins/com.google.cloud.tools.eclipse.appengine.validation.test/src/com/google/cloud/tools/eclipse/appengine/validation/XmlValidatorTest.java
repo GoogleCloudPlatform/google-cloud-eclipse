@@ -36,6 +36,7 @@ import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.validation.ValidationFramework;
 import org.eclipse.wst.validation.Validator;
+import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -156,8 +157,7 @@ public class XmlValidatorTest {
         new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)), true, false, null);
     ProjectUtils.waitForProjects(project);  // Wait until Eclipse puts an error marker.
 
-    String problemMarker = "org.eclipse.core.resources.problemmarker";
-    IMarker[] markers = file.findMarkers(problemMarker, true, IResource.DEPTH_ZERO);
+    IMarker[] markers = file.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
     ArrayAssertions.assertSize(1, markers);
     assertTrue(markers[0].getAttribute(IMarker.MESSAGE).toString().contains(
         "Invalid content was found starting with element 'foo'."));
@@ -167,7 +167,14 @@ public class XmlValidatorTest {
   public void testCreateMarker() throws CoreException {
     IFile file = createBogusProjectFile();
     String message = "Project ID should be specified at deploy time.";
-    ElementProblem element = new ElementProblem(message, IMarker.PROBLEM);
+    ElementProblem element = new ElementProblem(
+        message,
+        IMarker.PROBLEM,
+        IMarker.SEVERITY_WARNING,
+        IMessage.NORMAL_SEVERITY,
+        new DocumentLocation(0, 0),
+        0,
+        null);
     XmlValidator.createMarker(file, element);
     IMarker[] markers = file.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
     ArrayAssertions.assertSize(1, markers);

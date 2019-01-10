@@ -18,9 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 
 import java.util.Objects;
 
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.jface.text.quickassist.IQuickAssistProcessor;
-import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 import com.google.common.base.Preconditions;
 
 /**
@@ -53,15 +51,6 @@ class ElementProblem {
     this.iMarkerSeverity = iMarkerSeverity;
     this.iMessageSeverity = iMessageSeverity;
     this.processor = processor;
-  }
-
-  /**
-   * A problem with no specific location in the document such as an element
-   * that should be present but isn't.
-   */
-  ElementProblem(String message, String markerId) {
-    this(message, markerId,
-        IMarker.SEVERITY_WARNING, IMessage.NORMAL_SEVERITY, new DocumentLocation(0, 0), 1, null);
   }
 
   String getMessage() {
