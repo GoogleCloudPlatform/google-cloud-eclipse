@@ -27,7 +27,7 @@ import org.w3c.dom.NodeList;
 /**
  * Validator for appengine-web.xml
  */
-public class AppEngineWebXmlValidator implements XmlValidationHelper {
+class AppEngineWebXmlValidator implements XmlValidationHelper {
 
   @Override
   public List<ElementProblem> checkForProblems(IResource resource, Document document) {
@@ -53,7 +53,7 @@ public class AppEngineWebXmlValidator implements XmlValidationHelper {
         DocumentLocation location = (DocumentLocation) node.getUserData("location");
         
         // extend over the start-tag and end-tag
-        int tagLength = node.getNodeName().length() + 2;
+        int tagLength = node.getNodeName().length() + 2; // + 2 for < and >
         location = expandLocation(location, tagLength);
         int length = addTagLength(node, tagLength);
         
@@ -67,8 +67,12 @@ public class AppEngineWebXmlValidator implements XmlValidationHelper {
     return problems;
   }
 
+  // This is not a general purpose utility. 
+  // It only works for simple elements with no attributes or child elements
+  // and non insignificant white space in the start-tag. It does not work
+  // for empty-element tags either.
   private static int addTagLength(Node node, int tagLength) {
-    return node.getTextContent().length() + 2 * tagLength + 1;
+    return node.getTextContent().length() + 2 * tagLength + 1; // +1 for the / in the end-tag
   }
 
   private static DocumentLocation expandLocation(DocumentLocation location, int tagLength) {

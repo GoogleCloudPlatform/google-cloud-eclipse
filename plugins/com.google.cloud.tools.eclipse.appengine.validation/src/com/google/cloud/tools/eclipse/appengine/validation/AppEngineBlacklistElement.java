@@ -20,7 +20,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 
 /**
- * A blacklisted element that will receive an App Engine blacklist marker. 
+ * An element that will receive an App Engine configuration error marker. 
  */
 class AppEngineBlacklistElement extends ElementProblem {
   

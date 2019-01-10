@@ -141,8 +141,14 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
   /**
    * Creates a message from a given {@link ElementProblem}.
    */
+<<<<<<< HEAD
   void createMessage(IReporter reporter, ElementProblem problem, int offset) {
     IMessage message = new LocalizedMessage(problem.getIMessageSeverity(), problem.getMessage());
+=======
+  @VisibleForTesting
+  void createMessage(IReporter reporter, ElementProblem element, int elementOffset) {
+    IMessage message = new LocalizedMessage(element.getIMessageSeverity(), element.getMessage());
+>>>>>>> master
     message.setTargetObject(this);
     message.setMarkerId(problem.getMarkerId());
     // TODO offset by line
@@ -159,6 +165,7 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
    * null if the IValidationContext does not return any files that need
    * to be validated.
    */
+  @VisibleForTesting
   static IProject getProject(IValidationContext helper) {
     IFile file = getFile(helper);
     if (file != null) {
@@ -171,6 +178,7 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
    * Returns the IFile for a given URI or null if the file does
    * not exist in the workspace.
    */
+  @VisibleForTesting
   static IFile getFile(IValidationContext helper) {
     String[] fileUri = helper.getURIs();
     if (fileUri.length > 0) {
@@ -180,7 +188,7 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
     return null;
   }
 
-
+  @VisibleForTesting
   static IFile getFile(String filePath) {
     IPath path = new Path(filePath);
     if (path.segmentCount() > 1) {
