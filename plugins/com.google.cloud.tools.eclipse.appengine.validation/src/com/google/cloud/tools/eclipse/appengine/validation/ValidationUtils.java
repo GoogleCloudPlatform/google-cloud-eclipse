@@ -40,19 +40,19 @@ public class ValidationUtils {
    * character offsets.
    */
   public static Map<ElementProblem, Integer> getOffsetMap(byte[] bytes,
-      List<ElementProblem> blacklist, String encoding) {
+      List<ElementProblem> problems, String encoding) {
     Map<ElementProblem, Integer> elementProblemOffsetMap = new HashMap<>();
-    for (ElementProblem element : blacklist) {
+    for (ElementProblem problem : problems) {
       ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
       try (BufferedReader reader =
         new BufferedReader(new InputStreamReader(bais, encoding))) {
         int charOffset = 0;
-        for (int i = 1; i < element.getStart().getLineNumber(); i++) {
+        for (int i = 1; i < problem.getStart().getLineNumber(); i++) {
           String line = reader.readLine();
           charOffset += line.length() + 1;
         }
-        int start = charOffset + element.getStart().getColumnNumber() - 1;
-        elementProblemOffsetMap.put(element, start);
+        int start = charOffset + problem.getStart().getColumnNumber() - 1;
+        elementProblemOffsetMap.put(problem, start);
       } catch (IOException ex) {
         logger.log(Level.SEVERE, ex.getMessage());
       }

@@ -145,7 +145,8 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
     IMessage message = new LocalizedMessage(problem.getIMessageSeverity(), problem.getMessage());
     message.setTargetObject(this);
     message.setMarkerId(problem.getMarkerId());
-    int lineNumber = problem.getStart().getLineNumber();
+    // TODO offset by line
+    int lineNumber = problem.getStart().getLineNumber() + 1;
     message.setLineNo(lineNumber);
     message.setOffset(offset);
     message.setLength(problem.getLength());
