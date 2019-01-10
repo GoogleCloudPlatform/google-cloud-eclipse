@@ -85,7 +85,7 @@ public class AppEngineWebXmlValidatorTest {
     assertEquals(RUNTIME_MARKER_ID, problem.getMarkerId());
     
     assertEquals(2, problem.getStart().getLineNumber());
-    assertEquals(1, problem.getStart().getColumnNumber());
+    assertEquals(0, problem.getStart().getColumnNumber());
     assertEquals(19, problem.getLength());    
 
   }  
