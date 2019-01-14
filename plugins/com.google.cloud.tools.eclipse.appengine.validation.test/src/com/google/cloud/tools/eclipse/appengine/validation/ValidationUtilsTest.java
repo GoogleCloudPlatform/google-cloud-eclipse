@@ -52,8 +52,8 @@ public class ValidationUtilsTest {
   private static final String XML_WITH_PROJECT_ID_WHITESPACE =
       LINE_WITH_WHITESPACE + PROJECT_ID;
   
-  private DocumentLocation location = new DocumentLocation(2, 13);
-  private ElementProblem problem =
+  private final DocumentLocation location = new DocumentLocation(2, 13);
+  private final ElementProblem problem =
       new AppEngineDeprecatedElement("application", location, 3);
   private ArrayList<ElementProblem> problems = new ArrayList<>(Arrays.asList(problem));
   

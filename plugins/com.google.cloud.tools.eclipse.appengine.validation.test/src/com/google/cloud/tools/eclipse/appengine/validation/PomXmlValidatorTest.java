@@ -30,7 +30,7 @@ import org.w3c.dom.Element;
 
 public class PomXmlValidatorTest {
   
-  private PomXmlValidator validator = new PomXmlValidator();
+  private final PomXmlValidator validator = new PomXmlValidator();
   private Document document;
 
   @Before

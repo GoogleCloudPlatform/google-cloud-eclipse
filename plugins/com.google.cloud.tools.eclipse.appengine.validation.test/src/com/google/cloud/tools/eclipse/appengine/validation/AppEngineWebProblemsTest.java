@@ -28,7 +28,7 @@ import org.junit.Test;
 public class AppEngineWebProblemsTest {
   
   @Test
-  public void testBlacklisted() {
+  public void testDeprecated() {
     Assert.assertTrue(AppEngineWebProblems.contains("application"));
   }
  
@@ -43,17 +43,17 @@ public class AppEngineWebProblemsTest {
   }
   
   @Test(expected = NullPointerException.class)
-  public void testGetBlacklistElementMessage_nullArg() {
+  public void testGetDeprecatedElementMessage_nullArg() {
     AppEngineWebProblems.getDeprecatedElementMessage(null);
   }
   
   @Test(expected = IllegalArgumentException.class)
-  public void testGetBlacklistElementMessage_elementNotInBlacklist() {
+  public void testGetDeprecatedElementMessage_elementNotInBlacklist() {
     AppEngineWebProblems.getDeprecatedElementMessage("test");
   }
   
   @Test
-  public void testGetBlacklistElementMessage() {
+  public void testGetDeprecatedElementMessage() {
     assertEquals("Project ID should be specified at deploy time",
       AppEngineWebProblems.getDeprecatedElementMessage("application"));
   }
@@ -65,7 +65,7 @@ public class AppEngineWebProblemsTest {
   }
   
   @Test
-  public void testGetBlacklistElements() {
+  public void testGetDeprecatedElements() {
     ArrayList<String> elements = AppEngineWebProblems.getDeprecatedElements();
     assertEquals(2, elements.size());
     assertTrue("application".equals(elements.get(0)) ^ "application".equals(elements.get(1)));
