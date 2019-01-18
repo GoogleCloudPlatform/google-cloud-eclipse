@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.deploy;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
@@ -83,6 +84,7 @@ public class CloudSdkStagingHelperTest {
     when(monitor.isCanceled()).thenReturn(true);
     try {
       CloudSdkStagingHelper.stageStandard(null, stagingDirectory, null, monitor);
+      fail();
     } catch (OperationCanceledException ex) {
       assertEquals("canceled early", ex.getMessage());
     }
