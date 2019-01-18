@@ -42,11 +42,12 @@ public class ContentXmlTest {
   }
 
   @Test
-  public void testContributionsHaveId() throws ParserConfigurationException, IOException, SAXException {
+  public void testContributionsHaveId()
+      throws ParserConfigurationException, IOException, SAXException {
     Document document = parseDocument("intro/cloud-tools-for-eclipse.xml");
     NodeList contributions = document.getElementsByTagName("extensionContent");
-    for(int i = 0 ; i < contributions.getLength(); i++) {
-      Element contribution = (Element)contributions.item(i);
+    for (int i = 0 ; i < contributions.getLength(); i++) {
+      Element contribution = (Element) contributions.item(i);
       assertEquals("extensionContent", contribution.getNodeName());
       assertFalse(Strings.isNullOrEmpty(contribution.getAttribute("id")));
       assertFalse(Strings.isNullOrEmpty(contribution.getAttribute("name")));
