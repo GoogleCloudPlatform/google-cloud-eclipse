@@ -48,7 +48,7 @@ public class AppEngineWebProblemsTest {
   }
   
   @Test(expected = IllegalArgumentException.class)
-  public void testGetDeprecatedElementMessage_elementNotInBlacklist() {
+  public void testGetDeprecatedElementMessage_unrelatedElement() {
     AppEngineWebProblems.getDeprecatedElementMessage("test");
   }
   
