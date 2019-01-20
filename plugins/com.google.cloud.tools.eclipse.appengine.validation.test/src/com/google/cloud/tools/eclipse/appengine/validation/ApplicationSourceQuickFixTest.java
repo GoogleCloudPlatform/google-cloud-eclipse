@@ -45,7 +45,7 @@ import org.junit.Test;
 
 public class ApplicationSourceQuickFixTest {
 
-  private static final String BLACKLIST_MARKER =
+  private static final String MARKER =
       "com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker";
 
   private static final String APPLICATION_XML =
@@ -78,7 +78,7 @@ public class ApplicationSourceQuickFixTest {
     String preContents = viewer.getDocument().get();
     assertThat(preContents, containsString("application"));
 
-    IMarker[] markers = ProjectUtils.waitUntilMarkersFound(file, BLACKLIST_MARKER,
+    IMarker[] markers = ProjectUtils.waitUntilMarkersFound(file, MARKER,
         true /* includeSubtypes */, IResource.DEPTH_ZERO);
     assertEquals(1, markers.length);
 
@@ -93,7 +93,7 @@ public class ApplicationSourceQuickFixTest {
     // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1527
     editorPart.doSave(new NullProgressMonitor());
 
-    ProjectUtils.waitUntilNoMarkersFound(file, BLACKLIST_MARKER, true /* includeSubtypes */,
+    ProjectUtils.waitUntilNoMarkersFound(file, MARKER, true /* includeSubtypes */,
         IResource.DEPTH_ZERO);
   }
 
