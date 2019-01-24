@@ -18,7 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import com.google.api.client.util.Preconditions;
 import com.google.cloud.tools.appengine.AppEngineDescriptor;
-import com.google.cloud.tools.appengine.api.AppEngineException;
+import com.google.cloud.tools.appengine.AppEngineException;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineConfigurationUtil;
 import java.io.IOException;
 import java.io.InputStream;

@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.sdk;
 
-import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
+import com.google.cloud.tools.appengine.operations.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.managedcloudsdk.ConsoleListener;
 import org.eclipse.ui.console.MessageConsoleStream;
 

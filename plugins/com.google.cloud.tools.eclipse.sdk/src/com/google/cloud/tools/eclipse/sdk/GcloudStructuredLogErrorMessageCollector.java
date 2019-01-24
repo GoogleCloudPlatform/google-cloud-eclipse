@@ -16,8 +16,8 @@
 
 package com.google.cloud.tools.eclipse.sdk;
 
-import com.google.cloud.tools.appengine.cloudsdk.JsonParseException;
-import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
+import com.google.cloud.tools.appengine.operations.cloudsdk.JsonParseException;
+import com.google.cloud.tools.appengine.operations.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.appengine.operations.cloudsdk.serialization.GcloudStructuredLog;
 import java.util.ArrayList;
 import java.util.List;
