@@ -19,7 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.deploy;
 import com.google.cloud.tools.appengine.AppEngineException;
 import com.google.cloud.tools.appengine.api.deploy.AppEngineDeployment;
 import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
-import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.operations.CloudSdk;
 import com.google.cloud.tools.eclipse.appengine.deploy.util.CloudSdkProcessWrapper;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;

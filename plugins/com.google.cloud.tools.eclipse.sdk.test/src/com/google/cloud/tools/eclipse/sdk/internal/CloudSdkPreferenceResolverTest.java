@@ -25,9 +25,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.appengine.AppEngineException;
-import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdk;
-import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkNotFoundException;
-import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkResolver;
+import com.google.cloud.tools.appengine.operations.CloudSdk;
+import com.google.cloud.tools.appengine.operations.CloudSdkNotFoundException;
+import com.google.cloud.tools.appengine.operations.CloudSdkResolver;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;

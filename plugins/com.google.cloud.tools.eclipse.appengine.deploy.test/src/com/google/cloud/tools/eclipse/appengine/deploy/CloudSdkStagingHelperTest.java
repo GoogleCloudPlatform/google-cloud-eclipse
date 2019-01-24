@@ -23,8 +23,8 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.appengine.AppEngineException;
 import com.google.cloud.tools.appengine.api.deploy.AppEngineStandardStaging;
-import com.google.cloud.tools.appengine.operations.cloudsdk.AppCfg;
-import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.operations.AppCfg;
+import com.google.cloud.tools.appengine.operations.CloudSdk;
 import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.operations.cloudsdk.process.LegacyProcessHandler;
 import com.google.cloud.tools.appengine.operations.cloudsdk.process.ProcessHandler;

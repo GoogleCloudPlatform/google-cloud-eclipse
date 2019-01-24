@@ -17,7 +17,7 @@
 package com.google.cloud.tools.eclipse.bugreport.ui;
 
 import com.google.cloud.tools.appengine.AppEngineException;
-import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.operations.CloudSdk;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.annotations.VisibleForTesting;

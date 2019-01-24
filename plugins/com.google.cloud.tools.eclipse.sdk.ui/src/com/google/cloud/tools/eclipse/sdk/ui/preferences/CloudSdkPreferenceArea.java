@@ -18,10 +18,10 @@ package com.google.cloud.tools.eclipse.sdk.ui.preferences;
 
 import com.google.cloud.tools.appengine.AppEngineException;
 import com.google.cloud.tools.appengine.operations.cloudsdk.AppEngineJavaComponentsNotInstalledException;
-import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdk;
-import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkNotFoundException;
-import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkOutOfDateException;
-import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkVersionFileException;
+import com.google.cloud.tools.appengine.operations.CloudSdk;
+import com.google.cloud.tools.appengine.operations.CloudSdkNotFoundException;
+import com.google.cloud.tools.appengine.operations.CloudSdkOutOfDateException;
+import com.google.cloud.tools.appengine.operations.CloudSdkVersionFileException;
 import com.google.cloud.tools.appengine.operations.cloudsdk.InvalidJavaSdkException;
 import com.google.cloud.tools.eclipse.preferences.areas.PreferenceArea;
 import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
