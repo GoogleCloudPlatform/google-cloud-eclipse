@@ -23,7 +23,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import com.google.cloud.tools.appengine.cloudsdk.serialization.CloudSdkVersion;
+import com.google.cloud.tools.appengine.operations.cloudsdk.serialization.CloudSdkVersion;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.regex.Matcher;
