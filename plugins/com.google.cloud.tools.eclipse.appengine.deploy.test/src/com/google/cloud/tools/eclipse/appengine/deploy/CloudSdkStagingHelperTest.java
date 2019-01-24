@@ -22,8 +22,8 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.appengine.AppEngineException;
-import com.google.cloud.tools.appengine.api.deploy.AppEngineStandardStaging;
 import com.google.cloud.tools.appengine.operations.AppCfg;
+import com.google.cloud.tools.appengine.operations.AppEngineWebXmlProjectStaging;
 import com.google.cloud.tools.appengine.operations.CloudSdk;
 import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.operations.cloudsdk.process.LegacyProcessHandler;
@@ -92,7 +92,7 @@ public class CloudSdkStagingHelperTest {
 
   @Test
   public void testStageStandard() throws AppEngineException, CoreException {
-    AppEngineStandardStaging staging = setUpAppEngineStaging();
+    AppEngineWebXmlProjectStaging staging = setUpAppEngineStaging();
 
     IPath explodedWarDirectory = project.getFolder("WebContent").getLocation();
     CloudSdkStagingHelper.stageStandard(explodedWarDirectory, stagingDirectory, staging, monitor);
@@ -118,7 +118,7 @@ public class CloudSdkStagingHelperTest {
   @Test
   public void testCloudSdkStaging_xmlConfigFilesConvertedToYaml()
       throws CoreException, AppEngineException {
-    AppEngineStandardStaging staging = setUpAppEngineStaging();
+    AppEngineWebXmlProjectStaging staging = setUpAppEngineStaging();
 
     createConfigFile("cron.xml", CRON_XML);
     createConfigFile("datastore-indexes.xml", DATASTORE_INDEXES_XML);
@@ -139,7 +139,7 @@ public class CloudSdkStagingHelperTest {
     assertTrue(stagingGenerated.append("queue.yaml").toFile().exists());
   }
 
-  private AppEngineStandardStaging setUpAppEngineStaging()
+  private AppEngineWebXmlProjectStaging setUpAppEngineStaging()
       throws CloudSdkNotFoundException, CoreException {
     createFile("WebContent/WEB-INF/appengine-web.xml", APPENGINE_WEB_XML);
     createFile("WebContent/WEB-INF/web.xml", WEB_XML);

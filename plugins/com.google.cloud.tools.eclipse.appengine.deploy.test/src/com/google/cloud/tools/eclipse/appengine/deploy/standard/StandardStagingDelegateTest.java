@@ -24,10 +24,10 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.tools.appengine.api.deploy.AppEngineStandardStaging;
-import com.google.cloud.tools.appengine.operations.cloudsdk.AppCfg;
+import com.google.cloud.tools.appengine.operations.AppCfg;
+import com.google.cloud.tools.appengine.operations.AppEngineWebXmlProjectStaging;
 import com.google.cloud.tools.appengine.operations.CloudSdk;
-import com.google.cloud.tools.appengine.operations.CloudSdkNotFoundException;
+import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.operations.cloudsdk.process.LegacyProcessHandler;
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.appengine.deploy.util.CloudSdkProcessWrapper;
@@ -75,7 +75,8 @@ public class StandardStagingDelegateTest {
         .addStdErrLineListener(line -> { System.out.println("    [Cloud SDK] " + line); })
         .setExitListener(exitCode -> { cloudSdkExitCode = exitCode; })
         .build();
-    AppEngineStandardStaging staging = AppCfg.builder(cloudSdk).build().newStaging(processHandler);
+    AppEngineWebXmlProjectStaging staging =
+        AppCfg.builder(cloudSdk).build().newStaging(processHandler);
 
     when(cloudSdkWrapper.getAppEngineStandardStaging(
         any(Path.class), any(MessageConsoleStream.class), any(MessageConsoleStream.class)))

@@ -23,8 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 
-import com.google.cloud.tools.appengine.api.devserver.DefaultRunConfiguration;
-import com.google.cloud.tools.appengine.api.devserver.RunConfiguration;
+import com.google.cloud.tools.appengine.configuration.RunConfiguration;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;    
@@ -37,7 +36,7 @@ import org.junit.Test;
 public class RunConfigConflictTest {
   @Test
   public void testSameConflict() {
-    RunConfiguration config = new DefaultRunConfiguration();
+    RunConfiguration config = new RunConfiguration.Builder.().build();
     IStatus status = LocalAppEngineServerLaunchConfigurationDelegate.checkConflicts(config, config,
         StatusUtil.multi(RunConfigConflictTest.class, "Conflict"));
     assertFalse(status.isOK());

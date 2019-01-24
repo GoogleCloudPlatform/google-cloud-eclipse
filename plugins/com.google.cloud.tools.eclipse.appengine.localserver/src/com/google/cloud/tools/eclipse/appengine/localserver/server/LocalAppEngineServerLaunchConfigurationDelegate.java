@@ -16,13 +16,12 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
-import com.google.cloud.tools.appengine.api.devserver.DefaultRunConfiguration;
-import com.google.cloud.tools.appengine.api.devserver.RunConfiguration;
+import com.google.cloud.tools.appengine.configuration.RunConfiguration;
 import com.google.cloud.tools.appengine.operations.cloudsdk.AppEngineJavaComponentsNotInstalledException;
 import com.google.cloud.tools.appengine.operations.CloudSdk;
-import com.google.cloud.tools.appengine.operations.CloudSdkNotFoundException;
-import com.google.cloud.tools.appengine.operations.CloudSdkOutOfDateException;
-import com.google.cloud.tools.appengine.operations.CloudSdkVersionFileException;
+import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkNotFoundException;
+import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkOutOfDateException;
+import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkVersionFileException;
 import com.google.cloud.tools.appengine.operations.cloudsdk.InvalidJavaSdkException;
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
@@ -161,7 +160,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   @Override
   public ILaunch getLaunch(ILaunchConfiguration configuration, String mode) throws CoreException {
     IServer server = ServerUtil.getServer(configuration);
-    DefaultRunConfiguration runConfig = generateServerRunConfiguration(configuration, server, mode);
+    RunConfiguration runConfig = generateServerRunConfiguration(configuration, server, mode);
     ILaunch[] launches = getLaunchManager().getLaunches();
     checkConflictingLaunches(configuration.getType(), mode, runConfig, launches);
     return super.getLaunch(configuration, mode);
@@ -261,10 +260,10 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
    * attributes} and {@link IServer server settings and attributes}.
    */
   @VisibleForTesting
-  DefaultRunConfiguration generateServerRunConfiguration(ILaunchConfiguration configuration,
+  RunConfiguration generateServerRunConfiguration(ILaunchConfiguration configuration,
       IServer server, String mode) throws CoreException {
 
-    DefaultRunConfiguration devServerRunConfiguration = new DefaultRunConfiguration();
+    RunConfiguration devServerRunConfiguration = new RunConfiguration();
     // Iterate through our different configurable parameters
     // TODO: storage-related paths, incl storage_path and the {blob,data,*search*,logs} paths
 
@@ -278,7 +277,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     if (serverPort >= 0) {
       devServerRunConfiguration.setPort(serverPort);
     }
-
 
     // only restart server on on-disk changes detected when in RUN mode
     devServerRunConfiguration.setAutomaticRestart(ILaunchManager.RUN_MODE.equals(mode));
