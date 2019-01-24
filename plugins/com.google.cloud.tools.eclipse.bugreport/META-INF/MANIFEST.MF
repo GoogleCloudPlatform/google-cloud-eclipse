@@ -9,7 +9,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
 Import-Package: com.google.cloud.tools.appengine;version="0.7.3",
- com.google.cloud.tools.appengine.operations.cloudsdk;version="0.7.3",
+ com.google.cloud.tools.appengine.operations;version="0.7.3",
  com.google.cloud.tools.appengine.operations.cloudsdk.serialization;version="0.7.3",
  com.google.cloud.tools.eclipse.sdk.internal,
  com.google.cloud.tools.eclipse.util,

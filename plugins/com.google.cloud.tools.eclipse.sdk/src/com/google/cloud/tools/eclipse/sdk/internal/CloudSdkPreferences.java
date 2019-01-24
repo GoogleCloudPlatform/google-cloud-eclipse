@@ -17,7 +17,7 @@
 package com.google.cloud.tools.eclipse.sdk.internal;
 
 import com.google.cloud.tools.appengine.operations.CloudSdk;
-import com.google.cloud.tools.appengine.operations.CloudSdkNotFoundException;
+import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkNotFoundException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import java.util.logging.Level;
