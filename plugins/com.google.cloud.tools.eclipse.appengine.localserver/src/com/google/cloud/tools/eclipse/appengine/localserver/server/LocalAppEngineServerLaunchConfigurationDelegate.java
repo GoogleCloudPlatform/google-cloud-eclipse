@@ -160,7 +160,8 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   @Override
   public ILaunch getLaunch(ILaunchConfiguration configuration, String mode) throws CoreException {
     IServer server = ServerUtil.getServer(configuration);
-    RunConfiguration runConfig = generateServerRunConfiguration(configuration, server, mode);
+    List<Path> paths = new ArrayList<>();
+    RunConfiguration runConfig = generateServerRunConfiguration(configuration, server, mode, paths);
     ILaunch[] launches = getLaunchManager().getLaunches();
     checkConflictingLaunches(configuration.getType(), mode, runConfig, launches);
     return super.getLaunch(configuration, mode);
@@ -233,7 +234,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
   @VisibleForTesting
   void checkConflictingLaunches(ILaunchConfigurationType launchConfigType, String mode,
-      DefaultRunConfiguration runConfig, ILaunch[] launches) throws CoreException {
+      RunConfiguration runConfig, ILaunch[] launches) throws CoreException {
 
     for (ILaunch launch : launches) {
       if (launch.isTerminated()
@@ -242,8 +243,9 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
         continue;
       }
       IServer otherServer = ServerUtil.getServer(launch.getLaunchConfiguration());
-      DefaultRunConfiguration otherRunConfig =
-          generateServerRunConfiguration(launch.getLaunchConfiguration(), otherServer, mode);
+      List<Path> paths = new ArrayList<>();
+      RunConfiguration otherRunConfig =
+          generateServerRunConfiguration(launch.getLaunchConfiguration(), otherServer, mode, paths);
       IStatus conflicts = checkConflicts(runConfig, otherRunConfig,
           new MultiStatus(Activator.PLUGIN_ID, 0,
               Messages.getString("conflicts.with.running.server", otherServer.getName()), //$NON-NLS-1$
@@ -258,55 +260,56 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
    * Create a CloudSdk RunConfiguration corresponding to the launch configuration and server
    * defaults. Details are pulled from {@link ILaunchConfiguration#getAttributes() launch
    * attributes} and {@link IServer server settings and attributes}.
+   * @param runnables 
    */
   @VisibleForTesting
   RunConfiguration generateServerRunConfiguration(ILaunchConfiguration configuration,
-      IServer server, String mode) throws CoreException {
+      IServer server, String mode, List<Path> services) throws CoreException {
 
-    RunConfiguration devServerRunConfiguration = new RunConfiguration();
+    RunConfiguration.Builder builder = RunConfiguration.builder(services);
     // Iterate through our different configurable parameters
-    // TODO: storage-related paths, incl storage_path and the {blob,data,*search*,logs} paths
+    // TODO: storage-related paths, including storage_path and the {blob,data,*search*,logs} paths
 
     // TODO: allow setting host from launch config
     if (server.getHost() != null) {
-      devServerRunConfiguration.setHost(server.getHost());
+      builder.host(server.getHost());
     }
 
     int serverPort = getPortAttribute(LocalAppEngineServerBehaviour.SERVER_PORT_ATTRIBUTE_NAME,
         LocalAppEngineServerBehaviour.DEFAULT_SERVER_PORT, configuration, server);
     if (serverPort >= 0) {
-      devServerRunConfiguration.setPort(serverPort);
+      builder.port(serverPort);
     }
 
     // only restart server on on-disk changes detected when in RUN mode
-    devServerRunConfiguration.setAutomaticRestart(ILaunchManager.RUN_MODE.equals(mode));
+    builder.automaticRestart(ILaunchManager.RUN_MODE.equals(mode));
 
     if (DEV_APPSERVER2) {
       if (ILaunchManager.DEBUG_MODE.equals(mode)) {
         // default to 1 instance to simplify debugging
-        devServerRunConfiguration.setMaxModuleInstances(1);
+        builder.maxModuleInstances(1);
       }
 
       String adminHost = getAttribute(LocalAppEngineServerBehaviour.ADMIN_HOST_ATTRIBUTE_NAME,
           LocalAppEngineServerBehaviour.DEFAULT_ADMIN_HOST, configuration, server);
       if (!Strings.isNullOrEmpty(adminHost)) {
-        devServerRunConfiguration.setAdminHost(adminHost);
+        builder.adminHost(adminHost);
       }
 
       int adminPort = getPortAttribute(LocalAppEngineServerBehaviour.ADMIN_PORT_ATTRIBUTE_NAME,
           -1, configuration, server);
       if (adminPort >= 0) {
-        devServerRunConfiguration.setAdminPort(adminPort);
+        builder.adminPort(adminPort);
       } else {
         // perform failover if default port is busy
 
         // adminHost == null is ok as that resolves to null == INADDR_ANY
-        InetAddress addr = resolveAddress(devServerRunConfiguration.getAdminHost());
+        InetAddress addr = resolveAddress(adminHost);
         if (org.eclipse.wst.server.core.util.SocketUtil.isPortInUse(
             addr, LocalAppEngineServerBehaviour.DEFAULT_ADMIN_PORT)) {
-          devServerRunConfiguration.setAdminPort(0);
+          builder.adminPort(0);
         } else {
-          devServerRunConfiguration.setAdminPort(LocalAppEngineServerBehaviour.DEFAULT_ADMIN_PORT);
+          builder.adminPort(LocalAppEngineServerBehaviour.DEFAULT_ADMIN_PORT);
         }
       }
     }
@@ -316,14 +319,14 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     String vmArgumentString = getVMArguments(configuration);
     List<String> vmArguments = Arrays.asList(DebugPlugin.parseArguments(vmArgumentString));
     if (!vmArguments.isEmpty()) {
-      devServerRunConfiguration.setJvmFlags(vmArguments);
+      builder.jvmFlags(vmArguments);
     }
     // programArguments is exactly as supplied by the user in the dialog box
     String programArgumentString = getProgramArguments(configuration);
     List<String> programArguments =
         Arrays.asList(DebugPlugin.parseArguments(programArgumentString));
     if (!programArguments.isEmpty()) {
-      devServerRunConfiguration.setAdditionalArguments(programArguments);
+      builder.additionalArguments(programArguments);
     }
 
     boolean environmentAppend =
@@ -343,9 +346,9 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       // expand any variable references
       expanded.put(entry.getKey(), variableEngine.performStringSubstitution(entry.getValue()));
     }
-    devServerRunConfiguration.setEnvironment(expanded);
+    builder.environment(expanded);
 
-    return devServerRunConfiguration;
+    return builder.build();
   }
 
   /**
@@ -472,10 +475,10 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
     setDefaultSourceLocator(launch, configuration);
 
-    List<File> runnables = new ArrayList<>();
+    List<Path> runnables = new ArrayList<>();
     for (IModule module : modules) {
       IPath deployPath = serverBehaviour.getModuleDeployDirectory(module);
-      runnables.add(deployPath.toFile());
+      runnables.add(deployPath.toFile().toPath());
     }
 
     // configure the console for output
@@ -499,9 +502,8 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     target.engage();
 
     try {
-      DefaultRunConfiguration devServerRunConfiguration =
-          generateServerRunConfiguration(configuration, server, mode);
-      devServerRunConfiguration.setServices(runnables);
+      RunConfiguration devServerRunConfiguration =
+          generateServerRunConfiguration(configuration, server, mode, runnables);
       if (ILaunchManager.DEBUG_MODE.equals(mode)) {
         int debugPort = getDebugPort();
         setupDebugTarget(devServerRunConfiguration, launch, debugPort, monitor);
@@ -548,7 +550,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
         server.getName());
   }
 
-  private void setupDebugTarget(DefaultRunConfiguration devServerRunConfiguration, ILaunch launch,
+  private void setupDebugTarget(RunConfiguration devServerRunConfiguration, ILaunch launch,
       int debugPort, IProgressMonitor monitor) throws CoreException {
     if (debugPort <= 0 || debugPort > 65535) {
       throw new IllegalArgumentException("Debug port is set to " + debugPort //$NON-NLS-1$

@@ -22,6 +22,7 @@ import com.google.cloud.tools.appengine.configuration.RunConfiguration;
 import com.google.cloud.tools.appengine.configuration.StopConfiguration;
 import com.google.cloud.tools.appengine.operations.CloudSdk;
 import com.google.cloud.tools.appengine.operations.DevServerV1;
+import com.google.cloud.tools.appengine.operations.DevServers;
 import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.operations.cloudsdk.process.LegacyProcessHandler;
 import com.google.cloud.tools.appengine.operations.cloudsdk.process.ProcessExitListener;
@@ -377,7 +378,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
         .async(true)
         .build();
 
-    com.google.cloud.tools.appengine.operations.LocalRun localRun = LocalRun.builder(cloudSdk).build();
+    DevServers localRun = DevServers.builder(cloudSdk).build();
     devServer = LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2
         ? localRun.newDevAppServer2(processHandler)
         : localRun.newDevAppServer1(processHandler);
