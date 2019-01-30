@@ -41,7 +41,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.net.InetAddresses;
-import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Path;
@@ -562,7 +561,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     }
     jvmFlags.add("-Xdebug"); //$NON-NLS-1$
     jvmFlags.add("-Xrunjdwp:transport=dt_socket,server=n,suspend=y,quiet=y,address=" + debugPort); //$NON-NLS-1$
-    devServerRunConfiguration.setJvmFlags(jvmFlags);
+    devServerRunConfiguration = devServerRunConfiguration.toBuilder().jvmFlags(jvmFlags).build();
 
     // The 4.7 listen connector supports a connectionLimit
     IVMConnector connector =

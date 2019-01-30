@@ -26,8 +26,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.tools.appengine.api.devserver.DefaultRunConfiguration;
+import com.google.cloud.tools.appengine.configuration.RunConfiguration;
 import java.net.InetAddress;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiPredicate;
 import org.eclipse.core.runtime.CoreException;
 import org.junit.Assume;
@@ -221,8 +224,8 @@ public class LocalAppEngineServerBehaviourTest {
   public void testStartDevServer_ignoresAdminPortWhenDevAppserver1() throws CoreException {
     Assume.assumeFalse(LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2);
 
-    DefaultRunConfiguration runConfig = new DefaultRunConfiguration();
-    runConfig.setAdminPort(8000);
+    List<Path> services = new ArrayList<>();
+    RunConfiguration runConfig = RunConfiguration.builder(services).adminPort(8000).build();
     when(portProber.test(any(InetAddress.class), anyInt())).thenReturn(false);
     when(portProber.test(any(InetAddress.class), eq(8000))).thenReturn(true);
 
