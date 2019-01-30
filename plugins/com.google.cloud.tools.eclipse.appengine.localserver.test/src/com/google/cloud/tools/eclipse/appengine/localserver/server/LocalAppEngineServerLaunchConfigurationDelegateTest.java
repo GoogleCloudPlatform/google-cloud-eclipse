@@ -213,7 +213,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
     assertNull(config.getHost());
     assertEquals((Integer) LocalAppEngineServerBehaviour.DEFAULT_SERVER_PORT, config.getPort());
     assertNull(config.getApiPort());
-    assertNull(config.getJvmFlags());
+    assertTrue(config.getJvmFlags().isEmpty());
     verify(server, atLeastOnce()).getHost();
     verify(launchConfiguration, atLeastOnce()).getAttribute(anyString(), anyInt());
     verify(server, atLeastOnce()).getAttribute(anyString(), anyInt());
