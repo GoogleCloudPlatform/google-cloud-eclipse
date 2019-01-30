@@ -29,9 +29,11 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.appengine.configuration.DeployConfiguration;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -42,6 +44,11 @@ public class DeployPreferencesConverterTest {
 
   @Mock private IEclipsePreferences preferences;
   private final List<Path> deployables = new ArrayList<>();
+  
+  @Before 
+  public void setUp() {
+    deployables.add(Paths.get("foo"));
+  }
 
   @Test
   public void testToDeployConfiguration_projectId() {
