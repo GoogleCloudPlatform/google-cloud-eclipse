@@ -58,7 +58,8 @@ public class CloudSdkPreferenceResolverTest {
   /** Verify that the preference resolver is found by default. */
   @Test
   public void testPreferenceResolverFound() {
-    List<CloudSdkResolver> resolvers = new CloudSdk.Builder().getResolvers();
+    CloudSdk.Builder builder = new CloudSdk.Builder();
+    List<CloudSdkResolver> resolvers = builder.getResolvers();
     int found = 0;
     for (CloudSdkResolver resolver : resolvers) {
       // Can't just compare classes as class likely loaded from
