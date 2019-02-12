@@ -60,6 +60,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -432,7 +433,8 @@ public class CodeTemplatesTest {
         new DefaultArtifactVersion(pluginVersion.getTextContent());
     DefaultArtifactVersion expected = new DefaultArtifactVersion("1.3.2");
     Assert.assertTrue(artifactVersion.compareTo(expected) >= 0);
-    
+
+    // Validate use of Cloud BOM
     XPath xpath = XPathFactory.newInstance().newXPath();
     xpath.setNamespaceContext(new MappedNamespaceContext("m", "http://maven.apache.org/POM/4.0.0"));
     NodeList dependencyManagementNodes = (NodeList) xpath.evaluate(
@@ -470,7 +472,27 @@ public class CodeTemplatesTest {
         root,
         XPathConstants.STRING);
     Assert.assertEquals("pom", type);
-    
+
+    // Validate use of maven-enforcer-plugin
+    Node enforcerNode =
+        (Node)
+            xpath.evaluate(
+                "./m:build/m:plugins/m:plugin/m:artifactId[text()='maven-enforcer-plugin']/..",
+                root,
+                XPathConstants.NODE);
+    Assert.assertNotNull(enforcerNode);
+
+    String enforcerVersion =
+        (String) xpath.evaluate("string(./m:version)", enforcerNode, XPathConstants.STRING);
+    Assert.assertEquals("3.0.0-M2", enforcerVersion);
+    String requiredMavenVersion =
+        (String)
+            xpath.evaluate(
+                "string(./m:executions/m:execution/m:configuration/m:rules/m:requireMavenVersion/m:version)",
+                enforcerNode,
+                XPathConstants.STRING);
+    Assert.assertEquals("3.5.0", requiredMavenVersion);
+
     return root;
   }
 
