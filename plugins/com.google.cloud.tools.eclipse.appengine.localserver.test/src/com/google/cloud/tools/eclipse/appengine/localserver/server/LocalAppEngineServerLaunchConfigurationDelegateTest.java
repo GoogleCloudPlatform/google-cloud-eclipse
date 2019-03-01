@@ -35,9 +35,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.appengine.configuration.RunConfiguration;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.ServerSocket;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,7 +48,6 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.wst.server.core.IServer;
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -249,42 +245,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
     verify(launchConfiguration)
         .getAttribute(eq(LocalAppEngineServerBehaviour.SERVER_PORT_ATTRIBUTE_NAME), anyInt());
     verify(server, never()).getAttribute(anyString(), anyInt());
-  }
-
-  @Test
-  public void testGenerateRunConfiguration_withAdminPortWhenDevAppserver2() throws CoreException {
-    Assume.assumeTrue(LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2);
-
-    when(launchConfiguration.getAttribute(anyString(), anyString()))
-        .thenAnswer(AdditionalAnswers.returnsSecondArg());
-    when(launchConfiguration
-        .getAttribute(eq(LocalAppEngineServerBehaviour.ADMIN_PORT_ATTRIBUTE_NAME), anyInt()))
-            .thenReturn(9999);
-
-    RunConfiguration config =
-        new LocalAppEngineServerLaunchConfigurationDelegate().generateServerRunConfiguration(
-            launchConfiguration, server, ILaunchManager.RUN_MODE, services);
-
-    assertNull(config.getAdminPort());
-    verify(launchConfiguration, never())
-        .getAttribute(eq(LocalAppEngineServerBehaviour.ADMIN_PORT_ATTRIBUTE_NAME), anyInt());
-    verify(server, never())
-        .getAttribute(eq(LocalAppEngineServerBehaviour.ADMIN_PORT_ATTRIBUTE_NAME), anyInt());
-  }
-
-  @Test
-  public void testGenerateRunConfiguration_withAdminPortFailoverWhenDevAppserver2()
-      throws CoreException, IOException {
-    Assume.assumeTrue(LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2);
-
-    // dev_appserver waits on localhost by default
-    try (ServerSocket socket = new ServerSocket(8080, 100, InetAddress.getLoopbackAddress())) {
-      RunConfiguration config =
-          new LocalAppEngineServerLaunchConfigurationDelegate().generateServerRunConfiguration(
-              launchConfiguration, server, ILaunchManager.RUN_MODE, services);
-
-      assertNull(config.getAdminPort());
-    }
   }
 
   @Test

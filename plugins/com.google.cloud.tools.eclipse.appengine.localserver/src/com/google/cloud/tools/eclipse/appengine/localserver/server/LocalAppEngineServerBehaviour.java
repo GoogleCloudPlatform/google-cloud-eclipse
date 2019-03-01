@@ -21,7 +21,6 @@ import com.google.cloud.tools.appengine.configuration.RunConfiguration;
 import com.google.cloud.tools.appengine.configuration.StopConfiguration;
 import com.google.cloud.tools.appengine.operations.CloudSdk;
 import com.google.cloud.tools.appengine.operations.DevServer;
-import com.google.cloud.tools.appengine.operations.DevServerV1;
 import com.google.cloud.tools.appengine.operations.DevServers;
 import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.operations.cloudsdk.process.LegacyProcessHandler;
@@ -101,8 +100,6 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
 
   @VisibleForTesting
   int serverPort = -1;
-  @VisibleForTesting
-  int adminPort = -1;
 
   private DevAppServerOutputListener serverOutputListener;
   
@@ -126,11 +123,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     if (devServer != null && (!force || serverState != IServer.STATE_STOPPING)) {
       setServerState(IServer.STATE_STOPPING);
       StopConfiguration.Builder builder = StopConfiguration.builder();
-      if (isDevAppServer1()) {
-        builder.adminPort(serverPort);        
-      } else {
-        builder.adminPort(adminPort);
-      }
+      builder.adminPort(serverPort);
       try {
         devServer.stop(builder.build());
       } catch (AppEngineException ex) {
@@ -289,14 +282,6 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   }
 
   /**
-   * Returns the admin port of this server. Note that this method returns -1 if the user has never
-   * attempted to launch the server.
-   */
-  public int getAdminPort() {
-    return adminPort;
-  }
-
-  /**
    * @return a short pithy description of this server suitable for use in UI elements
    */
   public String getDescription() {
@@ -370,13 +355,6 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   }
   
   /**
-   * @return true if and only if we're using devappserver1
-   */
-  private boolean isDevAppServer1() {
-    return devServer instanceof DevServerV1;
-  }
-
-  /**
    * A {@link ProcessExitListener} for the App Engine server.
    */
   private class LocalAppEngineExitListener implements ProcessExitListener {
@@ -413,8 +391,6 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     // devappserver2 patterns
     private final Pattern moduleStartedPattern = Pattern.compile(
         "INFO .*Starting module \"(?<service>[^\"]+)\" running at: (?<url>http://.+:(?<port>[0-9]+))$");
-    private final Pattern adminStartedPattern =
-        Pattern.compile("INFO .*Starting admin server at: (?<url>http://.+:(?<port>[0-9]+))$");
 
     // devappserver1 patterns
     private final Pattern moduleRunningPattern = Pattern.compile(
@@ -449,12 +425,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
         if (port > 0 && (serverPortCandidate == 0 || "default".equals(serviceId))) { // $NON-NLS-1$
           serverPortCandidate = port;
         }
-      } else if ((matcher = adminStartedPattern.matcher(line)).matches()
-          || (matcher = adminRunningPattern.matcher(line)).matches()) {
-        int port = parseInt(matcher.group("port"), 0);
-        if (port > 0 && adminPort <= 0) {
-          adminPort = port;
-        }
+      } else if ((matcher = adminRunningPattern.matcher(line)).matches()) {
         // Admin comes after other modules, so no more module URLs
         if (serverPort <= 0) {
           serverPort = serverPortCandidate;
