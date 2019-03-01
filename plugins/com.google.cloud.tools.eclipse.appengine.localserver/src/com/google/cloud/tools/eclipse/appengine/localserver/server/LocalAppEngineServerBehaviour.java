@@ -17,10 +17,10 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import com.google.cloud.tools.appengine.AppEngineException;
-import com.google.cloud.tools.appengine.operations.DevServer;
 import com.google.cloud.tools.appengine.configuration.RunConfiguration;
 import com.google.cloud.tools.appengine.configuration.StopConfiguration;
 import com.google.cloud.tools.appengine.operations.CloudSdk;
+import com.google.cloud.tools.appengine.operations.DevServer;
 import com.google.cloud.tools.appengine.operations.DevServerV1;
 import com.google.cloud.tools.appengine.operations.DevServers;
 import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkNotFoundException;
@@ -83,13 +83,9 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   }
 
   public static final String SERVER_PORT_ATTRIBUTE_NAME = "appEngineDevServerPort"; //$NON-NLS-1$
-  public static final String ADMIN_HOST_ATTRIBUTE_NAME = "appEngineDevServerAdminHost"; //$NON-NLS-1$
-  public static final String ADMIN_PORT_ATTRIBUTE_NAME = "appEngineDevServerAdminPort"; //$NON-NLS-1$
 
   // These are the default values used by Cloud SDK's dev_appserver
   public static final int DEFAULT_SERVER_PORT = 8080;
-  public static final String DEFAULT_ADMIN_HOST = "localhost"; //$NON-NLS-1$
-  public static final int DEFAULT_ADMIN_PORT = 8000;
   public static final int DEFAULT_API_PORT = 0; // allocated at random
 
   private static final Logger logger =
@@ -250,16 +246,6 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     serverPort = checkPort(serverHost,
         ifNull(devServerRunConfiguration.getPort(), DEFAULT_SERVER_PORT), portInUse);
 
-    if (LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2) {
-      InetAddress adminHost = InetAddress.getLoopbackAddress();
-      if (devServerRunConfiguration.getAdminHost() != null) {
-        adminHost = LocalAppEngineServerLaunchConfigurationDelegate
-            .resolveAddress(devServerRunConfiguration.getAdminHost());
-      }
-      adminPort = checkPort(adminHost,
-          ifNull(devServerRunConfiguration.getAdminPort(), DEFAULT_ADMIN_PORT), portInUse);
-    }
-
     // API port seems to be bound on localhost in practice
     checkPort(InetAddress.getLoopbackAddress(),
         ifNull(devServerRunConfiguration.getApiPort(), DEFAULT_API_PORT), portInUse);
@@ -379,9 +365,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
         .build();
 
     DevServers localRun = DevServers.builder(cloudSdk).build();
-    devServer = LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2
-        ? localRun.newDevAppServer2(processHandler)
-        : localRun.newDevAppServer1(processHandler);
+    devServer = localRun.newDevAppServer1(processHandler);
     moduleToUrlMap.clear();
   }
   

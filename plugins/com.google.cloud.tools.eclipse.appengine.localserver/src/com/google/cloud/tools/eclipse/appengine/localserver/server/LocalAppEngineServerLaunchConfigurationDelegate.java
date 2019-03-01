@@ -17,8 +17,8 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import com.google.cloud.tools.appengine.configuration.RunConfiguration;
-import com.google.cloud.tools.appengine.operations.cloudsdk.AppEngineJavaComponentsNotInstalledException;
 import com.google.cloud.tools.appengine.operations.CloudSdk;
+import com.google.cloud.tools.appengine.operations.cloudsdk.AppEngineJavaComponentsNotInstalledException;
 import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkOutOfDateException;
 import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkVersionFileException;
@@ -111,8 +111,6 @@ import org.eclipse.wst.server.core.ServerUtil;
 
 public class LocalAppEngineServerLaunchConfigurationDelegate
     extends AbstractJavaLaunchConfigurationDelegate {
-
-  static final boolean DEV_APPSERVER2 = false;
 
   private static final Logger logger =
       Logger.getLogger(LocalAppEngineServerLaunchConfigurationDelegate.class.getName());
@@ -282,36 +280,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
     // only restart server on on-disk changes detected when in RUN mode
     builder.automaticRestart(ILaunchManager.RUN_MODE.equals(mode));
-
-    if (DEV_APPSERVER2) {
-      if (ILaunchManager.DEBUG_MODE.equals(mode)) {
-        // default to 1 instance to simplify debugging
-        builder.maxModuleInstances(1);
-      }
-
-      String adminHost = getAttribute(LocalAppEngineServerBehaviour.ADMIN_HOST_ATTRIBUTE_NAME,
-          LocalAppEngineServerBehaviour.DEFAULT_ADMIN_HOST, configuration, server);
-      if (!Strings.isNullOrEmpty(adminHost)) {
-        builder.adminHost(adminHost);
-      }
-
-      int adminPort = getPortAttribute(LocalAppEngineServerBehaviour.ADMIN_PORT_ATTRIBUTE_NAME,
-          -1, configuration, server);
-      if (adminPort >= 0) {
-        builder.adminPort(adminPort);
-      } else {
-        // perform failover if default port is busy
-
-        // adminHost == null is ok as that resolves to null == INADDR_ANY
-        InetAddress addr = resolveAddress(adminHost);
-        if (org.eclipse.wst.server.core.util.SocketUtil.isPortInUse(
-            addr, LocalAppEngineServerBehaviour.DEFAULT_ADMIN_PORT)) {
-          builder.adminPort(0);
-        } else {
-          builder.adminPort(LocalAppEngineServerBehaviour.DEFAULT_ADMIN_PORT);
-        }
-      }
-    }
 
     // TODO: apiPort?
     // vmArguments is exactly as supplied by the user in the dialog box
