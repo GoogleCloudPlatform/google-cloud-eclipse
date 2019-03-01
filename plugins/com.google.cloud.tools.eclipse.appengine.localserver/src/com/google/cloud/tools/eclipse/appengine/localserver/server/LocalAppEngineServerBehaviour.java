@@ -353,7 +353,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     devServer = localRun.newDevAppServer1(processHandler);
     moduleToUrlMap.clear();
   }
-  
+
   /**
    * A {@link ProcessExitListener} for the App Engine server.
    */
@@ -386,15 +386,13 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     // devappserver1 patterns
     private final Pattern moduleRunningPattern = Pattern.compile(
         "INFO: Module instance (?<service>[\\w\\d\\-]+) is running at (?<url>http://.+:(?<port>[0-9]+)/)$");
-    private final Pattern adminRunningPattern =
-        Pattern.compile("INFO: The admin console is running at http://.+:[0-9]+/_ah/admin$");
 
-    private int serverPortCandidate = 0;
+    private final boolean shouldAutoDetectPort = serverPort <= 0;
 
     @Override
     public void onOutputLine(String line) {
-
       Matcher matcher;
+
       if (line.endsWith("Dev App Server is now running")) { //$NON-NLS-1$
         // App Engine Standard (v1)
         setServerState(IServer.STATE_STARTED);
@@ -407,19 +405,15 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
       } else if (line.contains("Error: A fatal exception has occurred. Program will exit")) { //$NON-NLS-1$
         // terminate the Python process
         stop(false);
-      } else if ((matcher = moduleRunningPattern.matcher(line)).matches()) {
+      } else if (shouldAutoDetectPort && (matcher = moduleRunningPattern.matcher(line)).matches()) {
         String serviceId = matcher.group("service");
         String url = matcher.group("url");
         moduleToUrlMap.put(serviceId, url);
+
         String portString = matcher.group("port");
         int port = parseInt(portString, 0);
-        if (port > 0 && (serverPortCandidate == 0 || "default".equals(serviceId))) { // $NON-NLS-1$
-          serverPortCandidate = port;
-        }
-      } else if ((matcher = adminRunningPattern.matcher(line)).matches()) {
-        // Admin comes after other modules, so no more module URLs
-        if (serverPort <= 0) {
-          serverPort = serverPortCandidate;
+        if (port > 0 && (serverPort <= 0 || "default".equals(serviceId))) { // $NON-NLS-1$
+          serverPort = port;
         }
       }
     }

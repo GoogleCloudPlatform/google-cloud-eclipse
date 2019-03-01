@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.appengine.configuration.RunConfiguration;
+import com.google.cloud.tools.appengine.operations.cloudsdk.process.ProcessOutputLineListener;
 import java.net.InetAddress;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -104,59 +105,55 @@ public class LocalAppEngineServerBehaviourTest {
   }
 
   private static final String[] devappserver1Output = new String[] {
-      "Apr 05, 2017 9:25:17 PM com.google.apphosting.utils.jetty.JettyLogger info",
-      "INFO: jetty-6.1.x",
-      "Apr 05, 2017 9:25:17 PM com.google.apphosting.utils.jetty.JettyLogger info",
-      "INFO: Started SelectChannelConnector@localhost:7979",
-      "Apr 05, 2017 9:25:17 PM com.google.appengine.tools.development.AbstractModule startup",
-      "INFO: Module instance default is running at http://localhost:7979/",
-      "Apr 05, 2017 9:25:17 PM com.google.appengine.tools.development.AbstractModule startup",
-      "INFO: The admin console is running at http://localhost:7979/_ah/admin",
-      "Apr 05, 2017 5:25:17 PM com.google.appengine.tools.development.DevAppServerImpl doStart",
+      "2019-03-01 17:14:16.279:INFO:oejs.Server:main: jetty-9.4.14.v20181114; built: 2018-11-14T21:20:31.478Z; git: c4550056e785fb5665914545889f21dc136ad9e6; jvm 1.8.0_161-b12",
+      "Mar 01, 2019 10:14:16 PM com.google.appengine.tools.development.AbstractModule startup",
+      "INFO: Module instance alice is running at http://localhost:7979/",
+      "Mar 01, 2019 10:14:16 PM com.google.appengine.tools.development.AbstractModule startup",
+      "INFO: The admin console is running at http://localhost:7979/_ah/admin"
   };
 
   private static final String[] devappserver1OutputWithDefaultModule1 = new String[] {
-      "Apr 05, 2017 9:25:17 PM com.google.apphosting.utils.jetty.JettyLogger info",
-      "INFO: jetty-6.1.x",
-      "Apr 05, 2017 9:25:17 PM com.google.apphosting.utils.jetty.JettyLogger info",
-      "INFO: Started SelectChannelConnector@localhost:7979",
-      "Apr 05, 2017 9:25:17 PM com.google.appengine.tools.development.AbstractModule startup",
+      "2019-03-01 17:01:53.026:INFO:oejs.Server:main: jetty-9.4.14.v20181114; built: 2018-11-14T21:20:31.478Z; git: c4550056e785fb5665914545889f21dc136ad9e6; jvm 1.8.0_161-b12",
+      "Mar 01, 2019 10:01:53 PM com.google.appengine.tools.development.AbstractModule startup",
       "INFO: Module instance default is running at http://localhost:55948/",
-      "Apr 05, 2017 9:25:17 PM com.google.appengine.tools.development.AbstractModule startup",
-      "INFO: Module instance second is running at http://localhost:8081/",
-      "Apr 05, 2017 9:25:17 PM com.google.appengine.tools.development.AbstractModule startup",
+      "Mar 01, 2019 10:01:53 PM com.google.appengine.tools.development.AbstractModule startup",
       "INFO: The admin console is running at http://localhost:55948/_ah/admin",
-      "Apr 05, 2017 5:25:17 PM com.google.appengine.tools.development.DevAppServerImpl doStart"
+      "2019-03-01 17:01:53.392:INFO:oejs.Server:main: jetty-9.4.14.v20181114; built: 2018-11-14T21:20:31.478Z; git: c4550056e785fb5665914545889f21dc136ad9e6; jvm 1.8.0_161-b12",
+      "Mar 01, 2019 10:01:53 PM com.google.appengine.tools.development.AbstractModule startup",
+      "INFO: Module instance second is running at http://localhost:8081/",
+      "Mar 01, 2019 10:01:53 PM com.google.appengine.tools.development.AbstractModule startup",
+      "INFO: The admin console is running at http://localhost:8081/_ah/admin"
   };
 
   private static final String[] devappserver1OutputWithDefaultModule2 = new String[] {
-      "Apr 05, 2017 9:25:17 PM com.google.apphosting.utils.jetty.JettyLogger info",
-      "INFO: jetty-6.1.x",
-      "Apr 05, 2017 9:25:17 PM com.google.apphosting.utils.jetty.JettyLogger info",
-      "INFO: Started SelectChannelConnector@localhost:7979",
-      "Apr 05, 2017 9:25:17 PM com.google.appengine.tools.development.AbstractModule startup",
+      "2019-03-01 17:01:53.026:INFO:oejs.Server:main: jetty-9.4.14.v20181114; built: 2018-11-14T21:20:31.478Z; git: c4550056e785fb5665914545889f21dc136ad9e6; jvm 1.8.0_161-b12",
+      "Mar 01, 2019 10:01:53 PM com.google.appengine.tools.development.AbstractModule startup",
       "INFO: Module instance first is running at http://localhost:55948/",
-      "Apr 05, 2017 9:25:17 PM com.google.appengine.tools.development.AbstractModule startup",
+      "Mar 01, 2019 10:01:53 PM com.google.appengine.tools.development.AbstractModule startup",
+      "INFO: The admin console is running at http://localhost:55948/_ah/admin",
+      "2019-03-01 17:01:53.392:INFO:oejs.Server:main: jetty-9.4.14.v20181114; built: 2018-11-14T21:20:31.478Z; git: c4550056e785fb5665914545889f21dc136ad9e6; jvm 1.8.0_161-b12",
+      "Mar 01, 2019 10:01:53 PM com.google.appengine.tools.development.AbstractModule startup",
       "INFO: Module instance default is running at http://localhost:8081/",
-      "Apr 05, 2017 9:25:17 PM com.google.appengine.tools.development.AbstractModule startup",
-      "INFO: The admin console is running at http://localhost:8081/_ah/admin",
-      "Apr 05, 2017 5:25:17 PM com.google.appengine.tools.development.DevAppServerImpl doStart"
+      "Mar 01, 2019 10:01:53 PM com.google.appengine.tools.development.AbstractModule startup",
+      "INFO: The admin console is running at http://localhost:8081/_ah/admin"
   };
 
   private static final String[] devappserver1OutputWithNoDefaultModule = new String[] {
-      "Apr 05, 2017 9:25:17 PM com.google.apphosting.utils.jetty.JettyLogger info",
-      "INFO: jetty-6.1.x",
-      "Apr 05, 2017 9:25:17 PM com.google.apphosting.utils.jetty.JettyLogger info",
-      "INFO: Started SelectChannelConnector@localhost:7979",
-      "Apr 05, 2017 9:25:17 PM com.google.appengine.tools.development.AbstractModule startup",
+      "2019-03-01 17:01:53.026:INFO:oejs.Server:main: jetty-9.4.14.v20181114; built: 2018-11-14T21:20:31.478Z; git: c4550056e785fb5665914545889f21dc136ad9e6; jvm 1.8.0_161-b12",
+      "Mar 01, 2019 10:01:53 PM com.google.appengine.tools.development.AbstractModule startup",
       "INFO: Module instance first is running at http://localhost:8181/",
-      "Apr 05, 2017 9:25:17 PM com.google.appengine.tools.development.AbstractModule startup",
+      "Mar 01, 2019 10:01:53 PM com.google.appengine.tools.development.AbstractModule startup",
+      "INFO: The admin console is running at http://localhost:8181/_ah/admin",
+      "2019-03-01 17:01:53.392:INFO:oejs.Server:main: jetty-9.4.14.v20181114; built: 2018-11-14T21:20:31.478Z; git: c4550056e785fb5665914545889f21dc136ad9e6; jvm 1.8.0_161-b12",
+      "Mar 01, 2019 10:01:53 PM com.google.appengine.tools.development.AbstractModule startup",
       "INFO: Module instance second is running at http://localhost:8182/",
-      "Apr 05, 2017 9:25:17 PM com.google.appengine.tools.development.AbstractModule startup",
+      "Mar 01, 2019 10:01:53 PM com.google.appengine.tools.development.AbstractModule startup",
+      "INFO: The admin console is running at http://localhost:8182/_ah/admin",
+      "2019-03-01 17:01:53.482:INFO:oejs.Server:main: jetty-9.4.14.v20181114; built: 2018-11-14T21:20:31.478Z; git: c4550056e785fb5665914545889f21dc136ad9e6; jvm 1.8.0_161-b12",
+      "Mar 01, 2019 10:01:53 PM com.google.appengine.tools.development.AbstractModule startup",
       "INFO: Module instance third is running at http://localhost:8183/",
-      "Apr 05, 2017 9:25:17 PM com.google.appengine.tools.development.AbstractModule startup",
-      "INFO: The admin console is running at http://localhost:8081/_ah/admin",
-      "Apr 05, 2017 5:25:17 PM com.google.appengine.tools.development.DevAppServerImpl doStart"
+      "Mar 01, 2019 10:01:53 PM com.google.appengine.tools.development.AbstractModule startup",
+      "INFO: The admin console is running at http://localhost:8183/_ah/admin"
   };
   
   @Test
@@ -215,8 +212,7 @@ public class LocalAppEngineServerBehaviourTest {
   }
 
   private void simulateOutputParsing(String[] output) {
-    LocalAppEngineServerBehaviour.DevAppServerOutputListener outputListener =
-        serverBehavior.new DevAppServerOutputListener();
+    ProcessOutputLineListener outputListener = serverBehavior.new DevAppServerOutputListener();
     for (String line : output) {
       outputListener.onOutputLine(line);
     }
