@@ -114,33 +114,49 @@ public class LocalAppEngineServerBehaviourTest {
       "INFO: The admin console is running at http://localhost:7979/_ah/admin",
       "Apr 05, 2017 5:25:17 PM com.google.appengine.tools.development.DevAppServerImpl doStart",
   };
-  
-  private static final String[] devappserver2OutputWithDefaultModule1 = new String[] {
-      "WARNING  2016-11-03 21:11:21,930 devappserver2.py:785] DEFAULT_VERSION_HOSTNAME will not be set correctly with --port=0",
-      "INFO     2016-11-03 21:11:21,956 api_server.py:205] Starting API server at: http://localhost:52892",
-      "INFO     2016-11-03 21:11:21,959 dispatcher.py:197] Starting module \"default\" running at: http://localhost:55948",
-      "INFO     2016-11-03 21:11:21,959 dispatcher.py:197] Starting module \"second\" running at: http://localhost:8081",
-      "INFO     2016-11-03 21:11:21,959 admin_server.py:116] Starting admin server at: http://localhost:43679",
-      "Nov 03, 2016 9:11:23 PM com.google.appengine.tools.development.SystemPropertiesManager setSystemProperties"
+
+  private static final String[] devappserver1OutputWithDefaultModule1 = new String[] {
+      "Apr 05, 2017 9:25:17 PM com.google.apphosting.utils.jetty.JettyLogger info",
+      "INFO: jetty-6.1.x",
+      "Apr 05, 2017 9:25:17 PM com.google.apphosting.utils.jetty.JettyLogger info",
+      "INFO: Started SelectChannelConnector@localhost:7979",
+      "Apr 05, 2017 9:25:17 PM com.google.appengine.tools.development.AbstractModule startup",
+      "INFO: Module instance default is running at http://localhost:55948/",
+      "Apr 05, 2017 9:25:17 PM com.google.appengine.tools.development.AbstractModule startup",
+      "INFO: Module instance second is running at http://localhost:8081/",
+      "Apr 05, 2017 9:25:17 PM com.google.appengine.tools.development.AbstractModule startup",
+      "INFO: The admin console is running at http://localhost:55948/_ah/admin",
+      "Apr 05, 2017 5:25:17 PM com.google.appengine.tools.development.DevAppServerImpl doStart"
   };
 
-  private static final String[] devappserver2OutputWithDefaultModule2 = new String[] {
-      "WARNING  2016-11-03 21:11:21,930 devappserver2.py:785] DEFAULT_VERSION_HOSTNAME will not be set correctly with --port=0",
-      "INFO     2016-11-03 21:11:21,956 api_server.py:205] Starting API server at: http://localhost:52892",
-      "INFO     2016-11-03 21:11:21,959 dispatcher.py:197] Starting module \"first\" running at: http://localhost:55948",
-      "INFO     2016-11-03 21:11:21,959 dispatcher.py:197] Starting module \"default\" running at: http://localhost:8081",
-      "INFO     2016-11-03 21:11:21,959 admin_server.py:116] Starting admin server at: http://localhost:43679",
-      "Nov 03, 2016 9:11:23 PM com.google.appengine.tools.development.SystemPropertiesManager setSystemProperties"
+  private static final String[] devappserver1OutputWithDefaultModule2 = new String[] {
+      "Apr 05, 2017 9:25:17 PM com.google.apphosting.utils.jetty.JettyLogger info",
+      "INFO: jetty-6.1.x",
+      "Apr 05, 2017 9:25:17 PM com.google.apphosting.utils.jetty.JettyLogger info",
+      "INFO: Started SelectChannelConnector@localhost:7979",
+      "Apr 05, 2017 9:25:17 PM com.google.appengine.tools.development.AbstractModule startup",
+      "INFO: Module instance first is running at http://localhost:55948/",
+      "Apr 05, 2017 9:25:17 PM com.google.appengine.tools.development.AbstractModule startup",
+      "INFO: Module instance default is running at http://localhost:8081/",
+      "Apr 05, 2017 9:25:17 PM com.google.appengine.tools.development.AbstractModule startup",
+      "INFO: The admin console is running at http://localhost:8081/_ah/admin",
+      "Apr 05, 2017 5:25:17 PM com.google.appengine.tools.development.DevAppServerImpl doStart"
   };
 
-  private static final String[] serverOutputWithNoDefaultModule = new String[] {
-      "WARNING  2016-11-03 21:11:21,930 devappserver2.py:785] DEFAULT_VERSION_HOSTNAME will not be set correctly with --port=0",
-      "INFO     2016-11-03 21:11:21,956 api_server.py:205] Starting API server at: http://localhost:52892",
-      "INFO     2016-11-03 21:11:21,959 dispatcher.py:197] Starting module \"first\" running at: http://localhost:8181",
-      "INFO     2016-11-03 21:11:21,959 dispatcher.py:197] Starting module \"second\" running at: http://localhost:8182",
-      "INFO     2016-11-03 21:11:21,959 dispatcher.py:197] Starting module \"third\" running at: http://localhost:8183",
-      "INFO     2016-11-03 21:11:21,959 admin_server.py:116] Starting admin server at: http://localhost:43679",
-      "Nov 03, 2016 9:11:23 PM com.google.appengine.tools.development.SystemPropertiesManager setSystemProperties"
+  private static final String[] devappserver1OutputWithNoDefaultModule = new String[] {
+      "Apr 05, 2017 9:25:17 PM com.google.apphosting.utils.jetty.JettyLogger info",
+      "INFO: jetty-6.1.x",
+      "Apr 05, 2017 9:25:17 PM com.google.apphosting.utils.jetty.JettyLogger info",
+      "INFO: Started SelectChannelConnector@localhost:7979",
+      "Apr 05, 2017 9:25:17 PM com.google.appengine.tools.development.AbstractModule startup",
+      "INFO: Module instance first is running at http://localhost:8181/",
+      "Apr 05, 2017 9:25:17 PM com.google.appengine.tools.development.AbstractModule startup",
+      "INFO: Module instance second is running at http://localhost:8182/",
+      "Apr 05, 2017 9:25:17 PM com.google.appengine.tools.development.AbstractModule startup",
+      "INFO: Module instance third is running at http://localhost:8183/",
+      "Apr 05, 2017 9:25:17 PM com.google.appengine.tools.development.AbstractModule startup",
+      "INFO: The admin console is running at http://localhost:8081/_ah/admin",
+      "Apr 05, 2017 5:25:17 PM com.google.appengine.tools.development.DevAppServerImpl doStart"
   };
   
   @Test
@@ -148,51 +164,50 @@ public class LocalAppEngineServerBehaviourTest {
     setUpServerPort(0);
     simulateOutputParsing(devappserver1Output);
     assertEquals(7979, serverBehavior.getServerPort());
-    assertEquals(7979, serverBehavior.getAdminPort());
   }
 
   @Test
   public void testExtractServerPortFromOutput_firstModuleIsDefault() {
     setUpServerPort(0);
-    simulateOutputParsing(devappserver2OutputWithDefaultModule1);
+    simulateOutputParsing(devappserver1OutputWithDefaultModule1);
     assertEquals(55948, serverBehavior.getServerPort());
   }
 
   @Test
   public void testExtractServerPortFromOutput_secondModuleIsDefault() {
     setUpServerPort(0);
-    simulateOutputParsing(devappserver2OutputWithDefaultModule2);
+    simulateOutputParsing(devappserver1OutputWithDefaultModule2);
     assertEquals(8081, serverBehavior.getServerPort());
   }
 
   @Test
   public void testExtractServerPortFromOutput_noDefaultModule() {
     setUpServerPort(0);
-    simulateOutputParsing(serverOutputWithNoDefaultModule);
+    simulateOutputParsing(devappserver1OutputWithNoDefaultModule);
     assertEquals(8181, serverBehavior.getServerPort());
   }
 
   @Test
   public void testExtractServerPortFromOutput_defaultModuleDoesNotOverrideUserSpecifiedPort() {
     setUpServerPort(12345);
-    simulateOutputParsing(devappserver2OutputWithDefaultModule1);
+    simulateOutputParsing(devappserver1OutputWithDefaultModule1);
     assertEquals(12345, serverBehavior.getServerPort());
   }
 
   @Test
   public void testExtractModuleUrlFromOutput_firstModuleIsDefault() {
-    simulateOutputParsing(devappserver2OutputWithDefaultModule1);
-    assertEquals("http://localhost:55948", serverBehavior.getServiceUrl("default"));
-    assertEquals("http://localhost:8081", serverBehavior.getServiceUrl("second"));
+    simulateOutputParsing(devappserver1OutputWithDefaultModule1);
+    assertEquals("http://localhost:55948/", serverBehavior.getServiceUrl("default"));
+    assertEquals("http://localhost:8081/", serverBehavior.getServiceUrl("second"));
   }
 
   @Test
   public void testExtractModuleUrlFromOutput_noDefaultModule() {
-    simulateOutputParsing(serverOutputWithNoDefaultModule);
+    simulateOutputParsing(devappserver1OutputWithNoDefaultModule);
     assertNull(serverBehavior.getServiceUrl("default"));
-    assertEquals("http://localhost:8181", serverBehavior.getServiceUrl("first"));
-    assertEquals("http://localhost:8182", serverBehavior.getServiceUrl("second"));
-    assertEquals("http://localhost:8183", serverBehavior.getServiceUrl("third"));
+    assertEquals("http://localhost:8181/", serverBehavior.getServiceUrl("first"));
+    assertEquals("http://localhost:8182/", serverBehavior.getServiceUrl("second"));
+    assertEquals("http://localhost:8183/", serverBehavior.getServiceUrl("third"));
   }
 
   private void setUpServerPort(int port) {

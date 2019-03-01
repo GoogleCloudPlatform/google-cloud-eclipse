@@ -388,7 +388,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
         "INFO: Module instance (?<service>[\\w\\d\\-]+) is running at (?<url>http://.+:(?<port>[0-9]+)/)$");
     private final Pattern adminRunningPattern =
         Pattern.compile("INFO: The admin console is running at http://.+:[0-9]+/_ah/admin$");
-      
+
     private int serverPortCandidate = 0;
 
     @Override
