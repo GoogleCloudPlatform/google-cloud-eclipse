@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets.ui.navigator;
 
-import com.google.cloud.tools.appengine.api.AppEngineException;
+import com.google.cloud.tools.appengine.AppEngineException;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexJarFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexWarFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;

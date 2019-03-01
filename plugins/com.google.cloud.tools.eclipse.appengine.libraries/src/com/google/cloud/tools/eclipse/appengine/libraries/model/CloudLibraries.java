@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.operations.CloudSdk;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import java.io.IOException;

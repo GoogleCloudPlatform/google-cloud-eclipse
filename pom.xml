@@ -99,7 +99,7 @@
       <!-- bundle: com.google.cloud.tools.appengine -->
       <groupId>com.google.cloud.tools</groupId>
       <artifactId>appengine-plugins-core</artifactId>
-      <version>0.6.8</version>
+      <version>0.7.4</version>
     </dependency>
     <dependency>
       <!--
@@ -114,7 +114,7 @@
       <!-- bundle: com.google.guava -->
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>26.0-jre</version>
+      <version>27.0-jre</version>
     </dependency>
     <dependency>
       <!-- bundle: jackson-core-asl -->

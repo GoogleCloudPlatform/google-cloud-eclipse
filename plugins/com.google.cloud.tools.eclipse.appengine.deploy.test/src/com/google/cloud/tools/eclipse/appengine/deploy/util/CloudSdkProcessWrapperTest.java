@@ -22,9 +22,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.cloud.tools.appengine.api.deploy.AppEngineDeployment;
-import com.google.cloud.tools.appengine.api.deploy.AppEngineStandardStaging;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
+import com.google.cloud.tools.appengine.operations.AppEngineWebXmlProjectStaging;
+import com.google.cloud.tools.appengine.operations.Deployment;
+import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -66,13 +66,13 @@ public class CloudSdkProcessWrapperTest {
   @Test
   public void testGetAppEngineDeployment() throws IOException, CloudSdkNotFoundException {
     Path credential = tempFolder.newFile().toPath();
-    AppEngineDeployment deployment = wrapper.getAppEngineDeployment(credential, null);
+    Deployment deployment = wrapper.getAppEngineDeployment(credential, null);
     assertNotNull(deployment);
   }
 
   @Test
   public void testGetAppEngineStandardStaging() throws CloudSdkNotFoundException {
-    AppEngineStandardStaging staging = wrapper.getAppEngineStandardStaging(null, null, null);
+    AppEngineWebXmlProjectStaging staging = wrapper.getAppEngineStandardStaging(null, null, null);
     assertNotNull(staging);
   }
 

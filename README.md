@@ -105,7 +105,7 @@ repositories (like [Maven Central](https://search.maven.org)), Eclipse
 cannot.  So we use Tycho to cobble together
 a target platform suitable for the Eclipse IDE with the following command.
 ```
-$ (cd eclipse; mvn package)        # may want -Declipse.target=XXX
+$ (cd eclipse; mvn -Pide-target-platform package)        # may want -Declipse.target=XXX
 ```
 This command creates a local copy of the
 target platform, including any Maven dependencies, into

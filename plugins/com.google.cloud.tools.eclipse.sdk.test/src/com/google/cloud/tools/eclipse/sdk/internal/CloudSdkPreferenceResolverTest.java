@@ -24,10 +24,10 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.tools.appengine.api.AppEngineException;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkResolver;
+import com.google.cloud.tools.appengine.AppEngineException;
+import com.google.cloud.tools.appengine.operations.CloudSdk;
+import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkNotFoundException;
+import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkResolver;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
@@ -58,7 +58,8 @@ public class CloudSdkPreferenceResolverTest {
   /** Verify that the preference resolver is found by default. */
   @Test
   public void testPreferenceResolverFound() {
-    List<CloudSdkResolver> resolvers = new CloudSdk.Builder().getResolvers();
+    CloudSdk.Builder builder = new CloudSdk.Builder();
+    List<CloudSdkResolver> resolvers = builder.getResolvers();
     int found = 0;
     for (CloudSdkResolver resolver : resolvers) {
       // Can't just compare classes as class likely loaded from

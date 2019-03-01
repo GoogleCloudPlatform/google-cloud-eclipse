@@ -16,20 +16,20 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
-import com.google.cloud.tools.appengine.api.AppEngineException;
-import com.google.cloud.tools.appengine.api.devserver.AppEngineDevServer;
-import com.google.cloud.tools.appengine.api.devserver.DefaultRunConfiguration;
-import com.google.cloud.tools.appengine.api.devserver.DefaultStopConfiguration;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDevServer1;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
-import com.google.cloud.tools.appengine.cloudsdk.LocalRun;
-import com.google.cloud.tools.appengine.cloudsdk.process.LegacyProcessHandler;
-import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
-import com.google.cloud.tools.appengine.cloudsdk.process.ProcessHandler;
-import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
-import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
-import com.google.cloud.tools.appengine.cloudsdk.serialization.CloudSdkVersion;
+import com.google.cloud.tools.appengine.AppEngineException;
+import com.google.cloud.tools.appengine.configuration.RunConfiguration;
+import com.google.cloud.tools.appengine.configuration.StopConfiguration;
+import com.google.cloud.tools.appengine.operations.CloudSdk;
+import com.google.cloud.tools.appengine.operations.DevServer;
+import com.google.cloud.tools.appengine.operations.DevServerV1;
+import com.google.cloud.tools.appengine.operations.DevServers;
+import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkNotFoundException;
+import com.google.cloud.tools.appengine.operations.cloudsdk.process.LegacyProcessHandler;
+import com.google.cloud.tools.appengine.operations.cloudsdk.process.ProcessExitListener;
+import com.google.cloud.tools.appengine.operations.cloudsdk.process.ProcessHandler;
+import com.google.cloud.tools.appengine.operations.cloudsdk.process.ProcessOutputLineListener;
+import com.google.cloud.tools.appengine.operations.cloudsdk.process.ProcessStartListener;
+import com.google.cloud.tools.appengine.operations.cloudsdk.serialization.CloudSdkVersion;
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.sdk.MessageConsoleWriterListener;
@@ -96,7 +96,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
 
   /** The {@link CloudSdk} instance currently in use; may be {@code null}. */
   private CloudSdk cloudSdk;
-  private AppEngineDevServer devServer;
+  private DevServer devServer;
   private Process devProcess;
 
   @VisibleForTesting
@@ -125,14 +125,14 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     // then try to shut it down nicely
     if (devServer != null && (!force || serverState != IServer.STATE_STOPPING)) {
       setServerState(IServer.STATE_STOPPING);
-      DefaultStopConfiguration stopConfig = new DefaultStopConfiguration();
+      StopConfiguration.Builder builder = StopConfiguration.builder();
       if (isDevAppServer1()) {
-        stopConfig.setAdminPort(serverPort);        
+        builder.adminPort(serverPort);        
       } else {
-        stopConfig.setAdminPort(adminPort);
+        builder.adminPort(adminPort);
       }
       try {
-        devServer.stop(stopConfig);
+        devServer.stop(builder.build());
       } catch (AppEngineException ex) {
         logger.log(Level.WARNING, "Error terminating server: " + ex.getMessage(), ex); //$NON-NLS-1$
         terminate();
@@ -236,7 +236,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   }
 
   @VisibleForTesting
-  void checkPorts(DefaultRunConfiguration devServerRunConfiguration,
+  void checkPorts(RunConfiguration devServerRunConfiguration,
       BiPredicate<InetAddress, Integer> portInUse) throws CoreException {
     InetAddress serverHost = InetAddress.getLoopbackAddress();
     if (devServerRunConfiguration.getHost() != null) {
@@ -316,7 +316,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
    *
    * @param mode the launch mode (see ILaunchManager.*_MODE constants)
    */
-  void startDevServer(String mode, DefaultRunConfiguration devServerRunConfiguration,
+  void startDevServer(String mode, RunConfiguration devServerRunConfiguration,
       Path javaHomePath, MessageConsoleStream outputStream, MessageConsoleStream errorStream)
       throws CoreException, CloudSdkNotFoundException {
 
@@ -364,7 +364,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
         .async(true)
         .build();
 
-    LocalRun localRun = LocalRun.builder(cloudSdk).build();
+    DevServers localRun = DevServers.builder(cloudSdk).build();
     devServer = localRun.newDevAppServer1(processHandler);
     moduleToUrlMap.clear();
   }
@@ -373,7 +373,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
    * @return true if and only if we're using devappserver1
    */
   private boolean isDevAppServer1() {
-    return devServer instanceof CloudSdkAppEngineDevServer1;
+    return devServer instanceof DevServerV1;
   }
 
   /**
