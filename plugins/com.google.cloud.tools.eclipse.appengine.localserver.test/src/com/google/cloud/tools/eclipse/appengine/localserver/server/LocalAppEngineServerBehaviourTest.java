@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiPredicate;
 import org.eclipse.core.runtime.CoreException;
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -196,20 +195,8 @@ public class LocalAppEngineServerBehaviourTest {
     assertEquals("http://localhost:8183", serverBehavior.getServiceUrl("third"));
   }
 
-  @Test
-  public void testExtractAdminPortFromOutput() {
-    setUpServerPort(9080);
-    setUpAdminPort(0);
-    simulateOutputParsing(devappserver2OutputWithDefaultModule1);
-    assertEquals(43679, serverBehavior.adminPort);
-  }
-
   private void setUpServerPort(int port) {
     serverBehavior.serverPort = port;
-  }
-
-  private void setUpAdminPort(int port) {
-    serverBehavior.adminPort = port;
   }
 
   private void simulateOutputParsing(String[] output) {
@@ -222,15 +209,12 @@ public class LocalAppEngineServerBehaviourTest {
 
   @Test
   public void testStartDevServer_ignoresAdminPortWhenDevAppserver1() throws CoreException {
-    Assume.assumeFalse(LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2);
-
     List<Path> services = new ArrayList<>();
     RunConfiguration runConfig = RunConfiguration.builder(services).adminPort(8000).build();
     when(portProber.test(any(InetAddress.class), anyInt())).thenReturn(false);
     when(portProber.test(any(InetAddress.class), eq(8000))).thenReturn(true);
 
     serverBehavior.checkPorts(runConfig, portProber);
-    assertEquals(-1, serverBehavior.adminPort);
     verify(portProber, never()).test(any(InetAddress.class), eq(8000));
   }
 

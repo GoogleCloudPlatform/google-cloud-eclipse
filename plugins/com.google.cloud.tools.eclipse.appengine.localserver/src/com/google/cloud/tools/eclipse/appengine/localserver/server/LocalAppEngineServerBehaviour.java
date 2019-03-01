@@ -383,25 +383,17 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
    * state changes.
    */
   public class DevAppServerOutputListener implements ProcessOutputLineListener {
-    // DevAppServer2 outputs the following for module-started and admin line (on one line):
-    // <<HEADER>> Starting module "default" running at: http://localhost:8080
-    // <<HEADER>> Starting admin server at: http://localhost:8000
-    // where <<HEADER>> = INFO 2017-01-31 21:00:40,700 dispatcher.py:197]
-    
-    // devappserver2 patterns
-    private final Pattern moduleStartedPattern = Pattern.compile(
-        "INFO .*Starting module \"(?<service>[^\"]+)\" running at: (?<url>http://.+:(?<port>[0-9]+))$");
-
     // devappserver1 patterns
     private final Pattern moduleRunningPattern = Pattern.compile(
         "INFO: Module instance (?<service>[\\w\\d\\-]+) is running at (?<url>http://.+:(?<port>[0-9]+)/)$");
     private final Pattern adminRunningPattern =
-        Pattern.compile("INFO: The admin console is running at (?<url>http://.+:(?<port>[0-9]+))/_ah/admin$");
+        Pattern.compile("INFO: The admin console is running at http://.+:[0-9]+/_ah/admin$");
       
     private int serverPortCandidate = 0;
 
     @Override
     public void onOutputLine(String line) {
+
       Matcher matcher;
       if (line.endsWith("Dev App Server is now running")) { //$NON-NLS-1$
         // App Engine Standard (v1)
@@ -415,8 +407,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
       } else if (line.contains("Error: A fatal exception has occurred. Program will exit")) { //$NON-NLS-1$
         // terminate the Python process
         stop(false);
-      } else if ((matcher = moduleStartedPattern.matcher(line)).matches()
-          || (matcher = moduleRunningPattern.matcher(line)).matches()) {
+      } else if ((matcher = moduleRunningPattern.matcher(line)).matches()) {
         String serviceId = matcher.group("service");
         String url = matcher.group("url");
         moduleToUrlMap.put(serviceId, url);
