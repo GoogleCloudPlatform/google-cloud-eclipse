@@ -405,15 +405,17 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
       } else if (line.contains("Error: A fatal exception has occurred. Program will exit")) { //$NON-NLS-1$
         // terminate the Python process
         stop(false);
-      } else if (shouldAutoDetectPort && (matcher = moduleRunningPattern.matcher(line)).matches()) {
+      } else if ((matcher = moduleRunningPattern.matcher(line)).matches()) {
         String serviceId = matcher.group("service");
         String url = matcher.group("url");
         moduleToUrlMap.put(serviceId, url);
 
-        String portString = matcher.group("port");
-        int port = parseInt(portString, 0);
-        if (port > 0 && (serverPort <= 0 || "default".equals(serviceId))) { // $NON-NLS-1$
-          serverPort = port;
+        if (shouldAutoDetectPort) {
+          String portString = matcher.group("port");
+          int port = parseInt(portString, 0);
+          if (port > 0 && (serverPort <= 0 || "default".equals(serviceId))) { // $NON-NLS-1$
+            serverPort = port;
+          }
         }
       }
     }
