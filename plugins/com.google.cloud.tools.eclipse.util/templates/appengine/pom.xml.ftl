@@ -80,21 +80,6 @@
     <outputDirectory>${r"${project.build.directory}/${project.build.finalName}/WEB-INF/classes"}</outputDirectory>
     <plugins>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>versions-maven-plugin</artifactId>
-        <version>2.3</version>
-        <executions>
-          <execution>
-            <phase>compile</phase>
-            <goals>
-              <goal>display-dependency-updates</goal>
-              <goal>display-plugin-updates</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
         <groupId>com.google.cloud.tools</groupId>
         <artifactId>appengine-maven-plugin</artifactId>
         <version>${r"${appengine.maven.plugin.version}"}</version>
