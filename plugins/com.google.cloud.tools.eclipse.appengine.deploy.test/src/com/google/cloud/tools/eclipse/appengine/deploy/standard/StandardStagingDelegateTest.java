@@ -31,7 +31,7 @@ import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkNotFoundExce
 import com.google.cloud.tools.appengine.operations.cloudsdk.process.LegacyProcessHandler;
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.appengine.deploy.util.CloudSdkProcessWrapper;
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.appengine.standard.java8.AppEngineStandardFacetChangeListener;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -54,7 +54,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class StandardStagingDelegateTest {
 
   @Rule public TestProjectCreator projectCreator =
-      new TestProjectCreator().withFacets(JavaFacet.VERSION_1_7);
+      new TestProjectCreator().withFacets(JavaFacet.VERSION_1_8);
 
   @Mock private CloudSdkProcessWrapper cloudSdkWrapper;
 
@@ -83,6 +83,11 @@ public class StandardStagingDelegateTest {
         .thenReturn(staging);
   }
 
+  private void setUpAppEngineStandard8Project() throws CloudSdkNotFoundException {
+    setUpProject(
+        WebFacetUtils.WEB_31, AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8);
+  }
+
   @After
   public void tearDown() {
     assertEquals(0, cloudSdkExitCode);
@@ -90,7 +95,7 @@ public class StandardStagingDelegateTest {
 
   @Test
   public void testStage() throws CloudSdkNotFoundException {
-    setUpProject(WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
+    setUpAppEngineStandard8Project();
     StagingDelegate delegate = new StandardStagingDelegate(project, null, cloudSdkWrapper);
     delegate.stage(stagingDirectory, safeWorkDirectory, null, null,
         new NullProgressMonitor());
@@ -103,7 +108,7 @@ public class StandardStagingDelegateTest {
 
   @Test
   public void testGetOptionalConfigurationFilesDirectory() throws CloudSdkNotFoundException {
-    setUpProject(WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
+    setUpAppEngineStandard8Project();
     StagingDelegate delegate = new StandardStagingDelegate(project, null, cloudSdkWrapper);
     delegate.stage(stagingDirectory, safeWorkDirectory, null, null,
         new NullProgressMonitor());
@@ -114,7 +119,7 @@ public class StandardStagingDelegateTest {
 
   @Test
   public void testSetJavaHome() throws CloudSdkNotFoundException {
-    setUpProject(WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
+    setUpAppEngineStandard8Project();
     Path javaHome = Paths.get("/some/path");
     StagingDelegate delegate = new StandardStagingDelegate(project, javaHome, cloudSdkWrapper);
     delegate.stage(stagingDirectory, safeWorkDirectory, null, null,
