@@ -11,7 +11,7 @@ install:
   # use mvn ≥ 3.3.9 to ensure faulty test exit states fail the build (#1276)
   - mvn -B -N io.takari:maven:wrapper -Dmaven=3.5.0
   # download and install Cloud SDK (may be cached)
-  - build/install-cloudsdk.sh 190.0.1 $HOME
+  - build/install-cloudsdk.sh 241.0.0 $HOME
 # ECLIPSE_TARGET is the targeted platform: photon is the default target
 # We run jacoco on photon
 matrix:
