@@ -281,7 +281,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     // only restart server on on-disk changes detected when in RUN mode
     builder.automaticRestart(ILaunchManager.RUN_MODE.equals(mode));
 
-    // TODO: apiPort?
     // vmArguments is exactly as supplied by the user in the dialog box
     String vmArgumentString = getVMArguments(configuration);
     List<String> vmArguments = Arrays.asList(DebugPlugin.parseArguments(vmArgumentString));
@@ -316,24 +315,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     builder.environment(expanded);
 
     return builder.build();
-  }
-
-  /**
-   * Retrieve and resolve a string attribute. If not specified, returns {@code defaultValue}.
-   */
-  private static String getAttribute(String attributeName, String defaultValue,
-      ILaunchConfiguration configuration, IServer server) {
-    try {
-      if (configuration.hasAttribute(attributeName)) {
-        String result = configuration.getAttribute(attributeName, ""); //$NON-NLS-1$
-        if (result != null) {
-          return result;
-        }
-      }
-    } catch (CoreException ex) {
-      logger.log(Level.WARNING, "Unable to retrieve " + attributeName, ex); //$NON-NLS-1$
-    }
-    return server.getAttribute(attributeName, defaultValue);
   }
 
   /**
@@ -393,12 +374,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
           Messages.getString("server.port", //$NON-NLS-1$
               ifNull(ours.getPort(), LocalAppEngineServerBehaviour.DEFAULT_SERVER_PORT))));
     }
-    if (equalPorts(ours.getApiPort(), theirs.getApiPort(), 0)) {
-      // ours.getAdminPort() will never be null with a 0 default
-      Preconditions.checkNotNull(ours.getApiPort());
-      status.add(StatusUtil.error(clazz, Messages.getString("api.port", ours.getAdminPort()))); //$NON-NLS-1$
-    }
-
     return status;
   }
 

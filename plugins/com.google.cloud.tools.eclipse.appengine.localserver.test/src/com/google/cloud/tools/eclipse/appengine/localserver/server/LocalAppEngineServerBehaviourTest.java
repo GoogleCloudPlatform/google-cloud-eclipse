@@ -21,17 +21,12 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.tools.appengine.configuration.RunConfiguration;
 import com.google.cloud.tools.appengine.operations.cloudsdk.process.ProcessOutputLineListener;
 import java.net.InetAddress;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.BiPredicate;
 import org.eclipse.core.runtime.CoreException;
 import org.junit.Before;
@@ -217,16 +212,4 @@ public class LocalAppEngineServerBehaviourTest {
       outputListener.onOutputLine(line);
     }
   }
-
-  @Test
-  public void testStartDevServer_ignoresAdminPortWhenDevAppserver1() throws CoreException {
-    List<Path> services = new ArrayList<>();
-    RunConfiguration runConfig = RunConfiguration.builder(services).adminPort(8000).build();
-    when(portProber.test(any(InetAddress.class), anyInt())).thenReturn(false);
-    when(portProber.test(any(InetAddress.class), eq(8000))).thenReturn(true);
-
-    serverBehavior.checkPorts(runConfig, portProber);
-    verify(portProber, never()).test(any(InetAddress.class), eq(8000));
-  }
-
 }

@@ -85,7 +85,6 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
 
   // These are the default values used by Cloud SDK's dev_appserver
   public static final int DEFAULT_SERVER_PORT = 8080;
-  public static final int DEFAULT_API_PORT = 0; // allocated at random
 
   private static final Logger logger =
       Logger.getLogger(LocalAppEngineServerBehaviour.class.getName());
@@ -123,7 +122,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     if (devServer != null && (!force || serverState != IServer.STATE_STOPPING)) {
       setServerState(IServer.STATE_STOPPING);
       StopConfiguration.Builder builder = StopConfiguration.builder();
-      builder.adminPort(serverPort);
+      builder.port(serverPort);
       try {
         devServer.stop(builder.build());
       } catch (AppEngineException ex) {
@@ -238,10 +237,6 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     }
     serverPort = checkPort(serverHost,
         ifNull(devServerRunConfiguration.getPort(), DEFAULT_SERVER_PORT), portInUse);
-
-    // API port seems to be bound on localhost in practice
-    checkPort(InetAddress.getLoopbackAddress(),
-        ifNull(devServerRunConfiguration.getApiPort(), DEFAULT_API_PORT), portInUse);
   }
 
   /**
@@ -350,7 +345,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
         .build();
 
     DevServers localRun = DevServers.builder(cloudSdk).build();
-    devServer = localRun.newDevAppServer1(processHandler);
+    devServer = localRun.newDevAppServer(processHandler);
     moduleToUrlMap.clear();
   }
 
