@@ -55,11 +55,8 @@ public class AnalyticsPingManager {
   private static final Logger logger = Logger.getLogger(AnalyticsPingManager.class.getName());
 
   private static final String ANALYTICS_COLLECTION_URL = "https://ssl.google-analytics.com/collect";
-  private static final String CLEARCUT_COLLECTION_URL = " https://play.google.com/log";
-  
-  // for Concord
-  private static final String CONSOLE_TYPE = "CLOUD_TOOLS_FOR_ECLIPSE";
-  
+  private static final String CLEARCUT_COLLECTION_URL = "https://play.google.com/log";
+
   // flag to switch between GA and Clearcut 
   private static final boolean USE_CLEARCUT = false;
 
