@@ -108,6 +108,8 @@ public class AnalyticsPingManager {
   // that's a different "session".
   private final String uuid = UUID.randomUUID().toString();
 
+  private int sequencePosition = 0;
+
   @VisibleForTesting
   AnalyticsPingManager(String endpointUrl, IEclipsePreferences preferences,
       ConcurrentLinkedQueue<PingEvent> concurrentLinkedQueue) {
@@ -361,7 +363,14 @@ public class AnalyticsPingManager {
     root.put("request_time_ms", System.currentTimeMillis());
     root.put("client_info", clientInfo);
     
-    Map<String, Long>[] logEvents = new Map[1];
+    List<Map<String, Object>> logEvents = new ArrayList<>(1);
+    Map<String, Object> logEvent = new HashMap<>();
+    logEvent.put("event_time_ms", System.currentTimeMillis());
+    logEvent.put("sequence_position", sequencePosition++);
+    
+    logEvent.put("source_extension_json", 
+        "{\"console_type\":\"CLOUDCODE_INTELLIJ\",\"event_name\":\"some_event_name\",\"event_metadata\":[{\"some_key\":\"some_value\"}]}");
+    logEvents.add(logEvent);
     root.put("log_event", logEvents);
     
     return new Gson().toJson(root);

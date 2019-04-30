@@ -84,10 +84,14 @@ public class AnalyticsPingManagerTest {
         (Map<String, String>) clientInfo.get("desktop_client_info");
     Assert.assertTrue(desktopClientInfo.get("os").length() > 1);
     
-    List<Object> logEvent = (List<Object>) root.get("log_event");
-    Assert.assertEquals(1, logEvent.size());
+    List<Object> logEvents = (List<Object>) root.get("log_event");
+    Assert.assertEquals(1, logEvents.size());
 
-    String sourceExtensionJson = (String) root.get("source_extension_json");
+    Map<String, Object> logEvent = (Map<String, Object>) logEvents.get(0);
+    long eventTimeMs = ((Double) logEvent.get("event_time_ms")).longValue();
+    Assert.assertTrue(eventTimeMs >= 1000000);
+
+    String sourceExtensionJson = (String) logEvent.get("source_extension_json");
     
     // double encoded
     Map<String, ?> source = new Gson().fromJson(sourceExtensionJson, Map.class);
