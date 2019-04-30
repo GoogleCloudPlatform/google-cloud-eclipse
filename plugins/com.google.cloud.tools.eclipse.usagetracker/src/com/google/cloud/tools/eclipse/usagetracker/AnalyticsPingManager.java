@@ -58,6 +58,9 @@ public class AnalyticsPingManager {
   
   // for Concord
   private static final String CONSOLE_TYPE = "CLOUD_TOOLS_FOR_ECLIPSE";
+  
+  // flag to switch between GA and Clearcut 
+  private static final boolean USE_CLEARCUT = false;
 
   // Fixed-value query parameters present in every ping, and their fixed values:
   //
