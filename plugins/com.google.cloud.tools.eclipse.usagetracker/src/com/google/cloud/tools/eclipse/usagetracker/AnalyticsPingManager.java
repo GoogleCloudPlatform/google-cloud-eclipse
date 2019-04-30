@@ -91,7 +91,7 @@ public class AnalyticsPingManager {
       while (!pingEventQueue.isEmpty() && !monitor.isCanceled()) {
         PingEvent event = pingEventQueue.poll();
         showOptInDialogIfNeeded(event.shell);
-        sendPingHelper(event);
+        sendPing(event);
       }
       return Status.OK_STATUS;
     }
@@ -212,7 +212,7 @@ public class AnalyticsPingManager {
     }
   }
 
-  private void sendPingHelper(PingEvent pingEvent) {
+  private void sendPing(PingEvent pingEvent) {
     if (userHasOptedIn()) {
       try {
         Map<String, String> parametersMap = buildParametersMap(pingEvent);
