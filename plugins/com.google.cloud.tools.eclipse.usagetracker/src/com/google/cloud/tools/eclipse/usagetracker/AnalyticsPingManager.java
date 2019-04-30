@@ -55,6 +55,9 @@ public class AnalyticsPingManager {
   private static final Logger logger = Logger.getLogger(AnalyticsPingManager.class.getName());
 
   private static final String ANALYTICS_COLLECTION_URL = "https://ssl.google-analytics.com/collect";
+  
+  // for Concord
+  private static final String CONSOLE_TYPE = "CLOUD_TOOLS_FOR_ECLIPSE";
 
   // Fixed-value query parameters present in every ping, and their fixed values:
   //
