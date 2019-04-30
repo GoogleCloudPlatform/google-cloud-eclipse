@@ -166,10 +166,6 @@ public class AnalyticsPingManager {
     sendPingOnShell(null, eventName);
   }
 
-  public void sendPing(String eventName, String metadataKey) {
-    sendPingOnShell(null, eventName, metadataKey);
-  }
-
   public void sendPing(String eventName, String metadataKey, String metadataValue) {
     sendPingOnShell(null, eventName, metadataKey, metadataValue);
   }
@@ -193,10 +189,6 @@ public class AnalyticsPingManager {
     sendPingOnShell(parentShell, eventName, ImmutableMap.<String, String>of());
   }
 
-  public void sendPingOnShell(Shell parentShell, String eventName, String metadataKey) {
-    sendPingOnShell(parentShell, eventName, metadataKey, "null");
-  }
-
   public void sendPingOnShell(Shell parentShell,
       String eventName, String metadataKey, String metadataValue) {
     Preconditions.checkArgument(!Strings.isNullOrEmpty(metadataKey), "metadataKey null or empty");
@@ -205,7 +197,7 @@ public class AnalyticsPingManager {
     sendPingOnShell(parentShell, eventName, ImmutableMap.of(metadataKey, metadataValue));
   }
 
-  public void sendPingOnShell(Shell parentShell, String eventName, Map<String, String> metadata) {
+  private void sendPingOnShell(Shell parentShell, String eventName, Map<String, String> metadata) {
     Preconditions.checkArgument(!Strings.isNullOrEmpty(eventName), "eventName null or empty");
     Preconditions.checkNotNull(metadata);
 
