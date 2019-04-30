@@ -20,6 +20,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.base.Preconditions;
 import java.io.IOException;
+import java.io.Reader;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
@@ -54,6 +55,7 @@ public class TestHttpServer extends ExternalResource {
   private String requestMethod;
   private Map<String, String[]> requestParameters;
   private final Map<String, String> requestHeaders = new HashMap<>();
+  private String requestBody = "";
 
   private final String expectedPath;
   private final byte[] responseBytes;
@@ -119,6 +121,11 @@ public class TestHttpServer extends ExternalResource {
 
   public String getRequestMethod() {
     Preconditions.checkState(requestHandled);
+    return requestBody;
+  }
+  
+  public String getRequestBody() {
+    Preconditions.checkState(requestHandled);
     return requestMethod;
   }
 
@@ -154,6 +161,14 @@ public class TestHttpServer extends ExternalResource {
           requestHeaders.put(header, request.getHeader(header));
         }
 
+        StringBuilder body = new StringBuilder();
+        try (Reader reader = request.getReader()) { 
+          for (int c = reader.read(); c != -1; c = reader.read()) {
+            body.append((char) c);
+          }
+          requestBody = body.toString();
+        }
+        
         baseRequest.setHandled(true);
         response.getOutputStream().write(responseBytes);
         response.setStatus(HttpServletResponse.SC_OK);
