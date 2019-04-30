@@ -113,7 +113,12 @@ public class AnalyticsPingManager {
     if (instance == null) {
       String endpointUrl = null;
       if (!Platform.inDevelopmentMode() && isTrackingIdDefined()) {
-        endpointUrl = ANALYTICS_COLLECTION_URL;  // Enable only in production env.
+        // Enable only in production environment.
+        if (USE_CLEARCUT) {
+          endpointUrl = CLEARCUT_COLLECTION_URL;
+        } else {
+          endpointUrl = ANALYTICS_COLLECTION_URL;
+        }
       }
       instance = new AnalyticsPingManager(endpointUrl, AnalyticsPreferences.getPreferenceNode(),
           new ConcurrentLinkedQueue<PingEvent>());
