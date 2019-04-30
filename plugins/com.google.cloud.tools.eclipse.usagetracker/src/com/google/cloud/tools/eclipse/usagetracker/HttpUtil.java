@@ -75,9 +75,9 @@ public class HttpUtil {
   public static int sendPost(String urlString, Map<String, String> parameters) throws IOException {
     String parametersString = getParametersString(parameters);
 
+    URL url = new URL(urlString);
     HttpURLConnection connection = null;
     try {
-      URL url = new URL(urlString);
       connection = (HttpURLConnection) url.openConnection();
       connection.setDoOutput(true);
       connection.setRequestMethod("POST");

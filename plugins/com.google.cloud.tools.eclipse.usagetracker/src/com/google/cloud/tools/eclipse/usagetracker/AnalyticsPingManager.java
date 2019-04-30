@@ -24,6 +24,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.escape.CharEscaperBuilder;
 import com.google.common.escape.Escaper;
+import com.google.gson.Gson;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -100,6 +101,12 @@ public class AnalyticsPingManager {
       return Status.OK_STATUS;
     }
   };
+
+  // Randomly create one when the plugin is activated? We use that one through
+  // the lifetime of plugin's process. If the user closes the IDE and starts a
+  // new one, our plugin will create a different UUID. That's OK though since 
+  // that's a different "session".
+  private final String uuid = UUID.randomUUID().toString();
 
   @VisibleForTesting
   AnalyticsPingManager(String endpointUrl, IEclipsePreferences preferences,
@@ -339,5 +346,24 @@ public class AnalyticsPingManager {
       this.metadata = metadata;
       this.shell = shell;
     }
+  }
+
+  @VisibleForTesting
+  String jsonEncode(PingEvent event) {
+    Map<String, Object> root = new HashMap<>();
+    Map<String, Object> clientInfo = new HashMap<>();
+    Map<String, String> desktopClientInfo = new HashMap<>();
+    desktopClientInfo.put("os", System.getProperty("os.name"));
+    clientInfo.put("client_type", "DESKTOP");
+    clientInfo.put("desktop_client_info", desktopClientInfo);
+    root.put("log_source_name", "CONCORD");
+    root.put("zwieback_cookie", uuid);
+    root.put("request_time_ms", System.currentTimeMillis());
+    root.put("client_info", clientInfo);
+    
+    Map<String, Long>[] logEvents = new Map[1];
+    root.put("log_event", logEvents);
+    
+    return new Gson().toJson(root);
   }
 }
