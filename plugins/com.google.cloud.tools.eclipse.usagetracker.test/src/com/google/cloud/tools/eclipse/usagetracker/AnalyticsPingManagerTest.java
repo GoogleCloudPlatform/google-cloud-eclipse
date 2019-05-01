@@ -93,7 +93,7 @@ public class AnalyticsPingManagerTest {
     // double encoded
     Map<String, ?> source = new Gson().fromJson(sourceExtensionJson, Map.class);
     Assert.assertEquals("CLOUD_TOOLS_FOR_ECLIPSE", source.get("console_type"));
-    Assert.assertEquals("something", source.get("event_name"));
+    Assert.assertEquals("SomeEvent", source.get("event_name"));
   }
 
   @Test

@@ -368,8 +368,14 @@ public class AnalyticsPingManager {
     logEvent.put("event_time_ms", System.currentTimeMillis());
     logEvent.put("sequence_position", sequencePosition++);
     
-    logEvent.put("source_extension_json", 
-        "{\"console_type\":\"CLOUDCODE_INTELLIJ\",\"event_name\":\"some_event_name\",\"event_metadata\":[{\"some_key\":\"some_value\"}]}");
+    
+    Map<String, Object> sourceExtension = new HashMap<>();
+    sourceExtension.put("console_type", CloudToolsInfo.CONSOLE_TYPE);
+    sourceExtension.put("event_name", event.eventName);
+    
+    // todo should we reuse the Gson object?
+    String sourceExtensionJsonString = new Gson().toJson(sourceExtension);
+    logEvent.put("source_extension_json", sourceExtensionJsonString);
     logEvents.add(logEvent);
     root.put("log_event", logEvents);
     
