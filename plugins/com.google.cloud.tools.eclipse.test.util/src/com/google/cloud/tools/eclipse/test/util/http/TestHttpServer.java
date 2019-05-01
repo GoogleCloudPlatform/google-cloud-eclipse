@@ -19,8 +19,8 @@ package com.google.cloud.tools.eclipse.test.util.http;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.base.Preconditions;
+import com.google.common.io.CharStreams;
 import java.io.IOException;
-import java.io.Reader;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
@@ -161,13 +161,7 @@ public class TestHttpServer extends ExternalResource {
           requestHeaders.put(header, request.getHeader(header));
         }
 
-        StringBuilder body = new StringBuilder();
-        try (Reader reader = request.getReader()) { 
-          for (int c = reader.read(); c != -1; c = reader.read()) {
-            body.append((char) c);
-          }
-          requestBody = body.toString();
-        }
+        requestBody = CharStreams.toString(request.getReader());
         
         baseRequest.setHandled(true);
         response.getOutputStream().write(responseBytes);
