@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.test.util.http;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.base.Preconditions;
-import com.google.common.io.CharStreams;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;

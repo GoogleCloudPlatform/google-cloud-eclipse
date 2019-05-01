@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Google Inc.
+ * Copyright 2019 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,8 @@
 
 package com.google.cloud.tools.eclipse.usagetracker;
 
-import static org.hamcrest.Matchers.startsWith;
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
@@ -95,8 +92,8 @@ public class AnalyticsPingManagerTest {
     
     // double encoded
     Map<String, ?> source = new Gson().fromJson(sourceExtensionJson, Map.class);
-
-    
+    Assert.assertEquals("CLOUD_TOOLS_FOR_ECLIPSE", source.get("console_type"));
+    Assert.assertEquals("something", source.get("event_name"));
   }
 
   @Test
@@ -127,61 +124,6 @@ public class AnalyticsPingManagerTest {
     } catch (NullPointerException e) {
       assertEquals("metadata is null", e.getMessage());
     }
-  }
-
-  @Test
-  public void testEventTypeEventNameConvention() {
-    PingEvent event = new PingEvent("some.event-name", EMPTY_MAP, null);
-    Map<String, String> parameters = pingManager.buildParametersMap(event);
-    assertEquals("/virtual/gcloud-eclipse-tools/some.event-name", parameters.get("dp"));
-  }
-
-  @Test
-  public void testVirtualHostSet() {
-    PingEvent event = new PingEvent("some.event-name", EMPTY_MAP, null);
-    Map<String, String> parameters = pingManager.buildParametersMap(event);
-    assertThat(parameters.get("dh"), startsWith("virtual."));
-  }
-
-  @Test
-  public void testMetadataConvention() {
-    PingEvent event = new PingEvent("some.event-name",
-        ImmutableMap.of("times-happened", "1234"), null);
-    Map<String, String> parameters = pingManager.buildParametersMap(event);
-    assertThat(parameters.get("dt"), containsString("times-happened=1234"));
-  }
-
-  @Test
-  public void testMetadataConvention_multiplePairs() {
-    PingEvent event = new PingEvent("some.event-name",
-        ImmutableMap.of("times-happened", "1234", "mode", "debug"), null);
-    Map<String, String> parameters = pingManager.buildParametersMap(event);
-    assertThat(parameters.get("dt"), containsString("times-happened=1234"));
-    assertThat(parameters.get("dt"), containsString("mode=debug"));
-  }
-
-  @Test
-  public void testMetadataConvention_escaping() {
-    PingEvent event = new PingEvent("some.event-name",
-        ImmutableMap.of("key , \\ = k", "value , \\ = v"), null);
-    Map<String, String> parameters = pingManager.buildParametersMap(event);
-    assertThat(parameters.get("dt"), containsString("key \\, \\\\ \\= k=value \\, \\\\ \\= v"));
-  }
-
-  @Test
-  public void testMetadataContainsPlatformInfo() {
-    ImmutableMap<String, String> customMetadata = ImmutableMap.of("times-happened", "1234");
-    PingEvent event = new PingEvent("some.event-name", customMetadata, null);
-    Map<String, String> parameters = pingManager.buildParametersMap(event);
-    assertThat(parameters.get("dt"), containsString("ct4e-version="));
-    assertThat(parameters.get("dt"), containsString("eclipse-version="));
-  }
-
-  @Test
-  public void testClientId() {
-    PingEvent event = new PingEvent("some.event-name", EMPTY_MAP, null);
-    Map<String, String> parameters = pingManager.buildParametersMap(event);
-    assertEquals("clientId", parameters.get("cid"));
   }
 
   @Test
