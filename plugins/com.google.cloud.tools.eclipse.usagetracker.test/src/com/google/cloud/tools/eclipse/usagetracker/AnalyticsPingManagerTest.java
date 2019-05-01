@@ -66,7 +66,11 @@ public class AnalyticsPingManagerTest {
   
   @Test
   public void testBuildJson() {
-    PingEvent event = new PingEvent("SomeEvent", EMPTY_MAP, null);
+    ImmutableMap<String, String> metadata = ImmutableMap.<String, String> builder()
+        .put("foo", "bar")
+        .put("bax", "bat")
+        .build();
+    PingEvent event = new PingEvent("SomeEvent", metadata, null);
     String json = pingManager.jsonEncode(event);
     Map<String, ?> root = new Gson().fromJson(json, Map.class);
     Map<String, ?> clientInfo = (Map<String, ?>) root.get("client_info");
@@ -94,6 +98,11 @@ public class AnalyticsPingManagerTest {
     Map<String, ?> source = new Gson().fromJson(sourceExtensionJson, Map.class);
     Assert.assertEquals("CLOUD_TOOLS_FOR_ECLIPSE", source.get("console_type"));
     Assert.assertEquals("SomeEvent", source.get("event_name"));
+    
+    Map<String, String> eventMetadata = (Map<String, String>) source.get("event_metadata");
+    assertEquals(2, eventMetadata.size());
+    assertEquals("bar", eventMetadata.get("foo"));
+    assertEquals("bat", eventMetadata.get("bax"));
   }
 
   @Test

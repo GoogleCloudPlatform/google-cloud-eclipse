@@ -372,12 +372,15 @@ public class AnalyticsPingManager {
     Map<String, Object> sourceExtension = new HashMap<>();
     sourceExtension.put("console_type", CloudToolsInfo.CONSOLE_TYPE);
     sourceExtension.put("event_name", event.eventName);
+    sourceExtension.put("event_metadata", event.metadata);
     
     // todo should we reuse the Gson object?
     String sourceExtensionJsonString = new Gson().toJson(sourceExtension);
     logEvent.put("source_extension_json", sourceExtensionJsonString);
     logEvents.add(logEvent);
     root.put("log_event", logEvents);
+    
+    
     
     return new Gson().toJson(root);
   }
