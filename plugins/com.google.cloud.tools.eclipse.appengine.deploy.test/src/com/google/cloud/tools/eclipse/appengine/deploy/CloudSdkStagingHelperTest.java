@@ -55,7 +55,7 @@ public class CloudSdkStagingHelperTest {
   private static final String APP_YAML = "runtime: java\nenv: flex";
   private static final String APPENGINE_WEB_XML =
       "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
-      + "<threadsafe>true</threadsafe></appengine-web-app>";
+      + "<threadsafe>true</threadsafe><runtime>java8</runtime></appengine-web-app>";
   private static final String WEB_XML = "<web-app/>";
 
   private static final String CRON_XML = "<cronentries/>";

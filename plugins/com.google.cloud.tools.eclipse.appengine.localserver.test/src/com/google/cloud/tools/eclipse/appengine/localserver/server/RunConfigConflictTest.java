@@ -21,14 +21,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import com.google.cloud.tools.appengine.configuration.RunConfiguration;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;    
+import org.eclipse.core.runtime.MultiStatus;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
@@ -55,8 +54,6 @@ public class RunConfigConflictTest {
   public void testNoConflicts() {
     RunConfiguration.Builder builder = RunConfiguration.builder(services);
     builder.port(0); // random allocation
-    builder.adminPort(0); // random allocation
-    builder.storagePath(Paths.get("/foo/bar"));
     RunConfiguration config2 = RunConfiguration.builder(services).build();
     IStatus status = LocalAppEngineServerLaunchConfigurationDelegate.checkConflicts(builder.build(),
         config2, StatusUtil.multi(RunConfigConflictTest.class, "Conflict"));
