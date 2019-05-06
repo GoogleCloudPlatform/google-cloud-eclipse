@@ -102,12 +102,6 @@ public class AnalyticsPingManager {
     }
   };
 
-  // Randomly create one when the plugin is activated? We use that one through
-  // the lifetime of plugin's process. If the user closes the IDE and starts a
-  // new one, our plugin will create a different UUID. That's OK though since 
-  // that's a different "session".
-  private final String uuid = UUID.randomUUID().toString();
-
   private int sequencePosition = 0;
 
   @VisibleForTesting
@@ -359,7 +353,7 @@ public class AnalyticsPingManager {
     clientInfo.put("client_type", "DESKTOP");
     clientInfo.put("desktop_client_info", desktopClientInfo);
     root.put("log_source_name", "CONCORD");
-    root.put("zwieback_cookie", uuid);
+    root.put("zwieback_cookie", getAnonymizedClientId(preferences));
     root.put("request_time_ms", System.currentTimeMillis());
     root.put("client_info", clientInfo);
     
@@ -367,8 +361,7 @@ public class AnalyticsPingManager {
     Map<String, Object> logEvent = new HashMap<>();
     logEvent.put("event_time_ms", System.currentTimeMillis());
     logEvent.put("sequence_position", sequencePosition++);
-    
-    
+  
     Map<String, Object> sourceExtension = new HashMap<>();
     sourceExtension.put("console_type", CloudToolsInfo.CONSOLE_TYPE);
     sourceExtension.put("event_name", event.eventName);
