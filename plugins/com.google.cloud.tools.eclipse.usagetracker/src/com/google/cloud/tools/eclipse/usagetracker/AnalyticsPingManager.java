@@ -350,6 +350,7 @@ public class AnalyticsPingManager {
     Map<String, Object> clientInfo = new HashMap<>();
     Map<String, String> desktopClientInfo = new HashMap<>();
     desktopClientInfo.put("os", System.getProperty("os.name"));
+    
     clientInfo.put("client_type", "DESKTOP");
     clientInfo.put("desktop_client_info", desktopClientInfo);
     root.put("log_source_name", "CONCORD");
@@ -367,14 +368,12 @@ public class AnalyticsPingManager {
     sourceExtension.put("event_name", event.eventName);
     sourceExtension.put("event_metadata", event.metadata);
     
-    // todo should we reuse the Gson object?
-    String sourceExtensionJsonString = new Gson().toJson(sourceExtension);
+    Gson gson = new Gson();
+    String sourceExtensionJsonString = gson.toJson(sourceExtension);
     logEvent.put("source_extension_json", sourceExtensionJsonString);
     logEvents.add(logEvent);
     root.put("log_event", logEvents);
     
-    
-    
-    return new Gson().toJson(root);
+    return gson.toJson(root);
   }
 }
