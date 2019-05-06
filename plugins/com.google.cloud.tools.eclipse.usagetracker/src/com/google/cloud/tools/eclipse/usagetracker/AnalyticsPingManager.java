@@ -269,8 +269,7 @@ public class AnalyticsPingManager {
     return parametersMap;
   }
 
-  @VisibleForTesting
-  static Map<String, String> getPlatformInfo() {
+  private static ImmutableMap<String, String> getPlatformInfo() {
     return ImmutableMap.of(
         "ct4e-version", CloudToolsInfo.getToolsVersion(),
         "eclipse-version", CloudToolsInfo.getEclipseVersion());
@@ -346,32 +345,38 @@ public class AnalyticsPingManager {
 
   @VisibleForTesting
   String jsonEncode(PingEvent event) {
-    Map<String, Object> root = new HashMap<>();
-    Map<String, Object> clientInfo = new HashMap<>();
+    Gson gson = new Gson();
+
     Map<String, String> desktopClientInfo = new HashMap<>();
     desktopClientInfo.put("os", System.getProperty("os.name"));
     
+    Map<String, Object> clientInfo = new HashMap<>();
     clientInfo.put("client_type", "DESKTOP");
     clientInfo.put("desktop_client_info", desktopClientInfo);
-    root.put("log_source_name", "CONCORD");
-    root.put("zwieback_cookie", getAnonymizedClientId(preferences));
-    root.put("request_time_ms", System.currentTimeMillis());
-    root.put("client_info", clientInfo);
+        
+    //logs/proto/cloud/concord/concord_event.proto
+    Map<String, Object> sourceExtension = new HashMap<>();
+    sourceExtension.put("console_type", CloudToolsInfo.CONSOLE_TYPE);
+    sourceExtension.put("event_name", event.eventName);
+    
+    Map<String, String> metadata = new HashMap<>(event.metadata);
+    metadata.putAll(getPlatformInfo());
+    sourceExtension.put("event_metadata", metadata);
+    
+    String sourceExtensionJsonString = gson.toJson(sourceExtension);
     
     List<Map<String, Object>> logEvents = new ArrayList<>(1);
     Map<String, Object> logEvent = new HashMap<>();
     logEvent.put("event_time_ms", System.currentTimeMillis());
-    logEvent.put("sequence_position", sequencePosition++);
-  
-    Map<String, Object> sourceExtension = new HashMap<>();
-    sourceExtension.put("console_type", CloudToolsInfo.CONSOLE_TYPE);
-    sourceExtension.put("event_name", event.eventName);
-    sourceExtension.put("event_metadata", event.metadata);
-    
-    Gson gson = new Gson();
-    String sourceExtensionJsonString = gson.toJson(sourceExtension);
+    logEvent.put("sequence_position", sequencePosition++);  
     logEvent.put("source_extension_json", sourceExtensionJsonString);
     logEvents.add(logEvent);
+    
+    Map<String, Object> root = new HashMap<>();
+    root.put("log_source_name", "CONCORD");
+    root.put("zwieback_cookie", getAnonymizedClientId(preferences));
+    root.put("request_time_ms", System.currentTimeMillis());
+    root.put("client_info", clientInfo);    
     root.put("log_event", logEvents);
     
     return gson.toJson(root);

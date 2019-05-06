@@ -24,9 +24,12 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager.PingEvent;
 import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,6 +54,53 @@ public class AnalyticsPingManagerPluginTest {
 
     pingManager = new AnalyticsPingManager("https://non-null-url-to-enable-mananger",
         preferences, pingEventQueue);
+  }
+  
+  @Test
+  public void testBuildJson() {
+    Gson gson = new Gson();
+    ImmutableMap<String, String> metadata = ImmutableMap.<String, String> builder()
+        .put("foo", "bar")
+        .put("bax", "bat")
+        .build();
+    PingEvent event = new PingEvent("SomeEvent", metadata, null);
+    String json = pingManager.jsonEncode(event);
+    Map<String, ?> root = gson.fromJson(json, Map.class);
+    Map<String, ?> clientInfo = (Map<String, ?>) root.get("client_info");
+    Assert.assertEquals("DESKTOP", clientInfo.get("client_type"));  
+    Assert.assertEquals("CONCORD", root.get("log_source_name"));  
+    Assert.assertNotNull(root.get("zwieback_cookie"));  
+    
+    long requestTimeMs = ((Double) root.get("request_time_ms")).longValue();
+    Assert.assertTrue(requestTimeMs >= 1000000);
+    
+    Map<String, String> desktopClientInfo =
+        (Map<String, String>) clientInfo.get("desktop_client_info");
+    Assert.assertTrue(desktopClientInfo.get("os").length() > 1);
+    
+    List<Object> logEvents = (List<Object>) root.get("log_event");
+    Assert.assertEquals(1, logEvents.size());
+
+    Map<String, Object> logEvent = (Map<String, Object>) logEvents.get(0);
+    long eventTimeMs = ((Double) logEvent.get("event_time_ms")).longValue();
+    Assert.assertTrue(eventTimeMs >= 1000000);
+
+    String sourceExtensionJson = (String) logEvent.get("source_extension_json");
+    
+    // double encoded
+    Map<String, ?> source = gson.fromJson(sourceExtensionJson, Map.class);
+    Assert.assertEquals("CLOUD_TOOLS_FOR_ECLIPSE", source.get("console_type"));
+     
+    Map<String, String> eventMetadata = (Map<String, String>) source.get("event_metadata");
+    Assert.assertEquals(4, eventMetadata.size());
+    Assert.assertEquals("bar", eventMetadata.get("foo"));
+    Assert.assertEquals("bat", eventMetadata.get("bax"));
+    Assert.assertEquals(sourceExtensionJson, "SomeEvent", eventMetadata.get("event_name"));
+    
+    // expected value depends on target platform
+    Assert.assertEquals(sourceExtensionJson, "4.8.0.v20180611-0500",
+        eventMetadata.get("ct4e-version"));
+    Assert.assertEquals("0.0.0", eventMetadata.get("eclipse-version"));
   }
 
   @Test
