@@ -98,7 +98,7 @@ public class AnalyticsPingManagerPluginTest {
     Assert.assertEquals("bat", eventMetadata.get("bax"));
     
     // expected value depends on target platform
-    Assert.assertEquals("0.0.0", eventMetadata.get("4.8.0.v20180611-0500"));
+    Assert.assertEquals("4.8.0.v20180611-0500", eventMetadata.get("eclipse-version"));
     Assert.assertEquals(sourceExtensionJson, "0.0.0", eventMetadata.get("ct4e-version"));
   }
 
