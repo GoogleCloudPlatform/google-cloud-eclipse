@@ -76,10 +76,10 @@ class HttpUtil {
 
   static int sendPost(String urlString, Map<String, String> parameters) throws IOException {
     String parametersString = getParametersString(parameters);
-    return sendPost(urlString, parametersString);
+    return sendPost(urlString, parametersString, "application/x-www-form-urlencoded");
   }
 
-  static int sendPost(String urlString, String body)
+  static int sendPost(String urlString, String body, String mediaType)
       throws MalformedURLException, IOException, ProtocolException {
     byte[] bytesToWrite = body.getBytes(StandardCharsets.UTF_8);
 
@@ -91,6 +91,7 @@ class HttpUtil {
       connection.setRequestMethod("POST");
       // This prevent Analytics from identifying our pings as spam.
       connection.setRequestProperty("User-Agent", CloudToolsInfo.USER_AGENT);
+      connection.setRequestProperty("Content-type", mediaType);
       connection.setConnectTimeout(DEFAULT_CONNECT_TIMEOUT_MS);
       connection.setReadTimeout(DEFAULT_READ_TIMEOUT_MS);
       connection.setFixedLengthStreamingMode(bytesToWrite.length);

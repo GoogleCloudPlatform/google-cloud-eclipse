@@ -253,7 +253,7 @@ public class AnalyticsPingManager {
       if (USE_CLEARCUT) {
         try {
           String json = jsonEncode(pingEvent);
-         // HttpUtil.sendPost(clearCutUrl, json);
+          HttpUtil.sendPost(clearCutUrl, json, "application/json");
         } catch (Exception ex) {
           // Don't recover or retry.
           logger.log(Level.WARNING, "Failed to POST to Concord", ex);
