@@ -87,7 +87,10 @@ public class AnalyticsPingManager {
 
   private static AnalyticsPingManager instance;
 
+  // analytics services
   private final String analyticsUrl;
+  private final String clearCutUrl;
+  
   // Preference store (should be configuration scoped) from which we get UUID, opt-in status, etc.
   private final IEclipsePreferences preferences;
 
@@ -112,6 +115,7 @@ public class AnalyticsPingManager {
   AnalyticsPingManager(String analyticsUrl, String clearCutUrl, IEclipsePreferences preferences,
       ConcurrentLinkedQueue<PingEvent> concurrentLinkedQueue) {
     this.analyticsUrl = analyticsUrl;
+    this.clearCutUrl = clearCutUrl;
     this.preferences = Preconditions.checkNotNull(preferences);
     pingEventQueue = concurrentLinkedQueue;
   }
@@ -230,14 +234,30 @@ public class AnalyticsPingManager {
     }
   }
 
+  /**
+   * This is the only method that makes an HTTP connection. Everything else
+   * ultimately funnels through here. 
+   */
   private void sendPing(PingEvent pingEvent) {
     if (userHasOptedIn()) {
-      try {
-        Map<String, String> parametersMap = buildParametersMap(pingEvent);
-        HttpUtil.sendPost(analyticsUrl, parametersMap);
-      } catch (IOException ex) {
-        // Don't try to recover or retry.
-        logger.log(Level.WARNING, "Failed to send a POST request", ex);
+      if (USE_GOOGLE_ANALYTICS) {
+        try {
+          Map<String, String> parametersMap = buildParametersMap(pingEvent);
+          HttpUtil.sendPost(analyticsUrl, parametersMap);
+        } catch (IOException ex) {
+          // Don't try to recover or retry.
+          logger.log(Level.WARNING, "Failed to POST to Google Analytics", ex);
+        }
+      }
+      
+      if (USE_CLEARCUT) {
+        try {
+          String json = jsonEncode(pingEvent);
+         // HttpUtil.sendPost(clearCutUrl, json);
+        } catch (Exception ex) {
+          // Don't try to recover or retry.
+          logger.log(Level.WARNING, "Failed to POST to Concord", ex);
+        } 
       }
     }
   }
