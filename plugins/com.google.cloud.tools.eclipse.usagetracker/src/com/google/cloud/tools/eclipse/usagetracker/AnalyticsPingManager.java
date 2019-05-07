@@ -56,13 +56,13 @@ public class AnalyticsPingManager {
   private static final Logger logger = Logger.getLogger(AnalyticsPingManager.class.getName());
 
   private static final String ANALYTICS_COLLECTION_URL = "https://ssl.google-analytics.com/collect";
-  private static final String CLEARCUT_COLLECTION_URL = "https://play.google.com/log";
+  private static final String CLEAR_CUT_COLLECTION_URL = "https://play.google.com/log";
 
   // flag for Clearcut 
-  private static final boolean USE_CLEARCUT = false;
+  private static final boolean USE_CLEAR_CUT = false;
 
   // flag for Google Analytics 
-  private static final boolean USE_GOOGLE_ANALYTICS = false;
+  private static final boolean USE_GOOGLE_ANALYTICS = true;
 
   // Fixed-value query parameters present in every ping, and their fixed values:
   //
@@ -126,8 +126,8 @@ public class AnalyticsPingManager {
       String clearCutUrl = null;
       if (!Platform.inDevelopmentMode() && isTrackingIdDefined()) {
         // Enable only in production environment.
-        if (USE_CLEARCUT) {
-          clearCutUrl = CLEARCUT_COLLECTION_URL;
+        if (USE_CLEAR_CUT) {
+          clearCutUrl = CLEAR_CUT_COLLECTION_URL;
         } 
         if (USE_GOOGLE_ANALYTICS) {
           analyticsUrl = ANALYTICS_COLLECTION_URL;
@@ -223,7 +223,7 @@ public class AnalyticsPingManager {
     Preconditions.checkArgument(!Strings.isNullOrEmpty(eventName), "eventName null or empty");
     Preconditions.checkNotNull(metadata);
 
-    if (analyticsUrl != null) {
+    if (analyticsUrl != null || clearCutUrl != null) {
       // Note: always enqueue if a user has not seen the opt-in dialog yet; enqueuing itself
       // doesn't mean that the event ping will be posted.
       if (userHasOptedIn() || !userHasRegisteredOptInStatus()) {
@@ -240,6 +240,7 @@ public class AnalyticsPingManager {
    */
   private void sendPing(PingEvent pingEvent) {
     if (userHasOptedIn()) {
+      
       if (USE_GOOGLE_ANALYTICS) {
         try {
           Map<String, String> parametersMap = buildParametersMap(pingEvent);
@@ -250,11 +251,11 @@ public class AnalyticsPingManager {
         }
       }
       
-      if (USE_CLEARCUT) {
+      if (USE_CLEAR_CUT) {
         try {
           String json = jsonEncode(pingEvent);
           HttpUtil.sendPost(clearCutUrl, json, "application/json");
-        } catch (Exception ex) {
+        } catch (IOException ex) {
           // Don't recover or retry.
           logger.log(Level.WARNING, "Failed to POST to Concord", ex);
         } 
