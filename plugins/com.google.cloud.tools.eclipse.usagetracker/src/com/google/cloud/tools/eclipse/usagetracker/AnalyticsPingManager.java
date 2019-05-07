@@ -58,8 +58,11 @@ public class AnalyticsPingManager {
   private static final String ANALYTICS_COLLECTION_URL = "https://ssl.google-analytics.com/collect";
   private static final String CLEARCUT_COLLECTION_URL = "https://play.google.com/log";
 
-  // flag to switch between GA and Clearcut 
+  // flag for Clearcut 
   private static final boolean USE_CLEARCUT = false;
+
+  // flag for Google Analytics 
+  private static final boolean USE_GOOGLE_ANALYTICS = false;
 
   // Fixed-value query parameters present in every ping, and their fixed values:
   //
@@ -84,11 +87,12 @@ public class AnalyticsPingManager {
 
   private static AnalyticsPingManager instance;
 
-  private final String endpointUrl;
+  private final String analyticsUrl;
   // Preference store (should be configuration scoped) from which we get UUID, opt-in status, etc.
   private final IEclipsePreferences preferences;
 
   private final ConcurrentLinkedQueue<PingEvent> pingEventQueue;
+  
   @VisibleForTesting
   final Job eventFlushJob = new Job("Analytics Event Submission") {
     @Override
@@ -105,25 +109,27 @@ public class AnalyticsPingManager {
   private int sequencePosition = 0;
 
   @VisibleForTesting
-  AnalyticsPingManager(String endpointUrl, IEclipsePreferences preferences,
+  AnalyticsPingManager(String analyticsUrl, String clearCutUrl, IEclipsePreferences preferences,
       ConcurrentLinkedQueue<PingEvent> concurrentLinkedQueue) {
-    this.endpointUrl = endpointUrl;
+    this.analyticsUrl = analyticsUrl;
     this.preferences = Preconditions.checkNotNull(preferences);
     pingEventQueue = concurrentLinkedQueue;
   }
 
   public static synchronized AnalyticsPingManager getInstance() {
     if (instance == null) {
-      String endpointUrl = null;
+      String analyticsUrl = null;
+      String clearCutUrl = null;
       if (!Platform.inDevelopmentMode() && isTrackingIdDefined()) {
         // Enable only in production environment.
         if (USE_CLEARCUT) {
-          endpointUrl = CLEARCUT_COLLECTION_URL;
-        } else {
-          endpointUrl = ANALYTICS_COLLECTION_URL;
+          clearCutUrl = CLEARCUT_COLLECTION_URL;
+        } 
+        if (USE_GOOGLE_ANALYTICS) {
+          analyticsUrl = ANALYTICS_COLLECTION_URL;
         }
       }
-      instance = new AnalyticsPingManager(endpointUrl, AnalyticsPreferences.getPreferenceNode(),
+      instance = new AnalyticsPingManager(analyticsUrl, clearCutUrl, AnalyticsPreferences.getPreferenceNode(),
           new ConcurrentLinkedQueue<PingEvent>());
     }
     return instance;
@@ -213,7 +219,7 @@ public class AnalyticsPingManager {
     Preconditions.checkArgument(!Strings.isNullOrEmpty(eventName), "eventName null or empty");
     Preconditions.checkNotNull(metadata);
 
-    if (endpointUrl != null) {
+    if (analyticsUrl != null) {
       // Note: always enqueue if a user has not seen the opt-in dialog yet; enqueuing itself
       // doesn't mean that the event ping will be posted.
       if (userHasOptedIn() || !userHasRegisteredOptInStatus()) {
@@ -228,7 +234,7 @@ public class AnalyticsPingManager {
     if (userHasOptedIn()) {
       try {
         Map<String, String> parametersMap = buildParametersMap(pingEvent);
-        HttpUtil.sendPost(endpointUrl, parametersMap);
+        HttpUtil.sendPost(analyticsUrl, parametersMap);
       } catch (IOException ex) {
         // Don't try to recover or retry.
         logger.log(Level.WARNING, "Failed to send a POST request", ex);

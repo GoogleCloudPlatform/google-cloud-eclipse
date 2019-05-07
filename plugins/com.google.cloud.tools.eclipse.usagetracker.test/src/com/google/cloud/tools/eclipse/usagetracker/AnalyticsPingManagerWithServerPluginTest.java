@@ -35,7 +35,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AnalyticsPingManagerWithServerTest {
+public class AnalyticsPingManagerWithServerPluginTest {
 
   @Mock private IEclipsePreferences preferences;
 
@@ -48,7 +48,7 @@ public class AnalyticsPingManagerWithServerTest {
     when(preferences.getBoolean("ANALYTICS_OPT_IN", false)).thenReturn(true);
     when(preferences.get("ANALYTICS_CLIENT_ID", null)).thenReturn("unique-client-id");
 
-    pingManager = new AnalyticsPingManager(server.getAddress(), preferences,
+    pingManager = new AnalyticsPingManager(server.getAddress(), null, preferences,
         new ConcurrentLinkedQueue<PingEvent>());
   }
 

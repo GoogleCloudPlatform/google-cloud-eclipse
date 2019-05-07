@@ -56,7 +56,7 @@ public class AnalyticsPingManagerTest {
     when(pingEventQueue.isEmpty()).thenReturn(true);
     when(preferences.get("ANALYTICS_CLIENT_ID", null)).thenReturn("clientId");
 
-    pingManager = new AnalyticsPingManager("https://non-null-url-to-enable-mananger",
+    pingManager = new AnalyticsPingManager("https://non-null-url-to-enable-manager", null,
         preferences, pingEventQueue);
   }
 
