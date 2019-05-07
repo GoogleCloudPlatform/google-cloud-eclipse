@@ -36,17 +36,17 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-public class HttpUtil {
+class HttpUtil {
 
-  public static final int DEFAULT_CONNECT_TIMEOUT_MS = 3000;
-  public static final int DEFAULT_READ_TIMEOUT_MS = 3000;
+  static final int DEFAULT_CONNECT_TIMEOUT_MS = 3000;
+  static final int DEFAULT_READ_TIMEOUT_MS = 3000;
 
   private static final String MULTIPART_BOUNDARY =
       "---------------------------45224ee4-f3c1-4b23-8df1-4012f722218c"; // some random UUID
 
   private static final HttpTransport transport = new NetHttpTransport();
 
-  public static int sendPostMultipart(String urlString, Map<String, String> parameters)
+  static int sendPostMultipart(String urlString, Map<String, String> parameters)
       throws IOException {
 
     MultipartContent postBody = new MultipartContent()
@@ -72,7 +72,7 @@ public class HttpUtil {
     return response.getStatusCode();
   }
 
-  public static int sendPost(String urlString, Map<String, String> parameters) throws IOException {
+  static int sendPost(String urlString, Map<String, String> parameters) throws IOException {
     String parametersString = getParametersString(parameters);
 
     URL url = new URL(urlString);

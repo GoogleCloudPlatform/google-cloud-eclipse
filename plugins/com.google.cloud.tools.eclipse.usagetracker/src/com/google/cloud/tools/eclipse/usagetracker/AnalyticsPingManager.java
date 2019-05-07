@@ -255,7 +255,7 @@ public class AnalyticsPingManager {
           String json = jsonEncode(pingEvent);
          // HttpUtil.sendPost(clearCutUrl, json);
         } catch (Exception ex) {
-          // Don't try to recover or retry.
+          // Don't recover or retry.
           logger.log(Level.WARNING, "Failed to POST to Concord", ex);
         } 
       }
