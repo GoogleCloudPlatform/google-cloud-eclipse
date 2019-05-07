@@ -44,8 +44,8 @@ public class HttpUtilWithServerTest {
 
   @Test
   public void testSendPostMultipart() throws IOException {
-    assertEquals(HttpURLConnection.HTTP_OK,
-        HttpUtil.sendPostMultipart(server.getAddress(), testParameters));
+    int responseCode = HttpUtil.sendPostMultipart(server.getAddress(), testParameters);
+    assertEquals(HttpURLConnection.HTTP_OK, responseCode);
     assertTrue(server.getRequestHeaders().get("Content-Type")
         .startsWith("multipart/form-data; boundary="));
 
@@ -62,6 +62,7 @@ public class HttpUtilWithServerTest {
     assertEquals("application/json", server.getRequestHeaders().get("Content-Type"));
     assertTrue(server.getRequestHeaders().get("User-Agent")
         .startsWith("gcloud-eclipse-tools/"));
+    assertEquals(json, server.getBody());
   }
 
   @Test
