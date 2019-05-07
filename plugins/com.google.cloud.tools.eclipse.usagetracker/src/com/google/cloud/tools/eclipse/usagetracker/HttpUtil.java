@@ -32,6 +32,8 @@ import com.google.common.net.UrlEscapers;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -74,6 +76,12 @@ class HttpUtil {
 
   static int sendPost(String urlString, Map<String, String> parameters) throws IOException {
     String parametersString = getParametersString(parameters);
+    return sendPost(urlString, parametersString);
+  }
+
+  static int sendPost(String urlString, String body)
+      throws MalformedURLException, IOException, ProtocolException {
+    byte[] bytesToWrite = body.getBytes(StandardCharsets.UTF_8);
 
     URL url = new URL(urlString);
     HttpURLConnection connection = null;
@@ -85,7 +93,6 @@ class HttpUtil {
       connection.setRequestProperty("User-Agent", CloudToolsInfo.USER_AGENT);
       connection.setConnectTimeout(DEFAULT_CONNECT_TIMEOUT_MS);
       connection.setReadTimeout(DEFAULT_READ_TIMEOUT_MS);
-      byte[] bytesToWrite = parametersString.getBytes(StandardCharsets.UTF_8);
       connection.setFixedLengthStreamingMode(bytesToWrite.length);
 
       try (OutputStream out = connection.getOutputStream()) {

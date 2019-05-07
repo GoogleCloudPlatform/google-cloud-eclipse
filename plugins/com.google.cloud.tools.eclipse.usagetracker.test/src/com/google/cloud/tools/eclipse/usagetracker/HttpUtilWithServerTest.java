@@ -49,6 +49,12 @@ public class HttpUtilWithServerTest {
 
     verifyPostRequest();
   }
+  
+  @Test
+  public void testSendPostWithJsonBody() throws IOException {
+    String json = "{\"firstName\": \"John\"}";
+    assertEquals(200, HttpUtil.sendPost(server.getAddress(), json));
+  }
 
   @Test
   public void testSendPost() throws IOException {
