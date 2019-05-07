@@ -247,7 +247,7 @@ public class AnalyticsPingManager {
           HttpUtil.sendPost(analyticsUrl, parametersMap);
         } catch (IOException ex) {
           // Don't try to recover or retry.
-          logger.log(Level.WARNING, "Failed to POST to Google Analytics", ex);
+          logger.log(Level.FINE, "Failed to POST to Google Analytics", ex);
         }
       }
       
@@ -257,7 +257,7 @@ public class AnalyticsPingManager {
           HttpUtil.sendPost(clearCutUrl, json, "application/json");
         } catch (IOException ex) {
           // Don't recover or retry.
-          logger.log(Level.WARNING, "Failed to POST to Concord", ex);
+          logger.log(Level.FINE, "Failed to POST to Concord", ex);
         } 
       }
     }

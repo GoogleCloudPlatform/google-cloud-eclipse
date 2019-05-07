@@ -79,8 +79,7 @@ class HttpUtil {
     return sendPost(urlString, parametersString, "application/x-www-form-urlencoded");
   }
 
-  static int sendPost(String urlString, String body, String mediaType)
-      throws MalformedURLException, IOException, ProtocolException {
+  static int sendPost(String urlString, String body, String mediaType) throws IOException {
     byte[] bytesToWrite = body.getBytes(StandardCharsets.UTF_8);
 
     URL url = new URL(urlString);

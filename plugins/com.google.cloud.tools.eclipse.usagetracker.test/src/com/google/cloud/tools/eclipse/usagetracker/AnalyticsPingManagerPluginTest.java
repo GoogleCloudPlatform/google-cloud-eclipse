@@ -59,10 +59,9 @@ public class AnalyticsPingManagerPluginTest {
   @Test
   public void testBuildJson() {
     Gson gson = new Gson();
-    ImmutableMap<String, String> metadata = ImmutableMap.<String, String> builder()
-        .put("foo", "bar")
-        .put("bax", "bat")
-        .build();
+    ImmutableMap<String, String> metadata = ImmutableMap.of(
+        "foo", "bar",
+        "bax", "bat");
     PingEvent event = new PingEvent("SomeEvent", metadata, null);
     String json = pingManager.jsonEncode(event);
     Map<String, ?> root = gson.fromJson(json, Map.class);
