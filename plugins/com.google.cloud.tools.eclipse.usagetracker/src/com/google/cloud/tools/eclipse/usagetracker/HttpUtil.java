@@ -32,16 +32,14 @@ import com.google.common.net.UrlEscapers;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 class HttpUtil {
 
-  static final int DEFAULT_CONNECT_TIMEOUT_MS = 3000;
-  static final int DEFAULT_READ_TIMEOUT_MS = 3000;
+  private static final int DEFAULT_CONNECT_TIMEOUT_MS = 3000;
+  private static final int DEFAULT_READ_TIMEOUT_MS = 3000;
 
   private static final String MULTIPART_BOUNDARY =
       "---------------------------45224ee4-f3c1-4b23-8df1-4012f722218c"; // some random UUID
