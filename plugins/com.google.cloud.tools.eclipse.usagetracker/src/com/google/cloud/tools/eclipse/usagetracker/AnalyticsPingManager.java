@@ -126,12 +126,8 @@ public class AnalyticsPingManager {
       String clearCutUrl = null;
       if (!Platform.inDevelopmentMode() && isTrackingIdDefined()) {
         // Enable only in production environment.
-        if (USE_CLEAR_CUT) {
-          clearCutUrl = CLEAR_CUT_COLLECTION_URL;
-        } 
-        if (USE_GOOGLE_ANALYTICS) {
-          analyticsUrl = ANALYTICS_COLLECTION_URL;
-        }
+        clearCutUrl = CLEAR_CUT_COLLECTION_URL;
+        analyticsUrl = ANALYTICS_COLLECTION_URL;
       }
       instance = new AnalyticsPingManager(analyticsUrl, clearCutUrl, AnalyticsPreferences.getPreferenceNode(),
           new ConcurrentLinkedQueue<PingEvent>());
