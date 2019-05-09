@@ -58,9 +58,6 @@ public class AnalyticsPingManager {
   private static final String ANALYTICS_COLLECTION_URL = "https://ssl.google-analytics.com/collect";
   private static final String CLEAR_CUT_COLLECTION_URL = "https://play.google.com/log";
 
-  // flag for Clearcut 
-  private static final boolean USE_CLEAR_CUT = false;
-
   // flag for Google Analytics 
   private static final boolean USE_GOOGLE_ANALYTICS = true;
 
@@ -247,7 +244,7 @@ public class AnalyticsPingManager {
         }
       }
       
-      if (USE_CLEAR_CUT) {
+      if (useClearCut()) {
         try {
           String json = jsonEncode(pingEvent);
           HttpUtil.sendPost(clearCutUrl, json, "application/json");
@@ -257,6 +254,14 @@ public class AnalyticsPingManager {
         } 
       }
     }
+  }
+
+  private static boolean useClearCut() {
+    String s = System.getenv("USE_CLEARCUT");
+    if (s == null) {
+      return false;
+    }
+    return s.equalsIgnoreCase("true");
   }
 
   private static final Escaper METADATA_ESCAPER = new CharEscaperBuilder()
