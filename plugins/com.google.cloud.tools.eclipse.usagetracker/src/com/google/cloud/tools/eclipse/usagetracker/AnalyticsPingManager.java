@@ -260,11 +260,8 @@ public class AnalyticsPingManager {
   }
 
   private static boolean useClearCut() {
-    String s = System.getenv("USE_CLEARCUT");
-    if (s == null) {
-      return false;
-    }
-    return s.equalsIgnoreCase("true");
+    String flag = System.getenv("USE_CLEARCUT");
+    return flag.equalsIgnoreCase("true");
   }
 
   private static final Escaper METADATA_ESCAPER = new CharEscaperBuilder()
