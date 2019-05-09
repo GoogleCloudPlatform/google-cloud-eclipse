@@ -109,9 +109,8 @@ public class AppEngineLibrariesSelectorGroupTest {
     objectifyButton.click();
     List<Library> selectedLibraries = getSelectedLibrariesSorted();
     assertNotNull(selectedLibraries);
-    assertThat(selectedLibraries.size(), is(2));
-    assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
-    assertThat(selectedLibraries.get(1).getId(), is("objectify"));
+    assertThat(selectedLibraries.size(), is(1));
+    assertThat(selectedLibraries.get(0).getId(), is("objectify"));
   }
 
   @Test
