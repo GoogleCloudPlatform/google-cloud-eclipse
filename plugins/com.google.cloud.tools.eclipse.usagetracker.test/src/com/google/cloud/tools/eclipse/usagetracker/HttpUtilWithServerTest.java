@@ -41,16 +41,6 @@ public class HttpUtilWithServerTest {
     testParameters.put("exception_info", LONG_PARAMETER);
     testParameters.put("product", "CT4E");
   }
-
-  @Test
-  public void testSendPostMultipart() throws IOException {
-    int responseCode = HttpUtil.sendPostMultipart(server.getAddress(), testParameters);
-    assertEquals(HttpURLConnection.HTTP_OK, responseCode);
-    assertTrue(server.getRequestHeaders().get("Content-Type")
-        .startsWith("multipart/form-data; boundary="));
-
-    verifyPostRequest();
-  }
   
   @Test
   public void testSendPostWithJsonBody() throws IOException {

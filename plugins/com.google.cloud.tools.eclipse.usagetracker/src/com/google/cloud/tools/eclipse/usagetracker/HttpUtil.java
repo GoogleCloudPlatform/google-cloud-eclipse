@@ -16,16 +16,6 @@
 
 package com.google.cloud.tools.eclipse.usagetracker;
 
-import com.google.api.client.http.ByteArrayContent;
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpContent;
-import com.google.api.client.http.HttpHeaders;
-import com.google.api.client.http.HttpMediaType;
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpResponse;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.MultipartContent;
-import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.net.UrlEscapers;
@@ -40,37 +30,6 @@ class HttpUtil {
 
   private static final int DEFAULT_CONNECT_TIMEOUT_MS = 3000;
   private static final int DEFAULT_READ_TIMEOUT_MS = 3000;
-
-  private static final String MULTIPART_BOUNDARY =
-      "---------------------------45224ee4-f3c1-4b23-8df1-4012f722218c"; // some random UUID
-
-  private static final HttpTransport transport = new NetHttpTransport();
-
-  static int sendPostMultipart(String urlString, Map<String, String> parameters)
-      throws IOException {
-
-    MultipartContent postBody = new MultipartContent()
-        .setMediaType(new HttpMediaType("multipart/form-data"));
-    postBody.setBoundary(MULTIPART_BOUNDARY);
-
-    for (Map.Entry<String, String> entry : parameters.entrySet()) {
-      HttpContent partContent = ByteArrayContent.fromString(  // uses UTF-8 internally
-          null /* part Content-Type */, entry.getValue());
-      HttpHeaders partHeaders = new HttpHeaders()
-          .set("Content-Disposition",  "form-data; name=\"" + entry.getKey() + "\"");
-
-      postBody.addPart(new MultipartContent.Part(partHeaders, partContent));
-    }
-
-    GenericUrl url = new GenericUrl(new URL(urlString));
-    HttpRequest request = transport.createRequestFactory().buildPostRequest(url, postBody);
-    request.setHeaders(new HttpHeaders().setUserAgent(CloudToolsInfo.USER_AGENT));
-    request.setConnectTimeout(DEFAULT_CONNECT_TIMEOUT_MS);
-    request.setReadTimeout(DEFAULT_READ_TIMEOUT_MS);
-
-    HttpResponse response = request.execute();
-    return response.getStatusCode();
-  }
 
   static int sendPost(String urlString, Map<String, String> parameters) throws IOException {
     String parametersString = getParametersString(parameters);
