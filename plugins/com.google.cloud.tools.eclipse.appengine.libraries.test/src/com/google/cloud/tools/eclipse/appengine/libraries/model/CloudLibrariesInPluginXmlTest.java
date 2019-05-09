@@ -80,7 +80,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(mavenCoordinates.getArtifactId(), is("appengine-api-1.0-sdk"));
     
     DefaultArtifactVersion actual = new DefaultArtifactVersion(mavenCoordinates.getVersion());
-    DefaultArtifactVersion expected = new DefaultArtifactVersion("1.9.64");
+    DefaultArtifactVersion expected = new DefaultArtifactVersion("1.9.74");
     assertTrue(actual.compareTo(expected) >= 0);
     
     assertThat(mavenCoordinates.getType(), is("jar"));
@@ -122,7 +122,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(mavenCoordinates.getArtifactId(), is("endpoints-framework"));
     
     DefaultArtifactVersion actual = new DefaultArtifactVersion(mavenCoordinates.getVersion());
-    DefaultArtifactVersion expected = new DefaultArtifactVersion("2.0.14");
+    DefaultArtifactVersion expected = new DefaultArtifactVersion("2.2.1");
     assertTrue(actual.compareTo(expected) >= 0);
  
     assertThat(mavenCoordinates.getType(), is("jar"));
