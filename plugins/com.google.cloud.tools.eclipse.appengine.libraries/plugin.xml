@@ -50,7 +50,6 @@
           tooltip="%objectify.tooltip"
           dependencies="include"
           siteUri="https://github.com/objectify/objectify/wiki" >
-      <libraryDependency id="appengine-api" />
       <libraryFile
           export="true"
           javadocUri="https://www.javadoc.io/doc/com.googlecode.objectify/objectify/6.0">
