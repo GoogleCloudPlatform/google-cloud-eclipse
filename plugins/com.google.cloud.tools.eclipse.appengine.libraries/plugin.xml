@@ -52,13 +52,12 @@
           siteUri="https://github.com/objectify/objectify/wiki" >
       <libraryDependency id="appengine-api" />
       <libraryFile
-          pinned="true"
           export="true"
-          javadocUri="https://www.javadoc.io/doc/com.googlecode.objectify/objectify/5.1.22">
+          javadocUri="https://www.javadoc.io/doc/com.googlecode.objectify/objectify/6.0">
         <mavenCoordinates
               artifactId="objectify"
               groupId="com.googlecode.objectify"
-              version="5.1.22" />
+              version="6.0.3" />
       </libraryFile>
     </library>
     
@@ -75,7 +74,7 @@
         <mavenCoordinates
               artifactId="objectify"
               groupId="com.googlecode.objectify"
-              version="6.0" />
+              version="6.0.3" />
       </libraryFile>
     </library>
 

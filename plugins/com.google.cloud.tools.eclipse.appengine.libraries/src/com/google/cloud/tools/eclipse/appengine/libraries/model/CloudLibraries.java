@@ -42,7 +42,7 @@ public class CloudLibraries {
 
   /**
    * Library files for App Engine standard environment applications; specifically
-   * Objectify 5, App Engine API 1.0 SDK, and Google Cloud Endpoints.
+   * Objectify 6, App Engine API 1.0 SDK, and Google Cloud Endpoints.
    */
   public static final String APP_ENGINE_STANDARD_GROUP = "appengine"; //$NON-NLS-1$
 
