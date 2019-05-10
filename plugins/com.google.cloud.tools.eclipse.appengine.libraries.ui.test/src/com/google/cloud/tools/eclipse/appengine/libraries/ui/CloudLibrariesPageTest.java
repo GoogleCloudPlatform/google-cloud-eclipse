@@ -182,7 +182,6 @@ public class CloudLibrariesPageTest {
 
     returnedLibraries = page.getSelectedLibraries();
     Assert.assertEquals(2, returnedLibraries.size());
-    assertThat(returnedLibraries, Matchers.hasItem(new LibraryMatcher("appengine-api")));
     assertThat(returnedLibraries, Matchers.hasItem(new LibraryMatcher("objectify")));
     assertThat(returnedLibraries, Matchers.hasItem(new LibraryMatcher("googlecloudstorage")));
 
