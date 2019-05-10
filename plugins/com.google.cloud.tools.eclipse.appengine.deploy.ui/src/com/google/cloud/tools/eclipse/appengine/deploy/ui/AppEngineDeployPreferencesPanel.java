@@ -39,6 +39,7 @@ import com.google.common.base.Strings;
 import com.google.common.net.UrlEscapers;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -206,7 +207,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     IViewerObservableValue projectSelection =
         ViewerProperties.singleSelection().observe(projectSelector.getViewer());
     bindingContext.addValidationStatusProvider(
-        new ProjectSelectionValidator(projectInput, projectSelection, requireValues));
+        new ProjectSelectionValidator(project, projectInput, projectSelection, requireValues));
 
     IViewerObservableValue projectList =
         ViewerProperties.singleSelection().observe(projectSelector.getViewer());
@@ -569,10 +570,11 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     private final IViewerObservableValue projectInput;
     private final IViewerObservableValue projectSelection;
     private final boolean requireValues;
+    private IProject project;
 
-    private ProjectSelectionValidator(IViewerObservableValue projectInput,
-                                      IViewerObservableValue projectSelection,
-                                      boolean requireValues) {
+    private ProjectSelectionValidator(IProject project, IViewerObservableValue projectInput,
+        IViewerObservableValue projectSelection, boolean requireValues) {
+      this.project = project;
       this.projectInput = projectInput;
       this.projectSelection = projectSelection;
       this.requireValues = requireValues;
@@ -592,10 +594,15 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
         }
       }
       if (requireValues) {
-        if (selectedProject == null) {
-          return ValidationStatus.error(Messages.getString("projectselector.project.not.selected")); //$NON-NLS-1$
-        }
-      }
+        return Optional.ofNullable(selectedProject).map(o -> {
+          return project != null
+              ? ValidationStatus.info(Messages.getString("projectselector.project.selected",
+                  project.getName(), ((GcpProject) selectedProject).getName()))
+              : ValidationStatus.ok();
+        }).orElseGet(() -> {
+          return ValidationStatus.error(Messages.getString("projectselector.project.not.selected")); //$NON-NLS-1$ ;
+        });
+      } 
       return ValidationStatus.ok();
     }
   }
