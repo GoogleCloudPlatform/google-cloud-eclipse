@@ -108,6 +108,7 @@ public class CodeTemplatesTest {
       throws CoreException, ParserConfigurationException, SAXException, IOException {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8);
+    config.setAppEngineLibraries(Collections.singleton(new Library("objectify")));
 
     CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
     assertTrue(objectifyFilterClassExists());
