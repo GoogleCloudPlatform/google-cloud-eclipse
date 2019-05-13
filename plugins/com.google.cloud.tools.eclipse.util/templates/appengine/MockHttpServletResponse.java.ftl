@@ -174,23 +174,28 @@ public class MockHttpServletResponse implements HttpServletResponse {
   public void setStatus(int arg0, String arg1) {
   }
 
-  // Servlet API 3.0 and 3.1 methods
+<#if servletVersion != "2.5">  // Servlet API 3.0 and 3.1 methods
+  @Override
   public void setContentLengthLong(long length) {
   }
 
+  @Override
   public int getStatus() {
     return 0;
   }
 
+  @Override
   public String getHeader(String name) {
     return null;
   }
 
+  @Override
   public Collection<String> getHeaders(String name) {
     return null;
   }
 
+  @Override
   public Collection<String> getHeaderNames() {
     return null;
   }
-}
+</#if>}
