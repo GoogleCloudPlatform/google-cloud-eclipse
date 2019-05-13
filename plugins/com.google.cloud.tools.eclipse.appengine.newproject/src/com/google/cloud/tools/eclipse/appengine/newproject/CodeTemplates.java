@@ -135,11 +135,9 @@ public class CodeTemplates {
           Templates.OBJECTIFY_WEB_FILTER_TEMPLATE,
           mainPackageFolder, properties, subMonitor.split(5));
 
-      if (isObjectify6Selected(config)) {
         createChildFile("ObjectifyWebListener.java", //$NON-NLS-1$
             Templates.OBJECTIFY_WEB_LISTENER_TEMPLATE,
             mainPackageFolder, properties, subMonitor.split(5));
-      }
     }
 
     return hello;
@@ -216,13 +214,6 @@ public class CodeTemplates {
             || "objectify6".equals(library.getId())); //$NON-NLS-1$
     List<Library> selectedLibraries = config.getAppEngineLibraries();
     return selectedLibraries.stream().anyMatch(isObjectify);
-  }
-
-  @VisibleForTesting
-  static boolean isObjectify6Selected(AppEngineProjectConfig config) {
-    Predicate<Library> isObjectify6 = library -> "objectify6".equals(library.getId()); //$NON-NLS-1$
-    List<Library> selectedLibraries = config.getAppEngineLibraries();
-    return selectedLibraries.stream().anyMatch(isObjectify6);
   }
 
   private static void createWebContents(IProject project, IProgressMonitor monitor)

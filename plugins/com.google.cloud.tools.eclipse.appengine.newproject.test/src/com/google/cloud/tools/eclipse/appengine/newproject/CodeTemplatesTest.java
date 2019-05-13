@@ -108,11 +108,10 @@ public class CodeTemplatesTest {
       throws CoreException, ParserConfigurationException, SAXException, IOException {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8);
-    config.setAppEngineLibraries(Collections.singleton(new Library("objectify"))); // Objectify 5
 
     CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
     assertTrue(objectifyFilterClassExists());
-    assertFalse(objectifyListenerClassExists()); // listener added only for Objectify 6
+    assertTrue(objectifyListenerClassExists());
     validateObjectifyFilterConfigInWebXml(false);
   }
 
@@ -238,32 +237,6 @@ public class CodeTemplatesTest {
     config.setAppEngineLibraries(libraries);
 
     assertTrue(CodeTemplates.isObjectifySelected(config));
-  }
-
-  @Test
-  public void testIsObjectify6Selected_notSelected() {
-    AppEngineProjectConfig config = new AppEngineProjectConfig();
-    assertFalse(CodeTemplates.isObjectify6Selected(config));
-  }
-
-  @Test
-  public void testIsObjectify6Selected_objectify5() {
-    List<Library> libraries = Arrays.asList(new Library("a-library"), new Library("objectify"));
-
-    AppEngineProjectConfig config = new AppEngineProjectConfig();
-    config.setAppEngineLibraries(libraries);
-
-    assertFalse(CodeTemplates.isObjectify6Selected(config));
-  }
-
-  @Test
-  public void testIsObjectify6Selected_objectify6() {
-    List<Library> libraries = Arrays.asList(new Library("objectify6"), new Library("a-library"));
-
-    AppEngineProjectConfig config = new AppEngineProjectConfig();
-    config.setAppEngineLibraries(libraries);
-
-    assertTrue(CodeTemplates.isObjectify6Selected(config));
   }
 
   @Test
