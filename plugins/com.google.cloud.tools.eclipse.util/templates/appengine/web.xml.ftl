@@ -13,6 +13,7 @@
     <url-pattern>/hello</url-pattern>
   </servlet-mapping>
 <#if objectifyAdded??>
+  <listener><#if package != "">${package}</#if>.ObjectifyListener</listener>
   <filter>
     <filter-name>ObjectifyFilter</filter-name>
     <filter-class>com.googlecode.objectify.ObjectifyFilter</filter-class>
