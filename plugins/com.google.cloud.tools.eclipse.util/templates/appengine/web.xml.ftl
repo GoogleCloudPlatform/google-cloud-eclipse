@@ -14,7 +14,7 @@
   </servlet-mapping>
 <#if objectifyAdded??>
   <listener>
-    <listener-class><#if package != "">${package}</#if>.ObjectifyListener<listener-class>
+    <listener-class><#if package != "">${package}</#if>.ObjectifyListener</listener-class>
   </listener>
   <filter>
     <filter-name>ObjectifyFilter</filter-name>
