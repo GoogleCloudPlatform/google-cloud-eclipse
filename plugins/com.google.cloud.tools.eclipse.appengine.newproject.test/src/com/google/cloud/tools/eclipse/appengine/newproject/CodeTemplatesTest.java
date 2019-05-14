@@ -149,7 +149,7 @@ public class CodeTemplatesTest {
 
     CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
     assertFalse(objectifyFilterClassExists());
-    assertFalse(objectifyListenerClassExists());
+    assertTrue(objectifyListenerClassExists());
     validateObjectifyFilterConfigInWebXml(true);
   }
 
