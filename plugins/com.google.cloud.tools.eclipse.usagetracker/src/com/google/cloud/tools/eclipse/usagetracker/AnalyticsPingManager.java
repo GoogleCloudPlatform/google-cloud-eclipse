@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -380,33 +381,39 @@ public class AnalyticsPingManager {
     
     Map<String, Object> clientInfo = new HashMap<>();
     clientInfo.put("client_type", "DESKTOP");
-    clientInfo.put("desktop_client_info", desktopClientInfo);
+    clientInfo.put("desktop_client_info", Collections.singletonList(desktopClientInfo));
         
     //logs/proto/cloud/concord/concord_event.proto
     Map<String, Object> sourceExtension = new HashMap<>();
     sourceExtension.put("console_type", CloudToolsInfo.CONSOLE_TYPE);
     sourceExtension.put("event_name", event.eventName);
     
-    Map<String, String> metadata = new HashMap<>(event.metadata);
-    metadata.putAll(getPlatformInfo());
-    sourceExtension.put("event_metadata", metadata);
+    Map<String, String> metadataMap = new LinkedHashMap<>(event.metadata);
+    metadataMap.putAll(getPlatformInfo());
+
+    List<Map<String, String>> metadataList = new ArrayList<>();
+    for (Map.Entry<String, String> entry : metadataMap.entrySet()) {
+      Map<String, String> keyValue = new HashMap<>();
+      keyValue.put("key", entry.getKey());
+      keyValue.put("value", entry.getValue());
+      metadataList.add(keyValue);
+    }
+    sourceExtension.put("event_metadata", metadataList);
     
     String sourceExtensionJsonString = gson.toJson(sourceExtension);
     
-    List<Map<String, Object>> logEvents = new ArrayList<>(1);
     Map<String, Object> logEvent = new HashMap<>();
     logEvent.put("event_time_ms", System.currentTimeMillis());
     logEvent.put("sequence_position", sequencePosition++);  
     logEvent.put("source_extension_json", sourceExtensionJsonString);
-    logEvents.add(logEvent);
     
     Map<String, Object> root = new HashMap<>();
     root.put("log_source_name", "CONCORD");
     root.put("zwieback_cookie", getAnonymizedClientId(preferences));
     root.put("request_time_ms", System.currentTimeMillis());
-    root.put("client_info", clientInfo);    
-    root.put("log_event", logEvents);
-    
-    return gson.toJson(root);
+    root.put("client_info", Collections.singletonList(clientInfo));
+    root.put("log_event", Collections.singletonList(Collections.singletonList(logEvent)));
+
+    return gson.toJson(Collections.singletonList(root));
   }
 }
