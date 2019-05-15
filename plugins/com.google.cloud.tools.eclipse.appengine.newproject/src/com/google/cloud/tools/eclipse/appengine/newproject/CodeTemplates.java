@@ -137,9 +137,9 @@ public class CodeTemplates {
     }
     
     if (isObjectifySelected(config)) {
-        createChildFile("ObjectifyWebListener.java", //$NON-NLS-1$
-            Templates.OBJECTIFY_WEB_LISTENER_TEMPLATE,
-            mainPackageFolder, properties, subMonitor.split(5));
+      createChildFile("ObjectifyWebListener.java", //$NON-NLS-1$
+          Templates.OBJECTIFY_WEB_LISTENER_TEMPLATE,
+          mainPackageFolder, properties, subMonitor.split(5));
     }
 
     return hello;

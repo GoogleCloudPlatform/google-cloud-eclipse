@@ -6,8 +6,8 @@ import javax.servlet.annotation.WebListener;
 
 import com.googlecode.objectify.ObjectifyService;
 
-@WebListener
-public class ObjectifyWebListener implements ServletContextListener {
+<#if servletVersion != "2.5">@WebListener
+</#if>public class ObjectifyWebListener implements ServletContextListener {
 
   @Override
   public void contextInitialized(ServletContextEvent event) {
