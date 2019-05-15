@@ -287,7 +287,7 @@ public class CodeTemplatesTest {
           "com.googlecode.objectify.ObjectifyFilter", filterClass.item(0).getTextContent());
       
       assertEquals(1, listenerClasses.getLength());
-      assertEquals("ObjectifyListener", listenerClasses.item(0).getTextContent());
+      assertEquals("ObjectifyWebListener", listenerClasses.item(0).getTextContent());
     } else {
       assertEquals(0, filterNames.getLength());
       assertEquals(0, listenerClasses.getLength());

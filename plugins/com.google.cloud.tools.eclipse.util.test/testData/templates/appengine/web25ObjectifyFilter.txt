@@ -12,7 +12,7 @@
     <url-pattern>/hello</url-pattern>
   </servlet-mapping>
   <listener>
-    <listener-class>com.example.ObjectifyListener</listener-class>
+    <listener-class>com.example.ObjectifyWebListener</listener-class>
   </listener>
   <filter>
     <filter-name>ObjectifyFilter</filter-name>
