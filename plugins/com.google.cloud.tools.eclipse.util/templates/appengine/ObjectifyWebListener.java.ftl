@@ -4,6 +4,7 @@
 import javax.servlet.ServletContextListener;
 <#if servletVersion != "2.5">import javax.servlet.annotation.WebListener;
 </#if>
+
 import com.googlecode.objectify.ObjectifyService;
 
 <#if servletVersion != "2.5">@WebListener
