@@ -198,6 +198,7 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     filterField.addModifyListener(event -> {
       projectSelector.setFilter(filterField.getText());
     });
+    projectSelector.clearStatusLink();
 
     // Service key row
     Label serviceKeyLabel = new Label(composite, SWT.LEAD);
