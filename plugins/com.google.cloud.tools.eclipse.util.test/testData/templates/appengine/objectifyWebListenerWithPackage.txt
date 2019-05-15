@@ -6,7 +6,6 @@ import javax.servlet.annotation.WebListener;
 
 import com.googlecode.objectify.ObjectifyService;
 
-@WebListener
 public class ObjectifyWebListener implements ServletContextListener {
 
   @Override

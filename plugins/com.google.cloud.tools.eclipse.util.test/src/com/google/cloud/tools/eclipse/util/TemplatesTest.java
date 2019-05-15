@@ -229,7 +229,7 @@ public class TemplatesTest {
   public void testCreateFileContent_objectifyWebListenerWithoutPackage()
       throws CoreException, IOException {
     dataMap.put("package", "");
-    dataMap.put("servletVersion", "2.5");
+    dataMap.put("servletVersion", "3.1");
     Templates.createFileContent(fileLocation, Templates.OBJECTIFY_WEB_LISTENER_TEMPLATE, dataMap);
 
     compareToFile("objectifyWebListenerWithoutPackage.txt");
