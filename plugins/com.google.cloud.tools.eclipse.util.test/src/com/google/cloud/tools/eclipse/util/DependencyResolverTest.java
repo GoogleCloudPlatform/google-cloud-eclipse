@@ -83,12 +83,15 @@ public class DependencyResolverTest {
   public void testObjectify6() throws CoreException {
     Collection<Artifact> dependencies = DependencyResolver.getTransitiveDependencies(
         "com.googlecode.objectify", "objectify", "6.0.3", monitor);
-    Artifact jacksonCore = new DefaultArtifact("com.fasterxml.jackson.core:2.1.3:jar");
     String result = "";
     for (Artifact artifact : dependencies) {
+      if ("com.fasterxml.jackson.core".equals(artifact.getGroupId())
+          && "jackson-core".equals(artifact.getArtifactId())) {
+        return;
+      }
       result += artifact.toString() + "\n";
     }
-    Assert.assertTrue("Jackson missing but contained: \n" + result, dependencies.contains(jacksonCore));
+    Assert.fail("Jackson missing but contained: \n" + result);
   }
 
   /**
