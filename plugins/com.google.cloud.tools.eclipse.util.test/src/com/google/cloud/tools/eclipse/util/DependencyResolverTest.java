@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import org.eclipse.aether.artifact.Artifact;
+import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.graph.Dependency;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -70,12 +71,24 @@ public class DependencyResolverTest {
   }
 
   @Test
-  public void testOptionalDependeciesNotIncluded() throws CoreException {
+  public void testOptionalDependenciesNotIncluded() throws CoreException {
     Collection<Artifact> dependencies = DependencyResolver.getTransitiveDependencies(
         "com.googlecode.objectify", "objectify", "5.1.22", monitor);
     for (Artifact artifact : dependencies) {
       Assert.assertNotEquals("joda-money", artifact.getArtifactId()); 
     }
+  }
+  
+  @Test
+  public void testObjectify6() throws CoreException {
+    Collection<Artifact> dependencies = DependencyResolver.getTransitiveDependencies(
+        "com.googlecode.objectify", "objectify", "6.0.3", monitor);
+    Artifact jacksonCore = new DefaultArtifact("com.fasterxml.jackson.core:2.1.3:jar");
+    String result = "";
+    for (Artifact artifact : dependencies) {
+      result += artifact.toString() + "\n";
+    }
+    Assert.assertTrue("Jackson missing but contained: \n" + result, dependencies.contains(jacksonCore));
   }
 
   /**

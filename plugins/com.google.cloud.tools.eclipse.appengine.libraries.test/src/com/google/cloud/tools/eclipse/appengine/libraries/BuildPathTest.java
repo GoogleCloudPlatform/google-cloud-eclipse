@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.util.ArrayList;
@@ -68,6 +69,17 @@ public class BuildPathTest {
   @Test
   public void testAddNativeLibrary() throws CoreException {
     Library library = new Library("libraryId");
+    List<Library> libraries = new ArrayList<>();
+    libraries.add(library);
+
+    BuildPath.addNativeLibrary(project, libraries, monitor);
+    assertEquals(initialClasspathSize + 1, project.getRawClasspath().length);
+    assertNotNull(BuildPath.findMasterContainer(project));
+  }
+  
+  @Test
+  public void testAddNativeObjectifyLibrary() throws CoreException {
+    Library library = CloudLibraries.getLibrary("objectify");
     List<Library> libraries = new ArrayList<>();
     libraries.add(library);
 

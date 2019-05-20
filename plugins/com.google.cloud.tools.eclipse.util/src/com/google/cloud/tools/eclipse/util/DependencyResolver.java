@@ -28,11 +28,13 @@ import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.collection.CollectRequest;
 import org.eclipse.aether.graph.Dependency;
 import org.eclipse.aether.graph.DependencyFilter;
+import org.eclipse.aether.graph.DependencyNode;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.repository.RepositoryPolicy;
 import org.eclipse.aether.resolution.ArtifactDescriptorRequest;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyRequest;
+import org.eclipse.aether.resolution.DependencyResult;
 import org.eclipse.aether.util.artifact.JavaScopes;
 import org.eclipse.aether.util.filter.AndDependencyFilter;
 import org.eclipse.aether.util.filter.DependencyFilterUtils;
@@ -43,6 +45,13 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.m2e.core.embedder.IMavenExecutionContext;
 
 public class DependencyResolver {
+
+  private static class NoFilter implements DependencyFilter {
+    @Override
+    public boolean accept(DependencyNode arg0, List<DependencyNode> arg1) {
+      return true;
+    }
+  }
 
   /**
    * Returns all transitive runtime dependencies of the specified Maven jar artifact including the
@@ -76,6 +85,8 @@ public class DependencyResolver {
         new AndDependencyFilter(DependencyFilterUtils.classpathFilter(JavaScopes.RUNTIME),
             new NonOptionalDependencyFilter());
     
+   // filter = new NoFilter();
+    
     // todo we'd prefer not to depend on m2e here
 
     String coords = groupId + ":" + artifactId + ":" + version;
@@ -91,8 +102,8 @@ public class DependencyResolver {
     session.setChecksumPolicy(RepositoryPolicy.CHECKSUM_POLICY_FAIL);
 
     try {
-      List<ArtifactResult> artifacts =
-          system.resolveDependencies(session, request).getArtifactResults();
+      DependencyResult resolved = system.resolveDependencies(session, request);
+      List<ArtifactResult> artifacts = resolved.getArtifactResults();
       progress.setWorkRemaining(artifacts.size());
       List<Artifact> dependencies = new ArrayList<>();
       for (ArtifactResult result : artifacts) {
