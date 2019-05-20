@@ -29,7 +29,7 @@ import org.junit.Test;
 
 public class DependencyResolverTest {
 
-  private NullProgressMonitor monitor = new NullProgressMonitor();
+  private final NullProgressMonitor monitor = new NullProgressMonitor();
 
   @Test
   public void testGetManagedDependencies() throws CoreException {

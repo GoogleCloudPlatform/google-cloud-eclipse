@@ -52,7 +52,7 @@
           siteUri="https://github.com/objectify/objectify/wiki" >
       <libraryFile
           export="true"
-          javadocUri="https://www.javadoc.io/doc/com.googlecode.objectify/objectify/6.0">
+          javadocUri="https://www.javadoc.io/doc/com.googlecode.objectify/objectify/6.0.3">
         <mavenCoordinates
               artifactId="objectify"
               groupId="com.googlecode.objectify"
@@ -69,7 +69,7 @@
           siteUri="https://github.com/objectify/objectify/wiki" >
       <libraryFile
           export="true"
-          javadocUri="https://www.javadoc.io/doc/com.googlecode.objectify/objectify/6.0">
+          javadocUri="https://www.javadoc.io/doc/com.googlecode.objectify/objectify/6.0.3">
         <mavenCoordinates
               artifactId="objectify"
               groupId="com.googlecode.objectify"
