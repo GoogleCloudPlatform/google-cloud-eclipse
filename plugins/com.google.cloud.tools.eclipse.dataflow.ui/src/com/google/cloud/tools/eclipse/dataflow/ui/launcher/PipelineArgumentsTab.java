@@ -281,6 +281,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     defaultOptionsComponent.addAccountSelectionListener(dialogChangedListener);
     defaultOptionsComponent.addButtonSelectionListener(dialogChangedListener);
     defaultOptionsComponent.addModifyListener(dialogChangedListener);
+    defaultOptionsComponent.setAccountRequired(true);
   }
 
   @Override
@@ -531,12 +532,6 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     MissingRequiredProperties validationFailures =
         launchConfiguration.getMissingRequiredProperties(hierarchy, getPreferences());
 
-    Map<String, String> values = defaultOptionsComponent.getValues();
-    String accountEmail = values.get(DataflowPreferences.ACCOUNT_EMAIL_PROPERTY);
-    if (accountEmail == null || accountEmail.isEmpty()) {
-      setErrorMessage("No Google account selected for this launch.");
-      return false;
-    }
     setErrorMessage(null);
     defaultOptionsComponent.validate();
 

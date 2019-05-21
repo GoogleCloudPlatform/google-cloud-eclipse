@@ -56,6 +56,7 @@ import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
@@ -138,13 +139,21 @@ public class PipelineArgumentsTabTest {
     // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/3048
     @Test
     public void testValidatePage_doesNotClearErrorSetByChildren() {
-      Text serviceAccountKey = CompositeUtil.findControlAfterLabel(shellResource.getShell(),
-          Text.class, "Service account key:");
-      serviceAccountKey.setText("/non/existing/file");
-      assertEquals("/non/existing/file does not exist.", pipelineArgumentsTab.getErrorMessage());
+      String errorMessage;
+      Combo emailKey =
+          CompositeUtil.findControlAfterLabel(shellResource.getShell(), Combo.class, "&Account:");
+      if (emailKey.getText().isEmpty()) {
+        errorMessage = "No Google account selected for this launch.";
+      } else {
+        Text serviceAccountKey = CompositeUtil.findControlAfterLabel(shellResource.getShell(),
+            Text.class, "Service account key:");
+        serviceAccountKey.setText("/non/existing/file");
+        errorMessage = "/non/existing/file does not exist.";
+      }
+      assertEquals(errorMessage, pipelineArgumentsTab.getErrorMessage());
 
       pipelineArgumentsTab.isValid(configuration1);
-      assertEquals("/non/existing/file does not exist.", pipelineArgumentsTab.getErrorMessage());
+      assertEquals(errorMessage, pipelineArgumentsTab.getErrorMessage());
     }
 
     @Test
