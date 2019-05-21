@@ -21,7 +21,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.forms.widgets.SharedScrolledComposite;
 
 
-public class ScrolledPageContent extends SharedScrolledComposite {
+class ScrolledPageContent extends SharedScrolledComposite {
 
   public ScrolledPageContent(Composite parent) {
     this(parent, SWT.V_SCROLL | SWT.H_SCROLL);
