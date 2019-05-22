@@ -219,6 +219,7 @@ public class TemplatesTest {
   public void testCreateFileContent_objectifyWebListenerWithPackage()
       throws CoreException, IOException {
     dataMap.put("package", "com.example");
+    dataMap.put("servletVersion", "2.5");
     Templates.createFileContent(fileLocation, Templates.OBJECTIFY_WEB_LISTENER_TEMPLATE, dataMap);
 
     compareToFile("objectifyWebListenerWithPackage.txt");
@@ -228,6 +229,7 @@ public class TemplatesTest {
   public void testCreateFileContent_objectifyWebListenerWithoutPackage()
       throws CoreException, IOException {
     dataMap.put("package", "");
+    dataMap.put("servletVersion", "3.1");
     Templates.createFileContent(fileLocation, Templates.OBJECTIFY_WEB_LISTENER_TEMPLATE, dataMap);
 
     compareToFile("objectifyWebListenerWithoutPackage.txt");

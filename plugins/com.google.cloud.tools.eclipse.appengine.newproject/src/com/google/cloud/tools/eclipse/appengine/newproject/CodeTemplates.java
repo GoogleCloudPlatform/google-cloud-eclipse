@@ -134,12 +134,12 @@ public class CodeTemplates {
       createChildFile("ObjectifyWebFilter.java", //$NON-NLS-1$
           Templates.OBJECTIFY_WEB_FILTER_TEMPLATE,
           mainPackageFolder, properties, subMonitor.split(5));
-
-      if (isObjectify6Selected(config)) {
-        createChildFile("ObjectifyWebListener.java", //$NON-NLS-1$
-            Templates.OBJECTIFY_WEB_LISTENER_TEMPLATE,
-            mainPackageFolder, properties, subMonitor.split(5));
-      }
+    }
+    
+    if (isObjectifySelected(config)) {
+      createChildFile("ObjectifyWebListener.java", //$NON-NLS-1$
+          Templates.OBJECTIFY_WEB_LISTENER_TEMPLATE,
+          mainPackageFolder, properties, subMonitor.split(5));
     }
 
     return hello;
@@ -218,13 +218,6 @@ public class CodeTemplates {
     return selectedLibraries.stream().anyMatch(isObjectify);
   }
 
-  @VisibleForTesting
-  static boolean isObjectify6Selected(AppEngineProjectConfig config) {
-    Predicate<Library> isObjectify6 = library -> "objectify6".equals(library.getId()); //$NON-NLS-1$
-    List<Library> selectedLibraries = config.getAppEngineLibraries();
-    return selectedLibraries.stream().anyMatch(isObjectify6);
-  }
-
   private static void createWebContents(IProject project, IProgressMonitor monitor)
       throws CoreException {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 10);
@@ -246,13 +239,13 @@ public class CodeTemplates {
     String bomVersion = getCurrentVersion(
         "com.google.cloud", //$NON-NLS-1$
         "google-cloud-bom", //$NON-NLS-1$
-        "0.53.0-alpha"); //$NON-NLS-1$
+        "0.91.0-alpha"); //$NON-NLS-1$
     properties.put("googleCloudJavaBomVersion", bomVersion); //$NON-NLS-1$
     
     String mavenPluginVersion = getCurrentVersion(
         "com.google.cloud.tools", //$NON-NLS-1$
         "appengine-maven-plugin", //$NON-NLS-1$
-        "1.3.2"); //$NON-NLS-1$
+        "2.0.0"); //$NON-NLS-1$
     properties.put("mavenPluginVersion", mavenPluginVersion); //$NON-NLS-1$
 
     if (isServlet25Selected(config)) {

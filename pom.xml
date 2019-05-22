@@ -99,7 +99,7 @@
       <!-- bundle: com.google.cloud.tools.appengine -->
       <groupId>com.google.cloud.tools</groupId>
       <artifactId>appengine-plugins-core</artifactId>
-      <version>0.7.5</version>
+      <version>0.7.6</version>
     </dependency>
     <dependency>
       <!--

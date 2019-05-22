@@ -16,8 +16,8 @@
 
 package com.google.cloud.tools.eclipse.usagetracker;
 
-import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
@@ -25,6 +25,8 @@ import static org.mockito.Mockito.when;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager.PingEvent;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -64,8 +66,12 @@ public class AnalyticsPingManagerPluginTest {
         "bax", "bat");
     PingEvent event = new PingEvent("SomeEvent", metadata, null);
     String json = pingManager.jsonEncode(event);
-    Map<String, ?> root = gson.fromJson(json, Map.class);
-    Map<String, ?> clientInfo = (Map<String, ?>) root.get("client_info");
+
+    Type singletonRootType = new TypeToken<List<Map<String, ?>>>(){}.getType();
+    List<Map<String, ?>> singletonRoot = gson.fromJson(json, singletonRootType);
+    Map<String, ?> root = singletonRoot.get(0);
+
+    Map<String, ?> clientInfo = ((List<Map<String, ?>>) root.get("client_info")).get(0);
     Assert.assertEquals("DESKTOP", clientInfo.get("client_type"));  
     Assert.assertEquals("CONCORD", root.get("log_source_name"));  
     Assert.assertNotNull(root.get("zwieback_cookie"));  
@@ -74,10 +80,10 @@ public class AnalyticsPingManagerPluginTest {
     Assert.assertTrue(requestTimeMs >= 1000000);
     
     Map<String, String> desktopClientInfo =
-        (Map<String, String>) clientInfo.get("desktop_client_info");
+        ((List<Map<String, String>>) clientInfo.get("desktop_client_info")).get(0);
     Assert.assertTrue(desktopClientInfo.get("os").length() > 1);
-    
-    List<Object> logEvents = (List<Object>) root.get("log_event");
+
+    List<Object> logEvents = ((List<List<Object>>) root.get("log_event")).get(0);
     Assert.assertEquals(1, logEvents.size());
 
     Map<String, Object> logEvent = (Map<String, Object>) logEvents.get(0);
@@ -87,18 +93,28 @@ public class AnalyticsPingManagerPluginTest {
     String sourceExtensionJson = (String) logEvent.get("source_extension_json");
 
     // double encoded
-    Map<String, ?> source = gson.fromJson(sourceExtensionJson, Map.class);
+    Type sourceExtensionJsonType = new TypeToken<Map<String, ?>>(){}.getType();
+    Map<String, ?> source = gson.fromJson(sourceExtensionJson, sourceExtensionJsonType);
     Assert.assertEquals("CLOUD_TOOLS_FOR_ECLIPSE", source.get("console_type"));
      
     Assert.assertEquals("SomeEvent", source.get("event_name"));
-    Map<String, String> eventMetadata = (Map<String, String>) source.get("event_metadata");
+
+    List<Map<String, String>> eventMetadata =
+        (List<Map<String, String>>) source.get("event_metadata");
     Assert.assertEquals(4, eventMetadata.size());
-    Assert.assertEquals("bar", eventMetadata.get("foo"));
-    Assert.assertEquals("bat", eventMetadata.get("bax"));
-    
+
+    Assert.assertEquals("foo", eventMetadata.get(0).get("key"));
+    Assert.assertEquals("bar", eventMetadata.get(0).get("value"));
+
+    Assert.assertEquals("bax", eventMetadata.get(1).get("key"));
+    Assert.assertEquals("bat", eventMetadata.get(1).get("value"));
+
+    Assert.assertEquals(sourceExtensionJson, "ct4e-version", eventMetadata.get(2).get("key"));
+    Assert.assertEquals(sourceExtensionJson, "0.0.0", eventMetadata.get(2).get("value"));
+
     // expected value depends on host
-    Assert.assertNotNull(eventMetadata.get("eclipse-version"));
-    Assert.assertEquals(sourceExtensionJson, "0.0.0", eventMetadata.get("ct4e-version"));
+    Assert.assertEquals("eclipse-version", eventMetadata.get(3).get("key"));
+    Assert.assertNotNull(eventMetadata.get(3).get("value"));
   }
 
   @Test
