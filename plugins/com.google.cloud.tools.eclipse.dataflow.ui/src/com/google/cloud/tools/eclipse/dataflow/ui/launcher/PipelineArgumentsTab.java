@@ -93,6 +93,12 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   private static final Joiner MISSING_GROUP_MEMBER_JOINER = Joiner.on(", "); //$NON-NLS-1$
 
   private static final String ARGUMENTS_SEPARATOR = "="; //$NON-NLS-1$
+  private static Image pipelineImage;
+  static {
+    ImageDescriptor imageDescriptor = AbstractUIPlugin
+        .imageDescriptorFromPlugin(DataflowUiPlugin.PLUGIN_ID, "icons/Dataflow_16.png");
+    pipelineImage = imageDescriptor != null ? imageDescriptor.createImage() : null;
+  }
 
   private final IWorkspaceRoot workspaceRoot;
 
@@ -627,8 +633,12 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
   @Override
   public Image getImage() {
-    ImageDescriptor imageDescriptor = AbstractUIPlugin
-        .imageDescriptorFromPlugin(DataflowUiPlugin.PLUGIN_ID, "icons/Dataflow_16.png");
-    return imageDescriptor != null ? imageDescriptor.createImage() : null;
+    return pipelineImage;
+  }
+
+  @Override
+  public void dispose() {
+    pipelineImage = null;
+    super.dispose();
   }
 }
