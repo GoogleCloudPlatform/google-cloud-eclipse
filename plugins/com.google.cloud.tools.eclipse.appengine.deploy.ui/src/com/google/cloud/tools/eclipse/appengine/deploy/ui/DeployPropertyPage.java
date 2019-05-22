@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PropertyPage;
+import org.eclipse.ui.forms.widgets.SharedScrolledComposite;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
@@ -60,7 +61,7 @@ public class DeployPropertyPage extends PropertyPage {
   private StandardDeployPreferencesPanel standardPreferencesPanel;
   private BlankDeployPreferencesPanel blankPreferencesPanel;
   private PreferencePageSupport databindingSupport;
-  private ScrolledPageContent container;
+  private SharedScrolledComposite container;
   private DeployPreferencesPanel activeControl;
 
   public DeployPropertyPage() {  // 0-arg required for injection
@@ -74,7 +75,9 @@ public class DeployPropertyPage extends PropertyPage {
 
   @Override
   protected Control createContents(Composite parent) {
-    container = new ScrolledPageContent(parent, SWT.H_SCROLL | SWT.V_SCROLL);
+    container = new SharedScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL) {};
+    container.setExpandHorizontal(true);
+    container.setExpandVertical(true);
     container.setLayout(new GridLayout());
 
     IProject project = AdapterUtil.adapt(getElement(), IProject.class);

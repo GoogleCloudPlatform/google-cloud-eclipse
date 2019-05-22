@@ -28,6 +28,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.forms.widgets.SharedScrolledComposite;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,7 +54,7 @@ public abstract class DeployPropertyPageTest<P extends DeployPreferencesPanel> {
     page.setVisible(true);
     Composite preferencePageComposite = (Composite) parent.getChildren()[0];
     for (Control control : preferencePageComposite.getChildren()) {
-      if (control instanceof ScrolledPageContent) {
+      if (control instanceof SharedScrolledComposite) {
         assertThat(getDeployPreferencesPanel((Composite) control), instanceOf(getPanelClass()));
         return;
       }
