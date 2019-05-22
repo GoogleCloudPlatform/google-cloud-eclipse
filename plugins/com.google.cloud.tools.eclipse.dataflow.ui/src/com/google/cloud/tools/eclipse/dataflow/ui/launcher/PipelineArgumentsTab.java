@@ -61,6 +61,7 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -68,6 +69,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -78,6 +80,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.events.IExpansionListener;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 /**
  * A tab specifying arguments required to run a Dataflow Pipeline.
@@ -620,5 +623,12 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
         updateLaunchConfigurationDialog();
       }
     }
+  }
+
+  @Override
+  public Image getImage() {
+    ImageDescriptor imageDescriptor = AbstractUIPlugin
+        .imageDescriptorFromPlugin(DataflowUiPlugin.PLUGIN_ID, "icons/Dataflow_16.png");
+    return imageDescriptor != null ? imageDescriptor.createImage() : null;
   }
 }
