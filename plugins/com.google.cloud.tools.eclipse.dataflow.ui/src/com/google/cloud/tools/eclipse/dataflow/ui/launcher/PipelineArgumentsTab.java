@@ -64,7 +64,6 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
-import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -105,7 +104,6 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   UpdateLaunchConfigurationDialogChangedListener dialogChangedListener =
       new UpdateLaunchConfigurationDialogChangedListener();
 
-  private ScrolledComposite composite;
   private Composite internalComposite;
 
   @VisibleForTesting
@@ -150,11 +148,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
   @Override
   public void createControl(Composite parent) {
-    composite = new ScrolledComposite(parent, SWT.V_SCROLL);
-    composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    composite.setLayout(new GridLayout(1, false));
-
-    internalComposite = new Composite(composite, SWT.NULL);
+    internalComposite = new Composite(parent, SWT.NULL);
 
     GridData internalCompositeGridData = new GridData(SWT.FILL, SWT.FILL, true, true);
     internalComposite.setLayoutData(internalCompositeGridData);
@@ -191,15 +185,8 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
         new PipelineOptionsFormComponent(runnerOptionsGroup, ARGUMENTS_SEPARATOR, filterProperties);
     pipelineOptionsForm.addModifyListener(dialogChangedListener);
     pipelineOptionsForm.addExpandListener(dialogChangedListener);
+    setControl(internalComposite);
 
-    composite.setContent(internalComposite);
-    composite.setExpandHorizontal(true);
-    composite.setExpandVertical(true);
-    composite.setMinSize(inputsComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-    composite.setShowFocusedControl(true);
-    composite.pack(true);
-
-    setControl(composite);
   }
 
   private TextAndButtonSelectionListener openPipelineOptionsSearchListener() {
@@ -497,7 +484,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
         }
       });
 
-      BusyIndicator.showWhile(composite.getDisplay(), () -> {
+      BusyIndicator.showWhile(internalComposite.getDisplay(), () -> {
         try {
           suppressDialogUpdates = true;
           pipelineOptionsForm.updateForm(launchConfiguration, optionsHierarchy.get());
@@ -572,13 +559,6 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   public boolean isValid(ILaunchConfiguration configuration) {
     reload(configuration);
     return validatePage();
-  }
-
-  @Override
-  protected void updateLaunchConfigurationDialog() {
-    composite.setMinSize(internalComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-    composite.pack();
-    super.updateLaunchConfigurationDialog();
   }
 
   /**
