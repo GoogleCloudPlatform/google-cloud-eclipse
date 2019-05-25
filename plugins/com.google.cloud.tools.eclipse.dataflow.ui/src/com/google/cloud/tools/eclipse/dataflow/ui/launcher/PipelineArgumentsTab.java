@@ -61,7 +61,6 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -80,7 +79,6 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.events.IExpansionListener;
-import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 /**
  * A tab specifying arguments required to run a Dataflow Pipeline.
@@ -93,11 +91,11 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   private static final Joiner MISSING_GROUP_MEMBER_JOINER = Joiner.on(", "); //$NON-NLS-1$
 
   private static final String ARGUMENTS_SEPARATOR = "="; //$NON-NLS-1$
-  private static Image pipelineImage;
+  private static final String PIPELINE_TAB_IMAGE = "PIPELINE_TAB_IMAGE";
   static {
-    ImageDescriptor imageDescriptor = AbstractUIPlugin
-        .imageDescriptorFromPlugin(DataflowUiPlugin.PLUGIN_ID, "icons/Dataflow_16.png");
-    pipelineImage = imageDescriptor != null ? imageDescriptor.createImage() : null;
+    DataflowUiPlugin.getDefault().getImageRegistry().put(PIPELINE_TAB_IMAGE,
+        DataflowUiPlugin.imageDescriptorFromPlugin(DataflowUiPlugin.PLUGIN_ID,
+            "icons/Dataflow_16.png"));
   }
 
   private final IWorkspaceRoot workspaceRoot;
@@ -633,12 +631,6 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
   @Override
   public Image getImage() {
-    return pipelineImage;
-  }
-
-  @Override
-  public void dispose() {
-    pipelineImage = null;
-    super.dispose();
+    return DataflowUiPlugin.getDefault().getImageRegistry().get(PIPELINE_TAB_IMAGE);
   }
 }
