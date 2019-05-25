@@ -30,7 +30,6 @@ public class DataflowUiPlugin extends AbstractUIPlugin {
 
   // The plug-in ID
   public static final String PLUGIN_ID = "com.google.cloud.tools.eclipse.dataflow.ui"; //$NON-NLS-1$
-
   // The shared instance
   private static DataflowUiPlugin plugin;
 
@@ -76,5 +75,9 @@ public class DataflowUiPlugin extends AbstractUIPlugin {
 
   public static Shell getActiveWindowShell() {
     return plugin.getWorkbench().getActiveWorkbenchWindow().getShell();
+  }
+
+  public static DataflowUiPlugin getDefault() {
+    return plugin;
   }
 }

@@ -68,6 +68,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -90,6 +91,12 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   private static final Joiner MISSING_GROUP_MEMBER_JOINER = Joiner.on(", "); //$NON-NLS-1$
 
   private static final String ARGUMENTS_SEPARATOR = "="; //$NON-NLS-1$
+  private static final String PIPELINE_TAB_IMAGE = "PIPELINE_TAB_IMAGE";
+  static {
+    DataflowUiPlugin.getDefault().getImageRegistry().put(PIPELINE_TAB_IMAGE,
+        DataflowUiPlugin.imageDescriptorFromPlugin(DataflowUiPlugin.PLUGIN_ID,
+            "icons/Dataflow_16.png"));
+  }
 
   private final IWorkspaceRoot workspaceRoot;
 
@@ -620,5 +627,10 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
         updateLaunchConfigurationDialog();
       }
     }
+  }
+
+  @Override
+  public Image getImage() {
+    return DataflowUiPlugin.getDefault().getImageRegistry().get(PIPELINE_TAB_IMAGE);
   }
 }
