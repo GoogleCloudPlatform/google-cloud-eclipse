@@ -91,13 +91,6 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   private static final Joiner MISSING_GROUP_MEMBER_JOINER = Joiner.on(", "); //$NON-NLS-1$
 
   private static final String ARGUMENTS_SEPARATOR = "="; //$NON-NLS-1$
-  private static final String PIPELINE_TAB_IMAGE = "PIPELINE_TAB_IMAGE";
-  static {
-    DataflowUiPlugin.getDefault().getImageRegistry().put(PIPELINE_TAB_IMAGE,
-        DataflowUiPlugin.imageDescriptorFromPlugin(DataflowUiPlugin.PLUGIN_ID,
-            "icons/Dataflow_16.png"));
-  }
-
   private final IWorkspaceRoot workspaceRoot;
 
   /**
@@ -631,6 +624,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
   @Override
   public Image getImage() {
-    return DataflowUiPlugin.getDefault().getImageRegistry().get(PIPELINE_TAB_IMAGE);
+    return DataflowUiPlugin.getDefault().getImageRegistry()
+        .get(DataflowUiPlugin.PIPELINE_TAB_IMAGE);
   }
 }

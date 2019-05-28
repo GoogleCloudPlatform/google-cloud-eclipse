@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.dataflow.ui;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -30,8 +31,10 @@ public class DataflowUiPlugin extends AbstractUIPlugin {
 
   // The plug-in ID
   public static final String PLUGIN_ID = "com.google.cloud.tools.eclipse.dataflow.ui"; //$NON-NLS-1$
+
   // The shared instance
   private static DataflowUiPlugin plugin;
+  public static final String PIPELINE_TAB_IMAGE = "PIPELINE_TAB_IMAGE";
 
   public DataflowUiPlugin() {}
 
@@ -79,5 +82,11 @@ public class DataflowUiPlugin extends AbstractUIPlugin {
 
   public static DataflowUiPlugin getDefault() {
     return plugin;
+  }
+
+  @Override
+  protected void initializeImageRegistry(ImageRegistry registry) {
+    registry.put(PIPELINE_TAB_IMAGE, imageDescriptorFromPlugin(PLUGIN_ID, "icons/Dataflow_16.png"));
+    super.initializeImageRegistry(registry);
   }
 }
