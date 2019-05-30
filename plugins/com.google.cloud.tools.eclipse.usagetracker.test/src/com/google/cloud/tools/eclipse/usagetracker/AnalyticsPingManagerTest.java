@@ -166,7 +166,7 @@ public class AnalyticsPingManagerTest {
   public void testGetAnonymizedClientId_generateNewId() {
     when(preferences.get(eq(AnalyticsPreferences.ANALYTICS_CLIENT_ID), anyString()))
         .thenReturn(null);  // Simulate that client ID has never been generated.
-    String clientId = AnalyticsPingManager.getAnonymizedClientId(preferences);
+    String clientId = pingManager.getAnonymizedClientId();
     assertFalse(clientId.isEmpty());
     verify(preferences).put(AnalyticsPreferences.ANALYTICS_CLIENT_ID, clientId);
   }
@@ -175,7 +175,7 @@ public class AnalyticsPingManagerTest {
   public void testGetAnonymizedClientId_useSavedId() {
     when(preferences.get(eq(AnalyticsPreferences.ANALYTICS_CLIENT_ID), anyString()))
         .thenReturn("some-unique-client-id");
-    String clientId = AnalyticsPingManager.getAnonymizedClientId(preferences);
+    String clientId = pingManager.getAnonymizedClientId();
     assertEquals("some-unique-client-id", clientId);
     verify(preferences, never()).put(AnalyticsPreferences.ANALYTICS_CLIENT_ID, clientId);
   }

@@ -139,7 +139,7 @@ public class AnalyticsPingManager {
   }
 
   @VisibleForTesting
-  static synchronized String getAnonymizedClientId(IEclipsePreferences preferences) {
+  synchronized String getAnonymizedClientId() {
     String clientId = preferences.get(AnalyticsPreferences.ANALYTICS_CLIENT_ID, null);
     if (clientId == null) {
       clientId = UUID.randomUUID().toString();
@@ -273,7 +273,7 @@ public class AnalyticsPingManager {
   @VisibleForTesting
   Map<String, String> buildParametersMap(PingEvent pingEvent) {
     Map<String, String> parametersMap = new HashMap<>(STANDARD_PARAMETERS);
-    parametersMap.put("cid", getAnonymizedClientId(preferences));
+    parametersMap.put("cid", getAnonymizedClientId());
     parametersMap.put("cd19", CloudToolsInfo.METRICS_NAME);  // cd19: "event type"
     parametersMap.put("cd20", pingEvent.eventName);
 
@@ -383,8 +383,9 @@ public class AnalyticsPingManager {
     clientInfo.put("client_type", "DESKTOP");
     clientInfo.put("desktop_client_info", Collections.singletonList(desktopClientInfo));
         
-    //logs/proto/cloud/concord/concord_event.proto
+    // logs/proto/cloud/concord/concord_event.proto
     Map<String, Object> sourceExtension = new HashMap<>();
+    sourceExtension.put("client_machine_id", getAnonymizedClientId());
     sourceExtension.put("console_type", CloudToolsInfo.CONSOLE_TYPE);
     sourceExtension.put("event_name", event.eventName);
     
@@ -409,7 +410,6 @@ public class AnalyticsPingManager {
     
     Map<String, Object> root = new HashMap<>();
     root.put("log_source_name", "CONCORD");
-    root.put("zwieback_cookie", getAnonymizedClientId(preferences));
     root.put("request_time_ms", System.currentTimeMillis());
     root.put("client_info", Collections.singletonList(clientInfo));
     root.put("log_event", Collections.singletonList(Collections.singletonList(logEvent)));
