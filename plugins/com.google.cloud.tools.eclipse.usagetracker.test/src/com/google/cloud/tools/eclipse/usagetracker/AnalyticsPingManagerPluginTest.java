@@ -74,8 +74,7 @@ public class AnalyticsPingManagerPluginTest {
     Map<String, ?> clientInfo = ((List<Map<String, ?>>) root.get("client_info")).get(0);
     Assert.assertEquals("DESKTOP", clientInfo.get("client_type"));  
     Assert.assertEquals("CONCORD", root.get("log_source_name"));  
-    Assert.assertNotNull(root.get("zwieback_cookie"));  
-    
+
     long requestTimeMs = ((Double) root.get("request_time_ms")).longValue();
     Assert.assertTrue(requestTimeMs >= 1000000);
     
@@ -96,7 +95,7 @@ public class AnalyticsPingManagerPluginTest {
     Type sourceExtensionJsonType = new TypeToken<Map<String, ?>>(){}.getType();
     Map<String, ?> source = gson.fromJson(sourceExtensionJson, sourceExtensionJsonType);
     Assert.assertEquals("CLOUD_TOOLS_FOR_ECLIPSE", source.get("console_type"));
-     
+    Assert.assertEquals("clientId", source.get("client_machine_id"));
     Assert.assertEquals("SomeEvent", source.get("event_name"));
 
     List<Map<String, String>> eventMetadata =
@@ -109,8 +108,8 @@ public class AnalyticsPingManagerPluginTest {
     Assert.assertEquals("bax", eventMetadata.get(1).get("key"));
     Assert.assertEquals("bat", eventMetadata.get(1).get("value"));
 
-    Assert.assertEquals(sourceExtensionJson, "ct4e-version", eventMetadata.get(2).get("key"));
-    Assert.assertEquals(sourceExtensionJson, "0.0.0", eventMetadata.get(2).get("value"));
+    Assert.assertEquals("ct4e-version", eventMetadata.get(2).get("key"));
+    Assert.assertEquals("0.0.0", eventMetadata.get(2).get("value"));
 
     // expected value depends on host
     Assert.assertEquals("eclipse-version", eventMetadata.get(3).get("key"));
