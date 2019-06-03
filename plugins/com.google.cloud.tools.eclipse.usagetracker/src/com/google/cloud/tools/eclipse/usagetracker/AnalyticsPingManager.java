@@ -245,24 +245,17 @@ public class AnalyticsPingManager {
         }
       }
       
-      if (useClearCut()) {
-        try {
-          String json = jsonEncode(pingEvent);
-          int resultCode = HttpUtil.sendPost(clearCutUrl, json, "application/json");
-          if (resultCode >= 300) {
-            logger.log(Level.FINE, "Failed to POST to Concord with HTTP result " + resultCode);
-          }
-        } catch (IOException ex) {
-          // Don't recover or retry.
-          logger.log(Level.FINE, "Failed to POST to Concord", ex);
-        } 
-      }
+      try {
+        String json = jsonEncode(pingEvent);
+        int resultCode = HttpUtil.sendPost(clearCutUrl, json, "application/json");
+        if (resultCode >= 300) {
+          logger.log(Level.FINE, "Failed to POST to Concord with HTTP result " + resultCode);
+        }
+      } catch (IOException ex) {
+        // Don't recover or retry.
+        logger.log(Level.FINE, "Failed to POST to Concord", ex);
+      } 
     }
-  }
-
-  private static boolean useClearCut() {
-    String flag = System.getenv("USE_CLEARCUT");
-    return "true".equalsIgnoreCase(flag);
   }
 
   private static final Escaper METADATA_ESCAPER = new CharEscaperBuilder()
