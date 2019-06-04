@@ -138,11 +138,12 @@ public class CloudLibrariesInPluginXmlTest {
   }
 
   @Test
-  public void testObjectify5LibraryConfig() throws URISyntaxException {
+  public void testObjectifyLibraryConfig() throws URISyntaxException {
     Library objectifyLibrary = CloudLibraries.getLibrary(OBJECTIFY_LIBRARY_ID);
     assertThat(objectifyLibrary.getId(), is(OBJECTIFY_LIBRARY_ID));
     assertThat(objectifyLibrary.getName(), is("Objectify"));
     assertThat(objectifyLibrary.getGroups().get(0), is("appengine"));
+    assertThat(objectifyLibrary.getJavaVersion(), is("1.8"));
     assertThat(objectifyLibrary.getSiteUri(),
         is(new URI("https://github.com/objectify/objectify/wiki")));
     assertTrue(objectifyLibrary.isExport());
@@ -167,7 +168,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(objectifyMavenCoordinates.getArtifactId(), is("objectify"));
     DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(
         objectifyMavenCoordinates.getVersion());
-    assertEquals(new DefaultArtifactVersion("6.0.3"), artifactVersion);
+    assertEquals(new DefaultArtifactVersion("6.0.4"), artifactVersion);
     assertThat(objectifyMavenCoordinates.getType(), is("jar"));
     assertNull(objectifyMavenCoordinates.getClassifier());
 
@@ -183,7 +184,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(guavaMavenCoordinates.getRepository(), is("central"));
     assertThat(guavaMavenCoordinates.getGroupId(), is("com.google.guava"));
     assertThat(guavaMavenCoordinates.getArtifactId(), is("guava"));
-    assertThat(guavaMavenCoordinates.getVersion(), is("20.0"));
+    assertThat(guavaMavenCoordinates.getVersion(), is("27.1-android"));
     assertThat(guavaMavenCoordinates.getType(), is("jar"));
     assertNull(guavaMavenCoordinates.getClassifier());
 
@@ -197,6 +198,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(objectifyLibrary.getId(), is("objectify6"));
     assertThat(objectifyLibrary.getName(), is("Objectify"));
     assertThat(objectifyLibrary.getGroups().get(0), is("non-appengine-standard"));
+    assertThat(objectifyLibrary.getJavaVersion(), is("1.8"));
     assertThat(objectifyLibrary.getSiteUri(),
         is(new URI("https://github.com/objectify/objectify/wiki")));
     assertTrue(objectifyLibrary.isExport());
@@ -223,7 +225,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(objectifyMavenCoordinates.getArtifactId(), is("objectify"));
     DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(
         objectifyMavenCoordinates.getVersion());
-    DefaultArtifactVersion expected = new DefaultArtifactVersion("6.0.3");
+    DefaultArtifactVersion expected = new DefaultArtifactVersion("6.0.4");
     assertTrue(artifactVersion.compareTo(expected) >= 0);
     assertThat(objectifyMavenCoordinates.getType(), is("jar"));
     assertNull(objectifyMavenCoordinates.getClassifier());
@@ -240,7 +242,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(guavaMavenCoordinates.getRepository(), is("central"));
     assertThat(guavaMavenCoordinates.getGroupId(), is("com.google.guava"));
     assertThat(guavaMavenCoordinates.getArtifactId(), is("guava"));
-    assertThat(guavaMavenCoordinates.getVersion(), is("20.0"));
+    assertThat(guavaMavenCoordinates.getVersion(), is("27.1-android"));
     assertThat(guavaMavenCoordinates.getType(), is("jar"));
     assertNull(guavaMavenCoordinates.getClassifier());
 
