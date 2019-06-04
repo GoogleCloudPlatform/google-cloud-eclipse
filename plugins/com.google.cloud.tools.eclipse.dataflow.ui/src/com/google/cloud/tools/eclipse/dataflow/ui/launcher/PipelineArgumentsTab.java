@@ -61,6 +61,7 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -68,6 +69,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -78,6 +80,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.events.IExpansionListener;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 /**
  * A tab specifying arguments required to run a Dataflow Pipeline.
@@ -92,6 +95,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   private static final String ARGUMENTS_SEPARATOR = "="; //$NON-NLS-1$
 
   private final IWorkspaceRoot workspaceRoot;
+  private Image image;
 
   /**
    * When true, suppresses calls to {@link #updateLaunchConfigurationDialog()} to avoid frequent
@@ -144,6 +148,9 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     this.workspaceRoot = workspaceRoot;
     this.dependencyManager = dependencyManager;
     hierarchy = pipelineOptionsHierarchyFactory.global(new NullProgressMonitor());
+    ImageDescriptor descriptor = AbstractUIPlugin
+        .imageDescriptorFromPlugin(DataflowUiPlugin.PLUGIN_ID, "icons/Dataflow_16.png");
+    image = descriptor != null ? descriptor.createImage() : null;;
   }
 
   @Override
@@ -620,5 +627,17 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
         updateLaunchConfigurationDialog();
       }
     }
+  }
+
+  @Override
+  public Image getImage() {
+    return image;
+  }
+
+  @Override
+  public void dispose() {
+    if (image != null)
+      image.dispose();
+    super.dispose();
   }
 }
