@@ -24,6 +24,7 @@ import java.text.MessageFormat;
 import javax.inject.Inject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IClasspathContainer;
@@ -80,7 +81,11 @@ public class LibraryClasspathContainerInitializer extends ClasspathContainerInit
             new IClasspathContainer[] {container},
             new NullProgressMonitor());
       } else {
-        resolverService.resolveContainer(project, containerPath, new NullProgressMonitor());
+        IStatus result =
+            resolverService.resolveContainer(project, containerPath, new NullProgressMonitor());
+        if (!result.isOK()) {
+          throw new CoreException(result);
+        }
       }
     } catch (IOException ex) {
       throw new CoreException(
