@@ -636,8 +636,9 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
   @Override
   public void dispose() {
-    if (image != null)
+    if (image != null) {
       image.dispose();
+    }
     super.dispose();
   }
 }
