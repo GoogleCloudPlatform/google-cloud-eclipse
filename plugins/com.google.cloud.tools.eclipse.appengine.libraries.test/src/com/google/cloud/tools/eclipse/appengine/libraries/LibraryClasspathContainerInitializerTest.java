@@ -40,6 +40,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -113,8 +114,11 @@ public class LibraryClasspathContainerInitializerTest {
   }
 
   @Test
-  public void testInitialize_ifSerializerReturnsNullResolverServiceIsCalled() throws IOException,
-                                                                                     CoreException {
+  public void testInitialize_ifSerializerReturnsNullResolverServiceIsCalled()
+      throws IOException, CoreException {
+    when(resolverService.resolveContainer(
+            any(IJavaProject.class), any(IPath.class), any(IProgressMonitor.class)))
+        .thenReturn(Status.OK_STATUS);
     when(serializer.loadContainer(any(IJavaProject.class), any(IPath.class))).thenReturn(null);
     LibraryClasspathContainerInitializer containerInitializer =
         new LibraryClasspathContainerInitializer(TEST_CONTAINER_PATH, serializer, resolverService);
@@ -142,6 +146,9 @@ public class LibraryClasspathContainerInitializerTest {
     IClasspathEntry[] entries = new IClasspathEntry[]{ entry };
     LibraryClasspathContainer container = mock(LibraryClasspathContainer.class);
     when(container.getClasspathEntries()).thenReturn(entries);
+    when(resolverService.resolveContainer(
+            any(IJavaProject.class), any(IPath.class), any(IProgressMonitor.class)))
+        .thenReturn(Status.OK_STATUS);
     when(serializer.loadContainer(any(IJavaProject.class), any(IPath.class))).thenReturn(container);
 
     LibraryClasspathContainerInitializer containerInitializer =
@@ -163,6 +170,9 @@ public class LibraryClasspathContainerInitializerTest {
     IClasspathEntry[] entries = new IClasspathEntry[]{ entry };
     LibraryClasspathContainer container = mock(LibraryClasspathContainer.class);
     when(container.getClasspathEntries()).thenReturn(entries);
+    when(resolverService.resolveContainer(
+            any(IJavaProject.class), any(IPath.class), any(IProgressMonitor.class)))
+        .thenReturn(Status.OK_STATUS);
     when(serializer.loadContainer(any(IJavaProject.class), any(IPath.class))).thenReturn(container);
 
     LibraryClasspathContainerInitializer containerInitializer =
