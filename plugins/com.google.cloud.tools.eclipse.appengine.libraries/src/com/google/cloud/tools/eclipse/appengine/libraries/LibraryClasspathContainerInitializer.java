@@ -42,7 +42,7 @@ import org.eclipse.jdt.core.JavaCore;
 public class LibraryClasspathContainerInitializer extends ClasspathContainerInitializer {
   @Inject private LibraryClasspathContainerSerializer serializer;
   @Inject private ILibraryClasspathContainerResolverService resolverService;
-  
+
   private String containerPathPrefix = LibraryClasspathContainer.CONTAINER_PATH_PREFIX;
 
   public LibraryClasspathContainerInitializer() {}
@@ -84,7 +84,10 @@ public class LibraryClasspathContainerInitializer extends ClasspathContainerInit
         IStatus result =
             resolverService.resolveContainer(project, containerPath, new NullProgressMonitor());
         if (!result.isOK()) {
-          throw new CoreException(result);
+          String message =
+              Messages.getString(
+                  "error.resolving.container", project.getElementName()); // $NON-NLS-1$
+          StatusUtil.setErrorStatus(this, message, result);
         }
       }
     } catch (IOException ex) {

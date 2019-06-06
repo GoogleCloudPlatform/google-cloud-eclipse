@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.util.status;
 
 import com.google.common.base.Strings;
 import java.lang.reflect.InvocationTargetException;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
@@ -119,7 +120,11 @@ public class StatusUtil {
   }
 
   public static IStatus setErrorStatus(Object origin, String message, IStatus status) {
-    return setErrorStatus(origin, message +  ": " + status.getMessage(), status.getException());
+    if (!message.equals(status.getMessage())) {
+      status = multi(origin, message, new IStatus[] {status});
+    }
+    StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.LOG);
+    return status;
   }
 
   public static IStatus setErrorStatus(Object origin, String message, Throwable exception) {
@@ -127,13 +132,14 @@ public class StatusUtil {
     if (exception instanceof InvocationTargetException && exception.getCause() != null) {
       targetException = targetException.getCause();
     }
-
+    if (targetException instanceof CoreException) {
+      return setErrorStatus(origin, message, ((CoreException) targetException).getStatus());
+    }
     if (targetException != null && !Strings.isNullOrEmpty(targetException.getMessage())) {
       message += ": " + targetException.getMessage();
     }
     IStatus status = error(origin, message, targetException);
-    StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.LOG);
-    return status;
+    return setErrorStatus(origin, message, status);
   }
 
   /**
