@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -40,6 +41,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -116,11 +118,23 @@ public class LibraryClasspathContainerInitializerTest {
   public void testInitialize_ifSerializerReturnsNullResolverServiceIsCalled() throws IOException,
                                                                                      CoreException {
     when(serializer.loadContainer(any(IJavaProject.class), any(IPath.class))).thenReturn(null);
+
+    boolean[] called = new boolean[] {false};
     LibraryClasspathContainerInitializer containerInitializer =
-        new LibraryClasspathContainerInitializer(TEST_CONTAINER_PATH, serializer, resolverService);
+        new LibraryClasspathContainerInitializer(TEST_CONTAINER_PATH, serializer, resolverService) {
+
+          @Override
+          public void requestClasspathContainerUpdate(
+              IPath containerPath, IJavaProject project, IClasspathContainer containerSuggestion)
+              throws CoreException {
+            called[0] = true;
+          }
+        };
+    assertFalse(called[0]);
     containerInitializer.initialize(new Path(TEST_CONTAINER_PATH + "/second.segment"),
                                     testProject.getJavaProject());
-    verifyContainerResolvedFromScratch();
+    assertTrue(called[0]);
+    verifyContainerWasNotResolvedFromScratch();
   }
 
   @Test(expected = CoreException.class)
@@ -144,11 +158,20 @@ public class LibraryClasspathContainerInitializerTest {
     when(container.getClasspathEntries()).thenReturn(entries);
     when(serializer.loadContainer(any(IJavaProject.class), any(IPath.class))).thenReturn(container);
 
+    boolean[] called = new boolean[] {false};
     LibraryClasspathContainerInitializer containerInitializer =
-        new LibraryClasspathContainerInitializer(TEST_CONTAINER_PATH, serializer, resolverService);
+        new LibraryClasspathContainerInitializer(TEST_CONTAINER_PATH, serializer, resolverService) {
+          @Override
+          public void requestClasspathContainerUpdate(
+              IPath containerPath, IJavaProject project, IClasspathContainer containerSuggestion)
+              throws CoreException {
+            called[0] = true;
+          }
+        };
+    assertFalse(called[0]);
     containerInitializer.initialize(new Path(TEST_LIBRARY_PATH), testProject.getJavaProject());
-
-    verifyContainerResolvedFromScratch();
+    assertTrue(called[0]);
+    verifyContainerWasNotResolvedFromScratch();
   }
 
   @Test
@@ -165,11 +188,21 @@ public class LibraryClasspathContainerInitializerTest {
     when(container.getClasspathEntries()).thenReturn(entries);
     when(serializer.loadContainer(any(IJavaProject.class), any(IPath.class))).thenReturn(container);
 
+    boolean[] called = new boolean[] {false};
     LibraryClasspathContainerInitializer containerInitializer =
-        new LibraryClasspathContainerInitializer(TEST_CONTAINER_PATH, serializer, resolverService);
-    containerInitializer.initialize(new Path(TEST_LIBRARY_PATH), testProject.getJavaProject());
+        new LibraryClasspathContainerInitializer(TEST_CONTAINER_PATH, serializer, resolverService) {
 
-    verifyContainerResolvedFromScratch();
+          @Override
+          public void requestClasspathContainerUpdate(
+              IPath containerPath, IJavaProject project, IClasspathContainer containerSuggestion)
+              throws CoreException {
+            called[0] = true;
+          }
+        };
+    assertFalse(called[0]);
+    containerInitializer.initialize(new Path(TEST_LIBRARY_PATH), testProject.getJavaProject());
+    assertTrue(called[0]);
+    verifyContainerWasNotResolvedFromScratch();
   }
 
   @Test

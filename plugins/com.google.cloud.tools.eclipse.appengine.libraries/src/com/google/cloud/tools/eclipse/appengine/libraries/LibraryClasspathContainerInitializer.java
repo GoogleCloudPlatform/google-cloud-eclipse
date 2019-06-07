@@ -79,9 +79,9 @@ public class LibraryClasspathContainerInitializer extends ClasspathContainerInit
             new IJavaProject[] {project},
             new IClasspathContainer[] {container},
             new NullProgressMonitor());
-      } else {
-        resolverService.resolveContainer(project, containerPath, new NullProgressMonitor());
+        return;
       }
+      requestClasspathContainerUpdate(containerPath, project, null);
     } catch (IOException ex) {
       throw new CoreException(
           StatusUtil.error(this, "Failed to load persisted container descriptor", ex));
