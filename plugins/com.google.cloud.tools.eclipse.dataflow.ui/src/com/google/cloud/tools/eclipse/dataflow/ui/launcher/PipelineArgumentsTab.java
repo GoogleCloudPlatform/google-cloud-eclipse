@@ -65,12 +65,12 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -168,19 +168,16 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
     createDefaultOptionsComponent(internalComposite, new GridData(SWT.FILL, SWT.FILL, true, false));
 
-    Composite inputsComposite = new Composite(internalComposite, SWT.NULL);
-    inputsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    inputsComposite.setLayout(new FillLayout(SWT.VERTICAL));
-
     Set<String> filterProperties =
         ImmutableSet.<String>builder()
             .addAll(DataflowPreferences.SUPPORTED_DEFAULT_PROPERTIES)
             .add("runner") //$NON-NLS-1$
             .build();
 
-    Group runnerOptionsGroup = new Group(inputsComposite, SWT.NULL);
+    Group runnerOptionsGroup = new Group(internalComposite, SWT.NULL);
     runnerOptionsGroup.setText(Messages.getString("pipeline.options")); //$NON-NLS-1$
     runnerOptionsGroup.setLayout(new GridLayout());
+    runnerOptionsGroup.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 
     userOptionsSelector = new TextAndButtonComponent(
         runnerOptionsGroup,
@@ -587,6 +584,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
       if (button.getSelection()) {
         launchConfiguration.setRunner(runner);
         updatePipelineOptionsForm();
+        handleLayoutChange();
         updateLaunchConfigurationDialog();
       }
     }
@@ -624,8 +622,22 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     @Override
     public void run() {
       if (!suppressDialogUpdates) {
+        handleLayoutChange();
         updateLaunchConfigurationDialog();
       }
+    }
+  }
+
+  private void handleLayoutChange() {
+    Composite parent = internalComposite.getParent();
+    while (parent != null) {
+      if (parent instanceof ScrolledComposite) {
+        ((ScrolledComposite) parent)
+            .setMinSize(internalComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+        parent.layout();
+        return;
+      }
+      parent = parent.getParent();
     }
   }
 
