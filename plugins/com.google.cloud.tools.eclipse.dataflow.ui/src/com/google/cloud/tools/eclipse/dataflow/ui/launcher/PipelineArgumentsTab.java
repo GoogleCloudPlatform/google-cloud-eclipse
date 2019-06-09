@@ -208,7 +208,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
           launchConfiguration.setUserOptionsName(userOptionsName);
         }
         updatePipelineOptionsForm();
-        updateLaunchConfigurationDialog();
+        handleLayoutChange();
       }
 
       @Override
@@ -351,7 +351,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     // updateLaunchConfigurationDialog() will call performApply() on the active tab
     // thus writing out the current UI state, like an updated runner
     uiUpToDate = true;
-    updateLaunchConfigurationDialog();
+    handleLayoutChange();
   }
 
   /**
@@ -585,7 +585,6 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
         launchConfiguration.setRunner(runner);
         updatePipelineOptionsForm();
         handleLayoutChange();
-        updateLaunchConfigurationDialog();
       }
     }
   }
@@ -623,22 +622,24 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     public void run() {
       if (!suppressDialogUpdates) {
         handleLayoutChange();
-        updateLaunchConfigurationDialog();
       }
     }
   }
 
   private void handleLayoutChange() {
-    Composite parent = internalComposite.getParent();
-    while (parent != null) {
-      if (parent instanceof ScrolledComposite) {
-        ((ScrolledComposite) parent)
-            .setMinSize(internalComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-        parent.layout();
-        return;
+    if (internalComposite != null && !internalComposite.isDisposed()) {
+      Composite parent = internalComposite.getParent();
+      while (parent != null) {
+        if (parent instanceof ScrolledComposite) {
+          ((ScrolledComposite) parent)
+              .setMinSize(internalComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+          parent.layout();
+          return;
+        }
+        parent = parent.getParent();
       }
-      parent = parent.getParent();
     }
+    updateLaunchConfigurationDialog();
   }
 
   @Override
