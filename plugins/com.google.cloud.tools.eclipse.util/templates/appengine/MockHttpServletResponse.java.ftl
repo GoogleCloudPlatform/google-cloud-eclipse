@@ -3,8 +3,8 @@
 </#if>import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Collection;
-import java.util.Locale;
+<#if servletVersion != "2.5"> import java.util.Collection;
+</#if>import java.util.Locale;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
@@ -127,7 +127,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
     return null;
   }
 
-  @Override
+  @Override @Deprecated
   public String encodeRedirectUrl(String arg0) {
     return null;
   }
@@ -137,7 +137,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
     return null;
   }
 
-  @Override
+  @Override @Deprecated
   public String encodeUrl(String arg0) {
     return null;
   }
@@ -170,7 +170,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
   public void setStatus(int arg0) {
   }
 
-  @Override
+  @Override @Deprecated
   public void setStatus(int arg0, String arg1) {
   }
 
