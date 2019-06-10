@@ -109,7 +109,7 @@ public class LibraryClasspathContainerResolverService
     ISchedulingRule currentRule = Job.getJobManager().currentRule();
     Preconditions.checkState(
         currentRule == null || currentRule.contains(getSchedulingRule()),
-        "current scheduling rule is insufficient");
+        "current scheduling rule is insufficient: " + currentRule);
 
     LinkedHashSet<IClasspathEntry> resolvedEntries = new LinkedHashSet<>();
     for (String libraryId : libraryIds) {

@@ -21,6 +21,7 @@ import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.Collections;
 import javax.inject.Inject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -81,7 +82,18 @@ public class LibraryClasspathContainerInitializer extends ClasspathContainerInit
             new NullProgressMonitor());
         return;
       }
-      requestClasspathContainerUpdate(containerPath, project, null);
+      /* Container definition is not resolved, so set an empty container (an
+       * IClasspathContainerInitializer *must* set a corresponding container) and initiate
+       * a container resolving job. */
+      JavaCore.setClasspathContainer(
+          containerPath,
+          new IJavaProject[] {project},
+          new IClasspathContainer[] {
+            new LibraryClasspathContainer(
+                containerPath, "in progress", Collections.emptyList(), Collections.emptyList())
+          },
+          new NullProgressMonitor());
+      requestClasspathContainerUpdate(containerPath, project, container);
     } catch (IOException ex) {
       throw new CoreException(
           StatusUtil.error(this, "Failed to load persisted container descriptor", ex));
@@ -114,7 +126,11 @@ public class LibraryClasspathContainerInitializer extends ClasspathContainerInit
         new LibraryClasspathContainerResolverJob(
             BuildPath.resolvingRule(project), resolverService, project);
     job.setUser(true);
-    job.schedule();
+    // Usually called from an initialize() request in response to adding a new libraries
+    // classpath entry to a project for the first time.  This classpath entry is not added
+    // until the initialize() is complete.  So schedule this job 1ms from now to ensure
+    // we return before it starts.
+    job.schedule(1);
   }
 
   @Override
