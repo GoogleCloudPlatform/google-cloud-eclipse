@@ -107,8 +107,8 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   @VisibleForTesting
   UpdateLaunchConfigurationDialogChangedListener dialogChangedListener =
       new UpdateLaunchConfigurationDialogChangedListener();
-
-  private Composite internalComposite;
+  @VisibleForTesting
+  Composite internalComposite;
 
   @VisibleForTesting
   Map<PipelineRunner, Button> runnerButtons;
@@ -626,7 +626,8 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     }
   }
 
-  private void handleLayoutChange() {
+  @VisibleForTesting
+  void handleLayoutChange() {
     if (internalComposite != null && !internalComposite.isDisposed()) {
       Composite parent = internalComposite.getParent();
       while (parent != null) {

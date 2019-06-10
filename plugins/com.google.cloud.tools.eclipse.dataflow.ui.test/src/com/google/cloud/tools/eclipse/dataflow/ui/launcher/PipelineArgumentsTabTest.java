@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
@@ -55,6 +56,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -308,7 +312,11 @@ public class PipelineArgumentsTabTest {
       Shell shell = shellResource.getShell();
       PipelineArgumentsTab tab = new PipelineArgumentsTab();
       tab.setLaunchConfigurationDialog(dialog);
-      tab.createControl(shell);
+      ScrolledComposite scrolledComposite =
+          new ScrolledComposite(shellResource.getShell(), SWT.V_SCROLL | SWT.H_SCROLL);
+      scrolledComposite.setExpandHorizontal(true);
+      scrolledComposite.setExpandVertical(true);
+      tab.createControl(scrolledComposite);
 
       PipelineLaunchConfiguration launchConfig = PipelineLaunchConfiguration
           .fromLaunchConfiguration(testParameter.majorVersion, mock(ILaunchConfiguration.class));
@@ -321,6 +329,24 @@ public class PipelineArgumentsTabTest {
       // Should not throw IllegalStateException:
       // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2136
       tab.getSelectedRunner();
+      testScrollbar(tab);
+    }
+
+    public void testScrollbar(PipelineArgumentsTab pipelineArgumentsTab) {
+      Composite composite = pipelineArgumentsTab.internalComposite;
+      assertNotNull(composite);
+      Composite parent = pipelineArgumentsTab.internalComposite.getParent();
+      if (parent instanceof ScrolledComposite) {
+        pipelineArgumentsTab.handleLayoutChange();
+        Point compositeSize = composite.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+        ScrolledComposite scrollComposite = (ScrolledComposite) parent;
+        Point scrollSize = new Point(scrollComposite.getMinWidth(), scrollComposite.getMinHeight());
+        if (compositeSize.equals(scrollSize)) {
+          return;
+        }
+        fail("Scrollbar is not working");
+      }
+      fail("Did not find the Scroll composite");
     }
 
     private static Button getCheckedRunnerButton(Composite composite) {
