@@ -85,7 +85,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
   }
 
   @Override
-  public void setBufferSize(int arg0) {
+  public void setBufferSize(int size) {
   }
 
   @Override
@@ -94,51 +94,51 @@ public class MockHttpServletResponse implements HttpServletResponse {
   }
 
   @Override
-  public void setContentLength(int arg0) {
+  public void setContentLength(int length) {
   }
 
   @Override
-  public void setLocale(Locale arg0) {
+  public void setLocale(Locale locale) {
   }
 
   @Override
-  public void addCookie(Cookie arg0) {
+  public void addCookie(Cookie cookie) {
   }
 
   @Override
-  public void addDateHeader(String arg0, long arg1) {
+  public void addDateHeader(String name, long date) {
   }
 
   @Override
-  public void addHeader(String arg0, String arg1) {
+  public void addHeader(String name, String value) {
   }
 
   @Override
-  public void addIntHeader(String arg0, int arg1) {
+  public void addIntHeader(String name, int value) {
   }
 
   @Override
-  public boolean containsHeader(String arg0) {
+  public boolean containsHeader(String name) {
     return false;
   }
 
   @Override
-  public String encodeRedirectURL(String arg0) {
+  public String encodeRedirectURL(String url) {
     return null;
   }
 
   @Override @Deprecated
-  public String encodeRedirectUrl(String arg0) {
+  public String encodeRedirectUrl(String url) {
     return null;
   }
 
   @Override
-  public String encodeURL(String arg0) {
+  public String encodeURL(String url) {
     return null;
   }
 
   @Override @Deprecated
-  public String encodeUrl(String arg0) {
+  public String encodeUrl(String url) {
     return null;
   }
 
@@ -147,7 +147,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
   }
 
   @Override
-  public void sendError(int arg0, String arg1) throws IOException {
+  public void sendError(int stausCode, String message) throws IOException {
   }
 
   @Override
@@ -155,23 +155,23 @@ public class MockHttpServletResponse implements HttpServletResponse {
   }
 
   @Override
-  public void setDateHeader(String arg0, long arg1) {
+  public void setDateHeader(String name, long date) {
   }
 
   @Override
-  public void setHeader(String arg0, String arg1) {
+  public void setHeader(String name, String value) {
   }
 
   @Override
-  public void setIntHeader(String arg0, int arg1) {
+  public void setIntHeader(String name, int value) {
   }
 
   @Override
-  public void setStatus(int arg0) {
+  public void setStatus(int statusCode) {
   }
 
   @Override @Deprecated
-  public void setStatus(int arg0, String arg1) {
+  public void setStatus(int statusCode, String message) {
   }
 
 <#if servletVersion != "2.5">  // Servlet API 3.0 and 3.1 methods
