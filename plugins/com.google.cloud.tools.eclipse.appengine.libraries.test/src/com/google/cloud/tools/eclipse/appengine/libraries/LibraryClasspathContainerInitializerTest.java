@@ -115,8 +115,8 @@ public class LibraryClasspathContainerInitializerTest {
   }
 
   @Test
-  public void testInitialize_ifSerializerReturnsNullResolverServiceIsCalled() throws IOException,
-                                                                                     CoreException {
+  public void testInitialize_ifSerializerReturnsNullContainerResolvedFromScratch()
+      throws IOException, CoreException {
     when(serializer.loadContainer(any(IJavaProject.class), any(IPath.class))).thenReturn(null);
 
     boolean[] called = new boolean[] {false};
@@ -134,7 +134,7 @@ public class LibraryClasspathContainerInitializerTest {
     containerInitializer.initialize(new Path(TEST_CONTAINER_PATH + "/second.segment"),
                                     testProject.getJavaProject());
     assertTrue(called[0]);
-    verifyContainerWasNotResolvedFromScratch();
+    verifyResolveServiceResolveContainerNotCalled();
   }
 
   @Test(expected = CoreException.class)
@@ -171,7 +171,7 @@ public class LibraryClasspathContainerInitializerTest {
     assertFalse(called[0]);
     containerInitializer.initialize(new Path(TEST_LIBRARY_PATH), testProject.getJavaProject());
     assertTrue(called[0]);
-    verifyContainerWasNotResolvedFromScratch();
+    verifyResolveServiceResolveContainerNotCalled();
   }
 
   @Test
@@ -202,7 +202,7 @@ public class LibraryClasspathContainerInitializerTest {
     assertFalse(called[0]);
     containerInitializer.initialize(new Path(TEST_LIBRARY_PATH), testProject.getJavaProject());
     assertTrue(called[0]);
-    verifyContainerWasNotResolvedFromScratch();
+    verifyResolveServiceResolveContainerNotCalled();
   }
 
   @Test
@@ -228,7 +228,7 @@ public class LibraryClasspathContainerInitializerTest {
     
     for (IClasspathEntry resolvedEntry : resolvedClasspath) {
       if (resolvedEntry.getPath().toOSString().equals(artifactFile.getAbsolutePath())) {
-        verifyContainerWasNotResolvedFromScratch();
+        verifyResolveServiceResolveContainerNotCalled();
         return;
       }
     }
@@ -259,7 +259,7 @@ public class LibraryClasspathContainerInitializerTest {
       if (resolvedEntry.getPath().toOSString().equals(artifactFile.getAbsolutePath())) {
         assertThat(resolvedEntry.getSourceAttachmentPath().toOSString(),
             is(sourceArtifactFile.getAbsolutePath()));
-        verifyContainerWasNotResolvedFromScratch();
+        verifyResolveServiceResolveContainerNotCalled();
         return;
       }
     }
@@ -278,12 +278,7 @@ public class LibraryClasspathContainerInitializerTest {
         containerInitializer.getComparisonID(new Path(TEST_CONTAINER_PATH + "/2"), null));
   }
 
-  private IStatus verifyContainerResolvedFromScratch() {
-    return verify(resolverService).resolveContainer(any(IJavaProject.class), any(IPath.class),
-                                                    any(IProgressMonitor.class));
-  }
-
-  private IStatus verifyContainerWasNotResolvedFromScratch() {
+  private IStatus verifyResolveServiceResolveContainerNotCalled() {
     return verify(resolverService, never()).resolveContainer(any(IJavaProject.class),
         any(IPath.class), any(IProgressMonitor.class));
   }
