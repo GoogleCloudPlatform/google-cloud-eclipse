@@ -88,6 +88,7 @@ public class CreateAppEngineStandardWtpProjectTest extends CreateAppEngineWtpPro
     } finally {
       Job.getJobManager().endRule(rule);
     }
+    ProjectUtils.waitForProjects(project);
 
     assertTrue(project.hasNature(JavaCore.NATURE_ID));
     assertAppEngineApiSdkOnClasspath();
