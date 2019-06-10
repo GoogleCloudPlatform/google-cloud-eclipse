@@ -35,6 +35,8 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -72,9 +74,12 @@ public class CloudToolsEclipseProjectUpdater {
    * Upgrade this specific project.
    */
   public static IStatus updateProject(IProject project, SubMonitor progress) {
-    progress.beginTask(Messages.getString("updating.project", project.getName()), 50); //$NON-NLS-1$
+    progress.beginTask(
+        Messages.getString("updating.project", project.getName()), 51); // $NON-NLS-1$
     IJavaProject javaProject = JavaCore.create(project);
 
+    ISchedulingRule rule = BuildPath.resolvingRule(javaProject);
+    Job.getJobManager().beginRule(rule, progress.newChild(1));
     try {
       // Identify the different libraries that should be added and classpath entries to be preserved
       List<IClasspathEntry> remainingEntries = new ArrayList<>();
@@ -127,6 +132,8 @@ public class CloudToolsEclipseProjectUpdater {
     } catch (CoreException ex) {
       return StatusUtil.error(CloudToolsEclipseProjectUpdater.class,
           Messages.getString("unable.to.update.project", project.getName()), ex); //$NON-NLS-1$
+    } finally {
+      Job.getJobManager().endRule(rule);
     }
   }
 }

@@ -126,11 +126,7 @@ public class LibraryClasspathContainerInitializer extends ClasspathContainerInit
         new LibraryClasspathContainerResolverJob(
             BuildPath.resolvingRule(project), resolverService, project);
     job.setUser(true);
-    // Usually called from an initialize() request in response to adding a new libraries
-    // classpath entry to a project for the first time.  This classpath entry is not added
-    // until the initialize() is complete.  So schedule this job 1ms from now to ensure
-    // we return before it starts.
-    job.schedule(1);
+    job.schedule();
   }
 
   @Override
