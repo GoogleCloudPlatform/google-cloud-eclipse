@@ -58,7 +58,8 @@ public class LibraryClasspathContainerResolverJob extends Job {
 
   @Override
   public boolean belongsTo(Object family) {
-    // so we seem part of builds, and make tests happy
+    // Consider container resolution as part of builds.  Simplifies
+    // our tests using {@code ProjectUtils.waitForProjects()}.
     return family == ResourcesPlugin.FAMILY_MANUAL_BUILD;
   }
   
