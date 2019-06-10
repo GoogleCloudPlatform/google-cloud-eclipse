@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.eclipse.util.jobs.MutexRule;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jdt.core.IJavaProject;
@@ -28,7 +29,7 @@ public class LibraryClasspathContainerResolverJobTest {
 
   @Test
   public void testBelongsTo() {
-    ISchedulingRule rule = Mockito.mock(ISchedulingRule.class);
+    ISchedulingRule rule = new MutexRule("LibraryClasspathContainerResolverJobTest");
     ILibraryClasspathContainerResolverService service =
         Mockito.mock(ILibraryClasspathContainerResolverService.class);
     IJavaProject javaProject = Mockito.mock(IJavaProject.class);
