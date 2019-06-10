@@ -143,7 +143,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
   }
 
   @Override
-  public void sendError(int arg0) throws IOException {
+  public void sendError(int statusCode) throws IOException {
   }
 
   @Override
