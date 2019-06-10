@@ -3,7 +3,7 @@
 </#if>import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-<#if servletVersion != "2.5"> import java.util.Collection;
+<#if servletVersion != "2.5">import java.util.Collection;
 </#if>import java.util.Locale;
 
 import javax.servlet.ServletOutputStream;
@@ -147,11 +147,11 @@ public class MockHttpServletResponse implements HttpServletResponse {
   }
 
   @Override
-  public void sendError(int stausCode, String message) throws IOException {
+  public void sendError(int statusCode, String message) throws IOException {
   }
 
   @Override
-  public void sendRedirect(String arg0) throws IOException {
+  public void sendRedirect(String url) throws IOException {
   }
 
   @Override
