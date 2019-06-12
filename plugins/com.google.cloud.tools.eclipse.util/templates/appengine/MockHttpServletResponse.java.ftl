@@ -172,8 +172,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
   public void setStatus(int statusCode) {
   }
 
-  @Override
   @Deprecated
+  @Override
   public void setStatus(int statusCode, String message) {
   }
 
