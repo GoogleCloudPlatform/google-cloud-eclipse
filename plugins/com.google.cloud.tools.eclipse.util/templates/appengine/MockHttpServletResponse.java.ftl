@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletResponse;
  * Feel free to change this class or replace it using other ways for testing
  * {@link HttpServlet}s, e.g. Spring MVC Test or Mockito to suit your needs.
  */
-public class MockHttpServletResponse implements HttpServletResponse {
+class MockHttpServletResponse implements HttpServletResponse {
 
   private String contentType;
   private String encoding;
