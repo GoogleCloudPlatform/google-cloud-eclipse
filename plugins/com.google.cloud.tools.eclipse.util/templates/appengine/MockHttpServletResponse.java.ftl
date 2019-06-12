@@ -127,7 +127,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
     return null;
   }
 
-  @Override @Deprecated
+  @Deprecated
+  @Override
   public String encodeRedirectUrl(String url) {
     return null;
   }
@@ -137,7 +138,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
     return null;
   }
 
-  @Override @Deprecated
+  @Deprecated
+  @Override
   public String encodeUrl(String url) {
     return null;
   }
@@ -170,7 +172,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
   public void setStatus(int statusCode) {
   }
 
-  @Override @Deprecated
+  @Override
+  @Deprecated
   public void setStatus(int statusCode, String message) {
   }
 
