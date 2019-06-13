@@ -65,9 +65,8 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
 
   private final IProjectConfigurationManager projectConfigurationManager;
 
-  private DataflowProjectArchetype template;
-  // TODO: Configure in constructor
-  private MajorVersion majorVersion = MajorVersion.ONE;
+  private final DataflowProjectArchetype template;
+  private final MajorVersion majorVersion = MajorVersion.TWO;
   private String projectNameTemplate;
   private boolean customLocation;
   private URI projectLocation;
