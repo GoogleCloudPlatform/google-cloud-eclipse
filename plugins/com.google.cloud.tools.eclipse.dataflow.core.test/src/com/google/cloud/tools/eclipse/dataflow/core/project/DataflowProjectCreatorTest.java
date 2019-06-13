@@ -42,7 +42,8 @@ public class DataflowProjectCreatorTest {
 
   @Test
   public void testCreate() {
-    Assert.assertNotNull(DataflowProjectCreator.create());
+    DataflowProjectCreator project = DataflowProjectCreator.create();
+    Assert.assertNotNull(project);
   }
   
   @Test

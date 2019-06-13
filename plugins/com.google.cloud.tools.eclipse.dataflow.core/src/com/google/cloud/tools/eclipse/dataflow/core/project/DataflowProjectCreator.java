@@ -57,11 +57,11 @@ import org.eclipse.m2e.core.project.ProjectImportConfiguration;
  */
 public class DataflowProjectCreator implements IRunnableWithProgress {
 
-  private static final String DEFAULT_JAVA_VERSION = JavaCore.VERSION_1_7;
+  private static final String DEFAULT_JAVA_VERSION = JavaCore.VERSION_1_8;
   private static final List<String> JAVA_VERSION_BLACKLIST =
       Collections.unmodifiableList(Arrays.asList(JavaCore.VERSION_1_1, JavaCore.VERSION_1_2,
-          JavaCore.VERSION_1_3, JavaCore.VERSION_1_4, JavaCore.VERSION_1_5, JavaCore.VERSION_1_6,
-          JavaCore.VERSION_CLDC_1_1));
+          JavaCore.VERSION_1_3, JavaCore.VERSION_1_4, JavaCore.VERSION_1_5, 
+          JavaCore.VERSION_1_6, JavaCore.VERSION_1_7, JavaCore.VERSION_CLDC_1_1));
 
   private final IProjectConfigurationManager projectConfigurationManager;
 
@@ -260,7 +260,7 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
   /**
    * Returns all of the validation failures in this {@code DataflowProject}.
    */
-  public Collection<DataflowProjectValidationStatus> failedValidations() {
+  private Collection<DataflowProjectValidationStatus> failedValidations() {
     Collection<DataflowProjectValidationStatus> statuses =
         EnumSet.noneOf(DataflowProjectValidationStatus.class);
     statuses.add(validateProjectName());
