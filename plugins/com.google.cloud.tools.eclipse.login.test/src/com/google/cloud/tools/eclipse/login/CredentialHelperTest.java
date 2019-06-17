@@ -22,12 +22,12 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson.JacksonFactory;
-import com.google.common.base.Charsets;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.Rule;
@@ -45,7 +45,7 @@ public class CredentialHelperTest {
     CredentialHelper.toJsonFile(credential, jsonFile);
 
     try (InputStream in = Files.newInputStream(jsonFile);
-        Reader reader = new InputStreamReader(in, Charsets.UTF_8)) {
+        Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
       CredentialType credentialType = new Gson().fromJson(reader, CredentialType.class);
       assertEquals(Constants.getOAuthClientId(), credentialType.client_id);
       assertEquals(Constants.getOAuthClientSecret(), credentialType.client_secret);
