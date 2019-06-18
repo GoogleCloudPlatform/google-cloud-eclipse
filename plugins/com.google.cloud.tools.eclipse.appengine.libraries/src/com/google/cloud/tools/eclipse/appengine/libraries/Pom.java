@@ -65,6 +65,15 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 class Pom {
+  private static final String NAMESPACE_URI = "http://maven.apache.org/POM/4.0.0";//$NON-NLS-1$
+  private static final String DEPENDENCY_MANAGEMENT = "dependencyManagement"; //$NON-NLS-1$
+  private static final String DEPENDENCIES = "dependencies"; //$NON-NLS-1$
+  private static final String DEPENDENCY = "dependency"; //$NON-NLS-1$
+  private static final String GROUP_ID = "groupId";//$NON-NLS-1$
+  private static final String ARTIFACT_ID = "artifactId"; //$NON-NLS-1$
+  private static final String VERSION = "version"; //$NON-NLS-1$
+  private static final String TYPE = "type";//$NON-NLS-1$
+  private static final String SCOPE = "scope";//$NON-NLS-1$
 
   private static final XPathFactory xpathFactory = XPathFactory.newInstance();
   // todo we're doing enough of this we should import or write some utilities
@@ -207,6 +216,7 @@ class Pom {
     // to delimit compilation/runtime dependencies from test dependencies.
     Comment testComment = findTestComment(dependencies);
     
+    createBOMIfNeeded(xpath);
     if (removedLibraries != null) {
       removeUnusedDependencies(dependencies, selectedLibraries, removedLibraries);
     }
@@ -268,6 +278,66 @@ class Pom {
     } catch (TransformerException ex) {
       throw new CoreException(null);
     }   
+  }
+
+  private void createBOMIfNeeded(XPath xpath) throws CoreException {
+    try {
+      Element bomElement = (Element) xpath.evaluate(
+          "//m:dependencyManagement/m:dependencies/m:dependency[m:groupId='"
+              + Bom.GOOGLE_BOM_GROUP_ID + "'][m:artifactId='" + Bom.GOOGLE_BOM_ARTIFACT_ID + "']",
+          document.getDocumentElement(), XPathConstants.NODE);
+      if (bomElement == null) {
+        Element dependencies = null;
+        NodeList dependenciesNodes =
+            (NodeList) xpath.evaluate("//m:dependencyManagement/m:dependencies",
+                document.getDocumentElement(), XPathConstants.NODESET);
+        if (dependenciesNodes.getLength() > 0) {
+          dependencies = (Element) dependenciesNodes.item(0);
+        } else {
+          dependencies = document.createElementNS(NAMESPACE_URI, DEPENDENCIES);
+          Node dependencyManagement = (Node) xpath.evaluate("//m:dependencyManagement",
+              document.getDocumentElement(), XPathConstants.NODE);
+          if (dependencyManagement == null) {
+            dependencyManagement = document.createElementNS(NAMESPACE_URI, DEPENDENCY_MANAGEMENT);
+          }
+          dependencyManagement.appendChild(dependencies);
+          document.getDocumentElement().appendChild(dependencyManagement);
+        }
+
+        if (dependencies == null)
+          return;
+
+        Element dependency = document.createElementNS(NAMESPACE_URI, DEPENDENCY);
+        dependency.appendChild(createChild(GROUP_ID, Bom.GOOGLE_BOM_GROUP_ID));
+        dependency.appendChild(createChild(ARTIFACT_ID, Bom.GOOGLE_BOM_ARTIFACT_ID));
+        dependency.appendChild(createChild(TYPE, Bom.GOOGLE_BOM_TYPE));
+        dependency.appendChild(createChild(SCOPE, Bom.GOOGLE_BOM_SCOPE));
+
+        String version = getBestVersion(Bom.GOOGLE_BOM_GROUP_ID, Bom.GOOGLE_BOM_ARTIFACT_ID);
+        if (version != null && !version.isEmpty()) {
+          dependency.appendChild(createChild(VERSION, version));
+          Bom bom = Bom.loadBom(Bom.GOOGLE_BOM_GROUP_ID, Bom.GOOGLE_BOM_ARTIFACT_ID, version, null);
+          if (bom != null) {
+            boms.add(bom);
+          }
+        }
+        dependencies.appendChild(dependency);
+      }
+    } catch (Exception ex) {
+      IStatus status = StatusUtil.error(Pom.class, ex.getMessage(), ex);
+      throw new CoreException(status);
+    }
+  }
+
+  private String getBestVersion(String groupId, String artifactId) {
+    ArtifactVersion latestVersion = ArtifactRetriever.DEFAULT.getBestVersion(groupId, artifactId);
+    return latestVersion != null ? latestVersion.toString() : null;
+  }
+
+  private Element createChild(String name, String value) {
+    Element child = document.createElementNS(NAMESPACE_URI, name);
+    child.setTextContent(value);
+    return child;
   }
 
   private static Comment findTestComment(Element dependencies) {

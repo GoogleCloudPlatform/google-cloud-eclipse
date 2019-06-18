@@ -29,7 +29,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
  * A cache of a pom.xml file and all its transitive dependencies.
  */
 class Bom {
-  
+
+  public static final String GOOGLE_BOM_GROUP_ID = "com.google.cloud";//$NON-NLS-1$
+  public static final String GOOGLE_BOM_ARTIFACT_ID = "google-cloud-bom";//$NON-NLS-1$
+  public static final String GOOGLE_BOM_TYPE = "pom";//$NON-NLS-1$
+  public static final String GOOGLE_BOM_SCOPE = "import";//$NON-NLS-1$
   private Map<String, Artifact> artifacts;
 
   private Bom(Map<String, Artifact> artifacts) {
