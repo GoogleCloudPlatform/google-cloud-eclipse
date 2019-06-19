@@ -104,15 +104,13 @@ public class Bug3380Test {
     Assert.assertTrue(pom.dependencyManaged("com.google.cloud", "google-cloud-asset"));
     Assert.assertTrue(pom.dependencyManaged("com.google.cloud", "google-cloud-automl"));
 
-    Element bomElement = null;
-    bomElement = (Element) xpath.evaluate(
+    Element bomElement = (Element) xpath.evaluate(
         "//m:dependencyManagement/m:dependencies/m:dependency[m:groupId='com.google.cloud'][m:artifactId='google-cloud-bom']",
         pom.document.getDocumentElement(), XPathConstants.NODE);
     Assert.assertNotNull(bomElement); // Make sure BOM element added
 
-    Element dependencies = null;
-    dependencies = (Element) xpath.evaluate("./m:dependencies", pom.document.getDocumentElement(),
-        XPathConstants.NODE);
+    Element dependencies = (Element) xpath.evaluate("./m:dependencies",
+        pom.document.getDocumentElement(), XPathConstants.NODE);
     Assert.assertNotNull(dependencies);
 
     Element dependency1 =
