@@ -65,15 +65,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 class Pom {
-  private static final String NAMESPACE_URI = "http://maven.apache.org/POM/4.0.0";//$NON-NLS-1$
-  private static final String DEPENDENCY_MANAGEMENT = "dependencyManagement"; //$NON-NLS-1$
-  private static final String DEPENDENCIES = "dependencies"; //$NON-NLS-1$
-  private static final String DEPENDENCY = "dependency"; //$NON-NLS-1$
-  private static final String GROUP_ID = "groupId";//$NON-NLS-1$
-  private static final String ARTIFACT_ID = "artifactId"; //$NON-NLS-1$
-  private static final String VERSION = "version"; //$NON-NLS-1$
-  private static final String TYPE = "type";//$NON-NLS-1$
-  private static final String SCOPE = "scope";//$NON-NLS-1$
 
   private static final XPathFactory xpathFactory = XPathFactory.newInstance();
   // todo we're doing enough of this we should import or write some utilities
@@ -228,8 +219,9 @@ class Pom {
         String groupId = coordinates.getGroupId();
         String artifactId = coordinates.getArtifactId();
         
-        if (!dependencyExists(dependencies, groupId, artifactId)) {
-          Element dependency = document.createElementNS(
+        Element dependency = findDependency(dependencies, groupId, artifactId);
+        if (dependency == null) {
+          dependency = document.createElementNS(
               "http://maven.apache.org/POM/4.0.0", "dependency");
           Element groupIdElement = document.createElementNS(
               "http://maven.apache.org/POM/4.0.0", "groupId");
@@ -240,32 +232,14 @@ class Pom {
               "http://maven.apache.org/POM/4.0.0", "artifactId");
           artifactIdElement.setTextContent(artifactId);
           dependency.appendChild(artifactIdElement);
-          
-          if (!dependencyManaged(groupId, artifactId)) {  
-            String version = coordinates.getVersion();
-            if (!artifact.isPinned()) {
-              ArtifactVersion latestVersion =
-                  ArtifactRetriever.DEFAULT.getBestVersion(groupId, artifactId);
-              if (latestVersion != null) {
-                version = latestVersion.toString(); 
-              }
-            }
-            
-            // todo latest version may not be needed anymore.
-            if (!MavenCoordinates.LATEST_VERSION.equals(version)) {
-              Element versionElement = document.createElementNS(
-                  "http://maven.apache.org/POM/4.0.0", "version");
-              versionElement.setTextContent(version);
-              dependency.appendChild(versionElement);
-            }
-          }
-          
+
           if (testComment == null) {
             dependencies.appendChild(dependency);
           } else {
             dependencies.insertBefore(dependency, testComment);
           }
         }
+        handleDependencyManaged(artifact, dependency);
       }
     }
     
@@ -280,11 +254,40 @@ class Pom {
     }   
   }
 
+  private void handleDependencyManaged(LibraryFile artifact, Element dependency) {
+    MavenCoordinates coordinates = artifact.getMavenCoordinates();
+    String groupId = coordinates.getGroupId();
+    String artifactId = coordinates.getArtifactId();
+    Node versionNode = findChildByName(dependency, "version");
+    if (!dependencyManaged(groupId, artifactId)) {
+      if (versionNode == null) {
+        String version = coordinates.getVersion();
+        if (!artifact.isPinned()) {
+          ArtifactVersion latestVersion =
+              ArtifactRetriever.DEFAULT.getBestVersion(groupId, artifactId);
+          if (latestVersion != null) {
+            version = latestVersion.toString();
+          }
+        }
+        // todo latest version may not be needed anymore.
+        if (!MavenCoordinates.LATEST_VERSION.equals(version)) {
+          Element versionElement =
+              document.createElementNS("http://maven.apache.org/POM/4.0.0", "version");
+          versionElement.setTextContent(version);
+          dependency.appendChild(versionElement);
+        }
+      }
+    } else {
+      if (versionNode != null) {
+        dependency.removeChild(versionNode);
+      }
+    }
+  }
+
   private void createBOMIfNeeded(XPath xpath) throws CoreException {
     try {
       Element bomElement = (Element) xpath.evaluate(
-          "//m:dependencyManagement/m:dependencies/m:dependency[m:groupId='"
-              + Bom.GOOGLE_BOM_GROUP_ID + "'][m:artifactId='" + Bom.GOOGLE_BOM_ARTIFACT_ID + "']",
+          "//m:dependencyManagement/m:dependencies/m:dependency[m:groupId='com.google.cloud'][m:artifactId='google-cloud-bom']",
           document.getDocumentElement(), XPathConstants.NODE);
       if (bomElement == null) {
         Element dependencies = null;
@@ -294,36 +297,33 @@ class Pom {
         if (dependenciesNodes.getLength() > 0) {
           dependencies = (Element) dependenciesNodes.item(0);
         } else {
-          dependencies = document.createElementNS(NAMESPACE_URI, DEPENDENCIES);
+          dependencies =
+              document.createElementNS("http://maven.apache.org/POM/4.0.0", "dependencies");
           Node dependencyManagement = (Node) xpath.evaluate("//m:dependencyManagement",
               document.getDocumentElement(), XPathConstants.NODE);
           if (dependencyManagement == null) {
-            dependencyManagement = document.createElementNS(NAMESPACE_URI, DEPENDENCY_MANAGEMENT);
+            dependencyManagement = document.createElementNS("http://maven.apache.org/POM/4.0.0",
+                "dependencyManagement");
           }
           dependencyManagement.appendChild(dependencies);
           document.getDocumentElement().appendChild(dependencyManagement);
         }
 
-        if (dependencies == null)
-          return;
-
-        Element dependency = document.createElementNS(NAMESPACE_URI, DEPENDENCY);
-        dependency.appendChild(createChild(GROUP_ID, Bom.GOOGLE_BOM_GROUP_ID));
-        dependency.appendChild(createChild(ARTIFACT_ID, Bom.GOOGLE_BOM_ARTIFACT_ID));
-        dependency.appendChild(createChild(TYPE, Bom.GOOGLE_BOM_TYPE));
-        dependency.appendChild(createChild(SCOPE, Bom.GOOGLE_BOM_SCOPE));
-
-        String version = getBestVersion(Bom.GOOGLE_BOM_GROUP_ID, Bom.GOOGLE_BOM_ARTIFACT_ID);
-        if (version != null && !version.isEmpty()) {
-          dependency.appendChild(createChild(VERSION, version));
-          Bom bom = Bom.loadBom(Bom.GOOGLE_BOM_GROUP_ID, Bom.GOOGLE_BOM_ARTIFACT_ID, version, null);
-          if (bom != null) {
-            boms.add(bom);
-          }
+        Element dependency =
+            document.createElementNS("http://maven.apache.org/POM/4.0.0", "dependency");
+        dependency.appendChild(createChild("groupId", "com.google.cloud"));
+        dependency.appendChild(createChild("artifactId", "google-cloud-bom"));
+        dependency.appendChild(createChild("type", "pom"));
+        dependency.appendChild(createChild("scope", "import"));
+        String version = getBestVersion("com.google.cloud", "google-cloud-bom");
+        dependency.appendChild(createChild("version", version));
+        Bom bom = Bom.loadBom("com.google.cloud", "google-cloud-bom", version, null);
+        if (bom != null) {
+          boms.add(bom);
         }
         dependencies.appendChild(dependency);
       }
-    } catch (Exception ex) {
+    } catch (XPathExpressionException ex) {
       IStatus status = StatusUtil.error(Pom.class, ex.getMessage(), ex);
       throw new CoreException(status);
     }
@@ -331,11 +331,11 @@ class Pom {
 
   private String getBestVersion(String groupId, String artifactId) {
     ArtifactVersion latestVersion = ArtifactRetriever.DEFAULT.getBestVersion(groupId, artifactId);
-    return latestVersion != null ? latestVersion.toString() : null;
+    return latestVersion != null ? latestVersion.toString() : MavenCoordinates.LATEST_VERSION;
   }
 
   private Element createChild(String name, String value) {
-    Element child = document.createElementNS(NAMESPACE_URI, name);
+    Element child = document.createElementNS("http://maven.apache.org/POM/4.0.0", name);
     child.setTextContent(value);
     return child;
   }
@@ -349,6 +349,20 @@ class Pom {
         if (node.getNodeValue().trim().toLowerCase(Locale.US).startsWith("test")) {
           return (Comment) node; 
         }
+      }
+    }
+    return null;
+  }
+
+  @VisibleForTesting
+  static Node findChildByName(Element dependency, String name) {
+    if (name == null || name.isEmpty())
+      return null;
+    NodeList childNodes = dependency.getChildNodes();
+    for (int i = 0; i < childNodes.getLength(); i++) {
+      Node node = childNodes.item(i);
+      if (name.equals(node.getNodeName())) {
+        return node;
       }
     }
     return null;
@@ -436,7 +450,11 @@ class Pom {
 
   private boolean dependencyExists(Element dependencies, String targetGroupId,
       String targetArtifactId) {
-    
+    return findDependency(dependencies, targetGroupId, targetArtifactId) != null;
+  }
+
+  @VisibleForTesting
+  Element findDependency(Element dependencies, String targetGroupId, String targetArtifactId) {
     NodeList children = dependencies.getChildNodes();
     for (int i = 0; i < children.getLength(); i++) {
       Node node = children.item(i);
@@ -445,11 +463,11 @@ class Pom {
         String groupId = getValue(dependency, "groupId");
         String artifactId = getValue(dependency, "artifactId");
         if (targetGroupId.equals(groupId) && targetArtifactId.equals(artifactId)) {
-          return true;
+          return dependency;
         }
       }
     }
-    return false;
+    return null;
   }
 
   private static String getValue(Element dependency, String childName) {
