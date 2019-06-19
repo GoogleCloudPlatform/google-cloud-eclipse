@@ -16,8 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
-import static org.junit.Assert.fail;
-
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
@@ -88,53 +86,48 @@ public class Bug3380Test {
   }
 
   @Test
-  public void testBug3380() throws CoreException {
-    LibraryFile addFile = new LibraryFile(coordinates("com.google.cloud", "google-cloud-asset"));
-    Library addLib = newLibrary("asset", addFile);
+  public void testBug3380() throws CoreException, XPathExpressionException {
+    LibraryFile addedFile = new LibraryFile(coordinates("com.google.cloud", "google-cloud-asset"));
+    Library addedLibrary = newLibrary("asset", addedFile);
 
-    LibraryFile existFile = new LibraryFile(coordinates("com.google.cloud", "google-cloud-automl"));
-    Library existLib = newLibrary("automl", existFile);
+    LibraryFile existingFile =
+        new LibraryFile(coordinates("com.google.cloud", "google-cloud-automl"));
+    Library existingLibrary = newLibrary("automl", existingFile);
 
-    LibraryFile removeFile =
+    LibraryFile removedFile =
         new LibraryFile(coordinates("com.google.cloud", "google-cloud-bigquery"));
-    Library removeLib = newLibrary("bigquery", removeFile);
+    Library removedLibrary = newLibrary("bigquery", removedFile);
 
-    pom.updateDependencies(Arrays.asList(addLib, existLib), Arrays.asList(removeLib));
+    pom.updateDependencies(Arrays.asList(addedLibrary, existingLibrary),
+        Arrays.asList(removedLibrary));
 
     Assert.assertTrue(pom.dependencyManaged("com.google.cloud", "google-cloud-asset"));
     Assert.assertTrue(pom.dependencyManaged("com.google.cloud", "google-cloud-automl"));
 
     Element bomElement = null;
-    try {
-      bomElement = (Element) xpath.evaluate(
-          "//m:dependencyManagement/m:dependencies/m:dependency[m:groupId='com.google.cloud'][m:artifactId='google-cloud-bom']",
-          pom.document.getDocumentElement(), XPathConstants.NODE);
-    } catch (XPathExpressionException e) {
-      fail(e.getMessage());
-    }
+    bomElement = (Element) xpath.evaluate(
+        "//m:dependencyManagement/m:dependencies/m:dependency[m:groupId='com.google.cloud'][m:artifactId='google-cloud-bom']",
+        pom.document.getDocumentElement(), XPathConstants.NODE);
     Assert.assertNotNull(bomElement); // Make sure BOM element added
 
     Element dependencies = null;
-    try {
-      dependencies = (Element) xpath.evaluate("./m:dependencies", pom.document.getDocumentElement(),
-          XPathConstants.NODE);
-    } catch (XPathExpressionException e) {
-      fail(e.getMessage());
-    }
+    dependencies = (Element) xpath.evaluate("./m:dependencies", pom.document.getDocumentElement(),
+        XPathConstants.NODE);
     Assert.assertNotNull(dependencies);
 
-    Element dependency = pom.findDependency(dependencies, "com.google.cloud", "google-cloud-asset");
-    Assert.assertNotNull(dependency);
+    Element dependency1 =
+        pom.findDependency(dependencies, "com.google.cloud", "google-cloud-asset");
+    Assert.assertNotNull(dependency1);
 
-    Node versionElement = Pom.findChildByName(dependency, "version");
-    Assert.assertNull(versionElement); // Version should be removed If BOM added
+    Node versionElement1 = Pom.findChildByName(dependency1, "version");
+    Assert.assertNull(versionElement1); // new element
 
-    dependency = pom.findDependency(dependencies, "com.google.cloud", "google-cloud-automl");
-    Assert.assertNotNull(dependency);
+    Element dependency2 =
+        pom.findDependency(dependencies, "com.google.cloud", "google-cloud-automl");
+    Assert.assertNotNull(dependency2);
 
-    versionElement = Pom.findChildByName(dependency, "version");
-    Assert.assertNull(versionElement); // Version should be removed If BOM added
-
+    Node versionElement2 = Pom.findChildByName(dependency2, "version");
+    Assert.assertNull(versionElement2); // existing element
   }
 
   private static Library newLibrary(String libraryId, LibraryFile... libraryFiles) {
