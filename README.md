@@ -16,13 +16,15 @@ Maven for building Eclipse bundles and features.
 
 ## Requirements
 
-1. The [Google Cloud SDK](https://cloud.google.com/sdk/); install this somewhere on your file system.
-  
-   - An alternative is to install _Cloud Tools for Eclipse_ into your Eclipse IDE and use its option to automatically install the _Cloud SDK_.
+1. The [Google Cloud SDK](https://cloud.google.com/sdk/); install this somewhere on your file system and add it to your path.
 
-2. JDK 8
+2. Install the App Engine Java components:
 
-3. The [Eclipse IDE](https://www.eclipse.org/downloads/eclipse-packages/).
+   `$ gcloud components install app-engine-java`
+
+3. JDK 8
+
+4. The [Eclipse IDE](https://www.eclipse.org/downloads/eclipse-packages/).
    It's easiest to use the _Eclipse IDE for Java EE Developers_ package. You must use
    Eclipse 4.7 (Oxygen) or later.  We use _target platforms_ to support building
    for earlier versions of Eclipse.  You also need the following:
@@ -43,12 +45,12 @@ Maven for building Eclipse bundles and features.
       and place the jar into your Eclipse installation's `dropins/` directory
       (on MacOS this may be in `Eclipse.app/Contents/Eclipse/dropins/`).
 
-4. Maven 3.5.0 or later.  Although m2eclipse is bundled with its own Maven install,
+5. Maven 3.5.0 or later.  Although m2eclipse is bundled with its own Maven install,
    Maven is necessary to test command-line builds.
 
-5. git (optional: you can use EGit from within Eclipse instead)
+6. git (optional: you can use EGit from within Eclipse instead)
 
-6. Clone the project to a local directory using `git clone
+7. Clone the project to a local directory using `git clone
    https://github.com/GoogleCloudPlatform/google-cloud-eclipse.git`.
 
 ## Running Tests
