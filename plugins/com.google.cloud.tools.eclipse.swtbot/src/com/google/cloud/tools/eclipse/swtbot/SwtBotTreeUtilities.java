@@ -244,6 +244,7 @@ public class SwtBotTreeUtilities {
         () -> {
           TreeItem[] items = tree.widget.getItems();
           for (TreeItem item : items) {
+            System.out.println("Debug Item: " + item.getText());
             if (textMatcher.matches(item.getText())) {
               return true;
             }
@@ -257,6 +258,7 @@ public class SwtBotTreeUtilities {
                 "need workaround for https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2569",
                 items.length == 1 && "".equals(items[0].getText()));
             for (TreeItem item : items) {
+              System.out.println("Debug Item: " + item.getText());
               if (textMatcher.matches(item.getText())) {
                 return true;
               }
