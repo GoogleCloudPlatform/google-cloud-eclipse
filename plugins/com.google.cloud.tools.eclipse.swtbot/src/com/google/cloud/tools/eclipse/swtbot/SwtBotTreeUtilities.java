@@ -238,13 +238,12 @@ public class SwtBotTreeUtilities {
   /** Expand the tree as necessary to find a child matching the given condition. */
   public static boolean hasChild(SWTWorkbenchBot bot, SWTBotTree tree, Matcher<String> textMatcher) {
     waitUntilTreeHasItems(bot, tree);
-    // perform breadth-first search; execute directly in SWT thread as we can
-    // be affected by tree changes due to thread changes
+    // perform breadth-first search; execute directly in SWT thread as the tree may otherwise
+    // be affected by thread changes
     Result<Boolean> query =
         () -> {
           TreeItem[] items = tree.widget.getItems();
           for (TreeItem item : items) {
-            System.out.println("Debug Item: " + item.getText());
             if (textMatcher.matches(item.getText())) {
               return true;
             }
@@ -254,11 +253,11 @@ public class SwtBotTreeUtilities {
           while (!stack.isEmpty()) {
             TreeItem parent = stack.removeFirst();
             items = parent.getItems();
+            // detect the situation identified in
+            // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2569
             assertFalse(
-                "need workaround for https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2569",
-                items.length == 1 && "".equals(items[0].getText()));
+                "workaround may be required", items.length == 1 && "".equals(items[0].getText()));
             for (TreeItem item : items) {
-              System.out.println("Debug Item: " + item.getText());
               if (textMatcher.matches(item.getText())) {
                 return true;
               }
