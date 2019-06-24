@@ -79,6 +79,15 @@ public class WritableDataflowPreferences implements DataflowPreferences {
     return preferenceStore.getOption(STAGING_LOCATION_PROPERTY);
   }
 
+  public void setDefaultServiceAccountKey(String key) {
+    preferenceStore.setOption(SERVICE_ACCOUNT_KEY_PROPERTY, key);
+  }
+
+  @Override
+  public String getDefaultServiceAccountKey() {
+    return preferenceStore.getOption(SERVICE_ACCOUNT_KEY_PROPERTY);
+  }
+
   public void save() {
     preferenceStore.save();
   }
@@ -100,6 +109,11 @@ public class WritableDataflowPreferences implements DataflowPreferences {
     if (defaultStagingLocation != null) {
       result.put(STAGING_LOCATION_PROPERTY, defaultStagingLocation);
       result.put(GCP_TEMP_LOCATION_PROPERTY, defaultStagingLocation);
+    }
+
+    String defaultKey = getDefaultServiceAccountKey();
+    if (defaultKey != null) {
+      result.put(SERVICE_ACCOUNT_KEY_PROPERTY, defaultKey);
     }
     return result;
   }

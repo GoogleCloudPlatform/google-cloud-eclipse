@@ -32,16 +32,14 @@ import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
 import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectVersionValidator;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorDialogErrorHandler;
-import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.QueryParameterProvider;
 import com.google.cloud.tools.eclipse.ui.util.images.SharedImages;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.net.UrlEscapers;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.databinding.Binding;
@@ -68,8 +66,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
@@ -188,7 +184,8 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
           }
         });
 
-    final IObservableValue accountEmailModel = PojoProperties.value("accountEmail").observe(model);
+    final IObservableValue<String> accountEmailModel =
+        PojoProperties.value("accountEmail").observe(model);
 
     Binding binding = bindingContext.bindValue(accountSelectorObservableValue, accountEmailModel,
         new UpdateValueStrategy(), modelToTarget);
@@ -213,7 +210,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
 
     IViewerObservableValue projectList =
         ViewerProperties.singleSelection().observe(projectSelector.getViewer());
-    IObservableValue projectIdModel = PojoProperties.value("projectId").observe(model);
+    IObservableValue<String> projectIdModel = PojoProperties.value("projectId").observe(model);
 
     UpdateValueStrategy gcpProjectToProjectId =
         new UpdateValueStrategy().setConverter(new GcpProjectToProjectIdConverter());
@@ -289,16 +286,16 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     bindingContext.bindValue(masterValue, masterModel);
 
     // Intermediary model necessary for "Restore Defaults" to work.
-    final IObservableValue currentDependantChoice = new WritableValue();
+    final IObservableValue<Boolean> currentDependantChoice = new WritableValue<>();
     bindingContext.bindValue(currentDependantChoice, dependantModel);
 
     // One-way update: button selection <-- latest user choice
     // Update the button (to match the user choice), if enabled; if not, force unchecking.
-    bindingContext.bindValue(dependantValue, new ComputedValue() {
+    bindingContext.bindValue(dependantValue, new ComputedValue<Boolean>() {
       @Override
-      protected Object calculate() {
+      protected Boolean calculate() {
         boolean controlEnabled = (boolean) dependantEnablement.getValue();
-        boolean currentValue = (boolean) currentDependantChoice.getValue();
+        boolean currentValue = currentDependantChoice.getValue();
         if (!controlEnabled) {
           return Boolean.FALSE;  // Force unchecking the stop previous button if it is disabled.
         }
@@ -308,12 +305,12 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
 
     // One-way update: button selection --> latest user choice
     // Update the user choice (to match the button selection), only when the button is enabled.
-    bindingContext.bindValue(new ComputedValue() {
+    bindingContext.bindValue(new ComputedValue<Boolean>() {
       @Override
-      protected Object calculate() {
+      protected Boolean calculate() {
         boolean controlEnabled = (boolean) dependantEnablement.getValue();
         boolean controlValue = (boolean) dependantValue.getValue();
-        boolean currentValue = (boolean) currentDependantChoice.getValue();
+        boolean currentValue = currentDependantChoice.getValue();
         if (controlEnabled) {
           return controlValue;  // Remember the button state as the latest choice if it is enabled.
         }
@@ -371,17 +368,11 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
                                                 CREATE_GCP_PROJECT_URL));
     createNewProject.setToolTipText(Messages.getString("projectselector.createproject.tooltip"));
     FontUtil.convertFontToItalic(createNewProject);
-    createNewProject.addSelectionListener(
-        new OpenUriSelectionListener(new QueryParameterProvider() {
-          @Override
-          public Map<String, String> getParameters() {
-            if (accountSelector.getSelectedEmail().isEmpty()) {
-              return Collections.emptyMap();
-            } else {
-              return Collections.singletonMap("authuser", accountSelector.getSelectedEmail());
-            }
-          }
-        }, new ErrorDialogErrorHandler(getShell())));
+    createNewProject.addSelectionListener(new OpenUriSelectionListener(
+        () -> accountSelector.getSelectedEmail().isEmpty()
+            ? Collections.emptyMap()
+            : Collections.singletonMap("authuser", accountSelector.getSelectedEmail()),
+        new ErrorDialogErrorHandler(getShell())));
     GridDataFactory.fillDefaults().applyTo(linkComposite);
     GridLayoutFactory.fillDefaults().generateLayout(linkComposite);
 
@@ -417,11 +408,8 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
         new ProjectSelectorSelectionChangedListener(accountSelector,
                                                     projectRepository,
                                                     projectSelector));
-    filterField.addModifyListener(new ModifyListener() {
-      @Override
-      public void modifyText(ModifyEvent event) {
-        projectSelector.setFilter(filterField.getText());
-      }
+    filterField.addModifyListener(event -> {
+      projectSelector.setFilter(filterField.getText());
     });
   }
 
@@ -456,17 +444,24 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     return checkBox;
   }
 
-  private void createAdvancedSection() {
+  protected void createAdvancedSection() {
     createExpandableComposite();
-    final Composite bucketComposite = createBucketSection(expandableComposite);
+    Composite advancedSection = new Composite(expandableComposite, SWT.NONE);
+    populateAdvancedSection(advancedSection);
+    GridLayoutFactory.swtDefaults().applyTo(advancedSection);
 
-    expandableComposite.setClient(bucketComposite);
+    expandableComposite.setClient(advancedSection);
     expandableComposite.addExpansionListener(new ExpansionAdapter() {
       @Override
       public void expansionStateChanged(ExpansionEvent event) {
         layoutChangedHandler.run();
       }
     });
+  }
+
+  /** Populate the "Advanced" twistie section. */
+  protected void populateAdvancedSection(Composite advancedSection) {
+    createBucketSection(advancedSection);
   }
 
   private void createExpandableComposite() {
@@ -502,19 +497,13 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
   @VisibleForTesting
   public Job latestGcpProjectQueryJob;  // Must be updated/accessed in the UI context.
 
-  private Predicate<Job> isLatestQueryJob = new Predicate<Job>() {
-    @Override
-    public boolean apply(Job job) {
-      return job == latestGcpProjectQueryJob;
-    }
-  };
-
   private void refreshProjectsForSelectedCredential() {
     projectSelector.setProjects(Collections.<GcpProject>emptyList());
     latestGcpProjectQueryJob = null;
 
     Credential selectedCredential = accountSelector.getSelectedCredential();
     if (selectedCredential != null) {
+      Predicate<Job> isLatestQueryJob = job -> job == latestGcpProjectQueryJob;
       latestGcpProjectQueryJob = new GcpProjectQueryJob(selectedCredential,
           projectRepository, projectSelector, bindingContext, isLatestQueryJob);
       latestGcpProjectQueryJob.schedule();
@@ -575,7 +564,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     }
   }
 
-  static class ProjectSelectionValidator extends FixedMultiValidator {
+  class ProjectSelectionValidator extends FixedMultiValidator {
 
     private final IViewerObservableValue projectInput;
     private final IViewerObservableValue projectSelection;
@@ -607,6 +596,10 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
           return ValidationStatus.error(Messages.getString("projectselector.project.not.selected")); //$NON-NLS-1$
         }
       }
+      if (selectedProject != null && project != null) {
+        return ValidationStatus.info(Messages.getString("deploy.project.summary", project.getName(),
+            ((GcpProject) selectedProject).getName()));
+      }
       return ValidationStatus.ok();
     }
   }
@@ -633,7 +626,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     @Override
     protected IStatus validate() {
       // access accountSelectorObservableValue so MultiValidator records the access
-      String selectedEmail = (String) accountSelectorObservableValue.getValue();
+      String selectedEmail = accountSelectorObservableValue.getValue();
       if (requireValues && Strings.isNullOrEmpty(selectedEmail)) {
         if (accountSelector.isSignedIn()) {
           return ValidationStatus.error(Messages.getString("error.account.missing.signedin"));

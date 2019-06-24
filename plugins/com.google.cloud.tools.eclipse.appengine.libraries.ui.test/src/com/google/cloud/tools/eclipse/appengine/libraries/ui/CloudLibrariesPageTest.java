@@ -17,19 +17,26 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.ui;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexWarFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
-import com.google.common.collect.Maps;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
@@ -42,6 +49,10 @@ import org.junit.Rule;
 import org.junit.Test;
 
 public class CloudLibrariesPageTest {
+  private static final IPath MASTER_CONTAINER_PATH =
+      new Path(LibraryClasspathContainer.CONTAINER_PATH_PREFIX)
+          .append(CloudLibraries.MASTER_CONTAINER_ID);
+
   private final CloudLibrariesPage page = new CloudLibrariesPage();
 
   @Rule
@@ -49,7 +60,7 @@ public class CloudLibrariesPageTest {
 
   @Rule
   public TestProjectCreator plainJavaProjectCreator =
-      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7);
+      new TestProjectCreator().withFacets(JavaFacet.VERSION_1_7);
 
   @Test
   public void testConstructor() {
@@ -90,12 +101,12 @@ public class CloudLibrariesPageTest {
   }
 
   @Test
-  public void testAppEngineLibraries_foundOnAppEngineProject() {
+  public void testAppEngineLibraries_foundOnAppEngineStandardProject() {
     IJavaProject javaProject = plainJavaProjectCreator
-        .withFacetVersions(WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7).getJavaProject();
+        .withFacets(WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7).getJavaProject();
     page.initialize(javaProject, null);
     page.createControl(shellTestResource.getShell());
-    assertThat(page.libraryGroups, Matchers.hasKey(CloudLibraries.APP_ENGINE_GROUP));
+    assertThat(page.libraryGroups, Matchers.hasKey(CloudLibraries.APP_ENGINE_STANDARD_GROUP));
   }
 
   @Test
@@ -103,15 +114,43 @@ public class CloudLibrariesPageTest {
     IJavaProject javaProject = plainJavaProjectCreator.getJavaProject();
     page.initialize(javaProject, null);
     page.createControl(shellTestResource.getShell());
-    assertThat(page.libraryGroups, Matchers.not(Matchers.hasKey(CloudLibraries.APP_ENGINE_GROUP)));
+    assertThat(page.libraryGroups, 
+        Matchers.not(Matchers.hasKey(CloudLibraries.APP_ENGINE_STANDARD_GROUP)));
+  }
+
+  @Test
+  public void testNonAppEngineLibraries_foundOnPlainJavaProject() {
+    IJavaProject javaProject = plainJavaProjectCreator.getJavaProject();
+    page.initialize(javaProject, null);
+    page.createControl(shellTestResource.getShell());
+    assertThat(page.libraryGroups, Matchers.hasKey(CloudLibraries.NON_APP_ENGINE_STANDARD_GROUP));
+  }
+
+  @Test
+  public void testNonAppEngineLibraries_foundOnAppEngineFlexProject() {
+    IJavaProject javaProject = plainJavaProjectCreator
+        .withFacets(WebFacetUtils.WEB_31, AppEngineFlexWarFacet.FACET_VERSION).getJavaProject();
+    page.initialize(javaProject, null);
+    page.createControl(shellTestResource.getShell());
+    assertThat(page.libraryGroups, Matchers.hasKey(CloudLibraries.NON_APP_ENGINE_STANDARD_GROUP));
+  }
+
+  @Test
+  public void testNonAppEngineLibraries_missingOnAppEngineStandardProject() {
+    IJavaProject javaProject = plainJavaProjectCreator
+        .withFacets(WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7).getJavaProject();
+    page.initialize(javaProject, null);
+    page.createControl(shellTestResource.getShell());
+    assertThat(page.libraryGroups,
+        Matchers.not(Matchers.hasKey(CloudLibraries.NON_APP_ENGINE_STANDARD_GROUP)));
   }
 
   @Test
   public void testSelectionMaintained() {
     // explicitly configure App Engine and GCP libraries
     IJavaProject javaProject = plainJavaProjectCreator.getJavaProject();
-    LinkedHashMap<String, String> groups = Maps.newLinkedHashMap();
-    groups.put(CloudLibraries.APP_ENGINE_GROUP, CloudLibraries.APP_ENGINE_GROUP);
+    LinkedHashMap<String, String> groups = new LinkedHashMap<>();
+    groups.put(CloudLibraries.APP_ENGINE_STANDARD_GROUP, CloudLibraries.APP_ENGINE_STANDARD_GROUP);
     groups.put(CloudLibraries.CLIENT_APIS_GROUP, CloudLibraries.CLIENT_APIS_GROUP);
 
     // select objectify
@@ -129,7 +168,7 @@ public class CloudLibrariesPageTest {
 
     // check the page's selected libraries
     List<Library> returnedLibraries = page.getSelectedLibraries();
-    Assert.assertEquals(1, returnedLibraries.size());
+    Assert.assertEquals(1 , returnedLibraries.size());
     assertThat(returnedLibraries, Matchers.hasItem(new LibraryMatcher("objectify")));
 
     // select GCS
@@ -157,6 +196,24 @@ public class CloudLibrariesPageTest {
     returnedLibraries = page.getSelectedLibraries();
     Assert.assertEquals(1, returnedLibraries.size());
     assertThat(returnedLibraries, Matchers.hasItem(new LibraryMatcher("googlecloudstorage")));
+  }
+
+  @Test
+  public void testPreventMultipleContainers() {
+    IClasspathEntry existingEntry = mock(IClasspathEntry.class);
+    when(existingEntry.getEntryKind()).thenReturn(IClasspathEntry.CPE_CONTAINER);
+    when(existingEntry.getPath()).thenReturn(MASTER_CONTAINER_PATH);
+    assertTrue(LibraryClasspathContainer.isEntry(existingEntry));
+
+    // explicitly configure App Engine and GCP libraries
+    IJavaProject javaProject = plainJavaProjectCreator.getJavaProject();
+
+    page.initialize(javaProject, new IClasspathEntry[] {existingEntry});
+    page.setSelection(null);
+    page.createControl(shellTestResource.getShell());
+
+    assertTrue(page.finish()); // should be ok
+    assertNull(page.getSelection()); // no new container created
   }
 
   private static class LibraryMatcher extends BaseMatcher<Library> {

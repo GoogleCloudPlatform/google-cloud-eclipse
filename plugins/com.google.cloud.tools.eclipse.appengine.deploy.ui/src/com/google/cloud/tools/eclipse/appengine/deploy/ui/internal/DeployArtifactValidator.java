@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.internal;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.io.File;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -31,9 +32,10 @@ import org.eclipse.swt.widgets.Text;
 public class DeployArtifactValidator extends FixedMultiValidator {
 
   private final IPath basePath;
-  private final IObservableValue deployArtifactPath;
+  private final IObservableValue<String> deployArtifactPath;
 
-  public DeployArtifactValidator(IPath basePath, IObservableValue deployArtifactPath) {
+  @VisibleForTesting
+  DeployArtifactValidator(IPath basePath, IObservableValue<String> deployArtifactPath) {
     Preconditions.checkArgument(basePath.isAbsolute(), "basePath is not absolute.");
     Preconditions.checkArgument(String.class.equals(deployArtifactPath.getValueType()));
     this.basePath = basePath;
@@ -49,14 +51,14 @@ public class DeployArtifactValidator extends FixedMultiValidator {
 
   @Override
   protected IStatus validate() {
-    String pathValue = deployArtifactPath.getValue().toString();
+    String pathValue = deployArtifactPath.getValue();
     if (pathValue.isEmpty()) {
       return ValidationStatus.error(Messages.getString("error.deploy.artifact.empty"));
     } else if (!pathValue.endsWith(".war") && !pathValue.endsWith(".jar")) {
       return ValidationStatus.error(Messages.getString("error.deploy.artifact.invalid.extension"));
     }
 
-    File deployArtifact = new File((String) deployArtifactPath.getValue());
+    File deployArtifact = new File(deployArtifactPath.getValue());
     if (!deployArtifact.isAbsolute()) {
       deployArtifact = new File(basePath + "/" + deployArtifact);
     }

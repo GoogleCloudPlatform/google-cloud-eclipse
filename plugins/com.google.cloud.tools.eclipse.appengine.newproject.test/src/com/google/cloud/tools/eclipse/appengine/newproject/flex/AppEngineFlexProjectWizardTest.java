@@ -29,11 +29,6 @@ public class AppEngineFlexProjectWizardTest {
   }
 
   @Test
-  public void testValidateDependencies() {
-    Assert.assertTrue(wizard.validateDependencies().isOK());
-  }
-
-  @Test
   public void testAddPages() {
     wizard.addPages();
     Assert.assertFalse(wizard.canFinish());

@@ -25,16 +25,25 @@ import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 
 public class LibraryClasspathContainer implements IClasspathContainer {
+  /** Return {@code true} if the provided classpath entry is for this container type. */
+  public static boolean isEntry(IClasspathEntry entry) {
+    return entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER
+        && entry.getPath().segmentCount() == 2
+        && CONTAINER_PATH_PREFIX.equals(entry.getPath().segment(0));
+  }
 
   private final IPath containerPath;
   private final String description;
   private final List<IClasspathEntry> classpathEntries;
   private final List<LibraryFile> libraryFiles;
   public static final String CONTAINER_PATH_PREFIX =
-      "com.google.cloud.tools.eclipse.appengine.libraries"; //$NON-NLS-1$
+      "com.google.cloud.tools.eclipse.appengine.libraries"; // $NON-NLS-1$
 
-  public LibraryClasspathContainer(IPath path, String description,
-      List<IClasspathEntry> classpathEntries, List<LibraryFile> libraryFiles) {
+  public LibraryClasspathContainer(
+      IPath path,
+      String description,
+      List<IClasspathEntry> classpathEntries,
+      List<LibraryFile> libraryFiles) {
     Preconditions.checkNotNull(path, "path is null");
     Preconditions.checkNotNull(description, "description is null");
     Preconditions.checkArgument(!description.isEmpty(), "description is empty");
@@ -48,14 +57,14 @@ public class LibraryClasspathContainer implements IClasspathContainer {
   }
 
   /**
-   * Creates a new {@link LibraryClasspathContainer} with the same path and description,
-   * but with the <code>classpathEntries</code>.
+   * Creates a new {@link LibraryClasspathContainer} with the same path and description, but with
+   * the <code>classpathEntries</code>.
    *
    * @param classpathEntries the classpath entries of the new container
    */
   public LibraryClasspathContainer copyWithNewEntries(List<IClasspathEntry> classpathEntries) {
-    return new LibraryClasspathContainer(containerPath, description, classpathEntries,
-        libraryFiles);
+    return new LibraryClasspathContainer(
+        containerPath, description, classpathEntries, libraryFiles);
   }
 
   @Override

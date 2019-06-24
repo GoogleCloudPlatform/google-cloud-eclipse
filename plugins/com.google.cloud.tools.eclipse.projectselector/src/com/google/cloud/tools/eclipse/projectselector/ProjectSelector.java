@@ -50,7 +50,7 @@ import org.eclipse.swt.widgets.Link;
 public class ProjectSelector extends Composite implements ISelectionProvider {
 
   private final TableViewer viewer;
-  private final WritableList/* <GcpProject> */ input; // Generics supported only in Neon+
+  private final WritableList<GcpProject> input;
   private Link statusLink;
   private IBeanValueProperty[] projectProperties;
 
@@ -147,10 +147,6 @@ public class ProjectSelector extends Composite implements ISelectionProvider {
     return viewer;
   }
 
-  /**
-   * @return the projects
-   */
-  @SuppressWarnings("unchecked")
   public List<GcpProject> getProjects() {
     return ImmutableList.copyOf(input);
   }
@@ -175,7 +171,7 @@ public class ProjectSelector extends Composite implements ISelectionProvider {
     }
     ViewerFilter filter = new ViewerFilter() {
       @Override
-      public boolean select(Viewer viewer, Object parentElement, Object element) {
+      public boolean select(Viewer unused, Object parentElement, Object element) {
         String[] searchTerms = searchText.split("\\s");
         return matches(searchTerms, element, projectProperties);
       }

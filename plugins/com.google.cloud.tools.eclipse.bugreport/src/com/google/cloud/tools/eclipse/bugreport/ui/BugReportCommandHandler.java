@@ -16,8 +16,9 @@
 
 package com.google.cloud.tools.eclipse.bugreport.ui;
 
-import com.google.cloud.tools.appengine.api.AppEngineException;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.AppEngineException;
+import com.google.cloud.tools.appengine.operations.CloudSdk;
+import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.escape.Escaper;
@@ -26,33 +27,35 @@ import java.text.MessageFormat;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.program.Program;
-import org.osgi.framework.Bundle;
 
 public class BugReportCommandHandler extends AbstractHandler {
 
   private static final String BUG_REPORT_URL =
       "https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/new";
 
-  //@formatter:off
   // should be kept up to date with .github/ISSUE_TEMPLATE.md
   private static final String BODY_TEMPLATE =
-      "(please ensure you are running the latest version of CT4E with _Help > Check for Updates_)\n"
-      + "- Cloud Tools for Eclipse version: {0}\n"
-      + "- Google Cloud SDK version: {1}\n"
-      + "- Eclipse version: {2}\n"
-      + "- OS: {3} {4}\n"
-      + "- Java version: {5}\n"
-      + "\n"
-      + "**What did you do?**\n"
-      + "\n"
-      + "**What did you expect to see?**\n"
-      + "\n"
-      + "**What did you see instead?**\n"
-      + "\n"
-      + "(screenshots are helpful)";
-  //@formatter:on
+      "<!--\n"
+          + "Before reporting a possible bug:\n\n"
+          + "1. Please ensure you are running the latest version of CT4E with _Help > Check for Updates_\n"
+          + "2. If the problem occurs when you deploy or after the application has been deployed, "
+          + "try deploying from the command line using gcloud or Maven. "
+          + "If the problem does not go away, then the issue is likely "
+          + "not with Cloud Tools for Eclipse.\n-->\n"
+          + "- Cloud Tools for Eclipse version: {0}\n"
+          + "- Google Cloud SDK version: {1} {2}\n"
+          + "- Eclipse version: {3}\n"
+          + "- OS: {4} {5}\n"
+          + "- Java version: {6}\n"
+          + "\n"
+          + "**What did you do?**\n"
+          + "\n"
+          + "**What did you expect to see?**\n"
+          + "\n"
+          + "**What did you see instead?**\n"
+          + "\n"
+          + "<!-- Screenshots and stacktraces are helpful. -->";
 
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -63,12 +66,17 @@ public class BugReportCommandHandler extends AbstractHandler {
   @VisibleForTesting
   static String formatReportUrl() {
     String body = MessageFormat.format(BODY_TEMPLATE, CloudToolsInfo.getToolsVersion(),
-        getCloudSdkVersion(), getEclipseVersion(),
+        getCloudSdkVersion(), getCloudSdkManagementOption(),
+        CloudToolsInfo.getEclipseVersion(),
         System.getProperty("os.name"), System.getProperty("os.version"),
         System.getProperty("java.version"));
 
     Escaper escaper = UrlEscapers.urlFormParameterEscaper();
     return BUG_REPORT_URL + "?body=" + escaper.escape(body);
+  }
+
+  private static Object getCloudSdkManagementOption() {
+    return CloudSdkPreferences.isAutoManaging() ? "(auto-managed)" : "(non-managed)";
   }
 
   private static String getCloudSdkVersion() {
@@ -77,15 +85,6 @@ public class BugReportCommandHandler extends AbstractHandler {
       return sdk.getVersion().toString();
     } catch (AppEngineException ex) {
       return ex.toString();
-    }
-  }
-
-  private static String getEclipseVersion() {
-    Bundle bundle = Platform.getBundle("org.eclipse.platform");
-    if (bundle != null) {
-      return bundle.getVersion().toString();
-    } else {
-      return "_(failed to get bundle \"org.eclipse.platform\")_";
     }
   }
 }

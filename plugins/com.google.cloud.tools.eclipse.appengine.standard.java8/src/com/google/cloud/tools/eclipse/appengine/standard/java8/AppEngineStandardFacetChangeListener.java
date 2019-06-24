@@ -17,8 +17,9 @@
 package com.google.cloud.tools.eclipse.appengine.standard.java8;
 
 import com.google.cloud.tools.appengine.AppEngineDescriptor;
+import com.google.cloud.tools.appengine.AppEngineException;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineConfigurationUtil;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Level;
@@ -88,7 +89,11 @@ public class AppEngineStandardFacetChangeListener implements IFacetedProjectList
 
   private static boolean isJava8(IFile descriptor) throws IOException, CoreException, SAXException {
     try (InputStream input = descriptor.getContents()) {
-      return AppEngineDescriptor.parse(input).isJava8();
+      try {
+        return AppEngineDescriptor.parse(input).isJava8();
+      } catch (AppEngineException ex) {
+        throw new IOException(ex);
+      }
     }
   }
 
@@ -96,7 +101,7 @@ public class AppEngineStandardFacetChangeListener implements IFacetedProjectList
    * Add our {@code appengine-web.xml} builder that monitors for changes to the {@code <runtime>}
    * element.
    */
-  private void addAppEngineWebBuilder(IProject project) {
+  private static void addAppEngineWebBuilder(IProject project) {
     try {
       IProjectDescription projectDescription = project.getDescription();
       ICommand[] commands = projectDescription.getBuildSpec();
@@ -124,7 +129,7 @@ public class AppEngineStandardFacetChangeListener implements IFacetedProjectList
    * Remove our {@code appengine-web.xml} builder that monitors for changes to the {@code <runtime>}
    * element.
    */
-  private void removeAppEngineWebBuilder(IProject project) {
+  private static void removeAppEngineWebBuilder(IProject project) {
     try {
       IProjectDescription projectDescription = project.getDescription();
       ICommand[] commands = projectDescription.getBuildSpec();
@@ -149,9 +154,10 @@ public class AppEngineStandardFacetChangeListener implements IFacetedProjectList
    * Find the <code>appengine-web.xml</code> file.
    * @return the file or {@code null} if not found
    */
-  private IFile findDescriptor(IFacetedProject project) {
+  private static IFile findDescriptor(IFacetedProject project) {
     IFile descriptor =
-        WebProjectUtil.findInWebInf(project.getProject(), new Path("appengine-web.xml"));
+        AppEngineConfigurationUtil.findConfigurationFile(
+            project.getProject(), new Path("appengine-web.xml"));
     return descriptor;
   }
 

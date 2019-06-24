@@ -16,6 +16,8 @@
 
 package com.google.cloud.tools.eclipse.util.status;
 
+import com.google.common.base.Strings;
+import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
@@ -32,12 +34,34 @@ public class StatusUtil {
 
   private StatusUtil() {}
 
+  /** Create a new {@link IStatus} of the given severity. */
+  public static IStatus create(int severity, Object origin, String message) {
+    return new Status(severity, getBundleId(origin), message);
+  }
+
+  /** Create a new {@link IStatus} of the given severity. */
+  public static IStatus create(int severity, Object origin, String message, Throwable error) {
+    return new Status(severity, getBundleId(origin), message, error);
+  }
+
   public static IStatus error(Object origin, String message) {
     return new Status(IStatus.ERROR, getBundleId(origin), message);
   }
 
+  public static IStatus error(Object origin, String message, int code) {
+    return new Status(IStatus.ERROR, getBundleId(origin), code, message, null);
+  }
+
   public static IStatus error(Object origin, String message, Throwable error) {
     return new Status(IStatus.ERROR, getBundleId(origin), message, error);
+  }
+
+  public static IStatus warn(Object origin, String message) {
+    return new Status(IStatus.WARNING, getBundleId(origin), message);
+  }
+
+  public static IStatus warn(Object origin, String message, Throwable error) {
+    return new Status(IStatus.WARNING, getBundleId(origin), message, error);
   }
 
   public static IStatus info(Object origin, String message) {
@@ -50,6 +74,14 @@ public class StatusUtil {
 
   public static MultiStatus multi(Object origin, String message, Throwable error) {
     return new MultiStatus(getBundleId(origin), 0, message, error);
+  }
+
+  public static MultiStatus multi(Object origin, String message, IStatus[] statuses) {
+    MultiStatus multiStatus = multi(origin, message);
+    for (IStatus status : statuses) {
+      multiStatus.add(status);
+    }
+    return multiStatus;
   }
 
   private static String getBundleId(Object origin) {
@@ -90,11 +122,16 @@ public class StatusUtil {
     return setErrorStatus(origin, message +  ": " + status.getMessage(), status.getException());
   }
 
-  public static IStatus setErrorStatus(Object origin, String message, Throwable ex) {
-    if (ex != null && ex.getMessage() != null && !ex.getMessage().isEmpty()) {
-      message += ": " + ex.getMessage();
+  public static IStatus setErrorStatus(Object origin, String message, Throwable exception) {
+    Throwable targetException = exception;
+    if (exception instanceof InvocationTargetException && exception.getCause() != null) {
+      targetException = targetException.getCause();
     }
-    IStatus status = error(origin, message, ex);
+
+    if (targetException != null && !Strings.isNullOrEmpty(targetException.getMessage())) {
+      message += ": " + targetException.getMessage();
+    }
+    IStatus status = error(origin, message, targetException);
     StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.LOG);
     return status;
   }
@@ -118,9 +155,5 @@ public class StatusUtil {
       }
     }
     return newStatus;
-  }
-
-  public static IStatus error(Object origin, String message, int code) {
-    return new Status(IStatus.ERROR, getBundleId(origin), code, message, null);
   }
 }

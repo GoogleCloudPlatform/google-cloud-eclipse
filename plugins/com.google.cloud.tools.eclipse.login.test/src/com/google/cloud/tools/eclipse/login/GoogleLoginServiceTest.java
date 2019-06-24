@@ -33,6 +33,7 @@ import com.google.cloud.tools.login.GoogleLoginState;
 import com.google.cloud.tools.login.LoggerFacade;
 import com.google.cloud.tools.login.OAuthData;
 import com.google.cloud.tools.login.OAuthDataStore;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -63,7 +64,7 @@ public class GoogleLoginServiceTest {
       )));
 
   @Before
-  public void setUp() {
+  public void setUp() throws IOException {
     when(account1.getEmail()).thenReturn("some-email-1@example.com");
     when(account2.getEmail()).thenReturn("some-email-2@example.com");
     when(account3.getEmail()).thenReturn("some-email-3@example.com");
@@ -176,7 +177,8 @@ public class GoogleLoginServiceTest {
   }
 
   @Test
-  public void testGoogleLoginService_removeSavedCredentialIfNullRefreshToken() {
+  public void testGoogleLoginService_removeSavedCredentialIfNullRefreshToken() 
+      throws IOException {
     when(savedOAuthData.getEmail()).thenReturn("my-email@example.com");
     when(savedOAuthData.getStoredScopes()).thenReturn(OAUTH_SCOPES);
     when(savedOAuthData.getRefreshToken()).thenReturn(null);
@@ -186,7 +188,8 @@ public class GoogleLoginServiceTest {
   }
 
   @Test
-  public void testGoogleLoginService_removeSavedCredentialIfScopesChanged() {
+  public void testGoogleLoginService_removeSavedCredentialIfScopesChanged()
+      throws IOException {
     // Credential in the data store has an out-dated scopes.
     Set<String> newScope = new HashSet<>(Arrays.asList("new_scope"));
     when(savedOAuthData.getEmail()).thenReturn("my-email@example.com");
@@ -198,7 +201,8 @@ public class GoogleLoginServiceTest {
   }
 
   @Test
-  public void testGoogleLoginService_restoreSavedCredential() {
+  public void testGoogleLoginService_restoreSavedCredential()
+      throws IOException {
     // Credential in the data store is valid.
     when(savedOAuthData.getEmail()).thenReturn("my-email@example.com");
     when(savedOAuthData.getStoredScopes()).thenReturn(OAUTH_SCOPES);

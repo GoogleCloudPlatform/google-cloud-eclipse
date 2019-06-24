@@ -23,32 +23,17 @@ import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpPro
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
+import com.google.common.collect.ImmutableMap;
 import javax.inject.Inject;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 
 public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
   @Inject
   private ILibraryRepositoryService repositoryService;
 
   public AppEngineFlexProjectWizard() {
+    super(new AppEngineFlexWizardPage());
     setWindowTitle(Messages.getString("new.app.engine.flex.project"));
-  }
-
-  @Override
-  public AppEngineFlexWizardPage createWizardPage() {
-    AnalyticsPingManager.getInstance().sendPingOnShell(getShell(),
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_FLEX);
-
-    return new AppEngineFlexWizardPage();
-  }
-
-  @Override
-  public IStatus validateDependencies() {
-    return Status.OK_STATUS;
   }
 
   @Override
@@ -63,8 +48,13 @@ public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
     if (accepted) {
       AnalyticsPingManager.getInstance().sendPing(
           AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_COMPLETE,
-          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
-          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_FLEX);
+          ImmutableMap.of(
+              AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
+              AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_FLEX,
+              AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_BUILD_TOOL,
+              config.getUseMaven()
+                  ? AnalyticsEvents.MAVEN_PROJECT
+                  : AnalyticsEvents.NATIVE_PROJECT));
     }
     return accepted;
   }

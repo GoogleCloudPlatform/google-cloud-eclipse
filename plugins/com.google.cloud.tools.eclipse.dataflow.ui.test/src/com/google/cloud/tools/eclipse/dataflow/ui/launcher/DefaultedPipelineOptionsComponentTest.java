@@ -17,12 +17,13 @@
 package com.google.cloud.tools.eclipse.dataflow.ui.launcher;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.MessageTarget;
@@ -36,7 +37,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
@@ -46,65 +46,55 @@ import org.mockito.stubbing.Answer;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultedPipelineOptionsComponentTest {
-  @Rule
-  public ShellTestResource shellCreator = new ShellTestResource();
-  @Mock
-  private MessageTarget messageTarget;
+  @Rule public ShellTestResource shellCreator = new ShellTestResource();
 
-  @Mock
-  private DataflowPreferences preferences;
-  private RunOptionsDefaultsComponent defaultOptions;
+  @Mock private MessageTarget messageTarget;
+  @Mock private DataflowPreferences preferences;
+  @Mock private RunOptionsDefaultsComponent defaultOptions;
+
+  private boolean defaultOptionsEnabled;
   private String accountEmail;
   private String projectId;
   private String stagingLocation;
+  private String serviceAccountKey;
 
   @Before
   public void setUp() {
     // This is easier than subclassing RunOptionsDefaultComponent
-    Answer<String> answerAccountEmail = new Answer<String>() {
-      @Override
-      public String answer(InvocationOnMock invocation) throws Throwable {
-        return Strings.nullToEmpty(
-            accountEmail == null ? preferences.getDefaultAccountEmail() : accountEmail);
-      }
-    };
-    Answer<Void> recordAccountEmail = new Answer<Void>() {
-      @Override
-      public Void answer(InvocationOnMock invocation) throws Throwable {
-        accountEmail = invocation.getArgumentAt(0, String.class);
-        return null;
-      }
+    Answer<String> answerAccountEmail = unused -> Strings.nullToEmpty(
+        accountEmail == null ? preferences.getDefaultAccountEmail() : accountEmail);
+    Answer<Void> recordAccountEmail = invocationOnMock -> {
+      accountEmail = invocationOnMock.getArgumentAt(0, String.class);
+      return null;
     };
 
-    Answer<String> answerProjectId = new Answer<String>() {
-      @Override
-      public String answer(InvocationOnMock invocation) throws Throwable {
-        return Strings.nullToEmpty(projectId == null ? preferences.getDefaultProject() : projectId);
-      }
-    };
-    Answer<Void> recordProjectId = new Answer<Void>() {
-      @Override
-      public Void answer(InvocationOnMock invocation) throws Throwable {
-        projectId = invocation.getArgumentAt(0, String.class);
-        return null;
-      }
-    };
-    Answer<String> answerStagingLocation = new Answer<String>() {
-      @Override
-      public String answer(InvocationOnMock invocation) throws Throwable {
-        return Strings.nullToEmpty(
-            stagingLocation == null ? preferences.getDefaultStagingLocation() : stagingLocation);
-      }
-    };
-    Answer<Void> recordStagingLocation = new Answer<Void>() {
-      @Override
-      public Void answer(InvocationOnMock invocation) throws Throwable {
-        stagingLocation = invocation.getArgumentAt(0, String.class);
-        return null;
-      }
+    Answer<String> answerProjectId = unused -> Strings.nullToEmpty(
+        projectId == null ? preferences.getDefaultProject() : projectId);
+    Answer<Void> recordProjectId = invocationOnMock -> {
+      projectId = invocationOnMock.getArgumentAt(0, String.class);
+      return null;
     };
 
-    defaultOptions = mock(RunOptionsDefaultsComponent.class);
+    Answer<String> answerStagingLocation = unused -> Strings.nullToEmpty(
+        stagingLocation == null ? preferences.getDefaultStagingLocation() : stagingLocation);
+    Answer<Void> recordStagingLocation = invocationOnMock -> {
+      stagingLocation = invocationOnMock.getArgumentAt(0, String.class);
+      return null;
+    };
+
+    Answer<String> answerServiceAccountKey = unused -> Strings.nullToEmpty(
+         serviceAccountKey == null ? preferences.getDefaultServiceAccountKey() : serviceAccountKey);
+    Answer<Void> recordServiceAccountKey = invocationOnMock -> {
+      serviceAccountKey = invocationOnMock.getArgumentAt(0, String.class);
+      return null;
+    };
+
+    Answer<Boolean> answerEnablement = unused -> defaultOptionsEnabled;
+    Answer<Void> recordEnablement = invocationOnMock -> {
+      defaultOptionsEnabled = invocationOnMock.getArgumentAt(0, Boolean.class);
+      return null;
+    };
+
     doAnswer(answerAccountEmail).when(defaultOptions).getAccountEmail();
     doAnswer(recordAccountEmail).when(defaultOptions).selectAccount(anyString());
     doThrow(IllegalStateException.class).when(defaultOptions).getProject();
@@ -112,6 +102,10 @@ public class DefaultedPipelineOptionsComponentTest {
     doAnswer(recordProjectId).when(defaultOptions).setCloudProjectText(anyString());
     doAnswer(answerStagingLocation).when(defaultOptions).getStagingLocation();
     doAnswer(recordStagingLocation).when(defaultOptions).setStagingLocationText(anyString());
+    doAnswer(answerServiceAccountKey).when(defaultOptions).getServiceAccountKey();
+    doAnswer(recordServiceAccountKey).when(defaultOptions).setServiceAccountKey(anyString());
+    doAnswer(answerEnablement).when(defaultOptions).isEnabled();
+    doAnswer(recordEnablement).when(defaultOptions).setEnabled(anyBoolean());
   }
 
   @Test
@@ -126,6 +120,7 @@ public class DefaultedPipelineOptionsComponentTest {
     assertEquals("", values.get(DataflowPreferences.PROJECT_PROPERTY));
     assertEquals("", values.get(DataflowPreferences.STAGING_LOCATION_PROPERTY));
     assertEquals("", values.get(DataflowPreferences.GCP_TEMP_LOCATION_PROPERTY));
+    assertEquals("", values.get(DataflowPreferences.SERVICE_ACCOUNT_KEY_PROPERTY));
   }
 
   @Test
@@ -134,6 +129,7 @@ public class DefaultedPipelineOptionsComponentTest {
     doReturn("pref-project").when(preferences).getDefaultProject();
     doReturn("gs://pref-staging").when(preferences).getDefaultStagingLocation();
     doReturn("gs://pref-staging").when(preferences).getDefaultGcpTempLocation();
+    doReturn("/key/file.json").when(preferences).getDefaultServiceAccountKey();
 
     DefaultedPipelineOptionsComponent component = new DefaultedPipelineOptionsComponent(
         shellCreator.getShell(), null, messageTarget, preferences, defaultOptions);
@@ -144,6 +140,7 @@ public class DefaultedPipelineOptionsComponentTest {
     assertEquals("pref-project", values.get(DataflowPreferences.PROJECT_PROPERTY));
     assertEquals("gs://pref-staging", values.get(DataflowPreferences.STAGING_LOCATION_PROPERTY));
     assertEquals("gs://pref-staging", values.get(DataflowPreferences.GCP_TEMP_LOCATION_PROPERTY));
+    assertEquals("/key/file.json", values.get(DataflowPreferences.SERVICE_ACCOUNT_KEY_PROPERTY));
   }
 
   @Test
@@ -152,6 +149,7 @@ public class DefaultedPipelineOptionsComponentTest {
     doReturn("pref-project").when(preferences).getDefaultProject();
     doReturn("gs://pref-staging").when(preferences).getDefaultStagingLocation();
     doReturn("gs://pref-staging").when(preferences).getDefaultGcpTempLocation();
+    doReturn("/key/file.json").when(preferences).getDefaultServiceAccountKey();
 
     DefaultedPipelineOptionsComponent component = new DefaultedPipelineOptionsComponent(
         shellCreator.getShell(), null, messageTarget, preferences, defaultOptions);
@@ -164,8 +162,8 @@ public class DefaultedPipelineOptionsComponentTest {
     assertEquals("", values.get(DataflowPreferences.PROJECT_PROPERTY));
     assertEquals("", values.get(DataflowPreferences.STAGING_LOCATION_PROPERTY));
     assertEquals("", values.get(DataflowPreferences.GCP_TEMP_LOCATION_PROPERTY));
+    assertEquals("", values.get(DataflowPreferences.SERVICE_ACCOUNT_KEY_PROPERTY));
   }
-
 
   @Test
   public void testCustomValues_values() {
@@ -178,6 +176,7 @@ public class DefaultedPipelineOptionsComponentTest {
     customValues.put(DataflowPreferences.PROJECT_PROPERTY, "newProject");
     customValues.put(DataflowPreferences.STAGING_LOCATION_PROPERTY, "newStagingLocation");
     customValues.put(DataflowPreferences.GCP_TEMP_LOCATION_PROPERTY, "newTempLocation");
+    customValues.put(DataflowPreferences.SERVICE_ACCOUNT_KEY_PROPERTY, "newKey");
 
     component.setCustomValues(customValues);
     component.setUseDefaultValues(false);
@@ -187,6 +186,7 @@ public class DefaultedPipelineOptionsComponentTest {
     assertEquals("newProject", values.get(DataflowPreferences.PROJECT_PROPERTY));
     assertEquals("newStagingLocation", values.get(DataflowPreferences.STAGING_LOCATION_PROPERTY));
     assertEquals("newStagingLocation", values.get(DataflowPreferences.GCP_TEMP_LOCATION_PROPERTY));
+    assertEquals("newKey", values.get(DataflowPreferences.SERVICE_ACCOUNT_KEY_PROPERTY));
   }
 
   @Test
@@ -195,12 +195,14 @@ public class DefaultedPipelineOptionsComponentTest {
     doReturn("pref-project").when(preferences).getDefaultProject();
     doReturn("gs://pref-staging").when(preferences).getDefaultStagingLocation();
     doReturn("gs://pref-staging").when(preferences).getDefaultGcpTempLocation();
+    doReturn("/key/file.json").when(preferences).getDefaultServiceAccountKey();
 
     Map<String, String> customValues = new HashMap<>();
     customValues.put(DataflowPreferences.ACCOUNT_EMAIL_PROPERTY, "newEmail");
     customValues.put(DataflowPreferences.PROJECT_PROPERTY, "newProject");
     customValues.put(DataflowPreferences.STAGING_LOCATION_PROPERTY, "newStagingLocation");
     customValues.put(DataflowPreferences.GCP_TEMP_LOCATION_PROPERTY, "newTempLocation");
+    customValues.put(DataflowPreferences.SERVICE_ACCOUNT_KEY_PROPERTY, "newKey");
 
     DefaultedPipelineOptionsComponent component = new DefaultedPipelineOptionsComponent(
         shellCreator.getShell(), null, messageTarget, preferences, defaultOptions);
@@ -213,6 +215,7 @@ public class DefaultedPipelineOptionsComponentTest {
     assertEquals("pref-project", values.get(DataflowPreferences.PROJECT_PROPERTY));
     assertEquals("gs://pref-staging", values.get(DataflowPreferences.STAGING_LOCATION_PROPERTY));
     assertEquals("gs://pref-staging", values.get(DataflowPreferences.GCP_TEMP_LOCATION_PROPERTY));
+    assertEquals("/key/file.json", values.get(DataflowPreferences.SERVICE_ACCOUNT_KEY_PROPERTY));
 
     // setting useDefaultValues=false should store current values and restore any custom values
     component.setUseDefaultValues(false);
@@ -221,6 +224,7 @@ public class DefaultedPipelineOptionsComponentTest {
     assertEquals("newProject", values.get(DataflowPreferences.PROJECT_PROPERTY));
     assertEquals("newStagingLocation", values.get(DataflowPreferences.STAGING_LOCATION_PROPERTY));
     assertEquals("newStagingLocation", values.get(DataflowPreferences.GCP_TEMP_LOCATION_PROPERTY));
+    assertEquals("newKey", values.get(DataflowPreferences.SERVICE_ACCOUNT_KEY_PROPERTY));
 
     // setting useDefaultValues=true should restore the preferences values
     component.setUseDefaultValues(true);
@@ -229,6 +233,7 @@ public class DefaultedPipelineOptionsComponentTest {
     assertEquals("pref-project", values.get(DataflowPreferences.PROJECT_PROPERTY));
     assertEquals("gs://pref-staging", values.get(DataflowPreferences.STAGING_LOCATION_PROPERTY));
     assertEquals("gs://pref-staging", values.get(DataflowPreferences.GCP_TEMP_LOCATION_PROPERTY));
+    assertEquals("/key/file.json", values.get(DataflowPreferences.SERVICE_ACCOUNT_KEY_PROPERTY));
 
     // setting useDefaultValues=false should store current values and restore any custom values
     component.setUseDefaultValues(false);
@@ -237,5 +242,46 @@ public class DefaultedPipelineOptionsComponentTest {
     assertEquals("newProject", values.get(DataflowPreferences.PROJECT_PROPERTY));
     assertEquals("newStagingLocation", values.get(DataflowPreferences.STAGING_LOCATION_PROPERTY));
     assertEquals("newStagingLocation", values.get(DataflowPreferences.GCP_TEMP_LOCATION_PROPERTY));
+    assertEquals("newKey", values.get(DataflowPreferences.SERVICE_ACCOUNT_KEY_PROPERTY));
+  }
+
+  @Test
+  public void testEnablement() {
+    DefaultedPipelineOptionsComponent component = new DefaultedPipelineOptionsComponent(
+        shellCreator.getShell(), null, messageTarget, preferences, defaultOptions);
+
+    assertTrue(component.isUseDefaultOptions());
+    assertTrue(component.useDefaultsButton.isEnabled());
+    assertFalse(component.defaultOptions.isEnabled()); // not enabled if useDefaultValues
+
+    component.setEnabled(false);
+    assertTrue(component.isUseDefaultOptions());
+    assertFalse(component.useDefaultsButton.isEnabled());
+    assertFalse(component.defaultOptions.isEnabled());
+
+    component.setEnabled(true);
+    assertTrue(component.isUseDefaultOptions());
+    assertTrue(component.useDefaultsButton.isEnabled());
+    assertFalse(component.defaultOptions.isEnabled()); // should not be re-enabled
+
+    component.setUseDefaultValues(false);
+    assertFalse(component.isUseDefaultOptions());
+    assertTrue(component.useDefaultsButton.isEnabled());
+    assertTrue(component.defaultOptions.isEnabled());
+
+    component.setEnabled(false);
+    assertFalse(component.isUseDefaultOptions());
+    assertFalse(component.useDefaultsButton.isEnabled());
+    assertFalse(component.defaultOptions.isEnabled());
+
+    component.setUseDefaultValues(true);
+    assertTrue(component.isUseDefaultOptions());
+    assertFalse(component.useDefaultsButton.isEnabled());
+    assertFalse(component.defaultOptions.isEnabled());
+
+    component.setEnabled(true);
+    assertTrue(component.isUseDefaultOptions());
+    assertTrue(component.useDefaultsButton.isEnabled());
+    assertFalse(component.defaultOptions.isEnabled()); // should not be re-enabled
   }
 }

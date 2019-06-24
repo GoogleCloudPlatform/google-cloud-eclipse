@@ -18,11 +18,10 @@ package com.google.cloud.tools.eclipse.dataflow.core.project;
 
 import com.google.cloud.tools.eclipse.dataflow.core.DataflowCorePlugin;
 import com.google.cloud.tools.eclipse.dataflow.core.natures.DataflowJavaProjectNature;
+import com.google.cloud.tools.eclipse.util.MappedNamespaceContext;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.io.IOException;
-import java.util.Iterator;
-import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
@@ -192,30 +191,8 @@ public class DataflowMavenModel {
      * <p>A well-formed POM file declares a namespace in the project element. This NamespaceContext
      * provides that namespace for the prefix 'pom'.
      */
-    @VisibleForTesting
-    static final NamespaceContext POM_NS_CONTEXT = new NamespaceContext() {
-      @Override
-      public String getNamespaceURI(String prefix) {
-        if (prefix == null) {
-          throw new NullPointerException("Null prefix");
-        } else if ("pom".equals(prefix)) {
-          return "http://maven.apache.org/POM/4.0.0";
-        } else if ("xml".equals(prefix)) {
-          return XMLConstants.XML_NS_URI;
-        }
-        return XMLConstants.NULL_NS_URI;
-      }
-
-      @Override
-      public String getPrefix(String namespaceURI) {
-        throw new UnsupportedOperationException();
-      }
-
-      @Override
-      public Iterator<?> getPrefixes(String namespaceURI) {
-        throw new UnsupportedOperationException();
-      }
-    };
+    private static final NamespaceContext pomNamespaceContext =
+        new MappedNamespaceContext("pom", "http://maven.apache.org/POM/4.0.0");
 
     private final DataflowDependencyManager dependencyManager;
     private final IMavenProjectRegistry projectRegistry;
@@ -250,7 +227,7 @@ public class DataflowMavenModel {
             StructuredModelManager.getModelManager().getModelForEdit(file);
         if (structuredModel instanceof IDOMModel) {
           XPath xpath = XPathFactory.newInstance().newXPath();
-          xpath.setNamespaceContext(POM_NS_CONTEXT);
+          xpath.setNamespaceContext(pomNamespaceContext);
           return new DataflowMavenModel(
               dependencyManager, xpath, file.getProject(), (IDOMModel) structuredModel);
         } else {

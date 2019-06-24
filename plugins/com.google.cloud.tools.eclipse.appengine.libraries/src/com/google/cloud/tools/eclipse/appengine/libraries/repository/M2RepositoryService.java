@@ -87,17 +87,4 @@ public class M2RepositoryService implements ILibraryRepositoryService {
   @Activate
   protected void activate() {  // Necessary to instantiate the class.
   }
-
-  /**
-   * First checks if the artifact is available locally. If not, then it tries to resolve it via
-   * Maven.
-   */
-  @Override
-  public void makeArtifactAvailable(LibraryFile libraryFile, IProgressMonitor monitor)
-      throws CoreException {
-    if (MavenHelper.isArtifactLocallyAvailable(libraryFile.getMavenCoordinates())) {
-      return;
-    }
-    MavenHelper.resolveArtifact(libraryFile.getMavenCoordinates(), monitor);
-  }
 }

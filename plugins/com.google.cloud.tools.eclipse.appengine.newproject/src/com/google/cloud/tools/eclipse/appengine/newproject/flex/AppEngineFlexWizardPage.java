@@ -16,15 +16,17 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.flex;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineWizardPage;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.PlatformUI;
 
 public class AppEngineFlexWizardPage extends AppEngineWizardPage {
 
   public AppEngineFlexWizardPage() {
-    super(false);
     setTitle(Messages.getString("app.engine.flex.project")); //$NON-NLS-1$
     setDescription(Messages.getString("create.app.engine.flex.project")); //$NON-NLS-1$
   }
@@ -34,5 +36,19 @@ public class AppEngineFlexWizardPage extends AppEngineWizardPage {
     PlatformUI.getWorkbench().getHelpSystem().setHelp(container,
         "com.google.cloud.tools.eclipse.appengine.newproject.NewFlexProjectContext"); //$NON-NLS-1$
   }
+  
+  @Override
+  protected String getSupportedLibrariesGroup() {
+    return CloudLibraries.NON_APP_ENGINE_STANDARD_GROUP;
+  }
 
+  @Override
+  public void createControl(Composite parent) {
+    super.createControl(parent);
+
+    AnalyticsPingManager.getInstance().sendPingOnShell(getShell(),
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_FLEX);
+  }
 }

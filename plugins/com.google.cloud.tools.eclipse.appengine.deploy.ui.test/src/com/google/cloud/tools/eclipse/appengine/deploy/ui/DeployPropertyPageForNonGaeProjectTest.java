@@ -26,8 +26,8 @@ public class DeployPropertyPageForNonGaeProjectTest
     extends DeployPropertyPageTest<BlankDeployPreferencesPanel> {
 
   @Rule
-  public TestProjectCreator nonGaeProjectCreator = new TestProjectCreator().withFacetVersions(
-      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
+  public TestProjectCreator nonGaeProjectCreator = new TestProjectCreator().withFacets(
+      JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31);
 
   @Override
   protected IProject getProject() {

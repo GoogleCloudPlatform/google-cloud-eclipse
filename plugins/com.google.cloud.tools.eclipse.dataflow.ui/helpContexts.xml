@@ -18,7 +18,7 @@
       Starter pipeline contains a simple pipeline which logs its input.
       Example pipelines contains the Dataflow Word Count examples.       
       
-      &lt;b&gt;Dataflow version:&lt;/b&gt; 1.9.x supports the com.google.cloud.dataflow.sdk packages. 2.x.x is based on Apache Beam and includes the org.apache.beam packages.
+      &lt;b&gt;Dataflow version:&lt;/b&gt; 2.5.0 is based on Apache Beam and includes the org.apache.beam packages.
       
       &lt;b&gt;Package:&lt;/b&gt; The Java package in which the sample code is placed.
 

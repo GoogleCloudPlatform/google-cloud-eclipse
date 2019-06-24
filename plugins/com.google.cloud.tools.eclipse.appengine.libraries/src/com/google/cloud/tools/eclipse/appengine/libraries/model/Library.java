@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,6 +45,7 @@ public final class Library {
   private List<LibraryFile> transitiveDependencies = null;
   private List<LibraryFile> directDependencies = Collections.emptyList();
   private String group;
+  private String stage = "GA";
   private String javaVersion="1.7";
   private String transport = "http";
 
@@ -85,6 +87,17 @@ public final class Library {
 
   void setToolTip(String toolTip) {
     this.toolTip = toolTip;
+  }
+  
+  /**
+   * @return typically GA, alpha, beta, or deprecated though other values are possible
+   */
+  public String getLaunchStage() {
+    return stage;
+  }
+  
+  void setLaunchStage(String stage) {
+    this.stage = stage;
   }
 
   public URI getSiteUri() {
@@ -147,10 +160,10 @@ public final class Library {
   }
 
   /**
-   * @return the collection to which this library belongs
+   * @return the collections to which this library belongs
    */
-  public String getGroup() {
-    return group;
+  List<String> getGroups() {
+    return Splitter.on(',').omitEmptyStrings().trimResults().splitToList(group);
   }
 
   public String getTransport() {
@@ -184,26 +197,26 @@ public final class Library {
    * transitive dependency graph.
    */
   private synchronized List<LibraryFile> resolveDependencies() {
-    List<LibraryFile> transitiveDependencies = new ArrayList<>();
-    
+    List<LibraryFile> resolvedDependencies = new ArrayList<>();
+        
     for (LibraryFile artifact : directDependencies) {
       artifact.updateVersion();
       MavenCoordinates coordinates = artifact.getMavenCoordinates();
       
       // include the artifact in its own list in case we can't find it in the repo
-      transitiveDependencies.add(artifact);
+      resolvedDependencies.add(artifact);
       
       try {
         Collection<LibraryFile> dependencies =
             LibraryFactory.loadTransitiveDependencies(coordinates);
-        transitiveDependencies.addAll(dependencies);
+        resolvedDependencies.addAll(dependencies);
       } catch (CoreException ex) {
         logger.log(Level.SEVERE,
             "Could not load library " + artifact.getMavenCoordinates().toString(), ex);
       }
     }
     
-    return resolveDuplicates(transitiveDependencies);
+    return resolveDuplicates(resolvedDependencies);
   }  
   
   /**

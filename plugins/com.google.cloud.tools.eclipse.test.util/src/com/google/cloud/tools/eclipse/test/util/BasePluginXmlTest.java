@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Google Inc.
+ * Copyright 2016 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +19,26 @@ package com.google.cloud.tools.eclipse.test.util;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+import org.eclipse.core.expressions.Expression;
+import org.eclipse.core.expressions.ExpressionConverter;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.RegistryFactory;
@@ -58,6 +68,8 @@ public abstract class BasePluginXmlTest {
   
   private Document doc;
 
+  private final XPathFactory xpathFactory = XPathFactory.newInstance();
+
   @Before
   public void setUp() {
     doc = pluginXmlDocument.get();
@@ -65,8 +77,79 @@ public abstract class BasePluginXmlTest {
 
   protected final Document getDocument() {
     return doc;
-  } 
-  
+  }
+
+  /** Pull out the selected nodes from the given root. */
+  protected NodeList findNodes(String xpathExpression, Element root) {
+    try {
+      XPath xpath = xpathFactory.newXPath();
+      return (NodeList) xpath.evaluate(xpathExpression, root, XPathConstants.NODESET);
+    } catch (XPathExpressionException ex) {
+      throw new AssertionError(ex.toString(), ex);
+    }
+  }
+
+  /** Pull out the selected nodes from the document. */
+  protected NodeList findNodes(String xpathExpression) {
+    return findNodes(xpathExpression, getDocument().getDocumentElement());
+  }
+
+  /** Return the single element matching the expression. */
+  protected Element findElement(String xpathExpression, Element root) {
+    NodeList list = findNodes(xpathExpression, root);
+    assertEquals(1, list.getLength());
+    return (Element) list.item(0);
+  }
+
+  /** Return the single element matching the expression. */
+  protected Element findElement(String xpathExpression) {
+    return findElement(xpathExpression, getDocument().getDocumentElement());
+  }
+
+  /** Return the extensions of the given extension point. */
+  protected final NodeList getExtensions(String extensionPointId) {
+    return findNodes("//plugin/extension[@point='" + extensionPointId + "']");
+  }
+
+  /** Verify that a node is a valid expression definition. */
+  protected static Node checkExpressionDefinition(Element definition) {
+    Assert.assertEquals("definition", definition.getNodeName());
+    String id = definition.getAttribute("id");
+    Assert.assertNotNull("definition must have an 'id' attribute", id);
+    Assert.assertFalse("invalid definition ID", Strings.isNullOrEmpty(id));
+    Assert.assertEquals(
+        "definition should have only an 'id' attribute", 1, definition.getAttributes().getLength());
+    List<Node> expressions = getChildNodes(definition, Node.ELEMENT_NODE);
+    Assert.assertEquals("definition must have only 1 subexpression", 1, expressions.size());
+    Assert.assertTrue(expressions.get(0) instanceof Element);
+    checkExpression((Element) expressions.get(0));
+    return definition;
+  }
+
+  /** Verify that a node is a valid expression. */
+  protected static Expression checkExpression(Element expression) {
+    try {
+      Expression converted = ExpressionConverter.getDefault().perform(expression);
+      Assert.assertNotNull(converted);
+      return converted;
+    } catch (CoreException ex) {
+      throw new AssertionError("failed to convert to core expression", ex);
+    }
+  }
+
+  /** Return the child nodes of given type. */
+  protected static final List<Node> getChildNodes(Node parent, short nodeType) {
+    List<Node> result = new ArrayList<>();
+    NodeList children = parent.getChildNodes();
+    for (int i = 0; i < children.getLength(); i++) {
+      Node child = children.item(i);
+      if (child.getNodeType() == nodeType) {
+        result.add(child);
+      }
+    }
+    return result;
+  }
+
   @Test
   public final void testRootElementIsPlugin() {
     Assert.assertEquals("plugin", getDocument().getDocumentElement().getNodeName());
@@ -169,7 +252,7 @@ public abstract class BasePluginXmlTest {
     if (vendor.startsWith("%")) {
       vendor = pluginProperties.get(vendor.substring(1));
     }
-    assertEquals("Google Inc.", vendor);
+    assertEquals("Google LLC", vendor);
   }
   
   @Test
@@ -188,27 +271,27 @@ public abstract class BasePluginXmlTest {
   @Test
   public final void testBundleExecutionEnvironment() throws IOException {
     Attributes manifest = getManifestAttributes();
-    assertEquals("JavaSE-1.7", manifest.getValue("Bundle-RequiredExecutionEnvironment"));
+    assertEquals("JavaSE-1.8", manifest.getValue("Bundle-RequiredExecutionEnvironment"));
   }
 
   @Test
   public final void testGuavaImportVersions() throws IOException {
     checkDependencyDirectives(
-        "Import-Package", "com.google.common.", "version=\"[20.0.0,21.0.0)\"");
+        "Import-Package", "com.google.common.", "version=\"[27.0.0,28.0.0)\"");
     checkDependencyDirectives(
-        "Require-Bundle", "com.google.guava", "bundle-version=\"[20.0.0,21.0.0)\"");
+        "Require-Bundle", "com.google.guava", "bundle-version=\"[27.0.0,28.0.0)\"");
   }
 
   @Test
   public final void testGoogleApisImportVersions() throws IOException {
     checkDependencyDirectives(
-        "Import-Package", "com.google.api.", "version=\"[1.23.0,1.24.0)\"");
+        "Import-Package", "com.google.api.", "version=\"[1.25.0,1.26.0)\"");
   }
 
   @Test
   public final void testGoogleApisExportVersions() throws IOException {
     checkDependencyDirectives(
-        "Export-Package", "com.google.api.", "version=\"1.23.0\"");
+        "Export-Package", "com.google.api.", "version=\"1.25.0\"");
   }
 
   private void checkDependencyDirectives(

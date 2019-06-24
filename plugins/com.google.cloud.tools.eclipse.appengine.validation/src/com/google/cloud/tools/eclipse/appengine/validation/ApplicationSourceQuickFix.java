@@ -17,7 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 /**
- * Quick fix for appengine-web.xml available in source editor.
+ * Quick fix to remove application element from appengine-web.xml in source editor.
  */
 public class ApplicationSourceQuickFix extends XsltSourceQuickFix {
   

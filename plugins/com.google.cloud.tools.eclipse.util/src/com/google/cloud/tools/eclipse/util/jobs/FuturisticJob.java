@@ -16,13 +16,14 @@
 
 package com.google.cloud.tools.eclipse.util.jobs;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -101,16 +102,13 @@ public abstract class FuturisticJob<T> extends Job {
    * providing that this job has not been abandoned or cancelled. The callback is executed using the
    * provided executor.
    */
-  public void onSuccess(Executor executor, final Consumer<? super T> callback) {
-    Runnable dispatch = new Runnable() {
-      @Override
-      public void run() {
-        if (!abandoned && !future.isCancelled()) {
-          try {
-            callback.accept(future.get());
-          } catch (InterruptedException | ExecutionException ex) {
-            // ignore
-          }
+  public void onSuccess(Executor executor, Consumer<? super T> callback) {
+    Runnable dispatch = () -> {
+      if (!abandoned && !future.isCancelled()) {
+        try {
+          callback.accept(future.get());
+        } catch (InterruptedException | ExecutionException ex) {
+          // ignore
         }
       }
     };
@@ -124,13 +122,8 @@ public abstract class FuturisticJob<T> extends Job {
    * this job has not been abandoned or cancelled. The runnable is executed using the provided
    * executor.
    */
-  public void onSuccess(Executor executor, final Runnable runnable) {
-    onSuccess(executor, new Consumer<T>() {
-      @Override
-      public void accept(T result) {
-        runnable.run();
-      }
-    });
+  public void onSuccess(Executor executor, Runnable runnable) {
+    onSuccess(executor, result -> runnable.run());
   }
 
   /**
@@ -138,20 +131,17 @@ public abstract class FuturisticJob<T> extends Job {
    * the computation, providing that this job has not been abandoned or cancelled. The callback is
    * executed using the provided executor.
    */
-  public void onError(Executor executor, final Consumer<? super Exception> callback) {
-    Runnable dispatch = new Runnable() {
-      @Override
-      public void run() {
-        if (!abandoned && !future.isCancelled()) {
-          try {
-            future.get();
-          } catch (ExecutionException ex) {
-            // #compute() only throws Exception
-            Verify.verify(ex.getCause() instanceof Exception);
-            callback.accept((Exception) ex.getCause());
-          } catch (InterruptedException ex) {
-            // ignored
-          }
+  public void onError(Executor executor, Consumer<? super Exception> callback) {
+    Runnable dispatch = () -> {
+      if (!abandoned && !future.isCancelled()) {
+        try {
+          future.get();
+        } catch (ExecutionException ex) {
+          // #compute() only throws Exception
+          Verify.verify(ex.getCause() instanceof Exception);
+          callback.accept((Exception) ex.getCause());
+        } catch (InterruptedException ex) {
+          // ignored
         }
       }
     };
@@ -195,7 +185,7 @@ public abstract class FuturisticJob<T> extends Job {
         // ignored and fallthrough
       }
     }
-    return Optional.absent();
+    return Optional.empty();
   }
 
   /**
@@ -210,7 +200,7 @@ public abstract class FuturisticJob<T> extends Job {
         // ignored and fallthrough
       }
     }
-    return Optional.absent();
+    return Optional.empty();
   }
 
   /**
@@ -228,7 +218,7 @@ public abstract class FuturisticJob<T> extends Job {
         // ignored and fallthrough
       }
     }
-    return Optional.absent();
+    return Optional.empty();
   }
 
   /**

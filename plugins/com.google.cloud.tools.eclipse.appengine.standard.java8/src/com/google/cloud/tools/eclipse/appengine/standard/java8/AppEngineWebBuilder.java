@@ -17,8 +17,9 @@
 package com.google.cloud.tools.eclipse.appengine.standard.java8;
 
 import com.google.cloud.tools.appengine.AppEngineDescriptor;
+import com.google.cloud.tools.appengine.AppEngineException;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineConfigurationUtil;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,7 +60,8 @@ public class AppEngineWebBuilder extends IncrementalProjectBuilder {
       return null;
     }
     IFile appEngineWebDescriptor =
-        WebProjectUtil.findInWebInf(project.getProject(), new Path("appengine-web.xml"));
+        AppEngineConfigurationUtil.findConfigurationFile(
+            project.getProject(), new Path("appengine-web.xml"));
     if (appEngineWebDescriptor == null || !appEngineWebDescriptor.exists()) {
       logger.warning(getProject() + ": no build required: missing appengine-web.xml");
       return null;
@@ -98,7 +100,7 @@ public class AppEngineWebBuilder extends IncrementalProjectBuilder {
           setupForJava7Runtime(project, isMaven, monitor);
         }
       }
-    } catch (SAXException ex) {
+    } catch (SAXException | AppEngineException ex) {
       // Parsing failed due to malformed XML; just don't check the value now.
     } catch (CoreException | IOException ex) {
       logger.log(Level.SEVERE, getProject() + ": error updating facets", ex);

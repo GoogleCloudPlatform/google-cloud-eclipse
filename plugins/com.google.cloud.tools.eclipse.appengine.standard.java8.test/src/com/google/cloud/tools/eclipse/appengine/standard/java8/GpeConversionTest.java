@@ -24,7 +24,7 @@ import com.google.cloud.tools.eclipse.appengine.facets.convert.AppEngineStandard
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
+import java.util.Map;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.jobs.Job;
@@ -63,11 +63,10 @@ public class GpeConversionTest {
 
   private void convertGpeProject(URL zipFile)
       throws CoreException, IOException, InterruptedException {
-    List<IProject> projects =
-        ProjectUtils.importProjects(zipFile,
-        false /* checkBuildErrors */, null);
+    Map<String, IProject> projects =
+        ProjectUtils.importProjects(zipFile, false /* checkBuildErrors */, null);
     assertEquals(1, projects.size());
-    project = projects.get(0);
+    project = projects.values().iterator().next();
     IFacetedProject facetedProject = ProjectFacetsManager.create(project,
         true /* convert to faceted project if necessary */, null /* no monitor here */);
 

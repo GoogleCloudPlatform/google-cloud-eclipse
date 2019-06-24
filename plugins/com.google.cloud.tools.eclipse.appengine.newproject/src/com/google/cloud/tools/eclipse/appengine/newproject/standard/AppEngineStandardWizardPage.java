@@ -16,17 +16,18 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.standard;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineWizardPage;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -41,7 +42,6 @@ public class AppEngineStandardWizardPage extends AppEngineWizardPage {
   private ComboViewer runtimeField;
 
   public AppEngineStandardWizardPage() {
-    super(true);
     setTitle(Messages.getString("app.engine.standard.project")); //$NON-NLS-1$
     setDescription(Messages.getString("create.app.engine.standard.project")); //$NON-NLS-1$
   }
@@ -50,6 +50,21 @@ public class AppEngineStandardWizardPage extends AppEngineWizardPage {
   public void setHelp(Composite container) {
     PlatformUI.getWorkbench().getHelpSystem().setHelp(container,
         "com.google.cloud.tools.eclipse.appengine.newproject.NewStandardProjectContext"); //$NON-NLS-1$
+  }
+  
+  @Override
+  protected String getSupportedLibrariesGroup() {
+    return CloudLibraries.APP_ENGINE_STANDARD_GROUP;
+  }
+
+  @Override
+  public void createControl(Composite parent) {
+    super.createControl(parent);
+
+    AnalyticsPingManager.getInstance().sendPingOnShell(getShell(),
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_STANDARD);
   }
 
   @Override
@@ -66,23 +81,17 @@ public class AppEngineStandardWizardPage extends AppEngineWizardPage {
     runtimeField.setContentProvider(ArrayContentProvider.getInstance());
     runtimeField.setInput(AppEngineRuntime.STANDARD_RUNTIMES);
     runtimeField.setSelection(new StructuredSelection(DEFAULT_RUNTIME), true);
-    runtimeField.addPostSelectionChangedListener(new ISelectionChangedListener() {
-      @Override
-      public void selectionChanged(SelectionChangedEvent event) {
-        revalidate();
-      }
-    });
+    runtimeField.addPostSelectionChangedListener(event -> revalidate());
   }
 
   @Override
-  public String getRuntimeId() {
-    AppEngineRuntime selected = DEFAULT_RUNTIME;
+  public AppEngineRuntime getRuntime() {
     if (runtimeField != null && !runtimeField.getSelection().isEmpty()) {
       Preconditions.checkState(runtimeField.getSelection() instanceof IStructuredSelection,
           "ComboViewer should return an IStructuredSelection");
       IStructuredSelection selection = (IStructuredSelection) runtimeField.getSelection();
-      selected = (AppEngineRuntime) selection.getFirstElement();
+      return (AppEngineRuntime) selection.getFirstElement();
     }
-    return selected.getId();
+    return DEFAULT_RUNTIME;
   }
 }

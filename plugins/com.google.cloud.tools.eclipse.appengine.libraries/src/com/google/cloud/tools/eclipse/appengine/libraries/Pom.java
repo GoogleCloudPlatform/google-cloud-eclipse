@@ -20,12 +20,11 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
 import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
+import com.google.cloud.tools.eclipse.util.MappedNamespaceContext;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
 import com.google.common.base.Verify;
-import com.google.common.collect.Iterables;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -36,8 +35,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
+import javax.xml.namespace.NamespaceContext;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -47,10 +49,15 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -59,16 +66,21 @@ import org.xml.sax.SAXException;
 
 class Pom {
 
+  private static final XPathFactory xpathFactory = XPathFactory.newInstance();
   // todo we're doing enough of this we should import or write some utilities
   private static final DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
   private static final TransformerFactory transformerFactory = TransformerFactory.newInstance();
+  private static final NamespaceContext maven4NamespaceContext =
+      new MappedNamespaceContext("m", "http://maven.apache.org/POM/4.0.0");
   
   static {
     builderFactory.setNamespaceAware(true);
   }
   
-  private Document document;
-  private IFile pomFile;
+  @VisibleForTesting
+  final Document document;
+  private final IFile pomFile;
+  private final List<Bom> boms = new ArrayList<>();
   
   private Pom(Document document, IFile pomFile) {
     this.document = document;
@@ -82,8 +94,31 @@ class Pom {
       DocumentBuilder builder = builderFactory.newDocumentBuilder();
       Document document = builder.parse(pomFile.getContents());
       Pom pom = new Pom(document, pomFile);
+      
+      XPath xpath = xpathFactory.newXPath();
+      xpath.setNamespaceContext(maven4NamespaceContext);
+
+      NodeList bomNodes = (NodeList) xpath.evaluate(
+          "//m:dependencyManagement/m:dependencies/m:dependency[m:type='pom'][m:scope='import']",
+          document.getDocumentElement(),
+          XPathConstants.NODESET);
+      
+      for (int i = 0; i < bomNodes.getLength(); i++) {
+        String artifactId = (String) xpath.evaluate("string(./m:artifactId)",
+            bomNodes.item(i),
+            XPathConstants.STRING);
+        String groupId = (String) xpath.evaluate("string(./m:groupId)",
+            bomNodes.item(i),
+            XPathConstants.STRING);
+        String version = (String) xpath.evaluate("string(./m:version)",
+            bomNodes.item(i),
+            XPathConstants.STRING);
+        Bom bom = Bom.loadBom(groupId, artifactId, version, null);
+        pom.boms.add(bom);
+      } 
+      
       return pom;
-    } catch (ParserConfigurationException ex) {
+    } catch (ParserConfigurationException | XPathExpressionException ex) {
       IStatus status = StatusUtil.error(Pom.class, ex.getMessage(), ex);
       throw new CoreException(status);
     }
@@ -93,30 +128,40 @@ class Pom {
    * Select libraries whose artifacts are satisfied by the pom's dependencies.
    */
   public Collection<Library> resolveLibraries(Collection<Library> availableLibraries) {
-    NodeList dependenciesList = document.getElementsByTagName("dependencies");
-    if (dependenciesList.getLength() == 0) {
-      return Collections.emptyList();
-    }
-    final Element dependencies = (Element) dependenciesList.item(0);
+    XPath xpath = xpathFactory.newXPath();
+    xpath.setNamespaceContext(maven4NamespaceContext);
 
-    Predicate<LibraryFile> dependencyFound = new Predicate<LibraryFile>() {
-      @Override
-      public boolean apply(LibraryFile libraryFile) {
+    try {
+      NodeList dependenciesNodes = (NodeList) xpath.evaluate(
+          "./m:dependencies", // top-level elements only
+          document.getDocumentElement(),
+          XPathConstants.NODESET);
+      if (dependenciesNodes.getLength() == 0) {
+        return Collections.emptyList();
+      } 
+      
+      final Element dependencies = (Element) dependenciesNodes.item(0);
+  
+      Predicate<LibraryFile> dependencyFound = libraryFile -> {
         Preconditions.checkNotNull(libraryFile);
         MavenCoordinates coordinates = libraryFile.getMavenCoordinates();
         String groupId = coordinates.getGroupId();
         String artifactId = coordinates.getArtifactId();
         return dependencyExists(dependencies, groupId, artifactId);
+      };
+  
+      List<Library> matched = new ArrayList<>();
+      for(Library library : availableLibraries) {
+        boolean allMatch = library.getDirectDependencies().stream().allMatch(dependencyFound);
+        if (allMatch) {
+          matched.add(library);
+        }
       }
-    };
-
-    List<Library> matched = new ArrayList<>();
-    for(Library library : availableLibraries) {
-      if (Iterables.all(library.getDirectDependencies(), dependencyFound)) {
-        matched.add(library);
-      }
+      return matched;
+    } catch (XPathExpressionException ex) {
+      // this only happens if the XPath expression embedded in this code is malformed
+      throw new RuntimeException(ex);
     }
-    return matched;
   }
 
   /** Add dependencies required for the list of selected libraries. */
@@ -138,14 +183,30 @@ class Pom {
     // m2e-core/org.eclipse.m2e.core.ui/src/org/eclipse/m2e/core/ui/internal/actions/AddDependencyAction.java
     // m2e-core/org.eclipse.m2e.core.ui/src/org/eclipse/m2e/core/ui/internal/editing/AddDependencyOperation.java
     
-    NodeList dependenciesList = document.getElementsByTagName("dependencies");
+    XPath xpath = xpathFactory.newXPath();
+    xpath.setNamespaceContext(maven4NamespaceContext);
+    
     Element dependencies;
-    if (dependenciesList.getLength() > 0) {
-      dependencies = (Element) dependenciesList.item(0);
-    } else {
-      dependencies = document.createElement("dependencies");
+    try {
+      NodeList dependenciesNodes = (NodeList) xpath.evaluate(
+          "./m:dependencies", // top-level elements only
+          document.getDocumentElement(),
+          XPathConstants.NODESET);
+      if (dependenciesNodes.getLength() > 0) {
+        dependencies = (Element) dependenciesNodes.item(0);
+      } else {
+        dependencies = document.createElementNS(
+            "http://maven.apache.org/POM/4.0.0", "dependencies");
+      }
+    } catch (XPathExpressionException ex) {
+      IStatus status = StatusUtil.error(Pom.class, ex.getMessage(), ex);
+      throw new CoreException(status);
     }
 
+    // our template includes a <!— test dependencies —> comment 
+    // to delimit compilation/runtime dependencies from test dependencies.
+    Comment testComment = findTestComment(dependencies);
+    
     if (removedLibraries != null) {
       removeUnusedDependencies(dependencies, selectedLibraries, removedLibraries);
     }
@@ -158,30 +219,42 @@ class Pom {
         String artifactId = coordinates.getArtifactId();
         
         if (!dependencyExists(dependencies, groupId, artifactId)) {
-          Element dependency = document.createElement("dependency");
-          Element groupIdElement = document.createElement("groupId");
+          Element dependency = document.createElementNS(
+              "http://maven.apache.org/POM/4.0.0", "dependency");
+          Element groupIdElement = document.createElementNS(
+              "http://maven.apache.org/POM/4.0.0", "groupId");
           groupIdElement.setTextContent(groupId);
           dependency.appendChild(groupIdElement);
 
-          Element artifactIdElement = document.createElement("artifactId");
+          Element artifactIdElement = document.createElementNS(
+              "http://maven.apache.org/POM/4.0.0", "artifactId");
           artifactIdElement.setTextContent(artifactId);
           dependency.appendChild(artifactIdElement);
-
-          String version = coordinates.getVersion();
-          ArtifactVersion latestVersion =
-              ArtifactRetriever.DEFAULT.getBestVersion(groupId, artifactId);
-          if (latestVersion != null) {
-            version = latestVersion.toString(); 
+          
+          if (!dependencyManaged(groupId, artifactId)) {  
+            String version = coordinates.getVersion();
+            if (!artifact.isPinned()) {
+              ArtifactVersion latestVersion =
+                  ArtifactRetriever.DEFAULT.getBestVersion(groupId, artifactId);
+              if (latestVersion != null) {
+                version = latestVersion.toString(); 
+              }
+            }
+            
+            // todo latest version may not be needed anymore.
+            if (!MavenCoordinates.LATEST_VERSION.equals(version)) {
+              Element versionElement = document.createElementNS(
+                  "http://maven.apache.org/POM/4.0.0", "version");
+              versionElement.setTextContent(version);
+              dependency.appendChild(versionElement);
+            }
           }
           
-          // todo latest version may not be needed anymore.
-          if (!MavenCoordinates.LATEST_VERSION.equals(version)) {
-            Element versionElement = document.createElement("version");
-            versionElement.setTextContent(version);
-            dependency.appendChild(versionElement);
+          if (testComment == null) {
+            dependencies.appendChild(dependency);
+          } else {
+            dependencies.insertBefore(dependency, testComment);
           }
-          
-          dependencies.appendChild(dependency);
         }
       }
     }
@@ -195,6 +268,33 @@ class Pom {
     } catch (TransformerException ex) {
       throw new CoreException(null);
     }   
+  }
+
+  private static Comment findTestComment(Element dependencies) {
+    NodeList children = dependencies.getChildNodes();
+    
+    for (int i = 0; i < children.getLength(); i++) {
+      Node node = children.item(i);
+      if (node.getNodeType() == Node.COMMENT_NODE) {
+        if (node.getNodeValue().trim().toLowerCase(Locale.US).startsWith("test")) {
+          return (Comment) node; 
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * @return true if and only if this artifact is controlled by a BOM
+   */
+  @VisibleForTesting
+  boolean dependencyManaged(String groupId, String artifactId) {
+    for (Bom bom : boms) {
+      if (bom.defines(groupId, artifactId)) {
+        return true; 
+      }
+    }
+    return false;
   }
 
   /**
@@ -232,7 +332,9 @@ class Pom {
         currentDependencies.put(encoded, node);
       }
     }
-    Verify.verify(currentDependencies.isEmpty() == (dependencies.getChildNodes().getLength() == 0));
+    Verify.verify(currentDependencies.isEmpty() == (dependencies
+        .getElementsByTagNameNS("http://maven.apache.org/POM/4.0.0", "dependency")
+        .getLength() == 0));
 
     // iterate through each library-to-remove and, providing all of its dependencies are
     // present, then remove the dependencies that are not required by any selected library
@@ -281,7 +383,8 @@ class Pom {
   }
 
   private static String getValue(Element dependency, String childName) {
-    NodeList children = dependency.getElementsByTagName(childName);
+    NodeList children = dependency.getElementsByTagNameNS(
+        "http://maven.apache.org/POM/4.0.0", childName);
     if (children.getLength() > 0) {
       return children.item(0).getTextContent();
     }

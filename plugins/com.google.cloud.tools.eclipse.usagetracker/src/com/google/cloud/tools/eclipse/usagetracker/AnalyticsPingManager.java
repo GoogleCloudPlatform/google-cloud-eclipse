@@ -24,10 +24,12 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.escape.CharEscaperBuilder;
 import com.google.common.escape.Escaper;
+import com.google.gson.Gson;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -55,6 +57,10 @@ public class AnalyticsPingManager {
   private static final Logger logger = Logger.getLogger(AnalyticsPingManager.class.getName());
 
   private static final String ANALYTICS_COLLECTION_URL = "https://ssl.google-analytics.com/collect";
+  private static final String CLEAR_CUT_COLLECTION_URL = "https://play.google.com/log";
+
+  // flag for Google Analytics 
+  private static final boolean USE_GOOGLE_ANALYTICS = true;
 
   // Fixed-value query parameters present in every ping, and their fixed values:
   //
@@ -79,11 +85,15 @@ public class AnalyticsPingManager {
 
   private static AnalyticsPingManager instance;
 
-  private final String endpointUrl;
+  // analytics services
+  private final String analyticsUrl;
+  private final String clearCutUrl;
+  
   // Preference store (should be configuration scoped) from which we get UUID, opt-in status, etc.
   private final IEclipsePreferences preferences;
 
   private final ConcurrentLinkedQueue<PingEvent> pingEventQueue;
+  
   @VisibleForTesting
   final Job eventFlushJob = new Job("Analytics Event Submission") {
     @Override
@@ -91,27 +101,33 @@ public class AnalyticsPingManager {
       while (!pingEventQueue.isEmpty() && !monitor.isCanceled()) {
         PingEvent event = pingEventQueue.poll();
         showOptInDialogIfNeeded(event.shell);
-        sendPingHelper(event);
+        sendPing(event);
       }
       return Status.OK_STATUS;
     }
   };
 
+  private int sequencePosition = 0;
+
   @VisibleForTesting
-  AnalyticsPingManager(String endpointUrl, IEclipsePreferences preferences,
+  AnalyticsPingManager(String analyticsUrl, String clearCutUrl, IEclipsePreferences preferences,
       ConcurrentLinkedQueue<PingEvent> concurrentLinkedQueue) {
-    this.endpointUrl = endpointUrl;
+    this.analyticsUrl = analyticsUrl;
+    this.clearCutUrl = clearCutUrl;
     this.preferences = Preconditions.checkNotNull(preferences);
     pingEventQueue = concurrentLinkedQueue;
   }
 
   public static synchronized AnalyticsPingManager getInstance() {
     if (instance == null) {
-      String endpointUrl = null;
+      String analyticsUrl = null;
+      String clearCutUrl = null;
       if (!Platform.inDevelopmentMode() && isTrackingIdDefined()) {
-        endpointUrl = ANALYTICS_COLLECTION_URL;  // Enable only in production env.
+        // Enable only in production environment.
+        clearCutUrl = CLEAR_CUT_COLLECTION_URL;
+        analyticsUrl = ANALYTICS_COLLECTION_URL;
       }
-      instance = new AnalyticsPingManager(endpointUrl, AnalyticsPreferences.getPreferenceNode(),
+      instance = new AnalyticsPingManager(analyticsUrl, clearCutUrl, AnalyticsPreferences.getPreferenceNode(),
           new ConcurrentLinkedQueue<PingEvent>());
     }
     return instance;
@@ -123,7 +139,7 @@ public class AnalyticsPingManager {
   }
 
   @VisibleForTesting
-  static synchronized String getAnonymizedClientId(IEclipsePreferences preferences) {
+  synchronized String getAnonymizedClientId() {
     String clientId = preferences.get(AnalyticsPreferences.ANALYTICS_CLIENT_ID, null);
     if (clientId == null) {
       clientId = UUID.randomUUID().toString();
@@ -166,10 +182,6 @@ public class AnalyticsPingManager {
     sendPingOnShell(null, eventName);
   }
 
-  public void sendPing(String eventName, String metadataKey) {
-    sendPingOnShell(null, eventName, metadataKey);
-  }
-
   public void sendPing(String eventName, String metadataKey, String metadataValue) {
     sendPingOnShell(null, eventName, metadataKey, metadataValue);
   }
@@ -193,10 +205,6 @@ public class AnalyticsPingManager {
     sendPingOnShell(parentShell, eventName, ImmutableMap.<String, String>of());
   }
 
-  public void sendPingOnShell(Shell parentShell, String eventName, String metadataKey) {
-    sendPingOnShell(parentShell, eventName, metadataKey, "null");
-  }
-
   public void sendPingOnShell(Shell parentShell,
       String eventName, String metadataKey, String metadataValue) {
     Preconditions.checkArgument(!Strings.isNullOrEmpty(metadataKey), "metadataKey null or empty");
@@ -205,11 +213,11 @@ public class AnalyticsPingManager {
     sendPingOnShell(parentShell, eventName, ImmutableMap.of(metadataKey, metadataValue));
   }
 
-  public void sendPingOnShell(Shell parentShell, String eventName, Map<String, String> metadata) {
+  private void sendPingOnShell(Shell parentShell, String eventName, Map<String, String> metadata) {
     Preconditions.checkArgument(!Strings.isNullOrEmpty(eventName), "eventName null or empty");
     Preconditions.checkNotNull(metadata);
 
-    if (endpointUrl != null) {
+    if (analyticsUrl != null || clearCutUrl != null) {
       // Note: always enqueue if a user has not seen the opt-in dialog yet; enqueuing itself
       // doesn't mean that the event ping will be posted.
       if (userHasOptedIn() || !userHasRegisteredOptInStatus()) {
@@ -220,15 +228,33 @@ public class AnalyticsPingManager {
     }
   }
 
-  private void sendPingHelper(PingEvent pingEvent) {
+  /**
+   * This is the only method that makes an HTTP connection. Everything else
+   * ultimately funnels through here. 
+   */
+  private void sendPing(PingEvent pingEvent) {
     if (userHasOptedIn()) {
-      try {
-        Map<String, String> parametersMap = buildParametersMap(pingEvent);
-        HttpUtil.sendPost(endpointUrl, parametersMap);
-      } catch (IOException ex) {
-        // Don't try to recover or retry.
-        logger.log(Level.WARNING, "Failed to send a POST request", ex);
+      
+      if (USE_GOOGLE_ANALYTICS) {
+        try {
+          Map<String, String> parametersMap = buildParametersMap(pingEvent);
+          HttpUtil.sendPost(analyticsUrl, parametersMap);
+        } catch (IOException ex) {
+          // Don't try to recover or retry.
+          logger.log(Level.FINE, "Failed to POST to Google Analytics", ex);
+        }
       }
+      
+      try {
+        String json = jsonEncode(pingEvent);
+        int resultCode = HttpUtil.sendPost(clearCutUrl, json, "application/json");
+        if (resultCode >= 300) {
+          logger.log(Level.FINE, "Failed to POST to Concord with HTTP result " + resultCode);
+        }
+      } catch (IOException ex) {
+        // Don't recover or retry.
+        logger.log(Level.FINE, "Failed to POST to Concord", ex);
+      } 
     }
   }
 
@@ -240,7 +266,7 @@ public class AnalyticsPingManager {
   @VisibleForTesting
   Map<String, String> buildParametersMap(PingEvent pingEvent) {
     Map<String, String> parametersMap = new HashMap<>(STANDARD_PARAMETERS);
-    parametersMap.put("cid", getAnonymizedClientId(preferences));
+    parametersMap.put("cid", getAnonymizedClientId());
     parametersMap.put("cd19", CloudToolsInfo.METRICS_NAME);  // cd19: "event type"
     parametersMap.put("cd20", pingEvent.eventName);
 
@@ -248,10 +274,13 @@ public class AnalyticsPingManager {
     parametersMap.put("dp", virtualPageUrl);
     parametersMap.put("dh", "virtual.eclipse");
 
-    if (!pingEvent.metadata.isEmpty()) {
+    Map<String, String> metadata = new HashMap<>(pingEvent.metadata);
+    metadata.putAll(getPlatformInfo());
+
+    if (!metadata.isEmpty()) {
       List<String> escapedPairs = new ArrayList<>();
 
-      for (Map.Entry<String, String> entry : pingEvent.metadata.entrySet()) {
+      for (Map.Entry<String, String> entry : metadata.entrySet()) {
         String key = METADATA_ESCAPER.escape(entry.getKey());
         String value = METADATA_ESCAPER.escape(entry.getValue());
         escapedPairs.add(key + "=" + value);
@@ -262,6 +291,12 @@ public class AnalyticsPingManager {
     return parametersMap;
   }
 
+  private static ImmutableMap<String, String> getPlatformInfo() {
+    return ImmutableMap.of(
+        "ct4e-version", CloudToolsInfo.getToolsVersion(),
+        "eclipse-version", CloudToolsInfo.getEclipseVersion());
+  }
+
   @VisibleForTesting
   boolean shouldShowOptInDialog() {
     return !userHasOptedIn() && !userHasRegisteredOptInStatus();
@@ -270,18 +305,15 @@ public class AnalyticsPingManager {
   /**
    * @param parentShell if null, tries to show the dialog at the workbench level.
    */
-  private void showOptInDialogIfNeeded(final Shell parentShell) {
+  private void showOptInDialogIfNeeded(Shell parentShell) {
     if (shouldShowOptInDialog()) {
       Display display = PlatformUI.getWorkbench().getDisplay();
 
-      display.syncExec(new Runnable() {
-        @Override
-        public void run() {
-          OptInDialog dialog = new OptInDialog(findShell(parentShell));
-          dialog.open();
-          boolean optIn = dialog.getReturnCode() == Window.OK;
-          registerOptInStatus(optIn);
-        }
+      display.syncExec(() -> {
+        OptInDialog dialog = new OptInDialog(findShell(parentShell));
+        dialog.open();
+        boolean optIn = dialog.getReturnCode() == Window.OK;
+        registerOptInStatus(optIn);
       });
     }
   }
@@ -296,14 +328,18 @@ public class AnalyticsPingManager {
     }
 
     try {
+      Shell activeShell = Display.getCurrent().getActiveShell();
+      if (activeShell != null) {
+        return activeShell;
+      }
       IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
       if (window != null) {
         return window.getShell();
       }
+      return null;
     } catch (IllegalStateException ise) {  // getWorkbench() might throw this.
-      // Fall through.
+      return null;
     }
-    return Display.getCurrent().getActiveShell();
   }
 
   private static void flushPreferences(IEclipsePreferences preferences) {
@@ -327,5 +363,50 @@ public class AnalyticsPingManager {
       this.metadata = metadata;
       this.shell = shell;
     }
+  }
+
+  @VisibleForTesting
+  String jsonEncode(PingEvent event) {
+    Gson gson = new Gson();
+
+    Map<String, String> desktopClientInfo = new HashMap<>();
+    desktopClientInfo.put("os", System.getProperty("os.name"));
+    
+    Map<String, Object> clientInfo = new HashMap<>();
+    clientInfo.put("client_type", "DESKTOP");
+    clientInfo.put("desktop_client_info", Collections.singletonList(desktopClientInfo));
+        
+    // logs/proto/cloud/concord/concord_event.proto
+    Map<String, Object> sourceExtension = new HashMap<>();
+    sourceExtension.put("client_machine_id", getAnonymizedClientId());
+    sourceExtension.put("console_type", CloudToolsInfo.CONSOLE_TYPE);
+    sourceExtension.put("event_name", event.eventName);
+    
+    Map<String, String> metadataMap = new LinkedHashMap<>(event.metadata);
+    metadataMap.putAll(getPlatformInfo());
+
+    List<Map<String, String>> metadataList = new ArrayList<>();
+    for (Map.Entry<String, String> entry : metadataMap.entrySet()) {
+      Map<String, String> keyValue = new HashMap<>();
+      keyValue.put("key", entry.getKey());
+      keyValue.put("value", entry.getValue());
+      metadataList.add(keyValue);
+    }
+    sourceExtension.put("event_metadata", metadataList);
+    
+    String sourceExtensionJsonString = gson.toJson(sourceExtension);
+    
+    Map<String, Object> logEvent = new HashMap<>();
+    logEvent.put("event_time_ms", System.currentTimeMillis());
+    logEvent.put("sequence_position", sequencePosition++);  
+    logEvent.put("source_extension_json", sourceExtensionJsonString);
+    
+    Map<String, Object> root = new HashMap<>();
+    root.put("log_source_name", "CONCORD");
+    root.put("request_time_ms", System.currentTimeMillis());
+    root.put("client_info", Collections.singletonList(clientInfo));
+    root.put("log_event", Collections.singletonList(Collections.singletonList(logEvent)));
+
+    return gson.toJson(Collections.singletonList(root));
   }
 }

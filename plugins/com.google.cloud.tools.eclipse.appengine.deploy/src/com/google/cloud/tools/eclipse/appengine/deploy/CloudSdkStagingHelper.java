@@ -16,12 +16,11 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
-import com.google.cloud.tools.appengine.api.AppEngineException;
-import com.google.cloud.tools.appengine.api.deploy.DefaultStageFlexibleConfiguration;
-import com.google.cloud.tools.appengine.api.deploy.DefaultStageStandardConfiguration;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineFlexibleStaging;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineStandardStaging;
+import com.google.cloud.tools.appengine.AppEngineException;
+import com.google.cloud.tools.appengine.configuration.AppEngineWebXmlProjectStageConfiguration;
+import com.google.cloud.tools.appengine.configuration.AppYamlProjectStageConfiguration;
+import com.google.cloud.tools.appengine.operations.AppEngineWebXmlProjectStaging;
+import com.google.cloud.tools.appengine.operations.AppYamlProjectStaging;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -38,25 +37,27 @@ public class CloudSdkStagingHelper {
   /**
    * @param explodedWarDirectory the input of the staging operation
    * @param stagingDirectory where the result of the staging operation will be written
-   * @param cloudSdk executes the staging operation
+   * @param appEngineStandardStaging executes the staging operation
+   * @throws AppEngineException when staging fails
    */
   public static void stageStandard(IPath explodedWarDirectory, IPath stagingDirectory,
-      CloudSdk cloudSdk, IProgressMonitor monitor) {
+      AppEngineWebXmlProjectStaging appEngineStandardStaging, IProgressMonitor monitor)
+          throws AppEngineException {
     if (monitor.isCanceled()) {
-      throw new OperationCanceledException();
+      throw new OperationCanceledException("canceled early");
     }
 
     SubMonitor progress = SubMonitor.convert(monitor, 1);
     progress.setTaskName(Messages.getString("task.name.stage.project")); //$NON-NLS-1$
 
-    DefaultStageStandardConfiguration stagingConfig = new DefaultStageStandardConfiguration();
-    stagingConfig.setSourceDirectory(explodedWarDirectory.toFile());
-    stagingConfig.setStagingDirectory(stagingDirectory.toFile());
-    stagingConfig.setEnableJarSplitting(true);
-    stagingConfig.setDisableUpdateCheck(true);
+    AppEngineWebXmlProjectStageConfiguration stagingConfig =
+        AppEngineWebXmlProjectStageConfiguration.builder(
+            explodedWarDirectory.toFile().toPath(), stagingDirectory.toFile().toPath())
+            .enableJarSplitting(true)
+            .disableUpdateCheck(true)
+            .build();
 
-    CloudSdkAppEngineStandardStaging staging = new CloudSdkAppEngineStandardStaging(cloudSdk);
-    staging.stageStandard(stagingConfig);
+    appEngineStandardStaging.stageStandard(stagingConfig);
 
     progress.worked(1);
   }
@@ -69,21 +70,20 @@ public class CloudSdkStagingHelper {
    * @throws OperationCanceledException when user cancels the operation
    */
   public static void stageFlexible(IPath appEngineDirectory, IPath deployArtifact,
-      IPath stagingDirectory, IProgressMonitor monitor) {
+      IPath stagingDirectory, IProgressMonitor monitor) throws AppEngineException {
     if (monitor.isCanceled()) {
-      throw new OperationCanceledException();
+      throw new OperationCanceledException("canceled early"); //$NON-NLS-1$
     }
 
     SubMonitor progress = SubMonitor.convert(monitor, 1);
     progress.setTaskName(Messages.getString("task.name.stage.project")); //$NON-NLS-1$
 
-    DefaultStageFlexibleConfiguration stagingConfig = new DefaultStageFlexibleConfiguration();
-    stagingConfig.setAppEngineDirectory(appEngineDirectory.toFile());
-    stagingConfig.setArtifact(deployArtifact.toFile());
-    stagingConfig.setStagingDirectory(stagingDirectory.toFile());
+    AppYamlProjectStageConfiguration stagingConfig =
+        AppYamlProjectStageConfiguration.builder(appEngineDirectory.toFile().toPath(),
+            deployArtifact.toFile().toPath(), stagingDirectory.toFile().toPath()).build();
 
-    CloudSdkAppEngineFlexibleStaging staging = new CloudSdkAppEngineFlexibleStaging();
-    staging.stageFlexible(stagingConfig);
+    AppYamlProjectStaging staging = new AppYamlProjectStaging();
+    staging.stageArchive(stagingConfig);
 
     progress.worked(1);
   }

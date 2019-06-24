@@ -7,12 +7,8 @@
 
    <extension
          point="org.eclipse.ui.commands">
-      <category
-            id="com.google.cloud.tools.eclipse.login.commands.category"
-            name="Google Login Category">
-      </category>
       <command
-            categoryId="com.google.cloud.tools.eclipse.login.commands.category"
+            categoryId="com.google.cloud.tools.eclipse.ui.commands"
             id="com.google.cloud.tools.eclipse.login.commands.loginCommand"
             name="Google Login Command">
       </command>
@@ -35,16 +31,13 @@
          </command>
       </menuContribution>
       <menuContribution
-            locationURI="toolbar:org.eclipse.ui.trim.status?after=additions">
-         <toolbar
-               id="com.google.cloud.tools.eclipse.login.toolbars.loginToolbar">
-            <command
-                  commandId="com.google.cloud.tools.eclipse.login.commands.loginCommand"
-                  icon="icons/googleFavicon.png"
-                  tooltip="%loginIconTooltip"
-                  id="com.google.cloud.tools.eclipse.login.toolbars.loginCommand">
-            </command>
-         </toolbar>
+            locationURI="toolbar:com.google.cloud.tools.eclipse.ui.status">
+         <command
+               commandId="com.google.cloud.tools.eclipse.login.commands.loginCommand"
+               icon="icons/googleFavicon.png"
+               tooltip="%loginIconTooltip"
+               id="com.google.cloud.tools.eclipse.login.toolbars.loginCommand">
+         </command>
       </menuContribution>
       <menuContribution
             allPopups="false"

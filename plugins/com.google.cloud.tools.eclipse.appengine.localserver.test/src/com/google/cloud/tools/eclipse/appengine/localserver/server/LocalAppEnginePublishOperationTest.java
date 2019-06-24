@@ -23,10 +23,14 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
+import com.google.common.base.Stopwatch;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -48,7 +52,7 @@ public class LocalAppEnginePublishOperationTest {
   @Rule
   public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
-  private List<IProject> projects;
+  private final List<IProject> projects = new ArrayList<>();
   private IProject serverProject;
   private IProject sharedProject;
   private IModule serverModule;
@@ -56,39 +60,45 @@ public class LocalAppEnginePublishOperationTest {
   private IServer server;
 
   @Before
-  public void setUp() throws IOException, CoreException {
-    projects = ProjectUtils.importProjects(getClass(),
-        "projects/test-submodules.zip", true /* checkBuildErrors */, null);
+  public void setUp() throws Exception {
+    sharedProject = importProject("sox-shared");
+    serverProject = importProject("sox-server");
     assertEquals(2, projects.size());
-    assertTrue("sox-server".equals(projects.get(0).getName())
-        || "sox-server".equals(projects.get(1).getName()));
-    assertTrue("sox-shared".equals(projects.get(1).getName())
-        || "sox-shared".equals(projects.get(0).getName()));
-    serverProject = projects.get("sox-server".equals(projects.get(0).getName()) ? 0 : 1);
-    assertNotNull("sox-server", serverProject);
-    sharedProject = projects.get("sox-shared".equals(projects.get(0).getName()) ? 0 : 1);
-    assertNotNull("sox-shared", sharedProject);
+
+    serverModule = ServerUtil.getModule(serverProject);
+    sharedModule = ServerUtil.getModule(sharedProject);
+
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1798
+    waitUntilProjectsReady();
 
     // To diagnose https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1798.
     logModules(serverProject);
     logModules(sharedProject);
+    assertTrue(serverProject.getFile("bin/sox/server/GreetingServiceImpl.class").exists());
+    assertTrue(sharedProject.getFile("bin/sox/shared/GreetingService.class").exists());
 
-    serverModule = ServerUtil.getModule(serverProject);
     assertNotNull(serverModule);
-    sharedModule = ServerUtil.getModule(sharedProject);
     assertNotNull(sharedModule);
   }
 
   @After
   public void tearDown() throws CoreException {
-    if (projects != null) {
-      for (IProject project : projects) {
-        project.delete(true, null);
-      }
+    if (!projects.isEmpty()) {
+      projects.get(0).getWorkspace().delete(projects.toArray(new IProject[0]), true, null);
     }
     if (server != null) {
       server.delete();
     }
+  }
+
+  private IProject importProject(String projectName) throws IOException, CoreException {
+    Map<String, IProject> imported = ProjectUtils.importProjects(getClass(),
+        "projects/" + projectName + ".zip", true /* checkBuildErrors */, null);
+    assertEquals(1, imported.size());
+    IProject project = imported.get(projectName);
+    assertNotNull(project);
+    projects.add(project);
+    return project;
   }
 
   /**
@@ -157,4 +167,41 @@ public class LocalAppEnginePublishOperationTest {
       }
     }
   }
+
+  private void waitUntilProjectsReady() throws Exception {
+    waitUntilCondition("Until fully built", this::classFilesExist, () -> Thread.sleep(100), 100);
+    waitUntilCondition("Until modules fully ready", this::modulesReady, this::reopenProjects, 10);
+  }
+
+  private static void waitUntilCondition(String comment, BooleanSupplier condition,
+      ThrowingRunnable interimAction, int tries) throws Exception {
+    Stopwatch stopwatch = Stopwatch.createStarted();
+    for (int i = 0; i < tries && !condition.getAsBoolean(); i++) {
+      ThreadDumpingWatchdog.report(comment, stopwatch);
+      interimAction.run();
+    }
+  }
+
+  private boolean classFilesExist() {
+    return serverProject.getFile("bin/sox/server/GreetingServiceImpl.class").exists()
+        && sharedProject.getFile("bin/sox/shared/GreetingService.class").exists();
+  }
+
+  private boolean modulesReady() {
+    return serverModule != null && sharedModule != null;
+  }
+
+  private void reopenProjects() throws CoreException {
+    for (IProject project : projects) {
+      project.close(null);
+      project.open(null);
+    }
+    ProjectUtils.waitForProjects(projects);
+    serverModule = ServerUtil.getModule(serverProject);
+    sharedModule = ServerUtil.getModule(sharedProject);
+  }
+
+  private interface ThrowingRunnable {
+    void run() throws Exception;
+  };
 }

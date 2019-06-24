@@ -16,8 +16,8 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
-import com.google.cloud.tools.appengine.api.AppEngineException;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.AppEngineException;
+import com.google.cloud.tools.appengine.operations.CloudSdk;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPreferenceArea;
 import org.eclipse.jface.preference.PreferenceDialog;
@@ -72,7 +72,7 @@ public class LocalAppEngineServerWizardFragment extends WizardFragment {
   private String getCloudSdkLocation() {
     try {
       CloudSdk cloudSdk = new CloudSdk.Builder().build();
-      return cloudSdk.getSdkPath().toString();
+      return cloudSdk.getPath().toString();
     } catch (AppEngineException ex) {
       return null;
     }
@@ -100,13 +100,10 @@ public class LocalAppEngineServerWizardFragment extends WizardFragment {
     public void widgetDisposed(DisposeEvent event) {
       if (openPreferenceDialog) {
         // switch to Cloud SDK preferences panel
-        event.display.asyncExec(new Runnable() {
-          @Override
-          public void run() {
-            PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(
-                null, CloudSdkPreferenceArea.PAGE_ID, null, null);
-            dialog.open();
-          }
+        event.display.asyncExec(() -> {
+          PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(
+              null, CloudSdkPreferenceArea.PAGE_ID, null, null);
+          dialog.open();
        });   
       }
     }

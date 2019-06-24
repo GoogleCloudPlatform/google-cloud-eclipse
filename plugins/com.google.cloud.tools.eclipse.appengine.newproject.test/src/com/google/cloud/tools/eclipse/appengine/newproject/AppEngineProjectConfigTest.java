@@ -25,6 +25,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
@@ -58,9 +59,12 @@ public class AppEngineProjectConfigTest {
 
   @Test
   public void testRuntime() {
-    Assert.assertNull(config.getRuntimeId());
-    config.setRuntimeId("foobar");
-    Assert.assertEquals("foobar", config.getRuntimeId());
+    Assert.assertNull(config.getRuntime());
+    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8);
+    Assert.assertEquals(AppEngineRuntime.STANDARD_JAVA_8, config.getRuntime());
+
+    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8_SERVLET_25);
+    Assert.assertEquals(AppEngineRuntime.STANDARD_JAVA_8_SERVLET_25, config.getRuntime());
   }
 
   @Test

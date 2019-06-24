@@ -1,11 +1,12 @@
 Manifest-Version: 1.0
+Automatic-Module-Name: com.google.cloud.tools.eclipse.jst.server.core
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.jst.server.core
 Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: %pluginProvider
 Bundle-Localization: plugin
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: com.google.cloud.tools.eclipse.jst.server.core
 Import-Package: org.eclipse.core.runtime;version="3.5.0",

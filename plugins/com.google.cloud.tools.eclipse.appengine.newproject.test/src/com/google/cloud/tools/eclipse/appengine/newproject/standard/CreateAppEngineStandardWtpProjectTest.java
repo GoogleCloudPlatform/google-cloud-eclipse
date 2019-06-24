@@ -32,8 +32,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -75,7 +78,17 @@ public class CreateAppEngineStandardWtpProjectTest extends CreateAppEngineWtpPro
     libraries.add(library);
     config.setAppEngineLibraries(libraries);
     CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
-    creator.execute(monitor);
+    
+    // CreateAppEngineWtpProject/WorkspaceModificationOperation normally acquires the
+    // workspace lock in `run()`
+    ISchedulingRule rule = ResourcesPlugin.getWorkspace().getRoot();
+    Job.getJobManager().beginRule(rule, null);
+    try {
+      creator.execute(monitor);
+    } finally {
+      Job.getJobManager().endRule(rule);
+    }
+    ProjectUtils.waitForProjects(project);
 
     assertTrue(project.hasNature(JavaCore.NATURE_ID));
     assertAppEngineApiSdkOnClasspath();
@@ -84,14 +97,14 @@ public class CreateAppEngineStandardWtpProjectTest extends CreateAppEngineWtpPro
   private void assertAppEngineApiSdkOnClasspath() throws CoreException {
     IJavaProject javaProject = JavaCore.create(project);
     Matcher<IClasspathEntry> masterLibraryEntryMatcher =
-        new CustomTypeSafeMatcher<IClasspathEntry>("has master container") {
+        new CustomTypeSafeMatcher<IClasspathEntry>("master container") {
       @Override
       protected boolean matchesSafely(IClasspathEntry entry) {
         return entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER && entry.getPath().toString()
             .equals("com.google.cloud.tools.eclipse.appengine.libraries/master-container");
       }};
     Matcher<IClasspathEntry> appEngineSdkMatcher =
-        new CustomTypeSafeMatcher<IClasspathEntry>("has appengine-api-1.0-sdk") {
+        new CustomTypeSafeMatcher<IClasspathEntry>("appengine-api-1.0-sdk") {
           @Override
           protected boolean matchesSafely(IClasspathEntry entry) {
             return entry.getEntryKind() == IClasspathEntry.CPE_LIBRARY

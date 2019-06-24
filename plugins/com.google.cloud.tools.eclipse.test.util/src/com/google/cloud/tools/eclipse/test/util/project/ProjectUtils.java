@@ -23,7 +23,6 @@ import com.google.cloud.tools.eclipse.test.util.ArrayAssertions;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.ZipUtil;
 import com.google.cloud.tools.eclipse.test.util.reflection.ReflectionUtil;
-import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Stopwatch;
 import java.io.File;
@@ -34,6 +33,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +60,7 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.wst.common.componentcore.internal.builder.DependencyGraphImpl;
 import org.eclipse.wst.validation.internal.operations.ValidationBuilder;
 import org.eclipse.wst.validation.internal.operations.ValidatorManager;
 import org.osgi.framework.Bundle;
@@ -72,14 +73,14 @@ public class ProjectUtils {
   private static boolean DEBUG = false;
 
   /**
-   * Import the Eclipse projects found within the bundle containing {@code clazz} at the
-   * {@code relativeLocation}. Return the list of projects imported.
+   * Import the Eclipse projects found within the bundle containing {@code clazz} at the {@code
+   * relativeLocation}. Return the list of projects imported.
    *
    * @throws IOException if the zip cannot be accessed
    * @throws CoreException if a project cannot be imported
    */
-  public static List<IProject> importProjects(Class<?> clazz, String relativeLocation,
-      boolean checkBuildErrors, IProgressMonitor monitor)
+  public static Map<String, IProject> importProjects(
+      Class<?> clazz, String relativeLocation, boolean checkBuildErrors, IProgressMonitor monitor)
       throws IOException, CoreException {
 
     // Resolve the zip from within this bundle
@@ -90,14 +91,15 @@ public class ProjectUtils {
   }
 
   /**
-   * Import the Eclipse projects found within the bundle containing {@code clazz} at the
-   * {@code relativeLocation}. Return the list of projects imported.
+   * Import the Eclipse projects found within the bundle containing {@code clazz} at the {@code
+   * relativeLocation}. Return the list of projects imported.
    *
    * @throws IOException if the zip cannot be accessed
    * @throws CoreException if a project cannot be imported
    */
-  public static List<IProject> importProjects(URL fileLocation,
-      boolean checkBuildErrors, IProgressMonitor monitor) throws IOException, CoreException {
+  public static Map<String, IProject> importProjects(
+      URL fileLocation, boolean checkBuildErrors, IProgressMonitor monitor)
+      throws IOException, CoreException {
     SubMonitor progress = SubMonitor.convert(monitor, 100);
     URL zipLocation = FileLocator.toFileURL(fileLocation);
     if (!zipLocation.getProtocol().equals("file")) {
@@ -127,7 +129,7 @@ public class ProjectUtils {
 
     // import the projects
     progress.setWorkRemaining(10 * projectFiles.size() + 10);
-    List<IProject> projects = new ArrayList<>(projectFiles.size());
+    Map<String, IProject> projects = new LinkedHashMap<>();
     System.out.printf("Importing %d projects:\n", projectFiles.size());
     for (IPath projectFile : projectFiles) {
       System.out.println("    " + projectFile);
@@ -136,13 +138,13 @@ public class ProjectUtils {
       // bring in the project to the workspace
       project.create(descriptor, progress.newChild(2));
       project.open(progress.newChild(8));
-      projects.add(project);
+      projects.put(project.getName(), project);
     }
 
     // wait for any post-import operations too
-    waitForProjects(projects);
+    waitForProjects(projects.values());
     if (checkBuildErrors) {
-      waitUntilNoBuildError();
+      waitUntilNoBuildErrors();
       // changed from specific projects to see all possible errors
       failIfBuildErrors("Imported projects have errors");
     }
@@ -150,14 +152,25 @@ public class ProjectUtils {
     return projects;
   }
 
-  private static void waitUntilNoBuildError() throws CoreException {
+  /**
+   * Waits until no error markers are found for the specified projects. Uses all projects in the
+   * workspace if {@code project} is empty. Returns {@code true} when no error markers are found and
+   * {@code false} after time-out of 300 seconds.
+   *
+   * This method does not wait for pending build and validation jobs, so it is usually required to
+   * call methods such as {@link #waitForProjects} beforehand.
+   */
+  public static boolean waitUntilNoBuildErrors(IProject... projects) throws CoreException {
     try {
       Stopwatch elapsed = Stopwatch.createStarted();
       while (true) {
-        Set<String> errors = getAllBuildErrors();
-        if (errors.isEmpty() || elapsed.elapsed(TimeUnit.SECONDS) > 300) {
-          return;
+        Set<String> errors = getAllBuildErrors(projects);
+        if (errors.isEmpty()) {
+          return true;
+        } else if (elapsed.elapsed(TimeUnit.SECONDS) > 300) {
+          return false;
         }
+
         if (Display.getCurrent() != null) {
           while (Display.getCurrent().readAndDispatch());
         }
@@ -165,28 +178,42 @@ public class ProjectUtils {
       }
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
+      return false;
     }
   }
 
-  /** Fail if there are any build errors on any project in the workspace. */
+  /** Fail if there are any build errors on any projects in the workspace. */
   public static void failIfBuildErrors() throws CoreException {
-    failIfBuildErrors("Projects have build errors", getWorkspace().getRoot().getProjects());
+    failIfBuildErrors("Projects have build errors");
   }
 
-  /** Fail if there are any build errors on the specified projects. */
+  /**
+   * Fail if there are any build errors on the specified projects. Uses all projects in the
+   * workspace if {@code project} is empty.
+   */
   public static void failIfBuildErrors(String message, Collection<IProject> projects)
       throws CoreException {
     failIfBuildErrors(message, projects.toArray(new IProject[projects.size()]));
   }
 
-  /** Fail if there are any build errors on the specified projects. */
+  /**
+   * Fail if there are any build errors on the specified projects. Uses all projects in the
+   * workspace if {@code project} is empty.
+   */
   public static void failIfBuildErrors(String message, IProject... projects) throws CoreException {
     Set<String> errors = getAllBuildErrors(projects);
     assertTrue(message + "\n" + Joiner.on("\n").join(errors), errors.isEmpty());
   }
 
-  /** Return a list of all build errors on the specified projects. */
+  /**
+   * Return a list of all build errors on the specified projects. Uses all projects in the
+   * workspace if {@code project} is empty.
+   */
   public static Set<String> getAllBuildErrors(IProject... projects) throws CoreException {
+    if (projects.length == 0) {
+      projects = getWorkspace().getRoot().getProjects();
+    }
+
     Set<String> errors = new LinkedHashSet<>();
     for (IProject project : projects) {
       IMarker[] problems = project.findMarkers(IMarker.PROBLEM, true /* includeSubtypes */,
@@ -266,17 +293,14 @@ public class ProjectUtils {
 
   /** Wait for any spawned jobs and builds to complete (e.g., validation jobs). */
   public static void waitForProjects(IProject... projects) {
-    Runnable delayTactic = new Runnable() {
-      @Override
-      public void run() {
-        Display display = Display.getCurrent();
-        if (display != null) {
-          while (display.readAndDispatch()) {
-            /* spin */
-          }
+    Runnable delayTactic = () -> {
+      Display display = Display.getCurrent();
+      if (display != null) {
+        while (display.readAndDispatch()) {
+          /* spin */
         }
-        Thread.yield();
       }
+      Thread.yield();
     };
     waitForProjects(delayTactic, projects);
   }
@@ -284,7 +308,7 @@ public class ProjectUtils {
   /** Wait for any spawned jobs and builds to complete (e.g., validation jobs). */
   public static void waitForProjects(Runnable delayTactic, IProject... projects) {
     if (projects.length == 0) {
-      projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+      projects = getWorkspace().getRoot().getProjects();
     }
     Stopwatch timer = Stopwatch.createStarted();
     try {
@@ -344,6 +368,7 @@ public class ProjectUtils {
     Collections.addAll(jobs, jobManager.find("org.eclipse.wst.server.core.family"));
     Collections.addAll(jobs, jobManager.find("org.eclipse.wst.server.ui.family"));
     Collections.addAll(jobs, jobManager.find(ValidationBuilder.FAMILY_VALIDATION_JOB));
+    Collections.addAll(jobs, jobManager.find(DependencyGraphImpl.GRAPH_UPDATE_JOB_FAMILY));
     for (IProject project : projects) {
       Collections.addAll(jobs,
           jobManager.find(project.getName() + ValidatorManager.VALIDATOR_JOB_FAMILY));
@@ -355,6 +380,8 @@ public class ProjectUtils {
         case "org.eclipse.m2e.core.ui.internal.wizards.ImportMavenProjectsJob":
         case "org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob":
           jobs.add(job);
+          break;
+        default:
           break;
       }
     }
@@ -385,12 +412,7 @@ public class ProjectUtils {
       }
     } while (elapsed.elapsed(TimeUnit.SECONDS) < 300 && markers.length > 0);
 
-    ArrayAssertions.assertIsEmpty(markers, new Function<IMarker, String>() {
-      @Override
-      public String apply(IMarker marker) {
-        return ProjectUtils.formatProblem(marker);
-      }
-    });
+    ArrayAssertions.assertIsEmpty(markers, ProjectUtils::formatProblem);
     return markers;
   }
 

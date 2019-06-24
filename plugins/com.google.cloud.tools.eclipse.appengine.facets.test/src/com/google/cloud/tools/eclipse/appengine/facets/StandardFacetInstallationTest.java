@@ -27,7 +27,7 @@ import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -49,14 +49,14 @@ public class StandardFacetInstallationTest {
 
   public final ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
-  private List<IProject> projects;
+  private Map<String, IProject> projects;
 
-  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacets();
 
   @After
   public void tearDown() throws CoreException {
     if (projects != null) {
-      for (IProject project : projects) {
+      for (IProject project : projects.values()) {
         try {
           project.delete(true, null);
         } catch (IllegalArgumentException ex) {
@@ -75,7 +75,7 @@ public class StandardFacetInstallationTest {
     projects = ProjectUtils.importProjects(getClass(),
         "projects/test-dynamic-web-project.zip", true /* checkBuildErrors */, null);
     assertEquals(1, projects.size());
-    IProject project = projects.get(0);
+    IProject project = projects.values().iterator().next();
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     // verify that the appengine-web.xml is installed in the dynamic web root folder
     AppEngineStandardFacet.installAppEngineFacet(facetedProject, true, null);
@@ -90,11 +90,23 @@ public class StandardFacetInstallationTest {
   }
 
   @Test
+  public void testStandardFacetInstallation_createsLoggingProperties() throws CoreException {
+    IProject project = projectCreator.getProject();
+    assertFalse(project.getFile("src/main/webapp/WEB-INF/logging.properties").exists());
+
+    IFacetedProject facetedProject = projectCreator.getFacetedProject();
+    AppEngineStandardFacet.installAppEngineFacet(facetedProject, true, null);
+    ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
+
+    assertTrue(project.getFile("src/main/webapp/WEB-INF/logging.properties").exists());
+  }
+
+  @Test
   public void testStandardFacetInstallation_createsWebXml() throws CoreException {
     IProject project = projectCreator.getProject();
     assertFalse(project.getFile("src/main/webapp/WEB-INF/web.xml").exists());
 
-    IFacetedProject facetedProject = ProjectFacetsManager.create(project);
+    IFacetedProject facetedProject = projectCreator.getFacetedProject();
     AppEngineStandardFacet.installAppEngineFacet(facetedProject, true, null);
     ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
 
@@ -112,7 +124,7 @@ public class StandardFacetInstallationTest {
     webXml.create(new ByteArrayInputStream(new byte[0]), true, null);
     assertEmptyFile(webXml);
 
-    IFacetedProject facetedProject = ProjectFacetsManager.create(project);
+    IFacetedProject facetedProject = projectCreator.getFacetedProject();
     AppEngineStandardFacet.installAppEngineFacet(facetedProject, true, null);
     ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
 

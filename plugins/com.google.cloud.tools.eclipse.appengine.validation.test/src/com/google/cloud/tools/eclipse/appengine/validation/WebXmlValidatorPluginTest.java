@@ -20,7 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import java.io.ByteArrayInputStream;
@@ -35,8 +34,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
-import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -47,8 +44,8 @@ public class WebXmlValidatorPluginTest {
 
   private IJavaProject javaProject;
   private IResource resource;
-  @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacetVersions(
-      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacets(
+      JavaFacet.VERSION_1_7);
 
   @Before
   public void setUp() throws CoreException {
@@ -60,15 +57,6 @@ public class WebXmlValidatorPluginTest {
     createFile(project, "src/main/java", "ServletClass.java", "public class ServletClass {}");
     createFile(project, "src/com/example", "ServletClassInPackage.java",
         "package com.example; public class ServletClassInPackage {}");
-    createFile(project, "WebContent", "InWebContent.jsp", "");
-    createFile(project, "src", "InSrc.jsp", "");
-  }
-
-  @After
-  public void tearDown() throws CoreException {
-    // Delete to avoid https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1916
-    javaProject.getProject().getFile("WebContent/InWebContent.jsp").delete(true, null);
-    javaProject.getProject().getFile("src/InSrc.jsp").delete(true, null);
   }
 
   private static void createFile(IProject project, String folder, String filename,
@@ -95,11 +83,11 @@ public class WebXmlValidatorPluginTest {
     document.appendChild(root);
 
     WebXmlValidator validator = new WebXmlValidator();
-    ArrayList<BannedElement> blacklist = validator.checkForElements(resource, document);
+    ArrayList<ElementProblem> problems = validator.checkForProblems(resource, document);
 
-    assertEquals(1, blacklist.size());
+    assertEquals(1, problems.size());
     String markerId = "com.google.cloud.tools.eclipse.appengine.validation.undefinedServletMarker";
-    assertEquals(markerId, blacklist.get(0).getMarkerId());
+    assertEquals(markerId, problems.get(0).getMarkerId());
   }
 
   @Test
@@ -119,49 +107,9 @@ public class WebXmlValidatorPluginTest {
     document.appendChild(root);
 
     WebXmlValidator validator = new WebXmlValidator();
-    ArrayList<BannedElement> blacklist = validator.checkForElements(resource, document);
+    ArrayList<ElementProblem> problems = validator.checkForProblems(resource, document);
 
-    assertTrue(blacklist.isEmpty());
-  }
-
-  @Test
-  public void testValidateJsp() throws ParserConfigurationException {
-    // For a typical dynamic web project:
-    //     /           -> WebContent
-    // WEB-INF         -> WebContent/WEB-INF
-    // WEB-INF/classes -> src
-
-    DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-    DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
-    Document document = documentBuilder.newDocument();
-
-    Element root = document.createElement("web-app");
-    root.setUserData("location", new DocumentLocation(1, 1), null);
-    root.setUserData("version", "2.5", null);
-
-    Element element = document.createElement("jsp-file");
-    element.setTextContent("InWebContent.jsp");
-    element.setUserData("location", new DocumentLocation(2, 1), null);
-    root.appendChild(element);
-
-    Element element2 = document.createElement("jsp-file");
-    element2.setTextContent("InSrc.jsp");
-    element2.setUserData("location", new DocumentLocation(3, 1), null);
-    root.appendChild(element2);
-
-    Element element3 = document.createElement("jsp-file");
-    element3.setTextContent("DoesNotExist.jsp");
-    element3.setUserData("location", new DocumentLocation(4, 1), null);
-    root.appendChild(element3);
-    document.appendChild(root);
-
-    WebXmlValidator validator = new WebXmlValidator();
-    ArrayList<BannedElement> blacklist = validator.checkForElements(resource, document);
-
-    assertEquals(1, blacklist.size());
-    String markerId = "com.google.cloud.tools.eclipse.appengine.validation.jspFileMarker";
-    assertEquals(markerId, blacklist.get(0).getMarkerId());
-    assertEquals("DoesNotExist.jsp could not be resolved", blacklist.get(0).getMessage());
+    assertTrue(problems.isEmpty());
   }
 
   @Test

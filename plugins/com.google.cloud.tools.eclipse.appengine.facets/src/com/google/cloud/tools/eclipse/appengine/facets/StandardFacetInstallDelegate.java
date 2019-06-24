@@ -17,40 +17,33 @@
 package com.google.cloud.tools.eclipse.appengine.facets;
 
 import com.google.cloud.tools.eclipse.util.Templates;
-import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
-import com.google.common.annotations.VisibleForTesting;
 import java.io.ByteArrayInputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jst.j2ee.refactor.listeners.J2EEElementChangedListener;
+import org.eclipse.wst.common.project.facet.core.IDelegate;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
-import org.eclipse.wst.common.project.facet.core.IProjectFacet;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
-public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate {
-  private static final String APPENGINE_WEB_XML = "appengine-web.xml";
-
-  private static final String JSDT_FACET_ID = "wst.jsdt.web";
-  private static final int MAX_JSDT_CHECK_RETRIES = 100;
+public class StandardFacetInstallDelegate implements IDelegate {
 
   @Override
   public void execute(IProject project,
                       IProjectFacetVersion version,
                       Object config,
                       IProgressMonitor monitor) throws CoreException {
-    super.execute(project, version, config, monitor);
-    createConfigFiles(project, monitor);
+    createConfigFiles(project, version, monitor);
     installAppEngineRuntimes(project);
   }
 
@@ -63,10 +56,6 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
     // Schedule immediately so that it doesn't go into the SLEEPING state. Ensuring the job is
     // active is necessary for unit testing.
     installJob.schedule();
-    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155
-    // The first ConvertJob has already been scheduled (which installs JSDT facet), and
-    // this is to suspend the second ConvertJob temporarily.
-    ConvertJobSuspender.suspendFutureConvertJobs();
   }
 
   private static class AppEngineRuntimeInstallJob extends Job {
@@ -88,73 +77,89 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
       return J2EEElementChangedListener.PROJECT_COMPONENT_UPDATE_JOB_FAMILY.equals(family);
     }
 
-    private void waitUntilJsdtIsFixedFacet(IProgressMonitor monitor) throws InterruptedException {
-      try {
-        IProjectFacet jsdtFacet = ProjectFacetsManager.getProjectFacet(JSDT_FACET_ID);
-        for (int times = 0; !monitor.isCanceled() && times < MAX_JSDT_CHECK_RETRIES; times++) {
-          if (facetedProject.isFixedProjectFacet(jsdtFacet)) {
-            return;
-          }
-          Thread.sleep(100 /* ms */);
-        }
-      } catch (IllegalArgumentException ex) {
-        // JSDT facet itself doesn't exist. (Should not really happen.) Ignore and fall through.
-      }
-    }
-
     @Override
     protected IStatus run(IProgressMonitor monitor) {
       try {
-        // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155
-        // Wait until the first ConvertJob installs the JSDT facet.
-        waitUntilJsdtIsFixedFacet(monitor);
-        if (monitor.isCanceled()) {
-          return Status.CANCEL_STATUS;
-        }
         AppEngineStandardFacet.installAllAppEngineRuntimes(facetedProject, monitor);
         return Status.OK_STATUS;
 
       } catch (CoreException ex) {
         return ex.getStatus();
-      } catch (InterruptedException ex) {
-        return Status.CANCEL_STATUS;
-      } finally {
-        // Now resume the second ConvertJob.
-        ConvertJobSuspender.resume();
       }
     }
   }
 
-  /**
-   * Creates an appengine-web.xml file in the WEB-INF folder if it doesn't exist.
-   */
-  @VisibleForTesting
-  void createConfigFiles(IProject project, IProgressMonitor monitor)
-      throws CoreException {
+  void createConfigFiles(IProject project, IProjectFacetVersion facetVersion,
+      IProgressMonitor monitor) throws CoreException {
     SubMonitor progress = SubMonitor.convert(monitor, 10);
 
-    // The virtual component model is very flexible, but we assume that
-    // the WEB-INF/appengine-web.xml isn't a virtual file remapped elsewhere
-    IFolder webInfDir = WebProjectUtil.getWebInfDirectory(project);
-    if (webInfDir == null) {
-      webInfDir =
-          project.getFolder(WebProjectUtil.DEFAULT_WEB_PATH).getFolder(WebProjectUtil.WEB_INF);
-    }
-    progress.worked(1);
+    createFileInWebInf(project, "logging.properties", Templates.LOGGING_PROPERTIES_TEMPLATE,
+        Collections.emptyMap(), progress.split(5));
 
-    IFile appEngineWebXml = webInfDir.getFile(APPENGINE_WEB_XML);
-    if (appEngineWebXml.exists()) {
+    Map<String, String> parameters = new HashMap<>();
+    Object appEngineRuntime = facetVersion.getProperty("appengine.runtime");
+    if (appEngineRuntime instanceof String) {
+      parameters.put("runtime", (String) appEngineRuntime);
+    }
+    createAppEngineConfigurationFile(
+        project,
+        "appengine-web.xml",
+        Templates.APPENGINE_WEB_XML_TEMPLATE,
+        parameters,
+        progress.split(5));
+  }
+
+  /** Creates a file in the WEB-INF folder if it doesn't exist. */
+  private void createFileInWebInf(IProject project, String filename, String templateName,
+      Map<String, String> templateParameters, IProgressMonitor monitor) throws CoreException {
+    SubMonitor progress = SubMonitor.convert(monitor, 7);
+
+    IFile targetFile = WebProjectUtil.findInWebInf(project, new Path(filename));
+    if (targetFile != null && targetFile.exists()) {
       return;
     }
 
-    ResourceUtils.createFolders(webInfDir, progress.newChild(1));
-    appEngineWebXml.create(new ByteArrayInputStream(new byte[0]), true, progress.newChild(2));
-    String configFileLocation = appEngineWebXml.getLocation().toString();
-    Map<String, String> parameters = new HashMap<>();
-    parameters.put("runtime", "java8");
-    Templates.createFileContent(configFileLocation, Templates.APPENGINE_WEB_XML_TEMPLATE,
-        parameters);
+    // Use the virtual component model to decide where to create the file
+    targetFile =
+        WebProjectUtil.createFileInWebInf(
+            project,
+            new Path(filename),
+            new ByteArrayInputStream(new byte[0]),
+            false /* overwrite */,
+            progress.split(2));
+    String fileLocation = targetFile.getLocation().toString();
+    Templates.createFileContent(fileLocation, templateName, templateParameters);
     progress.worked(4);
-    appEngineWebXml.refreshLocal(IFile.DEPTH_ZERO, progress.newChild(1));
+    targetFile.refreshLocal(IFile.DEPTH_ZERO, progress.split(1));
+  }
+
+  /** Creates an App Engine configuration file in the appropriate folder, if it doesn't exist. */
+  private void createAppEngineConfigurationFile(
+      IProject project,
+      String filename,
+      String templateName,
+      Map<String, String> templateParameters,
+      IProgressMonitor monitor)
+      throws CoreException {
+    SubMonitor progress = SubMonitor.convert(monitor, 7);
+
+    IFile targetFile =
+        AppEngineConfigurationUtil.findConfigurationFile(project, new Path(filename));
+    if (targetFile != null && targetFile.exists()) {
+      return;
+    }
+
+    // todo Templates should provide content as an InputStream
+    targetFile =
+        AppEngineConfigurationUtil.createConfigurationFile(
+            project,
+            new Path(filename),
+            new ByteArrayInputStream(new byte[0]),
+            false /* overwrite */,
+            progress.split(2));
+    String fileLocation = targetFile.getLocation().toString();
+    Templates.createFileContent(fileLocation, templateName, templateParameters);
+    progress.worked(4);
+    targetFile.refreshLocal(IFile.DEPTH_ZERO, progress.split(1));
   }
 }

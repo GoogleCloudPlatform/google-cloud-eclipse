@@ -28,8 +28,8 @@ public class DeployPropertyPageForFlexProjectTest
     extends DeployPropertyPageTest<FlexDeployPreferencesPanel> {
 
   @Rule
-  public TestProjectCreator flexProjectCreator = new TestProjectCreator().withFacetVersions(
-      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineFlexWarFacet.FACET_VERSION);
+  public TestProjectCreator flexProjectCreator = new TestProjectCreator().withFacets(
+      JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31, AppEngineFlexWarFacet.FACET_VERSION);
 
   @Override
   protected IProject getProject() {

@@ -24,6 +24,7 @@ import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.cloud.tools.login.UiFacade;
 import com.google.cloud.tools.login.VerificationCodeHolder;
+import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
@@ -31,28 +32,19 @@ import java.util.logging.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.program.Program;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.commands.ICommandService;
-import org.eclipse.ui.services.IServiceLocator;
 
 public class LoginServiceUi implements UiFacade {
 
   private static final Logger logger = Logger.getLogger(LoginServiceUi.class.getName());
 
-  private IServiceLocator serviceLocator;
-  private IShellProvider shellProvider;
-  private Display display;
+  private final IShellProvider shellProvider;
 
-  public LoginServiceUi(IServiceLocator serviceLocator, IShellProvider shellProvider,
-      Display display) {
-    this.serviceLocator = serviceLocator;
+  public LoginServiceUi(IShellProvider shellProvider) {
     this.shellProvider = shellProvider;
-    this.display = display;
   }
 
   public void showErrorDialogHelper(String title, String message) {
@@ -74,19 +66,12 @@ public class LoginServiceUi implements UiFacade {
   @Override
   public void notifyStatusIndicator() {
     // Update and refresh the menu, toolbar button, and tooltip.
-    display.asyncExec(new Runnable() {
-      @Override
-      public void run() {
-        serviceLocator.getService(ICommandService.class).refreshElements(
-            "com.google.cloud.tools.eclipse.login.commands.loginCommand", //$NON-NLS-1$
-            null);
-      }
-    });
+    MenuContributionInitializer.updateLoginCommand();
   }
 
   @Override
   public VerificationCodeHolder obtainVerificationCodeFromExternalUserInteraction(String message) {
-    LocalServerReceiver codeReceiver = new LocalServerReceiver();
+    LocalServerReceiver codeReceiver = createLocalServerReceiver();
 
     try {
       String redirectUrl = codeReceiver.getRedirectUri();
@@ -115,7 +100,16 @@ public class LoginServiceUi implements UiFacade {
     }
   }
 
-  private String showProgressDialogAndWaitForCode(final LocalServerReceiver codeReceiver)
+  @VisibleForTesting
+  static LocalServerReceiver createLocalServerReceiver() {
+    LocalServerReceiver.Builder builder = new LocalServerReceiver.Builder()
+        .setLandingPages(
+            "https://cloud.google.com/eclipse/auth_success",
+            "https://cloud.google.com/eclipse/auth_failure");
+    return builder.build();
+  }
+
+  private String showProgressDialogAndWaitForCode(LocalServerReceiver codeReceiver)
       throws IOException {
     try {
       final ProgressMonitorDialog dialog = new ProgressMonitorDialog(shellProvider.getShell()) {
@@ -132,20 +126,16 @@ public class LoginServiceUi implements UiFacade {
       };
 
       final String[] codeHolder = new String[1];
-      dialog.run(true /* fork */, true /* cancelable */, new IRunnableWithProgress() {
-        @Override
-        public void run(IProgressMonitor monitor)
-            throws InvocationTargetException, InterruptedException {
-          AnalyticsPingManager.getInstance().sendPingOnShell(dialog.getShell(),
-              AnalyticsEvents.LOGIN_START);
+      dialog.run(true /* fork */, true /* cancelable */, monitor -> {
+        AnalyticsPingManager.getInstance().sendPingOnShell(dialog.getShell(),
+            AnalyticsEvents.LOGIN_START);
 
-          monitor.beginTask(Messages.getString("LOGIN_PROGRESS_DIALOG_MESSAGE"),
-              IProgressMonitor.UNKNOWN);
-          try {
-            codeHolder[0] = codeReceiver.waitForCode();
-          } catch (IOException ioe) {
-            throw new InvocationTargetException(ioe);
-          }
+        monitor.beginTask(Messages.getString("LOGIN_PROGRESS_DIALOG_MESSAGE"),
+            IProgressMonitor.UNKNOWN);
+        try {
+          codeHolder[0] = codeReceiver.waitForCode();
+        } catch (IOException ioe) {
+          throw new InvocationTargetException(ioe);
         }
       });
 

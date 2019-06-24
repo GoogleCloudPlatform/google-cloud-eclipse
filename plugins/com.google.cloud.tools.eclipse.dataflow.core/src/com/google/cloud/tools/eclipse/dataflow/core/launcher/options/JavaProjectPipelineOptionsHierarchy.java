@@ -72,10 +72,9 @@ public class JavaProjectPipelineOptionsHierarchy implements PipelineOptionsHiera
     Preconditions.checkArgument(rootType.exists(), "PipelineOptions does not exist in project");
 
     // Flatten the class hierarchy, recording all the classes present
-    ITypeHierarchy hierarchy = rootType.newTypeHierarchy(monitor);
+    this.hierarchy = rootType.newTypeHierarchy(monitor);
 
     this.project = project;
-    this.hierarchy = hierarchy;
     this.majorVersion = version;
     this.knownTypes = new HashMap<>();
   }

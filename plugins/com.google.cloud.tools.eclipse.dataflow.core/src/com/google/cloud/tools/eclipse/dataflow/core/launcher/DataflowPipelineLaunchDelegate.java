@@ -16,8 +16,6 @@
 
 package com.google.cloud.tools.eclipse.dataflow.core.launcher;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.dataflow.core.DataflowCorePlugin;
 import com.google.cloud.tools.eclipse.dataflow.core.launcher.options.PipelineOptionsHierarchy;
@@ -29,6 +27,7 @@ import com.google.cloud.tools.eclipse.login.CredentialHelper;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
@@ -36,6 +35,7 @@ import com.google.common.base.Strings;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -112,16 +112,8 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
       ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
       throws CoreException {
     SubMonitor progress = SubMonitor.convert(monitor, 3);
-    PipelineLaunchConfiguration pipelineConfig =
-        PipelineLaunchConfiguration.fromLaunchConfiguration(configuration);
 
-    String projectName = pipelineConfig.getEclipseProjectName();
-    IProject project = workspaceRoot.getProject(projectName);
-    checkArgument(
-        project.exists(),
-        "Project with name %s must exist to launch. Got launch attributes %s",
-        projectName,
-        configuration.getAttributes());
+    IProject project = getProject(configuration);
     MajorVersion majorVersion = dependencyManager.getProjectMajorVersion(project);
 
     PipelineOptionsHierarchy hierarchy;
@@ -129,8 +121,11 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
       hierarchy = optionsRetrieverFactory.forProject(project, majorVersion, progress.newChild(1));
     } catch (PipelineOptionsRetrievalException e) {
       throw new CoreException(new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID,
-          "Could not retrieve Pipeline Options Hierarchy for project " + projectName, e));
+          "Could not retrieve Pipeline Options Hierarchy for project " + project.getName(), e));
     }
+
+    PipelineLaunchConfiguration pipelineConfig =
+        PipelineLaunchConfiguration.fromLaunchConfiguration(majorVersion, configuration);
 
     DataflowPreferences preferences = ProjectOrWorkspaceDataflowPreferences.forProject(project);
     if (!pipelineConfig.isValid(hierarchy, preferences)) {
@@ -148,17 +143,59 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
     workingCopy.setAttribute(
         IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, SPACE_JOINER.join(argComponents));
 
-    String accountEmail = effectiveArguments.get("accountEmail");
-    setLoginCredential(workingCopy, accountEmail);
+    setCredential(workingCopy, effectiveArguments);
 
+    PipelineRunner pipelineRunner = pipelineConfig.getRunner();
     AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.DATAFLOW_RUN,
-        AnalyticsEvents.DATAFLOW_RUN_RUNNER, pipelineConfig.getRunner().getRunnerName());
+        AnalyticsEvents.DATAFLOW_RUN_RUNNER, pipelineRunner.getRunnerName());
 
     delegate.launch(workingCopy, mode, launch, progress.newChild(1));
   }
 
+  private IProject getProject(ILaunchConfiguration configuration) throws CoreException {
+    String projectName =
+        configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, "");
+    if (projectName.isEmpty()) {
+      throw new CoreException(StatusUtil.error(this, "Cannot determine project"));
+    }
+    IProject project = workspaceRoot.getProject(projectName);
+    if (!project.exists()) {
+      String errorMessage = String.format("Project \"%s\" does not exist", projectName);
+      throw new CoreException(StatusUtil.error(this, errorMessage));
+    }
+    return project;
+  }
+
   @VisibleForTesting
-  void setLoginCredential(ILaunchConfigurationWorkingCopy workingCopy, String accountEmail)
+  void setCredential(ILaunchConfigurationWorkingCopy workingCopy,
+      Map<String, String> effectiveArguments) throws CoreException {
+
+    String serviceAccountKey =
+        effectiveArguments.get(DataflowPreferences.SERVICE_ACCOUNT_KEY_PROPERTY);
+
+    if (!Strings.isNullOrEmpty(serviceAccountKey)) {
+      setServiceAccountCredential(workingCopy, serviceAccountKey);
+    } else {
+      String accountEmail = effectiveArguments.get(DataflowPreferences.ACCOUNT_EMAIL_PROPERTY);
+      setLoginCredential(workingCopy, accountEmail);
+    }
+  }
+
+  private void setServiceAccountCredential(ILaunchConfigurationWorkingCopy workingCopy,
+      String serviceAccountKey) throws CoreException {
+    Path jsonKey = Paths.get(serviceAccountKey);
+    if (Files.isDirectory(jsonKey)) {
+      String message = "Not a file but directory: " + jsonKey;
+      throw new CoreException(new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, message));
+    } else if (!Files.isReadable(jsonKey)) {
+      String message = "Cannot open service account key file: " + jsonKey;
+      throw new CoreException(new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, message));
+    }
+
+    setCredentialEnvironmentVariable(workingCopy, serviceAccountKey);
+  }
+
+  private void setLoginCredential(ILaunchConfigurationWorkingCopy workingCopy, String accountEmail)
       throws CoreException {
     Preconditions.checkNotNull(accountEmail,
         "account email missing in launch configuration or preferences");
@@ -175,27 +212,33 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
         throw new CoreException(new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, message));
       }
 
-      // Dataflow SDK doesn't yet support reading credentials from an arbitrary JSON, so we use the
-      // workaround of setting the "GOOGLE_APPLICATION_CREDENTIALS" environment variable.
-      Map<String, String> variableMap = workingCopy.getAttribute(
-          ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, new HashMap<String, String>());
-      if (variableMap.containsKey(GOOGLE_APPLICATION_CREDENTIALS_ENVIRONMENT_VARIABLE)) {
-        String message = "You cannot define the environment variable GOOGLE_APPLICATION_CREDENTIALS"
-            + " when launching Dataflow pipelines from Cloud Tools for Eclipse.";
-        throw new CoreException(new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, message));
-      }
-
       Path jsonCredential = Files.createTempFile("google-ct4e-" + workingCopy.getName(), ".json");
       CredentialHelper.toJsonFile(credential, jsonCredential);
       jsonCredential.toFile().deleteOnExit();
 
-      variableMap.put(GOOGLE_APPLICATION_CREDENTIALS_ENVIRONMENT_VARIABLE,
-          jsonCredential.toAbsolutePath().toString());
-      workingCopy.setAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, variableMap);
+      String path = jsonCredential.toAbsolutePath().toString();
+      setCredentialEnvironmentVariable(workingCopy, path);
     } catch (IOException ex) {
       throw new CoreException(
           new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, ex.getMessage(), ex));
     }
+  }
+
+  private void setCredentialEnvironmentVariable(
+      ILaunchConfigurationWorkingCopy workingCopy, String value) throws CoreException {
+    // Dataflow SDK doesn't yet support reading credentials from an arbitrary JSON, so we use the
+    // workaround of setting the "GOOGLE_APPLICATION_CREDENTIALS" environment variable.
+    Map<String, String> variableMap = workingCopy.getAttribute(
+        ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, new HashMap<String, String>());
+    if (variableMap.containsKey(GOOGLE_APPLICATION_CREDENTIALS_ENVIRONMENT_VARIABLE)) {
+      String message = "You cannot define the environment variable GOOGLE_APPLICATION_CREDENTIALS"
+          + " when launching Dataflow pipelines from Cloud Tools for Eclipse.";
+      throw new CoreException(new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, message));
+    }
+
+    Map<String, String> variableMapCopy = new HashMap<>(variableMap);
+    variableMapCopy.put(GOOGLE_APPLICATION_CREDENTIALS_ENVIRONMENT_VARIABLE, value);
+    workingCopy.setAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, variableMapCopy);
   }
 
   private static IGoogleLoginService getLoginService() {
@@ -212,17 +255,17 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
       throws CoreException {
     List<String> argComponents = new ArrayList<>();
 
+    PipelineRunner runner = pipelineConfig.getRunner();
     argComponents.add(String.format(ARGUMENT_FORMAT_STR, RUNNER_COMMAND_LINE_STRING,
-        pipelineConfig.getRunner().getRunnerName()));
+        runner.getRunnerName()));
 
     Set<String> pipelineArgs;
-    if (pipelineConfig.getUserOptionsName() != null
-        && !pipelineConfig.getUserOptionsName().isEmpty()) {
+    if (!Strings.isNullOrEmpty(pipelineConfig.getUserOptionsName())) {
       pipelineArgs = optionsHierarchy.getPropertyNames(
-          pipelineConfig.getRunner().getOptionsClass(), pipelineConfig.getUserOptionsName());
+          runner.getOptionsClass(), pipelineConfig.getUserOptionsName());
     } else {
       pipelineArgs =
-          optionsHierarchy.getPropertyNames(pipelineConfig.getRunner().getOptionsClass());
+          optionsHierarchy.getPropertyNames(runner.getOptionsClass());
     }
 
     for (Map.Entry<String, String> argValueEntry : effectiveArguments.entrySet()) {

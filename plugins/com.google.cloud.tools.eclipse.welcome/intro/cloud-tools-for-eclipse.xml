@@ -1,45 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <introContent>
-  <extensionContent path="overview/@" style="css/intro.css">
+  <extensionContent id="com.google.cloud.tools.eclipse.overview" name="Cloud Tools for Eclipse Overview"
+      path="overview/@" style="css/intro.css">
     <group style-id="content-group">
       <link id="cloud-tools-for-eclipse-link"
             label="Google Cloud Tools for Eclipse"
             style-id="content-link"
             url="https://cloud.google.com/eclipse/docs/">
-        <text>Learn more about Google Cloud Tools for Eclipse.</text>
+        <text>Learn how to create, build, run, debug, and deploy App Engine and Cloud Dataflow applications from Eclipse</text>
       </link>
     </group>
   </extensionContent>
 
-  <extensionContent path="tutorials/@" style="css/intro.css">
-    <group style-id="content-group">
+  <extensionContent id="com.google.cloud.tools.eclipse.tutorials" name="Cloud Tools for Eclipse Tutorials"
+      path="tutorials/@" style="css/intro.css">
+    <group style-id="content-group" label="Google Cloud Tools for Eclipse">
       <link id="cloud-tools-for-eclipse-tutorial-link"
-            label="Google Cloud Tools for Eclipse Tutorial"
+            label="App Engine Standard Environment"
             style-id="content-link"
-            url="https://cloud.google.com/eclipse/docs/quickstart">
-        <text>Read the Google Cloud Tools for Eclipse tutorial to learn how to build App Engine applications with Eclipse.</text>
+            url="https://cloud.google.com/eclipse/docs/creating-new-webapp">
+        <text>Learn how to build, run, debug, and deploy App Engine standard environment applications with Eclipse</text>
+      </link>
+      <link id="cloud-tools-for-eclipse-flexible-link"
+            label="App Engine Flexible Environment"
+            style-id="content-link"
+            url="https://cloud.google.com/eclipse/docs/create-flex-app">
+        <text>Learn how to build, run, debug, and deploy App Engine flexible environment applications with Eclipse</text>
+      </link>
+      <link id="cloud-tools-for-eclipse-dataflow-link"
+            label="Cloud Dataflow"
+            style-id="content-link"
+            url="https://cloud.google.com/eclipse/docs/quickstart-dataflow">
+        <text>Learn how to build, run, and deploy Cloud Dataflow pipelines with Eclipse</text>
       </link>
     </group>
   </extensionContent>
 
-  <extensionContent path="whatsnew/@" style="css/intro.css">
+  <extensionContent id="com.google.cloud.tools.eclipse.whatsnew" name="What's New in Cloud Tools for Eclipse"
+      path="whatsnew/@" style="css/intro.css">
     <group style-id="content-group">
       <link id="cloud-tools-for-eclipse-whatsnew-link"
-            label="Google Cloud Tools for Eclipse Release Notes"
+            label="Google Cloud Tools for Eclipse"
             style-id="content-link"
             url="https://cloud.google.com/eclipse/docs/release-notes">
-        <text>Announcements about new and updated features, bug fixes, known issues, and deprecated functionality.</text>
+        <text>Review new and updated features, bug fixes, known issues, and deprecated functionality</text>
       </link>
     </group>
   </extensionContent>
 
-  <extensionContent path="migrate/@" style="css/intro.css">
+  <extensionContent id="com.google.cloud.tools.eclipse.migration" name="Migrating to Cloud Tools for Eclipse"
+      path="migrate/@" style="css/intro.css">
     <group style-id="content-group">
       <link id="cloud-tools-for-eclipse-migration-link"
             label="Migration from the Google Plugin for Eclipse (GPE)"
             style-id="content-link"
-            url="https://cloud.google.com/eclipse/docs/converting">
-        <text>Learn how to migrate to Google Cloud Tools for Eclipse from the Google Plugin for Eclipse.</text>
+            url="https://cloud.google.com/eclipse/docs/migrating-gpe">
+        <text>Learn how to migrate to Google Cloud Tools for Eclipse from the Google Plugin for Eclipse</text>
       </link>
     </group>
   </extensionContent>

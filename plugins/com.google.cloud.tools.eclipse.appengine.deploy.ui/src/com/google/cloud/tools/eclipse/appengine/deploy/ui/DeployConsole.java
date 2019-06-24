@@ -47,11 +47,8 @@ public class DeployConsole extends MessageConsole {
     job.addJobChangeListener(new JobChangeAdapter() {
       @Override
       public void done(IJobChangeEvent event) {
-        PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-          @Override
-          public void run() {
-            setName(Messages.getString("job.terminated.template", getName()));
-          }
+        PlatformUI.getWorkbench().getDisplay().asyncExec(() -> {
+          setName(Messages.getString("job.terminated.template", getName()));
         });
       }
     });

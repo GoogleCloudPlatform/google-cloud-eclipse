@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Google Inc. All Rights Reserved.
+ * Copyright 2017 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,30 +21,33 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexMavenPackagedProjectStagingDelegate;
-import com.google.cloud.tools.eclipse.test.util.project.JavaRuntimeUtils;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.io.IOException;
-import java.util.List;
+import java.util.Map;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.junit.Assume;
+import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+@RunWith(SWTBotJunit4ClassRunner.class)
 public class FlexMavenPackagedProjectStagingDelegateTest {
 
+  // flaking on Photon: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/pull/3256
+  @Ignore
   @Test
   public void testStage_springBoot() throws IOException, CoreException {
-    Assume.assumeTrue("Only for JavaSE-8", JavaRuntimeUtils.hasJavaSE8());
-
-    List<IProject> projects = ProjectUtils.importProjects(getClass(),
-        "test-projects/spring-boot-test.zip", false /* checkBuildErrors */, null);
+    Map<String, IProject> projects =
+        ProjectUtils.importProjects(
+            getClass(), "test-projects/spring-boot-test.zip", false /* checkBuildErrors */, null);
     assertEquals(1, projects.size());
 
-    IProject project = projects.get(0);
+    IProject project = projects.values().iterator().next();
     IPath safeWorkDirectory = project.getFolder("safe-work-directory").getLocation();
     IPath stagingDirectory = project.getFolder("staging-result").getLocation();
     IPath appEngineDirectory = project.getFolder("src/main/appengine").getLocation();

@@ -23,9 +23,11 @@ import com.google.cloud.tools.eclipse.dataflow.ui.page.NewDataflowProjectWizardD
 import com.google.cloud.tools.eclipse.dataflow.ui.page.NewDataflowProjectWizardLandingPage;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.lang.reflect.InvocationTargetException;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 
@@ -33,9 +35,8 @@ import org.eclipse.ui.IWorkbench;
  * A Wizard to create a new Google Cloud Dataflow Project.
  */
 public class NewDataflowProjectWizard extends Wizard implements INewWizard {
-  private DataflowProjectCreator creator = DataflowProjectCreator.create();
+  private final DataflowProjectCreator creator = DataflowProjectCreator.create();
 
-  private NewDataflowProjectWizardLandingPage landingPage;
   private NewDataflowProjectWizardDefaultRunOptionsPage defaultRunOptionsPage;
 
   @Override
@@ -46,6 +47,7 @@ public class NewDataflowProjectWizard extends Wizard implements INewWizard {
     creator.setDefaultAccountEmail(defaultRunOptionsPage.getAccountEmail());
     creator.setDefaultProject(defaultRunOptionsPage.getProjectId());
     creator.setDefaultStagingLocation(defaultRunOptionsPage.getStagingLocation());
+    creator.setDefaultServiceAccountKey(defaultRunOptionsPage.getServiceAccountKey());
 
     if (!creator.isValid()) {
       String message =
@@ -58,21 +60,18 @@ public class NewDataflowProjectWizard extends Wizard implements INewWizard {
     }
     try {
       getContainer().run(true, true, creator);
+      return true;
     } catch (InvocationTargetException | InterruptedException ex) {
-      // TODO: handle
-      DataflowUiPlugin.logError(ex, 
-          "Error encountered when trying to create project"); //$NON-NLS-1$
+      String message = "Error encountered when trying to create project"; //$NON-NLS-1$
+      DataflowUiPlugin.logError(ex, message);
+      StatusUtil.setErrorStatus(this, message, ex);
       return false;
     }
-    return true;
   }
 
   @Override
   public void addPages() {
-    AnalyticsPingManager.getInstance().sendPingOnShell(getShell(),
-        AnalyticsEvents.DATAFLOW_NEW_PROJECT_WIZARD);
-
-    landingPage = new NewDataflowProjectWizardLandingPage(creator);
+    WizardPage landingPage = new NewDataflowProjectWizardLandingPage(creator);
     addPage(landingPage);
 
     defaultRunOptionsPage = new NewDataflowProjectWizardDefaultRunOptionsPage();

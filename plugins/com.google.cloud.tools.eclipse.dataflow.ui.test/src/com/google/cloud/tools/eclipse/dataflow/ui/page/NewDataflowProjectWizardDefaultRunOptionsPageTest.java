@@ -66,4 +66,10 @@ public class NewDataflowProjectWizardDefaultRunOptionsPageTest {
     page.createControl(shellCreator.getShell());
     Assert.assertEquals("", page.getStagingLocation());
   }
+
+  @Test
+  public void testServiceAccountKey_none() {
+    page.createControl(shellCreator.getShell());
+    Assert.assertEquals("", page.getServiceAccountKey());
+  }
 }

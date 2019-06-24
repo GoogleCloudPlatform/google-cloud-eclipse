@@ -25,7 +25,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -50,7 +49,7 @@ import org.eclipse.wst.server.core.ServerUtil;
 import org.eclipse.wst.server.ui.internal.ServerUIPlugin;
 
 /**
- * A helper class for launching modules on a server
+ * A helper class for launching modules on a server.
  */
 public class LaunchHelper {
   private static final Logger logger = Logger.getLogger(LaunchHelper.class.getName());
@@ -65,9 +64,10 @@ public class LaunchHelper {
         if (isRunning(existing)) {
           ILaunch launch = existing.getLaunch();
           Preconditions.checkNotNull(launch, "A running server should have a launch"); //$NON-NLS-1$
-          String detail = launchMode.equals(launch.getLaunchMode()) ? Messages.getString("SERVER_ALREADY_RUNNING") //$NON-NLS-1$
-              : MessageFormat.format(Messages.getString("SERVER_ALREADY_RUNNING_IN_MODE"), //$NON-NLS-1$
-                  launch.getLaunchMode());
+          String detail = launchMode.equals(launch.getLaunchMode())
+              ? Messages.getString("SERVER_ALREADY_RUNNING") //$NON-NLS-1$
+              : Messages.getString(
+                  "SERVER_ALREADY_RUNNING_IN_MODE", launch.getLaunchMode()); //$NON-NLS-1$
           throw new CoreException(StatusUtil.info(this, detail));
         }
         server = existing;
@@ -92,12 +92,13 @@ public class LaunchHelper {
    * @return an existing server
    */
   @VisibleForTesting
-  public Collection<IServer> findExistingServers(IModule[] modules, boolean exact,
+  Collection<IServer> findExistingServers(IModule[] modules, boolean exact,
       SubMonitor progress) {
     if (modules.length == 1) {
       IServer defaultServer = ServerCore.getDefaultServer(modules[0]);
-      if (defaultServer != null && LocalAppEngineServerDelegate.SERVER_TYPE_ID
-          .equals(defaultServer.getServerType().getId())) {
+      if (defaultServer != null && defaultServer.getServerType() != null
+          && LocalAppEngineServerDelegate.SERVER_TYPE_ID
+              .equals(defaultServer.getServerType().getId())) {
         return Collections.singletonList(defaultServer);
       }
     }
@@ -130,6 +131,7 @@ public class LaunchHelper {
     return serverWorkingCopy.save(false, progress.newChild(2));
   }
 
+  @VisibleForTesting
   protected void launch(IServer server, String launchMode, SubMonitor progress)
       throws CoreException {
     // Explicitly offer to save dirty editors to avoid the puzzling prompt-to-save in

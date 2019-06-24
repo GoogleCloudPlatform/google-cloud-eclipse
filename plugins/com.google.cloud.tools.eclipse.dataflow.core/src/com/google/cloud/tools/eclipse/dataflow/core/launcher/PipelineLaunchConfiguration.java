@@ -19,14 +19,14 @@ package com.google.cloud.tools.eclipse.dataflow.core.launcher;
 import static com.google.cloud.tools.eclipse.dataflow.core.launcher.PipelineRunner.DIRECT_PIPELINE_RUNNER;
 import static com.google.cloud.tools.eclipse.dataflow.core.launcher.PipelineRunner.DIRECT_RUNNER;
 
-import com.google.cloud.tools.eclipse.dataflow.core.DataflowCorePlugin;
 import com.google.cloud.tools.eclipse.dataflow.core.launcher.options.PipelineOptionsHierarchy;
 import com.google.cloud.tools.eclipse.dataflow.core.launcher.options.PipelineOptionsProperty;
 import com.google.cloud.tools.eclipse.dataflow.core.launcher.options.PipelineOptionsType;
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.core.project.MajorVersion;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import java.util.Collection;
@@ -34,14 +34,16 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
 /**
- * A POJO that contains options specific to launching a dataflow pipeline.
+ * A POJO that contains options specific to launching a dataflow pipeline. Forces having a project
+ * and major version as it doesn't make sense to launch without.
  */
 public class PipelineLaunchConfiguration {
   /**
@@ -49,26 +51,21 @@ public class PipelineLaunchConfiguration {
    */
   static final Set<String> PROVIDED_PROPERTY_NAMES = ImmutableSet.of("runner");
 
-  private Optional<String> eclipseProjectName;
-
-  private boolean useDefaultLaunchOptions;
+  private final MajorVersion majorVersion;
 
   private PipelineRunner runner;
-  private Map<String, String> argumentValues;
-  private Optional<String> userOptionsName;
+  private boolean useDefaultLaunchOptions = true;
+  private Map<String, String> argumentValues = Collections.<String, String>emptyMap();
+  private Optional<String> userOptionsName = Optional.empty();
 
   /**
    * Construct a DataflowPipelineLaunchConfiguration from the provided {@link ILaunchConfiguration}.
    */
-  public static PipelineLaunchConfiguration fromLaunchConfiguration(
+  public static PipelineLaunchConfiguration fromLaunchConfiguration(MajorVersion majorVersion,
       ILaunchConfiguration launchConfiguration) throws CoreException {
-    PipelineLaunchConfiguration configuration = createDefault();
+    PipelineLaunchConfiguration configuration = new PipelineLaunchConfiguration(majorVersion);
     configuration.setValuesFromLaunchConfiguration(launchConfiguration);
     return configuration;
-  }
-
-  public static PipelineLaunchConfiguration createDefault() {
-    return new PipelineLaunchConfiguration(defaultRunner(MajorVersion.ONE));
   }
 
   public static PipelineRunner defaultRunner(MajorVersion majorVersion) {
@@ -80,18 +77,21 @@ public class PipelineLaunchConfiguration {
     }
   }
 
-  private PipelineLaunchConfiguration(PipelineRunner runner) {
-    this.runner = runner;
-    this.argumentValues = Collections.<String, String>emptyMap();
-
-    this.useDefaultLaunchOptions = true;
-
-    this.userOptionsName = Optional.absent();
-    this.eclipseProjectName = Optional.absent();
+  /** Create a new pipeline launch configuration with no default runner. */
+  @VisibleForTesting
+  PipelineLaunchConfiguration(MajorVersion majorVersion) {
+    Preconditions.checkNotNull(majorVersion);
+    this.majorVersion = majorVersion;
   }
 
+  /**
+   * Return the configured runner if set, or the default runner. Should never be {@code null}.
+   */
   public PipelineRunner getRunner() {
-    return runner;
+    if (runner != null) {
+      return runner;
+    }
+    return defaultRunner(majorVersion);
   }
 
   public void setRunner(PipelineRunner runner) {
@@ -99,11 +99,11 @@ public class PipelineLaunchConfiguration {
   }
 
   public String getUserOptionsName() {
-    return userOptionsName.orNull();
+    return userOptionsName.orElse(null);
   }
 
   public void setUserOptionsName(String userOptionsName) {
-    this.userOptionsName = Optional.fromNullable(userOptionsName);
+    this.userOptionsName = Optional.ofNullable(userOptionsName);
   }
 
   public Map<String, String> getArgumentValues() {
@@ -111,7 +111,7 @@ public class PipelineLaunchConfiguration {
   }
 
   public void setArgumentValues(Map<String, String> allRequiredArgs) {
-    this.argumentValues = allRequiredArgs;
+    argumentValues = allRequiredArgs;
   }
 
   public boolean isUseDefaultLaunchOptions() {
@@ -122,20 +122,46 @@ public class PipelineLaunchConfiguration {
     this.useDefaultLaunchOptions = useDefaultLaunchOptions;
   }
 
-  public String getEclipseProjectName() {
-    return eclipseProjectName.orNull();
+  public MajorVersion getMajorVersion() {
+    return majorVersion;
   }
 
-  private void setEclipseProjectName(ILaunchConfiguration configuration) throws CoreException {
-    eclipseProjectName = Optional.fromNullable(
-        configuration.getAttribute(
-            IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String) null));
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    } else if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+    PipelineLaunchConfiguration other = (PipelineLaunchConfiguration) obj;
+    return Objects.equals(majorVersion, other.majorVersion)
+        && Objects.equals(argumentValues, other.argumentValues)
+        && useDefaultLaunchOptions == other.useDefaultLaunchOptions
+        && Objects.equals(runner, other.runner)
+        && Objects.equals(userOptionsName, other.userOptionsName);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(majorVersion, argumentValues, useDefaultLaunchOptions, runner,
+        userOptionsName);
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(getClass())
+        .add("runnerName", runner != null ? runner.getRunnerName() : "(default runner)")
+        .add("argumentValues", argumentValues).toString();
   }
 
   private void setValuesFromLaunchConfiguration(ILaunchConfiguration configuration)
       throws CoreException {
-    setRunner(PipelineRunner.fromRunnerName(configuration.getAttribute(
-        PipelineConfigurationAttr.RUNNER_ARGUMENT.toString(), getRunner().getRunnerName())));
+    // never set a default runner unless actually specified
+    String runnerArgument = configuration
+        .getAttribute(PipelineConfigurationAttr.RUNNER_ARGUMENT.toString(), (String) null);
+    if (runnerArgument != null) {
+      setRunner(PipelineRunner.fromRunnerName(runnerArgument));
+    }
 
     setUseDefaultLaunchOptions(configuration.getAttribute(
         PipelineConfigurationAttr.USE_DEFAULT_LAUNCH_OPTIONS.toString(),
@@ -146,8 +172,6 @@ public class PipelineLaunchConfiguration {
 
     setUserOptionsName(configuration.getAttribute(
         PipelineConfigurationAttr.USER_OPTIONS_NAME.toString(), getUserOptionsName()));
-
-    setEclipseProjectName(configuration);
   }
 
   /**
@@ -155,21 +179,16 @@ public class PipelineLaunchConfiguration {
    * {@link ILaunchConfigurationWorkingCopy}.
    */
   public void toLaunchConfiguration(ILaunchConfigurationWorkingCopy configuration) {
-    configuration.setAttribute(
-        PipelineConfigurationAttr.RUNNER_ARGUMENT.toString(), runner.getRunnerName());
+    if (runner != null) {
+      configuration.setAttribute(PipelineConfigurationAttr.RUNNER_ARGUMENT.toString(),
+          runner.getRunnerName());
+    }
     configuration.setAttribute(
         PipelineConfigurationAttr.USE_DEFAULT_LAUNCH_OPTIONS.toString(), useDefaultLaunchOptions);
     configuration.setAttribute(
         PipelineConfigurationAttr.ALL_ARGUMENT_VALUES.toString(), argumentValues);
     configuration.setAttribute(
-        PipelineConfigurationAttr.USER_OPTIONS_NAME.toString(), userOptionsName.orNull());
-
-    try {
-      setEclipseProjectName(configuration);
-    } catch (CoreException e) {
-      DataflowCorePlugin.logWarning("CoreException while trying to retrieve"
-          + " project name from Configuration Working Copy");
-    }
+        PipelineConfigurationAttr.USER_OPTIONS_NAME.toString(), userOptionsName.orElse(null));
   }
 
   /**
@@ -186,9 +205,9 @@ public class PipelineLaunchConfiguration {
     Map<PipelineOptionsType, Set<PipelineOptionsProperty>> requiredOptions;
     if (userOptionsName.isPresent()) {
       requiredOptions =
-          hierarchy.getRequiredOptionsByType(runner.getOptionsClass(), userOptionsName.get());
+          hierarchy.getRequiredOptionsByType(getRunner().getOptionsClass(), userOptionsName.get());
     } else {
-      requiredOptions = hierarchy.getRequiredOptionsByType(runner.getOptionsClass());
+      requiredOptions = hierarchy.getRequiredOptionsByType(getRunner().getOptionsClass());
     }
     return requiredOptions;
   }
@@ -260,7 +279,7 @@ public class PipelineLaunchConfiguration {
     return missingGroups;
   }
 
-  private Map<String, Set<PipelineOptionsProperty>> getRequiredGroups(
+  private static Map<String, Set<PipelineOptionsProperty>> getRequiredGroups(
       Collection<Set<PipelineOptionsProperty>> requiredPropertySets) {
     Map<String, Set<PipelineOptionsProperty>> requiredGroups = new HashMap<>();
     for (Set<PipelineOptionsProperty> requiredProperties : requiredPropertySets) {
@@ -290,13 +309,6 @@ public class PipelineLaunchConfiguration {
     } else {
       return !Strings.isNullOrEmpty(argumentValues.get(propertyName));
     }
-  }
-
-  @Override
-  public String toString() {
-    return MoreObjects.toStringHelper(getClass())
-        .add("runnerName", runner.getRunnerName())
-        .add("argumentValues", argumentValues).toString();
   }
 
   /**

@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.persistence;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
+import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
@@ -164,6 +165,20 @@ public class LibraryClasspathContainerSerializer {
     }
   }
 
+  /** Return {@code true} if the project has a list of selected library IDs. */
+  public boolean hasLibraryIds(IJavaProject javaProject) {
+    try {
+      File stateFile = getContainerStateFile(javaProject, CONTAINER_LIBRARY_LIST_FILE_ID, false);
+      return stateFile != null;
+    } catch (CoreException ex) {
+      return false;
+    }
+  }
+
+  public void removeLibraryIds(IJavaProject javaProject) throws CoreException {
+    stateLocationProvider.removeContainerStateFile(javaProject, CONTAINER_LIBRARY_LIST_FILE_ID);
+  }
+
   private File getContainerStateFile(IJavaProject javaProject, String fileId, boolean create)
       throws CoreException {
     IPath containerStateFile =
@@ -198,7 +213,7 @@ public class LibraryClasspathContainerSerializer {
       IFolder folder =
           settingsFolder.getFolder(FrameworkUtil.getBundle(getClass()).getSymbolicName());
       if (!folder.exists() && create) {
-        folder.create(true, true, null);
+        ResourceUtils.createFolders(folder, null);
       }
       IFile containerFile = folder.getFile(id + ".container"); //$NON-NLS-1$
       return containerFile;

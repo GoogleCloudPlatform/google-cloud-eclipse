@@ -17,29 +17,51 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.when;
 
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.util.ArrayList;
+import java.util.function.BiPredicate;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
-import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.Mockito;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+@RunWith(MockitoJUnitRunner.class)
 public class WebXmlValidatorTest {
 
   @Rule
-  public TestProjectCreator projectCreator = new TestProjectCreator().withFacetVersions(
-      WebFacetUtils.WEB_25, JavaFacet.VERSION_1_7, AppEngineStandardFacet.JRE7);
+  public TestProjectCreator projectCreator = new TestProjectCreator().withFacets(
+      JavaFacet.VERSION_1_7);
 
-  private final WebXmlValidator validator = new WebXmlValidator();
+  @Mock private BiPredicate<IProject, String> servletApiSupportChecker;
+  @Mock private IResource resource;
+
+  private WebXmlValidator validator;
+
+  @Before
+  public void setUp() {
+    validator = new WebXmlValidator(servletApiSupportChecker);
+    
+    IProject project = projectCreator.getProject();
+    when(resource.getProject()).thenReturn(project);
+
+    // Assume the project has the Dynamic Web Module Facet 2.5.
+    when(servletApiSupportChecker.test(eq(project), anyString())).thenReturn(false);
+    when(servletApiSupportChecker.test(project, "2.5")).thenReturn(true);
+  }
 
   @Test
   public void testValidateJavaServlet() throws ParserConfigurationException {
@@ -52,17 +74,16 @@ public class WebXmlValidatorTest {
     element.setUserData("location", new DocumentLocation(1, 1), null);
     document.appendChild(element);
 
-    IResource resource = Mockito.mock(IResource.class);
-    Mockito.when(resource.getProject()).thenReturn(projectCreator.getProject());
-    ArrayList<BannedElement> blacklist = validator.checkForElements(resource, document);
+    ArrayList<ElementProblem> problems = validator.checkForProblems(resource, document);
 
-    assertEquals(1, blacklist.size());
+    assertEquals(1, problems.size());
     String markerId = "com.google.cloud.tools.eclipse.appengine.validation.servletMarker";
-    assertEquals(markerId, blacklist.get(0).getMarkerId());
+    assertEquals(markerId, problems.get(0).getMarkerId());
   }
 
   @Test
   public void testCheckForElements_noElements() throws ParserConfigurationException {
+
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
     DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
     Document document = documentBuilder.newDocument();
@@ -72,11 +93,8 @@ public class WebXmlValidatorTest {
     element.setUserData("location", new DocumentLocation(1, 1), null);
     document.appendChild(element);
 
-    IResource resource = Mockito.mock(IResource.class);
-    Mockito.when(resource.getProject()).thenReturn(projectCreator.getProject());
-    ArrayList<BannedElement> blacklist = validator.checkForElements(resource, document);
-
-    assertEquals(0, blacklist.size());
+    ArrayList<ElementProblem> problems = validator.checkForProblems(resource, document);
+    assertEquals(0, problems.size());
   }
 
   @Test
@@ -109,10 +127,8 @@ public class WebXmlValidatorTest {
 
     document.appendChild(webApp);
 
-    IResource resource = Mockito.mock(IResource.class);
-    Mockito.when(resource.getProject()).thenReturn(projectCreator.getProject());
-    ArrayList<BannedElement> blacklist = validator.checkForElements(resource, document);
-    assertEquals(1, blacklist.size());
+    ArrayList<ElementProblem> problems = validator.checkForProblems(resource, document);
+    assertEquals(1, problems.size());
   }
 
 }

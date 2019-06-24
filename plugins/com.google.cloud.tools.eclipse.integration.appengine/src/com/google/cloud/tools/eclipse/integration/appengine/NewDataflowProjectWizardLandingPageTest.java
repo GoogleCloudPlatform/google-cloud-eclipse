@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Google Inc. All Rights Reserved.
+ * Copyright 2017 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,13 @@ import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+@RunWith(SWTBotJunit4ClassRunner.class)
 public class NewDataflowProjectWizardLandingPageTest {
 
   private Display display;
@@ -43,52 +46,38 @@ public class NewDataflowProjectWizardLandingPageTest {
   @Before
   public void setUp() {
     display = Display.getDefault();
-    display.syncExec(new Runnable() {
-      @Override
-      public void run() {
-        shell = new Shell(display);
-        page = new NewDataflowProjectWizardLandingPage(mock(DataflowProjectCreator.class));
-        page.createControl(shell);
+    display.syncExec(() -> {
+      shell = new Shell(display);
+      page = new NewDataflowProjectWizardLandingPage(mock(DataflowProjectCreator.class));
+      page.createControl(shell);
 
-        templateDropdown =
-            CompositeUtil.findControlAfterLabel(shell, Combo.class, "Project &template:");
-        dataflowVersionDropdown =
-            CompositeUtil.findControlAfterLabel(shell, Combo.class, "Dataflow &version:");
-      }
+      templateDropdown =
+          CompositeUtil.findControlAfterLabel(shell, Combo.class, "Project &template:");
+      dataflowVersionDropdown =
+          CompositeUtil.findControlAfterLabel(shell, Combo.class, "Dataflow &version:");
     });
   }
 
   @After
   public void tearDown() {
-    display.syncExec(new Runnable() {
-      @Override
-      public void run() {
-        shell.dispose();
-      }
-    });
+    display.syncExec(shell::dispose);
   }
 
   @Test
   public void testTemplateVersionsDropdown_starterTemplate() {
-    display.syncExec(new Runnable() {
-      @Override
-      public void run() {
-        assertEquals(0, templateDropdown.getSelectionIndex());
-        assertEquals("Starter project with a simple pipeline", templateDropdown.getText());
-        assertThat(dataflowVersionDropdown.getItems().length, greaterThan(0));
-      }
+    display.syncExec(() -> {
+      assertEquals(0, templateDropdown.getSelectionIndex());
+      assertEquals("Starter project with a simple pipeline", templateDropdown.getText());
+      assertThat(dataflowVersionDropdown.getItems().length, greaterThan(0));
     });
   }
 
   @Test
   public void testTemplateVersionsDropdown_exampleTemplate() {
-    display.syncExec(new Runnable() {
-      @Override
-      public void run() {
-        templateDropdown.select(1);
-        assertEquals("Example pipelines", templateDropdown.getText());
-        assertThat(dataflowVersionDropdown.getItems().length, greaterThan(0));
-      }
+    display.syncExec(() -> {
+      templateDropdown.select(1);
+      assertEquals("Example pipelines", templateDropdown.getText());
+      assertThat(dataflowVersionDropdown.getItems().length, greaterThan(0));
     });
   }
 }

@@ -23,17 +23,20 @@ import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
 import com.google.cloud.tools.eclipse.ui.util.ProjectFromSelectionHelper;
 import com.google.cloud.tools.eclipse.ui.util.ServiceUtils;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
+import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -90,17 +93,22 @@ public abstract class DeployCommandHandler extends AbstractHandler {
           Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
         }
       }
+      Shell shell = HandlerUtil.getActiveShell(event);
       if (project != null && !checkProjectErrors(project)) {
-        MessageDialog.openInformation(HandlerUtil.getActiveShell(event),
-                                      Messages.getString("build.error.dialog.title"),
-                                      Messages.getString("build.error.dialog.message"));
+        MessageDialog.openInformation(
+            shell,
+            Messages.getString("build.error.dialog.title"),
+            Messages.getString("build.error.dialog.message"));
+        return null;
+      }
+      if (!checkProject(shell, project)) {
         return null;
       }
 
       IGoogleLoginService loginService = ServiceUtils.getService(event, IGoogleLoginService.class);
       IGoogleApiFactory googleApiFactory = ServiceUtils.getService(event, IGoogleApiFactory.class);
-      DeployPreferencesDialog dialog = newDeployPreferencesDialog(
-          HandlerUtil.getActiveShell(event), project, loginService, googleApiFactory);
+      DeployPreferencesDialog dialog =
+          newDeployPreferencesDialog(shell, project, loginService, googleApiFactory);
       if (dialog.open() == Window.OK) {
         launchDeployJob(project, dialog.getCredential());
       }
@@ -113,6 +121,16 @@ public abstract class DeployCommandHandler extends AbstractHandler {
       /* ignore */
       return null;
     }
+  }
+
+  /**
+   * Check that the project is deployable.
+   *
+   * @return {@code true} if deployable
+   * @throws CoreException on error
+   */
+  protected boolean checkProject(Shell shell, IProject project) throws CoreException {
+    return true;
   }
 
   protected IProject getSelectedProject(ExecutionEvent event)
@@ -128,7 +146,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
     return project;
   }
 
-  private IWorkspace getWorkspace(ExecutionEvent event) {
+  private static IWorkspace getWorkspace(ExecutionEvent event) {
     return ServiceUtils.getService(event, IWorkspace.class);
   }
 
@@ -148,8 +166,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
 
   private void launchDeployJob(IProject project, Credential credential)
       throws IOException, CoreException {
-    AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_DEPLOY,
-        analyticsDeployEventMetadataKey);
+    sendAnalyticsPing(AnalyticsEvents.APP_ENGINE_DEPLOY);
 
     IPath workDirectory = createWorkDirectory();
     DeployPreferences deployPreferences = getDeployPreferences(project);
@@ -177,8 +194,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
       @Override
       public void done(IJobChangeEvent event) {
         if (event.getResult().isOK()) {
-          AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_DEPLOY_SUCCESS,
-              analyticsDeployEventMetadataKey);
+          sendAnalyticsPing(AnalyticsEvents.APP_ENGINE_DEPLOY_SUCCESS);
         }
         launchCleanupJob();
       }
@@ -215,5 +231,17 @@ public abstract class DeployCommandHandler extends AbstractHandler {
     // DeployJob.class: create in the non-UI bundle.
     return Platform.getStateLocation(FrameworkUtil.getBundle(DeployJob.class))
         .append("tmp");
+  }
+
+  private void sendAnalyticsPing(String event) {
+    String cloudSdkManagement = CloudSdkPreferences.isAutoManaging()
+        ? AnalyticsEvents.AUTOMATIC_CLOUD_SDK
+        : AnalyticsEvents.MANUAL_CLOUD_SDK;
+    Map<String, String> metadata = ImmutableMap.of(
+        AnalyticsEvents.CLOUD_SDK_MANAGEMENT, cloudSdkManagement,
+        // For a historical reason, the key serves as an actual value for std vs. flex.
+        analyticsDeployEventMetadataKey, "null");
+
+    AnalyticsPingManager.getInstance().sendPing(event, metadata);
   }
 }

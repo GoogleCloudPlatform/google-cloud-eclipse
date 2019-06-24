@@ -16,30 +16,49 @@
 
 package com.google.cloud.tools.eclipse.sdk.internal;
 
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkResolver;
-
-import org.eclipse.jface.preference.IPreferenceStore;
-
+import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkResolver;
+import com.google.cloud.tools.managedcloudsdk.ManagedCloudSdk;
+import com.google.cloud.tools.managedcloudsdk.UnsupportedOsException;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.eclipse.jface.preference.IPreferenceStore;
 
 /**
  * Google Cloud SDK locator that uses the user-configured location preference.
  */
 public class CloudSdkPreferenceResolver implements CloudSdkResolver {
-  private IPreferenceStore preferences = PreferenceConstants.getPreferenceStore();
+  private static final Logger logger = Logger.getLogger(CloudSdkPreferenceResolver.class.getName());
+  
+  private final IPreferenceStore preferences;
 
-  public CloudSdkPreferenceResolver() {}
+  public CloudSdkPreferenceResolver() {
+    preferences = CloudSdkPreferences.getPreferenceStore();
+  }
 
-  // @VisibleForTesting
-  public CloudSdkPreferenceResolver(IPreferenceStore preferences) {
+  @VisibleForTesting
+  CloudSdkPreferenceResolver(IPreferenceStore preferences) {
     this.preferences = preferences;
   }
 
   @Override
   public Path getCloudSdkPath() {
-    String value = preferences.getString(PreferenceConstants.CLOUDSDK_PATH);
-    if (value != null && !value.isEmpty()) {
+    // We only consult the Managed Cloud SDK when it has been explicitly configured, which
+    // is done in CloudSdkPreferences.
+    if (CloudSdkPreferences.isAutoManaging()) {
+      try {
+        // It is assumed that clients do not get and use "CloudSdk" while it is being modified.
+        return ManagedCloudSdk.newManagedSdk().getSdkHome();
+      } catch (UnsupportedOsException ex) {
+        logger.log(Level.SEVERE, "Google Cloud SDK not available", ex); // $NON-NLS-1$
+        return null;
+      }
+    }
+    String value = preferences.getString(CloudSdkPreferences.CLOUD_SDK_PATH);
+    if (!Strings.isNullOrEmpty(value)) {
       return Paths.get(value);
     }
     return null;

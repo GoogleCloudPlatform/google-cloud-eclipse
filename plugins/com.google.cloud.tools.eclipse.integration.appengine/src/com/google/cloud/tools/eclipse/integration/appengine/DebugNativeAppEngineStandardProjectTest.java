@@ -17,6 +17,8 @@
 package com.google.cloud.tools.eclipse.integration.appengine;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.endsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -28,7 +30,6 @@ import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotTestingUtilities;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotTreeUtilities;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
-import com.google.cloud.tools.eclipse.test.util.project.JavaRuntimeUtils;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -39,24 +40,21 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
-import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotStyledText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotToolbarButton;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.hamcrest.Matchers;
-import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.osgi.service.prefs.Preferences;
 
 /**
  * Create a native App Engine Standard project, launch in debug mode, verify working, and then
  * terminate.
  */
-@RunWith(SWTBotJunit4ClassRunner.class)
 public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
 
   private static final long TERMINATE_SERVER_TIMEOUT = 10000L;
@@ -74,8 +72,6 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
    */
   @Test
   public void testDebugLaunch() throws Exception {
-    Assume.assumeTrue("Only for JavaSE-8", JavaRuntimeUtils.hasJavaSE8());
-
     // Disable WTP's download-server-bindings
     // Equivalent to: ServerUIPreferences.getInstance().setCacheFrequency(0);
     Preferences prefs = InstanceScope.INSTANCE.getNode("org.eclipse.wst.server.ui");
@@ -90,12 +86,13 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
 
     SWTBotTreeItem testProject = SwtBotProjectActions.selectProject(bot, "testapp_java8");
     assertNotNull(testProject);
-    SwtBotTestingUtilities.performAndWaitForWindowChange(bot, new Runnable() {
-      @Override
-      public void run() {
-        bot.menu("Run").menu("Debug As").menu("1 Debug on Server").click();
-      }
-    });
+    SwtBotTestingUtilities.waitUntilMenuHasItem(
+        bot, () -> bot.menu("Run").menu("Debug As"), endsWith("Debug on Server"));
+    SwtBotTestingUtilities.performAndWaitForWindowChange(
+        bot,
+        () -> {
+          bot.menu("Run").menu("Debug As").menu("1 Debug on Server").click();
+        });
 
     SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
 
@@ -106,8 +103,11 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
     SWTBotTree launchTree =
         new SWTBotTree(bot.widget(widgetOfType(Tree.class), debugView.getWidget()));
 
-    // avoid any stray processes that may be lying around
-    launchTree.contextMenu("Remove All Terminated").click();
+    // clean up any stray processes that may be lying around
+    SWTBotMenu launchMenu = launchTree.contextMenu("Remove All Terminated");
+    if (launchMenu.isEnabled()) {
+      launchMenu.click();
+    }
 
     SwtBotTreeUtilities.waitUntilTreeHasItems(bot, launchTree);
     SWTBotTreeItem[] allItems = launchTree.getAllItems();
@@ -116,10 +116,9 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
 
     SWTBotView consoleView = bot.viewById("org.eclipse.ui.console.ConsoleView"); // IConsoleConstants.ID_CONSOLE_VIEW
     consoleView.show();
-    assertThat("App Engine console not active",
-        consoleView.getViewReference().getContentDescription(),
-        Matchers.containsString("App Engine Standard at localhost"));
-    final SWTBotStyledText consoleContents =
+    SwtBotTestingUtilities.waitUntilViewContentDescription(
+        bot, consoleView, Matchers.containsString("App Engine Standard at localhost"));
+    SWTBotStyledText consoleContents =
         new SWTBotStyledText(bot.widget(widgetOfType(StyledText.class), consoleView.getWidget()));
     SwtBotTestingUtilities.waitUntilStyledTextContains(bot,
         "Module instance default is running at http://localhost:8080", consoleContents);
@@ -147,8 +146,8 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
       }
     }
     assertNotNull(stopServerButton);
-    SwtBotTreeUtilities.waitUntilTreeContainsText(bot, allItems[0], "<terminated>",
-                                                  TERMINATE_SERVER_TIMEOUT);
+    SwtBotTreeUtilities.waitUntilTreeTextMatches(
+        bot, allItems[0], containsString("<terminated>"), TERMINATE_SERVER_TIMEOUT);
     assertNoService(new URL("http://localhost:8080/hello"));
     assertTrue("App Engine console should mark as stopped",
         consoleView.getViewReference().getContentDescription().startsWith("<stopped>"));

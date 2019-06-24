@@ -16,10 +16,15 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets;
 
+import static org.junit.Assert.assertEquals;
+
+import com.google.cloud.tools.appengine.AppEngineDescriptor;
+import com.google.cloud.tools.appengine.AppEngineException;
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -30,58 +35,70 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
-
-import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
-import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 
 public class StandardFacetInstallDelegateTest {
 
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
   
-  private StandardFacetInstallDelegate delegate = new StandardFacetInstallDelegate();
-  private IProgressMonitor monitor = new NullProgressMonitor(); 
+  private final StandardFacetInstallDelegate delegate = new StandardFacetInstallDelegate();
+  private final IProgressMonitor monitor = new NullProgressMonitor();
   private IProject project;
   
   @Before 
   public void setUp() {
     project = projectCreator.getProject();
   }
-  
+
   @Test
-  public void testCreateConfigFiles() throws CoreException, IOException, SAXException {
-    delegate.createConfigFiles(project, monitor);
-    
+  public void testCreateConfigFiles_appengineWebXml()
+      throws CoreException, IOException, SAXException, AppEngineException {
+    delegate.createConfigFiles(project, AppEngineStandardFacet.JRE7, monitor);
+
     IFile appengineWebXml = project.getFile("src/main/webapp/WEB-INF/appengine-web.xml");
     Assert.assertTrue(appengineWebXml.exists());
-    
+
     try (InputStream in = appengineWebXml.getContents(true)) {
-      XMLReader parser = XMLReaderFactory.createXMLReader();
-      parser.parse(new InputSource(in));       
+      AppEngineDescriptor descriptor = AppEngineDescriptor.parse(in);
+      // AppEngineDescriptor treats an empty runtime as java7 as of 0.6.
+      assertEquals("java7", descriptor.getRuntime());
     }
   }
-  
+
   @Test
-  public void testCreateConfigFiles_dontOverwrite() 
+  public void testCreateConfigFiles_loggingProperties() throws CoreException {
+    delegate.createConfigFiles(project, AppEngineStandardFacet.JRE7, monitor);
+
+    IFile loggingProperties = project.getFile("src/main/webapp/WEB-INF/logging.properties");
+    Assert.assertTrue(loggingProperties.exists());
+  }
+
+  @Test
+  public void testCreateConfigFiles_dontOverwriteAppengineWebXml()
       throws CoreException, IOException {
-    
+    assertNoOverwriting("appengine-web.xml");
+  }
+
+  @Test
+  public void testCreateConfigFiles_dontOverwriteLoggingProperties()
+      throws CoreException, IOException {
+    assertNoOverwriting("logging.properties");
+  }
+
+  private void assertNoOverwriting(String fileInWebInf) throws CoreException, IOException {
     IFolder webInfDir = project.getFolder("src/main/webapp/WEB-INF");
     ResourceUtils.createFolders(webInfDir, monitor);
-    IFile appengineWebXml = project.getFile("src/main/webapp/WEB-INF/appengine-web.xml");
-    appengineWebXml.create(new ByteArrayInputStream(new byte[0]), true, monitor);
+    IFile file = webInfDir.getFile(fileInWebInf);
+    file.create(new ByteArrayInputStream(new byte[0]), true, monitor);
 
-    Assert.assertTrue(appengineWebXml.exists());
-    
-    delegate.createConfigFiles(project, monitor);
-    
-    // Make sure createConfigFiles did not write any data into appengine-web.xml
-    try (InputStream in = appengineWebXml.getContents(true)) {
-      Assert.assertEquals("appengine-web.xml is not empty", -1, in.read());       
+    Assert.assertTrue(file.exists());
+
+    delegate.createConfigFiles(project, AppEngineStandardFacet.JRE7, monitor);
+
+    // Make sure createConfigFiles did not overwrite the file in WEB-INF
+    try (InputStream in = file.getContents(true)) {
+      Assert.assertEquals(fileInWebInf + " is not empty", -1, in.read());
     }
-
   }
 
 }

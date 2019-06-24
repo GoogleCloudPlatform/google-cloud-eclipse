@@ -98,25 +98,21 @@ public class CloudToolsEclipseProjectNotifier implements IStartup {
   /**
    * Prompt the user to select the projects to upgrade.
    */
-  private Collection<IProject> promptUser(final Collection<IProject> projects,
-      SubMonitor progress) {
+  private Collection<IProject> promptUser(Collection<IProject> projects, SubMonitor progress) {
     Preconditions.checkArgument(!projects.isEmpty(), "no projects specified!"); // $NON-NLS-1$ //$NON-NLS-1$
     progress.setBlocked(StatusUtil.info(this, Messages.getString("waiting.for.user"))); //$NON-NLS-1$
-    final boolean[] proceed = new boolean[1];
-    workbench.getDisplay().syncExec(new Runnable() {
-      @Override
-      public void run() {
-        StringBuilder sb = new StringBuilder(
-            Messages.getString("following.projects.must.be.updated")); //$NON-NLS-1$
-        sb.append("\n"); //$NON-NLS-1$
-        for (IProject project : projects) {
-          sb.append("\n    ").append(project.getName()); //$NON-NLS-1$
-        }
-        sb.append("\n\n"); //$NON-NLS-1$
-        sb.append(Messages.getString("update.now")); //$NON-NLS-1$
-        proceed[0] =
-            MessageDialog.openQuestion(getShell(), Messages.getString("cloud.tools.for.eclipse"), sb.toString()); //$NON-NLS-1$
+    boolean[] proceed = new boolean[1];
+    workbench.getDisplay().syncExec(() -> {
+      StringBuilder sb = new StringBuilder(
+          Messages.getString("following.projects.must.be.updated")); //$NON-NLS-1$
+      sb.append("\n"); //$NON-NLS-1$
+      for (IProject project : projects) {
+        sb.append("\n    ").append(project.getName()); //$NON-NLS-1$
       }
+      sb.append("\n\n"); //$NON-NLS-1$
+      sb.append(Messages.getString("update.now")); //$NON-NLS-1$
+      proceed[0] =
+          MessageDialog.openQuestion(getShell(), Messages.getString("cloud.tools.for.eclipse"), sb.toString()); //$NON-NLS-1$
     });
     progress.clearBlocked();
     return proceed[0] ? projects : Collections.<IProject>emptyList();

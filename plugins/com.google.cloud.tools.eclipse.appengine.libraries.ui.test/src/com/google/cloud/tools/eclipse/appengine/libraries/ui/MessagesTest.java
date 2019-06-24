@@ -23,7 +23,7 @@ public class MessagesTest {
 
   @Test
   public void testAppEngineTitle() {
-    Assert.assertEquals("App Engine Standard Environment Libraries",
+    Assert.assertEquals("App Engine Standard Libraries",
         Messages.getString("appengine-title"));
   }
 

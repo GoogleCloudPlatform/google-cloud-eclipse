@@ -42,4 +42,27 @@ public class PluginXmlTest extends BasePluginXmlTest {
       Assert.assertTrue(group.isEmpty() || ProjectFacetsManager.isGroupDefined(group));
     }
   }
+  
+  @Test
+  public void testExpressionDefinitions() {
+    NodeList extensions = getExtensions("org.eclipse.core.expressions.definitions");
+    Assert.assertEquals(3, extensions.getLength());
+    // each extension has a single definition
+    String[] expectedDefinitionIds = {
+      "com.google.cloud.tools.eclipse.appengine.isStandardProject",
+      "com.google.cloud.tools.eclipse.appengine.isFlexWarProject",
+      "com.google.cloud.tools.eclipse.appengine.isFlexJarMavenProject"
+    };
+    for(int i = 0; i < extensions.getLength(); i++) {
+      Assert.assertTrue(extensions.item(i) instanceof Element);
+      Element element = (Element) extensions.item(i);
+      NodeList definitions = element.getElementsByTagName("definition");
+      // each definition has 1 element
+      Assert.assertEquals(1, definitions.getLength());
+      Assert.assertTrue(definitions.item(0) instanceof Element);
+      Element definition = (Element) definitions.item(0);
+      Assert.assertEquals(expectedDefinitionIds[i], definition.getAttribute("id"));
+      checkExpressionDefinition(definition);
+    }
+  }
 }

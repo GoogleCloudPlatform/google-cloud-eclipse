@@ -4,9 +4,8 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>com.google.cloud.tools.eclipse</groupId>
-    <artifactId>trunk</artifactId>
+    <artifactId>plugins</artifactId>
     <version>0.1.0-SNAPSHOT</version>
-    <relativePath>../../</relativePath>
   </parent>
   <artifactId>com.google.cloud.tools.eclipse.integration.appengine</artifactId>
   <version>0.1.0-SNAPSHOT</version>
@@ -49,22 +48,7 @@
             <extraRequirements>
               <requirement>
                 <type>eclipse-feature</type>
-                <id>com.google.cloud.tools.eclipse.suite.e45.feature</id>
-                <versionRange>0.0.0</versionRange>
-              </requirement>
-              <requirement>
-                <type>eclipse-plugin</type>
-                <id>ch.qos.logback.slf4j</id>
-                <versionRange>0.0.0</versionRange>
-              </requirement>
-              <requirement>
-                <type>eclipse-plugin</type>
-                <id>org.slf4j.log4j</id>
-                <versionRange>0.0.0</versionRange>
-              </requirement>
-              <requirement>
-                <type>eclipse-plugin</type>
-                <id>com.google.cloud.tools.eclipse.test.logback</id>
+                <id>com.google.cloud.tools.eclipse.suite.feature</id>
                 <versionRange>0.0.0</versionRange>
               </requirement>
               <requirement>

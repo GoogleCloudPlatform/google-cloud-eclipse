@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
+import com.google.cloud.tools.eclipse.util.MappedNamespaceContext;
 import java.util.ArrayList;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.xpath.XPath;
@@ -36,11 +37,12 @@ public class PomXmlValidator implements XmlValidationHelper {
    * sibling has the value "appengine-maven-plugin" or "gcloud-maven-plugin".
    */
   @Override
-  public ArrayList<BannedElement> checkForElements(IResource resource, Document document) {
-    ArrayList<BannedElement> blacklist = new ArrayList<>();
+  public ArrayList<ElementProblem> checkForProblems(IResource resource, Document document) {
+    ArrayList<ElementProblem> problems = new ArrayList<>();
     try {
       XPath xPath = FACTORY.newXPath();
-      NamespaceContext nsContext = new MavenContext();
+      NamespaceContext nsContext =
+          new MappedNamespaceContext("prefix", "http://maven.apache.org/POM/4.0.0");
       xPath.setNamespaceContext(nsContext);
       String selectGroupId = "//prefix:plugin/prefix:groupId[.='com.google.appengine']"
           + "[../prefix:artifactId[text()='appengine-maven-plugin'"
@@ -50,12 +52,12 @@ public class PomXmlValidator implements XmlValidationHelper {
       for (int i = 0; i < groupIdElements.getLength(); i++) {
         Node child = groupIdElements.item(i);
         DocumentLocation location = (DocumentLocation) child.getUserData("location");
-        BannedElement element = new MavenPluginElement(location, child.getTextContent().length());
-        blacklist.add(element);
+        ElementProblem element = new MavenPluginElement(location, child.getTextContent().length());
+        problems.add(element);
       }
     } catch (XPathExpressionException ex) {
       throw new RuntimeException("Invalid XPath expression");
     }
-    return blacklist;
+    return problems;
   }
 }

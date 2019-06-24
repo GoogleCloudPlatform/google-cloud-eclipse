@@ -18,10 +18,11 @@ package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import com.google.common.base.Preconditions;
 import java.util.logging.Logger;
-import javax.inject.Inject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
 
@@ -29,17 +30,20 @@ public class LibraryClasspathContainerResolverJob extends Job {
   private static final Logger logger =
       Logger.getLogger(LibraryClasspathContainerResolverJob.class.getName());
 
-  @Inject
   private ILibraryClasspathContainerResolverService resolverService;
   private IJavaProject javaProject;
 
-  @Inject
-  public LibraryClasspathContainerResolverJob(IJavaProject javaProject) {
+  public LibraryClasspathContainerResolverJob(
+      ISchedulingRule rule,
+      ILibraryClasspathContainerResolverService service,
+      IJavaProject javaProject) {
     super(Messages.getString("AppEngineLibraryContainerResolverJobName"));
+    // This job must be protected; our lower-level Maven classes actions do more verification
+    Preconditions.checkNotNull(rule, "rule must be prvided");
     Preconditions.checkNotNull(javaProject, "javaProject is null");
+    this.resolverService = service;
     this.javaProject = javaProject;
-    setUser(true);
-    setRule(javaProject.getSchedulingRule());
+    setRule(rule);
   }
 
   @Override
@@ -51,4 +55,13 @@ public class LibraryClasspathContainerResolverJob extends Job {
     }
     return resolverService.resolveAll(javaProject, monitor);
   }
+
+  @Override
+  public boolean belongsTo(Object family) {
+    // Consider container resolution as part of builds.  Simplifies
+    // our tests using {@code ProjectUtils.waitForProjects()}.
+    return family == ResourcesPlugin.FAMILY_MANUAL_BUILD;
+  }
+  
+  
 }

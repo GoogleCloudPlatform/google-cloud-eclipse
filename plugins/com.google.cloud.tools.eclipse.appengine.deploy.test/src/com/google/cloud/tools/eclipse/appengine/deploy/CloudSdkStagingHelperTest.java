@@ -16,12 +16,18 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.appengine.AppEngineException;
+import com.google.cloud.tools.appengine.operations.AppCfg;
+import com.google.cloud.tools.appengine.operations.AppEngineWebXmlProjectStaging;
+import com.google.cloud.tools.appengine.operations.CloudSdk;
+import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkNotFoundException;
+import com.google.cloud.tools.appengine.operations.cloudsdk.process.LegacyProcessHandler;
+import com.google.cloud.tools.appengine.operations.cloudsdk.process.ProcessHandler;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import java.io.ByteArrayInputStream;
@@ -35,8 +41,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jst.common.project.facet.core.JavaFacet;
-import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -49,6 +53,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class CloudSdkStagingHelperTest {
 
   private static final String APP_YAML = "runtime: java\nenv: flex";
+  private static final String APPENGINE_WEB_XML =
+      "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
+      + "<threadsafe>true</threadsafe><runtime>java8</runtime></appengine-web-app>";
+  private static final String WEB_XML = "<web-app/>";
 
   private static final String CRON_XML = "<cronentries/>";
   private static final String DATASTORE_INDEXES_XML =
@@ -57,16 +65,10 @@ public class CloudSdkStagingHelperTest {
   private static final String DOS_XML = "<blacklistentries/>";
   private static final String QUEUE_XML = "<queue-entries/>";
 
-  @Rule
-  public TemporaryFolder tempFolder = new TemporaryFolder();
-
-  @Rule
-  public TestProjectCreator projectCreator = new TestProjectCreator().withFacetVersions(
-      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
+  @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
 
   @Mock private IProgressMonitor monitor;
-
-  private final CloudSdk cloudSdk = new CloudSdk.Builder().async(false).build();
 
   private IPath stagingDirectory;
   private IProject project;
@@ -77,27 +79,33 @@ public class CloudSdkStagingHelperTest {
     stagingDirectory = new Path(tempFolder.getRoot().toString());
   }
 
-  @Test(expected = OperationCanceledException.class)
-  public void testStage_cancelled() {
+  @Test
+  public void testStage_cancelled() throws AppEngineException {
     when(monitor.isCanceled()).thenReturn(true);
-    CloudSdkStagingHelper.stageStandard(mock(IPath.class), stagingDirectory, cloudSdk, monitor);
+    try {
+      CloudSdkStagingHelper.stageStandard(null, stagingDirectory, null, monitor);
+      fail();
+    } catch (OperationCanceledException ex) {
+      assertEquals("canceled early", ex.getMessage());
+    }
   }
 
   @Test
-  public void testStageStandard() {
+  public void testStageStandard() throws AppEngineException, CoreException {
+    AppEngineWebXmlProjectStaging staging = setUpAppEngineStaging();
+
     IPath explodedWarDirectory = project.getFolder("WebContent").getLocation();
-    CloudSdkStagingHelper.stageStandard(explodedWarDirectory, stagingDirectory, cloudSdk, monitor);
+    CloudSdkStagingHelper.stageStandard(explodedWarDirectory, stagingDirectory, staging, monitor);
 
     assertTrue(stagingDirectory.append("WEB-INF/web.xml").toFile().exists());
     assertTrue(stagingDirectory.append("META-INF/MANIFEST.MF").toFile().exists());
   }
 
   @Test
-  public void testStageFlexible() throws CoreException {
-    IFolder appEngineDirectory = project.getFolder("src/main/appengine");
-    ResourceUtils.createFolders(appEngineDirectory, monitor);
+  public void testStageFlexible() throws CoreException, AppEngineException {
     createFile("src/main/appengine/app.yaml", APP_YAML);
 
+    IFolder appEngineDirectory = project.getFolder("src/main/appengine");
     IPath deployArtifact = createFile("my-app.war", "fake WAR").getLocation();
 
     CloudSdkStagingHelper.stageFlexible(
@@ -108,15 +116,18 @@ public class CloudSdkStagingHelperTest {
   }
 
   @Test
-  public void testCloudSdkStaging_xmlConfigFilesConvertedToYaml() throws CoreException {
+  public void testCloudSdkStaging_xmlConfigFilesConvertedToYaml()
+      throws CoreException, AppEngineException {
+    AppEngineWebXmlProjectStaging staging = setUpAppEngineStaging();
+
     createConfigFile("cron.xml", CRON_XML);
     createConfigFile("datastore-indexes.xml", DATASTORE_INDEXES_XML);
     createConfigFile("dispatch.xml", DISPATCH_XML);
     createConfigFile("dos.xml", DOS_XML);
     createConfigFile("queue.xml", QUEUE_XML);
 
-    IPath explodedWarDirectory = project.getFolder("WebContent").getRawLocation();
-    CloudSdkStagingHelper.stageStandard(explodedWarDirectory, stagingDirectory, cloudSdk, monitor);
+    IPath explodedWarDirectory = project.getFolder("WebContent").getLocation();
+    CloudSdkStagingHelper.stageStandard(explodedWarDirectory, stagingDirectory, staging, monitor);
 
     IPath stagingGenerated = stagingDirectory.append(
         CloudSdkStagingHelper.STANDARD_STAGING_GENERATED_FILES_DIRECTORY);
@@ -128,6 +139,18 @@ public class CloudSdkStagingHelperTest {
     assertTrue(stagingGenerated.append("queue.yaml").toFile().exists());
   }
 
+  private AppEngineWebXmlProjectStaging setUpAppEngineStaging()
+      throws CloudSdkNotFoundException, CoreException {
+    createFile("WebContent/WEB-INF/appengine-web.xml", APPENGINE_WEB_XML);
+    createFile("WebContent/WEB-INF/web.xml", WEB_XML);
+    createFile("WebContent/META-INF/MANIFEST.MF", "");
+
+    CloudSdk cloudSdk = new CloudSdk.Builder().build();
+    AppCfg appCfg = AppCfg.builder(cloudSdk).build();
+    ProcessHandler processHandler = LegacyProcessHandler.builder().async(false).build();
+    return appCfg.newStaging(processHandler);
+  }
+
   private void createConfigFile(String filename, String content) throws CoreException {
     createFile("WebContent/WEB-INF/" + filename, content);
   }
@@ -135,6 +158,7 @@ public class CloudSdkStagingHelperTest {
   private IFile createFile(String path, String content) throws CoreException {
     InputStream in = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
     IFile file = project.getFile(path);
+    ResourceUtils.createFolders(file.getParent(), null);
     file.create(in, true, null);
     return file;
   }

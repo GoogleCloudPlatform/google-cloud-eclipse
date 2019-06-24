@@ -34,8 +34,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.jface.window.IShellProvider;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 /**
@@ -73,21 +73,22 @@ public class GoogleLoginService implements IGoogleLoginService {
    * as an OSGi service.
    */
   protected void activate() {
-    final IWorkbench workbench = PlatformUI.getWorkbench();
-    LoginServiceLogger logger = new LoginServiceLogger();
-    IShellProvider shellProvider = new IShellProvider() {
-      @Override
-      public Shell getShell() {
-        return workbench.getDisplay().getActiveShell();
+    IShellProvider shellProvider = () -> {
+      IWorkbench workbench = PlatformUI.getWorkbench();
+      IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
+      if (window != null && window.getShell() != null) {
+        return window.getShell();
       }
+      return workbench.getDisplay().getActiveShell();
     };
 
-    LoginServiceUi uiFacade = new LoginServiceUi(workbench, shellProvider, workbench.getDisplay());
+    LoginServiceLogger loginServiceLogger = new LoginServiceLogger();
+    LoginServiceUi uiFacade = new LoginServiceUi(shellProvider);
     OAuthDataStore dataStore =
-        new JavaPreferenceOAuthDataStore(PREFERENCE_PATH_OAUTH_DATA_STORE, logger);
+        new JavaPreferenceOAuthDataStore(PREFERENCE_PATH_OAUTH_DATA_STORE, loginServiceLogger);
     loginState = new GoogleLoginState(
         Constants.getOAuthClientId(), Constants.getOAuthClientSecret(), OAUTH_SCOPES,
-        dataStore, uiFacade, logger);
+        dataStore, uiFacade, loginServiceLogger);
     loginState.setApplicationName(CloudToolsInfo.USER_AGENT);
     accounts = loginState.listAccounts();
   }

@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.operations.CloudSdk;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import java.io.IOException;
@@ -41,10 +41,16 @@ public class CloudLibraries {
   public static final String MASTER_CONTAINER_ID = "master-container";
 
   /**
-   * Library files for App Engine Standard environment applications; specifically
-   * Objectify, App Engine API, and Google Cloud Endpoints.
+   * Library files for App Engine standard environment applications; specifically
+   * Objectify 6, App Engine API 1.0 SDK, and Google Cloud Endpoints.
    */
-  public static final String APP_ENGINE_GROUP = "appengine";   //$NON-NLS-1$
+  public static final String APP_ENGINE_STANDARD_GROUP = "appengine"; //$NON-NLS-1$
+
+  /**
+   * Non-App Engine standard environment application libraries files that do not fall into the
+   * category of Google Cloud Client Library for Java. Includes Objectify 6.
+   */
+  public static final String NON_APP_ENGINE_STANDARD_GROUP = "non-appengine-standard"; //$NON-NLS-1$
 
   /**
    * Library files for the Google Cloud Client Library for Java. E.g.
@@ -64,7 +70,8 @@ public class CloudLibraries {
   public static List<Library> getLibraries(String group) {
     List<Library> result = new ArrayList<>();
     for (Library library : libraries.values()) {
-      if (library.getGroup().equals(group)) {
+      List<String> groups = library.getGroups();
+      if (groups.contains(group)) {
         result.add(library);
       }
     }
@@ -82,8 +89,8 @@ public class CloudLibraries {
     Bundle bundle = FrameworkUtil.getBundle(CloudSdk.class);
     URL url = bundle.getResource("/com/google/cloud/tools/libraries/libraries.json");
     
-    try (InputStream in = url.openStream()) {
-      JsonReader reader = Json.createReader(in); 
+    try (InputStream in = url.openStream();
+        JsonReader reader = Json.createReader(in)) {
       JsonObject[] apis = reader.readArray().toArray(new JsonObject[0]); 
       List<Library> clientApis = new ArrayList<>(apis.length);
       for (JsonObject api : apis) {
@@ -103,6 +110,7 @@ public class CloudLibraries {
             if (language != null && "java".equals(language.getString())) {
               String toolTip = client.getString("infotip");
               library.setToolTip(toolTip);
+              library.setLaunchStage(client.getString("launchStage"));
               JsonObject coordinates = client.getJsonObject("mavenCoordinates");
               String groupId = coordinates.getString("groupId");
               String artifactId = coordinates.getString("artifactId");

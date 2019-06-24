@@ -45,23 +45,27 @@ public class AppEngineStandardFacetTest {
 
   @Rule
   public TestProjectCreator appEngineProjectCreator =
-      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25,
+      new TestProjectCreator().withFacets(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25,
           AppEngineStandardFacet.JRE7);
 
   @Test
   public void testStandardFacetExists() {
     Assert.assertEquals("com.google.cloud.tools.eclipse.appengine.facets.standard",
         AppEngineStandardFacet.ID);
-    Assert.assertEquals("JRE7", AppEngineStandardFacet.JRE7.getVersionString());
     // see AppEngineStandardFacetVersionChangeTests for JRE8 test
     Assert.assertTrue(ProjectFacetsManager.isProjectFacetDefined(AppEngineStandardFacet.ID));
     Assert.assertEquals(AppEngineStandardFacet.ID, AppEngineStandardFacet.FACET.getId());
   }
 
   @Test
-  public void testDefaultFacetVersion() {
-    Assert.assertEquals(AppEngineStandardFacet.JRE7,
-        AppEngineStandardFacet.FACET.getDefaultVersion());
+  public void testJre7StandardFacetVersion() {
+    Assert.assertEquals("JRE7", AppEngineStandardFacet.JRE7.getVersionString());
+    Assert.assertNull(AppEngineStandardFacet.JRE7.getProperty("appengine.runtime"));
+  }
+
+  @Test
+  public void testJre7StandardFacetVersionObsolete() {
+    Assert.assertTrue(AppEngineStandardFacet.usesObsoleteRuntime(AppEngineStandardFacet.JRE7));
   }
 
   @Test

@@ -22,6 +22,7 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.util.ClasspathUtil;
+import com.google.cloud.tools.eclipse.util.MavenUtils;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Preconditions;
 import java.io.IOException;
@@ -34,33 +35,35 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-import org.eclipse.e4.core.contexts.ContextInjectionFactory;
-import org.eclipse.e4.core.contexts.EclipseContextFactory;
-import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jst.j2ee.classpathdep.UpdateClasspathAttributeUtil;
-import org.osgi.framework.FrameworkUtil;
 import org.xml.sax.SAXException;
 
 public class BuildPath {
 
   private static final Logger logger = Logger.getLogger(BuildPath.class.getName());
-  
+
+  public static final IPath MASTER_CONTAINER_PATH =
+      new Path(LibraryClasspathContainer.CONTAINER_PATH_PREFIX)
+          .append(CloudLibraries.MASTER_CONTAINER_ID);
+
   /**
    * Add the selected libraries to the project's Maven's dependencies.
    */
@@ -80,7 +83,8 @@ public class BuildPath {
     if (selectedLibraries.isEmpty() && removedLibraries.isEmpty()) {
       return; // nothing to do
     }
-    AnalyticsLibraryPingHelper.sendLibrarySelectionPing(AnalyticsEvents.MAVEN_PROJECT, selectedLibraries);
+    AnalyticsLibraryPingHelper.sendLibrarySelectionPing(AnalyticsEvents.MAVEN_PROJECT,
+        selectedLibraries);
 
     IFile pomFile = project.getFile("pom.xml"); //$NON-NLS-1$
     try {
@@ -127,7 +131,6 @@ public class BuildPath {
       ClasspathUtil.addClasspathEntry(javaProject.getProject(), masterEntry,
           subMonitor.newChild(8));
     }
-    runContainerResolverJob(javaProject);
   }
 
   /**
@@ -200,7 +203,7 @@ public class BuildPath {
     boolean alreadyExists = Arrays.asList(rawClasspath).contains(libraryContainer);
     return alreadyExists ? null : libraryContainer;
   }
-  
+
   private static IClasspathEntry makeClasspathEntry(Library library) throws CoreException {
     IClasspathAttribute[] classpathAttributes = new IClasspathAttribute[1];
     if (library.isExport()) {
@@ -214,23 +217,6 @@ public class BuildPath {
         .append(library.getId());
     return JavaCore.newContainerEntry(containerPath, new IAccessRule[0], classpathAttributes,
         false);
-  }
-
-  public static void runContainerResolverJob(IJavaProject javaProject) {
-    IEclipseContext context = EclipseContextFactory.getServiceContext(
-        FrameworkUtil.getBundle(BuildPath.class).getBundleContext());
-    final IEclipseContext childContext =
-        context.createChild(LibraryClasspathContainerResolverJob.class.getName());
-    childContext.set(IJavaProject.class, javaProject);
-    Job job =
-        ContextInjectionFactory.make(LibraryClasspathContainerResolverJob.class, childContext);
-    job.addJobChangeListener(new JobChangeAdapter() {
-      @Override
-      public void done(IJobChangeEvent event) {
-        childContext.dispose();
-      }
-    });
-    job.schedule();
   }
 
   /**
@@ -276,9 +262,7 @@ public class BuildPath {
       serializer.saveLibraryIds(project, libraryIds);
       progress.worked(5);
       // in practice, we only ever use the master-container
-      IPath containerPath = new Path(LibraryClasspathContainer.CONTAINER_PATH_PREFIX)
-          .append(CloudLibraries.MASTER_CONTAINER_ID);
-      serializer.resetContainer(project, containerPath);
+      serializer.resetContainer(project, MASTER_CONTAINER_PATH);
       progress.worked(5);
     } catch (IOException ex) {
       throw new CoreException(
@@ -286,4 +270,61 @@ public class BuildPath {
     }
   }
 
+  /**
+   * Check that the library list is still required (i.e., the classpath container may have been
+   * removed).
+   */
+  public static void checkLibraryList(IJavaProject javaProject, IProgressMonitor monitor) {
+    SubMonitor progress = SubMonitor.convert(monitor, 5);
+    LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer();
+    if (!serializer.hasLibraryIds(javaProject)) {
+      // nothing to do since no library list file found
+      return;
+    }
+    progress.worked(1);
+
+    try {
+      // Check if we can find our master library container; if found, then library list should stay
+      IClasspathEntry masterContainer = findMasterContainer(javaProject);
+      if (masterContainer != null) {
+        return;
+      }
+      progress.worked(3);
+
+      serializer.removeLibraryIds(javaProject);
+      serializer.resetContainer(javaProject, MASTER_CONTAINER_PATH);
+      progress.worked(1);
+    } catch (JavaModelException ex) {
+      logger.log(Level.WARNING,
+          "Unable to check classpath containers for: " + javaProject.getProject().getName());
+      return;
+    } catch (CoreException ex) {
+      logger.log(Level.SEVERE, "Unable to remove library ids", ex);
+    }
+  }
+
+  /** Find the master container in the given project or {@code null} if none. */
+  public static IClasspathEntry findMasterContainer(IJavaProject javaProject)
+      throws JavaModelException {
+    IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
+    return Stream.of(rawClasspath)
+        .filter(LibraryClasspathContainer::isEntry)
+        .filter(entry -> MASTER_CONTAINER_PATH.equals(entry.getPath()))
+        .findAny()
+        .orElse(null);
+  }
+
+  /**
+   * Returns a suitable {@link ISchedulingRule scheduling rule} when resolving libraries for a
+   * project.
+   */
+  public static ISchedulingRule resolvingRule(IJavaProject javaProject) {
+    // Requires both the project modification rule and the Maven project configuration rule
+    IWorkspace workspace = javaProject.getProject().getWorkspace();
+    ISchedulingRule rule =
+        MultiRule.combine(
+            workspace.getRuleFactory().modifyRule(javaProject.getProject()),
+            MavenUtils.mavenResolvingRule());
+    return rule;
+  }
 }

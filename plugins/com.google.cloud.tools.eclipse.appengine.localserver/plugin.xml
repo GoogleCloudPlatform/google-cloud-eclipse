@@ -44,8 +44,7 @@
             runtime="true"
             runtimeTypeId="com.google.cloud.tools.eclipse.appengine.standard.runtime"
             startBeforePublish="false"
-            supportsRemoteHosts="true"
-            synchronousStart="true">
+            supportsRemoteHosts="true">
       </serverType>
    </extension>
 
@@ -361,6 +360,12 @@
             class="com.google.cloud.tools.eclipse.appengine.localserver.ui.StaleResourcesStatusHandler"
             code="255"
             id="com.google.cloud.tools.eclipse.appengine.localserver.statusHandlers.staleResources"
+            plugin="com.google.cloud.tools.eclipse.appengine.localserver">
+      </statusHandler>
+      <statusHandler
+            class="com.google.cloud.tools.eclipse.appengine.localserver.ui.DatastoreIndexesUpdatedStatusHandler"
+            code="256"
+            id="com.google.cloud.tools.eclipse.appengine.localserver.datastoreIndexesUpdated"
             plugin="com.google.cloud.tools.eclipse.appengine.localserver">
       </statusHandler>
    </extension>

@@ -23,6 +23,8 @@ import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowProjectValid
 import com.google.cloud.tools.eclipse.dataflow.core.project.MajorVersion;
 import com.google.cloud.tools.eclipse.dataflow.ui.Messages;
 import com.google.cloud.tools.eclipse.dataflow.ui.util.ButtonFactory;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
 import com.google.common.base.Strings;
 import java.io.File;
@@ -174,8 +176,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     locationBrowse.setEnabled(false);
 
     projectNameTemplate = addCombo(formComposite, Messages.getString("name.template"), false); //$NON-NLS-1$
-    projectNameTemplate.setToolTipText(
-        Messages.getString("name.template.tooltip")); //$NON-NLS-1$
+    projectNameTemplate.setToolTipText(Messages.getString("name.template.tooltip")); //$NON-NLS-1$
     projectNameTemplate.add("[artifactId]"); //$NON-NLS-1$
     projectNameTemplate.add("[groupId]-[artifactId]"); //$NON-NLS-1$
     projectNameTemplate.setLayoutData(gridSpan(GridData.FILL_HORIZONTAL, 1));
@@ -185,8 +186,10 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
 
     formComposite.layout();
     parent.layout();
+
+    AnalyticsPingManager.getInstance().sendPingOnShell(parent.getShell(),
+        AnalyticsEvents.DATAFLOW_NEW_PROJECT_WIZARD);
   }
-  
 
   private void setHelp(Composite container) {
     PlatformUI.getWorkbench().getHelpSystem().setHelp(container,
@@ -223,43 +226,32 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     // When the Browse button is pressed, open a directory selection dialogue
     locationBrowse.addSelectionListener(folderSelectionListener(getShell()));
 
-    // Updating the group ID updates the the default package name
-    ModifyListener propagateGroupIdToPackageListener = propagateGroupIdToPackageListener();
-    groupIdInput.addModifyListener(propagateGroupIdToPackageListener);
+    // Updating the group ID updates the default package name
+    groupIdInput.addModifyListener(this::propagateGroupIdToPackageListener);
     packageInput.addFocusListener(
-        changeGroupIdPropogationListener(propagateGroupIdToPackageListener));
+        changeGroupIdPropogationListener(this::propagateGroupIdToPackageListener));
 
     // When the project inputs are modified, validate them and update the error message
-    locationInput.addModifyListener(validateAndSetProjectLocationListener());
-    groupIdInput.addModifyListener(validateAndSetMavenGroupIdListener());
-    artifactIdInput.addModifyListener(validateAndSetMavenArtifactIdListener());
-    packageInput.addModifyListener(validateAndSetPackageListener());
-    projectNameTemplate.addModifyListener(setProjectNameTemplate());
+    locationInput.addModifyListener(this::validateAndSetProjectLocationListener);
+    groupIdInput.addModifyListener(this::validateAndSetMavenGroupIdListener);
+    artifactIdInput.addModifyListener(this::validateAndSetMavenArtifactIdListener);
+    packageInput.addModifyListener(this::validateAndSetPackageListener);
+    projectNameTemplate.addModifyListener(this::setProjectNameTemplateListener);
 
     templateDropdown.addSelectionListener(templateListener());
-    templateVersionDropdown.addModifyListener(customTemplateVersionListener());
+    templateVersionDropdown.addModifyListener(event -> updateArchetypeVersion());
     templateVersionDropdown.addSelectionListener(templateVersionListener());
   }
 
-  private ModifyListener setProjectNameTemplate() {
-    return new ModifyListener() {
-      @Override
-      public void modifyText(ModifyEvent event) {
-        targetCreator.setProjectNameTemplate(projectNameTemplate.getText());
-      }
-    };
+  private void setProjectNameTemplateListener(ModifyEvent event) {
+    targetCreator.setProjectNameTemplate(projectNameTemplate.getText());
   }
 
-  private ModifyListener propagateGroupIdToPackageListener() {
-    return new ModifyListener() {
-      @Override
-      public void modifyText(ModifyEvent event) {
-        packageInput.setText(groupIdInput.getText());
-      }
-    };
+  private void propagateGroupIdToPackageListener(ModifyEvent event) {
+    packageInput.setText(groupIdInput.getText());
   }
 
-  private FocusListener changeGroupIdPropogationListener(final ModifyListener propogationListener) {
+  private FocusListener changeGroupIdPropogationListener(ModifyListener propogationListener) {
     return new FocusListener() {
       @Override
       public void focusLost(FocusEvent event) {
@@ -316,15 +308,6 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     updateArchetypeVersion();
   }
 
-  private ModifyListener customTemplateVersionListener() {
-    return new ModifyListener() {
-      @Override
-      public void modifyText(ModifyEvent modifyEvent) {
-        updateArchetypeVersion();
-      }
-    };
-  }
-
   private SelectionListener templateVersionListener() {
     return new SelectionAdapter() {
       @Override
@@ -365,52 +348,33 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     };
   }
 
-  private ModifyListener validateAndSetMavenArtifactIdListener() {
-    return new ModifyListener() {
-      @Override
-      public void modifyText(ModifyEvent event) {
-        targetCreator.setMavenArtifactId(artifactIdInput.getText());
-        validateAndSetError();
-      }
-    };
-  }
-  private ModifyListener validateAndSetMavenGroupIdListener() {
-    return new ModifyListener() {
-      @Override
-      public void modifyText(ModifyEvent event) {
-        targetCreator.setMavenGroupId(groupIdInput.getText());
-        validateAndSetError();
-      }
-    };
+  private void validateAndSetMavenArtifactIdListener(ModifyEvent event) {
+    targetCreator.setMavenArtifactId(artifactIdInput.getText());
+    validateAndSetError();
   }
 
-  private ModifyListener validateAndSetProjectLocationListener() {
-    return new ModifyListener() {
-      @Override
-      public void modifyText(ModifyEvent event) {
-        String locationInputString = locationInput.getText();
-        if (Strings.isNullOrEmpty(locationInputString)) {
-          targetCreator.setProjectLocation(null);
-          validateAndSetError();
-        } else {
-          File file = new File(locationInputString);
-          URI location = file.toURI();
-          targetCreator.setProjectLocation(location);
-          validateAndSetError();
-        }
-      }
-    };
+  private void validateAndSetMavenGroupIdListener(ModifyEvent event) {
+    targetCreator.setMavenGroupId(groupIdInput.getText());
+    validateAndSetError();
   }
 
-  private ModifyListener validateAndSetPackageListener() {
-    return new ModifyListener() {
-      @Override
-      public void modifyText(ModifyEvent event) {
-        String packageInputString = packageInput.getText();
-        targetCreator.setPackage(packageInputString);
-        validateAndSetError();
-      }
-    };
+  private void validateAndSetProjectLocationListener(ModifyEvent event) {
+    String locationInputString = locationInput.getText();
+    if (Strings.isNullOrEmpty(locationInputString)) {
+      targetCreator.setProjectLocation(null);
+      validateAndSetError();
+    } else {
+      File file = new File(locationInputString);
+      URI location = file.toURI();
+      targetCreator.setProjectLocation(location);
+      validateAndSetError();
+    }
+  }
+
+  private void validateAndSetPackageListener(ModifyEvent event) {
+    String packageInputString = packageInput.getText();
+    targetCreator.setPackage(packageInputString);
+    validateAndSetError();
   }
 
   /**

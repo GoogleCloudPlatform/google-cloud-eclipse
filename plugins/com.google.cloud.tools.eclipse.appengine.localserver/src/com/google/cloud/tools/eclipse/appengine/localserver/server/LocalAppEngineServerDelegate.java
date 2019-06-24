@@ -20,13 +20,13 @@ import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Function;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.runtime.CoreException;
@@ -275,7 +275,7 @@ public class LocalAppEngineServerDelegate extends ServerDelegate implements IURL
     try {
       String url;
       if (module == null) {
-        url = "http://" + getServer().getHost() + ":" + serverBehaviour.getAdminPort(); //$NON-NLS-1$ //$NON-NLS-2$
+        url = "http://" + getServer().getHost() + ":" + serverBehaviour.getServerPort(); //$NON-NLS-1$ //$NON-NLS-2$
       } else {
         String serviceId = getServiceId(module); // never null
         url = serverBehaviour.getServiceUrl(serviceId);

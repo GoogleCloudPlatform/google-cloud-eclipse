@@ -13,9 +13,10 @@
             category="com.google.cloud.tools.eclipse.wizards">
          <description>%standard.wizard.description</description>
          <selection class="org.eclipse.core.resources.IResource"/>
-         <keywordReference id="com.google.cloud.tools.eclipse.appengine.ui.GCPKeyword"/>
+         <keywordReference id="com.google.cloud.tools.eclipse.ui.GCPKeyword"/>
+         <keywordReference id="com.google.cloud.tools.eclipse.ui.GoogleKeyword"/>
+         <keywordReference id="com.google.cloud.tools.eclipse.ui.CloudKeyword"/>
          <keywordReference id="com.google.cloud.tools.eclipse.appengine.ui.GAEKeyword"/>
-         <keywordReference id="com.google.cloud.tools.eclipse.appengine.ui.GoogleKeyword"/>
          <keywordReference
              id="com.google.cloud.tools.eclipse.appengine.ui.AppEngineKeyword"/>
          <keywordReference
@@ -59,10 +60,11 @@
             category="com.google.cloud.tools.eclipse.wizards">
          <description>%flex.wizard.description</description>
          <selection class="org.eclipse.core.resources.IResource"/>
+         <keywordReference id="com.google.cloud.tools.eclipse.ui.GCPKeyword"/>
+         <keywordReference id="com.google.cloud.tools.eclipse.ui.GoogleKeyword"/>
+         <keywordReference id="com.google.cloud.tools.eclipse.ui.CloudKeyword"/>
          <keywordReference id="com.google.cloud.tools.eclipse.appengine.ui.FlexKeyword"/>
-         <keywordReference id="com.google.cloud.tools.eclipse.appengine.ui.GCPKeyword"/>
          <keywordReference id="com.google.cloud.tools.eclipse.appengine.ui.GAEKeyword"/>
-         <keywordReference id="com.google.cloud.tools.eclipse.appengine.ui.GoogleKeyword"/>
          <keywordReference
              id="com.google.cloud.tools.eclipse.appengine.ui.AppEngineKeyword"/>
          <keywordReference

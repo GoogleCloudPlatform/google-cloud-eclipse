@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.List;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
@@ -61,7 +62,9 @@ public class ClientApisLibrariesSelectorGroupTest {
 
   @Test
   public void testButtonSetup() {
-    Control groupAsControl = shell.getChildren()[0];
+    Control container = shell.getChildren()[0];
+    assertThat(container, instanceOf(Composite.class));
+    Control groupAsControl = ((Composite) container).getChildren()[0];
     assertThat(groupAsControl, instanceOf(Group.class));
     Control[] buttonsAsControls = ((Group) groupAsControl).getChildren();
     for (int i = 0; i < buttonsAsControls.length; i++) {

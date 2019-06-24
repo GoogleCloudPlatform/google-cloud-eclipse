@@ -71,7 +71,7 @@ class ProjectPreferenceStore implements PreferenceStore {
     prefsToSave = new HashMap<>();
   }
 
-  private QualifiedName key(String name) {
+  private static QualifiedName key(String name) {
     return new QualifiedName(DataflowCorePlugin.PLUGIN_ID, name);
   }
 }

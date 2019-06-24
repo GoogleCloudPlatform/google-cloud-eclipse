@@ -1,27 +1,28 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
+Automatic-Module-Name: com.google.cloud.tools.eclipse.projectselector
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.projectselector;singleton:=true
 Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: %providerName
-Bundle-Localization: plugin
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
+Bundle-Localization: plugin
 Export-Package: com.google.cloud.tools.eclipse.projectselector,
  com.google.cloud.tools.eclipse.projectselector.model
-Import-Package: com.google.api.client.auth.oauth2;version="[1.23.0,1.24.0)",
- com.google.api.client.googleapis;version="[1.23.0,1.24.0)",
- com.google.api.client.googleapis.json;version="[1.23.0,1.24.0)",
- com.google.api.client.googleapis.services;version="[1.23.0,1.24.0)",
- com.google.api.client.googleapis.services.json;version="[1.23.0,1.24.0)",
- com.google.api.client.http;version="[1.23.0,1.24.0)",
- com.google.api.client.http.javanet;version="[1.23.0,1.24.0)",
- com.google.api.client.json;version="[1.23.0,1.24.0)",
- com.google.api.client.json.jackson;version="[1.23.0,1.24.0)",
- com.google.api.services.appengine.v1;version="[1.23.0,1.24.0)",
- com.google.api.services.appengine.v1.model;version="[1.23.0,1.24.0)",
- com.google.api.services.cloudresourcemanager;version="[1.23.0,1.24.0)",
- com.google.api.services.cloudresourcemanager.model;version="[1.23.0,1.24.0)",
+Import-Package: com.google.api.client.auth.oauth2;version="[1.25.0,1.26.0)",
+ com.google.api.client.googleapis;version="[1.25.0,1.26.0)",
+ com.google.api.client.googleapis.json;version="[1.25.0,1.26.0)",
+ com.google.api.client.googleapis.services;version="[1.25.0,1.26.0)",
+ com.google.api.client.googleapis.services.json;version="[1.25.0,1.26.0)",
+ com.google.api.client.http;version="[1.25.0,1.26.0)",
+ com.google.api.client.http.javanet;version="[1.25.0,1.26.0)",
+ com.google.api.client.json;version="[1.25.0,1.26.0)",
+ com.google.api.client.json.jackson;version="[1.25.0,1.26.0)",
+ com.google.api.services.appengine.v1;version="[1.25.0,1.26.0)",
+ com.google.api.services.appengine.v1.model;version="[1.25.0,1.26.0)",
+ com.google.api.services.cloudresourcemanager;version="[1.25.0,1.26.0)",
+ com.google.api.services.cloudresourcemanager.model;version="[1.25.0,1.26.0)",
  com.google.cloud.tools.eclipse.googleapis,
  com.google.cloud.tools.eclipse.login.ui,
  com.google.cloud.tools.eclipse.ui.util,
@@ -29,10 +30,10 @@ Import-Package: com.google.api.client.auth.oauth2;version="[1.23.0,1.24.0)",
  com.google.cloud.tools.eclipse.util,
  com.google.cloud.tools.eclipse.util.jobs,
  com.google.cloud.tools.eclipse.util.status,
- com.google.common.annotations;version="[20.0.0,21.0.0)",
- com.google.common.base;version="[20.0.0,21.0.0)",
- com.google.common.collect;version="[20.0.0,21.0.0)",
- com.google.common.util.concurrent;version="[20.0.0,21.0.0)",
+ com.google.common.annotations;version="[27.0.0,28.0.0)",
+ com.google.common.base;version="[27.0.0,28.0.0)",
+ com.google.common.collect;version="[27.0.0,28.0.0)",
+ com.google.common.util.concurrent;version="[27.0.0,28.0.0)",
  org.codehaus.jackson,
  org.eclipse.core.databinding.beans,
  org.eclipse.core.databinding.conversion,

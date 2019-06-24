@@ -16,30 +16,8 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.w3c.dom.Element;
-
 import com.google.cloud.tools.eclipse.test.util.BasePluginXmlTest;
 
 public class PluginXmlTest extends BasePluginXmlTest {
-  
-  @Test
-  public void testLoadCompilationParticipant() {
-    Element compilationParticipant = (Element) getDocument()
-        .getDocumentElement()
-        .getElementsByTagName("compilationParticipant")
-        .item(0);
-    String className = compilationParticipant.getAttribute("class");
-    try {
-      Class.forName(className).newInstance();
-    } catch (ClassNotFoundException ex) {
-      Assert.fail("Could not load class " + className + " referenced in plugin.xml");
-    } catch (InstantiationException ex) {
-      Assert.fail("Class " + className + " does not have a no-arg constructor");
-    } catch (IllegalAccessException e) {
-      Assert.fail("Class " + className + " no-arg constructor is not public");
-    }
-  }
   
 }

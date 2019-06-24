@@ -10,7 +10,6 @@
        <version-comparator
              class="com.google.cloud.tools.eclipse.appengine.facets.StringVersionComparator">
        </version-comparator>
-       <default-version version="JRE8" />
     </project-facet>
     <project-facet-version facet="com.google.cloud.tools.eclipse.appengine.facets.standard" version="JRE7">
        <constraint>
@@ -25,6 +24,10 @@
              </requires>
           </and>
         </constraint>
+       <property
+             name="appengine.runtime.obsolete"
+             value="true">
+       </property>
     </project-facet-version>
   </extension>
 
@@ -132,12 +135,22 @@
           </iterate>
           <not>
             <iterate>
-              <reference definitionId="com.google.cloud.tools.eclipse.appengine.onlyForStandardProjects" />
+              <reference definitionId="com.google.cloud.tools.eclipse.appengine.isStandardProject" />
             </iterate>
           </not>
         </and>
       </enabledWhen>
     </handler>
+  </extension>
+
+  <extension point="org.eclipse.core.expressions.definitions">
+    <definition id="com.google.cloud.tools.eclipse.appengine.isStandardProject">
+      <adapt type="org.eclipse.core.resources.IProject">
+        <test
+            property="org.eclipse.wst.common.project.facet.core.projectFacet"
+            value="com.google.cloud.tools.eclipse.appengine.facets.standard" />
+      </adapt>
+    </definition>
   </extension>
   <!-- end App Engine standard facet -->
 
@@ -197,6 +210,16 @@
       <delegate class="com.google.cloud.tools.eclipse.appengine.facets.FlexFacetUninstallDelegate"/>
     </action>
   </extension>
+
+  <extension point="org.eclipse.core.expressions.definitions">
+    <definition id="com.google.cloud.tools.eclipse.appengine.isFlexWarProject">
+      <adapt type="org.eclipse.core.resources.IProject">
+        <test
+            property="org.eclipse.wst.common.project.facet.core.projectFacet"
+            value="com.google.cloud.tools.eclipse.appengine.facets.flex" />
+      </adapt>
+    </definition>
+  </extension>
   <!-- end App Engine flex WAR facet -->
 
   <!-- begin App Engine flex JAR facet -->
@@ -249,18 +272,94 @@
       <delegate class="com.google.cloud.tools.eclipse.appengine.facets.FlexFacetUninstallDelegate"/>
     </action>
   </extension>
+
+  <extension point="org.eclipse.core.expressions.definitions">
+    <definition id="com.google.cloud.tools.eclipse.appengine.isFlexJarMavenProject">
+      <adapt type="org.eclipse.core.resources.IProject">
+        <and>
+          <test
+              property="org.eclipse.wst.common.project.facet.core.projectFacet"
+              value="com.google.cloud.tools.eclipse.appengine.facets.flex.jar" />
+          <test
+              property="org.eclipse.core.resources.projectNature"
+              value="org.eclipse.m2e.core.maven2Nature" />
+        </and>
+      </adapt>
+    </definition>
+  </extension>
   <!-- end App Engine flex JAR facet -->
 
-  <extension point="org.eclipse.core.contenttype.contentTypes">
-    <content-type id="yaml"
-        name="YAML"
-        file-extensions="yaml,yml"
-        base-type="org.eclipse.core.runtime.text" />
-  </extension>
   <extension
         point="org.eclipse.wst.common.project.facet.core.detectors">
      <detector
            class="com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardJre7ProjectFacetDetector">
      </detector>
+  </extension>
+  
+  <!-- 
+    cannot use com.google.cloud.tools.eclipse.appengine.isStandardProject for the trigger
+    https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/3089
+  -->
+  <extension
+        point="org.eclipse.ui.navigator.navigatorContent">
+     <navigatorContent
+           activeByDefault="true"
+           appearsBefore="org.eclipse.jst.jee.ui.web"
+           contentProvider="com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.AppEngineContentProvider"
+           icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/obj16/appengine.png"
+           id="com.google.cloud.tools.eclipse.appengine.navigator"
+           labelProvider="com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.AppEngineLabelProvider"
+           name="%appengineNavigatorContentProvider"
+           priority="high">
+        <triggerPoints>
+           <and>
+              <instanceof
+                    value="org.eclipse.core.resources.IProject">
+              </instanceof>
+              <or>
+                 <test
+                       property="org.eclipse.wst.common.project.facet.core.projectFacet"
+                       value="com.google.cloud.tools.eclipse.appengine.facets.standard">
+                 </test>
+                 <test
+                       property="org.eclipse.wst.common.project.facet.core.projectFacet"
+                       value="com.google.cloud.tools.eclipse.appengine.facets.flex">
+                 </test>
+                 <test
+                       property="org.eclipse.wst.common.project.facet.core.projectFacet"
+                       value="com.google.cloud.tools.eclipse.appengine.facets.flex.jar">
+                 </test>
+              </or>
+           </and>
+        </triggerPoints>
+        <possibleChildren>
+           <instanceof
+                 value="org.eclipse.core.resources.IProject">
+           </instanceof>
+        </possibleChildren>
+        <actionProvider
+              class="com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.AppEngineActionProvider"
+              id="com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.actions">
+           <enablement>
+              <or>
+                 <instanceof
+                       value="com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineResourceElement">
+                 </instanceof>
+                 <instanceof
+                       value="com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineProjectElement">
+                 </instanceof>
+              </or>
+           </enablement>
+        </actionProvider>
+     </navigatorContent>
+  </extension>
+  <extension
+        point="org.eclipse.ui.navigator.viewer">
+     <viewerContentBinding
+           viewerId="org.eclipse.ui.navigator.ProjectExplorer">
+        <includes>
+           <contentExtension pattern="com.google.cloud.tools.eclipse.appengine.navigator"/>
+        </includes>
+     </viewerContentBinding>
   </extension>
 </plugin>

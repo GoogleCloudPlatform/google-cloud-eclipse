@@ -21,6 +21,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.test.util.http.TestHttpServer;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Rule;
@@ -40,19 +41,24 @@ public class HttpUtilWithServerTest {
     testParameters.put("exception_info", LONG_PARAMETER);
     testParameters.put("product", "CT4E");
   }
-
+  
   @Test
-  public void testSendPostMultipart() throws IOException {
-    assertEquals(200, HttpUtil.sendPostMultipart(server.getAddress(), testParameters));
-    assertTrue(server.getRequestHeaders().get("Content-Type")
-        .startsWith("multipart/form-data; boundary="));
-
-    verifyPostRequest();
+  public void testSendPostWithJsonBody() throws IOException {
+    String json = "{\"firstName\": \"John\"}";
+    int responseCode = HttpUtil.sendPost(server.getAddress(), json, "application/json");
+    
+    assertEquals(HttpURLConnection.HTTP_OK, responseCode);
+    assertEquals("POST", server.getRequestMethod());
+    assertEquals("application/json", server.getRequestHeaders().get("Content-Type"));
+    assertTrue(server.getRequestHeaders().get("User-Agent")
+        .startsWith("gcloud-eclipse-tools/"));
+    assertEquals(json, server.getBody());
   }
 
   @Test
   public void testSendPost() throws IOException {
-    assertEquals(200, HttpUtil.sendPost(server.getAddress(), testParameters));
+    assertEquals(HttpURLConnection.HTTP_OK,
+        HttpUtil.sendPost(server.getAddress(), testParameters));
     assertEquals("application/x-www-form-urlencoded",
         server.getRequestHeaders().get("Content-Type"));
 

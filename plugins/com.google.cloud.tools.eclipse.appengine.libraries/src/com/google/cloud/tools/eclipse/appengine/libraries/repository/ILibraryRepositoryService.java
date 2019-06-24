@@ -47,11 +47,4 @@ public interface ILibraryRepositoryService {
    */
   IPath resolveSourceArtifact(LibraryFile libraryFile, String versionHint, IProgressMonitor monitor)
       throws CoreException;
-
-  /**
-   * Checks if an artifact described by <code>libraryFile</code> is available. Throws a
-   * {@link CoreException} if the artifact is not available.
-   */
-  void makeArtifactAvailable(LibraryFile libraryFile, IProgressMonitor monitor)
-      throws CoreException;
 }

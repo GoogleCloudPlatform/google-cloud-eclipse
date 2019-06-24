@@ -25,13 +25,13 @@ public class MenuContributionInitializer implements IStartup {
 
   @Override
   public void earlyStartup() {
-    final IWorkbench workbench = PlatformUI.getWorkbench();
-    workbench.getDisplay().asyncExec(new Runnable() {
-      @Override
-      public void run() {
+    updateLoginCommand();
+  }
+
+  static void updateLoginCommand() {
+    IWorkbench workbench = PlatformUI.getWorkbench();
+    workbench.getDisplay().asyncExec(() ->
         workbench.getService(ICommandService.class).refreshElements(
-            "com.google.cloud.tools.eclipse.login.commands.loginCommand", null); //$NON-NLS-1$
-      }
-    });
+            "com.google.cloud.tools.eclipse.login.commands.loginCommand", null)); //$NON-NLS-1$
   }
 }

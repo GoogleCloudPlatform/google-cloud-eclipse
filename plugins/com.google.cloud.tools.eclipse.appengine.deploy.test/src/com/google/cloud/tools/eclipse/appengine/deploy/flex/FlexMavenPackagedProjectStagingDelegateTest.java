@@ -42,7 +42,7 @@ import org.junit.Test;
 
 public class FlexMavenPackagedProjectStagingDelegateTest {
 
-  @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacetVersions(
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacets(
       JavaFacet.VERSION_1_7);
 
   @Test

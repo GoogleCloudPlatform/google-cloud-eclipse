@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -37,6 +38,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
@@ -55,7 +57,7 @@ public class LibrarySelectorGroup implements ISelectionProvider {
   private final Collection<Library> explicitSelectedLibraries = new HashSet<>();
 
   private final Map<Library, Button> libraryButtons = new LinkedHashMap<>();
-  private final ListenerList/* <ISelectedChangeListener> */ listeners = new ListenerList/* <> */();
+  private final ListenerList<ISelectionChangedListener> listeners = new ListenerList<>();
 
   public LibrarySelectorGroup(Composite parentContainer, String groupName, String groupLabel) {
     this(parentContainer, groupName, groupLabel, true); // $NON-NLS-1$
@@ -83,20 +85,36 @@ public class LibrarySelectorGroup implements ISelectionProvider {
   }
 
   private void createContents(Composite parentContainer, String groupLabel) {
-    Group apiGroup = new Group(parentContainer, SWT.NONE);
+    ScrolledComposite scrolledComposite = new ScrolledComposite(parentContainer, SWT.V_SCROLL);
+
+    Group apiGroup = new Group(scrolledComposite, SWT.NONE);
     apiGroup.setText(groupLabel);
 
     for (Library library : availableLibraries.values()) {
       Button libraryButton = new Button(apiGroup, SWT.CHECK);
       libraryButton.setText(getLibraryName(library));
-      if (library.getToolTip() != null) {
-        libraryButton.setToolTipText(library.getToolTip());
+      String toolTip = library.getToolTip();
+      if (toolTip != null) {
+        String stage = library.getLaunchStage();
+        if (!"GA".equals(stage)) { //$NON-NLS-1
+          toolTip += " (" + stage + ")";
+        }
+        libraryButton.setToolTipText(toolTip);
       }
       libraryButton.setData(library);
       libraryButton.addSelectionListener(new ManualSelectionTracker());
       libraryButtons.put(library, libraryButton);
     }
-    GridLayoutFactory.fillDefaults().generateLayout(apiGroup);
+    GridLayoutFactory.swtDefaults().generateLayout(apiGroup);
+    apiGroup.pack();
+
+    scrolledComposite.setContent(apiGroup);
+    scrolledComposite.setMinSize(apiGroup.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+    scrolledComposite.setShowFocusedControl(true);
+    scrolledComposite.setExpandHorizontal(true);
+
+    GridDataFactory.fillDefaults().grab(true, true).applyTo(scrolledComposite);
+    GridLayoutFactory.fillDefaults().generateLayout(scrolledComposite);
   }
 
   /**

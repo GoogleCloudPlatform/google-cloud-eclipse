@@ -24,9 +24,10 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.tools.appengine.api.AppEngineException;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkResolver;
+import com.google.cloud.tools.appengine.AppEngineException;
+import com.google.cloud.tools.appengine.operations.CloudSdk;
+import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkNotFoundException;
+import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkResolver;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
@@ -36,7 +37,7 @@ import org.junit.Test;
 public class CloudSdkPreferenceResolverTest {
 
   @Test
-  public void testSetPreferenceInvalid() {
+  public void testSetPreferenceInvalid() throws CloudSdkNotFoundException {
     // A path that almost certainly does not contain the SDK
     File root = File.listRoots()[0];
     IPreferenceStore preferences = mock(IPreferenceStore.class);
@@ -45,7 +46,7 @@ public class CloudSdkPreferenceResolverTest {
     CloudSdkPreferenceResolver resolver = new CloudSdkPreferenceResolver(preferences);
     CloudSdk sdk = new CloudSdk.Builder()
         .resolvers(Collections.singletonList((CloudSdkResolver) resolver)).build();
-    assertEquals("SDK should be found at invalid location", root.toPath(), sdk.getSdkPath());
+    assertEquals("SDK should be found at invalid location", root.toPath(), sdk.getPath());
     try {
       sdk.validateCloudSdk();
       fail("root directory should not validate as a valid location");
@@ -57,7 +58,8 @@ public class CloudSdkPreferenceResolverTest {
   /** Verify that the preference resolver is found by default. */
   @Test
   public void testPreferenceResolverFound() {
-    List<CloudSdkResolver> resolvers = new CloudSdk.Builder().getResolvers();
+    CloudSdk.Builder builder = new CloudSdk.Builder();
+    List<CloudSdkResolver> resolvers = builder.getResolvers();
     int found = 0;
     for (CloudSdkResolver resolver : resolvers) {
       // Can't just compare classes as class likely loaded from

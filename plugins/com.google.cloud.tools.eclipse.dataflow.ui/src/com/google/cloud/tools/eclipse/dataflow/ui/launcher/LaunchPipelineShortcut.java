@@ -165,7 +165,7 @@ public class LaunchPipelineShortcut implements ILaunchShortcut2 {
     return new ILaunchConfiguration[0];
   }
 
-  private LaunchableResource toLaunchableResource(IResource resource) {
+  private static LaunchableResource toLaunchableResource(IResource resource) {
     if (resource == null) {
       return null;
     }

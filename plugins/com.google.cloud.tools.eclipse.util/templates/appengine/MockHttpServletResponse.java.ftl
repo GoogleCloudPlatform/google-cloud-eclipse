@@ -3,8 +3,8 @@
 </#if>import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Collection;
-import java.util.Locale;
+<#if servletVersion != "2.5">import java.util.Collection;
+</#if>import java.util.Locale;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletResponse;
  * Feel free to change this class or replace it using other ways for testing
  * {@link HttpServlet}s, e.g. Spring MVC Test or Mockito to suit your needs.
  */
-public class MockHttpServletResponse implements HttpServletResponse {
+class MockHttpServletResponse implements HttpServletResponse {
 
   private String contentType;
   private String encoding;
@@ -44,9 +44,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
   public StringWriter getWriterContent() {
     return writerContent;
   }
-  
+
   // anything below is the default generated implementation
-  
+
   @Override
   public void flushBuffer() throws IOException {
   }
@@ -85,7 +85,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
   }
 
   @Override
-  public void setBufferSize(int arg0) {
+  public void setBufferSize(int size) {
   }
 
   @Override
@@ -94,103 +94,111 @@ public class MockHttpServletResponse implements HttpServletResponse {
   }
 
   @Override
-  public void setContentLength(int arg0) {
+  public void setContentLength(int length) {
   }
 
   @Override
-  public void setLocale(Locale arg0) {
+  public void setLocale(Locale locale) {
   }
 
   @Override
-  public void addCookie(Cookie arg0) {
+  public void addCookie(Cookie cookie) {
   }
 
   @Override
-  public void addDateHeader(String arg0, long arg1) {
+  public void addDateHeader(String name, long date) {
   }
 
   @Override
-  public void addHeader(String arg0, String arg1) {
+  public void addHeader(String name, String value) {
   }
 
   @Override
-  public void addIntHeader(String arg0, int arg1) {
+  public void addIntHeader(String name, int value) {
   }
 
   @Override
-  public boolean containsHeader(String arg0) {
+  public boolean containsHeader(String name) {
     return false;
   }
 
   @Override
-  public String encodeRedirectURL(String arg0) {
+  public String encodeRedirectURL(String url) {
+    return null;
+  }
+
+  @Deprecated
+  @Override
+  public String encodeRedirectUrl(String url) {
     return null;
   }
 
   @Override
-  public String encodeRedirectUrl(String arg0) {
+  public String encodeURL(String url) {
+    return null;
+  }
+
+  @Deprecated
+  @Override
+  public String encodeUrl(String url) {
     return null;
   }
 
   @Override
-  public String encodeURL(String arg0) {
-    return null;
+  public void sendError(int statusCode) throws IOException {
   }
 
   @Override
-  public String encodeUrl(String arg0) {
-    return null;
+  public void sendError(int statusCode, String message) throws IOException {
   }
 
   @Override
-  public void sendError(int arg0) throws IOException {
+  public void sendRedirect(String url) throws IOException {
   }
 
   @Override
-  public void sendError(int arg0, String arg1) throws IOException {
+  public void setDateHeader(String name, long date) {
   }
 
   @Override
-  public void sendRedirect(String arg0) throws IOException {
+  public void setHeader(String name, String value) {
   }
 
   @Override
-  public void setDateHeader(String arg0, long arg1) {
+  public void setIntHeader(String name, int value) {
   }
 
   @Override
-  public void setHeader(String arg0, String arg1) {
+  public void setStatus(int statusCode) {
+  }
+
+  @Deprecated
+  @Override
+  public void setStatus(int statusCode, String message) {
+  }
+
+<#if servletVersion != "2.5">  // Servlet API 3.0 and 3.1 methods
+  @Override
+  public void setContentLengthLong(long length) {
   }
 
   @Override
-  public void setIntHeader(String arg0, int arg1) {
-  }
-
-  @Override
-  public void setStatus(int arg0) {
-  }
-
-  @Override
-  public void setStatus(int arg0, String arg1) {
-  }
-  
-  // Servlet API 3.0 and 3.1 methods
-  public void setContentLengthLong(long length) {  
-  }
-
   public int getStatus() {
     return 0;
   }
-  
+
+  @Override
   public String getHeader(String name) {
     return null;
   }
 
+  @Override
   public Collection<String> getHeaders(String name) {
     return null;
   }
-  
+
+  @Override
   public Collection<String> getHeaderNames() {
     return null;
   }
-}
+</#if>}

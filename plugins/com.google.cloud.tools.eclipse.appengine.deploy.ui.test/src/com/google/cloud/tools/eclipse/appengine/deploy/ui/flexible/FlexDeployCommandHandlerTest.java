@@ -39,7 +39,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
-import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.junit.Rule;
 import org.junit.Test;
@@ -48,14 +47,13 @@ import org.osgi.service.prefs.BackingStoreException;
 public class FlexDeployCommandHandlerTest {
 
   @Rule public TestProjectCreator javaProjectCreator = new TestProjectCreator()
-      .withFacetVersions(JavaFacet.VERSION_1_8);
+      .withFacets(JavaFacet.VERSION_1_8);
 
   @Rule public TestProjectCreator flexJarProjectCreator = new TestProjectCreator()
-      .withFacetVersions(JavaFacet.VERSION_1_8, AppEngineFlexJarFacet.FACET_VERSION);
+      .withFacets(JavaFacet.VERSION_1_8, AppEngineFlexJarFacet.FACET_VERSION);
 
   @Rule public TestProjectCreator flexWarProjectCreator = new TestProjectCreator()
-      .withFacetVersions(
-          JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31, AppEngineFlexWarFacet.FACET_VERSION);
+      .withFacets(JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31, AppEngineFlexWarFacet.FACET_VERSION);
 
   @Test
   public void testGetStagingDelegate_exceptionIfAppYamlDoesNotExist() {
@@ -101,12 +99,7 @@ public class FlexDeployCommandHandlerTest {
   private static boolean flexDeployMenuVisible(IProject project) {
     SWTBotTreeItem selected = SwtBotProjectActions.selectProject(
         new SWTWorkbenchBot(), project.getName());
-    try {
-      selected.contextMenu("Deploy to App Engine Flexible...");
-      return true;
-    } catch (WidgetNotFoundException e) {
-      return false;
-    }
+    return selected.contextMenu().menuItems().contains("Deploy to App Engine Flexible...");
   }
 
   @Test

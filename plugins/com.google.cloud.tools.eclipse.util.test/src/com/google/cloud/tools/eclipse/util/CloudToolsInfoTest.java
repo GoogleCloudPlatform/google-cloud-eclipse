@@ -34,7 +34,7 @@ public class CloudToolsInfoTest {
 
   @Test
   public void testGetToolsVersion_featureId() {
-    Assert.assertEquals("com.google.cloud.tools.eclipse.suite.e45.feature",
+    Assert.assertEquals("com.google.cloud.tools.eclipse.suite.feature",
         CloudToolsInfo.CLOUD_TOOLS_FOR_ECLIPSE_FEATURE_ID);
   }
 

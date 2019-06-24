@@ -16,9 +16,9 @@
 
 package com.google.cloud.tools.eclipse.sdk;
 
-import com.google.cloud.tools.appengine.cloudsdk.JsonParseException;
-import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
-import com.google.cloud.tools.appengine.cloudsdk.serialization.GcloudStructuredLog;
+import com.google.cloud.tools.appengine.operations.cloudsdk.JsonParseException;
+import com.google.cloud.tools.appengine.operations.cloudsdk.process.ProcessOutputLineListener;
+import com.google.cloud.tools.appengine.operations.cloudsdk.serialization.GcloudStructuredLog;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -36,12 +36,14 @@ public class GcloudStructuredLogErrorMessageCollector implements ProcessOutputLi
   public void onOutputLine(String line) {
     try {
       GcloudStructuredLog log = GcloudStructuredLog.parse(line);
-      if (log != null && log.getVerbosity() != null
-          && log.getVerbosity().toUpperCase(Locale.US).equals("ERROR")) {
-        if (log.getMessage() == null || log.getMessage().trim().isEmpty()) {
-          errorMessages.add("no error message provided");
-        } else {
-          errorMessages.add(log.getMessage());
+      if (log != null) {
+        String verbosity = log.getVerbosity();
+        if (verbosity != null && verbosity.toUpperCase(Locale.US).equals("ERROR")) {
+          if (log.getMessage() == null || log.getMessage().trim().isEmpty()) {
+            errorMessages.add("no error message provided");
+          } else {
+            errorMessages.add(log.getMessage());
+          }
         }
       }
     } catch (JsonParseException e) {

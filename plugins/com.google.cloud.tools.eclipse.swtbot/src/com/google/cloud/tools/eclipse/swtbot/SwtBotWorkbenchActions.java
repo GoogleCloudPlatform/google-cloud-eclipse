@@ -16,8 +16,12 @@
 
 package com.google.cloud.tools.eclipse.swtbot;
 
+import static org.junit.Assert.assertNotNull;
+
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
@@ -29,10 +33,12 @@ import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.finders.UIThreadRunnable;
+import org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory;
 import org.eclipse.swtbot.swt.finder.results.VoidResult;
 import org.eclipse.swtbot.swt.finder.waits.ICondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.hamcrest.Matcher;
 
@@ -40,6 +46,7 @@ import org.hamcrest.Matcher;
  * SWTBot utility methods that perform general workbench actions.
  */
 public final class SwtBotWorkbenchActions {
+  private static final Logger logger = Logger.getLogger(SwtBotWorkbenchActions.class.getName());
 
   private static final int OPEN_PREFERENCES_DIALOG_DELAY_MS = 1000;
 
@@ -49,20 +56,17 @@ public final class SwtBotWorkbenchActions {
    * Note: There are some platform-specific intricacies that this abstracts
    * away.
    */
-  public static void openPreferencesDialog(final SWTWorkbenchBot bot) {
-    SwtBotTestingUtilities.performAndWaitForWindowChange(bot, new Runnable() {
-      @Override
-      public void run() {
-        if (SwtBotTestingUtilities.isMac()) {
-          // TODO: Mac has "Preferences..." under the "Eclipse" menu item.
-          // However,
-          // the "Eclipse" menu item is a system menu item (like the Apple menu
-          // item), and can't be reached via SWTBot.
-          openPreferencesDialogViaEvents(bot);
-        } else {
-          SWTBotMenu windowMenu = bot.menu("Window");
-          windowMenu.menu("Preferences").click();
-        }
+  public static void openPreferencesDialog(SWTWorkbenchBot bot) {
+    SwtBotTestingUtilities.performAndWaitForWindowChange(bot, () -> {
+      if (SwtBotTestingUtilities.isMac()) {
+        // TODO: Mac has "Preferences..." under the "Eclipse" menu item.
+        // However,
+        // the "Eclipse" menu item is a system menu item (like the Apple menu
+        // item), and can't be reached via SWTBot.
+        openPreferencesDialogViaEvents(bot);
+      } else {
+        SWTBotMenu windowMenu = bot.menu("Window");
+        windowMenu.menu("Preferences").click();
       }
     });
   }
@@ -70,20 +74,15 @@ public final class SwtBotWorkbenchActions {
   /**
    * Wait until all background tasks are complete.
    */
-  public static void waitForProjects(final SWTBot bot, IProject... projects) {
-    Runnable delayTactic = new Runnable() {
-      @Override
-      public void run() {
-        bot.sleep(300);
-      }
-    };
+  public static void waitForProjects(SWTBot bot, IProject... projects) {
+    Runnable delayTactic = () -> bot.sleep(300);
     ProjectUtils.waitForProjects(delayTactic, projects);
   }
 
   /**
    * Wait for the main shell progress bar to get removed.
    */
-  public static void waitForMainShellProgressBarToFinish(final SWTWorkbenchBot bot) {
+  public static void waitForMainShellProgressBarToFinish(SWTWorkbenchBot bot) {
     // wait for progress bar to disappear
     bot.waitUntil(new ICondition() {
       @Override
@@ -95,8 +94,7 @@ public final class SwtBotWorkbenchActions {
           // Find the progress bar in the main shell and wait for it to be removed
           @SuppressWarnings("unchecked")
           Matcher<ProgressBar> matcher =
-              org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory
-                  .allOf(org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType(ProgressBar.class));
+              WidgetMatcherFactory.allOf(WidgetMatcherFactory.widgetOfType(ProgressBar.class));
           List<? extends ProgressBar> bars = bot.widgets(matcher);
           // keep polling until there are no progress bars found
           return bars == null || bars.isEmpty();
@@ -157,9 +155,24 @@ public final class SwtBotWorkbenchActions {
     bot.sleep(OPEN_PREFERENCES_DIALOG_DELAY_MS);
   }
 
-  /**
-   * Close the Welcome/Intro view, if found. Usually required on the first launch.
-   */
+  /** Open the view with the given ID. */
+  public static SWTBotView openViewById(SWTWorkbenchBot bot, String viewId) {
+    UIThreadRunnable.syncExec(
+        bot.getDisplay(),
+        () -> {
+          IWorkbenchWindow activeWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+          assertNotNull(activeWindow);
+          try {
+            activeWindow.getActivePage().showView(viewId);
+          } catch (PartInitException ex) {
+            // viewById() will fail in calling thread
+            logger.log(Level.SEVERE, "Unable to open view " + viewId, ex);
+          }
+        });
+    return bot.viewById(viewId);
+  }
+  
+  /** Close the Welcome/Intro view, if found. Usually required on the first launch. */
   public static void closeWelcome(SWTWorkbenchBot bot) {
     SWTBotView activeView = bot.activeView();
     if (activeView != null && activeView.getTitle().equals("Welcome")) {
@@ -192,7 +205,7 @@ public final class SwtBotWorkbenchActions {
    * Reimplementation of {@link SWTWorkbenchBot#closeAllShells()} that does not close the internal
    * Eclipse Workbench limbo shell thus avoiding Eclipse bug 511729.
    */
-  private static void closeAllShells(final SWTWorkbenchBot bot, final boolean forceKill) {
+  private static void closeAllShells(SWTWorkbenchBot bot, boolean forceKill) {
     // avoid bot.closeAllShells() due to bug 511729
     UIThreadRunnable.syncExec(bot.getDisplay(), new VoidResult() {
       @Override
@@ -219,7 +232,6 @@ public final class SwtBotWorkbenchActions {
       }
     });
   }
-
 
   private SwtBotWorkbenchActions() {}
 

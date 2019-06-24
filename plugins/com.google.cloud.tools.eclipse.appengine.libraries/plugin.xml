@@ -9,16 +9,16 @@
              
     <library 
           id="appengine-api"
-          group="appengine-api"
+          group="appengine"
           name="App Engine API"
           tooltip="%appengine.api.tooltip"
           siteUri="https://cloud.google.com/appengine/docs/java/" >
       <libraryFile javadocUri="https://cloud.google.com/appengine/docs/java/javadoc/"
-          export="false">
+          export="true">
         <mavenCoordinates
               artifactId="appengine-api-1.0-sdk"
               groupId="com.google.appengine" 
-              version="1.9.59" />
+              version="1.9.74" />
         <exclusionFilter pattern="com/google/appengine/repackaged/**" />
         <exclusionFilter pattern="com/google/appengine/labs/repackaged/**" />
         <inclusionFilter pattern="com/google/apphosting/api/**" />
@@ -32,12 +32,13 @@
           tooltip="%endpoints.tooltip"
           dependencies="include"
           siteUri="https://cloud.google.com/endpoints/docs/frameworks/java/about-cloud-endpoints-frameworks" >
+      <libraryDependency id="appengine-api" />
       <libraryFile export="true" 
             javadocUri="https://cloud.google.com/endpoints/docs/frameworks/java/javadoc/">
         <mavenCoordinates
               artifactId="endpoints-framework"
               groupId="com.google.endpoints" 
-              version="2.0.9"/>
+              version="2.2.1"/>
         <exclusionFilter pattern="com/google/appengine/repackaged/**" />
       </libraryFile>
     </library>
@@ -47,15 +48,34 @@
           group="appengine"
           name="Objectify"
           tooltip="%objectify.tooltip"
+          javaVersion="1.8"
           dependencies="include"
           siteUri="https://github.com/objectify/objectify/wiki" >
       <libraryFile
           export="true"
-          javadocUri="https://www.javadoc.io/doc/com.googlecode.objectify/objectify/5.1.21">
+          javadocUri="https://www.javadoc.io/doc/com.googlecode.objectify/objectify/6.0.3">
         <mavenCoordinates
               artifactId="objectify"
               groupId="com.googlecode.objectify"
-              version="5.1.21" />
+              version="6.0.4" />
+      </libraryFile>
+    </library>
+    
+    <library
+          id="objectify6"
+          group="non-appengine-standard"
+          name="Objectify"
+          tooltip="%objectify.tooltip"
+          javaVersion="1.8"
+          dependencies="include"
+          siteUri="https://github.com/objectify/objectify/wiki" >
+      <libraryFile
+          export="true"
+          javadocUri="https://www.javadoc.io/doc/com.googlecode.objectify/objectify/6.0.3">
+        <mavenCoordinates
+              artifactId="objectify"
+              groupId="com.googlecode.objectify"
+              version="6.0.4" />
       </libraryFile>
     </library>
 
@@ -66,6 +86,7 @@
           siteUri="http://www.oracle.com/technetwork/java/javaee/servlet/index.html"
           export="false">
       <libraryFile
+            pinned="true"
             javadocUri="https://docs.oracle.com/cd/E17802_01/products/products/servlet/2.5/docs/servlet-2_5-mr2/">
         <mavenCoordinates
               groupId="javax.servlet"
@@ -81,6 +102,7 @@
           siteUri="http://www.oracle.com/technetwork/java/javaee/jsp/index.html"
           export="false">
       <libraryFile
+            pinned="true"
             javadocUri="http://docs.oracle.com/cd/E17802_01/products/products/jsp/2.1/docs/jsp-2_1-pfd2/">
         <mavenCoordinates
               groupId="javax.servlet.jsp"

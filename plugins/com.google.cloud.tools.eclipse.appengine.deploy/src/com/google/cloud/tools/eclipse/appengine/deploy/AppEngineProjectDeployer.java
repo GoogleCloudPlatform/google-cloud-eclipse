@@ -16,10 +16,10 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
-import com.google.cloud.tools.appengine.api.AppEngineException;
-import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDeployment;
+import com.google.cloud.tools.appengine.AppEngineException;
+import com.google.cloud.tools.appengine.operations.Deployment;
+import com.google.cloud.tools.appengine.configuration.DeployConfiguration;
+import com.google.cloud.tools.appengine.operations.CloudSdk;
 import com.google.cloud.tools.eclipse.appengine.deploy.util.CloudSdkProcessWrapper;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -52,7 +52,7 @@ public class AppEngineProjectDeployer {
 
   /**
    * @param optionalConfigurationFilesDirectory if not {@code null}, searches optional configuration
-   * files (such as {@code cron.yaml}) in this directory and deploys them together
+   *     files (such as {@code cron.yaml}) in this directory and deploys them together
    */
   public IStatus deploy(IPath stagingDirectory, Path credentialFile,
       DeployPreferences deployPreferences, IPath optionalConfigurationFilesDirectory,
@@ -61,20 +61,21 @@ public class AppEngineProjectDeployer {
       throw new OperationCanceledException();
     }
 
-    cloudSdkProcessWrapper.setUpDeployCloudSdk(credentialFile, stdoutOutputStream);
-    CloudSdk cloudSdk = cloudSdkProcessWrapper.getCloudSdk();
-
     SubMonitor progress = SubMonitor.convert(monitor, 1);
     progress.setTaskName(Messages.getString("task.name.deploy.project")); //$NON-NLS-1$
     try {
-      List<File> deployables =
+      List<File> files =
           computeDeployables(stagingDirectory, optionalConfigurationFilesDirectory);
-
-      DefaultDeployConfiguration configuration =
-          DeployPreferencesConverter.toDeployConfiguration(deployPreferences);
-      configuration.setDeployables(deployables);
-      CloudSdkAppEngineDeployment deployment = new CloudSdkAppEngineDeployment(cloudSdk);
+      List<Path> deployables = new ArrayList<>();
+      for (File file : files) {
+        deployables.add(file.toPath());
+      }
+      
+      DeployConfiguration configuration =
+          DeployPreferencesConverter.toDeployConfiguration(deployPreferences, deployables);
       try { 
+        Deployment deployment =
+            cloudSdkProcessWrapper.getAppEngineDeployment(credentialFile, stdoutOutputStream);
         deployment.deploy(configuration);
       } catch (AppEngineException ex) {
         return StatusUtil.error(this, "Error deploying project: " + ex.getMessage(), ex);

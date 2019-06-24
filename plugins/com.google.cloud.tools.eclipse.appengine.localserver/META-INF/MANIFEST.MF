@@ -1,16 +1,18 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Cloud Tools for Eclipse App Engine Local Server
+Bundle-Name: %pluginName
+Automatic-Module-Name: com.google.cloud.tools.eclipse.appengine.localserver
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.localserver;singleton:=true
 Bundle-Version: 0.1.0.qualifier
-Bundle-Vendor: Google Inc.
-Bundle-Localization: plugin
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Vendor: %providerName
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.google.cloud.tools.eclipse.appengine.localserver.Activator
 Bundle-ActivationPolicy: lazy
-Require-Bundle: com.google.cloud.tools.appengine;bundle-version="0.4.1",
+Bundle-Localization: plugin
+Require-Bundle: com.google.cloud.tools.appengine;bundle-version="0.7.6",
  com.google.cloud.tools.eclipse.appengine.ui;bundle-version="0.1.0",
- com.google.guava;bundle-version="[20.0.0,21.0.0)",
+ com.google.guava;bundle-version="[27.0.0,28.0.0)",
+ javax.annotation,
  javax.servlet;bundle-version="2.5.0",
  javax.servlet.jsp;bundle-version="2.1.0",
  org.eclipse.wst.server.core;bundle-version="1.7.0",
@@ -34,11 +36,11 @@ Require-Bundle: com.google.cloud.tools.appengine;bundle-version="0.4.1",
  org.eclipse.ui.console;bundle-version="3.6.100",
  org.eclipse.ui.ide;bundle-version="3.11.0"
 Export-Package: com.google.cloud.tools.eclipse.appengine.localserver.server
-Import-Package: com.google.api.client.auth.oauth2;version="[1.23.0,1.24.0)",
- com.google.api.client.googleapis.services;version="[1.23.0,1.24.0)",
- com.google.api.client.util;version="[1.23.0,1.24.0)",
- com.google.api.services.iam.v1;version="[1.23.0,1.24.0)",
- com.google.api.services.iam.v1.model;version="[1.23.0,1.24.0)",
+Import-Package: com.google.api.client.auth.oauth2;version="[1.25.0,1.26.0)",
+ com.google.api.client.googleapis.services;version="[1.25.0,1.26.0)",
+ com.google.api.client.util;version="[1.25.0,1.26.0)",
+ com.google.api.services.iam.v1;version="[1.25.0,1.26.0)",
+ com.google.api.services.iam.v1.model;version="[1.25.0,1.26.0)",
  com.google.cloud.tools.eclipse.appengine.facets,
  com.google.cloud.tools.eclipse.appengine.libraries,
  com.google.cloud.tools.eclipse.appengine.libraries.model,
@@ -52,6 +54,7 @@ Import-Package: com.google.api.client.auth.oauth2;version="[1.23.0,1.24.0)",
  com.google.cloud.tools.eclipse.projectselector,
  com.google.cloud.tools.eclipse.projectselector.model,
  com.google.cloud.tools.eclipse.sdk,
+ com.google.cloud.tools.eclipse.sdk.internal,
  com.google.cloud.tools.eclipse.sdk.ui.preferences,
  com.google.cloud.tools.eclipse.ui.util,
  com.google.cloud.tools.eclipse.ui.util.console,
@@ -59,8 +62,12 @@ Import-Package: com.google.api.client.auth.oauth2;version="[1.23.0,1.24.0)",
  com.google.cloud.tools.eclipse.ui.util.images,
  com.google.cloud.tools.eclipse.usagetracker,
  com.google.cloud.tools.eclipse.util,
+ com.google.cloud.tools.eclipse.util.jobs,
  com.google.cloud.tools.eclipse.util.service,
  com.google.cloud.tools.eclipse.util.status,
+ org.eclipse.compare,
+ org.eclipse.compare.structuremergeviewer,
+ org.eclipse.core.filesystem,
  org.eclipse.core.variables,
  org.eclipse.e4.core.contexts,
  org.eclipse.e4.core.di,
@@ -68,4 +75,5 @@ Import-Package: com.google.api.client.auth.oauth2;version="[1.23.0,1.24.0)",
  org.eclipse.jdt.debug.ui.launchConfigurations,
  org.eclipse.jdt.internal.ui.viewsupport,
  org.eclipse.jst.j2ee.web.project.facet,
- org.eclipse.swt
+ org.eclipse.swt,
+ org.eclipse.team.ui.synchronize

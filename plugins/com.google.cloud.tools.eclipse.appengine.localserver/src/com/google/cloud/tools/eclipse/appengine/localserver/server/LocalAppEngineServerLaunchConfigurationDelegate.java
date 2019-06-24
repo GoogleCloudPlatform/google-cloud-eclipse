@@ -16,16 +16,21 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
-import com.google.cloud.tools.appengine.api.devserver.DefaultRunConfiguration;
-import com.google.cloud.tools.appengine.api.devserver.RunConfiguration;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
+import com.google.cloud.tools.appengine.configuration.RunConfiguration;
+import com.google.cloud.tools.appengine.operations.CloudSdk;
+import com.google.cloud.tools.appengine.operations.cloudsdk.AppEngineJavaComponentsNotInstalledException;
+import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkNotFoundException;
+import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkOutOfDateException;
+import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkVersionFileException;
+import com.google.cloud.tools.appengine.operations.cloudsdk.InvalidJavaSdkException;
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.appengine.localserver.PreferencesInitializer;
+import com.google.cloud.tools.eclipse.appengine.localserver.ui.DatastoreIndexesUpdatedStatusHandler;
 import com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsole;
 import com.google.cloud.tools.eclipse.appengine.localserver.ui.StaleResourcesStatusHandler;
+import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
+import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
@@ -34,8 +39,8 @@ import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.net.InetAddresses;
-import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Path;
@@ -96,6 +101,7 @@ import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
+import org.eclipse.ui.statushandlers.StatusManager;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerListener;
@@ -105,8 +111,6 @@ import org.eclipse.wst.server.core.ServerUtil;
 
 public class LocalAppEngineServerLaunchConfigurationDelegate
     extends AbstractJavaLaunchConfigurationDelegate {
-
-  static final boolean DEV_APPSERVER2 = false;
 
   private static final Logger logger =
       Logger.getLogger(LocalAppEngineServerLaunchConfigurationDelegate.class.getName());
@@ -120,27 +124,41 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     return value != null ? value : nullValue;
   }
 
-  private static void validateCloudSdk() throws CoreException  {
+  private static IStatus validateCloudSdk(IProgressMonitor monitor) {
+    // ensure we have a Cloud SDK; no-op if not configured to use managed sdk
+    IStatus status = CloudSdkManager.getInstance().installManagedSdk(null, monitor);
+    if (!status.isOK()) {
+      return status;
+    }
     try {
       CloudSdk cloudSdk = new CloudSdk.Builder().build();
       cloudSdk.validateCloudSdk();
-    } catch (CloudSdkNotFoundException ex) {
-      String detailMessage = Messages.getString("cloudsdk.not.configured"); //$NON-NLS-1$
-      Status status = new Status(IStatus.ERROR,
-          "com.google.cloud.tools.eclipse.appengine.localserver", detailMessage, ex); //$NON-NLS-1$
-      throw new CoreException(status);
-    } catch (CloudSdkOutOfDateException ex) {
-      String detailMessage = Messages.getString("cloudsdk.out.of.date"); //$NON-NLS-1$
-      Status status = new Status(IStatus.ERROR,
-          "com.google.cloud.tools.eclipse.appengine.deploy.ui", detailMessage); //$NON-NLS-1$
-      throw new CoreException(status);
+      cloudSdk.validateJdk();
+      cloudSdk.validateAppEngineJavaComponents();
+      return Status.OK_STATUS;
+    } catch (CloudSdkNotFoundException | InvalidJavaSdkException ex) {
+      return StatusUtil.error(
+          LocalAppEngineServerLaunchConfigurationDelegate.class,
+          Messages.getString("cloudsdk.not.configured"), // $NON-NLS-1$
+          ex);
+    } catch (CloudSdkOutOfDateException | CloudSdkVersionFileException ex) {
+      return StatusUtil.error(
+          LocalAppEngineServerLaunchConfigurationDelegate.class,
+          Messages.getString("cloudsdk.out.of.date"), // $NON-NLS-1$
+          ex);
+    } catch (AppEngineJavaComponentsNotInstalledException ex) {
+      return StatusUtil.error(
+          LocalAppEngineServerLaunchConfigurationDelegate.class,
+          Messages.getString("cloudsdk.no.app.engine.java.component"), // $NON-NLS-1$
+          ex);
     }
   }
 
   @Override
   public ILaunch getLaunch(ILaunchConfiguration configuration, String mode) throws CoreException {
     IServer server = ServerUtil.getServer(configuration);
-    DefaultRunConfiguration runConfig = generateServerRunConfiguration(configuration, server, mode);
+    List<Path> paths = new ArrayList<>();
+    RunConfiguration runConfig = generateServerRunConfiguration(configuration, server, mode, paths);
     ILaunch[] launches = getLaunchManager().getLaunches();
     checkConflictingLaunches(configuration.getType(), mode, runConfig, launches);
     return super.getLaunch(configuration, mode);
@@ -149,8 +167,15 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   @Override
   public boolean finalLaunchCheck(ILaunchConfiguration configuration, String mode,
       IProgressMonitor monitor) throws CoreException {
-    SubMonitor progress = SubMonitor.convert(monitor, 40);
-    if (!super.finalLaunchCheck(configuration, mode, progress.newChild(20))) {
+    SubMonitor progress = SubMonitor.convert(monitor, 50);
+    if (!super.finalLaunchCheck(configuration, mode, progress.newChild(10))) {
+      return false;
+    }
+    IStatus status = validateCloudSdk(progress.newChild(20));
+    if (!status.isOK()) {
+      // Throwing a CoreException will result in the ILaunch hanging around in
+      // an invalid state
+      StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.LOG);
       return false;
     }
 
@@ -180,7 +205,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
             monitor.setCanceled(true);
             return false;
           }
-          return true;
         }
       }
     }
@@ -207,7 +231,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
   @VisibleForTesting
   void checkConflictingLaunches(ILaunchConfigurationType launchConfigType, String mode,
-      DefaultRunConfiguration runConfig, ILaunch[] launches) throws CoreException {
+      RunConfiguration runConfig, ILaunch[] launches) throws CoreException {
 
     for (ILaunch launch : launches) {
       if (launch.isTerminated()
@@ -216,8 +240,9 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
         continue;
       }
       IServer otherServer = ServerUtil.getServer(launch.getLaunchConfiguration());
-      DefaultRunConfiguration otherRunConfig =
-          generateServerRunConfiguration(launch.getLaunchConfiguration(), otherServer, mode);
+      List<Path> paths = new ArrayList<>();
+      RunConfiguration otherRunConfig =
+          generateServerRunConfiguration(launch.getLaunchConfiguration(), otherServer, mode, paths);
       IStatus conflicts = checkConflicts(runConfig, otherRunConfig,
           new MultiStatus(Activator.PLUGIN_ID, 0,
               Messages.getString("conflicts.with.running.server", otherServer.getName()), //$NON-NLS-1$
@@ -232,73 +257,42 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
    * Create a CloudSdk RunConfiguration corresponding to the launch configuration and server
    * defaults. Details are pulled from {@link ILaunchConfiguration#getAttributes() launch
    * attributes} and {@link IServer server settings and attributes}.
+   * @param runnables 
    */
   @VisibleForTesting
-  DefaultRunConfiguration generateServerRunConfiguration(ILaunchConfiguration configuration,
-      IServer server, String mode) throws CoreException {
+  RunConfiguration generateServerRunConfiguration(ILaunchConfiguration configuration,
+      IServer server, String mode, List<Path> services) throws CoreException {
 
-    DefaultRunConfiguration devServerRunConfiguration = new DefaultRunConfiguration();
+    RunConfiguration.Builder builder = RunConfiguration.builder(services);
     // Iterate through our different configurable parameters
-    // TODO: storage-related paths, incl storage_path and the {blob,data,*search*,logs} paths
+    // TODO: storage-related paths, including storage_path and the {blob,data,*search*,logs} paths
 
     // TODO: allow setting host from launch config
     if (server.getHost() != null) {
-      devServerRunConfiguration.setHost(server.getHost());
+      builder.host(server.getHost());
     }
 
     int serverPort = getPortAttribute(LocalAppEngineServerBehaviour.SERVER_PORT_ATTRIBUTE_NAME,
         LocalAppEngineServerBehaviour.DEFAULT_SERVER_PORT, configuration, server);
     if (serverPort >= 0) {
-      devServerRunConfiguration.setPort(serverPort);
+      builder.port(serverPort);
     }
-
 
     // only restart server on on-disk changes detected when in RUN mode
-    devServerRunConfiguration.setAutomaticRestart(ILaunchManager.RUN_MODE.equals(mode));
+    builder.automaticRestart(ILaunchManager.RUN_MODE.equals(mode));
 
-    if (DEV_APPSERVER2) {
-      if (ILaunchManager.DEBUG_MODE.equals(mode)) {
-        // default to 1 instance to simplify debugging
-        devServerRunConfiguration.setMaxModuleInstances(1);
-      }
-
-      String adminHost = getAttribute(LocalAppEngineServerBehaviour.ADMIN_HOST_ATTRIBUTE_NAME,
-          LocalAppEngineServerBehaviour.DEFAULT_ADMIN_HOST, configuration, server);
-      if (!Strings.isNullOrEmpty(adminHost)) {
-        devServerRunConfiguration.setAdminHost(adminHost);
-      }
-
-      int adminPort = getPortAttribute(LocalAppEngineServerBehaviour.ADMIN_PORT_ATTRIBUTE_NAME,
-          -1, configuration, server);
-      if (adminPort >= 0) {
-        devServerRunConfiguration.setAdminPort(adminPort);
-      } else {
-        // adminPort = -1 perform failover if default port is busy
-        devServerRunConfiguration.setAdminPort(LocalAppEngineServerBehaviour.DEFAULT_ADMIN_PORT);
-        // adminHost == null is ok as that resolves to null == INADDR_ANY
-        InetAddress addr = resolveAddress(devServerRunConfiguration.getAdminHost());
-        if (org.eclipse.wst.server.core.util.SocketUtil.isPortInUse(addr,
-            devServerRunConfiguration.getAdminPort())) {
-          logger.log(Level.INFO, "default admin port " + devServerRunConfiguration.getAdminPort() //$NON-NLS-1$
-              + " in use. Picking an unused port."); //$NON-NLS-1$
-          devServerRunConfiguration.setAdminPort(0);
-        }
-      }
-    }
-
-    // TODO: apiPort?
     // vmArguments is exactly as supplied by the user in the dialog box
     String vmArgumentString = getVMArguments(configuration);
     List<String> vmArguments = Arrays.asList(DebugPlugin.parseArguments(vmArgumentString));
     if (!vmArguments.isEmpty()) {
-      devServerRunConfiguration.setJvmFlags(vmArguments);
+      builder.jvmFlags(vmArguments);
     }
     // programArguments is exactly as supplied by the user in the dialog box
     String programArgumentString = getProgramArguments(configuration);
     List<String> programArguments =
         Arrays.asList(DebugPlugin.parseArguments(programArgumentString));
     if (!programArguments.isEmpty()) {
-      devServerRunConfiguration.setAdditionalArguments(programArguments);
+      builder.additionalArguments(programArguments);
     }
 
     boolean environmentAppend =
@@ -318,27 +312,9 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       // expand any variable references
       expanded.put(entry.getKey(), variableEngine.performStringSubstitution(entry.getValue()));
     }
-    devServerRunConfiguration.setEnvironment(expanded);
+    builder.environment(expanded);
 
-    return devServerRunConfiguration;
-  }
-
-  /**
-   * Retrieve and resolve a string attribute. If not specified, returns {@code defaultValue}.
-   */
-  private static String getAttribute(String attributeName, String defaultValue,
-      ILaunchConfiguration configuration, IServer server) {
-    try {
-      if (configuration.hasAttribute(attributeName)) {
-        String result = configuration.getAttribute(attributeName, ""); //$NON-NLS-1$
-        if (result != null) {
-          return result;
-        }
-      }
-    } catch (CoreException ex) {
-      logger.log(Level.WARNING, "Unable to retrieve " + attributeName, ex); //$NON-NLS-1$
-    }
-    return server.getAttribute(attributeName, defaultValue);
+    return builder.build();
   }
 
   /**
@@ -398,12 +374,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
           Messages.getString("server.port", //$NON-NLS-1$
               ifNull(ours.getPort(), LocalAppEngineServerBehaviour.DEFAULT_SERVER_PORT))));
     }
-    if (equalPorts(ours.getApiPort(), theirs.getApiPort(), 0)) {
-      // ours.getAdminPort() will never be null with a 0 default
-      Preconditions.checkNotNull(ours.getApiPort());
-      status.add(StatusUtil.error(clazz, Messages.getString("api.port", ours.getAdminPort()))); //$NON-NLS-1$
-    }
-
     return status;
   }
 
@@ -425,10 +395,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   @Override
   public void launch(ILaunchConfiguration configuration, String mode, final ILaunch launch,
       IProgressMonitor monitor) throws CoreException {
-    AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_LOCAL_SERVER,
-        AnalyticsEvents.APP_ENGINE_LOCAL_SERVER_MODE, mode);
-
-    validateCloudSdk();
+    sendAnalyticsPing(mode);
 
     IServer server = ServerUtil.getServer(configuration);
     if (server == null) {
@@ -450,10 +417,10 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
     setDefaultSourceLocator(launch, configuration);
 
-    List<File> runnables = new ArrayList<>();
+    List<Path> runnables = new ArrayList<>();
     for (IModule module : modules) {
       IPath deployPath = serverBehaviour.getModuleDeployDirectory(module);
-      runnables.add(deployPath.toFile());
+      runnables.add(deployPath.toFile().toPath());
     }
 
     // configure the console for output
@@ -476,14 +443,9 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     launch.addDebugTarget(target);
     target.engage();
 
-    // todo: programArguments is currently ignored
-    if (!Strings.isNullOrEmpty(getProgramArguments(configuration))) {
-      logger.warning("App Engine Local Server currently ignores program arguments"); //$NON-NLS-1$
-    }
     try {
-      DefaultRunConfiguration devServerRunConfiguration =
-          generateServerRunConfiguration(configuration, server, mode);
-      devServerRunConfiguration.setServices(runnables);
+      RunConfiguration devServerRunConfiguration =
+          generateServerRunConfiguration(configuration, server, mode, runnables);
       if (ILaunchManager.DEBUG_MODE.equals(mode)) {
         int debugPort = getDebugPort();
         setupDebugTarget(devServerRunConfiguration, launch, debugPort, monitor);
@@ -498,7 +460,21 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     } catch (CoreException ex) {
       launch.terminate();
       throw ex;
+    } catch (CloudSdkNotFoundException ex) {
+      launch.terminate();
+      IStatus status = StatusUtil.error(this, ex.getMessage(), ex);
+      throw new CoreException(status);
     }
+  }
+
+  private void sendAnalyticsPing(String serverMode) {
+    String cloudSdkManagement = CloudSdkPreferences.isAutoManaging()
+        ? AnalyticsEvents.AUTOMATIC_CLOUD_SDK
+        : AnalyticsEvents.MANUAL_CLOUD_SDK;
+    AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_LOCAL_SERVER,
+        ImmutableMap.of(
+            AnalyticsEvents.APP_ENGINE_LOCAL_SERVER_MODE, serverMode,
+            AnalyticsEvents.CLOUD_SDK_MANAGEMENT, cloudSdkManagement));
   }
 
   /**
@@ -516,7 +492,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
         server.getName());
   }
 
-  private void setupDebugTarget(DefaultRunConfiguration devServerRunConfiguration, ILaunch launch,
+  private void setupDebugTarget(RunConfiguration devServerRunConfiguration, ILaunch launch,
       int debugPort, IProgressMonitor monitor) throws CoreException {
     if (debugPort <= 0 || debugPort > 65535) {
       throw new IllegalArgumentException("Debug port is set to " + debugPort //$NON-NLS-1$
@@ -528,16 +504,11 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     }
     jvmFlags.add("-Xdebug"); //$NON-NLS-1$
     jvmFlags.add("-Xrunjdwp:transport=dt_socket,server=n,suspend=y,quiet=y,address=" + debugPort); //$NON-NLS-1$
-    devServerRunConfiguration.setJvmFlags(jvmFlags);
+    devServerRunConfiguration = devServerRunConfiguration.toBuilder().jvmFlags(jvmFlags).build();
 
     // The 4.7 listen connector supports a connectionLimit
     IVMConnector connector =
         JavaRuntime.getVMConnector(IJavaLaunchConfigurationConstants.ID_SOCKET_LISTEN_VM_CONNECTOR);
-    if (connector == null || !connector.getArgumentOrder().contains("connectionLimit")) { //$NON-NLS-1$
-      // Attempt to retrieve our socketListenerMultipleConnector
-      connector = JavaRuntime.getVMConnector(
-          "com.google.cloud.tools.eclipse.jdt.launching.socketListenerMultipleConnector"); //$NON-NLS-1$
-    }
     if (connector == null) {
       abort("Cannot find Socket Listening connector", null, 0); //$NON-NLS-1$
       return; // keep JDT null analysis happy
@@ -642,6 +613,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
             } catch (DebugException ex) {
               logger.log(Level.WARNING, "Unable to terminate launch", ex); //$NON-NLS-1$
             }
+            checkUpdatedDatastoreIndex(launch.getLaunchConfiguration());
             return;
 
           default:
@@ -689,6 +661,26 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       this.serverBehaviour = serverBehaviour;
       server = serverBehaviour.getServer();
       this.console = console;
+    }
+
+    /** Check for an updated {@code datastore-index-auto.xml} in the {@code default} module. */
+    private void checkUpdatedDatastoreIndex(ILaunchConfiguration configuration) {
+      DatastoreIndexUpdateData update = DatastoreIndexUpdateData.detect(configuration, server);
+      if (update == null) {
+        return;
+      }
+      logger.fine("datastore-indexes-auto.xml found " + update.datastoreIndexesAutoXml);
+      
+      // punts to UI thread
+      IStatusHandler prompter = DebugPlugin.getDefault().getStatusHandler(promptStatus);
+      if (prompter != null) {
+        try {
+          prompter.handleStatus(DatastoreIndexesUpdatedStatusHandler.DATASTORE_INDEXES_UPDATED,
+              update);
+        } catch (CoreException ex) {
+          logger.log(Level.WARNING, "Unexpected failure", ex);
+        }
+      }
     }
 
     private void removeConsole() {

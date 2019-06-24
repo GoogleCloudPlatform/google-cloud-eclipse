@@ -1,32 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-
-  <extension
-      id="appEngineWhitelist"
-      name="%extension.name"
-      point="org.eclipse.jdt.core.compilationParticipant">
-     <compilationParticipant
-         createsProblems="true"
-         class="com.google.cloud.tools.eclipse.appengine.validation.JreWhitelistChecker"
-         id="APT"
-         requiredSourceLevel="1.5">
-     </compilationParticipant>
-  </extension>
-  
-  <extension 
-      id="blacklistedClass" 
-      name="App Engine Whitelist Marker"
-      point="org.eclipse.core.resources.markers">
-    <super type="org.eclipse.core.resources.problemmarker" />
-    <super type="org.eclipse.core.resources.textmarker" />
-    <persistent value="true" />
-  </extension>
   
   <extension 
       name="%appengine.web"
       point="org.eclipse.wst.validation.validatorV2" 
       id="appEngineWebXmlValidator">
+    <!-- TODO should this specify more than one marker type? -->
     <validator
     	class="com.google.cloud.tools.eclipse.appengine.validation.XmlValidator:com.google.cloud.tools.eclipse.appengine.validation.AppEngineWebXmlValidator"
       	markerId="com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker">
@@ -116,7 +96,7 @@
   
   <extension
       id="applicationMarker"
-      name="%appengine.blacklist.marker"
+      name="%remove.application.element"
       point="org.eclipse.core.resources.markers">
     <super type="com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker" />
     <persistent value="true" />
@@ -124,7 +104,7 @@
   
   <extension
       id="versionMarker"
-      name="%appengine.blacklist.marker"
+      name="%remove.version.element"
       point="org.eclipse.core.resources.markers">
     <super type="com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker" />
     <persistent value="true" />
@@ -188,11 +168,28 @@
     </markerResolutionGenerator>
   </extension>
   
-    <extension
+  <extension
       point="org.eclipse.ui.ide.markerResolution">
     <markerResolutionGenerator
       class="com.google.cloud.tools.eclipse.appengine.validation.AppEngineWebMarkerResolutionGenerator"
       markerType="com.google.cloud.tools.eclipse.appengine.validation.applicationMarker">
+    </markerResolutionGenerator>
+  </extension>
+  
+  <extension
+      id="runtimeMarker"
+      name="%upgrade.runtime.element"
+      point="org.eclipse.core.resources.markers">
+    <super type="org.eclipse.core.resources.problemmarker" />
+    <super type="org.eclipse.core.resources.textmarker" />
+    <persistent value="true" />
+  </extension>  
+  
+  <extension
+      point="org.eclipse.ui.ide.markerResolution">
+    <markerResolutionGenerator
+      class="com.google.cloud.tools.eclipse.appengine.validation.AppEngineWebMarkerResolutionGenerator"
+      markerType="com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker">
     </markerResolutionGenerator>
   </extension>
   
@@ -235,11 +232,31 @@
   </extension>
   
   <extension point="org.eclipse.wst.xml.core.catalogContributions">
-  	<catalogContribution>
-  	  <uri
-  	      name="http://appengine.google.com/ns/1.0"
-  	      uri="xsd/appengine-web.xsd"/>
-  	</catalogContribution>
+     <catalogContribution>
+        <uri
+              name="http://appengine.google.com/ns/1.0"
+              uri="xsd/appengine-web.xsd"/>
+     </catalogContribution>		
   </extension>
 
+  <extension
+        point="org.eclipse.wst.xml.core.externalSchemaLocations">
+     <provider
+           class="com.google.cloud.tools.eclipse.appengine.validation.AppEngineConfigFileSchemaLocationProvider">
+     </provider>
+  </extension>
+   <extension
+         point="org.eclipse.ui.ide.markerSupport">
+      <markerTypeCategory
+            name="%appengine.blacklist.marker">
+         <markerTypeReference
+               id="com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker"/>
+         <markerTypeReference
+               id="com.google.cloud.tools.eclipse.appengine.validation.applicationMarker"/>
+         <markerTypeReference
+               id="com.google.cloud.tools.eclipse.appengine.validation.versionMarker"/>
+         <markerTypeReference
+               id="com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker"/>
+      </markerTypeCategory>
+   </extension>
 </plugin>

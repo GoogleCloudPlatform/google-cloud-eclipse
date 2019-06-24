@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,24 +33,26 @@ public class AppEngineWebMarkerResolutionGenerator implements IMarkerResolutionG
 
   private static final Logger logger =
       Logger.getLogger(AppEngineWebMarkerResolutionGenerator.class.getName());
-  
+   
   @Override
   public IMarkerResolution[] getResolutions(IMarker marker) {
-    IMarkerResolution[] markerResolutions = new IMarkerResolution[1];
+    
+    ArrayList<IMarkerResolution> resolutions = new ArrayList<>();
     try {
       if ("com.google.cloud.tools.eclipse.appengine.validation.applicationMarker"
           .equals(marker.getType())) {
-        IMarkerResolution fix = new ApplicationQuickFix();
-        markerResolutions[0] = fix;
+        resolutions.add(new ApplicationQuickFix());
       } else if ("com.google.cloud.tools.eclipse.appengine.validation.versionMarker"
           .equals(marker.getType())) {
-        IMarkerResolution fix = new VersionQuickFix();
-        markerResolutions[0] = fix;
+        resolutions.add(new VersionQuickFix());
+      } else if ("com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker"
+          .equals(marker.getType())) {
+        resolutions.add(new UpgradeRuntimeQuickFix());
       }
     } catch (CoreException ex) {
       logger.log(Level.SEVERE, ex.getMessage());
     }
-    return markerResolutions;
+    return resolutions.toArray(new IMarkerResolution[0]);
   }
   
 }

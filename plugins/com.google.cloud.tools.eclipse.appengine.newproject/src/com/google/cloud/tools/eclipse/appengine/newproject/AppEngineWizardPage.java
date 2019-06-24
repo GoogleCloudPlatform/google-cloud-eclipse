@@ -16,11 +16,11 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.ui.LibrarySelectorGroup;
 import com.google.cloud.tools.eclipse.appengine.newproject.maven.MavenCoordinatesWizardUi;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.util.JavaPackageValidator;
 import com.google.cloud.tools.eclipse.util.MavenCoordinatesValidator;
 import com.google.cloud.tools.project.ServiceNameValidator;
@@ -35,12 +35,8 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 
@@ -53,7 +49,6 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
   private Text javaPackageField;
   private Text serviceNameField;
   private MavenCoordinatesWizardUi mavenCoordinatesUi;
-  private final boolean showLibrariesSelectorGroup;
 
   /** True if we should auto-generate the javaPackageField from the provided groupId */
   @VisibleForTesting
@@ -62,10 +57,9 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
   /** True if we're programmatically setting javaPackageField with an auto-generated value */
   private boolean javaPackageProgrammaticUpdate = false;
 
-  public AppEngineWizardPage(boolean showLibrariesSelectorGroup) {
+  public AppEngineWizardPage() {
     super("basicNewProjectPage"); //$NON-NLS-1$
     setImageDescriptor(AppEngineImages.appEngine(64));
-    this.showLibrariesSelectorGroup = showLibrariesSelectorGroup;
   }
 
   public abstract void setHelp(Composite container);
@@ -80,21 +74,13 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     createCustomFields(container);
 
     mavenCoordinatesUi = new MavenCoordinatesWizardUi(container, SWT.NONE);
-    mavenCoordinatesUi.addChangeListener(new Listener() {
-      @Override
-      public void handleEvent(Event event) {
-        revalidate();
-      }
-    });
+    mavenCoordinatesUi.addChangeListener(event -> revalidate());
     mavenCoordinatesUi.addGroupIdModifyListener(new AutoPackageNameSetterOnGroupIdChange());
 
     // Manage APIs
-    // todo we don't need this if; can do with subclasses
-    if (showLibrariesSelectorGroup) {
-      appEngineLibrariesSelectorGroup =
-          new LibrarySelectorGroup(container, CloudLibraries.APP_ENGINE_GROUP,
-              Messages.getString("app.engine.libraries.group")); //$NON-NLS-1$
-    }
+    appEngineLibrariesSelectorGroup = new LibrarySelectorGroup(container,
+        getSupportedLibrariesGroup(),
+        Messages.getString("app.engine.libraries.group")); //$NON-NLS-1$
 
     revalidate();
     // Show enter project name on opening
@@ -104,6 +90,8 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     GridLayoutFactory.swtDefaults().generateLayout(container);
     Dialog.applyDialogFont(container);
   }
+
+  protected abstract String getSupportedLibrariesGroup();
 
   private void createCustomFields(Composite container) {
     Composite composite = new Composite(container, SWT.NONE);
@@ -125,7 +113,7 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     // default: do nothing; used by subclasses
   }
 
-  public String getRuntimeId() {
+  public AppEngineRuntime getRuntime() {
     return null;
   }
 
@@ -134,19 +122,11 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     Label packageNameLabel = new Label(parent, SWT.LEAD);
     packageNameLabel.setText(Messages.getString("java.package")); //$NON-NLS-1$
     javaPackageField = new Text(parent, SWT.BORDER);
-    javaPackageField.addModifyListener(new ModifyListener() {
-      @Override
-      public void modifyText(ModifyEvent e) {
-        revalidate();
-      }
-    });
-    javaPackageField.addVerifyListener(new VerifyListener() {
-      @Override
-      public void verifyText(VerifyEvent event) {
-        // if the user ever changes the package name field, then we never auto-generate again.
-        if (!javaPackageProgrammaticUpdate) {
-          autoGeneratePackageName = false;
-        }
+    javaPackageField.addModifyListener(event -> revalidate());
+    javaPackageField.addVerifyListener(event -> {
+      // if the user ever changes the package name field, then we never auto-generate again.
+      if (!javaPackageProgrammaticUpdate) {
+        autoGeneratePackageName = false;
       }
     });
   }
@@ -157,12 +137,7 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     serviceNameLabel.setText(Messages.getString("app.engine.service")); //$NON-NLS-1$
     serviceNameField = new Text(parent, SWT.BORDER);
     serviceNameField.setMessage("default"); //$NON-NLS-1$
-    serviceNameField.addModifyListener(new ModifyListener() {
-      @Override
-      public void modifyText(ModifyEvent e) {
-        revalidate();
-      }
-    });
+    serviceNameField.addModifyListener(event -> revalidate());
   }
 
   @Override

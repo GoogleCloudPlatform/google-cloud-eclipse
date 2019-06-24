@@ -16,21 +16,38 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import com.google.cloud.tools.eclipse.util.MappedNamespaceContext;
 import com.google.cloud.tools.eclipse.util.Templates;
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -43,6 +60,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -62,24 +80,96 @@ public class CodeTemplatesTest {
   }
 
   @Test
-  public void testMaterializeAppEngineStandardFiles()
-      throws CoreException, ParserConfigurationException, SAXException, IOException {
-    AppEngineProjectConfig config = new AppEngineProjectConfig();
-    IFile mostImportant = CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
-    validateNonConfigFiles(mostImportant, "http://java.sun.com/xml/ns/javaee",
-        "http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd", "2.5");
-    validateAppEngineWebXml(AppEngineRuntime.STANDARD_JAVA_7);
-  }
-
-  @Test
   public void testMaterializeAppEngineStandardFiles_java8()
       throws CoreException, ParserConfigurationException, SAXException, IOException {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
-    config.setRuntimeId(AppEngineRuntime.STANDARD_JAVA_8.getId());
+    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8);
     IFile mostImportant = CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
     validateNonConfigFiles(mostImportant, "http://xmlns.jcp.org/xml/ns/javaee",
         "http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd", "3.1");
-    validateAppEngineWebXml(AppEngineRuntime.STANDARD_JAVA_8);
+    validateAppEngineWebXml(config.getRuntime());
+    validateLoggingProperties();
+  }
+
+  @Test
+  public void testMaterializeAppEngineStandardFiles_noObjectifyWithJava8()
+      throws CoreException, ParserConfigurationException, SAXException, IOException {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8);
+
+    CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
+    assertFalse(objectifyFilterClassExists());
+    assertFalse(objectifyListenerClassExists());
+    validateObjectifyFilterConfigInWebXml(false);
+  }
+
+  @Test
+  public void testMaterializeAppEngineStandardFiles_objectifyWithJava8()
+      throws CoreException, ParserConfigurationException, SAXException, IOException {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8);
+    config.setAppEngineLibraries(Collections.singleton(new Library("objectify")));
+
+    CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
+    assertTrue(objectifyFilterClassExists());
+    assertTrue(objectifyListenerClassExists());
+    validateObjectifyFilterConfigInWebXml(false);
+  }
+
+  @Test
+  public void testMaterializeAppEngineStandardFiles_java8Servlet25()
+      throws CoreException, ParserConfigurationException, SAXException, IOException {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8_SERVLET_25);
+    IFile mostImportant = CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
+    validateNonConfigFiles(mostImportant, "http://java.sun.com/xml/ns/javaee",
+        "http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd", "2.5");
+    validateAppEngineWebXml(config.getRuntime());
+    validateLoggingProperties();
+  }
+
+  @Test
+  public void testMaterializeAppEngineStandardFiles_noObjectifyWithJava8Servlet25()
+      throws CoreException, ParserConfigurationException, SAXException, IOException {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8_SERVLET_25);
+
+    CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
+    assertFalse(objectifyFilterClassExists());
+    assertFalse(objectifyListenerClassExists());
+    validateObjectifyFilterConfigInWebXml(false);
+  }
+
+  @Test
+  public void testMaterializeAppEngineStandardFiles_objectifyWithJava8Servlet25()
+      throws CoreException, ParserConfigurationException, SAXException, IOException {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8_SERVLET_25);
+    config.setAppEngineLibraries(Collections.singleton(new Library("objectify")));
+
+    CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
+    assertFalse(objectifyFilterClassExists());
+    assertTrue(objectifyListenerClassExists());
+    validateObjectifyFilterConfigInWebXml(true);
+  }
+
+  @Test
+  public void testMaterializeAppEnginFlexFiles_noObjectifyListener()
+      throws CoreException {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+
+    CodeTemplates.materializeAppEngineFlexFiles(project, config, monitor);
+    assertFalse(objectifyListenerClassExists());
+  }
+
+  @Test
+  public void testMaterializeAppEngineFlexFiles_objectifyListenerWithObjectify6()
+      throws CoreException {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setAppEngineLibraries(Collections.singleton(new Library("objectify6")));
+
+    CodeTemplates.materializeAppEngineFlexFiles(project, config, monitor);
+    assertTrue(objectifyListenerClassExists());
   }
 
   @Test
@@ -90,12 +180,12 @@ public class CodeTemplatesTest {
   }
 
   @Test
-  public void testMaterializeAppEngineStandardFiles_pomXmlIfEnablingMaven()
-      throws CoreException, ParserConfigurationException, SAXException, IOException {
+  public void testMaterializeAppEngineStandardFiles_pomXmlIfEnablingMaven() throws CoreException,
+      ParserConfigurationException, SAXException, IOException, XPathExpressionException {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     config.setUseMaven("my.project.group.id", "my-project-artifact-id", "98.76.54");
     CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
-    validatePomXml();
+    validatePom();
   }
 
   @Test
@@ -116,12 +206,92 @@ public class CodeTemplatesTest {
   }
 
   @Test
-  public void testMaterializeAppEngineFlexFiles_pomXmlIfEnablingMaven()
-      throws CoreException, ParserConfigurationException, SAXException, IOException {
+  public void testMaterializeAppEngineFlexFiles_pomXmlIfEnablingMaven() throws CoreException,
+      ParserConfigurationException, SAXException, IOException, XPathExpressionException {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     config.setUseMaven("my.project.group.id", "my-project-artifact-id", "98.76.54");
     CodeTemplates.materializeAppEngineFlexFiles(project, config, monitor);
-    validatePomXml();
+    validatePom();
+  }
+
+  @Test
+  public void testIsObjectifySelected_notSelected() {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    assertFalse(CodeTemplates.isObjectifySelected(config));
+  }
+
+  @Test
+  public void testIsObjectifySelected_objectify5() {
+    List<Library> libraries = Arrays.asList(new Library("a-library"), new Library("objectify"));
+
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setAppEngineLibraries(libraries);
+
+    assertTrue(CodeTemplates.isObjectifySelected(config));
+  }
+
+  @Test
+  public void testIsObjectifySelected_objectify6() {
+    List<Library> libraries = Arrays.asList(new Library("objectify6"), new Library("a-library"));
+
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setAppEngineLibraries(libraries);
+
+    assertTrue(CodeTemplates.isObjectifySelected(config));
+  }
+
+  @Test
+  public void testIsServlet25Selected_nullRuntime() {
+    assertFalse(CodeTemplates.isServlet25Selected(new AppEngineProjectConfig()));
+  }
+
+  @Test
+  public void testIsServlet25Selected_java8Runtime() {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8);
+    assertFalse(CodeTemplates.isServlet25Selected(config));
+  }
+
+  @Test
+  public void testIsServlet25Selected_java8Servlet25Runtime() {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8_SERVLET_25);
+    assertTrue(CodeTemplates.isServlet25Selected(config));
+  }
+
+  private boolean objectifyListenerClassExists() {
+    return project.getFile("src/main/java/ObjectifyWebListener.java").exists();
+  }
+
+  private boolean objectifyFilterClassExists() {
+    return project.getFile("src/main/java/ObjectifyWebFilter.java").exists();
+  }
+
+  private void validateObjectifyFilterConfigInWebXml(boolean configExpected)
+      throws ParserConfigurationException, SAXException, IOException, CoreException {
+    IFile webXml = project.getFile("src/main/webapp/WEB-INF/web.xml");
+    Element root = buildDocument(webXml).getDocumentElement();
+
+    NodeList filterNames =
+        root.getElementsByTagNameNS("http://java.sun.com/xml/ns/javaee", "filter-name");
+    NodeList listenerClasses =
+        root.getElementsByTagNameNS("http://java.sun.com/xml/ns/javaee", "listener-class");
+    if (configExpected) {
+      assertEquals(2, filterNames.getLength());
+      assertEquals("ObjectifyFilter", filterNames.item(0).getTextContent());
+      assertEquals("ObjectifyFilter", filterNames.item(1).getTextContent());
+
+      NodeList filterClass =
+          root.getElementsByTagNameNS("http://java.sun.com/xml/ns/javaee", "filter-class");
+      assertEquals(
+          "com.googlecode.objectify.ObjectifyFilter", filterClass.item(0).getTextContent());
+      
+      assertEquals(1, listenerClasses.getLength());
+      assertEquals("ObjectifyWebListener", listenerClasses.item(0).getTextContent());
+    } else {
+      assertEquals(0, filterNames.getLength());
+      assertEquals(0, listenerClasses.getLength());
+    }
   }
 
   private void validateNonConfigFiles(IFile mostImportant,
@@ -143,7 +313,8 @@ public class CodeTemplatesTest {
     Assert.assertEquals(webXmlNamespace + " " + webXmlSchemaUrl,
         root.getAttribute("xsi:schemaLocation"));
     Assert.assertEquals(servletVersion, root.getAttribute("version"));
-    Element servletClass = (Element) root.getElementsByTagName("servlet-class").item(0);
+    Element servletClass = (Element) root
+        .getElementsByTagNameNS("http://java.sun.com/xml/ns/javaee", "servlet-class").item(0);
     if (servletClass != null) { // servlet 2.5
       Assert.assertEquals("HelloAppEngine", servletClass.getTextContent());
     }
@@ -166,24 +337,27 @@ public class CodeTemplatesTest {
     IFile appengineWebXml = webinf.getFile("appengine-web.xml");
     Assert.assertTrue(appengineWebXml.exists());
     Document doc = buildDocument(appengineWebXml);
-    NodeList threadsafeElements = doc.getDocumentElement().getElementsByTagName("threadsafe");
+    NodeList threadsafeElements = doc.getDocumentElement().getElementsByTagNameNS(
+        "http://appengine.google.com/ns/1.0", "threadsafe");
     Assert.assertEquals("Must have exactly one threadsafe", 1, threadsafeElements.getLength());
     String threadsafe = threadsafeElements.item(0).getTextContent();
     Assert.assertEquals("true", threadsafe);
     NodeList sessionsEnabledElements
-        = doc.getDocumentElement().getElementsByTagName("sessions-enabled");
+        = doc.getDocumentElement().getElementsByTagNameNS("http://appengine.google.com/ns/1.0",
+            "sessions-enabled");
     Assert.assertEquals("Must have exactly one sessions-enabled",
         1, sessionsEnabledElements.getLength());
     String sessionsEnabled = sessionsEnabledElements.item(0).getTextContent();
     Assert.assertEquals("false", sessionsEnabled);
 
-    NodeList runtimeElements = doc.getDocumentElement().getElementsByTagName("runtime");
-    if (runtime.getId() == null) {
+    NodeList runtimeElements = doc.getDocumentElement().getElementsByTagNameNS(
+        "http://appengine.google.com/ns/1.0", "runtime");
+    if (runtime.getRuntimeId() == null) {
       Assert.assertEquals("should not have a <runtime> element", 0, runtimeElements.getLength());
     } else {
       Assert.assertEquals("should have exactly 1 <runtime> element", 1,
           runtimeElements.getLength());
-      Assert.assertEquals(runtime.getId(), runtimeElements.item(0).getTextContent());
+      Assert.assertEquals(runtime.getRuntimeId(), runtimeElements.item(0).getTextContent());
     }
   }
 
@@ -200,8 +374,20 @@ public class CodeTemplatesTest {
     }
   }
 
-  private void validatePomXml()
-      throws ParserConfigurationException, SAXException, IOException, CoreException {
+  private void validateLoggingProperties() throws FileNotFoundException, IOException {
+    IFolder loggingProperties = project.getFolder("src/main/webapp/WEB-INF/logging.properties");
+    Path path = Paths.get(loggingProperties.getLocation().toString());
+    try (InputStream in = Files.newInputStream(path)) {
+      Properties properties = new Properties();
+      properties.load(in);
+
+      Assert.assertEquals(1, properties.keySet().size());
+      Assert.assertEquals("WARNING", properties.getProperty(".level"));
+    }
+  }
+
+  private Element validatePom() throws ParserConfigurationException, SAXException, IOException,
+      CoreException, XPathExpressionException {
     IFile pomXml = project.getFile("pom.xml");
     Element root = buildDocument(pomXml).getDocumentElement();
     Assert.assertEquals("project", root.getNodeName());
@@ -210,12 +396,84 @@ public class CodeTemplatesTest {
         "http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd",
         root.getAttribute("xsi:schemaLocation"));
 
-    Element groupId = (Element) root.getElementsByTagName("groupId").item(0);
+    Element groupId = (Element) root
+        .getElementsByTagNameNS("http://maven.apache.org/POM/4.0.0", "groupId").item(0);
     Assert.assertEquals("my.project.group.id", groupId.getTextContent());
-    Element artifactId = (Element) root.getElementsByTagName("artifactId").item(0);
+    Element artifactId = (Element) root
+        .getElementsByTagNameNS("http://maven.apache.org/POM/4.0.0", "artifactId").item(0);
     Assert.assertEquals("my-project-artifact-id", artifactId.getTextContent());
-    Element version = (Element) root.getElementsByTagName("version").item(0);
+    Element version = (Element) root
+        .getElementsByTagNameNS("http://maven.apache.org/POM/4.0.0", "version").item(0);
     Assert.assertEquals("98.76.54", version.getTextContent());
+
+    Element pluginVersion =
+        (Element) root.getElementsByTagNameNS("http://maven.apache.org/POM/4.0.0",
+            "appengine.maven.plugin.version").item(0);
+    DefaultArtifactVersion artifactVersion =
+        new DefaultArtifactVersion(pluginVersion.getTextContent());
+    DefaultArtifactVersion expected = new DefaultArtifactVersion("1.3.2");
+    Assert.assertTrue(artifactVersion.compareTo(expected) >= 0);
+
+    // Validate use of Cloud BOM
+    XPath xpath = XPathFactory.newInstance().newXPath();
+    xpath.setNamespaceContext(new MappedNamespaceContext("m", "http://maven.apache.org/POM/4.0.0"));
+    NodeList dependencyManagementNodes = (NodeList) xpath.evaluate(
+        "./m:dependencyManagement",
+        root,
+        XPathConstants.NODESET);
+    Assert.assertEquals(1, dependencyManagementNodes.getLength());
+    
+    String bomGroupId = (String) xpath.evaluate(
+        "string(./m:dependencyManagement/m:dependencies/m:dependency/m:groupId)",
+        root,
+        XPathConstants.STRING);
+    Assert.assertEquals("com.google.cloud", bomGroupId);
+    String bomArtifactId = (String) xpath.evaluate(
+        "string(./m:dependencyManagement/m:dependencies/m:dependency/m:artifactId)",
+        root,
+        XPathConstants.STRING);
+    Assert.assertEquals("google-cloud-bom", bomArtifactId);
+
+    DefaultArtifactVersion bomVersion = new DefaultArtifactVersion((String) xpath.evaluate(
+        "string(./m:dependencyManagement/m:dependencies/m:dependency/m:version)",
+        root,
+        XPathConstants.STRING));
+    Assert.assertTrue(
+        bomVersion.compareTo(new DefaultArtifactVersion("0.53.0-alpha")) >= 0);
+
+    String scope = (String) xpath.evaluate(
+        "string(./m:dependencyManagement/m:dependencies/m:dependency/m:scope)",
+        root,
+        XPathConstants.STRING);
+    Assert.assertEquals("import", scope);
+    
+    String type = (String) xpath.evaluate(
+        "string(./m:dependencyManagement/m:dependencies/m:dependency/m:type)",
+        root,
+        XPathConstants.STRING);
+    Assert.assertEquals("pom", type);
+
+    // Validate use of maven-enforcer-plugin
+    Node enforcerNode =
+        (Node)
+            xpath.evaluate(
+                "./m:build/m:plugins/m:plugin/m:artifactId[text()='maven-enforcer-plugin']/..",
+                root,
+                XPathConstants.NODE);
+    Assert.assertNotNull(enforcerNode);
+
+    String enforcerVersion =
+        (String) xpath.evaluate("string(./m:version)", enforcerNode, XPathConstants.STRING);
+    Assert.assertEquals("3.0.0-M2", enforcerVersion);
+    String requiredMavenVersion =
+        (String)
+            xpath.evaluate(
+                "string(./m:executions/m:execution/m:configuration/m:rules/m:requireMavenVersion/m:version)",
+                enforcerNode,
+                XPathConstants.STRING);
+    Assert.assertEquals("3.5.0", requiredMavenVersion);
+
+    return root;
   }
 
   private Document buildDocument(IFile xml)
@@ -227,8 +485,7 @@ public class CodeTemplatesTest {
     factory.setAttribute("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
     factory.setAttribute("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
     DocumentBuilder builder = factory.newDocumentBuilder();
-    Document doc = builder.parse(xml.getContents());
-    return doc;
+    return builder.parse(xml.getContents());
   }
 
   @Test

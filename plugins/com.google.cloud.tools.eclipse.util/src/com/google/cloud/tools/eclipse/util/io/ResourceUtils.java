@@ -16,30 +16,33 @@
 
 package com.google.cloud.tools.eclipse.util.io;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
 
-/**
- * Utility methods for handling Eclipse Core Resources.
- */
+/** Utility methods for handling Eclipse Core Resources. */
 public class ResourceUtils {
 
   /**
    * Create the components of the provided folder as required. Assumes the containing project
    * already exists.
-   * 
+   *
    * @param folder the path to be created if it does not already exist
    * @param monitor may be {@code null}
    * @throws CoreException on error
    */
   public static void createFolders(IContainer folder, IProgressMonitor monitor)
       throws CoreException {
-    
+
     IPath path = folder.getProjectRelativePath();
     IContainer current = folder.getProject();
     SubMonitor progress = SubMonitor.convert(monitor, path.segmentCount());
@@ -54,5 +57,23 @@ public class ResourceUtils {
     }
   }
 
+  public static Multimap<IProject, IFile> getAffectedFiles(IResourceDelta topDelta)
+      throws CoreException {
+    Multimap<IProject, IFile> files = HashMultimap.create();
+    if (topDelta == null) {
+      return files;
+    }
 
+    topDelta.accept(
+        delta -> {
+          if (delta.getResource() instanceof IFile) {
+            IFile file = (IFile) delta.getResource();
+            files.put(file.getProject(), file);
+            return false;
+          } else {
+            return true;
+          }
+        });
+    return files;
+  }
 }

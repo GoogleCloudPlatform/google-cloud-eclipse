@@ -18,26 +18,24 @@ package com.google.cloud.tools.eclipse.test.util.project;
 
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineConfigurationUtil;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.FacetUtil;
-import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.util.ClasspathUtil;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -48,35 +46,39 @@ import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
-import org.eclipse.wst.common.project.facet.core.internal.FacetedProjectNature;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.ServerUtil;
 import org.junit.rules.ExternalResource;
 
 /**
  * Utility class to create and configure a Faceted Project. Installs a Java 1.7 facet if no facets
- * are specified with {@link #withFacetVersions}.
+ * are specified with {@link #withFacets}.
  */
-@SuppressWarnings("restriction") // For FacetedProjectNature
 public final class TestProjectCreator extends ExternalResource {
+  private static final Logger logger = Logger.getLogger(TestProjectCreator.class.getName());
 
   private IProject project;
   private IJavaProject javaProject;
+  private IFacetedProject facetedProject;
+
   private String containerPath;
   private String appEngineServiceId;
-  private List<IProjectFacetVersion> projectFacetVersions = new ArrayList<>();
+  private final List<IProjectFacetVersion> projectFacetVersions = new ArrayList<>();
+  private boolean makeFaceted;
 
   public TestProjectCreator withClasspathContainerPath(String containerPath) {
     this.containerPath = containerPath;
     return this;
   }
 
-  public TestProjectCreator withFacetVersions(IProjectFacetVersion... projectFacetVersions) {
+  public TestProjectCreator withFacets(IProjectFacetVersion... projectFacetVersions) {
+    makeFaceted = true;
     Collections.addAll(this.projectFacetVersions, projectFacetVersions);
     return this;
   }
 
-  public TestProjectCreator withFacetVersions(List<IProjectFacetVersion> projectFacetVersions) {
+  public TestProjectCreator withFacets(List<IProjectFacetVersion> projectFacetVersions) {
+    makeFaceted = true;
     this.projectFacetVersions.addAll(projectFacetVersions);
     return this;
   }
@@ -90,13 +92,18 @@ public final class TestProjectCreator extends ExternalResource {
   protected void after() {
     if (project != null) {
       try {
-        if (getFacetedProject().hasProjectFacet(WebFacetUtils.WEB_FACET)) {
+        if (facetedProject != null && facetedProject.hasProjectFacet(WebFacetUtils.WEB_FACET)) {
           // Wait for the WTP validation job as it runs without the workspace protection lock
           ProjectUtils.waitForProjects(project);
         }
+        try {
+          project.close(new NullProgressMonitor());
+        } catch (CoreException ex) {
+          logger.log(Level.SEVERE, "Exception closing test project: " + project, ex);
+        }
         project.delete(true, null);
       } catch (IllegalArgumentException ex) {
-        new ThreadDumpingWatchdog(0, TimeUnit.DAYS).run();
+        ThreadDumpingWatchdog.report();
         throw ex;
       } catch (CoreException ex) {
         throw new AssertionError("Could not delete project", ex);
@@ -111,6 +118,7 @@ public final class TestProjectCreator extends ExternalResource {
 
   public IJavaProject getJavaProject() {
     createProjectIfNecessary();
+    Preconditions.checkState(javaProject != null);
     return javaProject;
   }
 
@@ -119,11 +127,11 @@ public final class TestProjectCreator extends ExternalResource {
     return project;
   }
 
-  public IFacetedProject getFacetedProject() throws CoreException {
-    IFacetedProject facetedProject = ProjectFacetsManager.create(getProject());
+  public IFacetedProject getFacetedProject() {
+    createProjectIfNecessary();
+    Preconditions.checkState(facetedProject != null);
     return facetedProject;
   }
-
 
   private void createProjectIfNecessary() {
     if (project == null) {
@@ -138,8 +146,6 @@ public final class TestProjectCreator extends ExternalResource {
   private void createProject(String projectName) throws CoreException {
     IProjectDescription newProjectDescription =
         ResourcesPlugin.getWorkspace().newProjectDescription(projectName);
-    newProjectDescription.setNatureIds(
-        new String[] {FacetedProjectNature.NATURE_ID});
     project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
     project.create(newProjectDescription, null);
     project.open(null);
@@ -160,11 +166,12 @@ public final class TestProjectCreator extends ExternalResource {
   }
 
   private void addFacets() throws CoreException {
+    if (makeFaceted) {
+      facetedProject = ProjectFacetsManager.create(project, true, null);
+    }
     if (projectFacetVersions.isEmpty()) {
       return;
     }
-
-    IFacetedProject facetedProject = ProjectFacetsManager.create(getProject());
 
     FacetUtil facetUtil = new FacetUtil(facetedProject);
     for (IProjectFacetVersion projectFacetVersion : projectFacetVersions) {
@@ -174,7 +181,7 @@ public final class TestProjectCreator extends ExternalResource {
 
     if (facetedProject.hasProjectFacet(AppEngineStandardFacet.FACET)) {
       // App Engine runtime is added via a Job, so wait.
-      ProjectUtils.waitForProjects(getProject());
+      ProjectUtils.waitForProjects(project);
     }
 
     if (facetedProject.hasProjectFacet(JavaFacet.FACET)) {
@@ -183,14 +190,12 @@ public final class TestProjectCreator extends ExternalResource {
     }
   }
 
-  public void setAppEngineServiceId(String serviceId) throws CoreException {
-    IFolder webinf = WebProjectUtil.getWebInfDirectory(getProject());
-    IFile appEngineWebXml = webinf.getFile("appengine-web.xml");
+  private void setAppEngineServiceId(String serviceId) {
+    IFile appEngineWebXml =
+        AppEngineConfigurationUtil.findConfigurationFile(
+            getProject(), new Path("appengine-web.xml"));
     assertTrue("Project should have AppEngine Standard facet", appEngineWebXml.exists());
-    String contents = "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>\n"
-        + "<service>" + serviceId + "</service>\n</appengine-web-app>\n";
-    InputStream in = new ByteArrayInputStream(contents.getBytes(StandardCharsets.UTF_8));
-    appEngineWebXml.setContents(in, IFile.FORCE, null);
+    ConfigurationFileUtils.createAppEngineWebXml(project, serviceId);
   }
 
 }

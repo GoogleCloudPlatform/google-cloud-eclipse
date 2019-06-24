@@ -3,7 +3,7 @@
       id="com.google.cloud.tools.eclipse.3rdparty.feature"
       label="3rd Party Features"
       version="0.1.0.qualifier"
-      provider-name="Google Inc."
+      provider-name="Google LLC"
       license-feature="com.google.licenses.apache_v2">
 
    <description>
@@ -23,12 +23,14 @@
          version="0.0.0"
          name="YEdit"
          optional="true"/>
-
+         
+<!--
    <includes
-         id="eu.openanalytics.editor.docker"
+         id="org.eclipse.linuxtools.docker.feature"
          version="0.0.0"
-         name="Docker Editor"
+         name="Docker Tools"
          optional="true"/>
+-->
 
    <plugin
          id="com.google.cloud.tools.appengine"
@@ -48,14 +50,14 @@
          id="com.google.guava"
          download-size="0"
          install-size="0"
-         version="20.0.0"
+         version="27.0.0.jre"
          unpack="false"/>
 
    <plugin
          id="com.google.gson"
          download-size="0"
          install-size="0"
-         version="2.7.0"
+         version="2.8.2"
          unpack="false"/>
 
    <plugin
@@ -97,7 +99,7 @@
          id="org.yaml.snakeyaml"
          download-size="0"
          install-size="0"
-         version="1.17.0"
+         version="1.21.0"
          unpack="false"/>
          
    <plugin

@@ -20,9 +20,7 @@ import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -53,7 +51,8 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 /**
- * Contains the logic for source validation and message creation.
+ * Contains the logic for source validation and message creation. The actual validation logic is
+ * delegated to an {@link XmlValidationHelper}.
  */
 public class XmlSourceValidator implements ISourceValidator, IValidator, IExecutableExtension {
 
@@ -71,7 +70,7 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
     IProject project = getProject(helper);
     try {
       IFacetedProject facetedProject = ProjectFacetsManager.create(project);
-      if (AppEngineStandardFacet.hasFacet(facetedProject)) {
+      if (facetedProject != null && AppEngineStandardFacet.hasFacet(facetedProject)) {
         String encoding = getDocumentEncoding(document);
         byte[] bytes = document.get().getBytes(encoding);
         IFile source = getFile(helper);
@@ -84,17 +83,18 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
 
   /**
    * Adds an {@link IMessage} to the XML file for every
-   * {@link BannedElement} found in the file.
+   * {@link ElementProblem} found in the file.
    */
+  @VisibleForTesting
   void validate(IReporter reporter, IFile source, byte[] bytes) throws IOException {
     try {
       Document document = PositionalXmlScanner.parse(bytes);
       if (document != null) {
-        ArrayList<BannedElement> blacklist = helper.checkForElements(source, document);
+        List<ElementProblem> problems = helper.checkForProblems(source, document);
         String encoding = (String) document.getDocumentElement().getUserData("encoding");
-        Map<BannedElement, Integer> bannedElementOffsetMap =
-            ValidationUtils.getOffsetMap(bytes, blacklist, encoding);
-        for (Map.Entry<BannedElement, Integer> entry : bannedElementOffsetMap.entrySet()) {
+        Map<ElementProblem, Integer> problemOffsetMap =
+            ValidationUtils.getOffsetMap(bytes, problems, encoding);
+        for (Map.Entry<ElementProblem, Integer> entry : problemOffsetMap.entrySet()) {
           createMessage(reporter, entry.getKey(), entry.getValue());
         }
       }
@@ -112,18 +112,24 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
   public void setInitializationData(IConfigurationElement config, String propertyName, Object data)
       throws CoreException {
     try {
-      if (data == null || !(data instanceof String)) {
+      if (!(data instanceof String)) {
         throw new CoreException(StatusUtil.error(getClass(), "Data must be a class name"));
       }
       String className = (String) data;
+      // We delegate the validation to a helper class that is specified in this extension's data
+      // string. As such we can't use createExecutableExtension() and must instead resolve and
+      // instantiate the helper directly.  As our validation helpers are all defined in this
+      // bundle we can just use Class#forName(), though a general solution would require resolving
+      // the class-name using the extension's defining bundle.
       Class<?> clazz = Class.forName(className);
-      Constructor<?> constructor = clazz.getConstructor();
-      XmlValidationHelper helper = (XmlValidationHelper) constructor.newInstance(new Object[] {});
-      this.setHelper(helper);
-    } catch (ClassNotFoundException | NoSuchMethodException | SecurityException
-        | InstantiationException | IllegalAccessException | IllegalArgumentException
-        | InvocationTargetException ex) {
+      this.setHelper((XmlValidationHelper) clazz.newInstance());
+    } catch (ClassNotFoundException
+        | SecurityException
+        | InstantiationException
+        | IllegalAccessException
+        | IllegalArgumentException ex) {
       logger.log(Level.SEVERE, ex.getMessage());
+      throw new CoreException(StatusUtil.error(this, "Unable to instantiate helper", ex));
     }
   }
 
@@ -133,16 +139,19 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
   }
 
   /**
-   * Creates a message from a given {@link BannedElement}.
+   * Creates a message from a given {@link ElementProblem}.
    */
-  void createMessage(IReporter reporter, BannedElement element, int elementOffset) {
-    IMessage message = new LocalizedMessage(element.getIMessageSeverity(), element.getMessage());
+  @VisibleForTesting
+  void createMessage(IReporter reporter, ElementProblem problem, int offset) {
+    IMessage message = new LocalizedMessage(problem.getIMessageSeverity(), problem.getMessage());
     message.setTargetObject(this);
-    message.setMarkerId(element.getMarkerId());
-    message.setLineNo(element.getStart().getLineNumber());
-    message.setOffset(elementOffset);
-    message.setLength(element.getLength());
-    message.setAttribute(IQuickAssistProcessor.class.getName(), element.getQuickAssistProcessor());
+    message.setMarkerId(problem.getMarkerId());
+    // TODO offset by line
+    int lineNumber = problem.getStart().getLineNumber() + 1;
+    message.setLineNo(lineNumber);
+    message.setOffset(offset);
+    message.setLength(problem.getLength());
+    message.setAttribute(IQuickAssistProcessor.class.getName(), problem.getQuickAssistProcessor());
     reporter.addMessage(this, message);
   }
 
@@ -151,6 +160,7 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
    * null if the IValidationContext does not return any files that need
    * to be validated.
    */
+  @VisibleForTesting
   static IProject getProject(IValidationContext helper) {
     IFile file = getFile(helper);
     if (file != null) {
@@ -163,6 +173,7 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
    * Returns the IFile for a given URI or null if the file does
    * not exist in the workspace.
    */
+  @VisibleForTesting
   static IFile getFile(IValidationContext helper) {
     String[] fileUri = helper.getURIs();
     if (fileUri.length > 0) {
@@ -172,7 +183,7 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
     return null;
   }
 
-
+  @VisibleForTesting
   static IFile getFile(String filePath) {
     IPath path = new Path(filePath);
     if (path.segmentCount() > 1) {

@@ -54,12 +54,8 @@ import org.eclipse.jface.fieldassist.FieldDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
@@ -156,22 +152,19 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     // Account row
     new Label(composite, SWT.LEAD).setText(Messages.getString("label.account")); //$NON-NLS-1$
     accountSelector = new AccountSelector(composite, loginService);
-    accountSelector.addSelectionListener(new Runnable() {
-      @Override
-      public void run() {
-        updateProjectSelector();
+    accountSelector.addSelectionListener(() -> {
+      updateProjectSelector();
 
-        if (!initializingUiValues) {
-          boolean accountSelected = !accountSelector.getSelectedEmail().isEmpty();
-          boolean savedEmailAvailable = accountSelector.isEmailAvailable(accountEmailModel);
-          // 1. If some account is selected, always save it.
-          // 2. Otherwise (no account selected), clear the saved email only when it is certain
-          // that the user explicitly removed selection (i.e., not because of logout).
-          if (accountSelected || savedEmailAvailable) {
-            accountEmailModel = accountSelector.getSelectedEmail();
-            gcpProjectIdModel = ""; //$NON-NLS-1$
-            updateLaunchConfigurationDialog();
-          }
+      if (!initializingUiValues) {
+        boolean accountSelected = !accountSelector.getSelectedEmail().isEmpty();
+        boolean savedEmailAvailable = accountSelector.isEmailAvailable(accountEmailModel);
+        // 1. If some account is selected, always save it.
+        // 2. Otherwise (no account selected), clear the saved email only when it is certain
+        // that the user explicitly removed selection (i.e., not because of logout).
+        if (accountSelected || savedEmailAvailable) {
+          accountEmailModel = accountSelector.getSelectedEmail();
+          gcpProjectIdModel = ""; //$NON-NLS-1$
+          updateLaunchConfigurationDialog();
         }
       }
     });
@@ -181,48 +174,40 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     projectLabel.setText(Messages.getString("label.project")); //$NON-NLS-1$
 
     Composite projectSelectorComposite = new Composite(composite, SWT.NONE);
-    final Text filterField = new Text(projectSelectorComposite,
+    Text filterField = new Text(projectSelectorComposite,
         SWT.BORDER | SWT.SEARCH | SWT.ICON_SEARCH | SWT.ICON_CANCEL);
 
     projectSelector = new ProjectSelector(projectSelectorComposite);
-    projectSelector.addSelectionChangedListener(new ISelectionChangedListener() {
-      @Override
-      public void selectionChanged(SelectionChangedEvent event) {
-        boolean projectSelected = !projectSelector.getSelection().isEmpty();
-        createServiceKey.setEnabled(projectSelected);
+    projectSelector.addSelectionChangedListener(event -> {
+      boolean projectSelected = !projectSelector.getSelection().isEmpty();
+      createServiceKey.setEnabled(projectSelected);
 
-        if (!initializingUiValues) {
-          boolean savedIdAvailable = projectSelector.isProjectIdAvailable(gcpProjectIdModel);
-          // 1. If some project is selected, always save it.
-          // 2. Otherwise (no project selected), clear the saved project only when it is certain
-          // that the user explicitly removed selection (i.e., not because of logout).
-          if (projectSelected || savedIdAvailable) {
-            gcpProjectIdModel = projectSelector.getSelectedProjectId();
-            updateLaunchConfigurationDialog();
-          }
+      if (!initializingUiValues) {
+        boolean savedIdAvailable = projectSelector.isProjectIdAvailable(gcpProjectIdModel);
+        // 1. If some project is selected, always save it.
+        // 2. Otherwise (no project selected), clear the saved project only when it is certain
+        // that the user explicitly removed selection (i.e., not because of logout).
+        if (projectSelected || savedIdAvailable) {
+          gcpProjectIdModel = projectSelector.getSelectedProjectId();
+          updateLaunchConfigurationDialog();
         }
       }
     });
 
     filterField.setMessage(Messages.getString("project.filter.hint")); //$NON-NLS-1$
-    filterField.addModifyListener(new ModifyListener() {
-      @Override
-      public void modifyText(ModifyEvent event) {
-        projectSelector.setFilter(filterField.getText());
-      }
+    filterField.addModifyListener(event -> {
+      projectSelector.setFilter(filterField.getText());
     });
+    projectSelector.clearStatusLink();
 
     // Service key row
     Label serviceKeyLabel = new Label(composite, SWT.LEAD);
     serviceKeyLabel.setText(Messages.getString("label.service.key")); //$NON-NLS-1$
     
     serviceKeyInput = new Text(composite, SWT.BORDER);
-    serviceKeyInput.addModifyListener(new ModifyListener() {
-      @Override
-      public void modifyText(ModifyEvent event) {
-        serviceKeyDecoration.hide();
-        updateLaunchConfigurationDialog();
-      }
+    serviceKeyInput.addModifyListener(event -> {
+      serviceKeyDecoration.hide();
+      updateLaunchConfigurationDialog();
     });
     Button browse = new Button(composite, SWT.NONE);
     browse.setText(Messages.getString("button.browse")); //$NON-NLS-1$
@@ -239,14 +224,12 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     createServiceKey.addSelectionListener(new SelectionAdapter() {
       @Override
       public void widgetSelected(SelectionEvent event) {
-        BusyIndicator.showWhile(createServiceKey.getDisplay(), new Runnable() {
-          @Override
-          public void run() {
-            Path keyPath = getServiceAccountKeyPath();
-            if (keyPath != null) {
-              createServiceAccountKey(keyPath);
-            }
-          }});
+        BusyIndicator.showWhile(createServiceKey.getDisplay(), () -> {
+          Path keyPath = getServiceAccountKeyPath();
+          if (keyPath != null) {
+            createServiceAccountKey(keyPath);
+          }
+        });
       }
     });
 
@@ -268,22 +251,19 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
   }
 
   private void updateProjectSelector() {
-    final Credential credential = accountSelector.getSelectedCredential();
+    Credential credential = accountSelector.getSelectedCredential();
     if (credential == null) {
       projectSelector.setProjects(new ArrayList<GcpProject>());
       return;
     }
 
-    BusyIndicator.showWhile(projectSelector.getDisplay(), new Runnable() {
-      @Override
-      public void run() {
-        try {
-          List<GcpProject> gcpProjects = projectRepository.getProjects(credential);
-          projectSelector.setProjects(gcpProjects);
-        } catch (ProjectRepositoryException e) {
-          logger.log(Level.WARNING,
-              "Could not retrieve GCP project information from server.", e); //$NON-NLS-1$
-        }
+    BusyIndicator.showWhile(projectSelector.getDisplay(), () -> {
+      try {
+        List<GcpProject> gcpProjects = projectRepository.getProjects(credential);
+        projectSelector.setProjects(gcpProjects);
+      } catch (ProjectRepositoryException e) {
+        logger.log(Level.WARNING,
+            "Could not retrieve GCP project information from server.", e); //$NON-NLS-1$
       }
     });
   }

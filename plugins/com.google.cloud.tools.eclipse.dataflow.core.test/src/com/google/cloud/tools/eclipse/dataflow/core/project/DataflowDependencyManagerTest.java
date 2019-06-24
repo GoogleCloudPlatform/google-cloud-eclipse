@@ -47,9 +47,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-/**
- * Tests for {@link DataflowArtifactRetriever}.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class DataflowDependencyManagerTest {
 

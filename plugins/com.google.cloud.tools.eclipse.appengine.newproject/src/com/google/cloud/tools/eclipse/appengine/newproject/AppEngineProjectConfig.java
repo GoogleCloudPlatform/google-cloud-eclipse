@@ -17,7 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
-import java.io.File;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,33 +29,24 @@ import org.eclipse.core.resources.IProject;
  * Collects all data needed to create and configure an App Engine Eclipse Project.
  */
 public class AppEngineProjectConfig {
-  private File cloudSdkLocation = null;
   private URI eclipseProjectLocationUri = null;
   private String packageName = "";
   private IProject project;
   private List<Library> appEngineLibraries = Collections.emptyList();
   private String serviceName;
-  private String runtimeId;
+  private AppEngineRuntime runtime;
 
   private boolean useMaven;
   private String mavenGroupId;
   private String mavenArtifactId;
   private String mavenVersion;
 
-  File getCloudSdkLocation() {
-    return cloudSdkLocation;
-  }
-
-  void setCloudSdkLocation(File cloudSdkLocation) {
-    this.cloudSdkLocation = cloudSdkLocation;
-  }
-
   void setPackageName(String name) {
-    this.packageName = name;
+    packageName = name;
   }
 
   String getPackageName() {
-    return this.packageName;
+    return packageName;
   }
 
   /**
@@ -66,15 +57,15 @@ public class AppEngineProjectConfig {
   }
 
   IProject getProject() {
-    return this.project;
+    return project;
   }
 
   URI getEclipseProjectLocationUri() {
-    return this.eclipseProjectLocationUri;
+    return eclipseProjectLocationUri;
   }
 
   void setEclipseProjectLocationUri(URI uri) {
-    this.eclipseProjectLocationUri = uri;
+    eclipseProjectLocationUri = uri;
   }
 
   List<Library> getAppEngineLibraries() {
@@ -82,7 +73,7 @@ public class AppEngineProjectConfig {
   }
 
   public void setAppEngineLibraries(Collection<Library> libraries) {
-    this.appEngineLibraries = new ArrayList<>(libraries);
+    appEngineLibraries = new ArrayList<>(libraries);
   }
 
   String getServiceName() {
@@ -93,16 +84,16 @@ public class AppEngineProjectConfig {
     this.serviceName = serviceName;
   }
 
-  String getRuntimeId() {
-    return runtimeId;
+  AppEngineRuntime getRuntime() {
+    return runtime;
   }
 
-  void setRuntimeId(String runtimeId) {
-    this.runtimeId = runtimeId;
+  void setRuntime(AppEngineRuntime runtime) {
+    this.runtime = runtime;
   }
 
   void setUseMaven(String mavenGroupId, String mavenArtifactId, String mavenVersion) {
-    this.useMaven = true;
+    useMaven = true;
     this.mavenGroupId = mavenGroupId;
     this.mavenArtifactId = mavenArtifactId;
     this.mavenVersion = mavenVersion;

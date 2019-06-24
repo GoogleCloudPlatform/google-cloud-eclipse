@@ -16,14 +16,19 @@
 
 package com.google.cloud.tools.eclipse.swtbot;
 
+import com.google.common.collect.Iterables;
+import java.util.function.Supplier;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotStyledText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTable;
+import org.hamcrest.Matcher;
 
 /**
  * Provides helper methods to aid in SWTBot testing.
@@ -35,23 +40,13 @@ public class SwtBotTestingUtilities {
   public static final int EVENT_DOWN_UP_DELAY_MS = 100;
 
   /** Click the button, wait for the window change. */
-  public static void clickButtonAndWaitForWindowChange(SWTBot bot, final SWTBotButton button) {
-    performAndWaitForWindowChange(bot, new Runnable() {
-      @Override
-      public void run() {
-        button.click();
-      }
-    });
+  public static void clickButtonAndWaitForWindowChange(SWTBot bot, SWTBotButton button) {
+    performAndWaitForWindowChange(bot, button::click);
   }
 
   /** Click the button, wait for the window close. */
-  public static void clickButtonAndWaitForWindowClose(SWTBot bot, final SWTBotButton button) {
-    performAndWaitForWindowClose(bot, new Runnable() {
-      @Override
-      public void run() {
-        button.click();
-      }
-    });
+  public static void clickButtonAndWaitForWindowClose(SWTBot bot, SWTBotButton button) {
+    performAndWaitForWindowClose(bot, button::click);
   }
 
   /**
@@ -117,11 +112,11 @@ public class SwtBotTestingUtilities {
   /**
    * Blocks the caller until the given shell is no longer active.
    */
-  public static void waitUntilShellIsNotActive(SWTBot bot, final SWTBotShell shell) {
+  public static void waitUntilShellIsNotActive(SWTBot bot, SWTBotShell shell) {
     bot.waitUntil(new DefaultCondition() {
       @Override
       public String getFailureMessage() {
-        return "Shell " + shell.getText() + " did not close"; //$NON-NLS-1$
+        return "Shell " + shell.getText() + " did not become inactive"; //$NON-NLS-1$
       }
 
       @Override
@@ -134,7 +129,7 @@ public class SwtBotTestingUtilities {
   /**
    * Blocks the caller until the given shell is closed.
    */
-  public static void waitUntilShellIsClosed(SWTBot bot, final SWTBotShell shell) {
+  public static void waitUntilShellIsClosed(SWTBot bot, SWTBotShell shell) {
     bot.waitUntil(new DefaultCondition() {
       @Override
       public String getFailureMessage() {
@@ -151,8 +146,7 @@ public class SwtBotTestingUtilities {
   /**
    * Wait until the given text widget contains the provided string
    */
-  public static void waitUntilStyledTextContains(SWTBot bot, final String text,
-      final SWTBotStyledText widget) {
+  public static void waitUntilStyledTextContains(SWTBot bot, String text, SWTBotStyledText widget) {
     bot.waitUntil(new DefaultCondition() {
       @Override
       public boolean test() throws Exception {
@@ -166,4 +160,38 @@ public class SwtBotTestingUtilities {
     });
   }
 
+  /** Wait until the view's content description matches. */
+  public static void waitUntilViewContentDescription(
+      SWTBot bot, SWTBotView consoleView, Matcher<String> matcher) {
+    bot.waitUntil(
+        new DefaultCondition() {
+
+          @Override
+          public boolean test() throws Exception {
+            return matcher.matches(consoleView.getViewReference().getContentDescription());
+          }
+
+          @Override
+          public String getFailureMessage() {
+            return matcher.toString();
+          }
+        });
+  }
+
+  /** Wait until a menu contains a matching item. */
+  public static void waitUntilMenuHasItem(
+      SWTBot bot, Supplier<SWTBotMenu> menuSupplier, Matcher<String> matcher) {
+    bot.waitUntil(
+        new DefaultCondition() {
+          @Override
+          public boolean test() throws Exception {
+            return Iterables.any(menuSupplier.get().menuItems(), matcher::matches);
+          }
+
+          @Override
+          public String getFailureMessage() {
+            return "Never matched menu with " + matcher.toString();
+          }
+        });
+  }
 }

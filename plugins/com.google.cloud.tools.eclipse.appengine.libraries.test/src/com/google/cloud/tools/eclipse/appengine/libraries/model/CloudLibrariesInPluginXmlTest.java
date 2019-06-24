@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -26,6 +27,7 @@ import static org.junit.Assert.assertTrue;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
@@ -43,7 +45,7 @@ public class CloudLibrariesInPluginXmlTest {
 
   @Test
   public void testLibrarySize() {
-    assertThat(CloudLibraries.getLibraries("appengine").size(), is(2));
+    assertThat(CloudLibraries.getLibraries("appengine").size(), is(3));
     // There may be different number of servlet libraries depending on whether the
     // .appengine.java.standard.java8 bundle is present
     List<Library> servletLibraries = CloudLibraries.getLibraries("servlet");
@@ -58,7 +60,7 @@ public class CloudLibrariesInPluginXmlTest {
     Library appEngineLibrary = CloudLibraries.getLibrary(APP_ENGINE_API_LIBRARY_ID);
     assertThat(appEngineLibrary.getId(), is(APP_ENGINE_API_LIBRARY_ID));
     assertThat(appEngineLibrary.getName(), is("App Engine API"));
-    assertThat(appEngineLibrary.getGroup(), is("appengine-api"));
+    assertThat(appEngineLibrary.getGroups().get(0), is("appengine"));
     assertFalse(appEngineLibrary.getToolTip().isEmpty());
     assertThat(appEngineLibrary.getSiteUri(),
         is(new URI("https://cloud.google.com/appengine/docs/java/")));
@@ -69,14 +71,18 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(libraryFile.getJavadocUri(),
         is(new URI("https://cloud.google.com/appengine/docs/java/javadoc/")));
     assertNull(libraryFile.getSourceUri());
-    assertFalse("App Engine API exported", libraryFile.isExport());
+    assertTrue("App Engine API exported", libraryFile.isExport());
 
     assertNotNull(libraryFile.getMavenCoordinates());
     MavenCoordinates mavenCoordinates = libraryFile.getMavenCoordinates();
     assertThat(mavenCoordinates.getRepository(), is("central"));
     assertThat(mavenCoordinates.getGroupId(), is("com.google.appengine"));
     assertThat(mavenCoordinates.getArtifactId(), is("appengine-api-1.0-sdk"));
-    assertThat(mavenCoordinates.getVersion(), is("1.9.59"));
+    
+    DefaultArtifactVersion actual = new DefaultArtifactVersion(mavenCoordinates.getVersion());
+    DefaultArtifactVersion expected = new DefaultArtifactVersion("1.9.74");
+    assertTrue(actual.compareTo(expected) >= 0);
+    
     assertThat(mavenCoordinates.getType(), is("jar"));
     assertNull(mavenCoordinates.getClassifier());
 
@@ -98,7 +104,7 @@ public class CloudLibrariesInPluginXmlTest {
     Library endpointsLibrary = CloudLibraries.getLibrary(CLOUD_ENDPOINTS_LIBRARY_ID);
     assertThat(endpointsLibrary.getId(), is(CLOUD_ENDPOINTS_LIBRARY_ID));
     assertThat(endpointsLibrary.getName(), is("Google Cloud Endpoints"));
-    assertThat(endpointsLibrary.getGroup(), is("appengine"));
+    assertThat(endpointsLibrary.getGroups().get(0), is("appengine"));
     assertThat(endpointsLibrary.getSiteUri(), is(new URI(
         "https://cloud.google.com/endpoints/docs/frameworks/java/about-cloud-endpoints-frameworks")));
     assertTrue(endpointsLibrary.isExport());
@@ -114,7 +120,11 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(mavenCoordinates.getRepository(), is("central"));
     assertThat(mavenCoordinates.getGroupId(), is("com.google.endpoints"));
     assertThat(mavenCoordinates.getArtifactId(), is("endpoints-framework"));
-    assertThat(mavenCoordinates.getVersion(), is("2.0.9"));
+    
+    DefaultArtifactVersion actual = new DefaultArtifactVersion(mavenCoordinates.getVersion());
+    DefaultArtifactVersion expected = new DefaultArtifactVersion("2.2.1");
+    assertTrue(actual.compareTo(expected) >= 0);
+ 
     assertThat(mavenCoordinates.getType(), is("jar"));
     assertNull(mavenCoordinates.getClassifier());
     assertThat(libraryFile.getJavadocUri(),
@@ -132,13 +142,69 @@ public class CloudLibrariesInPluginXmlTest {
     Library objectifyLibrary = CloudLibraries.getLibrary(OBJECTIFY_LIBRARY_ID);
     assertThat(objectifyLibrary.getId(), is(OBJECTIFY_LIBRARY_ID));
     assertThat(objectifyLibrary.getName(), is("Objectify"));
-    assertThat(objectifyLibrary.getGroup(), is("appengine"));
+    assertThat(objectifyLibrary.getGroups().get(0), is("appengine"));
+    assertThat(objectifyLibrary.getJavaVersion(), is("1.8"));
+    assertThat(objectifyLibrary.getSiteUri(),
+        is(new URI("https://github.com/objectify/objectify/wiki")));
+    assertTrue(objectifyLibrary.isExport());
+
+    List<LibraryFile> allDependencies = objectifyLibrary.getAllDependencies();    
+    LibraryFile objectifyLibraryFile = null;
+    LibraryFile guavaLibraryFile = null;
+    for (LibraryFile file : allDependencies) {
+      if (file.getMavenCoordinates().getArtifactId().equals("objectify")) {
+        objectifyLibraryFile = file;
+      } else if (file.getMavenCoordinates().getArtifactId().equals("guava")) {
+        guavaLibraryFile = file;
+      }
+    }
+    assertNotNull("objectify not found", objectifyLibraryFile);
+    assertTrue("Objectify not exported", objectifyLibraryFile.isExport());
+    assertNotNull("guava not found", guavaLibraryFile);
+
+    MavenCoordinates objectifyMavenCoordinates = objectifyLibraryFile.getMavenCoordinates();
+    assertThat(objectifyMavenCoordinates.getRepository(), is("central"));
+    assertThat(objectifyMavenCoordinates.getGroupId(), is("com.googlecode.objectify"));
+    assertThat(objectifyMavenCoordinates.getArtifactId(), is("objectify"));
+    DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(
+        objectifyMavenCoordinates.getVersion());
+    assertEquals(new DefaultArtifactVersion("6.0.4"), artifactVersion);
+    assertThat(objectifyMavenCoordinates.getType(), is("jar"));
+    assertNull(objectifyMavenCoordinates.getClassifier());
+
+    assertNotNull(objectifyLibraryFile.getFilters());
+    assertTrue(objectifyLibraryFile.getFilters().isEmpty());
+    assertTrue(objectifyLibraryFile.getJavadocUri().toString().startsWith(
+        "https://www.javadoc.io/doc/com.googlecode.objectify/objectify/"));
+    
+    assertNull(guavaLibraryFile.getSourceUri());
+    assertTrue("Guava not exported", guavaLibraryFile.isExport());
+
+    MavenCoordinates guavaMavenCoordinates = guavaLibraryFile.getMavenCoordinates();
+    assertThat(guavaMavenCoordinates.getRepository(), is("central"));
+    assertThat(guavaMavenCoordinates.getGroupId(), is("com.google.guava"));
+    assertThat(guavaMavenCoordinates.getArtifactId(), is("guava"));
+    assertThat(guavaMavenCoordinates.getVersion(), is("27.1-android"));
+    assertThat(guavaMavenCoordinates.getType(), is("jar"));
+    assertNull(guavaMavenCoordinates.getClassifier());
+
+    assertNotNull(guavaLibraryFile.getFilters());
+    assertTrue(guavaLibraryFile.getFilters().isEmpty());
+  }
+
+  @Test
+  public void testObjectify6LibraryConfig() throws URISyntaxException {
+    Library objectifyLibrary = CloudLibraries.getLibrary("objectify6");
+    assertThat(objectifyLibrary.getId(), is("objectify6"));
+    assertThat(objectifyLibrary.getName(), is("Objectify"));
+    assertThat(objectifyLibrary.getGroups().get(0), is("non-appengine-standard"));
+    assertThat(objectifyLibrary.getJavaVersion(), is("1.8"));
     assertThat(objectifyLibrary.getSiteUri(),
         is(new URI("https://github.com/objectify/objectify/wiki")));
     assertTrue(objectifyLibrary.isExport());
 
     List<LibraryFile> allDependencies = objectifyLibrary.getAllDependencies();
-    assertTrue(allDependencies.size() > 2);
+    assertTrue(allDependencies.size() + " dependencies", allDependencies.size() > 2);
     
     LibraryFile objectifyLibraryFile = null;
     LibraryFile guavaLibraryFile = null;
@@ -157,14 +223,17 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(objectifyMavenCoordinates.getRepository(), is("central"));
     assertThat(objectifyMavenCoordinates.getGroupId(), is("com.googlecode.objectify"));
     assertThat(objectifyMavenCoordinates.getArtifactId(), is("objectify"));
-    assertThat(objectifyMavenCoordinates.getVersion(), is("5.1.21"));
+    DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(
+        objectifyMavenCoordinates.getVersion());
+    DefaultArtifactVersion expected = new DefaultArtifactVersion("6.0.4");
+    assertTrue(artifactVersion.compareTo(expected) >= 0);
     assertThat(objectifyMavenCoordinates.getType(), is("jar"));
     assertNull(objectifyMavenCoordinates.getClassifier());
 
     assertNotNull(objectifyLibraryFile.getFilters());
     assertTrue(objectifyLibraryFile.getFilters().isEmpty());
-    assertThat(objectifyLibraryFile.getJavadocUri(),
-        is(new URI("https://www.javadoc.io/doc/com.googlecode.objectify/objectify/5.1.21")));
+    assertTrue(objectifyLibraryFile.getJavadocUri().toString().startsWith(
+        "https://www.javadoc.io/doc/com.googlecode.objectify/objectify/"));
     
     assertNull(guavaLibraryFile.getSourceUri());
     assertTrue("Guava not exported", guavaLibraryFile.isExport());
@@ -173,7 +242,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(guavaMavenCoordinates.getRepository(), is("central"));
     assertThat(guavaMavenCoordinates.getGroupId(), is("com.google.guava"));
     assertThat(guavaMavenCoordinates.getArtifactId(), is("guava"));
-    assertThat(guavaMavenCoordinates.getVersion(), is("20.0"));
+    assertThat(guavaMavenCoordinates.getVersion(), is("27.1-android"));
     assertThat(guavaMavenCoordinates.getType(), is("jar"));
     assertNull(guavaMavenCoordinates.getClassifier());
 
@@ -186,7 +255,7 @@ public class CloudLibrariesInPluginXmlTest {
     Library servletApiLibrary = CloudLibraries.getLibrary(SERVLET_API_LIBRARY_ID);
     assertThat(servletApiLibrary.getId(), is(SERVLET_API_LIBRARY_ID));
     assertThat(servletApiLibrary.getName(), is("Servlet API 2.5"));
-    assertThat(servletApiLibrary.getGroup(), is("servlet"));
+    assertThat(servletApiLibrary.getGroups().get(0), is("servlet"));
     assertThat(servletApiLibrary.getSiteUri(),
         is(new URI("http://www.oracle.com/technetwork/java/javaee/servlet/index.html")));
     assertFalse(servletApiLibrary.isExport());
@@ -216,7 +285,7 @@ public class CloudLibrariesInPluginXmlTest {
   public void testJspApiLibraryConfig() throws URISyntaxException {
     Library jspApiLibrary = CloudLibraries.getLibrary(JSP_API_LIBRARY_ID);
     assertThat(jspApiLibrary.getId(), is(JSP_API_LIBRARY_ID));
-    assertThat(jspApiLibrary.getGroup(), is("servlet"));
+    assertThat(jspApiLibrary.getGroups().get(0), is("servlet"));
     assertThat(jspApiLibrary.getName(), is("Java Server Pages API 2.1"));
     assertThat(jspApiLibrary.getSiteUri(),
         is(new URI("http://www.oracle.com/technetwork/java/javaee/jsp/index.html")));

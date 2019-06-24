@@ -42,12 +42,13 @@ import org.eclipse.swt.widgets.Group;
 public class DefaultedPipelineOptionsComponent {
   private Group defaultsGroup;
 
-  private Button useDefaultsButton;
+  @VisibleForTesting
+  Button useDefaultsButton;
+  @VisibleForTesting
+  RunOptionsDefaultsComponent defaultOptions;
 
   private DataflowPreferences preferences;
   private Map<String, String> customValues;
-
-  private RunOptionsDefaultsComponent defaultOptions;
 
   public DefaultedPipelineOptionsComponent(Composite parent, Object layoutData,
       MessageTarget messageTarget, DataflowPreferences preferences) {
@@ -105,6 +106,10 @@ public class DefaultedPipelineOptionsComponent {
         .customValues.put(
             DataflowPreferences.GCP_TEMP_LOCATION_PROPERTY,
             customValues.get(DataflowPreferences.STAGING_LOCATION_PROPERTY));
+    this
+        .customValues.put(
+            DataflowPreferences.SERVICE_ACCOUNT_KEY_PROPERTY,
+            customValues.get(DataflowPreferences.SERVICE_ACCOUNT_KEY_PROPERTY));
     if (!isUseDefaultOptions()) {
       loadCustomValues();
     }
@@ -115,6 +120,16 @@ public class DefaultedPipelineOptionsComponent {
     if (isUseDefaultOptions()) {
       loadPreferences();
     }
+  }
+
+  @VisibleForTesting
+  boolean isEnabled() {
+    return useDefaultsButton.isEnabled();
+  }
+
+  public void setEnabled(boolean enabled) {
+    useDefaultsButton.setEnabled(enabled);
+    setWidgetsEnabled(enabled ? !useDefaultsButton.getSelection() : false);
   }
 
   private void setWidgetsEnabled(boolean enabled) {
@@ -128,6 +143,8 @@ public class DefaultedPipelineOptionsComponent {
     values.put(DataflowPreferences.STAGING_LOCATION_PROPERTY, defaultOptions.getStagingLocation());
     // TODO: Give this a separate input
     values.put(DataflowPreferences.GCP_TEMP_LOCATION_PROPERTY, defaultOptions.getStagingLocation());
+    values.put(DataflowPreferences.SERVICE_ACCOUNT_KEY_PROPERTY,
+        defaultOptions.getServiceAccountKey());
     return values;
   }
 
@@ -156,6 +173,8 @@ public class DefaultedPipelineOptionsComponent {
     // TODO: Give this a separate input
     customValues.put(DataflowPreferences.GCP_TEMP_LOCATION_PROPERTY,
         defaultOptions.getStagingLocation());
+    customValues.put(DataflowPreferences.SERVICE_ACCOUNT_KEY_PROPERTY,
+        defaultOptions.getServiceAccountKey());
   }
 
   private void loadPreferences() {
@@ -165,6 +184,8 @@ public class DefaultedPipelineOptionsComponent {
     defaultOptions.setCloudProjectText(Strings.nullToEmpty(defaultProject));
     String defaultStagingLocation = preferences.getDefaultStagingLocation();
     defaultOptions.setStagingLocationText(Strings.nullToEmpty(defaultStagingLocation));
+    String defaultKey = preferences.getDefaultServiceAccountKey();
+    defaultOptions.setServiceAccountKey(Strings.nullToEmpty(defaultKey));
   }
 
   private void loadCustomValues() {
@@ -174,6 +195,8 @@ public class DefaultedPipelineOptionsComponent {
     defaultOptions.setCloudProjectText(Strings.nullToEmpty(project));
     String stagingLocation = customValues.get(DataflowPreferences.STAGING_LOCATION_PROPERTY);
     defaultOptions.setStagingLocationText(Strings.nullToEmpty(stagingLocation));
+    String key = customValues.get(DataflowPreferences.SERVICE_ACCOUNT_KEY_PROPERTY);
+    defaultOptions.setServiceAccountKey(Strings.nullToEmpty(key));
   }
 
   public void addAccountSelectionListener(Runnable listener) {
@@ -208,5 +231,13 @@ public class DefaultedPipelineOptionsComponent {
       updateDefaultableInputValues();
     }
 
+  }
+
+  public void validate() {
+    defaultOptions.validate();
+  }
+
+  void setAccountRequired(boolean required) {
+    defaultOptions.setAccountRequired(required);
   }
 }

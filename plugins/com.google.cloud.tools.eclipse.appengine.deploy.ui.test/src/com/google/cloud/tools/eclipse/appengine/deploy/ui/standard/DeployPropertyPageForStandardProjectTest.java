@@ -18,7 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui.standard;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.AppEngineDeployPreferencesPanel;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPropertyPageTest;
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.appengine.standard.java8.AppEngineStandardFacetChangeListener;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
@@ -29,8 +29,9 @@ public class DeployPropertyPageForStandardProjectTest
     extends DeployPropertyPageTest<AppEngineDeployPreferencesPanel> {
 
   @Rule
-  public TestProjectCreator standardProjectCreator = new TestProjectCreator().withFacetVersions(
-      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
+  public TestProjectCreator standardProjectCreator = new TestProjectCreator().withFacets(
+      JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31,
+      AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8);
 
   @Override
   protected IProject getProject() {

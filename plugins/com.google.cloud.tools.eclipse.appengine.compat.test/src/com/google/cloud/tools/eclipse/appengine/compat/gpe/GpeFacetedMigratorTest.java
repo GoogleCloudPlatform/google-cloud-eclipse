@@ -21,10 +21,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import com.google.cloud.tools.eclipse.appengine.compat.gpe.GpeMigrator;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.io.IOException;
-import java.util.List;
+import java.util.Map;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -51,10 +50,14 @@ public class GpeFacetedMigratorTest {
 
   @Before
   public void setUp() throws IOException, CoreException {
-    List<IProject> projects = ProjectUtils.importProjects(getClass(),
-        "test-projects/GPE-faceted-project.zip", false /* checkBuildErrors */, monitor);
+    Map<String, IProject> projects =
+        ProjectUtils.importProjects(
+            getClass(),
+            "test-projects/GPE-faceted-project.zip",
+            false /* checkBuildErrors */,
+            monitor);
     assertEquals(1, projects.size());
-    gpeProject = projects.get(0);
+    gpeProject = projects.values().iterator().next();
   }
 
   @After

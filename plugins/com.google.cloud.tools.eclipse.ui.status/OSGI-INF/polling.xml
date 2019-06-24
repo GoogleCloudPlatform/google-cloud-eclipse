@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="start" deactivate="stop" name="polling">
+   <service>
+      <provide interface="com.google.cloud.tools.eclipse.ui.status.GcpStatusMonitoringService"/>
+   </service>
+   <reference bind="setProxyService" cardinality="0..1" interface="org.eclipse.core.net.proxy.IProxyService" name="ProxyService" policy="dynamic" unbind="unsetProxyService"/>
+   <implementation class="com.google.cloud.tools.eclipse.ui.status.PollingStatusServiceImpl"/>
+</scr:component>

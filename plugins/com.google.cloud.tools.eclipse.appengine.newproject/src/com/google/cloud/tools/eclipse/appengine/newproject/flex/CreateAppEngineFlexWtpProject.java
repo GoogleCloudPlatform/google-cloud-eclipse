@@ -119,7 +119,7 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
     addDependenciesToClasspath(newProject, libFolder, subMonitor.newChild(10));
   }
 
-  private void addDependenciesToClasspath(IProject project, IFolder folder,
+  private static void addDependenciesToClasspath(IProject project, IFolder folder,
       IProgressMonitor monitor)  throws CoreException {
     List<IClasspathEntry> newEntries = new ArrayList<>();
 

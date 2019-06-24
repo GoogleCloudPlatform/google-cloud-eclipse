@@ -19,6 +19,8 @@ package com.google.cloud.tools.eclipse.test.util.http;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.base.Preconditions;
+import com.google.common.io.CharStreams;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -53,6 +55,7 @@ public class TestHttpServer extends ExternalResource {
 
   private String requestMethod;
   private Map<String, String[]> requestParameters;
+  private String body;
   private final Map<String, String> requestHeaders = new HashMap<>();
 
   private final String expectedPath;
@@ -127,6 +130,11 @@ public class TestHttpServer extends ExternalResource {
     return requestParameters;
   }
 
+  public String getBody() {
+    Preconditions.checkState(requestHandled);
+    return body;
+  }
+
   public Map<String, String> getRequestHeaders() {
     Preconditions.checkState(requestHandled);
     return requestHeaders;
@@ -139,8 +147,9 @@ public class TestHttpServer extends ExternalResource {
         HttpServletResponse response) throws IOException, ServletException {
       Preconditions.checkState(!requestHandled);
 
-      if (request.getContentType() != null
-          && request.getContentType().startsWith("multipart/form-data")) {
+      String contentType = request.getContentType();
+      boolean isMultipart = contentType != null && contentType.startsWith("multipart/form-data");
+      if (isMultipart) {
         request.setAttribute(Request.__MULTIPART_CONFIG_ELEMENT,
             new MultipartConfigElement(System.getProperty("java.io.tmpdir")));
       }
@@ -148,10 +157,18 @@ public class TestHttpServer extends ExternalResource {
       if (target.equals("/" + expectedPath)) {
         requestHandled = true;
         requestMethod = request.getMethod();
-        requestParameters = request.getParameterMap();
         for (Enumeration<String> headers = request.getHeaderNames(); headers.hasMoreElements(); ) {
           String header = headers.nextElement();
           requestHeaders.put(header, request.getHeader(header));
+        }
+
+        
+        if ("application/x-www-form-urlencoded".equals(contentType) || isMultipart) {
+          requestParameters = request.getParameterMap();
+        } else {
+          try (BufferedReader reader = request.getReader()) {
+            body = CharStreams.toString(reader);
+          }
         }
 
         baseRequest.setHandled(true);

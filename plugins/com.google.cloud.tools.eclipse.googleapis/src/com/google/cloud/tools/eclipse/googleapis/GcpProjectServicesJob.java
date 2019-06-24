@@ -76,7 +76,7 @@ public class GcpProjectServicesJob extends FuturisticJob<List<String>> {
   @Override
   protected List<String> compute(IProgressMonitor monitor)
       throws GoogleJsonResponseException, IOException {
-    String projectId = this.projectId;
+    String originalProjectId = this.projectId;
     ServiceManagement serviceManagement = apiFactory.newServiceManagementApi(credential);
     ListServicesResponse response = null;
     Collection<String> serviceIds = new ArrayList<>();
@@ -86,7 +86,7 @@ public class GcpProjectServicesJob extends FuturisticJob<List<String>> {
       //@formatter:off
       Services.List request = serviceManagement.services().list()
           .setFields("services/serviceName")
-          .setConsumerId("project:" + projectId);
+          .setConsumerId("project:" + originalProjectId);
       //@formatter:on
       if (response != null && response.getNextPageToken() != null) {
         request.setPageToken(response.getNextPageToken());

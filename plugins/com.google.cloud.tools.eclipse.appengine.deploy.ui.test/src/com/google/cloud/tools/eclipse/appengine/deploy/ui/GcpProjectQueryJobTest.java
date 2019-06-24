@@ -28,11 +28,9 @@ import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepositoryException;
 import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
@@ -66,7 +64,7 @@ public class GcpProjectQueryJobTest {
 
     when(projectSelector.isDisposed()).thenReturn(false);
     when(projectRepository.getProjects(credential)).thenReturn(projects);
-    when(isLatestQueryJob.apply(queryJob)).thenReturn(true);
+    when(isLatestQueryJob.test(queryJob)).thenReturn(true);
   }
 
   @After
@@ -86,7 +84,7 @@ public class GcpProjectQueryJobTest {
     queryJob.join();
 
     verify(projectRepository).getProjects(credential);
-    verify(isLatestQueryJob).apply(queryJob);
+    verify(isLatestQueryJob).test(queryJob);
     verify(projectSelector).isDisposed();
     verify(projectSelector).setProjects(projects);
   }
@@ -105,7 +103,7 @@ public class GcpProjectQueryJobTest {
   @Test
   public void testRun_abandonIfNotLatestJob()
       throws InterruptedException, ProjectRepositoryException {
-    when(isLatestQueryJob.apply(queryJob)).thenReturn(false);
+    when(isLatestQueryJob.test(queryJob)).thenReturn(false);
 
     queryJob.schedule();
     queryJob.join();
@@ -126,7 +124,7 @@ public class GcpProjectQueryJobTest {
     when(projectRepository2.getProjects(staleCredential)).thenReturn(anotherProjectList);
 
     // This second job is stale, i.e., it was fired, but user has selected another credential.
-    Predicate<Job> notLatest = Predicates.alwaysFalse();
+    Predicate<Job> notLatest = job -> false;
     Job staleJob = new GcpProjectQueryJob(staleCredential, projectRepository2,
         projectSelector, dataBindingContext, notLatest);
 

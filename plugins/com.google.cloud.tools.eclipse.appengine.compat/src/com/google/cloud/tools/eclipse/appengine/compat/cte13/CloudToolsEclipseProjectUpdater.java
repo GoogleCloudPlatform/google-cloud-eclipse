@@ -35,6 +35,8 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -57,7 +59,7 @@ public class CloudToolsEclipseProjectUpdater {
       IJavaProject javaProject = JavaCore.create(project);
       for (IClasspathEntry entry : javaProject.getRawClasspath()) {
         IPath containerPath = entry.getPath();
-        if (isLibraryContainer(entry, containerPath)
+        if (LibraryClasspathContainer.isEntry(entry)
             && !CloudLibraries.MASTER_CONTAINER_ID.equals(containerPath.segment(1))) {
           return true;
         }
@@ -72,16 +74,19 @@ public class CloudToolsEclipseProjectUpdater {
    * Upgrade this specific project.
    */
   public static IStatus updateProject(IProject project, SubMonitor progress) {
-    progress.beginTask(Messages.getString("updating.project", project.getName()), 50); //$NON-NLS-1$
+    progress.beginTask(
+        Messages.getString("updating.project", project.getName()), 51); // $NON-NLS-1$
     IJavaProject javaProject = JavaCore.create(project);
 
+    ISchedulingRule rule = BuildPath.resolvingRule(javaProject);
+    Job.getJobManager().beginRule(rule, progress.newChild(1));
     try {
       // Identify the different libraries that should be added and classpath entries to be preserved
       List<IClasspathEntry> remainingEntries = new ArrayList<>();
       Set<String> libraryIds = new HashSet<>();
       for (IClasspathEntry entry : javaProject.getRawClasspath()) {
         IPath containerPath = entry.getPath();
-        if (isLibraryContainer(entry, containerPath)
+        if (LibraryClasspathContainer.isEntry(entry)
             && !CloudLibraries.MASTER_CONTAINER_ID.equals(containerPath.segment(1))) {
           libraryIds.add(containerPath.segment(1));
         } else {
@@ -106,8 +111,6 @@ public class CloudToolsEclipseProjectUpdater {
       }
       progress.worked(5);
 
-      // remove "appengine-api" as appengine-api-1.0-sdk now included in the servlet container
-      libraryIds.remove("appengine-api"); //$NON-NLS-1$
       // remove "googlecloudcore" and "googleapiclient" as they were utility definitions, now
       // pulled from library dependencies
       libraryIds.remove("googlecloudcore"); //$NON-NLS-1$
@@ -129,15 +132,8 @@ public class CloudToolsEclipseProjectUpdater {
     } catch (CoreException ex) {
       return StatusUtil.error(CloudToolsEclipseProjectUpdater.class,
           Messages.getString("unable.to.update.project", project.getName()), ex); //$NON-NLS-1$
+    } finally {
+      Job.getJobManager().endRule(rule);
     }
   }
-
-  private static boolean isLibraryContainer(IClasspathEntry entry, IPath containerPath) {
-    return entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER
-        && containerPath.segmentCount() == 2
-        && LibraryClasspathContainer.CONTAINER_PATH_PREFIX
-            .equals(containerPath.segment(0));
-  }
-
-
 }

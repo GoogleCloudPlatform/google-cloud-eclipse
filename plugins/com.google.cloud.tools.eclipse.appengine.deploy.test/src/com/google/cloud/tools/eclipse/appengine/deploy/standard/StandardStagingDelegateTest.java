@@ -17,29 +17,33 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
-import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
+import com.google.cloud.tools.appengine.operations.AppCfg;
+import com.google.cloud.tools.appengine.operations.AppEngineWebXmlProjectStaging;
+import com.google.cloud.tools.appengine.operations.CloudSdk;
+import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkNotFoundException;
+import com.google.cloud.tools.appengine.operations.cloudsdk.process.LegacyProcessHandler;
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.appengine.deploy.util.CloudSdkProcessWrapper;
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.appengine.standard.java8.AppEngineStandardFacetChangeListener;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.ui.console.MessageConsoleStream;
+import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,8 +53,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class StandardStagingDelegateTest {
 
-  @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacetVersions(
-      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
+  @Rule public TestProjectCreator projectCreator =
+      new TestProjectCreator().withFacets(JavaFacet.VERSION_1_8);
 
   @Mock private CloudSdkProcessWrapper cloudSdkWrapper;
 
@@ -59,19 +63,29 @@ public class StandardStagingDelegateTest {
   private IPath safeWorkDirectory;
   private IPath stagingDirectory;
 
-  @Before
-  public void setUp() {
-    project = projectCreator.getProject();
+  private void setUpProject(IProjectFacetVersion... facetVersions)
+      throws CloudSdkNotFoundException {
+    project = projectCreator.withFacets(facetVersions).getProject();
     safeWorkDirectory = project.getFolder("safe-work-directory").getLocation();
     stagingDirectory = project.getFolder("staging-result").getLocation();
 
-    CloudSdk cloudSdk = new CloudSdk.Builder()
-        .addStdOutLineListener(new OutputListener())
-        .addStdErrLineListener(new OutputListener())
-        .exitListener(new ExitListener())
+    CloudSdk cloudSdk = new CloudSdk.Builder().build();
+    LegacyProcessHandler processHandler = LegacyProcessHandler.builder()
+        .addStdOutLineListener(line -> { System.out.println("    [Cloud SDK] " + line); })
+        .addStdErrLineListener(line -> { System.out.println("    [Cloud SDK] " + line); })
+        .setExitListener(exitCode -> { cloudSdkExitCode = exitCode; })
         .build();
+    AppEngineWebXmlProjectStaging staging =
+        AppCfg.builder(cloudSdk).build().newStaging(processHandler);
 
-    when(cloudSdkWrapper.getCloudSdk()).thenReturn(cloudSdk);
+    when(cloudSdkWrapper.getAppEngineStandardStaging(
+        any(Path.class), any(MessageConsoleStream.class), any(MessageConsoleStream.class)))
+        .thenReturn(staging);
+  }
+
+  private void setUpAppEngineStandard8Project() throws CloudSdkNotFoundException {
+    setUpProject(
+        WebFacetUtils.WEB_31, AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8);
   }
 
   @After
@@ -80,7 +94,8 @@ public class StandardStagingDelegateTest {
   }
 
   @Test
-  public void testStage() {
+  public void testStage() throws CloudSdkNotFoundException {
+    setUpAppEngineStandard8Project();
     StagingDelegate delegate = new StandardStagingDelegate(project, null, cloudSdkWrapper);
     delegate.stage(stagingDirectory, safeWorkDirectory, null, null,
         new NullProgressMonitor());
@@ -92,7 +107,8 @@ public class StandardStagingDelegateTest {
   }
 
   @Test
-  public void testGetOptionalConfigurationFilesDirectory() {
+  public void testGetOptionalConfigurationFilesDirectory() throws CloudSdkNotFoundException {
+    setUpAppEngineStandard8Project();
     StagingDelegate delegate = new StandardStagingDelegate(project, null, cloudSdkWrapper);
     delegate.stage(stagingDirectory, safeWorkDirectory, null, null,
         new NullProgressMonitor());
@@ -102,27 +118,26 @@ public class StandardStagingDelegateTest {
   }
 
   @Test
-  public void testSetJavaHome() {
+  public void testSetJavaHome() throws CloudSdkNotFoundException {
+    setUpAppEngineStandard8Project();
     Path javaHome = Paths.get("/some/path");
     StagingDelegate delegate = new StandardStagingDelegate(project, javaHome, cloudSdkWrapper);
     delegate.stage(stagingDirectory, safeWorkDirectory, null, null,
         new NullProgressMonitor());
 
-    verify(cloudSdkWrapper).setUpStandardStagingCloudSdk(
+    verify(cloudSdkWrapper).getAppEngineStandardStaging(
         eq(javaHome), any(MessageConsoleStream.class), any(MessageConsoleStream.class));
   }
 
-  private static class OutputListener implements ProcessOutputLineListener {
-    @Override
-    public void onOutputLine(String line) {
-      System.out.println("    [Cloud SDK] " + line);
-    }
-  }
+  @Test
+  public void testStage_errorStatusReported() throws CloudSdkNotFoundException {
+    setUpProject();
+    StagingDelegate delegate = new StandardStagingDelegate(project, null, cloudSdkWrapper);
+    IStatus status = delegate.stage(stagingDirectory, safeWorkDirectory,
+        null, null, new NullProgressMonitor());
 
-  private class ExitListener implements ProcessExitListener {
-    @Override
-    public void onExit(int exitCode) {
-      cloudSdkExitCode = exitCode;
-    }
+    assertFalse(status.isOK());
+    assertEquals("problem publishing WAR", status.getMessage());
+    cloudSdkExitCode = 0;  // Make the Cloud SDK check in tearDown() happy.
   }
 }

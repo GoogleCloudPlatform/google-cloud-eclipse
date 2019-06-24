@@ -1,23 +1,26 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Cloud Tools for Eclipse App Engine Facets
+Bundle-Name: %pluginName
+Automatic-Module-Name: com.google.cloud.tools.eclipse.appengine.facets
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.facets;singleton:=true
 Bundle-Version: 0.1.0.qualifier
-Bundle-Vendor: Google Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Vendor: %providerName
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
-Require-Bundle: com.google.cloud.tools.appengine;bundle-version="0.4.1",
- com.google.guava;bundle-version="[20.0.0,21.0.0)",
+Require-Bundle: com.google.cloud.tools.appengine;bundle-version="0.7.6",
+ com.google.guava;bundle-version="[27.0.0,28.0.0)",
  org.eclipse.core.resources,
  org.eclipse.jdt.core,
  org.eclipse.jst.j2ee,
  org.eclipse.jst.j2ee.web,
  org.eclipse.m2e.maven.runtime,
- org.eclipse.swt
+ org.eclipse.ui.navigator,
+ org.eclipse.ui
 Import-Package: com.google.cloud.tools.eclipse.appengine.deploy.flex,
- com.google.cloud.tools.eclipse.sdk.ui.preferences,
+ com.google.cloud.tools.eclipse.appengine.ui,
  com.google.cloud.tools.eclipse.ui.util,
+ com.google.cloud.tools.eclipse.ui.util.images,
  com.google.cloud.tools.eclipse.util,
  com.google.cloud.tools.eclipse.util.io,
  com.google.cloud.tools.eclipse.util.status,
@@ -26,7 +29,7 @@ Import-Package: com.google.cloud.tools.eclipse.appengine.deploy.flex,
  org.eclipse.core.runtime.jobs,
  org.eclipse.jst.common.project.facet.core,
  org.eclipse.jst.server.core,
- org.eclipse.ui.handlers,
+ org.eclipse.ui.actions,
  org.eclipse.wst.common.frameworks.datamodel,
  org.eclipse.wst.common.project.facet.core,
  org.eclipse.wst.common.project.facet.core.events,

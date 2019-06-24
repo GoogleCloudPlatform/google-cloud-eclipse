@@ -153,7 +153,7 @@ public class ProjectSelectorTest {
     assertFalse(projectSelector.isProjectIdAvailable(""));
   }
 
-  private List<GcpProject> getUnsortedProjectList() {
+  private static List<GcpProject> getUnsortedProjectList() {
     return Arrays.asList(new GcpProject("b", "b"),
                          new GcpProject("a", "a"),
                          new GcpProject("d", "d"),

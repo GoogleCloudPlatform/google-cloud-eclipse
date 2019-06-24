@@ -17,8 +17,8 @@
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,8 +27,9 @@ import java.nio.file.attribute.FileTime;
 import java.util.Arrays;
 import java.util.Comparator;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -62,9 +63,10 @@ public class CleanupOldDeploysJobTest {
 
     IPath tempFolderPath = new Path(tempFolder.getRoot().toString());
     CleanupOldDeploysJob job = new CleanupOldDeploysJob(tempFolderPath);
-    job.run(mock(IProgressMonitor.class));
+    assertEquals(Status.OK_STATUS, job.run(new NullProgressMonitor()));
 
     File[] directoriesKept = tempFolder.getRoot().listFiles();
+    assertThat(directoriesKept.length, is(expectedDirectoriesToKeep.length));
     Arrays.sort(directoriesKept, new Comparator<File>() {
 
       @Override
@@ -72,7 +74,6 @@ public class CleanupOldDeploysJobTest {
         return o1.getName().compareTo(o2.getName());
       }
     });
-    assertThat(directoriesKept.length, is(expectedDirectoriesToKeep.length));
     for (int i = 0; i < expectedDirectoriesToKeep.length; i++) {
       assertThat(directoriesKept[i].getName(), is(expectedDirectoriesToKeep[i]));
     }

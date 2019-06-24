@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Google Inc. All Rights Reserved.
+ * Copyright 2017 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,16 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.WarPublisher;
+import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.ZipUtil;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -33,18 +37,23 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
+import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.junit.AfterClass;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+@RunWith(SWTBotJunit4ClassRunner.class)
 public abstract class ChildModuleWarPublishTest {
 
-  @Rule
-  public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
+  @Rule public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
   private static final IProgressMonitor monitor = new NullProgressMonitor();
-  private static List<IProject> allProjects;
+  private static Map<String, IProject> allProjects;
   private static IProject project;
+
+  private static final SWTWorkbenchBot bot = new SWTWorkbenchBot();
 
   protected abstract List<String> getExpectedChildModuleNames();
 
@@ -52,19 +61,28 @@ public abstract class ChildModuleWarPublishTest {
       throws IOException, CoreException {
     allProjects = ProjectUtils.importProjects(ChildModuleWarPublishTest.class,
         testZip, false /* checkBuildErrors */, monitor);
-    for (IProject loaded : allProjects) {
-      if (loaded.getName().equals(mainProject)) {
-        project = loaded;
-      }
-    }
+    project = allProjects.get(mainProject);
     assertNotNull(project);
   }
 
   @AfterClass
-  public static void tearDown() throws CoreException {
-    ProjectUtils.waitForProjects(allProjects);
-    for (IProject project : allProjects) {
-      project.delete(true, null);
+  public static void tearDown() {
+    // Collapse projects to avoid "No IModelProvider exists for project" errors
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=511541
+    SwtBotProjectActions.collapseProjects(bot);
+
+    // close editors, so no property changes are dispatched on delete
+    bot.closeAllEditors();
+
+    IProject[] projects = allProjects.values().toArray(new IProject[0]);
+    ProjectUtils.waitForProjects(projects);
+    if (projects.length > 0) {
+      try {
+        projects[0].getWorkspace().delete(projects, true, null);
+      } catch (CoreException | RuntimeException ex) {
+        Logger.getLogger(ChildModuleWarPublishTest.class.getName()).log(Level.WARNING,
+            ex.getMessage(), ex);
+      }
     }
   }
 

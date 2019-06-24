@@ -41,8 +41,8 @@ import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.IMavenProjectRegistry;
 
 /**
- * {@link DataflowDependencyManager} provides {@code Dependency} instances for Dataflow and the
- * Dataflow Examples.
+ * {@link DataflowDependencyManager} parses a project's POM to determine possible versions of the
+ * {@link DataflowMavenCoordinates Dataflow Java SDK}.
  */
 public class DataflowDependencyManager {
 
@@ -125,7 +125,24 @@ public class DataflowDependencyManager {
         || Artifact.RELEASE_VERSION.equals(dependency.getVersion()));
   }
 
+  /**
+   * Returns a possible version range from the given project's POM.
+   * 
+   * @throws IllegalStateException if the version range is invalid
+   */
   public VersionRange getDataflowVersionRange(IProject project) {
+    VersionRange actual = getActualDataflowVersionRange(project);
+    return actual != null ? actual : allVersions();
+  }
+
+  /**
+   * Returns the encoded version range from the given project's POM, or {@code null} if no version
+   * is specified.
+   * 
+   * @return the version range or {@code null} if a version range is not specified
+   * @throws IllegalStateException if the encoded version range is not a valid version specification
+   */
+  private VersionRange getActualDataflowVersionRange(IProject project) {
     Model model = getModelFromProject(project);
     if (model != null) {
       Dependency dependency = getDataflowDependencyFromModel(model);
@@ -142,10 +159,10 @@ public class DataflowDependencyManager {
         }
       }
     }
-    return allVersions();
+    return null;
   }
 
-  private VersionRange allVersions() {
+  private static VersionRange allVersions() {
     try {
       return VersionRange.createFromVersionSpec("[1.0.0,)");
     } catch (InvalidVersionSpecificationException e) {
@@ -155,7 +172,10 @@ public class DataflowDependencyManager {
   }
 
   public MajorVersion getProjectMajorVersion(IProject project) {
-    VersionRange projectVersionRange = getDataflowVersionRange(project);
+    VersionRange projectVersionRange = getActualDataflowVersionRange(project);
+    if (projectVersionRange == null) {
+      return null;
+    }
     if (projectVersionRange.getRecommendedVersion() != null) {
       return MajorVersion.fromVersion(projectVersionRange.getRecommendedVersion());
     } else {
