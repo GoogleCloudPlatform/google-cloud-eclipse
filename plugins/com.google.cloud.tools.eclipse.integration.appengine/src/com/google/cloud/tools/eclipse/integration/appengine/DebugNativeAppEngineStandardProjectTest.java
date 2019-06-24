@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.integration.appengine;
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -128,9 +129,7 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
         getUrlContents(new URL("http://localhost:8080/hello"), (int) SWTBotPreferences.TIMEOUT));
 
     // Ensure debugger has connected by looking for well-known thread
-    assertNotNull(
-        SwtBotTreeUtilities.findItem(
-            bot, launchTree, item -> "Thread [main] (Running)".equals(item.getText())));
+    assertTrue(SwtBotTreeUtilities.hasChild(bot, launchTree, is("Thread [main] (Running)")));
 
     SwtBotTreeUtilities.waitUntilTreeContainsText(
         bot, allItems[0], "App Engine Standard at localhost");
