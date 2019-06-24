@@ -253,8 +253,9 @@ public class SwtBotTreeUtilities {
           while (!stack.isEmpty()) {
             TreeItem parent = stack.removeFirst();
             items = parent.getItems();
-            // detect the situation identified in
+            // If this assertion fails, it may be due to
             // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2569
+            // and may require applying the workaround to collapse and re-expand the node
             assertFalse(
                 "workaround may be required", items.length == 1 && "".equals(items[0].getText()));
             for (TreeItem item : items) {
