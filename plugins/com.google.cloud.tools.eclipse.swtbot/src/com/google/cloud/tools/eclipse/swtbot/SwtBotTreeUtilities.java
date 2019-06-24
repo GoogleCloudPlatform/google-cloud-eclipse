@@ -238,6 +238,7 @@ public class SwtBotTreeUtilities {
     waitUntilTreeHasItems(bot, tree);
     SWTBotTreeItem[] items = tree.getAllItems();
     for (SWTBotTreeItem item : items) {
+      System.out.println("findItem: checking top-level item: " + item.getText());
       if (condition.test(item)) {
         return item;
       }
@@ -255,6 +256,7 @@ public class SwtBotTreeUtilities {
         items = parent.getItems();
       }
       for (SWTBotTreeItem item : items) {
+        System.out.println("findItem: checking child item: " + item.getText());
         if (condition.test(item)) {
           return item;
         }
