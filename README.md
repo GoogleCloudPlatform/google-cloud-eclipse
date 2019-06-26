@@ -189,7 +189,10 @@ target platform whenever dependencies are updated.
       contains the project.
 
    4. Under `Projects:` the `pom.xml` files representing modules should be
-      displayed. Make sure that all of them are selected _except_ the sub-directories under `eclipse`, and click `Finish`.
+      displayed. Make sure that all of them are selected _except_ 
+      verify_feature_completeness and the sub-directories under 
+      `eclipse`. You probably need to explicitly unselect these
+      projects. Click `Finish`.
 
       - The subprojects under the `eclipse` directory define target platforms for the Tycho build. It's easier to edit the files from the `eclipse-setup` project.
 
