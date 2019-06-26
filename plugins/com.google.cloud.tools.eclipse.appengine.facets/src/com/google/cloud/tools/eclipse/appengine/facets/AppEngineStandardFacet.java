@@ -121,7 +121,6 @@ public class AppEngineStandardFacet {
     return Boolean.TRUE == obsoleteProperty;
   }
 
-
   /**
    * Return the App Engine standard facet for the given project, or {@code null} if none.
    */
@@ -139,8 +138,8 @@ public class AppEngineStandardFacet {
 
   /**
    * Check that the given Servlet API version string (expected to be from the
-   * <tt>&lt;web-app version="xxx"&gt;</tt> attribute), is compatible with this project's App Engine
-   * settings.
+   * <code>&lt;web-app version="N.N"&gt;</code> attribute), is compatible with
+   * this project's App Engine settings.
    *
    * @return {@code true} if supported or {@code false} otherwise
    * @throws NullPointerException if the project does not have an App Engine Standard facet
