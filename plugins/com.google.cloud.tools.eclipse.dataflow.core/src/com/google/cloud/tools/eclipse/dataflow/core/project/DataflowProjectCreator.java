@@ -58,10 +58,15 @@ import org.eclipse.m2e.core.project.ProjectImportConfiguration;
 public class DataflowProjectCreator implements IRunnableWithProgress {
 
   private static final String DEFAULT_JAVA_VERSION = JavaCore.VERSION_1_8;
+  
+  // blacklist everything we're likely to see except 1.8. This needs to change when
+  // we get a minute to update to Beam.
   private static final List<String> JAVA_VERSION_BLACKLIST =
       Collections.unmodifiableList(Arrays.asList(JavaCore.VERSION_1_1, JavaCore.VERSION_1_2,
           JavaCore.VERSION_1_3, JavaCore.VERSION_1_4, JavaCore.VERSION_1_5, 
-          JavaCore.VERSION_1_6, JavaCore.VERSION_1_7, JavaCore.VERSION_CLDC_1_1));
+          JavaCore.VERSION_1_6, JavaCore.VERSION_1_7, JavaCore.VERSION_CLDC_1_1,
+          JavaCore.VERSION_9, JavaCore.VERSION_10,
+          "11", "12", "13")); // versions not yet available as constants
 
   private final IProjectConfigurationManager projectConfigurationManager;
 
