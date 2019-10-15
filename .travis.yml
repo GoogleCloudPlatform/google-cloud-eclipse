@@ -30,8 +30,10 @@ matrix:
       env: ECLIPSE_TARGET=2018-09
     - name: "Eclipse 2018-09 (4.9) on Java 11"
       jdk: openjdk11
+      dist: trusty
       env: ECLIPSE_TARGET=2018-09 MAVEN_FLAGS='--toolchains=.travisci/toolchains.xml'
     - name: "Eclipse 2018-12 (4.10) on Java 11"
+      dist: trusty
       jdk: openjdk11
       env: ECLIPSE_TARGET=2018-12 MAVEN_FLAGS='--toolchains=.travisci/toolchains.xml'
 env:
