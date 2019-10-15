@@ -55,6 +55,12 @@ Maven for building Eclipse bundles and features.
 
 ## Running Tests
 
+If you're using Goobuntu, first point JAVA_HOME at a stock OpenJDK, not at the Google JDK:
+
+```sh
+$ export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+```
+
 If all you want is to run tests, just do `mvn verify`.
 
 However, the integration tests will interfere with your display, disrupt your using your computer, and likely fail if you touch the screen while the integration tests are running. A nice solution on Unix-like systems is to do `xvfb-run mvn verify`. (Install [Xvfb](https://linux.die.net/man/1/xvfb) if necessary.) `xvfb-run` will use a virtual display, and you and the tests will not be disrupted.
