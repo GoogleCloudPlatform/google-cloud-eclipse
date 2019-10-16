@@ -18,7 +18,7 @@ location "http://dadacoalition.org/yedit/" {
   org.dadacoalition.yedit.feature.feature.group
 }
 
-// SWTBot 2.7.0 was released with Photon, and supports Oxygen, and Photon
-location "http://download.eclipse.org/technology/swtbot/releases/2.7.0/" {
+// SWTBot supports very old releases (https://wiki.eclipse.org/SWTBot#Latest_Release) 
+location "http://download.eclipse.org/technology/swtbot/releases/latest/" {
   org.eclipse.swtbot.eclipse.feature.group
 }

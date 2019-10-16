@@ -17,6 +17,7 @@
     <module>photon</module>
     <module>eclipse-2018-09</module>
     <module>eclipse-2018-12</module>
+    <module>eclipse-latest</module> <!-- points to the latest build -->
   </modules>
 
   <profiles>

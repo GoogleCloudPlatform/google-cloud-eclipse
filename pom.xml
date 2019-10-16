@@ -426,28 +426,27 @@
          <jettyMinVersion>9.3</jettyMinVersion>
          <jettyMaxVersion>9.5</jettyMaxVersion>
       </properties>
-      <repositories>
-        <repository>
-          <id>eclipse-latest</id>
-          <url>https://download.eclipse.org/releases/latest</url>
-          <layout>p2</layout>
-        </repository>
-        <repository>
-          <id>orbit</id>
-          <url>http://download.eclipse.org/tools/orbit/downloads/latest-R/</url>
-          <layout>p2</layout>
-        </repository>
-        <repository>
-          <id>yedit</id>
-          <url>http://dadacoalition.org/yedit/</url>
-          <layout>p2</layout>
-        </repository>
-        <repository>
-          <id>swtbot</id>
-          <url>http://download.eclipse.org/technology/swtbot/releases/2.7.0/</url>
-          <layout>p2</layout>
-        </repository>
-      </repositories>
+      <!-- build against a known target platform: must be regenerated after a new release -->
+      <modules>
+        <module>eclipse/eclipse-latest</module>
+      </modules>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>target-platform-configuration</artifactId>
+            <configuration>
+            <target>
+              <artifact>
+                <groupId>com.google.cloud.tools.eclipse</groupId>
+                <artifactId>gcp-eclipse-latest</artifactId>
+                <version>4.99.0-SNAPSHOT</version>
+              </artifact>
+            </target>
+           </configuration>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
 
     <profile>
@@ -582,7 +581,6 @@
         <jgit.dirtyWorkingTree>error</jgit.dirtyWorkingTree>
       </properties>
       <modules>
-        <module>eclipse/ide-target-platform</module>
         <module>build/verify-feature-completeness</module>
       </modules>
     </profile>

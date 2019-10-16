@@ -19,13 +19,14 @@ matrix:
     - name: "Latest Eclipse IDE release on Java 8"
       jdk: oraclejdk8
       dist: trusty
+      env: MAVEN_FLAGS='-Pjacoco'
     - name: "Latest Eclipse IDE release on Java 11"
       jdk: openjdk11
       dist: trusty
     - name: "Eclipse Photon (4.8) on Java 8"
       jdk: oraclejdk8
       dist: trusty
-      env: MAVEN_FLAGS='-Pjacoco'
+      env: ECLIPSE_TARGET=photon
     - name: "Eclipse 2018-09 (4.9) on Java 8"
       jdk: oraclejdk8
       dist: trusty
