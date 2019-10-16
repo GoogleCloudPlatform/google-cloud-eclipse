@@ -18,17 +18,22 @@ matrix:
   include:
     - name: "Eclipse Oxygen (4.7) on Java 8"
       jdk: oraclejdk8
+      dist: trusty
       env: ECLIPSE_TARGET=oxygen
     - name: "Eclipse Photon (4.8) on Java 8"
       jdk: oraclejdk8
+      dist: trusty
       env: MAVEN_FLAGS='-Pjacoco'
     - name: "Eclipse 2018-09 (4.9) on Java 8"
       jdk: oraclejdk8
+      dist: trusty
       env: ECLIPSE_TARGET=2018-09
     - name: "Eclipse 2018-09 (4.9) on Java 11"
       jdk: openjdk11
+      dist: trusty
       env: ECLIPSE_TARGET=2018-09 MAVEN_FLAGS='--toolchains=.travisci/toolchains.xml'
     - name: "Eclipse 2018-12 (4.10) on Java 11"
+      dist: trusty
       jdk: openjdk11
       env: ECLIPSE_TARGET=2018-12 MAVEN_FLAGS='--toolchains=.travisci/toolchains.xml'
 env:

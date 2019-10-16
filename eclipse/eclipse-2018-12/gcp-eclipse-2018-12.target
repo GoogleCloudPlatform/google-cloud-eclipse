@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde?>
 <!-- generated with https://github.com/eclipse-cbi/targetplatform-dsl -->
-<target name="GCP for Eclipse 2018-12" sequenceNumber="1547139021">
+<target name="GCP for Eclipse 2018-12" sequenceNumber="1571238366">
   <locations>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
       <unit id="org.eclipse.sdk.feature.group" version="4.10.0.v20181206-1038"/>
@@ -27,7 +27,7 @@
       <unit id="org.eclipse.wst.web_sdk.feature.feature.group" version="3.11.0.v201807251925"/>
       <unit id="org.eclipse.jst.enterprise_sdk.feature.feature.group" version="3.8.1.v201802202154"/>
       <unit id="org.eclipse.wst.server_adapters.sdk.feature.feature.group" version="3.2.601.v201802152148"/>
-      <repository location="http://download.eclipse.org/webtools/downloads/drops/R3.12.0/S-3.12.0.RC1-20181130055351/repository"/>
+      <repository location="http://download.eclipse.org/webtools/downloads/drops/R3.12.0/R-3.12.0-20181130055351/repository"/>
     </location>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
       <unit id="org.eclipse.linuxtools.docker.feature.feature.group" version="4.0.2.201809272014"/>
