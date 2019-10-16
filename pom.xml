@@ -581,6 +581,7 @@
         <jgit.dirtyWorkingTree>error</jgit.dirtyWorkingTree>
       </properties>
       <modules>
+        <module>eclipse/ide-target-platform</module>
         <module>build/verify-feature-completeness</module>
       </modules>
     </profile>
