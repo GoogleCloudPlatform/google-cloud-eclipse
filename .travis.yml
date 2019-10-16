@@ -16,10 +16,12 @@ install:
 # We run jacoco on photon
 matrix:
   include:
-    - name: "Eclipse Oxygen (4.7) on Java 8"
+    - name: "Latest Eclipse IDE release on Java 8"
       jdk: oraclejdk8
       dist: trusty
-      env: ECLIPSE_TARGET=oxygen
+    - name: "Latest Eclipse IDE release on Java 11"
+      jdk: openjdk11
+      dist: trusty
     - name: "Eclipse Photon (4.8) on Java 8"
       jdk: oraclejdk8
       dist: trusty
