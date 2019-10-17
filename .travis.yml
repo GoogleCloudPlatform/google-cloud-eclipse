@@ -17,12 +17,13 @@ install:
 matrix:
   include:
     - name: "Latest Eclipse IDE release on Java 8"
-      dist: trusty
       jdk: oraclejdk8
+      dist: trusty
       env: MAVEN_FLAGS='-Pjacoco'
     - name: "Latest Eclipse IDE release on Java 11"
-      dist: trusty
       jdk: openjdk11
+      dist: trusty
+      env: MAVEN_FLAGS='--toolchains=.travisci/toolchains.xml'
     - name: "Eclipse Photon (4.8) on Java 8"
       jdk: oraclejdk8
       dist: trusty
@@ -36,8 +37,8 @@ matrix:
       dist: trusty
       env: ECLIPSE_TARGET=2018-09 MAVEN_FLAGS='--toolchains=.travisci/toolchains.xml'
     - name: "Eclipse 2018-12 (4.10) on Java 11"
-      dist: trusty
       jdk: openjdk11
+      dist: trusty
       env: ECLIPSE_TARGET=2018-12 MAVEN_FLAGS='--toolchains=.travisci/toolchains.xml'
 env:
   global:
