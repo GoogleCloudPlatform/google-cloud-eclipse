@@ -9,7 +9,7 @@ before_install:
   - sed -i.bak -e 's|https://nexus.codehaus.org/snapshots/|https://oss.sonatype.org/content/repositories/codehaus-snapshots/|g' ~/.m2/settings.xml
 install: 
   # use mvn ≥ 3.3.9 to ensure faulty test exit states fail the build (#1276)
-  - mvn -B -N io.takari:maven:wrapper -Dmaven=3.5.0
+  - mvn -B -N io.takari:maven:wrapper -Dmaven=3.5.4
   # download and install Cloud SDK (may be cached)
   - build/install-cloudsdk.sh 241.0.0 $HOME
 # ECLIPSE_TARGET is the targeted platform: photon is the default target
