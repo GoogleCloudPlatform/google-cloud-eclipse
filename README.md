@@ -388,3 +388,8 @@ errors such as `java.lang.String` not found and `java.lang.Exception`
 not found indicate a misconfigured _jdkHome_.  With the introduction of
 _Java modules_ with Java 9, there is no longer a separate JRE distribution.
 
+### Clearing the Travis cache
+
+If a particular CI build in the matrix (e.g. Java 8 Eclipse 4.8 on push) appears to be
+reproducibly failing while other builds pass, try clearing the cache on Travis.
+To do so ????
