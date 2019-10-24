@@ -150,7 +150,10 @@ public class TestHttpServer extends ExternalResource {
       String contentType = request.getContentType();
       boolean isMultipart = contentType != null && contentType.startsWith("multipart/form-data");
       if (isMultipart) {
-        request.setAttribute(Request.__MULTIPART_CONFIG_ELEMENT,
+        // Use explicit multipart string as Request.__MULTIPART_CONFIG_ELEMENT was renamed to
+        // MULTIPART_CONFIG_ELEMENT in Jetty 9.4.20
+        request.setAttribute(
+            "org.eclipse.jetty.multipartConfig",
             new MultipartConfigElement(System.getProperty("java.io.tmpdir")));
       }
 
