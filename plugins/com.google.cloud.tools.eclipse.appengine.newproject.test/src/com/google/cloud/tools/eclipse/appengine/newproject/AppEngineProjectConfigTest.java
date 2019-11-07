@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -92,5 +93,12 @@ public class AppEngineProjectConfigTest {
     assertEquals("group.foo", config.getMavenGroupId());
     assertEquals("artifact.bar", config.getMavenArtifactId());
     assertEquals("version.baz", config.getMavenVersion());
+  }
+  
+  @Test
+  public void testEntryPoint() {
+    assertNull(config.getEntryPoint());
+    config.setEntryPoint("java -Xmx64m -jar your-artifact.jar");
+    assertEquals("java -Xmx64m -jar your-artifact.jar", config.getEntryPoint());
   }
 }

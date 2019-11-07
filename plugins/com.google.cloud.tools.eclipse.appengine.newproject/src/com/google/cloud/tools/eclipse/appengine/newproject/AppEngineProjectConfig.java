@@ -40,6 +40,7 @@ public class AppEngineProjectConfig {
   private String mavenGroupId;
   private String mavenArtifactId;
   private String mavenVersion;
+  private String entryPoint;
 
   void setPackageName(String name) {
     packageName = name;
@@ -113,5 +114,13 @@ public class AppEngineProjectConfig {
 
   String getMavenVersion() {
     return mavenVersion;
+  }
+
+  void setEntryPoint(String entryPoint) {
+    this.entryPoint = entryPoint;
+  }
+
+  String getEntryPoint() {
+    return entryPoint;
   }
 }
