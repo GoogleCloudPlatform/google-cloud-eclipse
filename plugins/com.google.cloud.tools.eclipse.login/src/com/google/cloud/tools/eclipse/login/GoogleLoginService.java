@@ -62,7 +62,7 @@ public class GoogleLoginService implements IGoogleLoginService {
    */
   public static String getGoogleLoginUrl(String redirectUrl) {
     return new GoogleAuthorizationCodeRequestUrl(Constants.getOAuthClientId(), redirectUrl,
-        GoogleLoginService.OAUTH_SCOPES).toString();
+        OAUTH_SCOPES).toString();
   }
 
   private Set<Account> accounts = new HashSet<>();

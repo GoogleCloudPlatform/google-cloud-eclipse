@@ -91,7 +91,7 @@ public class AnalyticsPingManager {
   public static synchronized AnalyticsPingManager getInstance() {
     if (instance == null) {
       String clearCutUrl = null;
-      if (!Platform.inDevelopmentMode() && isTrackingIdDefined()) {
+      if (!Platform.inDevelopmentMode()) {
         // Enable only in production environment.
         clearCutUrl = CLEAR_CUT_COLLECTION_URL;
       }
@@ -99,11 +99,6 @@ public class AnalyticsPingManager {
           new ConcurrentLinkedQueue<PingEvent>());
     }
     return instance;
-  }
-
-  private static boolean isTrackingIdDefined() {
-    return Constants.ANALYTICS_TRACKING_ID != null
-        && Constants.ANALYTICS_TRACKING_ID.startsWith("UA-");
   }
 
   @VisibleForTesting

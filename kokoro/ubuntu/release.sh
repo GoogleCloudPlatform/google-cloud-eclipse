@@ -17,13 +17,11 @@ gcloud components install app-engine-java --quiet
 
 echo "OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID}"
 echo "OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET}"
-echo "ANALYTICS_TRACKING_ID: ${ANALYTICS_TRACKING_ID}"
 echo "PRODUCT_VERSION_SUFFIX: "${PRODUCT_VERSION_SUFFIX}
 
 # Exit if undefined (zero-length).
 test -n "${OAUTH_CLIENT_ID}"
 test -n "${OAUTH_CLIENT_SECRET}"
-test -n "${ANALYTICS_TRACKING_ID}"
 
 cd git/google-cloud-eclipse
 
@@ -36,6 +34,5 @@ TMPDIR= xvfb-run \
   mvn -V -B \
       -Doauth.client.id="${OAUTH_CLIENT_ID}" \
       -Doauth.client.secret="${OAUTH_CLIENT_SECRET}" \
-      -Dga.tracking.id="${ANALYTICS_TRACKING_ID}" \
       ${PRODUCT_VERSION_SUFFIX:+-Dproduct.version.qualifier.suffix="'${PRODUCT_VERSION_SUFFIX}'"} \
     clean verify
