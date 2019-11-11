@@ -100,14 +100,15 @@ public class CloudLibrariesSelectionPage extends WizardPage {
     createWidget(parent, false);
   }
 
-  protected final void createWidget(Composite parent, boolean java7) {
+  protected final void createWidget(Composite parent, boolean restrictedEnvironment) {
     Preconditions.checkNotNull(libraryGroups, "Library groups must be set"); //$NON-NLS-1$
     Composite composite = new Composite(parent, SWT.NONE);
 
     // create the library selector libraryGroups
     for (Entry<String, String> group : libraryGroups.entrySet()) {
       LibrarySelectorGroup librariesSelector =
-          new LibrarySelectorGroup(composite, group.getKey(), group.getValue(), java7);
+          new LibrarySelectorGroup(
+              composite, group.getKey(), group.getValue(), restrictedEnvironment);
       librariesSelectors.add(librariesSelector);
     }
     setSelectedLibraries(initialSelection);
