@@ -32,8 +32,9 @@ public class AppEngineStandardProjectWizardTest {
   public void testAddPages() {
     wizard.addPages();
     Assert.assertFalse(wizard.canFinish());
-    Assert.assertEquals(1, wizard.getPageCount());
+    Assert.assertEquals(2, wizard.getPageCount());
     Assert.assertNotNull(wizard.getPage("basicNewProjectPage"));
+    Assert.assertNotNull(wizard.getPage("cloudPlatformLibrariesPage"));
   }
 
 }
