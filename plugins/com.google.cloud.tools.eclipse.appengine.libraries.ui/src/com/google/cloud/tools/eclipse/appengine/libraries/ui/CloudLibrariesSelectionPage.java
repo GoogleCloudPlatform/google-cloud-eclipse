@@ -60,7 +60,7 @@ public class CloudLibrariesSelectionPage extends WizardPage {
   /**
    * Return the list of selected libraries.
    */
-  protected final List<Library> getSelectedLibraries() {
+  public final List<Library> getSelectedLibraries() {
     List<Library> selectedLibraries = new ArrayList<>();
     for (LibrarySelectorGroup librariesSelector : librariesSelectors) {
       selectedLibraries.addAll(librariesSelector.getSelectedLibraries());
@@ -80,7 +80,7 @@ public class CloudLibrariesSelectionPage extends WizardPage {
   /**
    * Set the different library groups to be shown; must be called before controls are created.
    */
-  protected final void setLibraryGroups(Map<String, String> groups) {
+  public final void setLibraryGroups(Map<String, String> groups) {
     libraryGroups = groups;
   }
   

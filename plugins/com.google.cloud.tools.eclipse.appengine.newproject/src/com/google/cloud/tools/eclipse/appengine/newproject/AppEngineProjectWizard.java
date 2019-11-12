@@ -16,10 +16,15 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
+import com.google.cloud.tools.eclipse.appengine.libraries.ui.CloudLibrariesSelectionPage;
+import com.google.cloud.tools.eclipse.appengine.libraries.ui.Messages;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Preconditions;
 import java.lang.reflect.InvocationTargetException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -31,12 +36,22 @@ import org.eclipse.ui.ide.undo.WorkspaceUndoUtil;
 public abstract class AppEngineProjectWizard extends Wizard implements INewWizard {
 
   private final AppEngineWizardPage appEnginePage;
+  private final CloudLibrariesSelectionPage librariesPage = new CloudLibrariesSelectionPage();
   protected final AppEngineProjectConfig config = new AppEngineProjectConfig();
   private IWorkbench workbench;
 
   public AppEngineProjectWizard(AppEngineWizardPage appEngineWizardPage) {
     appEnginePage = Preconditions.checkNotNull(appEngineWizardPage);
+    
+    Map<String, String> groups = new LinkedHashMap<>();
+    groups.put(appEngineWizardPage.getSupportedLibrariesGroup(), 
+          Messages.getString("appengine-title")); //$NON-NLS-1$
+    groups.put(CloudLibraries.CLIENT_APIS_GROUP, 
+        Messages.getString("clientapis-title")); //$NON-NLS-1$
+    
+    librariesPage.setLibraryGroups(groups);
     addPage(appEnginePage);
+    addPage(librariesPage);
     setNeedsProgressMonitor(true);
   }
 
@@ -84,7 +99,7 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
       config.setEclipseProjectLocationUri(appEnginePage.getLocationURI());
     }
 
-    config.setAppEngineLibraries(appEnginePage.getSelectedLibraries());
+    config.setAppEngineLibraries(librariesPage.getSelectedLibraries());
 
     if (appEnginePage.asMavenProject()) {
       config.setUseMaven(appEnginePage.getMavenGroupId(), appEnginePage.getMavenArtifactId(),
