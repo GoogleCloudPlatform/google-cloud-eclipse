@@ -136,16 +136,6 @@ public class CloudLibrariesPageTest {
   }
 
   @Test
-  public void testNonAppEngineLibraries_missingOnAppEngineStandardProject() {
-    IJavaProject javaProject = plainJavaProjectCreator
-        .withFacets(WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7).getJavaProject();
-    page.initialize(javaProject, null);
-    page.createControl(shellTestResource.getShell());
-    assertThat(page.libraryGroups,
-        Matchers.not(Matchers.hasKey(CloudLibraries.NON_APP_ENGINE_STANDARD_GROUP)));
-  }
-
-  @Test
   public void testSelectionMaintained() {
     // explicitly configure App Engine and GCP libraries
     IJavaProject javaProject = plainJavaProjectCreator.getJavaProject();
