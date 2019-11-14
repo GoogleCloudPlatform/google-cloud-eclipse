@@ -214,7 +214,7 @@ public class CodeTemplates {
     Predicate<Library> isObjectify = library ->
         ("objectify".equals(library.getId()) //$NON-NLS-1$
             || "objectify6".equals(library.getId())); //$NON-NLS-1$
-    List<Library> selectedLibraries = config.getAppEngineLibraries();
+    List<Library> selectedLibraries = config.getLibraries();
     return selectedLibraries.stream().anyMatch(isObjectify);
   }
 

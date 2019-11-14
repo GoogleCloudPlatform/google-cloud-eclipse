@@ -76,9 +76,9 @@ public class AppEngineProjectConfigTest {
 
   @Test
   public void testAppEngineLibraries() {
-    config.setAppEngineLibraries(Collections.singleton(new Library("app-engine-library")));
-    assertThat(config.getAppEngineLibraries().size(), is(1));
-    assertThat(config.getAppEngineLibraries().iterator().next().getId(), is("app-engine-library"));
+    config.setLibraries(Collections.singleton(new Library("app-engine-library")));
+    assertThat(config.getLibraries().size(), is(1));
+    assertThat(config.getLibraries().iterator().next().getId(), is("app-engine-library"));
   }
 
   @Test
