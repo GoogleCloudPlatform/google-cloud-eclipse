@@ -32,7 +32,7 @@ public class AppEngineProjectConfig {
   private URI eclipseProjectLocationUri = null;
   private String packageName = "";
   private IProject project;
-  private List<Library> appEngineLibraries = Collections.emptyList();
+  private List<Library> libraries = Collections.emptyList();
   private String serviceName;
   private AppEngineRuntime runtime;
 
@@ -69,12 +69,12 @@ public class AppEngineProjectConfig {
     eclipseProjectLocationUri = uri;
   }
 
-  List<Library> getAppEngineLibraries() {
-    return appEngineLibraries;
+  List<Library> getLibraries() {
+    return new ArrayList<>(libraries);
   }
 
-  public void setAppEngineLibraries(Collection<Library> libraries) {
-    appEngineLibraries = new ArrayList<>(libraries);
+  public void setLibraries(Collection<Library> libraries) {
+    this.libraries = new ArrayList<>(libraries);
   }
 
   String getServiceName() {

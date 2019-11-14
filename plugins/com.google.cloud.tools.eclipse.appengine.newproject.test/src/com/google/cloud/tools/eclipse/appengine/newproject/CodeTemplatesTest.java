@@ -108,7 +108,7 @@ public class CodeTemplatesTest {
       throws CoreException, ParserConfigurationException, SAXException, IOException {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8);
-    config.setAppEngineLibraries(Collections.singleton(new Library("objectify")));
+    config.setLibraries(Collections.singleton(new Library("objectify")));
 
     CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
     assertTrue(objectifyFilterClassExists());
@@ -145,7 +145,7 @@ public class CodeTemplatesTest {
       throws CoreException, ParserConfigurationException, SAXException, IOException {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8_SERVLET_25);
-    config.setAppEngineLibraries(Collections.singleton(new Library("objectify")));
+    config.setLibraries(Collections.singleton(new Library("objectify")));
 
     CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
     assertFalse(objectifyFilterClassExists());
@@ -166,7 +166,7 @@ public class CodeTemplatesTest {
   public void testMaterializeAppEngineFlexFiles_objectifyListenerWithObjectify6()
       throws CoreException {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
-    config.setAppEngineLibraries(Collections.singleton(new Library("objectify6")));
+    config.setLibraries(Collections.singleton(new Library("objectify6")));
 
     CodeTemplates.materializeAppEngineFlexFiles(project, config, monitor);
     assertTrue(objectifyListenerClassExists());
@@ -225,7 +225,7 @@ public class CodeTemplatesTest {
     List<Library> libraries = Arrays.asList(new Library("a-library"), new Library("objectify"));
 
     AppEngineProjectConfig config = new AppEngineProjectConfig();
-    config.setAppEngineLibraries(libraries);
+    config.setLibraries(libraries);
 
     assertTrue(CodeTemplates.isObjectifySelected(config));
   }
@@ -235,7 +235,7 @@ public class CodeTemplatesTest {
     List<Library> libraries = Arrays.asList(new Library("objectify6"), new Library("a-library"));
 
     AppEngineProjectConfig config = new AppEngineProjectConfig();
-    config.setAppEngineLibraries(libraries);
+    config.setLibraries(libraries);
 
     assertTrue(CodeTemplates.isObjectifySelected(config));
   }

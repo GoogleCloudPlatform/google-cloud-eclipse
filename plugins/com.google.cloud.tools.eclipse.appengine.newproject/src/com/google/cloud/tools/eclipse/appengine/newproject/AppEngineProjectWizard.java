@@ -99,7 +99,7 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
       config.setEclipseProjectLocationUri(appEnginePage.getLocationURI());
     }
 
-    config.setAppEngineLibraries(librariesPage.getSelectedLibraries());
+    config.setLibraries(librariesPage.getSelectedLibraries());
 
     if (appEnginePage.asMavenProject()) {
       config.setUseMaven(appEnginePage.getMavenGroupId(), appEnginePage.getMavenArtifactId(),
