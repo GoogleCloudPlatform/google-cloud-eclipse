@@ -18,4 +18,3 @@ Import-Package: com.google.cloud.tools.eclipse.test.util,
  org.eclipse.swtbot.swt.finder.widgets,
  org.eclipse.wst.common.componentcore.internal
 Require-Capability: com.google.cloud.tools.facets.appengine;filter:="(type=jre8)"
- 
