@@ -134,7 +134,10 @@ public class XmlSourceValidatorTest {
     IFile file = Mockito.mock(IFile.class);
     when(file.getProject()).thenReturn(appEngineStandardProject.getProject());
     validator.validate(reporter, file, xml.getBytes(StandardCharsets.UTF_8));
-    assertEquals(1, reporter.getMessages().size());
+    List<IMessage> messages = reporter.getMessages();
+    assertEquals(1, messages.size());
+    assertEquals(
+        "App Engine Standard does not support this servlet version", messages.get(0).getText());
   }
 
   @Test

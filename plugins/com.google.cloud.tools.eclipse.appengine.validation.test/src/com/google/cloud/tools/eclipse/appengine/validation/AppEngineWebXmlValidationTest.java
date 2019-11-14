@@ -37,7 +37,7 @@ import org.junit.Test;
 public class AppEngineWebXmlValidationTest {
 
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacets(
-      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
+      JavaFacet.VERSION_1_8, WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE8);
 
   @Test
   public void testValidElementsInAppEngineWebXml() throws CoreException {
