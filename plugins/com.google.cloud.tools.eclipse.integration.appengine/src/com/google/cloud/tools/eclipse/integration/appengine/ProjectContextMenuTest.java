@@ -59,25 +59,6 @@ public class ProjectContextMenuTest extends BaseProjectTest {
   }
 
   @Test
-  public void testDynamicWebProjectJava7() {
-    IProject project =
-        projectCreator.withFacets(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25).getProject();
-    SWTBotTreeItem selected = SwtBotProjectActions.selectProject(bot, project.getName());
-    assertThat(
-        selected.contextMenu("Debug As"), not(MenuMatcher.hasMenuItem(endsWith("App Engine"))));
-    assertThat(
-        selected.contextMenu("Run As"), not(MenuMatcher.hasMenuItem(endsWith("App Engine"))));
-    assertThat(
-        selected.contextMenu(), not(MenuMatcher.hasMenuItem("Deploy to App Engine Standard...")));
-    assertThat(
-        selected.contextMenu("Configure"),
-        MenuMatcher.hasMenuItem("Convert to App Engine Standard Project"));
-    assertThat(
-        selected.contextMenu("Configure"),
-        not(MenuMatcher.hasMenuItem("Reconfigure for App Engine Java 8 runtime")));
-  }
-
-  @Test
   public void testDynamicWebProjectJava8() {
     IProject project =
         projectCreator.withFacets(JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31).getProject();
@@ -94,24 +75,6 @@ public class ProjectContextMenuTest extends BaseProjectTest {
     assertThat(
         selected.contextMenu("Configure"),
         not(MenuMatcher.hasMenuItem("Reconfigure for App Engine Java 8 runtime")));
-  }
-
-  @Test
-  public void testAppEngineStandardJava7() {
-    IProject project =
-        projectCreator
-            .withFacets(AppEngineStandardFacet.JRE7, JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25)
-            .getProject();
-    SWTBotTreeItem selected = SwtBotProjectActions.selectProject(bot, project.getName());
-    assertThat(selected.contextMenu("Debug As"), MenuMatcher.hasMenuItem(endsWith("App Engine")));
-    assertThat(selected.contextMenu("Run As"), MenuMatcher.hasMenuItem(endsWith("App Engine")));
-    assertThat(selected.contextMenu(), MenuMatcher.hasMenuItem("Deploy to App Engine Standard..."));
-    assertThat(
-        selected.contextMenu("Configure"),
-        not(MenuMatcher.hasMenuItem("Convert to App Engine Standard Project")));
-    assertThat(
-        selected.contextMenu("Configure"),
-        MenuMatcher.hasMenuItem("Reconfigure for App Engine Java 8 runtime"));
   }
 
   @Test
