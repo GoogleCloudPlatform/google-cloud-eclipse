@@ -42,18 +42,6 @@ public class AppEngineProjectElementTest {
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
 
   @Test
-  public void testCreation_appEngineStandardJava7() throws AppEngineException {
-    projectCreator.withFacets(
-        AppEngineStandardFacet.JRE7, WebFacetUtils.WEB_25, JavaFacet.VERSION_1_7);
-    IProject project = projectCreator.getProject();
-
-    AppEngineProjectElement projectElement = AppEngineProjectElement.create(project);
-    assertNotNull(projectElement);
-    assertNotNull(projectElement.getDescriptorFile());
-    assertEquals("appengine-web.xml", projectElement.getDescriptorFile().getName());
-  }
-
-  @Test
   public void testCreation_appEngineFlexibleWar() throws AppEngineException {
     projectCreator.withFacets(
         AppEngineFlexWarFacet.FACET_VERSION, WebFacetUtils.WEB_31, JavaFacet.VERSION_1_8);
