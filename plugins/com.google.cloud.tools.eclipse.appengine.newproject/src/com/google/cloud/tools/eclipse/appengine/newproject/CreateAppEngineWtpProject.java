@@ -145,13 +145,13 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
     SubMonitor progress = SubMonitor.convert(monitor, 12);
     if (config.getUseMaven()) {
       enableMavenNature(newProject, progress.newChild(5));
-      BuildPath.addMavenLibraries(newProject, config.getAppEngineLibraries(), progress.newChild(7));
+      BuildPath.addMavenLibraries(newProject, config.getLibraries(), progress.newChild(7));
     } else {
       addJunit4ToClasspath(newProject, progress.newChild(2));
       addJstl12ToClasspath(newProject, progress.newChild(2));
       IJavaProject javaProject = JavaCore.create(newProject);
       
-      List<Library> libraries = config.getAppEngineLibraries();
+      List<Library> libraries = config.getLibraries();
       BuildPath.addNativeLibrary(javaProject, libraries, progress.newChild(8));
     }
   }
