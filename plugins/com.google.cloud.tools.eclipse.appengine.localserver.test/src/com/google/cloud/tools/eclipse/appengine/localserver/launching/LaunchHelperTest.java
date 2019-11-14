@@ -54,14 +54,14 @@ public class LaunchHelperTest {
 
   @Rule
   public TestProjectCreator appEngineStandardProject1 = new TestProjectCreator().withFacets(
-      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
+      JavaFacet.VERSION_1_8, WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE8);
   @Rule
   public TestProjectCreator appEngineStandardProject2 = new TestProjectCreator().withFacets(
-      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
+      JavaFacet.VERSION_1_8, WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE8);
 
   @Rule
   public TestProjectCreator projectCreator = new TestProjectCreator().withFacets(
-      JavaFacet.VERSION_1_7);
+      JavaFacet.VERSION_1_8);
 
   @Before
   public void setUp() {

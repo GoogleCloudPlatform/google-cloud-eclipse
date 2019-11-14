@@ -56,6 +56,7 @@ public class AppEngineStandardFacet {
   public static final IProjectFacet FACET = ProjectFacetsManager.getProjectFacet(ID);
   // See AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8 too
   public static final IProjectFacetVersion JRE7 = FACET.getVersion("JRE7");
+  public static final IProjectFacetVersion JRE8 = FACET.getVersion("JRE8");
 
   static final String DEFAULT_RUNTIME_ID =
       "com.google.cloud.tools.eclipse.appengine.standard.runtime";
