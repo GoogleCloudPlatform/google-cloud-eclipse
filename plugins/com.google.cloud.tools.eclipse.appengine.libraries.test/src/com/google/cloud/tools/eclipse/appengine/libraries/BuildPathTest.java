@@ -45,7 +45,7 @@ import org.junit.Test;
 public class BuildPathTest {
 
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator()
-      .withFacets(JavaFacet.VERSION_1_7);
+      .withFacets(JavaFacet.VERSION_1_8);
 
   private final IProgressMonitor monitor = new NullProgressMonitor();
   private IJavaProject project;
