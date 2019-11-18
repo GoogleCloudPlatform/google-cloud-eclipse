@@ -1,6 +1,6 @@
 # How to become a contributor and submit your own code
 
-Pull requests are welcome.
+Pull requests are welcome!
 
 ## Contributor License Agreements
 
