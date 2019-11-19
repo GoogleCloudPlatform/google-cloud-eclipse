@@ -103,7 +103,7 @@
     </dependency>
     <dependency>
       <!--
-        bundle: org.apache.commons.compress
+        bundle: org.apache.commons.commons-compress
         dependency used by appengine-plugins-core
       -->
       <groupId>org.apache.commons</groupId>
