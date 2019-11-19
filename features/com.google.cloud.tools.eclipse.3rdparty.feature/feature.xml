@@ -54,6 +54,13 @@
          unpack="false"/>
 
    <plugin
+         id="com.google.guava.failureaccess"
+         download-size="0"
+         install-size="0"
+         version="1.0.1"
+         unpack="false"/>
+
+   <plugin
          id="com.google.gson"
          download-size="0"
          install-size="0"
