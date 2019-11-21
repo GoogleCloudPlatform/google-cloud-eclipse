@@ -157,16 +157,6 @@ public class DeployPreferencesTest {
   }
 
   @Test
-  public void testAllowObsoleteRuntime() {
-    assertFalse(DeployPreferences.DEFAULT_ALLOW_OBSOLETE_RUNTIME);
-    assertFalse(preferences.getAllowObsoleteRuntime());
-    preferences.setAllowObsoleteRuntime(true);
-    assertTrue(preferences.getAllowObsoleteRuntime());
-    preferences.setAllowObsoleteRuntime(false);
-    assertFalse(preferences.getAllowObsoleteRuntime());
-  }
-
-  @Test
   public void testResetToDefault() {
     setAllFieldsWithExamples();
     preferences.resetToDefaults();
@@ -178,7 +168,6 @@ public class DeployPreferencesTest {
     assertThat(preferences.getBucket(), isEmptyString());
     assertTrue(preferences.isStopPreviousVersion());
     assertTrue(preferences.isIncludeOptionalConfigurationFiles());
-    assertFalse(preferences.getAllowObsoleteRuntime());
   }
 
   @Test
@@ -202,7 +191,6 @@ public class DeployPreferencesTest {
     assertFalse(preferenceStore.getBoolean(DeployPreferences.PREF_STOP_PREVIOUS_VERSION, true));
     assertFalse(preferenceStore.getBoolean(
         DeployPreferences.PREF_INCLUDE_OPTIONAL_CONFIGURATION_FILES, true));
-    assertTrue(preferenceStore.getBoolean(DeployPreferences.PREF_ALLOW_OBSOLETE_RUNTIME, false));
   }
 
   private void setAllFieldsWithExamples() {
@@ -213,7 +201,6 @@ public class DeployPreferencesTest {
     preferences.setBucket("somebucket45");
     preferences.setStopPreviousVersion(false);
     preferences.setIncludeOptionalConfigurationFiles(false);
-    preferences.setAllowObsoleteRuntime(true);
   }
 
   private void verifyEmptyPreferenceStore() {
@@ -225,6 +212,5 @@ public class DeployPreferencesTest {
     assertTrue(preferenceStore.getBoolean(DeployPreferences.PREF_STOP_PREVIOUS_VERSION, true));
     assertTrue(preferenceStore.getBoolean(
         DeployPreferences.PREF_INCLUDE_OPTIONAL_CONFIGURATION_FILES, true));
-    assertTrue(preferenceStore.getBoolean(DeployPreferences.PREF_ALLOW_OBSOLETE_RUNTIME, true));
   }
 }
