@@ -27,15 +27,10 @@ import static org.junit.Assert.assertTrue;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.junit.Test;
-
-import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
 
 public class LibraryTest {
   
@@ -129,54 +124,9 @@ public class LibraryTest {
   }
 
   @Test
-  public void testSetLibraryFiles() {   
-    Logger logger = Logger.getLogger(ArtifactRetriever.class.getName());
-    Logger logger2 = Logger.getLogger(Library.class.getName());
-    
-    try {
-      logger.setLevel(Level.OFF);
-      logger2.setLevel(Level.OFF);
-
-      MavenCoordinates mavenCoordinates =
-          new MavenCoordinates.Builder().setGroupId("groupId").setArtifactId("artifactId").build();
-      library.setLibraryFiles(Arrays.asList(new LibraryFile(mavenCoordinates)));
-      List<LibraryFile> allDependencies = library.getAllDependencies();
-      assertNotNull(allDependencies);
-      assertThat(allDependencies.size(), is(1));
-      LibraryFile actual = allDependencies.get(0);
-      assertThat(actual.getMavenCoordinates().getRepository(), is("central"));
-      assertThat(actual.getMavenCoordinates().getGroupId(), is("groupId"));
-      assertThat(actual.getMavenCoordinates().getArtifactId(), is("artifactId"));
-    } finally {
-      logger.setLevel(null);
-      logger2.setLevel(null);
-    }
-  }
-
-  @Test
   public void testExportDefaultsToTrue() {
     assertTrue(library.isExport());
   }
-
-  @Test
-  public void testDirectDependencies() {
-    // objectify depends on guava
-    MavenCoordinates mavenCoordinates =
-        new MavenCoordinates.Builder()
-            .setGroupId("com.googlecode.objectify")
-            .setArtifactId("objectify")
-            .setVersion("5.1.21").build();
-    library.setLibraryFiles(Arrays.asList(new LibraryFile(mavenCoordinates)));
-
-    List<LibraryFile> directFiles = library.getDirectDependencies();
-    assertEquals(1, directFiles.size()); 
-    assertEquals(mavenCoordinates.getArtifactId(),
-        directFiles.get(0).getMavenCoordinates().getArtifactId());
-    
-    List<LibraryFile> transitiveDependencies = library.getAllDependencies();
-    assertTrue(transitiveDependencies.size() > directFiles.size()); 
-  }
-
   
   @Test
   public void testResolvedDuplicates() {
