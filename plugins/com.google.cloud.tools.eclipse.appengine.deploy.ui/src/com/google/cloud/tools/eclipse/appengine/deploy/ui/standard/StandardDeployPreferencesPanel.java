@@ -47,16 +47,6 @@ public class StandardDeployPreferencesPanel extends AppEngineDeployPreferencesPa
   }
 
   @Override
-  protected void populateAdvancedSection(Composite parent) {
-    super.populateAdvancedSection(parent);
-
-    Button checkBox = new Button(parent, SWT.CHECK);
-    checkBox.setText(Messages.getString("deploy.allowObsoleteRuntime.text"));
-    checkBox.setToolTipText(Messages.getString("deploy.allowObsoleteRuntime.tooltip"));
-    setupCheckBoxDataBinding(checkBox, "allowObsoleteRuntime");
-  }
-
-  @Override
   protected String getHelpContextId() {
     return "com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployAppEngineStandardProjectContext";
   }
