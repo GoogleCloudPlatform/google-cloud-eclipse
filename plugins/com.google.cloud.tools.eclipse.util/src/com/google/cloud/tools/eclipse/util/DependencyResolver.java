@@ -20,6 +20,8 @@ import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositoryException;
 import org.eclipse.aether.RepositorySystem;
@@ -33,6 +35,7 @@ import org.eclipse.aether.repository.RepositoryPolicy;
 import org.eclipse.aether.resolution.ArtifactDescriptorRequest;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyRequest;
+import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.aether.resolution.DependencyResult;
 import org.eclipse.aether.util.artifact.JavaScopes;
 import org.eclipse.aether.util.filter.DependencyFilterUtils;
@@ -43,6 +46,8 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.m2e.core.embedder.IMavenExecutionContext;
 
 public class DependencyResolver {
+  
+  private static final Logger logger = Logger.getLogger(DependencyResolver.class.getName());
 
   /**
    * Returns all transitive runtime dependencies of the specified Maven jar artifact including the
@@ -99,7 +104,8 @@ public class DependencyResolver {
         progress.worked(1);
       }
       return dependencies;
-    } catch (RepositoryException ex) {
+    } catch (DependencyResolutionException ex) {
+      logger.log(Level.WARNING, "Repository exception while loading transitive dependencies", ex);
       throw new CoreException(
           StatusUtil.error(DependencyResolver.class, "Could not resolve dependencies", ex));
     } catch (NullPointerException ex) {
