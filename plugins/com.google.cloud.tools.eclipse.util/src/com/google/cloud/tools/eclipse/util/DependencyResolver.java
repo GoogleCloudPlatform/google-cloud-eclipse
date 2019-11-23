@@ -105,7 +105,26 @@ public class DependencyResolver {
       }
       return dependencies;
     } catch (DependencyResolutionException ex) {
-      logger.log(Level.WARNING, "Repository exception while loading transitive dependencies", ex);
+      logger.log(Level.WARNING,
+          "Dependency resolution exception while loading transitive dependencies", ex);
+      DependencyResult result = ex.getResult();
+      for (ArtifactResult artifactResult : result.getArtifactResults()) {
+        Artifact a = artifactResult.getArtifact();
+        String c = a.getGroupId() + ":" + a.getArtifactId() + ":" + a.getVersion();
+        if (artifactResult.isMissing()) {
+          logger.log(Level.WARNING, c + " is missing");
+        } else if (artifactResult.isResolved()) {
+          logger.log(Level.WARNING, c + " is resolved");
+        } else {
+          logger.log(Level.WARNING, c + "?");
+        }
+      }
+      
+      List<Exception> collectExceptions = result.getCollectExceptions();
+      for (Exception ce : collectExceptions) {
+        logger.log(Level.WARNING, ce.getMessage(), ce);
+      }
+      
       throw new CoreException(
           StatusUtil.error(DependencyResolver.class, "Could not resolve dependencies", ex));
     } catch (NullPointerException ex) {
