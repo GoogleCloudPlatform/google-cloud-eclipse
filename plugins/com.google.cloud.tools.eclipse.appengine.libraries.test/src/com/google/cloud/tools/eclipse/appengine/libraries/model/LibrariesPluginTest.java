@@ -62,12 +62,11 @@ public class LibrariesPluginTest {
 
   @Test
   public void testDirectDependencies() {
-    // objectify depends on guava
     MavenCoordinates mavenCoordinates =
         new MavenCoordinates.Builder()
             .setGroupId("com.googlecode.objectify")
             .setArtifactId("objectify")
-            .setVersion("5.1.21").build();
+            .setVersion("6.0.5").build();
     library.setLibraryFiles(Arrays.asList(new LibraryFile(mavenCoordinates)));
 
     List<LibraryFile> directFiles = library.getDirectDependencies();
