@@ -112,13 +112,17 @@ public class DependencyResolver {
         Artifact a = artifactResult.getArtifact();
         if (a != null) {
           String c = a.getGroupId() + ":" + a.getArtifactId() + ":" + a.getVersion();
-          if (artifactResult.isMissing()) {
-            logger.log(Level.WARNING, c + " is missing");
-          } else if (artifactResult.isResolved()) {
+          if (artifactResult.isResolved()) {
             logger.log(Level.WARNING, c + " is resolved");
           } else {
             logger.log(Level.WARNING, c + "?");
-          }
+          } 
+        } else {
+          if (artifactResult.isMissing()) {
+            logger.log(Level.WARNING, artifactResult + " is missing");
+          } else {
+            logger.log(Level.WARNING, artifactResult + "?");
+          } 
         }
       }
       
