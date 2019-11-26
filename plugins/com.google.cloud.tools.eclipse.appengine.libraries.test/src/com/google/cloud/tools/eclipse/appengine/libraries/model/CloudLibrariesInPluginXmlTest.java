@@ -80,7 +80,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(mavenCoordinates.getArtifactId(), is("appengine-api-1.0-sdk"));
     
     DefaultArtifactVersion actual = new DefaultArtifactVersion(mavenCoordinates.getVersion());
-    DefaultArtifactVersion expected = new DefaultArtifactVersion("1.9.74");
+    DefaultArtifactVersion expected = new DefaultArtifactVersion("1.9.77");
     assertTrue(actual.compareTo(expected) >= 0);
     
     assertThat(mavenCoordinates.getType(), is("jar"));
@@ -168,7 +168,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(objectifyMavenCoordinates.getArtifactId(), is("objectify"));
     DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(
         objectifyMavenCoordinates.getVersion());
-    assertEquals(new DefaultArtifactVersion("6.0.4"), artifactVersion);
+    assertEquals(new DefaultArtifactVersion("6.0.5"), artifactVersion);
     assertThat(objectifyMavenCoordinates.getType(), is("jar"));
     assertNull(objectifyMavenCoordinates.getClassifier());
 
@@ -184,7 +184,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(guavaMavenCoordinates.getRepository(), is("central"));
     assertThat(guavaMavenCoordinates.getGroupId(), is("com.google.guava"));
     assertThat(guavaMavenCoordinates.getArtifactId(), is("guava"));
-    assertThat(guavaMavenCoordinates.getVersion(), is("27.1-android"));
+    assertThat(guavaMavenCoordinates.getVersion(), is("28.1-android"));
     assertThat(guavaMavenCoordinates.getType(), is("jar"));
     assertNull(guavaMavenCoordinates.getClassifier());
 
@@ -242,7 +242,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(guavaMavenCoordinates.getRepository(), is("central"));
     assertThat(guavaMavenCoordinates.getGroupId(), is("com.google.guava"));
     assertThat(guavaMavenCoordinates.getArtifactId(), is("guava"));
-    assertThat(guavaMavenCoordinates.getVersion(), is("27.1-android"));
+    assertThat(guavaMavenCoordinates.getVersion(), is("28.1-android"));
     assertThat(guavaMavenCoordinates.getType(), is("jar"));
     assertNull(guavaMavenCoordinates.getClassifier());
 
