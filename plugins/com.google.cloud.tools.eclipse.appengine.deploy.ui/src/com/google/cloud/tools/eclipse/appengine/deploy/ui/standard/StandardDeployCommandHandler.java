@@ -65,17 +65,8 @@ public class StandardDeployCommandHandler extends DeployCommandHandler {
       }
 
       if (AppEngineStandardFacet.usesObsoleteRuntime(facetedProject)) {
-        String[] buttons = {Messages.getString("ok.button")};
         String message = Messages.getString("obsolete.runtime.message", project.getName());
-        MessageDialog dialog = new MessageDialog(
-            shell,
-            Messages.getString("obsolete.runtime.title"),
-            null,
-            message,
-            MessageDialog.ERROR,
-            buttons,
-            0 /* index into buttonsWithIds of default button */);
-        dialog.open();
+        MessageDialog.openError(shell, Messages.getString("obsolete.runtime.title"), message);
         return false;
       }
     } catch(CoreException ex) {
