@@ -25,12 +25,14 @@ import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -58,6 +60,9 @@ public class AppEngineWebXmlValidationTest {
     appEngineWebXml.setContents(in, true, false, null);
 
     ProjectUtils.waitForProjects(project);
-    assertTrue(ProjectUtils.waitUntilNoBuildErrors(project));
+    Set<String> buildErrors = ProjectUtils.getAllBuildErrors(project);
+    Assert.assertEquals(1, buildErrors.size());
+    String errorMessage = buildErrors.iterator().next();
+    Assert.assertTrue(errorMessage.endsWith("Java 7 runtime no longer supported"));
   }
 }
