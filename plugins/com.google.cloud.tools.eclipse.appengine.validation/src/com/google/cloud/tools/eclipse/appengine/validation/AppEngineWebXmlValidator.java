@@ -98,7 +98,7 @@ class AppEngineWebXmlValidator implements XmlValidationHelper {
         ElementProblem problem = makeRuntimeProblem(runtimeElement, runtime);
         problems.add(problem);
       }
-      // else java8 is not a problem
+      // else java8 and later are not a problem
     }
     
     if (nodeList.getLength() == 0) {
