@@ -206,8 +206,8 @@ public class ProjectUtils {
   }
 
   /**
-   * Return a list of all build errors on the specified projects. Uses all projects in the
-   * workspace if {@code project} is empty.
+   * Returns all build errors on the specified projects. Uses all projects in the
+   * workspace if {@code projects} is empty.
    */
   public static Set<String> getAllBuildErrors(IProject... projects) throws CoreException {
     if (projects.length == 0) {
