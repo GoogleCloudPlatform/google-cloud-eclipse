@@ -228,7 +228,7 @@ public class ProjectUtils {
     return errors;
   }
 
-  private static String formatProblem(IMarker problem) {
+  public static String formatProblem(IMarker problem) {
     StringBuilder sb = new StringBuilder();
     sb.append(problem.getResource().getFullPath());
     sb.append(':');

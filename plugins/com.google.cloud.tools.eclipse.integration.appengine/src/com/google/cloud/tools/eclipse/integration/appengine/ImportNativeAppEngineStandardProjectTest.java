@@ -146,7 +146,6 @@ public class ImportNativeAppEngineStandardProjectTest extends BaseProjectTest {
         CloudToolsEclipseProjectUpdater.updateProject(project, SubMonitor.convert(null));
 
     ProjectUtils.waitForProjects(project);
-    ProjectUtils.waitUntilNoBuildErrors(project);
 
     assertTrue("Update failed: " + updateStatus.getMessage(), updateStatus.isOK());
     assertFalse(CloudToolsEclipseProjectUpdater.hasOldContainers(project));
