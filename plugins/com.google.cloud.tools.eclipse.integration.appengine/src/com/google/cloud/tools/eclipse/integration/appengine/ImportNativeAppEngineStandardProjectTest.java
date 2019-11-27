@@ -71,8 +71,9 @@ public class ImportNativeAppEngineStandardProjectTest extends BaseProjectTest {
     project = SwtBotAppEngineActions.importNativeProject(bot, "AESv7", tempFolder.getRoot());
     assertTrue(project.exists());
 
-    updateOldContainers(project);
-
+    IStatus updateStatus = updateContainers(project);
+    verifyImportedProject(project, updateStatus);
+    
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     assertNotNull("should be a faceted project", facetedProject);
 
@@ -95,8 +96,10 @@ public class ImportNativeAppEngineStandardProjectTest extends BaseProjectTest {
     project = SwtBotAppEngineActions.importNativeProject(bot, "AESv8", tempFolder.getRoot());
     assertTrue(project.exists());
 
-    updateOldContainers(project);
-
+    IStatus updateStatus = updateContainers(project);
+    ProjectUtils.waitUntilNoBuildErrors(project);
+    verifyImportedProject(project, updateStatus);
+    
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     assertNotNull("should be a faceted project", facetedProject);
 
@@ -122,8 +125,10 @@ public class ImportNativeAppEngineStandardProjectTest extends BaseProjectTest {
         bot, "old-library-container-with-appengine-api", tempFolder.getRoot());
     assertTrue(project.exists());
 
-    updateOldContainers(project);
+    IStatus updateStatus = updateContainers(project);
+    ProjectUtils.waitUntilNoBuildErrors(project);
 
+    verifyImportedProject(project, updateStatus);
     assertTrue(hasAppEngineApi(project));
   }
 
@@ -140,13 +145,17 @@ public class ImportNativeAppEngineStandardProjectTest extends BaseProjectTest {
     return false;
   }
 
-  private static void updateOldContainers(IProject project) throws CoreException {
+  private static IStatus updateContainers(IProject project) {
     assertTrue(CloudToolsEclipseProjectUpdater.hasOldContainers(project));
     IStatus updateStatus =
         CloudToolsEclipseProjectUpdater.updateProject(project, SubMonitor.convert(null));
 
     ProjectUtils.waitForProjects(project);
+    return updateStatus;
+  }
 
+  private static void verifyImportedProject(IProject project, IStatus updateStatus)
+      throws JavaModelException {
     assertTrue("Update failed: " + updateStatus.getMessage(), updateStatus.isOK());
     assertFalse(CloudToolsEclipseProjectUpdater.hasOldContainers(project));
 
