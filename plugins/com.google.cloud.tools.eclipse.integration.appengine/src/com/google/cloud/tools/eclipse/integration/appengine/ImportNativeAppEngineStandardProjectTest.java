@@ -74,11 +74,6 @@ public class ImportNativeAppEngineStandardProjectTest extends BaseProjectTest {
     assertTrue(project.exists());
 
     IStatus updateStatus = updateContainers(project);
-    Set<String> buildErrors = ProjectUtils.getAllBuildErrors(project);
-    assertEquals(1, buildErrors.size());
-    String errorMessage = buildErrors.iterator().next();
-    Assert.assertTrue(errorMessage.endsWith("Java 7 runtime no longer supported"));
-
     verifyImportedProject(project, updateStatus);
     
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
