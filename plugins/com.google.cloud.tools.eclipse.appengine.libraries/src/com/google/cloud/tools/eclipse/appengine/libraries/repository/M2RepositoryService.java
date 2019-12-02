@@ -52,7 +52,7 @@ public class M2RepositoryService implements ILibraryRepositoryService {
 
   @Override
   public IPath resolveSourceArtifact(LibraryFile libraryFile, String versionHint,
-      IProgressMonitor monitor) throws CoreException {
+      IProgressMonitor monitor) {
     
     MavenCoordinates mavenCoordinates = libraryFile.getMavenCoordinates();
     MavenCoordinates.Builder sourceCoordinates = mavenCoordinates.toBuilder();
@@ -61,8 +61,13 @@ public class M2RepositoryService implements ILibraryRepositoryService {
     }
     sourceCoordinates.setClassifier("sources");
     if (libraryFile.getSourceUri() == null) {
-      File artifactFile = MavenHelper.resolveArtifact(sourceCoordinates.build(), monitor).getFile();
-      return new Path(artifactFile.getAbsolutePath());
+      try {
+        File artifactFile = MavenHelper.resolveArtifact(sourceCoordinates.build(), monitor).getFile();
+        return new Path(artifactFile.getAbsolutePath());
+      } catch (CoreException ex) {
+        // not all artifacts have sources. E.g. com.google.appengine:appengine does not.
+        return null;
+      }
     } else {
       try {
         URL sourceUrl = libraryFile.getSourceUri().toURL();

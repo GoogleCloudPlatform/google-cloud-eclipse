@@ -258,14 +258,8 @@ public class LibraryClasspathContainerResolverService
 
     // Not all artifacts have sources; need to work if no source artifact is available
     // e.g. appengine-api-sdk doesn't
-    IPath sourceAttachmentPath = null;
-    try {
-      sourceAttachmentPath =
-          repositoryService.resolveSourceArtifact(
-              libraryFile, artifact.getVersion(), new NullProgressMonitor());
-    } catch (CoreException ex) {
-      // continue without source
-    }
+    IPath sourceAttachmentPath = repositoryService.resolveSourceArtifact(
+        libraryFile, artifact.getVersion(), new NullProgressMonitor());
 
     IClasspathEntry newLibraryEntry =
         JavaCore.newLibraryEntry(

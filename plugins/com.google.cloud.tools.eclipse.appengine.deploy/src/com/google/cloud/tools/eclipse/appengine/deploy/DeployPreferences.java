@@ -42,7 +42,6 @@ public class DeployPreferences {
       "include.optional.configuration.files"; // boolean
   static final String PREF_CUSTOM_BUCKET = "project.bucket";
   static final String PREF_STOP_PREVIOUS_VERSION = "project.previousVersion.stop"; // boolean
-  static final String PREF_ALLOW_OBSOLETE_RUNTIME = "project.allowObsoleteRuntime"; // boolean
 
   public static final String DEFAULT_ACCOUNT_EMAIL = "";
   public static final String DEFAULT_PROJECT_ID = "";
@@ -51,7 +50,6 @@ public class DeployPreferences {
   public static final boolean DEFAULT_INCLUDE_OPTIONAL_CONFIGURATION_FILES = true;
   public static final String DEFAULT_CUSTOM_BUCKET = "";
   public static final boolean DEFAULT_STOP_PREVIOUS_VERSION = true;
-  public static final boolean DEFAULT_ALLOW_OBSOLETE_RUNTIME = false;
 
   protected final IEclipsePreferences preferenceStore;
 
@@ -62,7 +60,6 @@ public class DeployPreferences {
   private boolean stopPreviousVersion;
   private boolean includeOptionalConfigurationFiles;
   private String bucket;
-  private boolean allowObsoleteRuntime;
 
   public DeployPreferences(IProject project) {
     this(new ProjectScope(project).getNode(PREFERENCE_STORE_QUALIFIER));
@@ -80,8 +77,6 @@ public class DeployPreferences {
     bucket = preferenceStore.get(PREF_CUSTOM_BUCKET, DEFAULT_CUSTOM_BUCKET);
     stopPreviousVersion = preferenceStore.getBoolean(
         PREF_STOP_PREVIOUS_VERSION, DEFAULT_STOP_PREVIOUS_VERSION);
-    allowObsoleteRuntime =
-        preferenceStore.getBoolean(PREF_ALLOW_OBSOLETE_RUNTIME, DEFAULT_ALLOW_OBSOLETE_RUNTIME);
   }
 
   public void resetToDefaults() {
@@ -92,7 +87,6 @@ public class DeployPreferences {
     stopPreviousVersion = DEFAULT_STOP_PREVIOUS_VERSION;
     includeOptionalConfigurationFiles = DEFAULT_INCLUDE_OPTIONAL_CONFIGURATION_FILES;
     bucket = DEFAULT_CUSTOM_BUCKET;
-    allowObsoleteRuntime = DEFAULT_ALLOW_OBSOLETE_RUNTIME;
   }
 
   public void save() throws BackingStoreException {
@@ -104,7 +98,6 @@ public class DeployPreferences {
         PREF_INCLUDE_OPTIONAL_CONFIGURATION_FILES, includeOptionalConfigurationFiles);
     preferenceStore.put(PREF_CUSTOM_BUCKET, Strings.nullToEmpty(bucket));
     preferenceStore.putBoolean(PREF_STOP_PREVIOUS_VERSION, stopPreviousVersion);
-    preferenceStore.putBoolean(PREF_ALLOW_OBSOLETE_RUNTIME, allowObsoleteRuntime);
     preferenceStore.flush();
   }
 
@@ -164,12 +157,4 @@ public class DeployPreferences {
     this.stopPreviousVersion = stopPreviousVersion;
   }
 
-  /** Return {@code true} if this project can deploy to an obsolete runtime. */
-  public boolean getAllowObsoleteRuntime() {
-    return allowObsoleteRuntime;
-  }
-
-  public void setAllowObsoleteRuntime(boolean allowObsoleteRuntime) {
-    this.allowObsoleteRuntime = allowObsoleteRuntime;
-  }
 }
