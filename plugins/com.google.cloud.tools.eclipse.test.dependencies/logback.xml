@@ -9,6 +9,8 @@
   </appender>
 
   <logger name="com.google.cloud.tools" level="debug"/>
+  <logger name="com.google.cloud.tools.eclipse.appengine.libraries.SourceAttacherJob" level="warn"/>
+  
   <root level="info">
     <appender-ref ref="STDOUT" />
   </root>
