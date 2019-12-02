@@ -80,7 +80,8 @@ public class MavenHelper {
   }
 
   /**
-   * Returns the folder to which the file described by <code>artifact</code> should be downloaded.
+   * Returns the folder to which the file described by <code>mavenCoordinates</code>
+   * should be downloaded.
    *
    * <p>The folder is created as follows: <code>
    * &lt;bundle_state_location&gt;/downloads/&lt;groupId&gt;/&lt;artifactId&gt;/&lt;version&gt;
@@ -91,7 +92,7 @@ public class MavenHelper {
    *
    * @return the location of the download folder, may not exist
    */
-  public static IPath bundleStateBasedMavenFolder(MavenCoordinates mavenCoordinates) {
+  static IPath bundleStateBasedMavenFolder(MavenCoordinates mavenCoordinates) {
     Preconditions.checkArgument(
         !mavenCoordinates.getVersion().equals(MavenCoordinates.LATEST_VERSION));
     File downloadedSources =
