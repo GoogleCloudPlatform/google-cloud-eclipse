@@ -65,7 +65,7 @@ public class M2RepositoryService implements ILibraryRepositoryService {
         File artifactFile = MavenHelper.resolveArtifact(sourceCoordinates.build(), monitor).getFile();
         return new Path(artifactFile.getAbsolutePath());
       } catch (CoreException ex) {
-        // not all artifacts have sources. E.g. com.google.appengine:apengine does not.
+        // not all artifacts have sources. E.g. com.google.appengine:appengine does not.
         return null;
       }
     } else {
