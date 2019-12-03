@@ -126,7 +126,7 @@ public class ImportNativeAppEngineStandardProjectTest extends BaseProjectTest {
     assertTrue(project.exists());
 
     IStatus updateStatus = updateContainers(project);
-    ProjectUtils.waitUntilNoBuildErrors(project);
+   // ProjectUtils.waitUntilNoBuildErrors(project);
 
     verifyImportedProject(project, updateStatus);
     assertTrue(hasAppEngineApi(project));
