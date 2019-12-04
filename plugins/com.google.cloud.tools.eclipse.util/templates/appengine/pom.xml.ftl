@@ -97,7 +97,7 @@
             </goals>
             <configuration>
               <rules>
-                <!-- appengine-maven-plugin requires Maven 3.5.0 -->
+                <!-- appengine-maven-plugin requires Maven 3.5.0 or later -->
                 <requireMavenVersion>
                   <version>3.5.0</version>
                 </requireMavenVersion>
