@@ -105,7 +105,7 @@ public class AppEngineStandardFacet {
    * is no App Engine Standard facet or if the version is not marked as obsolete.
    *
    * @param facetedProject should not be null
-   * @return true if project uses an obselete App Engine Standard facet and false otherwise
+   * @return true if project uses an obsolete App Engine Standard facet and false otherwise
    */
   public static boolean usesObsoleteRuntime(IFacetedProject facetedProject) {
     Preconditions.checkNotNull(facetedProject);
