@@ -66,7 +66,6 @@ public class AccountsPanel extends PopupDialog {
     this.imageLoader = imageLoader;
   }
 
-
   @Override
   protected Color getBackground() {
     return getShell().getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND);
