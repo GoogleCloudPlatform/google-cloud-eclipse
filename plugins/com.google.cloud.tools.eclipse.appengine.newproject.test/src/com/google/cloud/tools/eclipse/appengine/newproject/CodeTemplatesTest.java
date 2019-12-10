@@ -464,7 +464,7 @@ public class CodeTemplatesTest {
 
     String enforcerVersion =
         (String) xpath.evaluate("string(./m:version)", enforcerNode, XPathConstants.STRING);
-    Assert.assertEquals("3.0.0-M2", enforcerVersion);
+    Assert.assertEquals("3.0.0-M3", enforcerVersion);
     String requiredMavenVersion =
         (String)
             xpath.evaluate(
