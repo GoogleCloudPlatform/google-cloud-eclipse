@@ -42,10 +42,15 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
 
   public AppEngineProjectWizard(AppEngineWizardPage appEngineWizardPage) {
     appEnginePage = Preconditions.checkNotNull(appEngineWizardPage);
-    
+
     Map<String, String> groups = new LinkedHashMap<>();
-    groups.put(appEngineWizardPage.getSupportedLibrariesGroup(), 
-          Messages.getString("appengine-title")); //$NON-NLS-1$
+
+    String supportedLibrariesGroup = appEngineWizardPage.getSupportedLibrariesGroup();
+    if (CloudLibraries.APP_ENGINE_STANDARD_GROUP.equals(supportedLibrariesGroup)) {
+      groups.put(supportedLibrariesGroup, Messages.getString("appengine-title")); //$NON-NLS-1$
+    } else {
+      groups.put(supportedLibrariesGroup, Messages.getString("non-appengine-title")); //$NON-NLS-1$
+    }
     groups.put(CloudLibraries.CLIENT_APIS_GROUP, 
         Messages.getString("clientapis-title")); //$NON-NLS-1$
     
