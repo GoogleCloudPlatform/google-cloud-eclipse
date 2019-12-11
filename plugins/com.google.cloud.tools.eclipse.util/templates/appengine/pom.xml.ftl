@@ -23,7 +23,7 @@
     <dependencies>
       <dependency>
         <groupId>com.google.cloud</groupId>
-        <artifactId>google-cloud-bom</artifactId>
+        <artifactId>libraries-bom</artifactId>
         <version>${googleCloudJavaBomVersion}</version>
         <type>pom</type>
         <scope>import</scope>

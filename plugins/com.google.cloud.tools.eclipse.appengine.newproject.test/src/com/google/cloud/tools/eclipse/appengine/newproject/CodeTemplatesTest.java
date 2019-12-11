@@ -432,7 +432,7 @@ public class CodeTemplatesTest {
         "string(./m:dependencyManagement/m:dependencies/m:dependency/m:artifactId)",
         root,
         XPathConstants.STRING);
-    Assert.assertEquals("google-cloud-bom", bomArtifactId);
+    Assert.assertEquals("libraries-bom", bomArtifactId);
 
     DefaultArtifactVersion bomVersion = new DefaultArtifactVersion((String) xpath.evaluate(
         "string(./m:dependencyManagement/m:dependencies/m:dependency/m:version)",

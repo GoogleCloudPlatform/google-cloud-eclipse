@@ -105,7 +105,7 @@ public class Bug3380Test {
     Assert.assertTrue(pom.dependencyManaged("com.google.cloud", "google-cloud-automl"));
 
     Element bomElement = (Element) xpath.evaluate(
-        "//m:dependencyManagement/m:dependencies/m:dependency[m:groupId='com.google.cloud'][m:artifactId='google-cloud-bom']",
+        "//m:dependencyManagement/m:dependencies/m:dependency[m:groupId='com.google.cloud'][m:artifactId='libraries-bom']",
         pom.document.getDocumentElement(), XPathConstants.NODE);
     Assert.assertNotNull(bomElement); // Make sure BOM element added
 

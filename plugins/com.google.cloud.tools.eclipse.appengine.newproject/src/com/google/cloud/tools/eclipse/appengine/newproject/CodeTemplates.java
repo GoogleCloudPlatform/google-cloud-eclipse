@@ -238,14 +238,14 @@ public class CodeTemplates {
     
     String bomVersion = getCurrentVersion(
         "com.google.cloud", //$NON-NLS-1$
-        "google-cloud-bom", //$NON-NLS-1$
-        "0.91.0-alpha"); //$NON-NLS-1$
+        "libraries-bom", //$NON-NLS-1$
+        "3.1.0"); //$NON-NLS-1$
     properties.put("googleCloudJavaBomVersion", bomVersion); //$NON-NLS-1$
     
     String mavenPluginVersion = getCurrentVersion(
         "com.google.cloud.tools", //$NON-NLS-1$
         "appengine-maven-plugin", //$NON-NLS-1$
-        "2.0.0"); //$NON-NLS-1$
+        "2.2.0"); //$NON-NLS-1$
     properties.put("mavenPluginVersion", mavenPluginVersion); //$NON-NLS-1$
 
     if (isServlet25Selected(config)) {

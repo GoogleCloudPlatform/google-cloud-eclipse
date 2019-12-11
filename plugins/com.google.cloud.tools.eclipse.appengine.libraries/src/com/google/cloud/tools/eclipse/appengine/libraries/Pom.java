@@ -287,7 +287,7 @@ class Pom {
   private void createBOMIfNeeded(XPath xpath) throws CoreException {
     try {
       Element bomElement = (Element) xpath.evaluate(
-          "//m:dependencyManagement/m:dependencies/m:dependency[m:groupId='com.google.cloud'][m:artifactId='google-cloud-bom']",
+          "//m:dependencyManagement/m:dependencies/m:dependency[m:groupId='com.google.cloud'][m:artifactId='libraries-bom']",
           document.getDocumentElement(), XPathConstants.NODE);
       if (bomElement == null) {
         Element dependencies = null;
@@ -312,12 +312,12 @@ class Pom {
         Element dependency =
             document.createElementNS("http://maven.apache.org/POM/4.0.0", "dependency");
         dependency.appendChild(createChild("groupId", "com.google.cloud"));
-        dependency.appendChild(createChild("artifactId", "google-cloud-bom"));
+        dependency.appendChild(createChild("artifactId", "libraries-bom"));
         dependency.appendChild(createChild("type", "pom"));
         dependency.appendChild(createChild("scope", "import"));
-        String version = getBestVersion("com.google.cloud", "google-cloud-bom");
+        String version = getBestVersion("com.google.cloud", "libraries-bom");
         dependency.appendChild(createChild("version", version));
-        Bom bom = Bom.loadBom("com.google.cloud", "google-cloud-bom", version, null);
+        Bom bom = Bom.loadBom("com.google.cloud", "libraries-bom", version, null);
         if (bom != null) {
           boms.add(bom);
         }
