@@ -78,9 +78,9 @@ The tests need to find the Google Cloud SDK.  You can either:
 
 By default, the build is targeted against Eclipse Photon / 4.8.
 You can explicitly set the `eclipse.target` property to
-`oxygen` (4.7), `2018-09` (4.9), or `2018-12` (4.10).
+`2018-09` (4.9), or `2018-12` (4.10).
 ```
-$ mvn -Declipse.target=oxygen package
+$ mvn -Declipse.target=2018-09 package
 ```
 
 ### Adding a new bundle/fragment
@@ -265,7 +265,6 @@ features being built against. We currently maintain three target platforms,
 targeting the latest version of the current, previous, and next releases.
 This is currently:
 
-  - Eclipse Oxygen (4.7): [`eclipse/oxygen/gcp-eclipse-oxygen.target`](eclipse/oxygen/gcp-eclipse-oxygen.target)
   - Eclipse Photon (4.8): [`eclipse/photon/gcp-eclipse-photon.target`](eclipse/photon/gcp-eclipse-photon.target)
   - Eclipse 2018-09 (4.9): [`eclipse/eclipse-2018-09/gcp-eclipse-2018-09.target`](eclipse/eclipse-2018-09/gcp-eclipse-2018-09.target)
   - Eclipse 2018-12 (4.10): [`eclipse/eclipse-2018-12/gcp-eclipse-2018-12.target`](eclipse/eclipse-2018-12/gcp-eclipse-2018-12.target)
