@@ -418,8 +418,7 @@
       <id>build-eclipse-photon</id>
       <activation>
         <property>
-          <name>eclipse.target</name>
-          <value>photon</value>
+          <name>eclipse.target</name> <value>photon</value>
         </property>
       </activation>
       <properties>
