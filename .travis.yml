@@ -23,7 +23,6 @@ matrix:
     - name: "Eclipse 2018-09 (4.9) on Java 8"
       jdk: oraclejdk8
       dist: trusty
-      env: 
     - name: "Eclipse 2018-09 (4.9) on Java 11"
       jdk: openjdk11
       dist: trusty
