@@ -76,11 +76,11 @@ The tests need to find the Google Cloud SDK.  You can either:
 
 ### Changing the Eclipse Platform compilation and testing target
 
-By default, the build is targeted against Eclipse Photon / 4.8.
+By default, the build is targeted against Eclipse `2018-09` (4.9).
 You can explicitly set the `eclipse.target` property to
-`2018-09` (4.9), or `2018-12` (4.10).
+`photon` (4.8), or `2018-12` (4.10).
 ```
-$ mvn -Declipse.target=2018-09 package
+$ mvn -Declipse.target=2018-12 package
 ```
 
 ### Adding a new bundle/fragment
