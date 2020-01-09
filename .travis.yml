@@ -12,14 +12,14 @@ install:
   - mvn -B -N io.takari:maven:wrapper -Dmaven=3.5.4
   # download and install Cloud SDK (may be cached)
   - build/install-cloudsdk.sh 241.0.0 $HOME
-# ECLIPSE_TARGET is the targeted platform: photon is the default target
+# ECLIPSE_TARGET is the targeted platform: 2018-09 is the default target
 # We run jacoco on photon
 matrix:
   include:
     - name: "Eclipse Photon (4.8) on Java 8"
       jdk: oraclejdk8
       dist: trusty
-      env: MAVEN_FLAGS='-Pjacoco'
+      env: ECLIPSE_TARGET=photon MAVEN_FLAGS='-Pjacoco'
     - name: "Eclipse 2018-09 (4.9) on Java 8"
       jdk: oraclejdk8
       dist: trusty
