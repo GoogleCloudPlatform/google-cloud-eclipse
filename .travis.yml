@@ -25,7 +25,6 @@ matrix:
       env: ECLIPSE_TARGET=photon MAVEN_FLAGS='-Pjacoco'
     - name: "Eclipse 2018-09 (4.9) on Java 8"
       jdk: openjdk8
-      env: ECLIPSE_TARGET=2018-09
     - name: "Eclipse 2018-09 (4.9) on Java 11"
       jdk: openjdk11
       env: MAVEN_FLAGS='--toolchains=.travisci/toolchains.xml'
