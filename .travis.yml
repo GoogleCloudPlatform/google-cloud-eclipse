@@ -16,19 +16,19 @@ install:
   - mvn -B -N io.takari:maven:wrapper -Dmaven=3.5.4
   # download and install Cloud SDK (may be cached)
   - build/install-cloudsdk.sh 241.0.0 $HOME
-# ECLIPSE_TARGET is the targeted platform: photon is the default target
+# ECLIPSE_TARGET is the targeted platform: 2018-09 is the default target
 # We run jacoco on photon
 matrix:
   include:
     - name: "Eclipse Photon (4.8) on Java 8"
       jdk: openjdk8
-      env: MAVEN_FLAGS='-Pjacoco'
+      env: ECLIPSE_TARGET=photon MAVEN_FLAGS='-Pjacoco'
     - name: "Eclipse 2018-09 (4.9) on Java 8"
       jdk: openjdk8
       env: ECLIPSE_TARGET=2018-09
     - name: "Eclipse 2018-09 (4.9) on Java 11"
       jdk: openjdk11
-      env: ECLIPSE_TARGET=2018-09 MAVEN_FLAGS='--toolchains=.travisci/toolchains.xml'
+      env: MAVEN_FLAGS='--toolchains=.travisci/toolchains.xml'
     - name: "Eclipse 2018-12 (4.10) on Java 11"
       jdk: openjdk11
       env: ECLIPSE_TARGET=2018-12 MAVEN_FLAGS='--toolchains=.travisci/toolchains.xml'
@@ -40,7 +40,6 @@ env:
     # -DshowDateTime: show milliseconds since start
     - MAVEN_OPTS='-Xmx700m -Dorg.slf4j.simpleLogger.showDateTime=true'
     - CLOUDSDK_CORE_DISABLE_USAGE_REPORTING=true
-    - DISPLAY=:99.0
     - GCS_BUILD_BUCKET=gs://travis_artifacts
 before_script:
   - metacity --sm-disable --replace &
