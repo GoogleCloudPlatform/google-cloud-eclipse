@@ -108,6 +108,7 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
           }
         });
     SWTBotShell debugPage = bot.shell("Debug On Server");
+    assertNotNull(debugPage);
     debugPage.activate();
     SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
 
