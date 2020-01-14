@@ -99,7 +99,7 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
         new DefaultCondition() {
           @Override
           public boolean test() throws Exception {
-            return bot.shell("Debug On Server") != null;
+            return bot.shell("Debug On Server").isOpen();
           }
 
           @Override
