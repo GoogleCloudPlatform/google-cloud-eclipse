@@ -127,6 +127,23 @@ public class SwtBotTestingUtilities {
   }
 
   /**
+   * Blocks the caller until the shell matching the text is open.
+   */
+  public static void waitUntilShellIsOpen(SWTBot bot, String text) {
+    bot.waitUntil(new DefaultCondition() {
+        @Override
+        public String getFailureMessage() {
+          return "Cannot find a shell with text '" + text + "'";
+        }
+
+        @Override
+        public boolean test() throws Exception {
+          return bot.shell(text).isOpen();
+        }
+      });
+  }
+
+  /**
    * Blocks the caller until the given shell is closed.
    */
   public static void waitUntilShellIsClosed(SWTBot bot, SWTBotShell shell) {

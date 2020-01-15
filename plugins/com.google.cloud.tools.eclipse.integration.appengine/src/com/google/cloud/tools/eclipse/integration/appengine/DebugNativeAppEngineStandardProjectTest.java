@@ -43,7 +43,6 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
-import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotStyledText;
@@ -95,20 +94,8 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
         bot, () -> bot.menu("Run").menu("Debug As"), endsWith("Debug on Server"));
 
     bot.menu("Run").menu("Debug As").menu("1 Debug on Server").click();
-    bot.waitUntil(
-        new DefaultCondition() {
-          @Override
-          public boolean test() throws Exception {
-            return bot.shell("Debug On Server").isOpen();
-          }
-
-          @Override
-          public String getFailureMessage() {
-            return "Cannot find a shell with title 'Debug On Server'";
-          }
-        });
+    SwtBotTestingUtilities.waitUntilShellIsOpen(bot, "Debug On Server");
     SWTBotShell debugPage = bot.shell("Debug On Server");
-    assertNotNull(debugPage);
     debugPage.activate();
     SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
 
