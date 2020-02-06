@@ -317,7 +317,7 @@ public class AnalyticsPingManager {
     Map<String, Object> logEvent = new HashMap<>();
     logEvent.put("event_time_ms", System.currentTimeMillis());
     logEvent.put("sequence_position", sequencePosition++);  
-    logEvent.put("source_extension_json_proto3", sourceExtensionJsonString);
+    logEvent.put("source_extension_json", sourceExtensionJsonString);
     
     Map<String, Object> root = new HashMap<>();
     root.put("log_source", "CONCORD");
