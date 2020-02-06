@@ -53,12 +53,14 @@ public class AnalyticsPingManager {
 
   private static final Logger logger = Logger.getLogger(AnalyticsPingManager.class.getName());
 
-  private static final String CLEAR_CUT_COLLECTION_URL = "https://play.google.com/log";
+  private static final String FIRELOG_COLLECTION_URL =
+      "https://firebaselogging-pa.googleapis.com/v1/firelog/legacy/log?key="
+          + Constants.FIRELOG_API_KEY;
 
   private static AnalyticsPingManager instance;
 
   // analytics services
-  private final String clearCutUrl;
+  private final String firelogUrl;
   
   // Preference store (should be configuration scoped) from which we get UUID, opt-in status, etc.
   private final IEclipsePreferences preferences;
@@ -81,21 +83,21 @@ public class AnalyticsPingManager {
   private int sequencePosition = 0;
 
   @VisibleForTesting
-  AnalyticsPingManager(String clearCutUrl, IEclipsePreferences preferences,
+  AnalyticsPingManager(String firelogUrl, IEclipsePreferences preferences,
       ConcurrentLinkedQueue<PingEvent> concurrentLinkedQueue) {
-    this.clearCutUrl = clearCutUrl;
+    this.firelogUrl = firelogUrl;
     this.preferences = Preconditions.checkNotNull(preferences);
     pingEventQueue = concurrentLinkedQueue;
   }
 
   public static synchronized AnalyticsPingManager getInstance() {
     if (instance == null) {
-      String clearCutUrl = null;
+      String firelogUrl = null;
       if (!Platform.inDevelopmentMode()) {
         // Enable only in production environment.
-        clearCutUrl = CLEAR_CUT_COLLECTION_URL;
+        firelogUrl = FIRELOG_COLLECTION_URL;
       }
-      instance = new AnalyticsPingManager(clearCutUrl, AnalyticsPreferences.getPreferenceNode(),
+      instance = new AnalyticsPingManager(firelogUrl, AnalyticsPreferences.getPreferenceNode(),
           new ConcurrentLinkedQueue<PingEvent>());
     }
     return instance;
@@ -180,7 +182,7 @@ public class AnalyticsPingManager {
     Preconditions.checkArgument(!Strings.isNullOrEmpty(eventName), "eventName null or empty");
     Preconditions.checkNotNull(metadata);
 
-    if (clearCutUrl != null) {
+    if (firelogUrl != null) {
       // Note: always enqueue if a user has not seen the opt-in dialog yet; enqueuing itself
       // doesn't mean that the event ping will be posted.
       if (userHasOptedIn() || !userHasRegisteredOptInStatus()) {
@@ -199,7 +201,7 @@ public class AnalyticsPingManager {
     if (userHasOptedIn()) {
       try {
         String json = jsonEncode(pingEvent);
-        int resultCode = HttpUtil.sendPost(clearCutUrl, json, "application/json");
+        int resultCode = HttpUtil.sendPost(firelogUrl, json, "application/json");
         if (resultCode >= 300) {
           logger.log(Level.FINE, "Failed to POST to Concord with HTTP result " + resultCode);
         }
@@ -293,11 +295,11 @@ public class AnalyticsPingManager {
     
     Map<String, Object> clientInfo = new HashMap<>();
     clientInfo.put("client_type", "DESKTOP");
-    clientInfo.put("desktop_client_info", Collections.singletonList(desktopClientInfo));
+    clientInfo.put("desktop_client_info", desktopClientInfo);
         
     // logs/proto/cloud/concord/concord_event.proto
     Map<String, Object> sourceExtension = new HashMap<>();
-    sourceExtension.put("client_machine_id", getAnonymizedClientId());
+    sourceExtension.put("client_install_id", getAnonymizedClientId());
     sourceExtension.put("console_type", CloudToolsInfo.CONSOLE_TYPE);
     sourceExtension.put("event_name", event.eventName);
     
@@ -318,14 +320,14 @@ public class AnalyticsPingManager {
     Map<String, Object> logEvent = new HashMap<>();
     logEvent.put("event_time_ms", System.currentTimeMillis());
     logEvent.put("sequence_position", sequencePosition++);  
-    logEvent.put("source_extension_json", sourceExtensionJsonString);
+    logEvent.put("source_extension_json_proto3", sourceExtensionJsonString);
     
     Map<String, Object> root = new HashMap<>();
-    root.put("log_source_name", "CONCORD");
+    root.put("log_source", "CONCORD");
     root.put("request_time_ms", System.currentTimeMillis());
-    root.put("client_info", Collections.singletonList(clientInfo));
-    root.put("log_event", Collections.singletonList(Collections.singletonList(logEvent)));
+    root.put("client_info", clientInfo);
+    root.put("log_event", Collections.singletonList(logEvent));
 
-    return gson.toJson(Collections.singletonList(root));
+    return gson.toJson(root);
   }
 }
