@@ -59,8 +59,7 @@ public class AnalyticsPingManager {
 
   private static AnalyticsPingManager instance;
 
-  // analytics services
-  private final String firelogUrl;
+  private final String collectionUrl;
   
   // Preference store (should be configuration scoped) from which we get UUID, opt-in status, etc.
   private final IEclipsePreferences preferences;
@@ -83,21 +82,20 @@ public class AnalyticsPingManager {
   private int sequencePosition = 0;
 
   @VisibleForTesting
-  AnalyticsPingManager(String firelogUrl, IEclipsePreferences preferences,
+  AnalyticsPingManager(String collectionUrl, IEclipsePreferences preferences,
       ConcurrentLinkedQueue<PingEvent> concurrentLinkedQueue) {
-    this.firelogUrl = firelogUrl;
+    this.collectionUrl = collectionUrl;
     this.preferences = Preconditions.checkNotNull(preferences);
     pingEventQueue = concurrentLinkedQueue;
   }
 
   public static synchronized AnalyticsPingManager getInstance() {
     if (instance == null) {
-      String firelogUrl = null;
+      String collectionUrl = null;
       if (!Platform.inDevelopmentMode()) {
-        // Enable only in production environment.
-        firelogUrl = FIRELOG_COLLECTION_URL;
+        collectionUrl = FIRELOG_COLLECTION_URL;
       }
-      instance = new AnalyticsPingManager(firelogUrl, AnalyticsPreferences.getPreferenceNode(),
+      instance = new AnalyticsPingManager(collectionUrl, AnalyticsPreferences.getPreferenceNode(),
           new ConcurrentLinkedQueue<PingEvent>());
     }
     return instance;
@@ -182,7 +180,7 @@ public class AnalyticsPingManager {
     Preconditions.checkArgument(!Strings.isNullOrEmpty(eventName), "eventName null or empty");
     Preconditions.checkNotNull(metadata);
 
-    if (firelogUrl != null) {
+    if (collectionUrl != null) {
       // Note: always enqueue if a user has not seen the opt-in dialog yet; enqueuing itself
       // doesn't mean that the event ping will be posted.
       if (userHasOptedIn() || !userHasRegisteredOptInStatus()) {
@@ -201,7 +199,7 @@ public class AnalyticsPingManager {
     if (userHasOptedIn()) {
       try {
         String json = jsonEncode(pingEvent);
-        int resultCode = HttpUtil.sendPost(firelogUrl, json, "application/json");
+        int resultCode = HttpUtil.sendPost(collectionUrl, json, "application/json");
         if (resultCode >= 300) {
           logger.log(Level.FINE, "Failed to POST to Concord with HTTP result " + resultCode);
         }
