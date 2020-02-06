@@ -44,7 +44,7 @@ location "https://download.eclipse.org/webtools/downloads/drops/R3.15.0/R-3.15.0
     org.eclipse.wst.server_adapters.sdk.feature.feature.group
 }
 
-location "http://download.eclipse.org/linuxtools/update-docker-4.3.0" {
+location "http://download.eclipse.org/linuxtools/update-2019-09-docker/" {
     org.eclipse.linuxtools.docker.feature.feature.group
 }
 
