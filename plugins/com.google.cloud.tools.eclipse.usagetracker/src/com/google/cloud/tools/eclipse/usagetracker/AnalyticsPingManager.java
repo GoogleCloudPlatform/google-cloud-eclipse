@@ -54,8 +54,7 @@ public class AnalyticsPingManager {
   private static final Logger logger = Logger.getLogger(AnalyticsPingManager.class.getName());
 
   private static final String FIRELOG_COLLECTION_URL =
-      "https://firebaselogging-pa.googleapis.com/v1/firelog/legacy/log?key="
-          + Constants.FIRELOG_API_KEY;
+      "https://firebaselogging-pa.googleapis.com/v1/firelog/legacy/log";
 
   private static AnalyticsPingManager instance;
 
@@ -92,8 +91,8 @@ public class AnalyticsPingManager {
   public static synchronized AnalyticsPingManager getInstance() {
     if (instance == null) {
       String collectionUrl = null;
-      if (!Platform.inDevelopmentMode()) {
-        collectionUrl = FIRELOG_COLLECTION_URL;
+      if (!Platform.inDevelopmentMode() && !Constants.FIRELOG_API_KEY.startsWith("@")) {
+        collectionUrl = FIRELOG_COLLECTION_URL + "?key=" + Constants.FIRELOG_API_KEY;
       }
       instance = new AnalyticsPingManager(collectionUrl, AnalyticsPreferences.getPreferenceNode(),
           new ConcurrentLinkedQueue<PingEvent>());
