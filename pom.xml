@@ -345,9 +345,10 @@
               ${os-jvm-flags}
             </argLine>
             <bundleStartLevel>
+              <!-- use level 3 to ensure we start after other org.eclipse.equinox.* bundles -->
               <bundle>
                  <id>com.google.cloud.tools.eclipse.test.dependencies</id>
-                 <level>1</level>
+                 <level>3</level>
                  <autoStart>true</autoStart>
               </bundle>
            </bundleStartLevel>

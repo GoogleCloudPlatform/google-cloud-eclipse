@@ -19,11 +19,12 @@ package com.google.cloud.tools.eclipse.test.dependencies;
 import org.eclipse.equinox.log.ExtendedLogService;
 import org.eclipse.equinox.log.Logger;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.log.LogService;
 import org.osgi.service.log.LoggerFactory;
 
-/** An SLF4j facade for OSGi LoggerFactory and Eclipse ExtendedLogService */
+/**
+ * An SLF4j facade for OSGi {@link LoggerFactory} and Eclipse {@link ExtendedLogService}. This class
+ * is intended to be a replacement for other ExtendedLogService implementations.
+ */
 public class EclipseLoggingAdapter extends LoggerDelegate
     implements LoggerFactory, ExtendedLogService {
 
@@ -44,78 +45,6 @@ public class EclipseLoggingAdapter extends LoggerDelegate
   @Override
   public Logger getLogger(Bundle bundle, String loggerName) {
     return new LoggerDelegate(org.slf4j.LoggerFactory.getLogger(bundle.getSymbolicName()));
-  }
-
-  @Override
-  public void log(int level, String message) {
-    log(level, message, null);
-  }
-
-  @Override
-  public void log(int level, String message, Throwable exception) {
-    log(null, level, message, exception);
-  }
-
-  @Override
-  public void log(ServiceReference<?> sr, int level, String message) {
-    log(level, message);
-  }
-
-  @Override
-  public void log(ServiceReference<?> sr, int level, String message, Throwable exception) {
-    log(level, message, exception);
-  }
-
-  @Override
-  public void log(Object context, int level, String message) {
-    log(context, level, message, null);
-  }
-
-  private Logger getLogger(Object context) {
-    if (context instanceof Class) {
-      return getLogger((Class) context);
-    } else if (context != null) {
-      return getLogger(context.getClass());
-    }
-    return this;
-  }
-
-  @Override
-  public void log(Object context, int level, String message, Throwable exception) {
-    Logger logger = getLogger(context);
-    switch (level) {
-      case LogService.LOG_ERROR:
-        logger.error(message, exception);
-        break;
-      case LogService.LOG_WARNING:
-        logger.warn(message, exception);
-        break;
-      case LogService.LOG_INFO:
-        logger.info(message, exception);
-        break;
-      case LogService.LOG_DEBUG:
-        logger.debug(message, exception);
-        break;
-      default:
-        logger.debug(message, exception);
-        break;
-    }
-  }
-
-  @Override
-  public boolean isLoggable(int level) {
-    switch (level) {
-      case LogService.LOG_ERROR:
-        return isErrorEnabled();
-      case LogService.LOG_WARNING:
-        return isWarnEnabled();
-      case LogService.LOG_INFO:
-        return isInfoEnabled();
-      case LogService.LOG_DEBUG:
-        return isDebugEnabled();
-      default:
-        return false;
-    }
   }
 
   @Override

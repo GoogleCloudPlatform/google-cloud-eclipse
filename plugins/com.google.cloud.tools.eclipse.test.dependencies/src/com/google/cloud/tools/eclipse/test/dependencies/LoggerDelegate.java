@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.test.dependencies;
 
 import org.eclipse.equinox.log.Logger;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.log.LogService;
 import org.osgi.service.log.LoggerConsumer;
 
 class LoggerDelegate implements Logger {
@@ -214,43 +215,69 @@ class LoggerDelegate implements Logger {
 
   @Override
   public void log(int level, String message) {
-    // TODO Auto-generated method stub
-    
+    log(level, message, null);
   }
 
   @Override
   public void log(int level, String message, Throwable exception) {
-    // TODO Auto-generated method stub
-    
+    log(null, level, message, exception);
   }
 
   @Override
   public void log(ServiceReference<?> sr, int level, String message) {
-    // TODO Auto-generated method stub
-    
+    log(level, message);
   }
 
   @Override
   public void log(ServiceReference<?> sr, int level, String message, Throwable exception) {
-    // TODO Auto-generated method stub
-    
+    log(level, message, exception);
   }
 
   @Override
   public void log(Object context, int level, String message) {
-    // TODO Auto-generated method stub
-    
+    log(context, level, message, null);
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   public void log(Object context, int level, String message, Throwable exception) {
-    // TODO Auto-generated method stub
-    
+    // Oddly LogService#LOG_xxx are deprecated in favour of LogLevel enum, but
+    // the LogLevel enum does not provide integer mappings.
+    switch (level) {
+      case LogService.LOG_ERROR:
+        logger.error(message, exception);
+        break;
+      case LogService.LOG_WARNING:
+        logger.warn(message, exception);
+        break;
+      case LogService.LOG_INFO:
+        logger.info(message, exception);
+        break;
+      case LogService.LOG_DEBUG:
+        logger.debug(message, exception);
+        break;
+      default:
+        logger.debug(message, exception);
+        break;
+    }
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   public boolean isLoggable(int level) {
-    // TODO Auto-generated method stub
-    return false;
+    // Oddly LogService#LOG_xxx are deprecated in favour of LogLevel enum, but
+    // the LogLevel enum does not provide integer mappings.
+    switch (level) {
+      case LogService.LOG_ERROR:
+        return isErrorEnabled();
+      case LogService.LOG_WARNING:
+        return isWarnEnabled();
+      case LogService.LOG_INFO:
+        return isInfoEnabled();
+      case LogService.LOG_DEBUG:
+        return isDebugEnabled();
+      default:
+        return false;
+    }
   }
 }
