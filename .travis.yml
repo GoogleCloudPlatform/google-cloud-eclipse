@@ -83,3 +83,5 @@ after_script:
             $GCS_BUILD_BUCKET/travis/${TRAVIS_BUILD_NUMBER}/repository/;
       fi;
     fi
+after_failure:
+  - tail -n 1000 cmd_output.txt
