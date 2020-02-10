@@ -21,6 +21,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogService;
 import org.osgi.service.log.LoggerConsumer;
 
+/** Delegates from OSGi's newer Logger to SLF4j. */
 class LoggerDelegate implements Logger {
   private org.slf4j.Logger logger;
 
