@@ -43,7 +43,7 @@ env:
     - PATH=$CLOUD_SDK_HOME/bin:$PATH
     # -Xmx700m: Our maven build typically reports about 512m required
     # -DshowDateTime: show milliseconds since start
-    - MAVEN_OPTS='-Xmx700m -Dorg.slf4j.simpleLogger.showDateTime=true'
+    - MAVEN_OPTS='-Xmx700m -XX:MaxJavaStackTraceDepth=2 -Dorg.slf4j.simpleLogger.showDateTime=true'
     - CLOUDSDK_CORE_DISABLE_USAGE_REPORTING=true
     - GCS_BUILD_BUCKET=gs://travis_artifacts
 before_script:
