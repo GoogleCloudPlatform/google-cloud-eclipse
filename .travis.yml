@@ -10,7 +10,7 @@ addons:
 before_install:
   # change reference from now-defunct maven repository (#1406)
   - sed -i.bak -e 's|https://nexus.codehaus.org/snapshots/|https://oss.sonatype.org/content/repositories/codehaus-snapshots/|g' ~/.m2/settings.xml
-install: 
+install:
   # use mvn ≥ 3.3.9 to ensure faulty test exit states fail the build (#1276)
   # todo: mvn 3.6.3 should work with tycho
   - mvn -B -N io.takari:maven:wrapper -Dmaven=3.5.4
