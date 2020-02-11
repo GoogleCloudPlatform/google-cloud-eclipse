@@ -60,25 +60,24 @@ public class AnalyticsPingManagerPluginTest {
     PingEvent event = new PingEvent("SomeEvent", metadata, null);
     String json = pingManager.jsonEncode(event);
 
-    Type singletonRootType = new TypeToken<List<Map<String, ?>>>(){}.getType();
-    List<Map<String, ?>> singletonRoot = gson.fromJson(json, singletonRootType);
-    Map<String, ?> root = singletonRoot.get(0);
+    Type mapType = new TypeToken<Map<String, ?>>(){}.getType();
+    Map<String, ?> root = gson.fromJson(json, mapType);
 
-    Map<String, ?> clientInfo = ((List<Map<String, ?>>) root.get("client_info")).get(0);
+    Map<String, ?> clientInfo = (Map<String, ?>) root.get("client_info");
     Assert.assertEquals("DESKTOP", clientInfo.get("client_type"));  
-    Assert.assertEquals("CONCORD", root.get("log_source_name"));  
+    Assert.assertEquals("CONCORD", root.get("log_source"));
 
     long requestTimeMs = ((Double) root.get("request_time_ms")).longValue();
     Assert.assertTrue(requestTimeMs >= 1000000);
     
     Map<String, String> desktopClientInfo =
-        ((List<Map<String, String>>) clientInfo.get("desktop_client_info")).get(0);
+        (Map<String, String>) clientInfo.get("desktop_client_info");
     Assert.assertTrue(desktopClientInfo.get("os").length() > 1);
 
-    List<Object> logEvents = ((List<List<Object>>) root.get("log_event")).get(0);
+    List<Map<String, Object>> logEvents = (List<Map<String, Object>>) root.get("log_event");
     Assert.assertEquals(1, logEvents.size());
 
-    Map<String, Object> logEvent = (Map<String, Object>) logEvents.get(0);
+    Map<String, Object> logEvent = logEvents.get(0);
     long eventTimeMs = ((Double) logEvent.get("event_time_ms")).longValue();
     Assert.assertTrue(eventTimeMs >= 1000000);
 
@@ -88,7 +87,7 @@ public class AnalyticsPingManagerPluginTest {
     Type sourceExtensionJsonType = new TypeToken<Map<String, ?>>(){}.getType();
     Map<String, ?> source = gson.fromJson(sourceExtensionJson, sourceExtensionJsonType);
     Assert.assertEquals("CLOUD_TOOLS_FOR_ECLIPSE", source.get("console_type"));
-    Assert.assertEquals("clientId", source.get("client_machine_id"));
+    Assert.assertEquals("clientId", source.get("client_install_id"));
     Assert.assertEquals("SomeEvent", source.get("event_name"));
 
     List<Map<String, String>> eventMetadata =

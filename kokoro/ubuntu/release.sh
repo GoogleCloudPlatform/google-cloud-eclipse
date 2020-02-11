@@ -17,11 +17,13 @@ gcloud components install app-engine-java --quiet
 
 echo "OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID}"
 echo "OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET}"
+echo "FIRELOG_API_KEY: ${FIRELOG_API_KEY}"
 echo "PRODUCT_VERSION_SUFFIX: "${PRODUCT_VERSION_SUFFIX}
 
 # Exit if undefined (zero-length).
 test -n "${OAUTH_CLIENT_ID}"
 test -n "${OAUTH_CLIENT_SECRET}"
+test -n "${FIRELOG_API_KEY}"
 
 cd git/google-cloud-eclipse
 
@@ -34,5 +36,6 @@ TMPDIR= xvfb-run \
   mvn -V -B \
       -Doauth.client.id="${OAUTH_CLIENT_ID}" \
       -Doauth.client.secret="${OAUTH_CLIENT_SECRET}" \
+      -Dfirelog.api.key="${FIRELOG_API_KEY}" \
       ${PRODUCT_VERSION_SUFFIX:+-Dproduct.version.qualifier.suffix="'${PRODUCT_VERSION_SUFFIX}'"} \
     clean verify
