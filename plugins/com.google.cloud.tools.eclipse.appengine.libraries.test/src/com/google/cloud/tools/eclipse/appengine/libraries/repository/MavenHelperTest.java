@@ -54,6 +54,31 @@ public class MavenHelperTest {
   }
   
   @Test
+  public void testResolveArtifact_googleApiClient() throws CoreException {
+    MavenCoordinates coordinates = new MavenCoordinates.Builder()
+        .setGroupId("com.google.api-client")
+        .setArtifactId("google-api-client")
+        .setVersion("1.30.8")
+        .build();
+    Artifact artifact = MavenHelper.resolveArtifact(coordinates, new NullProgressMonitor());
+    Assert.assertEquals("google-api-client", artifact.getArtifactId());
+  }
+  
+  @Test
+  public void testResolveArtifact_android() throws CoreException {
+    MavenCoordinates coordinates = new MavenCoordinates.Builder()
+        .setGroupId("androidx.annotation")
+        .setArtifactId("annotation")
+        .setVersion("1.1.0")
+        .setRepository("https://maven.google.com")
+        .build();
+    Artifact artifact = MavenHelper.resolveArtifact(coordinates, new NullProgressMonitor());
+    Assert.assertEquals("annotation", artifact.getArtifactId());
+  }
+  
+
+  
+  @Test
   public void testBundleStateBasedMavenFolder_withLatestVersion() {
     MavenCoordinates coordinates = new MavenCoordinates.Builder()
         .setGroupId("com.google.cloud")
