@@ -17,35 +17,52 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.repository;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
+import org.apache.maven.artifact.Artifact;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
-@RunWith(MockitoJUnitRunner.class)
 public class MavenHelperTest {
 
   private static final String EXPECTED_DOWNLOAD_FOLDER =
       ".metadata/.plugins/com.google.cloud.tools.eclipse.appengine.libraries/downloads/groupId/artifactId/1.0.0";
 
-  @Mock private MavenCoordinates artifact;
-
   @Test
   public void testBundleStateBasedMavenFolder_withSpecificVersion() {
-    when(artifact.getGroupId()).thenReturn("groupId");
-    when(artifact.getArtifactId()).thenReturn("artifactId");
-    when(artifact.getVersion()).thenReturn("1.0.0");
-    IPath folder = MavenHelper.bundleStateBasedMavenFolder(artifact);
+    MavenCoordinates coordinates = new MavenCoordinates.Builder()
+        .setGroupId("groupId")
+        .setArtifactId("artifactId")
+        .setVersion("1.0.0")
+        .build();
+    IPath folder = MavenHelper.bundleStateBasedMavenFolder(coordinates);
     assertTrue(folder.toString().endsWith(EXPECTED_DOWNLOAD_FOLDER));
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test
+  public void testUseAndroidRepo() throws CoreException {
+    MavenCoordinates coordinates = new MavenCoordinates.Builder()
+        .setGroupId("com.google.cloud")
+        .setArtifactId("google-cloud-datastore")
+        .setVersion("1.30.8")
+        .build();
+    Artifact artifact = MavenHelper.resolveArtifact(coordinates, new NullProgressMonitor());
+  }
+  
+  @Test
   public void testBundleStateBasedMavenFolder_withLatestVersion() {
-    when(artifact.getVersion()).thenReturn("LATEST");
-    MavenHelper.bundleStateBasedMavenFolder(artifact);
+    MavenCoordinates coordinates = new MavenCoordinates.Builder()
+        .setGroupId("com.google.cloud")
+        .setArtifactId("datastore")
+        .setVersion("LATEST")
+        .build();
+    try {
+      MavenHelper.bundleStateBasedMavenFolder(coordinates);
+      Assert.fail();
+    } catch (IllegalArgumentException expected) {
+    }
   }
 }
