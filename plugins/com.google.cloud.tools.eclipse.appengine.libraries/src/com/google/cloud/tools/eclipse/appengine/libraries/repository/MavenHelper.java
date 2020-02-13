@@ -24,6 +24,7 @@ import com.google.common.base.Preconditions;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.apache.maven.artifact.Artifact;
@@ -51,17 +52,21 @@ public class MavenHelper {
         monitor);
   }
 
+  
   private static List<ArtifactRepository> getRepository(MavenCoordinates mavenCoordinates)
       throws CoreException {
     if (MavenCoordinates.MAVEN_CENTRAL_REPO.equals(mavenCoordinates.getRepository())) {
       // M2Eclipse will use the Maven Central repo in case null is used
-      return null;
+      ArrayList<ArtifactRepository> repos = new ArrayList<>();
+      repos.add(makeRepository("https://repo1.maven.org/maven2/"));
+      repos.add(makeRepository("https://maven.google.com"));
+      return repos;
     } else {
-      return Collections.singletonList(getCustomRepository(mavenCoordinates.getRepository()));
+      return Collections.singletonList(makeRepository(mavenCoordinates.getRepository()));
     }
   }
 
-  private static ArtifactRepository getCustomRepository(String repository) throws CoreException {
+  private static ArtifactRepository makeRepository(String repository) throws CoreException {
     try {
       URI repoUri = new URI(repository);
       if (!repoUri.isAbsolute()) {

@@ -76,7 +76,16 @@ public class MavenHelperTest {
     Assert.assertEquals("annotation", artifact.getArtifactId());
   }
   
-
+  @Test
+  public void testResolveArtifact_android_noRepository() throws CoreException {
+    MavenCoordinates coordinates = new MavenCoordinates.Builder()
+        .setGroupId("androidx.annotation")
+        .setArtifactId("annotation")
+        .setVersion("1.1.0")
+        .build();
+    Artifact artifact = MavenHelper.resolveArtifact(coordinates, new NullProgressMonitor());
+    Assert.assertEquals("annotation", artifact.getArtifactId());
+  }
   
   @Test
   public void testBundleStateBasedMavenFolder_withLatestVersion() {
