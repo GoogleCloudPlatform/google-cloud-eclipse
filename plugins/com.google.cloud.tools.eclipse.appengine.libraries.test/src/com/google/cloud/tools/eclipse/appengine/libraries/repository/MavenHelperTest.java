@@ -43,13 +43,14 @@ public class MavenHelperTest {
   }
   
   @Test
-  public void testUseAndroidRepo() throws CoreException {
+  public void testResolveArtifact() throws CoreException {
     MavenCoordinates coordinates = new MavenCoordinates.Builder()
         .setGroupId("com.google.cloud")
         .setArtifactId("google-cloud-datastore")
-        .setVersion("1.30.8")
+        .setVersion("1.102.1")
         .build();
     Artifact artifact = MavenHelper.resolveArtifact(coordinates, new NullProgressMonitor());
+    Assert.assertEquals("google-cloud-datastore", artifact.getArtifactId());
   }
   
   @Test
