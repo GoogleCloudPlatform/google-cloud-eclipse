@@ -52,15 +52,11 @@ public class MavenHelper {
         monitor);
   }
 
-  
   private static List<ArtifactRepository> getRepository(MavenCoordinates mavenCoordinates)
       throws CoreException {
     if (MavenCoordinates.MAVEN_CENTRAL_REPO.equals(mavenCoordinates.getRepository())) {
-      // M2Eclipse will use the Maven Central repo in case null is used
-      ArrayList<ArtifactRepository> repos = new ArrayList<>();
-      repos.add(makeRepository("https://repo1.maven.org/maven2/"));
-      repos.add(makeRepository("https://maven.google.com"));
-      return repos;
+      // M2Eclipse uses the Maven Central repo if the repsoitory list is null
+      return null;
     } else {
       return Collections.singletonList(makeRepository(mavenCoordinates.getRepository()));
     }

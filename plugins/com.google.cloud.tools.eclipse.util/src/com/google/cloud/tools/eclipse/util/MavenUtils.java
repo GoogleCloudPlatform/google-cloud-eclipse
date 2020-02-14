@@ -39,6 +39,7 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.embedder.IMaven;
 import org.eclipse.m2e.core.embedder.IMavenExecutionContext;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.w3c.dom.DOMException;
@@ -93,9 +94,9 @@ public class MavenUtils {
     return runOperation(
         monitor,
         (context, system, progress) -> {
-          Artifact artifact =
-              MavenPlugin.getMaven()
-                  .resolve(groupId, artifactId, version, type, classifier, repositories, progress);
+          IMaven maven = MavenPlugin.getMaven();
+          Artifact artifact = maven.resolve(
+              groupId, artifactId, version, type, classifier, repositories, progress);
           return artifact;
         });
   }

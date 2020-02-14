@@ -138,6 +138,9 @@ public class MavenCoordinates {
       Preconditions.checkNotNull(groupId, "groupId null");
       Preconditions.checkArgument(!groupId.isEmpty(), "groupId is empty");
       this.groupId = groupId;
+      if (groupId.startsWith("androidx")) {
+        setRepository("https://maven.google.com");
+      }
       return this;
     }
 
