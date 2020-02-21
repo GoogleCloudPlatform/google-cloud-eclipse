@@ -18,14 +18,14 @@ gcloud components install app-engine-java --quiet
 echo "OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID}"
 echo "OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET}"
 echo "FIRELOG_API_KEY: ${FIRELOG_API_KEY}"
-echo "PRODUCT_VERSION_SUFFIX: "${PRODUCT_VERSION_SUFFIX}
+echo "PRODUCT_VERSION_SUFFIX: ${PRODUCT_VERSION_SUFFIX}"
 
 # Exit if undefined (zero-length).
-test -n "${OAUTH_CLIENT_ID}"
-test -n "${OAUTH_CLIENT_SECRET}"
-test -n "${FIRELOG_API_KEY}"
+[[ -n "${OAUTH_CLIENT_ID}" ]]
+[[ -n "${OAUTH_CLIENT_SECRET}" ]]
+[[ -n "${FIRELOG_API_KEY}" ]]
 
-cd git/google-cloud-eclipse
+cd github/google-cloud-eclipse
 
 # A few notes on the Maven command:
 #    - Need to unset `TMPDIR` for `xvfb-run` due to a bug:
