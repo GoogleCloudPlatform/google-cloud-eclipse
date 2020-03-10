@@ -35,7 +35,6 @@ import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -52,8 +51,6 @@ public class ImportMavenAppEngineStandardProjectTest extends BaseProjectTest {
   @Rule
   public TemporaryFolder tempFolder = new TemporaryFolder();
 
-  // flaking on Photon: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/pull/3256
-  @Ignore
   @Test
   public void runImport() throws IOException, CoreException {
     assertFalse(projectExists("springboot-appengine-standard"));
