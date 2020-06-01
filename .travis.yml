@@ -34,6 +34,9 @@ matrix:
     - name: "Eclipse 2019-12 (4.14) on Java 11"
       jdk: openjdk11
       env: ECLIPSE_TARGET=2019-12 MAVEN_FLAGS='--toolchains=.travisci/toolchains.xml'
+    - name: "Eclipse 2020-03 (4.15) on Java 11"
+      jdk: openjdk11
+      env: ECLIPSE_TARGET=2020-03 MAVEN_FLAGS='--toolchains=.travisci/toolchains.xml'
 env:
   global:
     - CLOUD_SDK_HOME=$HOME/google-cloud-sdk

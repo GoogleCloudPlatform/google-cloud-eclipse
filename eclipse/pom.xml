@@ -18,6 +18,7 @@
     <module>eclipse-2018-12</module>
     <module>eclipse-2019-09</module>
     <module>eclipse-2019-12</module>
+    <module>eclipse-2020-03</module>
   </modules>
 
   <profiles>

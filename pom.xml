@@ -553,6 +553,40 @@
       </build>
     </profile>
 
+    <profile>
+      <id>build-eclipse-2020-03</id>
+      <activation>
+        <property>
+          <name>eclipse.target</name> <value>2020-03</value>
+        </property>
+      </activation>
+      <properties>
+         <jettyMinVersion>9.4</jettyMinVersion>
+         <jettyMaxVersion>9.5</jettyMaxVersion>
+      </properties>
+      <!-- build against a known target platform -->
+      <modules>
+        <module>eclipse/eclipse-2020-03</module>
+      </modules>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>target-platform-configuration</artifactId>
+            <configuration>
+            <target>
+              <artifact>
+                <groupId>com.google.cloud.tools.eclipse</groupId>
+                <artifactId>gcp-eclipse-2020-03</artifactId>
+                <version>4.15.0-SNAPSHOT</version>
+              </artifact>
+            </target>
+           </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
     <!--
       The following profiles work to prevent Java 9'isms
       using Maven and Tycho's support for toolchains.
