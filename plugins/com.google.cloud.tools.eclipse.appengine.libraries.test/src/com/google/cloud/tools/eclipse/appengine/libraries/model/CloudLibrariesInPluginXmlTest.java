@@ -168,7 +168,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(objectifyMavenCoordinates.getArtifactId(), is("objectify"));
     DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(
         objectifyMavenCoordinates.getVersion());
-    assertEquals(new DefaultArtifactVersion("6.0.6"), artifactVersion);
+    assertEquals(new DefaultArtifactVersion("6.0.7"), artifactVersion);
     assertThat(objectifyMavenCoordinates.getType(), is("jar"));
     assertNull(objectifyMavenCoordinates.getClassifier());
 
