@@ -9,7 +9,7 @@
     <!-- TODO should this specify more than one marker type? -->
     <validator
         class="com.google.cloud.tools.eclipse.appengine.validation.XmlValidator:com.google.cloud.tools.eclipse.appengine.validation.AppEngineWebXmlValidator"
-        com.google.cloud.tools.eclipse.appengine.validation.appEngineProblemMarker">
+        markerId="com.google.cloud.tools.eclipse.appengine.validation.appEngineProblemMarker">
       <include>
         <rules>
           <file type="file" name="appengine-web.xml"/>
