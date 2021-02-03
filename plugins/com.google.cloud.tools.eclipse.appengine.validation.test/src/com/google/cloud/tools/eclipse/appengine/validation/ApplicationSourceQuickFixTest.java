@@ -46,7 +46,7 @@ import org.junit.Test;
 public class ApplicationSourceQuickFixTest {
 
   private static final String MARKER =
-      "com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker";
+      "com.google.cloud.tools.eclipse.appengine.validation.appEngineProblemMarker";
 
   private static final String APPLICATION_XML =
       "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"

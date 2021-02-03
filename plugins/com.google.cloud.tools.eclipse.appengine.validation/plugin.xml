@@ -8,8 +8,8 @@
       id="appEngineWebXmlValidator">
     <!-- TODO should this specify more than one marker type? -->
     <validator
-    	class="com.google.cloud.tools.eclipse.appengine.validation.XmlValidator:com.google.cloud.tools.eclipse.appengine.validation.AppEngineWebXmlValidator"
-      	markerId="com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker">
+        class="com.google.cloud.tools.eclipse.appengine.validation.XmlValidator:com.google.cloud.tools.eclipse.appengine.validation.AppEngineWebXmlValidator"
+        com.google.cloud.tools.eclipse.appengine.validation.appEngineProblemMarker">
       <include>
         <rules>
           <file type="file" name="appengine-web.xml"/>
@@ -85,8 +85,8 @@
 
   
   <extension
-      id="appEngineBlacklistMarker"
-      name="%appengine.blacklist.marker"
+      id="appEngineProblemMarker"
+      name="%appengine.problem.marker"
       point="org.eclipse.core.resources.markers">
     <super type="org.eclipse.jdt.core.problem" />
     <super type="org.eclipse.core.resources.problemmarker" />
@@ -98,7 +98,7 @@
       id="applicationMarker"
       name="%remove.application.element"
       point="org.eclipse.core.resources.markers">
-    <super type="com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker" />
+    <super type="com.google.cloud.tools.eclipse.appengine.validation.appEngineProblemMarker" />
     <persistent value="true" />
   </extension>
   
@@ -106,7 +106,7 @@
       id="versionMarker"
       name="%remove.version.element"
       point="org.eclipse.core.resources.markers">
-    <super type="com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker" />
+    <super type="com.google.cloud.tools.eclipse.appengine.validation.appEngineProblemMarker" />
     <persistent value="true" />
   </extension>
   
@@ -248,9 +248,9 @@
    <extension
          point="org.eclipse.ui.ide.markerSupport">
       <markerTypeCategory
-            name="%appengine.blacklist.marker">
+            name="%appengine.problem.marker">
          <markerTypeReference
-               id="com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker"/>
+               id="com.google.cloud.tools.eclipse.appengine.validation.appEngineProblemMarker"/>
          <markerTypeReference
                id="com.google.cloud.tools.eclipse.appengine.validation.applicationMarker"/>
          <markerTypeReference

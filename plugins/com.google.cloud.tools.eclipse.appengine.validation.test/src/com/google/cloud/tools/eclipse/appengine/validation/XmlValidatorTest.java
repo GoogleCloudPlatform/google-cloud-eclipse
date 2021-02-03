@@ -48,7 +48,7 @@ public class XmlValidatorTest {
       + "<runtime>java8</runtime></application>";
   private static final String BAD_XML = "<";
   private static final String APPLICATION_MARKER =
-      "com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker";
+      "com.google.cloud.tools.eclipse.appengine.validation.appEngineProblemMarker";
 
   @Rule public TestProjectCreator appEngineStandardProjectCreator =
       new TestProjectCreator().withFacets(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25,
