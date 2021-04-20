@@ -56,9 +56,6 @@ cache:
   directories:
    - $HOME/.m2
    - $CLOUD_SDK_HOME
-after_success:
-  # test req'd as we don't run coverage on all elements of the matrix
-  - if [ -d build/jacoco/target ]; then bash <(curl -s https://codecov.io/bash); fi
 after_script:
   # Upload build reports to our Google Cloud Storage bucket (only available
   # for team PRs).  This is done in two steps:
