@@ -168,6 +168,13 @@ public class AccountsPanelTest {
     assertTrue(namesEmails.names.contains("Charlie"));
   }
 
+  @Test
+  public void testResizedImageUrl() {
+    assertEquals("https://lh3/xxxx=s48", AccountsPanel.resizedImageUrl("https://lh3/xxxx", 48));
+    assertEquals(
+        "https://lh3/xxxx=s48", AccountsPanel.resizedImageUrl("https://lh3/xxxx=s96-c", 48));
+  }
+
   private void setUpLoginService(List<Account> accounts) {
     when(loginService.hasAccounts()).thenReturn(!accounts.isEmpty());
     when(loginService.getAccounts()).thenReturn(new HashSet<>(accounts));
