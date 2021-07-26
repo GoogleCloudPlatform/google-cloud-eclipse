@@ -8,6 +8,9 @@ set -o errexit
 # Display commands being run.
 set -o xtrace
 
+# More recent Cloud SDK requires Python 3.5 (b/194714889)
+export CLOUDSDK_PYTHON=python3.5
+
 gsutil -q cp "gs://ct4e-m2-repositories-for-kokoro/m2-cache.tar" - \
   | tar -C "${HOME}" -xf -
 
