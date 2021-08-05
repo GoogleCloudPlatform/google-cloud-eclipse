@@ -277,9 +277,9 @@ public abstract class BasePluginXmlTest {
   @Test
   public final void testGuavaImportVersions() throws IOException {
     checkDependencyDirectives(
-        "Import-Package", "com.google.common.", "version=\"[28.1.0,29.0.0)\"");
+        "Import-Package", "com.google.common.", "version=\"[30.0.0,31.0.0)\"");
     checkDependencyDirectives(
-        "Require-Bundle", "com.google.guava", "bundle-version=\"[28.1.0,29.0.0)\"");
+        "Require-Bundle", "com.google.guava", "bundle-version=\"[30.0.0,31.0.0)\"");
   }
 
   @Test

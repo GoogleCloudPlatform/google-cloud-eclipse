@@ -11,7 +11,7 @@ Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
 Require-Bundle: com.google.cloud.tools.appengine;bundle-version="0.8.1",
  com.google.cloud.tools.eclipse.appengine.ui;bundle-version="0.1.0",
- com.google.guava;bundle-version="[28.1.0,29.0.0)",
+ com.google.guava;bundle-version="[30.0.0,31.0.0)",
  javax.annotation,
  javax.servlet;bundle-version="2.5.0",
  javax.servlet.jsp;bundle-version="2.1.0",
