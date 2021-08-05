@@ -25,8 +25,7 @@ import org.osgi.service.log.LoggerFactory;
  * An SLF4j facade for OSGi {@link LoggerFactory} and Eclipse {@link ExtendedLogService}. This class
  * is intended to be a replacement for other ExtendedLogService implementations.
  */
-public class EclipseLoggingAdapter extends LoggerDelegate
-    implements LoggerFactory, ExtendedLogService {
+public class EclipseLoggingAdapter extends LoggerDelegate implements ExtendedLogService {
 
   public EclipseLoggingAdapter() {
     super(org.slf4j.LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME));
