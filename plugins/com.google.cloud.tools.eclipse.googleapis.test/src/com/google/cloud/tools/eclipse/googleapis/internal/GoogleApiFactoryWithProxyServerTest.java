@@ -43,6 +43,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+@SuppressWarnings("DoNotMock")
 @RunWith(MockitoJUnitRunner.class)
 public class GoogleApiFactoryWithProxyServerTest {
 
