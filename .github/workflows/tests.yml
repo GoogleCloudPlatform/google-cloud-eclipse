@@ -1,0 +1,51 @@
+name: Eclipse 2018-09 (4.9) on Java 8
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:  # Allows you to run this workflow manually from the Actions tab
+
+jobs:
+  2018-09-java8-tests:
+    runs-on: ubuntu-latest
+    #strategy:
+    #  fail-fast: false
+    env:
+      CLOUDSDK_CORE_DISABLE_USAGE_REPORTING: true
+      MAVEN_OPTS: '-Xmx700m -Dorg.slf4j.simpleLogger.showDateTime=true'
+      
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 8
+      - uses: google-github-actions/setup-gcloud@v0.2.0# This is a basic workflow to help you get started with Actions
+      #- name: fix ~/.m2/settings.xml
+      #- run: |
+      #    cat ~/.m2.settings.xml
+      #    sed -i.bak -e 's|https://nexus.codehaus.org/snapshots/|https://oss.sonatype.org/content/repositories/codehaus-snapshots/|g' ~/.m2/settings.xml
+      - uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Run tests
+        run: |
+          # google-github-actions/setup-gcloud@v0.2.0 sets up gcloud at, e.g,.
+          # "/opt/hostedtoolcache/gcloud/325.0.0/x64". appengine-plugins-core
+          # fails to find it, since the directory doesn't end with
+          # "google-cloud-sdk". Instead, appengine-plugins-core picks up the SDK
+          # at "/usr/lib/google-cloud-sdk" managed by a package manager. As a
+          # workaround, create a symlink at $HOME and add it to $PATH.
+          ln -s "$( dirname "$( dirname "$( which gcloud )")")" \
+            "${HOME}"/google-cloud-sdk
+          ls -ld "${HOME}"/google-cloud-sdk
+          export PATH="${HOME}/google-cloud-sdk/bin:${PATH}"
+          gcloud components install app-engine-java #--quiet
+
+          metacity --sm-disable --replace &
+          sleep 3  # give metacity some time to start
+          #mvn --batch-mode --fail-at-end -Derrorprone clean verify
+          mvn --batch-mode -Derrorprone clean verify
