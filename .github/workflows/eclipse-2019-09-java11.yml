@@ -46,5 +46,6 @@ jobs:
           gcloud components install app-engine-java --quiet
 
           xvfb-run mvn --show-version --batch-mode --fail-at-end \
+            --toolchains=.github/workflows/toolchains.xml \
             -Derrorprone -Dci-build -Declipse-target=${{ env.ECLIPSE_TARGET }} \
             clean verify
