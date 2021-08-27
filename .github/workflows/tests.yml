@@ -20,7 +20,7 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: 8
-      - uses: google-github-actions/setup-gcloud@v0.2.0# This is a basic workflow to help you get started with Actions
+      - uses: google-github-actions/setup-gcloud@v0.2.0
       #- name: fix ~/.m2/settings.xml
       #- run: |
       #    cat ~/.m2.settings.xml
