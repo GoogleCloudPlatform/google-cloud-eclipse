@@ -18,8 +18,6 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: 8
-      # Technically we don't need to pre-install Cloud SDK, as CT4E auto-installs
-      # it as necessary. However, setting up here to save time.
       - uses: google-github-actions/setup-gcloud@v0.2.0
       #- name: fix ~/.m2/settings.xml
       #- run: |
@@ -54,4 +52,5 @@ jobs:
         run: |
           set -o xtrace
           #xvfb-run mvn --batch-mode --fail-at-end -Derrorprone clean verify
-          xvfb-run mvn --batch-mode -Derrorprone clean verify
+          #xvfb-run mvn --batch-mode -Derrorprone clean verify
+          mvn package -DskipTests
