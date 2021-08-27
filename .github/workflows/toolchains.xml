@@ -8,7 +8,7 @@
       <vendor>openjdk</vendor>
     </provides>
     <configuration>
-      <jdkHome>/opt/hostedtoolcache/jdk/8.0.302/x64</jdkHome>
+      <jdkHome>JDK_8_HOME</jdkHome>
     </configuration>
   </toolchain>
   <toolchain>
@@ -19,7 +19,7 @@
       <vendor>openjdk</vendor>
     </provides>
     <configuration>
-      <jdkHome>/opt/hostedtoolcache/jdk/11.0.12/x64</jdkHome>
+      <jdkHome>JDK_11_HOME</jdkHome>
     </configuration>
   </toolchain>
 </toolchains>
