@@ -30,7 +30,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: set up envrionment
+      - name: Set up test envrionment
         run: |
           set -o xtrace
 
@@ -46,11 +46,14 @@ jobs:
           export PATH="${HOME}/google-cloud-sdk/bin:${PATH}"
           gcloud components install app-engine-java --quiet
 
-      - name: run tests
+      - name: Run tests
         env:
           MAVEN_OPTS: '-Xmx700m -Dorg.slf4j.simpleLogger.showDateTime=true'
         run: |
           set -o xtrace
-          #xvfb-run mvn --batch-mode --fail-at-end -Derrorprone clean verify
+
+          which gcloud
+          gcloud components install app-engine-java --quiet
+
+          #xvfb-run mvn --batch-mode --fail-at-end -Dtravis -Derrorprone clean verify
           #xvfb-run mvn --batch-mode -Derrorprone clean verify
-          mvn package -DskipTests
