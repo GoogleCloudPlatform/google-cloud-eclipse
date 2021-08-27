@@ -20,15 +20,16 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: 8
-      - name: Set JDK 8 home in toolchain.xml
-      run: |
+      - name: Set JDK 8 toolchain
+        run: |
           echo $JAVA_HOME
           JHOME=$( dirname $( dirname $( which java )))
           echo $JHOME
       - uses: actions/setup-java@v1
         with:
           java-version: 11
-      - run: |
+      - name: Set JDK 11 toolchain
+        run: |
           echo $JAVA_HOME
           JHOME=$( dirname $( dirname $( which java )))
           echo $JHOME
