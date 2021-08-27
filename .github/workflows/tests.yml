@@ -18,6 +18,8 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: 8
+      # Technically we don't need to pre-install Cloud SDK, as CT4E auto-installs
+      # it as necessary. However, setting up here to save time.
       - uses: google-github-actions/setup-gcloud@v0.2.0
       #- name: fix ~/.m2/settings.xml
       #- run: |
@@ -38,6 +40,21 @@ jobs:
           MAVEN_OPTS: '-Xmx700m -Dorg.slf4j.simpleLogger.showDateTime=true'
         run: |
           set -o xtrace
+
+          # google-github-actions/setup-gcloud@v0.2.0 sets up gcloud at, e.g,.
+          # "/opt/hostedtoolcache/gcloud/325.0.0/x64". appengine-plugins-core
+          # fails to find it, since the directory doesn't end with
+          # "google-cloud-sdk". Instead, appengine-plugins-core picks up the SDK
+          # at "/usr/lib/google-cloud-sdk" managed by a package manager. As a
+          # workaround, create a symlink at $HOME and add it to $PATH.
+          ln -s "$( dirname "$( dirname "$( which gcloud )")")" \
+            "${HOME}"/google-cloud-sdk
+          ls -ld "${HOME}"/google-cloud-sdk
+          export PATH="${HOME}/google-cloud-sdk/bin:${PATH}"
+          gcloud components install app-engine-java #--quiet
+
+          sudo apt-get install xvfb
+
           #metacity --sm-disable --replace &
           #sleep 3  # give metacity some time to start
           #mvn --batch-mode --fail-at-end -Derrorprone clean verify
