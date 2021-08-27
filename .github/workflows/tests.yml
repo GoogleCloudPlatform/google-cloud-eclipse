@@ -31,13 +31,8 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
+
       - name: set up envrionment
-        run: |
-          set -o xtrace
-          sudo apt-get install xvfb
-      - name: run tests
-        env:
-          MAVEN_OPTS: '-Xmx700m -Dorg.slf4j.simpleLogger.showDateTime=true'
         run: |
           set -o xtrace
 
@@ -51,11 +46,12 @@ jobs:
             "${HOME}"/google-cloud-sdk
           ls -ld "${HOME}"/google-cloud-sdk
           export PATH="${HOME}/google-cloud-sdk/bin:${PATH}"
-          gcloud components install app-engine-java #--quiet
+          gcloud components install app-engine-java --quiet
 
-          sudo apt-get install xvfb
-
-          #metacity --sm-disable --replace &
-          #sleep 3  # give metacity some time to start
-          #mvn --batch-mode --fail-at-end -Derrorprone clean verify
-          xvfb mvn --batch-mode -Derrorprone clean verify
+      - name: run tests
+        env:
+          MAVEN_OPTS: '-Xmx700m -Dorg.slf4j.simpleLogger.showDateTime=true'
+        run: |
+          set -o xtrace
+          #xvfb-run mvn --batch-mode --fail-at-end -Derrorprone clean verify
+          xvfb-run mvn --batch-mode -Derrorprone clean verify
