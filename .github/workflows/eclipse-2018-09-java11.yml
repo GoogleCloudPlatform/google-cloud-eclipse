@@ -33,6 +33,9 @@ jobs:
         run: |
           set -o xtrace
 
+          which java
+          whereis java
+
           # google-github-actions/setup-gcloud@v0.2.0 sets up gcloud at, e.g,.
           # "/opt/hostedtoolcache/gcloud/325.0.0/x64". appengine-plugins-core
           # fails to find it, since the directory doesn't end with
