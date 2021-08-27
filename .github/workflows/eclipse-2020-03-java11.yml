@@ -14,12 +14,26 @@ jobs:
     env:
       CLOUDSDK_CORE_DISABLE_USAGE_REPORTING: true
       ECLIPSE_TARGET: 2020-03
+
     steps:
       - uses: actions/checkout@v2
+
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 8  # Java 8 required for compilation.
+      - name: Set JDK 8 toolchain
+        run: |
+          sed -i.bak -e "s,JDK_8_HOME,${JAVA_HOME}," .github/workflows/toolchains.xml
+
       - uses: actions/setup-java@v1
         with:
           java-version: 11
+      - name: Set JDK 11 toolchain
+        run: |
+          sed -i.bak -e "s,JDK_11_HOME,${JAVA_HOME}," .github/workflows/toolchains.xml
+
       - uses: google-github-actions/setup-gcloud@v0.2.0
+
       - uses: actions/cache@v2
         with:
           path: ~/.m2/repository

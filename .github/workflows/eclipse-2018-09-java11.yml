@@ -20,7 +20,7 @@ jobs:
 
       - uses: actions/setup-java@v1
         with:
-          java-version: 8  # Java 11 tests still require JDK 8.
+          java-version: 8  # Java 8 required for compilation.
       - name: Set JDK 8 toolchain
         run: |
           sed -i.bak -e "s,JDK_8_HOME,${JAVA_HOME}," .github/workflows/toolchains.xml
@@ -31,7 +31,6 @@ jobs:
       - name: Set JDK 11 toolchain
         run: |
           sed -i.bak -e "s,JDK_11_HOME,${JAVA_HOME}," .github/workflows/toolchains.xml
-          cat .github/workflows/toolchains.xml
 
       - uses: google-github-actions/setup-gcloud@v0.2.0
 
@@ -47,8 +46,6 @@ jobs:
           MAVEN_OPTS: '-Xmx700m -Dorg.slf4j.simpleLogger.showDateTime=true'
         run: |
           set -o xtrace
-
-          cat .github/workflows/toolchains.xml
 
           # google-github-actions/setup-gcloud@v0.2.0 sets up gcloud at, e.g,.
           # "/opt/hostedtoolcache/gcloud/325.0.0/x64". appengine-plugins-core
