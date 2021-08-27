@@ -35,8 +35,6 @@ jobs:
         env:
           MAVEN_OPTS: '-Xmx700m -Dorg.slf4j.simpleLogger.showDateTime=true'
         run: |
-          set -o xtrace
-
           # google-github-actions/setup-gcloud@v0.2.0 sets up gcloud at, e.g,.
           # "/opt/hostedtoolcache/gcloud/325.0.0/x64". appengine-plugins-core
           # fails to find it, since the directory doesn't end with
