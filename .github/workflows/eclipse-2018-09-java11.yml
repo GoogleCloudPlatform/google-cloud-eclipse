@@ -16,18 +16,22 @@ jobs:
       ECLIPSE_TARGET: 2018-09
     steps:
       - uses: actions/checkout@v2
+      # Java 11 tests still requires JDK 8.
       - uses: actions/setup-java@v1
         with:
           java-version: 8
-      - run: |
-          which java
-          whereis java
+      - name: Set JDK 8 home in toolchain.xml
+      run: |
+          echo $JAVA_HOME
+          JHOME=$( dirname $( dirname $( which java )))
+          echo $JHOME
       - uses: actions/setup-java@v1
         with:
           java-version: 11
       - run: |
-          which java
-          whereis java
+          echo $JAVA_HOME
+          JHOME=$( dirname $( dirname $( which java )))
+          echo $JHOME
       - uses: google-github-actions/setup-gcloud@v0.2.0
       - uses: actions/cache@v2
         with:
