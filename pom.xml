@@ -610,7 +610,7 @@
     </profile>
 
     <profile>
-      <id>travis</id>
+      <id>ci-build</id>
       <properties>
         <!-- Ensure we don't resolve previous versions of our artifacts -->
         <tycho.localArtifacts>ignore</tycho.localArtifacts>
