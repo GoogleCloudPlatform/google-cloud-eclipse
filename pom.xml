@@ -43,7 +43,7 @@
     <tycho-extras.version>2.5.0</tycho-extras.version>
     <product.version.qualifier.suffix/>  <!-- 0-length string by default -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <eclipse.target>2018-09</eclipse.target> <!-- the default build -->
+    <!-- <eclipse.target>latest-release</eclipse.target> --> <!-- the default build -->
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
 
@@ -419,11 +419,42 @@
 
     <profile>
       <!-- Default target if no eclipse.target specified. -->
-      <id>build-eclipse-2018-09</id>
+      <id>build-latest-release</id>
       <activation>
         <property>
           <name>!eclipse.target</name>
-          <!-- when no longer the default: <name>eclipse.target</name> <value>2018-09</value> -->
+          <!-- <name>eclipse.target</name> <value>latest-release</value> -->
+        </property>
+      </activation>
+      <properties>
+         <jettyMinVersion>9.4</jettyMinVersion>
+         <jettyMaxVersion>99</jettyMaxVersion>
+      </properties>
+      <repositories>
+        <repository>
+          <id>eclipse-latest-release</id>
+          <name>Eclipse latest release</name>
+          <url>https://download.eclipse.org/releases/latest/</url>
+          <layout>p2</layout>
+        </repository>
+        <repository>
+          <id>orbit</id>
+          <url>https://download.eclipse.org/tools/orbit/downloads/latest-R/</url>
+          <layout>p2</layout>
+        </repository>
+        <repository>
+          <id>yedit</id>
+          <url>http://dadacoalition.org/yedit</url>
+          <layout>p2</layout>
+        </repository>
+      </repositories>
+    </profile>
+
+    <profile>
+      <id>build-eclipse-2018-09</id>
+      <activation>
+        <property>
+          <name>eclipse.target</name> <value>2018-09</value>
         </property>
       </activation>
       <properties>
