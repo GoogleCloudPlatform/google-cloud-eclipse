@@ -66,6 +66,7 @@
       the Bundle-RequiredExecutionEnvironment. See `README.md` for details.
     -->
     <tycho.toolchains>SYSTEM</tycho.toolchains>
+    <tycho.testToolchains>SYSTEM</tycho.testToolchains>
 
     <!-- OS-specific JVM flags, empty for the default case but redefined below -->
     <os-jvm-flags/>
@@ -330,6 +331,7 @@
             <runOrder>hourly</runOrder>
             <forkedProcessTimeoutInSeconds>600</forkedProcessTimeoutInSeconds>
             <trimStackTrace>false</trimStackTrace>
+            <useJDK>${tycho.testToolchains}</useJDK>
             <!--
               - maven.artifact.threads=1 to workaround repository corruption seen in
                 https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2284
@@ -427,6 +429,8 @@
       <properties>
          <jettyMinVersion>9.4</jettyMinVersion>
          <jettyMaxVersion>9.5</jettyMaxVersion>
+         <!-- 2018-09 was the last release to work on Java 8 -->
+         <tycho.testToolchains>BREE</tycho.testToolchains>
       </properties>
       <!-- build against a known target platform -->
       <modules>
