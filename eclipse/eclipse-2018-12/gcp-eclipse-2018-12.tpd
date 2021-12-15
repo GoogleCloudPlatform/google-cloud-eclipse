@@ -1,6 +1,6 @@
 /*
  * Target Platform Definition created using Eclipse TPD editor
- * (http://download.eclipse.org/cbi/tpd/3.0.0-SNAPSHOT/).
+ * (https://download.eclipse.org/cbi/tpd/3.0.0-SNAPSHOT/).
  *
  * If you make changes to this file, either:
  *
@@ -13,8 +13,8 @@ target "GCP for Eclipse 2018-12" with source requirements
 // Eclipse Platform 4.10
 // Eclipse WTP 3.12
 
-// Eclipse 2018-12 RC2 (composite at http://download.eclipse.org/releases/2018-12/)
-location "http://download.eclipse.org/releases/2018-12/201812191000" {
+// Eclipse 2018-12 RC2 (composite at https://download.eclipse.org/releases/2018-12/)
+location "https://download.eclipse.org/releases/2018-12/201812191000" {
     org.eclipse.sdk.feature.group
     org.eclipse.jdt.feature.group
     org.eclipse.m2e.feature.feature.group
@@ -33,8 +33,8 @@ location "http://download.eclipse.org/releases/2018-12/201812191000" {
 }
 
 // WTP SDKs aren't exposed through the main release links
-// (composite at http://download.eclipse.org/webtools/repository/2018-12/)
-location "http://download.eclipse.org/webtools/downloads/drops/R3.12.0/R-3.12.0-20181130055351/repository" {
+// (composite at https://download.eclipse.org/webtools/repository/2018-12/)
+location "https://download.eclipse.org/webtools/downloads/drops/R3.12.0/R-3.12.0-20181130055351/repository" {
     org.eclipse.jst.web_sdk.feature.feature.group
     org.eclipse.jst.server_sdk.feature.feature.group
     org.eclipse.jst.common.fproj.enablement.jdt.sdk.feature.group
@@ -44,7 +44,7 @@ location "http://download.eclipse.org/webtools/downloads/drops/R3.12.0/R-3.12.0-
     org.eclipse.wst.server_adapters.sdk.feature.feature.group
 }
 
-location "http://download.eclipse.org/linuxtools/update-2018-12-docker/" {
+location "https://download.eclipse.org/linuxtools/update-2018-12-docker/" {
     org.eclipse.linuxtools.docker.feature.feature.group
 }
 

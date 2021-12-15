@@ -277,7 +277,7 @@ which resolves the specified dependencies and creates a `.target`.
 The process is:
 
    1. Install the TPD Editor, if necessary
-      - Use _Help > Install New Software_ and specify `http://download.eclipse.org/cbi/tpd/3.0.0-SNAPSHOT/`
+      - Use _Help > Install New Software_ and specify `https://download.eclipse.org/cbi/tpd/3.0.0-SNAPSHOT/`
         as the location.
       - Restart Eclipse when prompted
    2. Open the `.tpd` file in Eclipse.
