@@ -1,6 +1,6 @@
 /*
  * Target Platform Definition created using Eclipse TPD editor
- * (http://download.eclipse.org/cbi/tpd/3.0.0-SNAPSHOT/).
+ * (https://download.eclipse.org/cbi/tpd/3.0.0-SNAPSHOT/).
  *
  * If you make changes to this file, either:
  *
@@ -13,7 +13,7 @@ target "GCP for Eclipse 2020-03" with source requirements
 // Eclipse Platform 4.15
 // Eclipse WTP 3.17
 
-location "http://download.eclipse.org/releases/2020-03/" {
+location "https://download.eclipse.org/releases/2020-03/" {
     org.eclipse.sdk.feature.group
     org.eclipse.jdt.feature.group
     org.eclipse.m2e.feature.feature.group
@@ -32,7 +32,7 @@ location "http://download.eclipse.org/releases/2020-03/" {
 }
 
 // WTP SDKs aren't exposed through the main release links
-// (composite at http://download.eclipse.org/webtools/repository/2020-03/)
+// (composite at https://download.eclipse.org/webtools/repository/2020-03/)
 location "https://download.eclipse.org/webtools/downloads/drops/R3.17.0/R-3.17.0-20200306035042/repository/" {
     org.eclipse.jst.web_sdk.feature.feature.group
     org.eclipse.jst.server_sdk.feature.feature.group
@@ -43,7 +43,7 @@ location "https://download.eclipse.org/webtools/downloads/drops/R3.17.0/R-3.17.0
     org.eclipse.wst.server_adapters.sdk.feature.feature.group
 }
 
-location "http://download.eclipse.org/linuxtools/update-2020-03-docker/" {
+location "https://download.eclipse.org/linuxtools/update-2020-03-docker/" {
     org.eclipse.linuxtools.docker.feature.feature.group
 }
 
