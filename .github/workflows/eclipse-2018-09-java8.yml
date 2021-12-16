@@ -20,7 +20,17 @@ jobs:
 
       - uses: actions/setup-java@v1
         with:
-          java-version: 8
+          java-version: 8  # Java 8 required for compilation.
+      - name: Set JDK 8 toolchain
+        run: |
+          sed -i.bak -e "s,JDK_8_HOME,${JAVA_HOME}," .github/workflows/toolchains.xml
+
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Set JDK 11 toolchain
+        run: |
+          sed -i.bak -e "s,JDK_11_HOME,${JAVA_HOME}," .github/workflows/toolchains.xml
 
       - uses: google-github-actions/setup-gcloud@v0.2.0
 
@@ -47,6 +57,8 @@ jobs:
           export PATH="${HOME}/google-cloud-sdk/bin:${PATH}"
           gcloud components install app-engine-java --quiet
 
+         # 2018-09 was the last release to work on Java 8
           xvfb-run mvn --show-version --batch-mode --fail-at-end -e \
+            -Dtycho.toolchains=BREE -Dtycho.testToolchains=BREE \
             -Derrorprone -Dci-build -Declipse-target=${{ env.ECLIPSE_TARGET }} \
             clean verify
