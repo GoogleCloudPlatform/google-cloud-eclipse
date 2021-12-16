@@ -429,8 +429,6 @@
       <properties>
          <jettyMinVersion>9.4</jettyMinVersion>
          <jettyMaxVersion>9.5</jettyMaxVersion>
-         <!-- 2018-09 was the last release to work on Java 8 -->
-         <tycho.testToolchains>BREE</tycho.testToolchains>
       </properties>
       <!-- build against a known target platform -->
       <modules>
