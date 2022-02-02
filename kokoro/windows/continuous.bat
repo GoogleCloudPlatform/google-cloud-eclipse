@@ -18,7 +18,7 @@ call gcloud.cmd components install app-engine-java --quiet
 @echo on
 
 mvn -V -B -N io.takari:maven:wrapper -Dmaven=3.8.4
-call mvnw.cmd -V -B -e --fail-at-end -Pci-build verify
+call mvnw.cmd -V -B --fail-at-end -Pci-build verify
 set MAVEN_BUILD_EXIT=%ERRORLEVEL%
 @echo on
 
