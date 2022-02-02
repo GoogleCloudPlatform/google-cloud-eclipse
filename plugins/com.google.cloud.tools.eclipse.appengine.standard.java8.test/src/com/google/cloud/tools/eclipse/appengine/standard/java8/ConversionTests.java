@@ -126,7 +126,7 @@ public class ConversionTests {
   @Test
   public void appEngineWebWithNoRuntime()
       throws CoreException, IOException, InterruptedException, SAXException, AppEngineException {
-    IFacetedProject project = projectCreator.getFacetedProject();
+    IFacetedProject project = projectCreator.withFacets().getFacetedProject();
     createAppEngineWebWithNoRuntime(project);
 
     Job conversionJob = new AppEngineStandardProjectConvertJob(project);
@@ -244,7 +244,7 @@ public class ConversionTests {
   @Test
   public void appEngineWebWithJava8Runtime()
       throws CoreException, IOException, InterruptedException, SAXException, AppEngineException {
-    IFacetedProject project = projectCreator.getFacetedProject();
+    IFacetedProject project = projectCreator.withFacets().getFacetedProject();
     createAppEngineWebWithJava8Runtime(project);
 
     Job conversionJob = new AppEngineStandardProjectConvertJob(project);

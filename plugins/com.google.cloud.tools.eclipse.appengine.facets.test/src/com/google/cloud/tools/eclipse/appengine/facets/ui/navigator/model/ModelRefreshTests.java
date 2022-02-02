@@ -311,10 +311,8 @@ public class ModelRefreshTests {
                   webroot, newWebRoot.getProjectRelativePath(), null);
               ProjectUtils.waitForProjects(project);
             });
-    assertEquals(1, changed.size());
-    assertEquals(
-        project.getFile(".settings/org.eclipse.wst.common.component"),
-        Iterables.getOnlyElement(changed));
+    assertThat(changed,
+        Matchers.hasItem(project.getFile(".settings/org.eclipse.wst.common.component")));
     assertTrue(projectElement.resourcesChanged(changed));
 
     AppEngineResourceElement[] newElements = projectElement.getConfigurations();
