@@ -26,10 +26,14 @@ jobs:
 
       - uses: actions/setup-java@v1
         with:
-          java-version: 11
-      - name: Set JDK 11 toolchain
+          java-version: 17
+      - name: Set JDK 17 toolchain
         run: |
-          sed -i.bak -e "s,JDK_11_HOME,${JAVA_HOME}," .github/workflows/toolchains.xml
+          sed -i.bak \
+            -e "s,JDK_11_HOME,${JAVA_HOME}," \
+            -e "s,<id>JavaSE-11</id>,<id>JavaSE-17</id>," \
+            -e "s,<version>11</version>,<version>17</version>," \
+            .github/workflows/toolchains.xml
 
       - uses: google-github-actions/setup-gcloud@v0.2.0
 
