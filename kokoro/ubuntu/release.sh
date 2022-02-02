@@ -38,7 +38,7 @@ cd github/google-cloud-eclipse
 #    - Single-quotes are necessary for `-Dproduct.version.qualifier.suffix`,
 #      since it should be appended as a constant string in a date format.
 TMPDIR= xvfb-run \
-  mvn -V -B -e \
+  mvn -V -B \
       -Doauth.client.id="${OAUTH_CLIENT_ID}" \
       -Doauth.client.secret="${OAUTH_CLIENT_SECRET}" \
       -Dfirelog.api.key="${FIRELOG_API_KEY}" \
