@@ -34,7 +34,7 @@ location "http://download.eclipse.org/releases/2018-09/201809191002/" {
 
 // WTP SDKs aren't exposed through the main release links
 // (composite at http://download.eclipse.org/webtools/repository/2018-09)
-location "http://download.eclipse.org/webtools/downloads/drops/R3.11.0/R-3.11.0-20180910170749/repository" {
+location "https://archive.eclipse.org/webtools/downloads/drops/R3.11.0/R-3.11.0-20180910170749/repository/" {
     org.eclipse.jst.web_sdk.feature.feature.group
     org.eclipse.jst.server_sdk.feature.feature.group
     org.eclipse.jst.common.fproj.enablement.jdt.sdk.feature.group

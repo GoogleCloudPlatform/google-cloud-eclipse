@@ -27,7 +27,7 @@
       <unit id="org.eclipse.wst.web_sdk.feature.feature.group" version="3.11.0.v201807251925"/>
       <unit id="org.eclipse.jst.enterprise_sdk.feature.feature.group" version="3.8.1.v201802202154"/>
       <unit id="org.eclipse.wst.server_adapters.sdk.feature.feature.group" version="3.2.601.v201802152148"/>
-      <repository location="http://download.eclipse.org/webtools/downloads/drops/R3.11.0/R-3.11.0-20180910170749/repository"/>
+      <repository location="https://archive.eclipse.org/webtools/downloads/drops/R3.11.0/R-3.11.0-20180910170749/repository/"/>
     </location>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
       <unit id="org.eclipse.linuxtools.docker.feature.feature.group" version="4.0.1.201809121533"/>
