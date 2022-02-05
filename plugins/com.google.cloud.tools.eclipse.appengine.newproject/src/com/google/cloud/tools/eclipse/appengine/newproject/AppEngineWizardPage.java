@@ -16,18 +16,15 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
-import com.google.cloud.tools.eclipse.appengine.libraries.ui.LibrarySelectorGroup;
 import com.google.cloud.tools.eclipse.appengine.newproject.maven.MavenCoordinatesWizardUi;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.util.JavaPackageValidator;
 import com.google.cloud.tools.eclipse.util.MavenCoordinatesValidator;
 import com.google.cloud.tools.project.ServiceNameValidator;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CharMatcher;
 import java.io.File;
-import java.util.Collection;
-import java.util.HashSet;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -44,7 +41,6 @@ import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
  */
 public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
 
-  private LibrarySelectorGroup appEngineLibrariesSelectorGroup;
   private Text javaPackageField;
   private Text serviceNameField;
   private MavenCoordinatesWizardUi mavenCoordinatesUi;
@@ -75,11 +71,6 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     mavenCoordinatesUi = new MavenCoordinatesWizardUi(container, SWT.NONE);
     mavenCoordinatesUi.addChangeListener(event -> revalidate());
     mavenCoordinatesUi.addGroupIdModifyListener(new AutoPackageNameSetterOnGroupIdChange());
-
-    // Manage APIs
-    appEngineLibrariesSelectorGroup = new LibrarySelectorGroup(container,
-        getSupportedLibrariesGroup(),
-        Messages.getString("app.engine.libraries.group")); //$NON-NLS-1$
 
     revalidate();
     // Show enter project name on opening
@@ -112,7 +103,7 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     // default: do nothing; used by subclasses
   }
 
-  public String getRuntimeId() {
+  public AppEngineRuntime getRuntime() {
     return null;
   }
 
@@ -199,22 +190,6 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
 
   public String getMavenVersion() {
     return mavenCoordinatesUi.getVersion();
-  }
-
-  public Collection<Library> getSelectedLibraries() {
-    if (appEngineLibrariesSelectorGroup == null) {
-      return new HashSet<>();
-    } else {
-      return appEngineLibrariesSelectorGroup.getSelectedLibraries();
-    }
-  }
-
-  @Override
-  public void dispose() {
-    if (appEngineLibrariesSelectorGroup != null) {
-      appEngineLibrariesSelectorGroup.dispose();
-    }
-    super.dispose();
   }
 
   public String getServiceName() {

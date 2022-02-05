@@ -21,7 +21,7 @@ class DocumentLocation {
   private final int lineNumber;
   private final int columnNumber;
   
-  public DocumentLocation(int lineNumber, int columnNumber) {
+  DocumentLocation(int lineNumber, int columnNumber) {
     this.lineNumber = lineNumber;
     this.columnNumber = columnNumber;
   }
@@ -32,6 +32,11 @@ class DocumentLocation {
   
   int getColumnNumber() {
     return columnNumber;
+  }
+  
+  @Override
+  public String toString() {
+    return "Line " + lineNumber + "; Column " + columnNumber;
   }
   
 }

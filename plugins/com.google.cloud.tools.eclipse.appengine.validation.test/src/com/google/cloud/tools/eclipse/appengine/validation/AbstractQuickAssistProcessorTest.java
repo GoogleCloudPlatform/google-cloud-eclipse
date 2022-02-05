@@ -26,7 +26,7 @@ public class AbstractQuickAssistProcessorTest {
   @Test
   public void testComputeApplicationQuickAssistProposals() {
     AbstractQuickAssistProcessor processor = new ApplicationQuickAssistProcessor();
-    ICompletionProposal[] fixes =  processor.computeQuickAssistProposals(null);
+    ICompletionProposal[] fixes = processor.computeQuickAssistProposals(null);
     assertEquals(1, fixes.length);
     assertEquals(ApplicationSourceQuickFix.class.getName(), fixes[0].getClass().getName());
   }
@@ -34,9 +34,17 @@ public class AbstractQuickAssistProcessorTest {
   @Test
   public void testComputeVersionQuickAssistProposals() {
     AbstractQuickAssistProcessor processor = new VersionQuickAssistProcessor();
-    ICompletionProposal[] fixes =  processor.computeQuickAssistProposals(null);
+    ICompletionProposal[] fixes = processor.computeQuickAssistProposals(null);
     assertEquals(1, fixes.length);
     assertEquals(VersionSourceQuickFix.class.getName(), fixes[0].getClass().getName());
+  }
+  
+  @Test
+  public void testComputeUpgradeRuntimeQuickAssistProposals() {
+    AbstractQuickAssistProcessor processor = new UpgradeRuntimeQuickAssistProcessor();
+    ICompletionProposal[] fixes = processor.computeQuickAssistProposals(null);
+    assertEquals(1, fixes.length);
+    assertEquals(UpgradeRuntimeSourceQuickFix.class.getName(), fixes[0].getClass().getName());
   }
   
 }

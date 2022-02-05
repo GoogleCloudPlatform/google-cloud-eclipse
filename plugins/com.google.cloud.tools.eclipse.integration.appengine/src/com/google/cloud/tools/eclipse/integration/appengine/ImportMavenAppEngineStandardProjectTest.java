@@ -25,7 +25,6 @@ import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.ArrayAssertions;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.ZipUtil;
-import com.google.cloud.tools.eclipse.test.util.project.JavaRuntimeUtils;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.io.IOException;
 import java.net.URL;
@@ -36,7 +35,6 @@ import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
-import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -55,7 +53,6 @@ public class ImportMavenAppEngineStandardProjectTest extends BaseProjectTest {
 
   @Test
   public void runImport() throws IOException, CoreException {
-    Assume.assumeTrue("No JavaSE 8 JRE found", JavaRuntimeUtils.hasJavaSE8());
     assertFalse(projectExists("springboot-appengine-standard"));
     ZipUtil.extractZip(new URL(
         "platform:/plugin/com.google.cloud.tools.eclipse.integration.appengine/test-projects/springboot-appengine-standard.zip"),

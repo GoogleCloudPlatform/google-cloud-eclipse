@@ -21,6 +21,7 @@ import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.Collections;
 import javax.inject.Inject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -79,9 +80,20 @@ public class LibraryClasspathContainerInitializer extends ClasspathContainerInit
             new IJavaProject[] {project},
             new IClasspathContainer[] {container},
             new NullProgressMonitor());
-      } else {
-        resolverService.resolveContainer(project, containerPath, new NullProgressMonitor());
+        return;
       }
+      /* Container definition is not resolved, so set an empty container (an
+       * IClasspathContainerInitializer *must* set a corresponding container) and initiate
+       * a container resolving job. */
+      JavaCore.setClasspathContainer(
+          containerPath,
+          new IJavaProject[] {project},
+          new IClasspathContainer[] {
+            new LibraryClasspathContainer(
+                containerPath, "in progress", Collections.emptyList(), Collections.emptyList())
+          },
+          new NullProgressMonitor());
+      requestClasspathContainerUpdate(containerPath, project, container);
     } catch (IOException ex) {
       throw new CoreException(
           StatusUtil.error(this, "Failed to load persisted container descriptor", ex));

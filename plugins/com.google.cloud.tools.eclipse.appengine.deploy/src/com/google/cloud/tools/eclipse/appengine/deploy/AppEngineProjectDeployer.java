@@ -16,10 +16,10 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
-import com.google.cloud.tools.appengine.api.AppEngineException;
-import com.google.cloud.tools.appengine.api.deploy.AppEngineDeployment;
-import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.AppEngineException;
+import com.google.cloud.tools.appengine.operations.Deployment;
+import com.google.cloud.tools.appengine.configuration.DeployConfiguration;
+import com.google.cloud.tools.appengine.operations.CloudSdk;
 import com.google.cloud.tools.eclipse.appengine.deploy.util.CloudSdkProcessWrapper;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -64,14 +64,17 @@ public class AppEngineProjectDeployer {
     SubMonitor progress = SubMonitor.convert(monitor, 1);
     progress.setTaskName(Messages.getString("task.name.deploy.project")); //$NON-NLS-1$
     try {
-      List<File> deployables =
+      List<File> files =
           computeDeployables(stagingDirectory, optionalConfigurationFilesDirectory);
-
-      DefaultDeployConfiguration configuration =
-          DeployPreferencesConverter.toDeployConfiguration(deployPreferences);
-      configuration.setDeployables(deployables);
+      List<Path> deployables = new ArrayList<>();
+      for (File file : files) {
+        deployables.add(file.toPath());
+      }
+      
+      DeployConfiguration configuration =
+          DeployPreferencesConverter.toDeployConfiguration(deployPreferences, deployables);
       try { 
-        AppEngineDeployment deployment =
+        Deployment deployment =
             cloudSdkProcessWrapper.getAppEngineDeployment(credentialFile, stdoutOutputStream);
         deployment.deploy(configuration);
       } catch (AppEngineException ex) {

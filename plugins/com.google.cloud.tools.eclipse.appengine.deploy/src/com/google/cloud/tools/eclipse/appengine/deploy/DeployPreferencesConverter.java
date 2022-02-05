@@ -16,34 +16,37 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
-import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
+import com.google.cloud.tools.appengine.configuration.DeployConfiguration;
 import com.google.common.base.Strings;
+import java.nio.file.Path;
+import java.util.List;
 
-public class DeployPreferencesConverter {
+class DeployPreferencesConverter {
 
-  public static DefaultDeployConfiguration toDeployConfiguration(DeployPreferences preferences) {
-    DefaultDeployConfiguration configuration = new DefaultDeployConfiguration();
+  static DeployConfiguration toDeployConfiguration(DeployPreferences preferences,
+      List<Path> deployables) {
+    DeployConfiguration.Builder builder = DeployConfiguration.builder(deployables);
 
-    configuration.setProject(preferences.getProjectId());
+    builder.projectId(preferences.getProjectId());
 
     String bucketName = preferences.getBucket();
     if (!Strings.isNullOrEmpty(bucketName)) {
       if (bucketName.startsWith("gs://")) {
-        configuration.setBucket(bucketName);
+        builder.bucket(bucketName);
       } else {
-        configuration.setBucket("gs://" + bucketName);
+        builder.bucket("gs://" + bucketName);
       }
     }
 
-    configuration.setPromote(preferences.isAutoPromote());
+    builder.promote(preferences.isAutoPromote());
     if (preferences.isAutoPromote()) {
-      configuration.setStopPreviousVersion(preferences.isStopPreviousVersion());
+      builder.stopPreviousVersion(preferences.isStopPreviousVersion());
     }
 
     if (!Strings.isNullOrEmpty(preferences.getVersion())) {
-      configuration.setVersion(preferences.getVersion());
+      builder.version(preferences.getVersion());
     }
 
-    return configuration;
+    return builder.build();
   }
 }

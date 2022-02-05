@@ -18,8 +18,12 @@ Require-Bundle: org.junit;bundle-version="[4.12.0,4.12.1)";visibility:=reexport,
  org.slf4j.api;bundle-version="[1.7.10,2)",
  org.slf4j.apis.log4j;bundle-version="[1.7.10,2)",
  org.slf4j.apis.jcl;bundle-version="[1.7.10,2)",
- org.slf4j.bridge.jul;bundle-version="[1.7.10,2)"
-Import-Package: org.osgi.framework,
+ org.slf4j.bridge.jul;bundle-version="[1.7.10,2)",
+ javax.annotation
+Service-Component: OSGI-INF/logservice.xml
+Import-Package: org.eclipse.equinox.log;version="1.0",
+ org.osgi.framework,
+ org.osgi.service.log;version="1.4.0",
  org.slf4j.impl;version="[1.7.10,2)"
 Export-Package: org.mockito;provider=google;version="1.10.19";
   uses:="org.mockito.invocation,

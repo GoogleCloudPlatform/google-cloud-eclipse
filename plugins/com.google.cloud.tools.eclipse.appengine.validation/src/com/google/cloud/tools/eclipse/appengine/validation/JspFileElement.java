@@ -23,7 +23,7 @@ import org.eclipse.wst.validation.internal.provisional.core.IMessage;
  * A <servlet-name> element within parent <servlet-mapping> whose value has not
  * been defined.
  */
-public class JspFileElement extends BannedElement {
+public class JspFileElement extends ElementProblem {
 
   private static final String MARKER_ID = 
       "com.google.cloud.tools.eclipse.appengine.validation.jspFileMarker";

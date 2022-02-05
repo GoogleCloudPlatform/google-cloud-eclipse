@@ -17,11 +17,11 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 /**
- * Provides quick assists for appengine-web.xml in the source editor.
+ * Provides a quick fix to remove the {@code application} element from appengine-web.xml.
  */
-public class ApplicationQuickAssistProcessor extends AbstractQuickAssistProcessor {
+class ApplicationQuickAssistProcessor extends AbstractQuickAssistProcessor {
 
-  public ApplicationQuickAssistProcessor() {
+  ApplicationQuickAssistProcessor() {
     super(new ApplicationSourceQuickFix());
   }
 

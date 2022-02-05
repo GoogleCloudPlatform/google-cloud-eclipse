@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.Rule;
@@ -44,8 +45,7 @@ public class CredentialHelperTest {
     CredentialHelper.toJsonFile(credential, jsonFile);
 
     try (InputStream in = Files.newInputStream(jsonFile);
-        // todo needs character set
-        Reader reader = new InputStreamReader(in)) {
+        Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
       CredentialType credentialType = new Gson().fromJson(reader, CredentialType.class);
       assertEquals(Constants.getOAuthClientId(), credentialType.client_id);
       assertEquals(Constants.getOAuthClientSecret(), credentialType.client_secret);
@@ -61,7 +61,7 @@ public class CredentialHelperTest {
     private String type;
   }
 
-  private Credential createCredential(String accessToken, String refreshToken) {
+  private static Credential createCredential(String accessToken, String refreshToken) {
     GoogleCredential credential = new GoogleCredential.Builder()
         .setTransport(new NetHttpTransport())
         .setJsonFactory(new JacksonFactory())

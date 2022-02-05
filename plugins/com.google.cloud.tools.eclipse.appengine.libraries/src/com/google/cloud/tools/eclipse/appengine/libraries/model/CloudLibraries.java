@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.operations.CloudSdk;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import java.io.IOException;
@@ -41,17 +41,17 @@ public class CloudLibraries {
   public static final String MASTER_CONTAINER_ID = "master-container";
 
   /**
-   * Library files for App Engine Standard environment applications; specifically
-   * Objectify, App Engine API, and Google Cloud Endpoints.
+   * Library files for App Engine standard environment applications; specifically
+   * Objectify 6, App Engine API 1.0 SDK, and Google Cloud Endpoints.
    */
   public static final String APP_ENGINE_STANDARD_GROUP = "appengine"; //$NON-NLS-1$
 
   /**
-   * Library files for App Engine Flexible environment applications; specifically
-   * Objectify.
+   * Non-App Engine standard environment application libraries files that do not fall into the
+   * category of Google Cloud Client Library for Java. Includes Objectify 6.
    */
-  public static final String APP_ENGINE_FLEXIBLE_GROUP = "flexible"; //$NON-NLS-1$  
-  
+  public static final String NON_APP_ENGINE_STANDARD_GROUP = "non-appengine-standard"; //$NON-NLS-1$
+
   /**
    * Library files for the Google Cloud Client Library for Java. E.g.
    * Stackdriver Logging, Cloud Datastore, Cloud Storage, Cloud Translation, etc.

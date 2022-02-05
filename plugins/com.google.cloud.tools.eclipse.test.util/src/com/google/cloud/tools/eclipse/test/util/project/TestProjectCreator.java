@@ -18,16 +18,13 @@ package com.google.cloud.tools.eclipse.test.util.project;
 
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineConfigurationUtil;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.FacetUtil;
-import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.util.ClasspathUtil;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -170,7 +167,7 @@ public final class TestProjectCreator extends ExternalResource {
 
   private void addFacets() throws CoreException {
     if (makeFaceted) {
-      facetedProject = ProjectFacetsManager.create(getProject(), true, null);
+      facetedProject = ProjectFacetsManager.create(project, true, null);
     }
     if (projectFacetVersions.isEmpty()) {
       return;
@@ -184,7 +181,7 @@ public final class TestProjectCreator extends ExternalResource {
 
     if (facetedProject.hasProjectFacet(AppEngineStandardFacet.FACET)) {
       // App Engine runtime is added via a Job, so wait.
-      ProjectUtils.waitForProjects(getProject());
+      ProjectUtils.waitForProjects(project);
     }
 
     if (facetedProject.hasProjectFacet(JavaFacet.FACET)) {
@@ -193,14 +190,12 @@ public final class TestProjectCreator extends ExternalResource {
     }
   }
 
-  private void setAppEngineServiceId(String serviceId) throws CoreException {
+  private void setAppEngineServiceId(String serviceId) {
     IFile appEngineWebXml =
-        WebProjectUtil.findInWebInf(getProject(), new Path("appengine-web.xml"));
+        AppEngineConfigurationUtil.findConfigurationFile(
+            getProject(), new Path("appengine-web.xml"));
     assertTrue("Project should have AppEngine Standard facet", appEngineWebXml.exists());
-    String contents = "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>\n"
-        + "<service>" + serviceId + "</service>\n</appengine-web-app>\n";
-    InputStream in = new ByteArrayInputStream(contents.getBytes(StandardCharsets.UTF_8));
-    appEngineWebXml.setContents(in, IFile.FORCE, null);
+    ConfigurationFileUtils.createAppEngineWebXml(project, serviceId);
   }
 
 }

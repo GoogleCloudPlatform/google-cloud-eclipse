@@ -17,7 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.facets;
 
 import com.google.cloud.tools.appengine.AppEngineDescriptor;
-import com.google.cloud.tools.appengine.api.AppEngineException;
+import com.google.cloud.tools.appengine.AppEngineException;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,7 +57,8 @@ public class AppEngineStandardJre7ProjectFacetDetector extends ProjectFacetDetec
     }
 
     IFile appEngineWebXml =
-        WebProjectUtil.findInWebInf(workingCopy.getProject(), new Path("appengine-web.xml"));
+        AppEngineConfigurationUtil.findConfigurationFile(
+            workingCopy.getProject(), new Path("appengine-web.xml"));
     progress.worked(1);
     if (appEngineWebXml == null || !appEngineWebXml.exists()) {
       logger.fine("skipping " + projectName + ": cannot find appengine-web.xml");

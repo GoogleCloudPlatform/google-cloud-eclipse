@@ -17,3 +17,4 @@ Import-Package: com.google.cloud.tools.eclipse.appengine.libraries.ui,
  org.eclipse.jst.common.project.facet.core,
  org.eclipse.jst.j2ee.web.project.facet,
  org.eclipse.swtbot.swt.finder.widgets
+Require-Capability: com.google.cloud.tools.facets.appengine;filter:="(type=jre8)"

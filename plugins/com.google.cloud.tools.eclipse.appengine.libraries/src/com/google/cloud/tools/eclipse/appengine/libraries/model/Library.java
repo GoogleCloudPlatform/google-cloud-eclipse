@@ -197,26 +197,26 @@ public final class Library {
    * transitive dependency graph.
    */
   private synchronized List<LibraryFile> resolveDependencies() {
-    List<LibraryFile> transitiveDependencies = new ArrayList<>();
+    List<LibraryFile> resolvedDependencies = new ArrayList<>();
         
     for (LibraryFile artifact : directDependencies) {
       artifact.updateVersion();
       MavenCoordinates coordinates = artifact.getMavenCoordinates();
       
       // include the artifact in its own list in case we can't find it in the repo
-      transitiveDependencies.add(artifact);
+      resolvedDependencies.add(artifact);
       
       try {
         Collection<LibraryFile> dependencies =
             LibraryFactory.loadTransitiveDependencies(coordinates);
-        transitiveDependencies.addAll(dependencies);
+        resolvedDependencies.addAll(dependencies);
       } catch (CoreException ex) {
         logger.log(Level.SEVERE,
             "Could not load library " + artifact.getMavenCoordinates().toString(), ex);
       }
     }
     
-    return resolveDuplicates(transitiveDependencies);
+    return resolveDuplicates(resolvedDependencies);
   }  
   
   /**

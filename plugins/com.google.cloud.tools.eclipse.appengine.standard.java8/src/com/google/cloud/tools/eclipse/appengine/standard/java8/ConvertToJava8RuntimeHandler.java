@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.standard.java8;
 
-import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineConfigurationUtil;
 import com.google.cloud.tools.eclipse.ui.util.ProjectFromSelectionHelper;
 import com.google.common.base.Preconditions;
 import java.util.List;
@@ -46,14 +46,15 @@ public class ConvertToJava8RuntimeHandler extends AbstractHandler {
   public Object execute(ExecutionEvent event) throws ExecutionException {
     List<IProject> projects = ProjectFromSelectionHelper.getProjects(event);
     Preconditions.checkArgument(!projects.isEmpty());
-    Job updateJob = new WorkspaceJob(Messages.getString("reconfiguringToJava8")) { //$NON-NLS-1$
+    Job updateJob = new WorkspaceJob(Messages.getString("reconfiguringToJava8")) { // $NON-NLS-1$
           @Override
           public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
             SubMonitor progress = SubMonitor.convert(monitor, projects.size());
             for (IProject project : projects) {
               progress.subTask(
-                  Messages.getString("reconfiguringProject", project.getName())); //$NON-NLS-1$
-              IFile appEngineWebXml = WebProjectUtil.findInWebInf(project, APPENGINE_DESCRIPTOR);
+                  Messages.getString("reconfiguringProject", project.getName())); // $NON-NLS-1$
+              IFile appEngineWebXml =
+                  AppEngineConfigurationUtil.findConfigurationFile(project, APPENGINE_DESCRIPTOR);
               if (appEngineWebXml != null) {
                 // add the <runtime> and the rest should be handled for us
                 AppEngineDescriptorTransform.addJava8Runtime(appEngineWebXml);

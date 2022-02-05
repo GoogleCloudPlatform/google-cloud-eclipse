@@ -18,8 +18,7 @@ location "http://dadacoalition.org/yedit/" {
   org.dadacoalition.yedit.feature.feature.group
 }
 
-// SWTBot 2.7.0 will be released with Photon, and supports Neon, Oxygen, and Photon
-// Once released, link will be http://download.eclipse.org/technology/swtbot/releases/2.7.0
-location "http://download.eclipse.org/technology/swtbot/milestones/photon-rc4/" {
+// SWTBot 2.8.0 supports Oxygen and later (https://wiki.eclipse.org/SWTBot#Latest_Release)
+location "http://download.eclipse.org/technology/swtbot/releases/2.8.0/" {
   org.eclipse.swtbot.eclipse.feature.group
 }

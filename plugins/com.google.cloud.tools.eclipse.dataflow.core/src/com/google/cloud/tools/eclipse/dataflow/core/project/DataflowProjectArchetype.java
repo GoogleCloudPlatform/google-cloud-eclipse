@@ -26,11 +26,11 @@ public enum DataflowProjectArchetype {
   STARTER_POM_WITH_PIPELINE(
       "Starter project with a simple pipeline",
       "google-cloud-dataflow-java-archetypes-starter",
-      ImmutableSortedSet.of(MajorVersion.ONE, MajorVersion.QUALIFIED_TWO, MajorVersion.TWO)),
+      ImmutableSortedSet.of(MajorVersion.QUALIFIED_TWO, MajorVersion.TWO)),
   EXAMPLES(
       "Example pipelines",
       "google-cloud-dataflow-java-archetypes-examples",
-      ImmutableSortedSet.of(MajorVersion.ONE, MajorVersion.QUALIFIED_TWO, MajorVersion.TWO));
+      ImmutableSortedSet.of(MajorVersion.QUALIFIED_TWO, MajorVersion.TWO));
 
   private final String label;
   private final String artifactId;

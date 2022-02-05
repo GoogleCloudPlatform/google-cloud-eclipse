@@ -19,13 +19,12 @@ package com.google.cloud.tools.eclipse.appengine.standard.java8;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.appengine.AppEngineDescriptor;
-import com.google.cloud.tools.appengine.api.AppEngineException;
+import com.google.cloud.tools.appengine.AppEngineException;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineConfigurationUtil;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.eclipse.appengine.facets.convert.AppEngineStandardProjectConvertJob;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
@@ -127,7 +126,7 @@ public class ConversionTests {
   @Test
   public void appEngineWebWithNoRuntime()
       throws CoreException, IOException, InterruptedException, SAXException, AppEngineException {
-    IFacetedProject project = projectCreator.getFacetedProject();
+    IFacetedProject project = projectCreator.withFacets().getFacetedProject();
     createAppEngineWebWithNoRuntime(project);
 
     Job conversionJob = new AppEngineStandardProjectConvertJob(project);
@@ -245,7 +244,7 @@ public class ConversionTests {
   @Test
   public void appEngineWebWithJava8Runtime()
       throws CoreException, IOException, InterruptedException, SAXException, AppEngineException {
-    IFacetedProject project = projectCreator.getFacetedProject();
+    IFacetedProject project = projectCreator.withFacets().getFacetedProject();
     createAppEngineWebWithJava8Runtime(project);
 
     Job conversionJob = new AppEngineStandardProjectConvertJob(project);
@@ -389,7 +388,8 @@ public class ConversionTests {
   private void assertJava8Runtime(IFacetedProject project)
       throws IOException, SAXException, CoreException, AppEngineException {
     IFile appengineWebXml =
-        WebProjectUtil.findInWebInf(project.getProject(), new Path("appengine-web.xml"));
+        AppEngineConfigurationUtil.findConfigurationFile(
+            project.getProject(), new Path("appengine-web.xml"));
     assertNotNull("appengine-web.xml is missing", appengineWebXml);
     assertTrue("appengine-web.xml does not exist", appengineWebXml.exists());
     try (InputStream contents = appengineWebXml.getContents()) {
@@ -409,7 +409,8 @@ public class ConversionTests {
   private void assertNoJava8Runtime(IFacetedProject project)
       throws IOException, SAXException, CoreException, AppEngineException {
     IFile appengineWebXml =
-        WebProjectUtil.findInWebInf(project.getProject(), new Path("appengine-web.xml"));
+        AppEngineConfigurationUtil.findConfigurationFile(
+            project.getProject(), new Path("appengine-web.xml"));
     assertNotNull("appengine-web.xml is missing", appengineWebXml);
     assertTrue("appengine-web.xml does not exist", appengineWebXml.exists());
     try (InputStream contents = appengineWebXml.getContents()) {
@@ -422,7 +423,7 @@ public class ConversionTests {
       AppEngineDescriptor descriptor = AppEngineDescriptor
           .parse(new ByteArrayInputStream(appEngineWebContent.getBytes(StandardCharsets.UTF_8)));
       assertFalse("should not have <runtime>java8</runtime>", descriptor.isJava8());
-      assertNull("should not have a <runtime>", descriptor.getRuntime());
+      assertEquals("should report runtime=java7", "java7", descriptor.getRuntime());
     }
   }
 

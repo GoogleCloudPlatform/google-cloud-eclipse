@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.persistence;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
+import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
@@ -212,7 +213,7 @@ public class LibraryClasspathContainerSerializer {
       IFolder folder =
           settingsFolder.getFolder(FrameworkUtil.getBundle(getClass()).getSymbolicName());
       if (!folder.exists() && create) {
-        folder.create(true, true, null);
+        ResourceUtils.createFolders(folder, null);
       }
       IFile containerFile = folder.getFile(id + ".container"); //$NON-NLS-1$
       return containerFile;

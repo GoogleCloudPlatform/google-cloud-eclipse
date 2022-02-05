@@ -29,7 +29,8 @@ public class DispatchRoutingDescriptor extends AppEngineResourceElement {
 
   @Override
   public StyledString getStyledLabel() {
-    return new StyledString("Dispatch Routing Rules");
+    return new StyledString("Dispatch Routing Rules")
+        .append(" - " + getFile().getName(), StyledString.DECORATIONS_STYLER);
   }
 
 }

@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.appengine.compat.cte13;
 
 import com.google.cloud.tools.eclipse.appengine.compat.Messages;
 import com.google.cloud.tools.eclipse.ui.util.ProjectFromSelectionHelper;
-import java.text.MessageFormat;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -34,11 +33,12 @@ public class UpdateCloudToolsEclipseProjectHandler extends AbstractHandler {
 
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
-    final IProject project = ProjectFromSelectionHelper.getFirstProject(event);
+    IProject project = ProjectFromSelectionHelper.getFirstProject(event);
     if (!CloudToolsEclipseProjectUpdater.hasOldContainers(project)) {
       throw new ExecutionException(Messages.getString("project.appears.up.to.date")); //$NON-NLS-1$
     }
-    Job updateJob = new WorkspaceJob(MessageFormat.format(Messages.getString("updating.project"), project.getName())) { //$NON-NLS-1$
+    String jobName = Messages.getString("updating.project", project.getName()); //$NON-NLS-1$
+    Job updateJob = new WorkspaceJob(jobName) {
       @Override
       public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
         return CloudToolsEclipseProjectUpdater.updateProject(project, SubMonitor.convert(monitor));

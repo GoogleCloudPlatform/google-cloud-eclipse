@@ -101,11 +101,11 @@ public class WebXmlValidatorPluginJspTest {
 
     IFile webXml = project.getFile("WebContent/WEB-INF/web.xml");
     WebXmlValidator validator = new WebXmlValidator();
-    ArrayList<BannedElement> blacklist = validator.checkForElements(webXml, document);
+    ArrayList<ElementProblem> problems = validator.checkForProblems(webXml, document);
 
-    assertEquals(1, blacklist.size());
+    assertEquals(1, problems.size());
     String markerId = "com.google.cloud.tools.eclipse.appengine.validation.jspFileMarker";
-    assertEquals(markerId, blacklist.get(0).getMarkerId());
-    assertEquals("DoesNotExist.jsp could not be resolved", blacklist.get(0).getMessage());
+    assertEquals(markerId, problems.get(0).getMarkerId());
+    assertEquals("DoesNotExist.jsp could not be resolved", problems.get(0).getMessage());
   }
 }

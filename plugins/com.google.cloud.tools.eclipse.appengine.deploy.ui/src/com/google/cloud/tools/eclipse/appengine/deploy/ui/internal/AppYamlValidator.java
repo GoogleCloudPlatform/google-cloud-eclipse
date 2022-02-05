@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.internal;
 
-import com.google.cloud.tools.appengine.api.AppEngineException;
+import com.google.cloud.tools.appengine.AppEngineException;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
 import com.google.cloud.tools.project.AppYaml;
 import com.google.common.annotations.VisibleForTesting;

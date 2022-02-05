@@ -16,17 +16,18 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets.ui.navigator;
 
-import com.google.cloud.tools.appengine.api.AppEngineException;
+import com.google.cloud.tools.appengine.AppEngineException;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexJarFacet;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexWarFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineProjectElement;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineResourceElement;
-import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineStandardProjectElement;
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import java.util.Collection;
 import java.util.HashSet;
@@ -89,14 +90,17 @@ public class AppEngineContentProvider implements ITreeContentProvider {
     return null;
   }
 
-  /** Return {@code true} if the project is an App Engine Standard project. */
-  static boolean isStandard(IProject project) {
+  /** Return {@code true} if the project is an App Engine project. */
+  static boolean isAppEngine(IProject project) {
     Preconditions.checkNotNull(project);
     try {
       IFacetedProject facetedProject = ProjectFacetsManager.create(project);
-      return facetedProject != null && AppEngineStandardFacet.hasFacet(facetedProject);
+      return facetedProject != null
+          && (AppEngineStandardFacet.hasFacet(facetedProject)
+              || AppEngineFlexWarFacet.hasFacet(facetedProject)
+              || AppEngineFlexJarFacet.hasFacet(facetedProject));
     } catch (CoreException ex) {
-      logger.log(Level.INFO, "Project is not faceted", ex);
+      // Project is not faceted
       return false;
     }
   }
@@ -106,26 +110,25 @@ public class AppEngineContentProvider implements ITreeContentProvider {
    *
    * @throws AppEngineException if not an App Engine project
    */
-  @VisibleForTesting
-  static AppEngineStandardProjectElement loadRepresentation(IProject project)
+  static AppEngineProjectElement loadRepresentation(IProject project)
       throws AppEngineException {
     Preconditions.checkNotNull(project);
-    if (!project.exists() || !isStandard(project)) {
+    if (!project.exists() || !isAppEngine(project)) {
       throw new AppEngineException("Not an App Engine project");
     }
-    AppEngineStandardProjectElement appEngineProject =
-        AppEngineStandardProjectElement.create(project);
+    AppEngineProjectElement appEngineProject =
+        AppEngineProjectElement.create(project);
     return appEngineProject;
   }
 
   /** Cached representation of App Engine projects. */
-  private final LoadingCache<IProject, AppEngineStandardProjectElement> projectMapping =
+  private final LoadingCache<IProject, AppEngineProjectElement> projectMapping =
       CacheBuilder.newBuilder()
           .weakKeys()
           .build(
-              new CacheLoader<IProject, AppEngineStandardProjectElement>() {
+              new CacheLoader<IProject, AppEngineProjectElement>() {
                 @Override
-                public AppEngineStandardProjectElement load(IProject key) throws Exception {
+                public AppEngineProjectElement load(IProject key) throws Exception {
                   return AppEngineContentProvider.loadRepresentation(key);
                 }
               });
@@ -185,7 +188,7 @@ public class AppEngineContentProvider implements ITreeContentProvider {
       }
       Collection<IFile> projectFiles = affected.get(project);
       // Do we have a model for this project?  If so, then update it.
-      AppEngineStandardProjectElement projectElement = projectMapping.getIfPresent(project);
+      AppEngineProjectElement projectElement = projectMapping.getIfPresent(project);
       if (projectElement != null) {
         try {
           if (projectElement.resourcesChanged(projectFiles)) {
@@ -204,8 +207,7 @@ public class AppEngineContentProvider implements ITreeContentProvider {
           projectMapping.invalidate(project);
           toBeRefreshed.add(project);
         }
-      } else if (Iterables.any(
-          projectFiles, file -> file != null && "appengine-web.xml".equals(file.getName()))) {
+      } else if (AppEngineProjectElement.hasAppEngineDescriptor(projectFiles)) {
         // We have no project model (wasn't an App Engine project previously) but it seems to
         // contain an App Engine descriptor.  So trigger refresh of project.
         toBeRefreshed.add(project);
@@ -239,8 +241,8 @@ public class AppEngineContentProvider implements ITreeContentProvider {
 
   @Override
   public boolean hasChildren(Object element) {
-    if (element instanceof AppEngineStandardProjectElement) {
-      AppEngineStandardProjectElement projectElement = (AppEngineStandardProjectElement) element;
+    if (element instanceof AppEngineProjectElement) {
+      AppEngineProjectElement projectElement = (AppEngineProjectElement) element;
       return projectElement.getConfigurations().length > 0;
     } else if (element instanceof AppEngineResourceElement) {
       // none of our descriptor models have children
@@ -250,19 +252,19 @@ public class AppEngineContentProvider implements ITreeContentProvider {
     if (project == null) {
       return false;
     }
-    AppEngineStandardProjectElement webProject = projectMapping.getIfPresent(project);
+    AppEngineProjectElement webProject = projectMapping.getIfPresent(project);
     return webProject != null ? webProject.getConfigurations().length > 0 : true;
   }
 
   @Override
   public Object[] getChildren(Object parentElement) {
-    if (parentElement instanceof AppEngineStandardProjectElement) {
-      return ((AppEngineStandardProjectElement) parentElement).getConfigurations();
+    if (parentElement instanceof AppEngineProjectElement) {
+      return ((AppEngineProjectElement) parentElement).getConfigurations();
     }
     IProject project = getProject(parentElement);
     if (project != null) {
       try {
-        AppEngineStandardProjectElement projectElement = projectMapping.get(project);
+        AppEngineProjectElement projectElement = projectMapping.get(project);
         return projectElement == null ? EMPTY_ARRAY : new Object[] {projectElement};
       } catch (ExecutionException ex) {
         // ignore: either not an App Engine project, or load failed due to a validation problem
@@ -274,8 +276,8 @@ public class AppEngineContentProvider implements ITreeContentProvider {
 
   @Override
   public Object getParent(Object element) {
-    if (element instanceof AppEngineStandardProjectElement) {
-      return ((AppEngineStandardProjectElement) element).getProject();
+    if (element instanceof AppEngineProjectElement) {
+      return ((AppEngineProjectElement) element).getProject();
     } else if (element instanceof AppEngineResourceElement) {
       IProject project = ((AppEngineResourceElement) element).getProject();
       return projectMapping.getIfPresent(project);

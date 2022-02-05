@@ -16,8 +16,8 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
-import com.google.cloud.tools.appengine.api.AppEngineException;
-import com.google.cloud.tools.appengine.api.deploy.AppEngineStandardStaging;
+import com.google.cloud.tools.appengine.AppEngineException;
+import com.google.cloud.tools.appengine.operations.AppEngineWebXmlProjectStaging;
 import com.google.cloud.tools.eclipse.appengine.deploy.CloudSdkStagingHelper;
 import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
@@ -63,7 +63,7 @@ public class StandardStagingDelegate implements StagingDelegate {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
     try {
-      AppEngineStandardStaging appEngineStandardStaging = cloudSdkWrapper
+      AppEngineWebXmlProjectStaging appEngineStandardStaging = cloudSdkWrapper
           .getAppEngineStandardStaging(javaHome, stdoutOutputStream, stderrOutputStream);
 
       IPath explodedWar = safeWorkDirectory.append("exploded-war");

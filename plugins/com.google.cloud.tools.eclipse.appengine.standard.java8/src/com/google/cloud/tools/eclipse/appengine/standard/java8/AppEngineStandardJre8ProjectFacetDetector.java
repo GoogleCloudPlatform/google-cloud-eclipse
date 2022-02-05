@@ -17,16 +17,21 @@
 package com.google.cloud.tools.eclipse.appengine.standard.java8;
 
 import com.google.cloud.tools.appengine.AppEngineDescriptor;
-import com.google.cloud.tools.appengine.api.AppEngineException;
+import com.google.cloud.tools.appengine.AppEngineException;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineConfigurationUtil;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.FacetUtil;
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.logging.Logger;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
@@ -34,7 +39,9 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IFacetedProjectWorkingCopy;
+import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetDetector;
+import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 public class AppEngineStandardJre8ProjectFacetDetector extends ProjectFacetDetector {
@@ -60,7 +67,8 @@ public class AppEngineStandardJre8ProjectFacetDetector extends ProjectFacetDetec
     }
 
     IFile appEngineWebXml =
-        WebProjectUtil.findInWebInf(workingCopy.getProject(), new Path("appengine-web.xml"));
+        AppEngineConfigurationUtil.findConfigurationFile(
+            workingCopy.getProject(), new Path("appengine-web.xml"));
     if (appEngineWebXml == null || !appEngineWebXml.exists()) {
       return;
     }
@@ -89,10 +97,9 @@ public class AppEngineStandardJre8ProjectFacetDetector extends ProjectFacetDetec
 
       // But we don't touch the Dynamic Web facet unless required
       if (!workingCopy.hasProjectFacet(WebFacetUtils.WEB_FACET)) {
-        // Should we attempt to detect the version from web.xml? what if web.xml doesn't exist?
         Object webModel =
             FacetUtil.createWebFacetDataModel(appEngineWebXml.getParent().getParent());
-        workingCopy.addProjectFacet(WebFacetUtils.WEB_31);
+        workingCopy.addProjectFacet(getWebFacetVersionToInstall(workingCopy.getProject()));
         workingCopy.setProjectFacetActionConfig(WebFacetUtils.WEB_FACET, webModel);
         progress.worked(1);
       }
@@ -100,5 +107,30 @@ public class AppEngineStandardJre8ProjectFacetDetector extends ProjectFacetDetec
     } catch (SAXException | IOException | AppEngineException ex) {
       throw new CoreException(StatusUtil.error(this, "Unable to retrieve appengine-web.xml", ex));
     }
+  }
+
+  @VisibleForTesting
+  static IProjectFacetVersion getWebFacetVersionToInstall(IProject project) {
+    IFile webXml = WebProjectUtil.findInWebInf(project, new Path("web.xml"));
+    if (webXml == null) {
+      return WebFacetUtils.WEB_31;
+    }
+
+    try (InputStream in = webXml.getContents()) {
+      String servletVersion = buildDomDocument(in).getDocumentElement().getAttribute("version");
+      if ("2.5".equals(servletVersion)) {
+        return WebFacetUtils.WEB_25;
+      }
+    } catch (IOException | CoreException | ParserConfigurationException | SAXException ex) {
+      // give up and install Servlet 3.1 facet
+    }
+    return WebFacetUtils.WEB_31;
+  }
+
+  private static Document buildDomDocument(InputStream in)
+      throws SAXException, IOException, ParserConfigurationException {
+    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    factory.setNamespaceAware(true);
+    return factory.newDocumentBuilder().parse(in);
   }
 }

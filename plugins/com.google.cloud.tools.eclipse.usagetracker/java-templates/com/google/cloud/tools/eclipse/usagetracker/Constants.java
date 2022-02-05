@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Google Inc.
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,6 @@ package com.google.cloud.tools.eclipse.usagetracker;
  * Placeholder constants initialized at compile-time.
  */
 public class Constants {
-  // Placeholder for Google Analytics tracking ID.
-  public static final String ANALYTICS_TRACKING_ID = "@ga.tracking.id@";
+
+  public static final String FIRELOG_API_KEY = "@firelog.api.key@";
 }

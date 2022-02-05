@@ -21,13 +21,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
-
-import com.google.cloud.tools.appengine.api.devserver.DefaultRunConfiguration;
-import com.google.cloud.tools.appengine.api.devserver.RunConfiguration;
+import com.google.cloud.tools.appengine.configuration.RunConfiguration;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;    
+import org.eclipse.core.runtime.MultiStatus;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
@@ -35,9 +35,12 @@ import org.junit.Test;
  * Tests detection of conflicts between two {@link RunConfiguration}.
  */
 public class RunConfigConflictTest {
+  
+  private List<Path> services = new ArrayList<>();
+  
   @Test
   public void testSameConflict() {
-    RunConfiguration config = new DefaultRunConfiguration();
+    RunConfiguration config = RunConfiguration.builder(services).build();
     IStatus status = LocalAppEngineServerLaunchConfigurationDelegate.checkConflicts(config, config,
         StatusUtil.multi(RunConfigConflictTest.class, "Conflict"));
     assertFalse(status.isOK());
@@ -49,12 +52,10 @@ public class RunConfigConflictTest {
 
   @Test
   public void testNoConflicts() {
-    DefaultRunConfiguration config1 = new DefaultRunConfiguration();
-    config1.setPort(0); // random allocation
-    config1.setAdminPort(0); // random allocation
-    config1.setStoragePath(new File("/foo/bar"));
-    DefaultRunConfiguration config2 = new DefaultRunConfiguration();
-    IStatus status = LocalAppEngineServerLaunchConfigurationDelegate.checkConflicts(config1,
+    RunConfiguration.Builder builder = RunConfiguration.builder(services);
+    builder.port(0); // random allocation
+    RunConfiguration config2 = RunConfiguration.builder(services).build();
+    IStatus status = LocalAppEngineServerLaunchConfigurationDelegate.checkConflicts(builder.build(),
         config2, StatusUtil.multi(RunConfigConflictTest.class, "Conflict"));
     assertTrue(status.isOK());
   }

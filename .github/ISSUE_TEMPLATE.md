@@ -1,3 +1,4 @@
+<!--
 Before reporting a possible bug:
 
 1. Please ensure you are running the latest version of CT4E with _Help > Check for Updates_.
@@ -6,10 +7,10 @@ Before reporting a possible bug:
 try deploying from the command line using `gcloud` or Maven. 
 If the problem does not go away, then the issue is very likely
 not with Cloud Tools for Eclipse.
-
+-->
 - Cloud Tools for Eclipse version:
-- Google Cloud SDK version: _(run `gcloud version`)_
-- Eclipse version: _(e.g, 4.5.2.v20160212-1500 or Neon.3)_
+- Google Cloud SDK version: <!-- run `gcloud version` -->
+- Eclipse version: <!-- e.g, Photon -->
 - OS:
 - Java version:
 
@@ -19,4 +20,4 @@ not with Cloud Tools for Eclipse.
 
 **What did you see instead?**
 
-Screenshots and stack traces are helpful.
+<!-- Screenshots and stack traces are helpful. -->

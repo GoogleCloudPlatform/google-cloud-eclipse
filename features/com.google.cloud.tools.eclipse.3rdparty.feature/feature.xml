@@ -24,12 +24,6 @@
          name="YEdit"
          optional="true"/>
          
-   <includes
-         id="eu.openanalytics.editor.docker"
-         version="0.0.0"
-         name="Docker Editor"
-         optional="true"/>
-         
 <!--
    <includes
          id="org.eclipse.linuxtools.docker.feature"
@@ -46,7 +40,7 @@
          unpack="false"/>
 
    <plugin
-         id="org.apache.commons.compress"
+         id="org.apache.commons.commons-compress"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -56,7 +50,14 @@
          id="com.google.guava"
          download-size="0"
          install-size="0"
-         version="21.0.0"
+         version="30.0.0.jre"
+         unpack="false"/>
+
+   <plugin
+         id="com.google.guava.failureaccess"
+         download-size="0"
+         install-size="0"
+         version="1.0.1"
          unpack="false"/>
 
    <plugin
@@ -105,7 +106,7 @@
          id="org.yaml.snakeyaml"
          download-size="0"
          install-size="0"
-         version="1.21.0"
+         version="1.29.0"
          unpack="false"/>
          
    <plugin

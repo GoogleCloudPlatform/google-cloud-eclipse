@@ -6,7 +6,6 @@
 <booleanAttribute key="automaticValidate" value="false"/>
 <stringAttribute key="bad_container_name" value="/trunk/gcloud-eclipse-tools-launcher"/>
 <stringAttribute key="bootstrap" value=""/>
-<stringAttribute key="checked" value="com.google.cloud.tools.eclipse.sdk"/>
 <booleanAttribute key="clearConfig" value="true"/>
 <booleanAttribute key="clearws" value="true"/>
 <booleanAttribute key="clearwslog" value="false"/>
@@ -22,14 +21,13 @@
 <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dosgi.requiredJavaVersion=1.8 -XX:MaxPermSize=256m -Xms256m -Xmx1024m -Doauth.client.id=${oauth_id} -Doauth.client.secret=${oauth_secret}"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dosgi.requiredJavaVersion=1.8 -Xms256m -Xmx1024m -Doauth.client.id=${oauth_id} -Doauth.client.secret=${oauth_secret}"/>
 <stringAttribute key="pde.version" value="3.3"/>
 <stringAttribute key="product" value="org.eclipse.sdk.ide"/>
 <booleanAttribute key="show_selected_only" value="false"/>
 <stringAttribute key="templateConfig" value="${target_home}/configuration/config.ini"/>
 <booleanAttribute key="tracing" value="true"/>
 <mapAttribute key="tracingOptions">
-<mapEntry key="com.google.cloud.tools.eclipse.sdk/enable.managed.cloud.sdk" value="true"/>
 <mapEntry key="com.ibm.datatools.core.ui/debug" value="true"/>
 <mapEntry key="com.ibm.datatools.core.ui/editor/log" value="true"/>
 <mapEntry key="com.ibm.datatools.core.ui/modelExplorer/log" value="true"/>

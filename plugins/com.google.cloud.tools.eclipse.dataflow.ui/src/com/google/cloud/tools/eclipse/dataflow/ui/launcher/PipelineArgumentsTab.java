@@ -61,6 +61,7 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -69,7 +70,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -79,6 +80,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.events.IExpansionListener;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 /**
  * A tab specifying arguments required to run a Dataflow Pipeline.
@@ -93,6 +95,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   private static final String ARGUMENTS_SEPARATOR = "="; //$NON-NLS-1$
 
   private final IWorkspaceRoot workspaceRoot;
+  private Image image;
 
   /**
    * When true, suppresses calls to {@link #updateLaunchConfigurationDialog()} to avoid frequent
@@ -104,9 +107,8 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   @VisibleForTesting
   UpdateLaunchConfigurationDialogChangedListener dialogChangedListener =
       new UpdateLaunchConfigurationDialogChangedListener();
-
-  private ScrolledComposite composite;
-  private Composite internalComposite;
+  @VisibleForTesting
+  Composite internalComposite;
 
   @VisibleForTesting
   Map<PipelineRunner, Button> runnerButtons;
@@ -146,15 +148,14 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     this.workspaceRoot = workspaceRoot;
     this.dependencyManager = dependencyManager;
     hierarchy = pipelineOptionsHierarchyFactory.global(new NullProgressMonitor());
+    ImageDescriptor descriptor = AbstractUIPlugin
+        .imageDescriptorFromPlugin(DataflowUiPlugin.PLUGIN_ID, "icons/Dataflow_16.png");
+    image = descriptor != null ? descriptor.createImage() : null;;
   }
 
   @Override
   public void createControl(Composite parent) {
-    composite = new ScrolledComposite(parent, SWT.V_SCROLL);
-    composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    composite.setLayout(new GridLayout(1, false));
-
-    internalComposite = new Composite(composite, SWT.NULL);
+    internalComposite = new Composite(parent, SWT.NULL);
 
     GridData internalCompositeGridData = new GridData(SWT.FILL, SWT.FILL, true, true);
     internalComposite.setLayoutData(internalCompositeGridData);
@@ -167,19 +168,16 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
     createDefaultOptionsComponent(internalComposite, new GridData(SWT.FILL, SWT.FILL, true, false));
 
-    Composite inputsComposite = new Composite(internalComposite, SWT.NULL);
-    inputsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    inputsComposite.setLayout(new FillLayout(SWT.VERTICAL));
-
     Set<String> filterProperties =
         ImmutableSet.<String>builder()
             .addAll(DataflowPreferences.SUPPORTED_DEFAULT_PROPERTIES)
             .add("runner") //$NON-NLS-1$
             .build();
 
-    Group runnerOptionsGroup = new Group(inputsComposite, SWT.NULL);
+    Group runnerOptionsGroup = new Group(internalComposite, SWT.NULL);
     runnerOptionsGroup.setText(Messages.getString("pipeline.options")); //$NON-NLS-1$
     runnerOptionsGroup.setLayout(new GridLayout());
+    runnerOptionsGroup.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 
     userOptionsSelector = new TextAndButtonComponent(
         runnerOptionsGroup,
@@ -191,15 +189,8 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
         new PipelineOptionsFormComponent(runnerOptionsGroup, ARGUMENTS_SEPARATOR, filterProperties);
     pipelineOptionsForm.addModifyListener(dialogChangedListener);
     pipelineOptionsForm.addExpandListener(dialogChangedListener);
+    setControl(internalComposite);
 
-    composite.setContent(internalComposite);
-    composite.setExpandHorizontal(true);
-    composite.setExpandVertical(true);
-    composite.setMinSize(inputsComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-    composite.setShowFocusedControl(true);
-    composite.pack(true);
-
-    setControl(composite);
   }
 
   private TextAndButtonSelectionListener openPipelineOptionsSearchListener() {
@@ -217,7 +208,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
           launchConfiguration.setUserOptionsName(userOptionsName);
         }
         updatePipelineOptionsForm();
-        updateLaunchConfigurationDialog();
+        handleLayoutChange();
       }
 
       @Override
@@ -281,6 +272,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     defaultOptionsComponent.addAccountSelectionListener(dialogChangedListener);
     defaultOptionsComponent.addButtonSelectionListener(dialogChangedListener);
     defaultOptionsComponent.addModifyListener(dialogChangedListener);
+    defaultOptionsComponent.setAccountRequired(true);
   }
 
   @Override
@@ -359,7 +351,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     // updateLaunchConfigurationDialog() will call performApply() on the active tab
     // thus writing out the current UI state, like an updated runner
     uiUpToDate = true;
-    updateLaunchConfigurationDialog();
+    handleLayoutChange();
   }
 
   /**
@@ -496,7 +488,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
         }
       });
 
-      BusyIndicator.showWhile(composite.getDisplay(), () -> {
+      BusyIndicator.showWhile(internalComposite.getDisplay(), () -> {
         try {
           suppressDialogUpdates = true;
           pipelineOptionsForm.updateForm(launchConfiguration, optionsHierarchy.get());
@@ -573,13 +565,6 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     return validatePage();
   }
 
-  @Override
-  protected void updateLaunchConfigurationDialog() {
-    composite.setMinSize(internalComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-    composite.pack();
-    super.updateLaunchConfigurationDialog();
-  }
-
   /**
    * When the Runner selection is changed, update the underlying launch configuration, update the
    * PipelineOptionsForm to show all available inputs, and re-render the tab.
@@ -599,7 +584,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
       if (button.getSelection()) {
         launchConfiguration.setRunner(runner);
         updatePipelineOptionsForm();
-        updateLaunchConfigurationDialog();
+        handleLayoutChange();
       }
     }
   }
@@ -636,8 +621,38 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     @Override
     public void run() {
       if (!suppressDialogUpdates) {
-        updateLaunchConfigurationDialog();
+        handleLayoutChange();
       }
     }
+  }
+
+  @VisibleForTesting
+  void handleLayoutChange() {
+    if (internalComposite != null && !internalComposite.isDisposed()) {
+      Composite parent = internalComposite.getParent();
+      while (parent != null) {
+        if (parent instanceof ScrolledComposite) {
+          ((ScrolledComposite) parent)
+              .setMinSize(internalComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+          parent.layout();
+          return;
+        }
+        parent = parent.getParent();
+      }
+    }
+    updateLaunchConfigurationDialog();
+  }
+
+  @Override
+  public Image getImage() {
+    return image;
+  }
+
+  @Override
+  public void dispose() {
+    if (image != null) {
+      image.dispose();
+    }
+    super.dispose();
   }
 }

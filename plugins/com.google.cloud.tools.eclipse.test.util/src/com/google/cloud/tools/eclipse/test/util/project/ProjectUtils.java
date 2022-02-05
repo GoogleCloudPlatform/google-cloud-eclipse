@@ -60,6 +60,7 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.wst.common.componentcore.internal.builder.DependencyGraphImpl;
 import org.eclipse.wst.validation.internal.operations.ValidationBuilder;
 import org.eclipse.wst.validation.internal.operations.ValidatorManager;
 import org.osgi.framework.Bundle;
@@ -205,8 +206,8 @@ public class ProjectUtils {
   }
 
   /**
-   * Return a list of all build errors on the specified projects. Uses all projects in the
-   * workspace if {@code project} is empty.
+   * Returns all build errors on the specified projects. Uses all projects in the
+   * workspace if {@code projects} is empty.
    */
   public static Set<String> getAllBuildErrors(IProject... projects) throws CoreException {
     if (projects.length == 0) {
@@ -367,6 +368,7 @@ public class ProjectUtils {
     Collections.addAll(jobs, jobManager.find("org.eclipse.wst.server.core.family"));
     Collections.addAll(jobs, jobManager.find("org.eclipse.wst.server.ui.family"));
     Collections.addAll(jobs, jobManager.find(ValidationBuilder.FAMILY_VALIDATION_JOB));
+    Collections.addAll(jobs, jobManager.find(DependencyGraphImpl.GRAPH_UPDATE_JOB_FAMILY));
     for (IProject project : projects) {
       Collections.addAll(jobs,
           jobManager.find(project.getName() + ValidatorManager.VALIDATOR_JOB_FAMILY));

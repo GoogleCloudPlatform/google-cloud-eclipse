@@ -16,8 +16,8 @@
 
 package com.google.cloud.tools.eclipse.appengine.standard.java8.m2e;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineConfigurationUtil;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -41,7 +41,9 @@ public class AppEngineStandardProjectDetector extends AbstractProjectConfigurato
     if (facetedProject == null || facetedProject.hasProjectFacet(AppEngineStandardFacet.FACET)) {
       return;
     }
-    IFile appEngineWebXml = WebProjectUtil.findInWebInf(project, new Path("appengine-web.xml")); //$NON-NLS-1$
+    IFile appEngineWebXml =
+        AppEngineConfigurationUtil.findConfigurationFile(
+            project, new Path("appengine-web.xml")); // $NON-NLS-1$
     if (appEngineWebXml == null || !appEngineWebXml.exists()) {
       return;
     }

@@ -64,6 +64,11 @@ public class AppEngineStandardFacetTest {
   }
 
   @Test
+  public void testJre7StandardFacetVersionObsolete() {
+    Assert.assertTrue(AppEngineStandardFacet.usesObsoleteRuntime(AppEngineStandardFacet.JRE7));
+  }
+
+  @Test
   public void testIsAppEngineStandardRuntime_appEngineRuntime() {
     when(runtimeType.getId()).thenReturn(AppEngineStandardFacet.DEFAULT_RUNTIME_ID);
     when(serverRuntime.getRuntimeType()).thenReturn(runtimeType);

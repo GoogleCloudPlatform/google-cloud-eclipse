@@ -23,9 +23,6 @@
     <build.rootUri>${project.baseUri}/../..</build.rootUri>
     <eclipse.repoUrl>${build.rootUri}/eclipse/ide-target-platform/target/repository</eclipse.repoUrl>
     <gcp.repoUrl>${build.rootUri}/gcp-repo/target/repository</gcp.repoUrl>
-
-    <!-- required for eclipserun which is a bit awkward -->
-    <toolchain.java.runtime>JavaSE-1.8</toolchain.java.runtime>
   </properties>
 
   <dependencies>
@@ -72,7 +69,7 @@
             -repository ${eclipse.repoUrl},${gcp.repoUrl}
             -installIUs ${installIUs}
           </appArgLine>
-          <executionEnvironment>${toolchain.java.runtime}</executionEnvironment>
+          <executionEnvironment>${requiredExecutionEnvironment}</executionEnvironment>
           <repositories>
             <repository>
               <id>eclipse</id>
@@ -82,43 +79,15 @@
           </repositories>
           <dependencies>
             <dependency>
-              <artifactId>org.eclipse.equinox.p2.transport.ecf</artifactId>
-              <type>eclipse-plugin</type>
+              <artifactId>org.eclipse.e4.rcp</artifactId>
+              <type>eclipse-feature</type>
             </dependency>
             <dependency>
-              <artifactId>org.eclipse.equinox.p2.repository</artifactId>
-              <type>eclipse-plugin</type>
-            </dependency>
-            <dependency>
-              <artifactId>org.eclipse.equinox.p2.touchpoint.natives</artifactId>
-              <type>eclipse-plugin</type>
-            </dependency>
-            <dependency>
-              <artifactId>org.eclipse.equinox.p2.touchpoint.eclipse</artifactId>
-              <type>eclipse-plugin</type>
-            </dependency>
-            <dependency>
-              <artifactId>org.eclipse.equinox.p2.artifact.repository</artifactId>
-              <type>eclipse-plugin</type>
+              <artifactId>org.eclipse.equinox.p2.core.feature</artifactId>
+              <type>eclipse-feature</type>
             </dependency>
             <dependency>
               <artifactId>org.eclipse.equinox.p2.director.app</artifactId>
-              <type>eclipse-plugin</type>
-            </dependency>
-            <dependency>
-              <artifactId>org.eclipse.equinox.simpleconfigurator</artifactId>
-              <type>eclipse-plugin</type>
-            </dependency>
-            <dependency>
-              <artifactId>org.eclipse.osgi.compatibility.state</artifactId>
-              <type>eclipse-plugin</type>
-            </dependency>
-            <dependency>
-              <artifactId>org.eclipse.equinox.ds</artifactId>
-              <type>eclipse-plugin</type>
-            </dependency>
-            <dependency>
-              <artifactId>org.eclipse.core.net</artifactId>
               <type>eclipse-plugin</type>
             </dependency>
           </dependencies>

@@ -16,10 +16,10 @@
 
 package com.google.cloud.tools.eclipse.sdk.ui;
 
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkVersionFileException;
-import com.google.cloud.tools.appengine.cloudsdk.serialization.CloudSdkVersion;
+import com.google.cloud.tools.appengine.operations.CloudSdk;
+import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkNotFoundException;
+import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkVersionFileException;
+import com.google.cloud.tools.appengine.operations.cloudsdk.serialization.CloudSdkVersion;
 import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
 import com.google.cloud.tools.managedcloudsdk.ManagedCloudSdk;

@@ -33,15 +33,17 @@
     <module>features</module>
     <module>plugins</module>
     <module>third_party</module>
-    <module>eclipse</module>
   </modules>
 
   <properties>
-    <tycho.version>1.1.0</tycho.version>
-    <tycho-extras.version>1.0.0</tycho-extras.version>
+    <!-- Execution environment supported by Cloud Tools for Eclipse -->
+    <requiredExecutionEnvironment>JavaSE-1.8</requiredExecutionEnvironment>
+
+    <tycho.version>1.5.0</tycho.version>
+    <tycho-extras.version>1.5.0</tycho-extras.version>
     <product.version.qualifier.suffix/>  <!-- 0-length string by default -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <eclipse.target>oxygen</eclipse.target>
+    <eclipse.target>2018-09</eclipse.target> <!-- the default build -->
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
 
@@ -59,7 +61,7 @@
     <jacoco.agentArgLine/>
 
     <!--
-      `SYSTEM` means build using the default JDK.
+      `SYSTEM` means build using the current JDK.
       `BREE` means find an appropriate JDK using Maven Toolchains matching
       the Bundle-RequiredExecutionEnvironment. See `README.md` for details.
     -->
@@ -97,22 +99,22 @@
       <!-- bundle: com.google.cloud.tools.appengine -->
       <groupId>com.google.cloud.tools</groupId>
       <artifactId>appengine-plugins-core</artifactId>
-      <version>0.6.3</version>
+      <version>0.9.5</version>
     </dependency>
     <dependency>
       <!--
-        bundle: org.apache.commons.compress
+        bundle: org.apache.commons.commons-compress
         dependency used by appengine-plugins-core
       -->
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
-      <version>1.14</version>
+      <version>1.21</version>
     </dependency>
     <dependency>
       <!-- bundle: com.google.guava -->
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>21.0</version>
+      <version>30.0-jre</version>
     </dependency>
     <dependency>
       <!-- bundle: jackson-core-asl -->
@@ -124,7 +126,7 @@
       <!-- bundle: com.fasterxml.jackson.core.jackson-core -->
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
-      <version>2.8.6</version>
+      <version>2.9.6</version>
     </dependency>
     <dependency>
       <!-- bundle: org.mortbay.jetty.server -->
@@ -148,7 +150,7 @@
       <!-- bundle: org.yaml.snakeyaml -->
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>
-      <version>1.21</version>
+      <version>1.29</version>
     </dependency>
     <dependency>
       <!-- bundle: org.glassfish.javax.json -->
@@ -163,7 +165,7 @@
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
-        <version>4.12</version>
+        <version>4.13.1</version>
       </dependency>
       <dependency>
         <groupId>org.mockito</groupId>
@@ -231,13 +233,7 @@
           </filters>
           <environments>
             <environment>
-              <os>linux</os> <ws>gtk</ws> <arch>x86</arch>
-            </environment>
-            <environment>
               <os>linux</os> <ws>gtk</ws> <arch>x86_64</arch>
-            </environment>
-            <environment>
-              <os>win32</os> <ws>win32</ws> <arch>x86</arch>
             </environment>
             <environment>
               <os>win32</os> <ws>win32</ws> <arch>x86_64</arch>
@@ -267,6 +263,25 @@
             pom.xml
           </jgit.ignore>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>enforce-maven</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireMavenVersion>
+                  <version>3.5.0</version>
+                </requireMavenVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
 
@@ -314,6 +329,7 @@
           <configuration>
             <runOrder>hourly</runOrder>
             <forkedProcessTimeoutInSeconds>600</forkedProcessTimeoutInSeconds>
+            <trimStackTrace>false</trimStackTrace>
             <!--
               - maven.artifact.threads=1 to workaround repository corruption seen in
                 https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2284
@@ -323,15 +339,16 @@
             </environmentVariables>
             <argLine>${jacoco.agentArgLine} -Dmaven.artifact.threads=1
               -Dorg.eclipse.swtbot.search.timeout=${org.eclipse.swtbot.search.timeout}
-              -Xms40m -Xmx1G -XX:MaxPermSize=512m
+              -Xms40m -Xmx1G
               -Djava.awt.headless=true
               -Dlogback.configurationFile=platform:/plugin/com.google.cloud.tools.eclipse.test.dependencies/logback.xml
               ${os-jvm-flags}
             </argLine>
             <bundleStartLevel>
+              <!-- use level 3 to ensure we start after other org.eclipse.equinox.* bundles -->
               <bundle>
                  <id>com.google.cloud.tools.eclipse.test.dependencies</id>
-                 <level>1</level>
+                 <level>3</level>
                  <autoStart>true</autoStart>
               </bundle>
            </bundleStartLevel>
@@ -347,7 +364,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-enforcer-plugin</artifactId>
-          <version>1.4.1</version>
+          <version>3.0.0-M3</version>
         </plugin>
 
         <plugin>
@@ -359,7 +376,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.6.1</version>
+          <version>3.8.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -399,74 +416,12 @@
     </profile>
 
     <profile>
-      <id>build-eclipse-neon</id>
+      <!-- Default target if no eclipse.target specified. -->
+      <id>build-eclipse-2018-09</id>
       <activation>
-        <property>
-          <name>eclipse.target</name> <value>neon</value>
-        </property>
-      </activation>
-      <properties>
-         <jettyMinVersion>9.3</jettyMinVersion>
-         <jettyMaxVersion>9.4</jettyMaxVersion>
-      </properties>
-      <!-- build against a known target platform -->
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.eclipse.tycho</groupId>
-            <artifactId>target-platform-configuration</artifactId>
-            <configuration>
-            <target>
-              <artifact>
-                <groupId>com.google.cloud.tools.eclipse</groupId>
-                <artifactId>gcp-eclipse-neon</artifactId>
-                <version>4.6.0-SNAPSHOT</version>
-              </artifact>
-            </target>
-           </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-
-    <profile>
-      <id>build-eclipse-oxygen</id>
-      <activation>
-        <!-- Default target if no eclipse.target specified. -->
         <property>
           <name>!eclipse.target</name>
-          <!-- when no longer the default: <name>eclipse.target</name> <value>oxygen</value> -->
-        </property>
-      </activation>
-      <properties>
-         <jettyMinVersion>9.3</jettyMinVersion>
-         <jettyMaxVersion>9.5</jettyMaxVersion>
-      </properties>
-      <!-- build against a known target platform -->
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.eclipse.tycho</groupId>
-            <artifactId>target-platform-configuration</artifactId>
-            <configuration>
-            <target>
-              <artifact>
-                <groupId>com.google.cloud.tools.eclipse</groupId>
-                <artifactId>gcp-eclipse-oxygen</artifactId>
-                <version>4.7.0-SNAPSHOT</version>
-              </artifact>
-            </target>
-           </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-
-    <profile>
-      <id>build-eclipse-photon</id>
-      <activation>
-        <property>
-          <name>eclipse.target</name> <value>photon</value>
+          <!-- when no longer the default: <name>eclipse.target</name> <value>2018-09</value> -->
         </property>
       </activation>
       <properties>
@@ -474,6 +429,9 @@
          <jettyMaxVersion>9.5</jettyMaxVersion>
       </properties>
       <!-- build against a known target platform -->
+      <modules>
+        <module>eclipse/eclipse-2018-09</module>
+      </modules>
       <build>
         <plugins>
           <plugin>
@@ -483,8 +441,144 @@
             <target>
               <artifact>
                 <groupId>com.google.cloud.tools.eclipse</groupId>
-                <artifactId>gcp-eclipse-photon</artifactId>
-                <version>4.8.0-SNAPSHOT</version>
+                <artifactId>gcp-eclipse-2018-09</artifactId>
+                <version>4.9.0-SNAPSHOT</version>
+              </artifact>
+            </target>
+           </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>build-eclipse-2018-12</id>
+      <activation>
+        <property>
+          <name>eclipse.target</name> <value>2018-12</value>
+        </property>
+      </activation>
+      <properties>
+         <jettyMinVersion>9.4</jettyMinVersion>
+         <jettyMaxVersion>9.5</jettyMaxVersion>
+      </properties>
+      <!-- build against a known target platform -->
+      <modules>
+        <module>eclipse/eclipse-2018-12</module>
+      </modules>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>target-platform-configuration</artifactId>
+            <configuration>
+            <target>
+              <artifact>
+                <groupId>com.google.cloud.tools.eclipse</groupId>
+                <artifactId>gcp-eclipse-2018-12</artifactId>
+                <version>4.10.0-SNAPSHOT</version>
+              </artifact>
+            </target>
+           </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>build-eclipse-2019-09</id>
+      <activation>
+        <property>
+          <name>eclipse.target</name> <value>2019-09</value>
+        </property>
+      </activation>
+      <properties>
+         <jettyMinVersion>9.4</jettyMinVersion>
+         <jettyMaxVersion>9.5</jettyMaxVersion>
+      </properties>
+      <!-- build against a known target platform -->
+      <modules>
+        <module>eclipse/eclipse-2019-09</module>
+      </modules>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>target-platform-configuration</artifactId>
+            <configuration>
+            <target>
+              <artifact>
+                <groupId>com.google.cloud.tools.eclipse</groupId>
+                <artifactId>gcp-eclipse-2019-09</artifactId>
+                <version>4.13.0-SNAPSHOT</version>
+              </artifact>
+            </target>
+           </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>build-eclipse-2019-12</id>
+      <activation>
+        <property>
+          <name>eclipse.target</name> <value>2019-12</value>
+        </property>
+      </activation>
+      <properties>
+         <jettyMinVersion>9.4</jettyMinVersion>
+         <jettyMaxVersion>9.5</jettyMaxVersion>
+      </properties>
+      <!-- build against a known target platform -->
+      <modules>
+        <module>eclipse/eclipse-2019-12</module>
+      </modules>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>target-platform-configuration</artifactId>
+            <configuration>
+            <target>
+              <artifact>
+                <groupId>com.google.cloud.tools.eclipse</groupId>
+                <artifactId>gcp-eclipse-2019-12</artifactId>
+                <version>4.14.0-SNAPSHOT</version>
+              </artifact>
+            </target>
+           </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>build-eclipse-2020-03</id>
+      <activation>
+        <property>
+          <name>eclipse.target</name> <value>2020-03</value>
+        </property>
+      </activation>
+      <properties>
+         <jettyMinVersion>9.4</jettyMinVersion>
+         <jettyMaxVersion>9.5</jettyMaxVersion>
+      </properties>
+      <!-- build against a known target platform -->
+      <modules>
+        <module>eclipse/eclipse-2020-03</module>
+      </modules>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>target-platform-configuration</artifactId>
+            <configuration>
+            <target>
+              <artifact>
+                <groupId>com.google.cloud.tools.eclipse</groupId>
+                <artifactId>gcp-eclipse-2020-03</artifactId>
+                <version>4.15.0-SNAPSHOT</version>
               </artifact>
             </target>
            </configuration>
@@ -498,62 +592,25 @@
       using Maven and Tycho's support for toolchains.
     -->
     <profile>
-       <!-- 
-          We can only use tycho-compiler-plugin's `useJDK=BREE`
-          mode when we're building with our minimum supported Java
-          runtime environment (currently JavaSE-1.9).  `BREE` mode
-          builds each bundle against a JDK that matches its
-          Bundle-RequiredExecutionEnvironment, but results in
-          compile-time resolving errors on Eclipse 4.6/Neon
-          and later which require Java 8.
+       <!--
+          When building with a later JDK (i.e., JDK 11) than our
+          minimum supported platform (`requiredExecutionEnvironment`) then
+          use Tycho's useJDK=BREE mode to compile bundles using their
+          corresponding `Bundle-RequiredExecutionEnvironment` to catch
+          inadvertent use of incompatible language features.  We still
+          run tests with the current JRE to catch any JVM-specificisms.
       -->
-      <id>building-with-minimum-java-runtime-</id>
+      <id>building-with-bree</id>
       <activation>
-        <property><name>toolchain.java.runtime</name><value>JavaSE-1.9</value></property>
+        <jdk>[9,)</jdk> <!-- kept in sync with `requiredExecutionEnvironment` -->
       </activation>
       <properties>
          <tycho.toolchains>BREE</tycho.toolchains>
       </properties>
     </profile>
-    <profile>
-      <!--
-          We use tycho-surefire-plugin's default `useJDK=SYSTEM`
-          mode to run tests using the configured Maven toolchain.  So
-          specifying toolchain.java.runtime=JavaSE-1.9 will lead to test
-          failures should we attempt to load bundles with BREE=JavaSE-1.8
-          or that contains Java 8 code.  Same applies with Java 9.
-      -->
-      <id>testing-with-java-runtime</id>
-      <activation>
-        <property><name>toolchain.java.runtime</name></property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-toolchains-plugin</artifactId>
-            <executions>
-              <execution>
-                <phase>validate</phase>
-                <goals>
-                  <goal>toolchain</goal>
-                </goals>
-              </execution>
-            </executions>
-            <configuration>
-              <toolchains>
-                <jdk>
-                  <id>${toolchain.java.runtime}</id>
-                </jdk>
-              </toolchains>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
 
     <profile>
-      <id>travis</id>
+      <id>ci-build</id>
       <properties>
         <!-- Ensure we don't resolve previous versions of our artifacts -->
         <tycho.localArtifacts>ignore</tycho.localArtifacts>
@@ -603,9 +660,12 @@
       </build>
     </profile>
 
+    <!-- enable error-prone as per http://errorprone.info/docs/installation -->
     <profile>
       <id>errorprone</id>
-      <!-- add separate compilation step using the errorprone compiler -->
+      <activation>
+        <property><name>errorprone</name></property>
+      </activation>
       <build>
         <plugins>
           <plugin>
@@ -620,23 +680,47 @@
               </execution>
             </executions>
             <configuration>
-              <compilerId>javac-with-errorprone</compilerId>
-              <forceJavacCompilerUse>true</forceJavacCompilerUse>
+              <source>8</source>
+              <target>8</target>
+              <compilerArgs>
+                <arg>-XDcompilePolicy=simple</arg>
+                <arg>-Xplugin:ErrorProne</arg>
+              </compilerArgs>
+              <annotationProcessorPaths>
+                <path>
+                  <groupId>com.google.errorprone</groupId>
+                  <artifactId>error_prone_core</artifactId>
+                  <version>2.3.4</version>
+                </path>
+              </annotationProcessorPaths>
             </configuration>
-            <dependencies>
-              <dependency>
-                <groupId>org.codehaus.plexus</groupId>
-                <artifactId>plexus-compiler-javac-errorprone</artifactId>
-                <version>2.8.1</version>
-              </dependency>
-              <!-- override plexus-compiler-javac-errorprone's dependency on
-                 Error Prone with the latest version -->
-              <dependency>
-                <groupId>com.google.errorprone</groupId>
-                <artifactId>error_prone_core</artifactId>
-                <version>2.0.15</version>
-              </dependency>
-            </dependencies>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>errorprone-jdk8</id>
+      <activation>
+        <property><name>errorprone</name></property>
+        <jdk>1.8</jdk>
+      </activation>
+      <properties>
+        <!-- unclear how this magic version number should be determined
+           https://github.com/google/error-prone/blob/master/examples/maven/pom.xml#L28 -->
+        <javac.version>9+181-r4173-1</javac.version>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+              <fork>true</fork>
+              <compilerArgs combine.children="append">
+                <arg>-J-Xbootclasspath/p:${settings.localRepository}/com/google/errorprone/javac/${javac.version}/javac-${javac.version}.jar</arg>
+                <arg>-version</arg>
+              </compilerArgs>
+            </configuration>
           </plugin>
         </plugins>
       </build>
@@ -656,6 +740,4 @@
       </snapshots>
     </repository>
   </repositories>
-<pluginRepositories>
-</pluginRepositories>
 </project>

@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
@@ -55,7 +56,11 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
@@ -138,13 +143,21 @@ public class PipelineArgumentsTabTest {
     // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/3048
     @Test
     public void testValidatePage_doesNotClearErrorSetByChildren() {
-      Text serviceAccountKey = CompositeUtil.findControlAfterLabel(shellResource.getShell(),
-          Text.class, "Service account key:");
-      serviceAccountKey.setText("/non/existing/file");
-      assertEquals("/non/existing/file does not exist.", pipelineArgumentsTab.getErrorMessage());
+      String errorMessage;
+      Combo emailKey =
+          CompositeUtil.findControlAfterLabel(shellResource.getShell(), Combo.class, "&Account:");
+      if (emailKey.getText().isEmpty()) {
+        errorMessage = "No Google account selected for this launch.";
+      } else {
+        Text serviceAccountKey = CompositeUtil.findControlAfterLabel(shellResource.getShell(),
+            Text.class, "Service account key:");
+        serviceAccountKey.setText("/non/existing/file");
+        errorMessage = "/non/existing/file does not exist.";
+      }
+      assertEquals(errorMessage, pipelineArgumentsTab.getErrorMessage());
 
       pipelineArgumentsTab.isValid(configuration1);
-      assertEquals("/non/existing/file does not exist.", pipelineArgumentsTab.getErrorMessage());
+      assertEquals(errorMessage, pipelineArgumentsTab.getErrorMessage());
     }
 
     @Test
@@ -299,7 +312,11 @@ public class PipelineArgumentsTabTest {
       Shell shell = shellResource.getShell();
       PipelineArgumentsTab tab = new PipelineArgumentsTab();
       tab.setLaunchConfigurationDialog(dialog);
-      tab.createControl(shell);
+      ScrolledComposite scrolledComposite =
+          new ScrolledComposite(shellResource.getShell(), SWT.V_SCROLL | SWT.H_SCROLL);
+      scrolledComposite.setExpandHorizontal(true);
+      scrolledComposite.setExpandVertical(true);
+      tab.createControl(scrolledComposite);
 
       PipelineLaunchConfiguration launchConfig = PipelineLaunchConfiguration
           .fromLaunchConfiguration(testParameter.majorVersion, mock(ILaunchConfiguration.class));
@@ -312,6 +329,24 @@ public class PipelineArgumentsTabTest {
       // Should not throw IllegalStateException:
       // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2136
       tab.getSelectedRunner();
+      testScrollbar(tab);
+    }
+
+    public void testScrollbar(PipelineArgumentsTab pipelineArgumentsTab) {
+      Composite composite = pipelineArgumentsTab.internalComposite;
+      assertNotNull(composite);
+      Composite parent = pipelineArgumentsTab.internalComposite.getParent();
+      if (parent instanceof ScrolledComposite) {
+        pipelineArgumentsTab.handleLayoutChange();
+        Point compositeSize = composite.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+        ScrolledComposite scrollComposite = (ScrolledComposite) parent;
+        Point scrollSize = new Point(scrollComposite.getMinWidth(), scrollComposite.getMinHeight());
+        if (compositeSize.equals(scrollSize)) {
+          return;
+        }
+        fail("Scrollbar is not working");
+      }
+      fail("Did not find the Scroll composite");
     }
 
     private static Button getCheckedRunnerButton(Composite composite) {

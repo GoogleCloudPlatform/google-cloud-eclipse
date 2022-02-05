@@ -9,17 +9,16 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
 Export-Package: com.google.cloud.tools.eclipse.usagetracker
-Require-Bundle: org.eclipse.core.runtime;bundle-version="3.11.1",
+Require-Bundle: com.google.gson;bundle-version="[2.8.2,3.0)",
+ org.eclipse.core.runtime;bundle-version="3.11.1",
  org.eclipse.jface,
  org.eclipse.ui.workbench
-Import-Package: com.google.api.client.http;version="[1.23.0,1.24.0)",
- com.google.api.client.http.javanet;version="[1.23.0,1.24.0)",
- com.google.cloud.tools.eclipse.preferences,
+Import-Package: com.google.cloud.tools.eclipse.preferences,
  com.google.cloud.tools.eclipse.preferences.areas,
  com.google.cloud.tools.eclipse.ui.util.event,
  com.google.cloud.tools.eclipse.util,
- com.google.common.annotations;version="[21.0.0,22.0.0)",
- com.google.common.base;version="[21.0.0,22.0.0)",
- com.google.common.collect;version="[21.0.0,22.0.0)",
- com.google.common.escape;version="[21.0.0,22.0.0)",
- com.google.common.net;version="[21.0.0,22.0.0)"
+ com.google.common.annotations;version="[30.0.0,31.0.0)",
+ com.google.common.base;version="[30.0.0,31.0.0)",
+ com.google.common.collect;version="[30.0.0,31.0.0)",
+ com.google.common.escape;version="[30.0.0,31.0.0)",
+ com.google.common.net;version="[30.0.0,31.0.0)"

@@ -19,8 +19,10 @@ package com.google.cloud.tools.eclipse.appengine.facets.ui.navigator;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexJarFacet;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexWarFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineStandardProjectElement;
+import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineProjectElement;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.CronDescriptor;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.DatastoreIndexesDescriptor;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.DenialOfServiceDescriptor;
@@ -95,6 +97,37 @@ public class PluginXmlTest extends BasePluginXmlTest {
   }
 
   @Test
+  public void testNavigatorContentTriggerExpression_appEngineFlexibleWarJavaProject()
+      throws CoreException {
+    Element triggerPoints =
+        findElement(
+            "//plugin/extension[@point='org.eclipse.ui.navigator.navigatorContent']"
+                + "/navigatorContent[@id='com.google.cloud.tools.eclipse.appengine.navigator']"
+                + "/triggerPoints/*");
+    Expression triggerExpression = checkExpression(triggerPoints);
+    projectCreator.withFacets(
+        AppEngineFlexWarFacet.FACET_VERSION, JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31);
+    assertEquals(
+        EvaluationResult.TRUE,
+        triggerExpression.evaluate(new EvaluationContext(null, projectCreator.getProject())));
+  }
+
+  @Test
+  public void testNavigatorContentTriggerExpression_appEngineFlexibleJarJavaProject()
+      throws CoreException {
+    Element triggerPoints =
+        findElement(
+            "//plugin/extension[@point='org.eclipse.ui.navigator.navigatorContent']"
+                + "/navigatorContent[@id='com.google.cloud.tools.eclipse.appengine.navigator']"
+                + "/triggerPoints/*");
+    Expression triggerExpression = checkExpression(triggerPoints);
+    projectCreator.withFacets(AppEngineFlexJarFacet.FACET_VERSION, JavaFacet.VERSION_1_8);
+    assertEquals(
+        EvaluationResult.TRUE,
+        triggerExpression.evaluate(new EvaluationContext(null, projectCreator.getProject())));
+  }
+
+  @Test
   public void testNavigatorContentActionProvider() throws CoreException {
     Element actionProvider =
         findElement(
@@ -110,7 +143,7 @@ public class PluginXmlTest extends BasePluginXmlTest {
     assertEquals(
         EvaluationResult.TRUE,
         enablementExpression.evaluate(
-            new EvaluationContext(null, mock(AppEngineStandardProjectElement.class))));
+            new EvaluationContext(null, mock(AppEngineProjectElement.class))));
     assertEquals(
         EvaluationResult.TRUE,
         enablementExpression.evaluate(new EvaluationContext(null, mock(CronDescriptor.class))));

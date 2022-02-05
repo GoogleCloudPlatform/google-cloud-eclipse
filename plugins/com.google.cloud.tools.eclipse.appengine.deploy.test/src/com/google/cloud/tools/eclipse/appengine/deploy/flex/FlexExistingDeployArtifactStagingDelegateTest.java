@@ -21,6 +21,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import com.google.common.base.Charsets;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import org.eclipse.core.resources.IFile;
@@ -51,7 +52,10 @@ public class FlexExistingDeployArtifactStagingDelegateTest {
 
     IFolder appEngineFolder = project.getFolder("appEngineDirectory");
     appEngineFolder.create(true, true, null);
-    appEngineFolder.getFile("app.yaml").create(new ByteArrayInputStream(new byte[0]), true, null);
+    String appYaml = "runtime: java\n" + 
+        "env: flex\n";
+    appEngineFolder.getFile("app.yaml")
+        .create(new ByteArrayInputStream(appYaml.getBytes(Charsets.UTF_8)), true, null);
     appEngineDirectory = appEngineFolder.getLocation();
 
   }
@@ -64,9 +68,9 @@ public class FlexExistingDeployArtifactStagingDelegateTest {
         deployArtifact, appEngineDirectory);
     IStatus status = delegate.stage(stagingDirectory, null, null, null, null);
 
+    assertTrue(status.toString(), status.isOK());
     assertTrue(stagingDirectory.append("not-in-workspace.war").toFile().exists());
     assertTrue(stagingDirectory.append("app.yaml").toFile().exists());
-    assertTrue(status.isOK());
   }
 
   @Test
@@ -77,9 +81,9 @@ public class FlexExistingDeployArtifactStagingDelegateTest {
         deployArtifact, appEngineDirectory);
     IStatus status = delegate.stage(stagingDirectory, null, null, null, null);
 
+    assertTrue(status.toString(), status.isOK());
     assertTrue(stagingDirectory.append("in-workspace.war").toFile().exists());
     assertTrue(stagingDirectory.append("app.yaml").toFile().exists());
-    assertTrue(status.isOK());
   }
 
   @Test

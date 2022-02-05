@@ -277,21 +277,21 @@ public abstract class BasePluginXmlTest {
   @Test
   public final void testGuavaImportVersions() throws IOException {
     checkDependencyDirectives(
-        "Import-Package", "com.google.common.", "version=\"[21.0.0,22.0.0)\"");
+        "Import-Package", "com.google.common.", "version=\"[30.0.0,31.0.0)\"");
     checkDependencyDirectives(
-        "Require-Bundle", "com.google.guava", "bundle-version=\"[21.0.0,22.0.0)\"");
+        "Require-Bundle", "com.google.guava", "bundle-version=\"[30.0.0,31.0.0)\"");
   }
 
   @Test
   public final void testGoogleApisImportVersions() throws IOException {
     checkDependencyDirectives(
-        "Import-Package", "com.google.api.", "version=\"[1.23.0,1.24.0)\"");
+        "Import-Package", "com.google.api.", "version=\"[1.25.0,1.26.0)\"");
   }
 
   @Test
   public final void testGoogleApisExportVersions() throws IOException {
     checkDependencyDirectives(
-        "Export-Package", "com.google.api.", "version=\"1.23.0\"");
+        "Export-Package", "com.google.api.", "version=\"1.25.0\"");
   }
 
   private void checkDependencyDirectives(

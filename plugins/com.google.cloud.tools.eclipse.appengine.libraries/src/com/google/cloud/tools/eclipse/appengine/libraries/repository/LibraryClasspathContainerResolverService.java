@@ -110,7 +110,7 @@ public class LibraryClasspathContainerResolverService
     ISchedulingRule currentRule = Job.getJobManager().currentRule();
     Preconditions.checkState(
         currentRule == null || currentRule.contains(getSchedulingRule()),
-        "current scheduling rule is insufficient");
+        "current scheduling rule is insufficient: " + currentRule);
 
     LinkedHashSet<IClasspathEntry> resolvedEntries = new LinkedHashSet<>();
     for (String libraryId : libraryIds) {
@@ -267,14 +267,8 @@ public class LibraryClasspathContainerResolverService
 
     // Not all artifacts have sources; need to work if no source artifact is available
     // e.g. appengine-api-sdk doesn't
-    IPath sourceAttachmentPath = null;
-    try {
-      sourceAttachmentPath =
-          repositoryService.resolveSourceArtifact(
-              libraryFile, artifact.getVersion(), new NullProgressMonitor());
-    } catch (CoreException ex) {
-      // continue without source
-    }
+    IPath sourceAttachmentPath = repositoryService.resolveSourceArtifact(
+        libraryFile, artifact.getVersion(), new NullProgressMonitor());
 
     IClasspathEntry newLibraryEntry =
         JavaCore.newLibraryEntry(

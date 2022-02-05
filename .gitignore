@@ -10,3 +10,5 @@ plugins/.settings
 features/.settings
 third_party/.settings
 RemoteSystemsTempFiles/
+features/.project
+third_party/.project

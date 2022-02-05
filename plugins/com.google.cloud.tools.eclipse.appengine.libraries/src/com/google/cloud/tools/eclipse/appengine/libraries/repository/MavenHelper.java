@@ -54,14 +54,14 @@ public class MavenHelper {
   private static List<ArtifactRepository> getRepository(MavenCoordinates mavenCoordinates)
       throws CoreException {
     if (MavenCoordinates.MAVEN_CENTRAL_REPO.equals(mavenCoordinates.getRepository())) {
-      // M2Eclipse will use the Maven Central repo in case null is used
+      // M2Eclipse uses the Maven Central repo if the repsoitory list is null
       return null;
     } else {
-      return Collections.singletonList(getCustomRepository(mavenCoordinates.getRepository()));
+      return Collections.singletonList(makeRepository(mavenCoordinates.getRepository()));
     }
   }
 
-  private static ArtifactRepository getCustomRepository(String repository) throws CoreException {
+  private static ArtifactRepository makeRepository(String repository) throws CoreException {
     try {
       URI repoUri = new URI(repository);
       if (!repoUri.isAbsolute()) {
@@ -80,7 +80,8 @@ public class MavenHelper {
   }
 
   /**
-   * Returns the folder to which the file described by <code>artifact</code> should be downloaded.
+   * Returns the folder to which the file described by <code>mavenCoordinates</code>
+   * should be downloaded.
    *
    * <p>The folder is created as follows: <code>
    * &lt;bundle_state_location&gt;/downloads/&lt;groupId&gt;/&lt;artifactId&gt;/&lt;version&gt;
@@ -91,7 +92,7 @@ public class MavenHelper {
    *
    * @return the location of the download folder, may not exist
    */
-  public static IPath bundleStateBasedMavenFolder(MavenCoordinates mavenCoordinates) {
+  static IPath bundleStateBasedMavenFolder(MavenCoordinates mavenCoordinates) {
     Preconditions.checkArgument(
         !mavenCoordinates.getVersion().equals(MavenCoordinates.LATEST_VERSION));
     File downloadedSources =

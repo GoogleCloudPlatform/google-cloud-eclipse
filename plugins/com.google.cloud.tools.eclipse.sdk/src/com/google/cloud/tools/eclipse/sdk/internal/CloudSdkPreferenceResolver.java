@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.sdk.internal;
 
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkResolver;
+import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkResolver;
 import com.google.cloud.tools.managedcloudsdk.ManagedCloudSdk;
 import com.google.cloud.tools.managedcloudsdk.UnsupportedOsException;
 import com.google.common.annotations.VisibleForTesting;

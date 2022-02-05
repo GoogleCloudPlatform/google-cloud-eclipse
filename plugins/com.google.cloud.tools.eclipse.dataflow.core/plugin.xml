@@ -19,7 +19,7 @@
   <extension
       point="org.eclipse.core.resources.natures"
       id="com.google.cloud.dataflow.DataflowJavaProjectNature"
-      name="Cloud Dataflow Nature">
+      name="%extension.name">
     <runtime>
       <run class="com.google.cloud.tools.eclipse.dataflow.core.natures.DataflowJavaProjectNature">
       </run>
@@ -57,10 +57,10 @@
       point="org.eclipse.debug.core.launchConfigurationTypes">
     <launchConfigurationType
           delegate="com.google.cloud.tools.eclipse.dataflow.core.launcher.DataflowPipelineLaunchDelegate"
-          delegateName="Dataflow Pipeline Launcher"
+          delegateName="%launchConfigurationType.delegateName"
           id="com.google.cloud.dataflow.DataflowPipeline"
           modes="run,debug"
-          name="Dataflow Pipeline"
+          name="%launchConfigurationType.name"
           public="true"
           sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
           sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer">

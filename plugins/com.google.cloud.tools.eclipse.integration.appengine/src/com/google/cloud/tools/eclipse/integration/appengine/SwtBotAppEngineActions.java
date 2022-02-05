@@ -93,10 +93,10 @@ public class SwtBotAppEngineActions {
       bot.textWithLabel("Java package:").setText(javaPackage);
     }
     if (runtime != null) {
-      if (runtime == AppEngineRuntime.STANDARD_JAVA_7) {
-        bot.comboBoxWithLabel("Java version:").setSelection("Java 7, Servlet 2.5 (deprecated)");
-      } else if (runtime == AppEngineRuntime.STANDARD_JAVA_8) {
+      if (runtime == AppEngineRuntime.STANDARD_JAVA_8) {
         bot.comboBoxWithLabel("Java version:").setSelection("Java 8, Servlet 3.1");
+      } else if (runtime == AppEngineRuntime.STANDARD_JAVA_8_SERVLET_25) {
+        bot.comboBoxWithLabel("Java version:").setSelection("Java 8, Servlet 2.5");
       } else {
         Assert.fail("Runtime not handled: " + runtime);
       }
@@ -191,7 +191,7 @@ public class SwtBotAppEngineActions {
   }
 
   /**
-   * Spin until the given project actually exists and is facetd.
+   * Spin until the given project actually exists and is faceted.
    *
    * @return the project
    */

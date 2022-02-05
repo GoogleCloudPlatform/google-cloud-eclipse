@@ -16,8 +16,8 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
-import com.google.cloud.tools.appengine.api.AppEngineException;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.AppEngineException;
+import com.google.cloud.tools.appengine.operations.CloudSdk;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPreferenceArea;
 import org.eclipse.jface.preference.PreferenceDialog;

@@ -16,8 +16,8 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
-import com.google.cloud.tools.appengine.cloudsdk.JsonParseException;
-import com.google.cloud.tools.appengine.cloudsdk.serialization.AppEngineDeployResult;
+import com.google.cloud.tools.appengine.operations.cloudsdk.JsonParseException;
+import com.google.cloud.tools.appengine.operations.cloudsdk.serialization.AppEngineDeployResult;
 import org.junit.Assert;
 import org.junit.Test;
 

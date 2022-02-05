@@ -17,7 +17,9 @@
 package com.google.cloud.tools.eclipse.welcome;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
+import com.google.common.base.Strings;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -27,20 +29,44 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.junit.Test;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class ContentXmlTest {
 
   @Test
   public void testWellFormed() throws ParserConfigurationException, IOException, SAXException {
+    Document document = parseDocument("intro/cloud-tools-for-eclipse.xml");
+    assertEquals(4, document.getElementsByTagName("extensionContent").getLength());
+  }
+
+  @Test
+  public void testContributionsHaveId()
+      throws ParserConfigurationException, IOException, SAXException {
+    Document document = parseDocument("intro/cloud-tools-for-eclipse.xml");
+    NodeList contributions = document.getElementsByTagName("extensionContent");
+    for (int i = 0 ; i < contributions.getLength(); i++) {
+      Element contribution = (Element) contributions.item(i);
+      assertEquals("extensionContent", contribution.getNodeName());
+      assertFalse(Strings.isNullOrEmpty(contribution.getAttribute("id")));
+      assertFalse(Strings.isNullOrEmpty(contribution.getAttribute("name")));
+      assertFalse(Strings.isNullOrEmpty(contribution.getAttribute("path")));
+      assertFalse(Strings.isNullOrEmpty(contribution.getAttribute("style")));
+    }
+  }
+
+  /** Parse the XML document within the plugin-under-test. */
+  private Document parseDocument(String filePath)
+      throws ParserConfigurationException, IOException, SAXException {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     factory.setNamespaceAware(true);
     DocumentBuilder builder = factory.newDocumentBuilder();
 
-    try (InputStream contentXml = Files.newInputStream(Paths.get(
-        "../com.google.cloud.tools.eclipse.welcome/intro/cloud-tools-for-eclipse.xml"))) {
+    try (InputStream contentXml =
+        Files.newInputStream(Paths.get("../com.google.cloud.tools.eclipse.welcome/" + filePath))) {
       Document document = builder.parse(contentXml);
-      assertEquals(4, document.getElementsByTagName("extensionContent").getLength());
+      return document;
     }
   }
 }

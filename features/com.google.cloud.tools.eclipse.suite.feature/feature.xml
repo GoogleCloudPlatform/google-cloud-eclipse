@@ -2,7 +2,7 @@
 <feature
       id="com.google.cloud.tools.eclipse.suite.feature"
       label="Google Cloud Platform for Eclipse"
-      version="1.7.0.qualifier"
+      version="1.8.5.qualifier"
       provider-name="Google LLC"
       plugin="com.google.cloud.tools.eclipse.ui"
       license-feature="com.google.licenses.apache_v2">
@@ -188,14 +188,6 @@
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="com.google.cloud.tools.eclipse.jdt.launching"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
          unpack="false"/>
 
    <plugin

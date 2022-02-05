@@ -17,17 +17,15 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
 import com.google.api.client.util.Preconditions;
-import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineConfigurationUtil;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.appengine.localserver.server.DatastoreIndexUpdateData;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.compare.BufferedContent;
@@ -123,13 +121,11 @@ public class DatastoreIndexesUpdatedStatusHandler implements IStatusHandler {
   /** Create a new empty {@code datastore-indexes.xml} for the given project. */
   private IFile createNewDatastoreIndexesXml(IProject project, IProgressMonitor monitor)
       throws CoreException {
-    InputStream contents =
-        new ByteArrayInputStream(EMPTY_DATASTORE_INDEXES_XML.getBytes(StandardCharsets.UTF_8));
     IFile datastoreIndexesXml =
-        WebProjectUtil.createFileInWebInf(
+        AppEngineConfigurationUtil.createConfigurationFile(
             project,
-            new Path("datastore-indexes.xml"), //$NON-NLS-1$
-            contents,
+            new Path("datastore-indexes.xml"), // $NON-NLS-1$
+            EMPTY_DATASTORE_INDEXES_XML,
             false /* overwrite */,
             monitor);
     return datastoreIndexesXml;

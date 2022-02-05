@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,14 +32,15 @@ public class AppEngineProjectConfig {
   private URI eclipseProjectLocationUri = null;
   private String packageName = "";
   private IProject project;
-  private List<Library> appEngineLibraries = Collections.emptyList();
+  private List<Library> libraries = Collections.emptyList();
   private String serviceName;
-  private String runtimeId;
+  private AppEngineRuntime runtime;
 
   private boolean useMaven;
   private String mavenGroupId;
   private String mavenArtifactId;
   private String mavenVersion;
+  private String entryPoint;
 
   void setPackageName(String name) {
     packageName = name;
@@ -67,12 +69,12 @@ public class AppEngineProjectConfig {
     eclipseProjectLocationUri = uri;
   }
 
-  List<Library> getAppEngineLibraries() {
-    return appEngineLibraries;
+  List<Library> getLibraries() {
+    return new ArrayList<>(libraries);
   }
 
-  public void setAppEngineLibraries(Collection<Library> libraries) {
-    appEngineLibraries = new ArrayList<>(libraries);
+  public void setLibraries(Collection<Library> libraries) {
+    this.libraries = new ArrayList<>(libraries);
   }
 
   String getServiceName() {
@@ -83,12 +85,12 @@ public class AppEngineProjectConfig {
     this.serviceName = serviceName;
   }
 
-  String getRuntimeId() {
-    return runtimeId;
+  AppEngineRuntime getRuntime() {
+    return runtime;
   }
 
-  void setRuntimeId(String runtimeId) {
-    this.runtimeId = runtimeId;
+  void setRuntime(AppEngineRuntime runtime) {
+    this.runtime = runtime;
   }
 
   void setUseMaven(String mavenGroupId, String mavenArtifactId, String mavenVersion) {
@@ -112,5 +114,13 @@ public class AppEngineProjectConfig {
 
   String getMavenVersion() {
     return mavenVersion;
+  }
+
+  void setEntryPoint(String entryPoint) {
+    this.entryPoint = entryPoint;
+  }
+
+  String getEntryPoint() {
+    return entryPoint;
   }
 }

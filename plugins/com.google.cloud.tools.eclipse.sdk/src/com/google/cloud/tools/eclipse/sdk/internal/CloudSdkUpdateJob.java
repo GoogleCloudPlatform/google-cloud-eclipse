@@ -16,8 +16,8 @@
 
 package com.google.cloud.tools.eclipse.sdk.internal;
 
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkVersionFileException;
+import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkNotFoundException;
+import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkVersionFileException;
 import com.google.cloud.tools.eclipse.sdk.MessageConsoleWriterListener;
 import com.google.cloud.tools.eclipse.sdk.Messages;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;

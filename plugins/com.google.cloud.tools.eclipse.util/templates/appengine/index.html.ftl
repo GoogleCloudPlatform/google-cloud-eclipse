@@ -7,7 +7,7 @@
 
   <body>
     <h1>Hello App Engine!</h1>
-  
+
     <table>
       <tr>
         <td colspan="2" style="font-weight:bold;">Available Servlets:</td>        

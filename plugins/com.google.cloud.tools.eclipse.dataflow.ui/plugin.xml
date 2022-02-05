@@ -103,41 +103,41 @@
     <command
         id="com.google.cloud.tools.eclipse.dataflow.ui.launcher.launchPipelineShortcut.run"
         categoryId="org.eclipse.debug.ui.category.run"
-        name="Dataflow Pipeline">
+        name="%shortcut.label">
     </command>
     <command
         id="com.google.cloud.tools.eclipse.dataflow.ui.launcher.launchPipelineShortcut.debug"
         categoryId="org.eclipse.debug.ui.category.run"
-        name="Dataflow Pipeline">
+        name="%shortcut.label">
     </command>
     <category id="com.google.cloud.tools.eclipse.dataflow.ui.menuCommands"
-        name="Dataflow">
+        name="%category.name">
     </category>
     <!-- Add the dataflow nature to the currently selected project -->
     <command
         id="com.google.cloud.tools.eclipse.dataflow.ui.dataflowNature.add"
-        name="Enable Dataflow Nature"
+        name="%command.enable.dataflow"
         categoryId="com.google.cloud.tools.eclipse.dataflow.ui.menuCommands">
     </command>
     <!-- Remove the dataflow nature from the currently selected project -->
     <command
         id="com.google.cloud.tools.eclipse.dataflow.ui.dataflowNature.remove"
-        name="Disable Dataflow Nature"
+        name="%command.disable.dataflow"
         categoryId="com.google.cloud.tools.eclipse.dataflow.ui.menuCommands">
     </command>
     <command
         id="com.google.cloud.tools.eclipse.dataflow.ui.dataflowVersion.pin"
-        name="Pin Dataflow Version"
+        name="%command.pin.dataflow"
         categoryId="com.google.cloud.tools.eclipse.dataflow.ui.menuCommands">
     </command>
     <command
         id="com.google.cloud.tools.eclipse.dataflow.ui.dataflowVersion.track"
-        name="Track Latest Dataflow Version"
+        name="%command.track.dataflow"
         categoryId="com.google.cloud.tools.eclipse.dataflow.ui.menuCommands">
     </command>
     <command
         id="com.google.cloud.tools.eclipse.dataflow.ui.dataflowVersion.update"
-        name="Update Dataflow Version"
+        name="%command.update.dataflow"
         categoryId="com.google.cloud.tools.eclipse.dataflow.ui.menuCommands">
     </command>
   </extension>
@@ -180,7 +180,7 @@
           class="com.google.cloud.tools.eclipse.dataflow.ui.launcher.LaunchPipelineShortcut"
           icon="icons/Dataflow_16.png"
           id="com.google.cloud.tools.eclipse.dataflow.ui.launcher.launchPipelineShortcut"
-          label="Dataflow Pipeline"
+          label="%shortcut.label"
           modes="run,debug">
       <contextualLaunch>
         <enablement>
@@ -204,22 +204,22 @@
          allPopups="true"
          locationURI="popup:org.eclipse.ui.popup.any">
        <menu id="com.google.cloud.tools.eclipse.dataflow.ui.dataflowMenu"
-           label="Dataflow"
-           mnemonic="D">
+           label="%menu.label"
+           mnemonic="%menu.mnemonic">
          <separator
              name="com.google.cloud.tools.eclipse.dataflow.ui.separator0"
              visible="true">
          </separator>
          <command commandId="com.google.cloud.tools.eclipse.dataflow.ui.dataflowNature.add"
-             label="Enable Dataflow Nature"
-             tooltip="Enables the Dataflow Java Project Nature for this Project">
+             label="%command.enable.dataflow"
+             tooltip="%command.enable.dataflow.tooltip">
            <visibleWhen>
              <reference definitionId="com.google.cloud.tools.eclipse.dataflow.ui.isNonDataflowProjectSelected" />
            </visibleWhen>
          </command>
          <command commandId="com.google.cloud.tools.eclipse.dataflow.ui.dataflowNature.remove"
-             label="Disable Dataflow Nature"
-             tooltip="Disables the Dataflow Java Project Nature for this Project">
+             label="%command.disable.dataflow"
+             tooltip="%command.disable.dataflow.tooltip">
            <visibleWhen>
              <reference definitionId="com.google.cloud.tools.eclipse.dataflow.ui.isDataflowProjectSelected" />
            </visibleWhen>
@@ -229,22 +229,22 @@
              visible="true">
          </separator>
          <command commandId="com.google.cloud.tools.eclipse.dataflow.ui.dataflowVersion.pin"
-             label="Pin Dataflow Version"
-             tooltip="Pin the Dataflow Version for this Project to the Current Latest Version">
+             label="%command.pin.dataflow"
+             tooltip="%command.pin.dataflow.tooltip">
            <visibleWhen>
              <reference definitionId="com.google.cloud.tools.eclipse.dataflow.ui.tracksDataflowVersion" />
            </visibleWhen>
          </command>
          <command commandId="com.google.cloud.tools.eclipse.dataflow.ui.dataflowVersion.track"
-             label="Track Dataflow Version"
-             tooltip="Tracks the Latest Dataflow Version in this Project">
+             label="%command.track.dataflow"
+             tooltip="%command.track.dataflow.tooltip">
            <visibleWhen>
              <reference definitionId="com.google.cloud.tools.eclipse.dataflow.ui.pinnedDataflowVersion" />
            </visibleWhen>
          </command>
          <command commandId="com.google.cloud.tools.eclipse.dataflow.ui.dataflowVersion.update"
-             label="Update Dataflow Version"
-             tooltip="Update the Dataflow Version in this Project to the Latest Version">
+             label="%command.update.dataflow"
+             tooltip="%command.update.dataflow.tooltip">
            <visibleWhen>
              <reference definitionId="com.google.cloud.tools.eclipse.dataflow.ui.pinnedDataflowVersion" />
            </visibleWhen>
@@ -269,7 +269,7 @@
 
    <extension point="org.eclipse.ui.preferencePages">
      <page id="com.google.cloud.tools.eclipse.dataflow.ui.defaultRunOptions"
-         name="Cloud Dataflow"
+         name="%page.name"
          category="com.google.cloud.tools.eclipse.preferences.main"
          class="com.google.cloud.tools.eclipse.dataflow.ui.preferences.DefaultRunOptionsPage">
      </page>
@@ -277,7 +277,7 @@
 
    <extension point="org.eclipse.ui.propertyPages">
      <page id="com.google.cloud.tools.eclipse.dataflow.ui.defaultRunOptionsProperties"
-         name="Cloud Dataflow"
+         name="%page.name"
          category="com.google.cloud.tools.eclipse"
          class="com.google.cloud.tools.eclipse.dataflow.ui.preferences.DefaultRunOptionsPage">
        <enabledWhen>
@@ -294,4 +294,16 @@
     <extension point="org.eclipse.help.contexts">
        <contexts file="helpContexts.xml" />
     </extension>
- </plugin>
+	
+  <extension point="org.eclipse.ui.perspectiveExtensions">
+    <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
+      <newWizardShortcut id="com.google.cloud.tools.eclipse.dataflow.ui.wizard.NewDataflowProjectWizard" />
+    </perspectiveExtension>
+    <perspectiveExtension targetID="org.eclipse.jst.j2ee.J2EEPerspective">
+      <newWizardShortcut id="com.google.cloud.tools.eclipse.dataflow.ui.wizard.NewDataflowProjectWizard" />
+    </perspectiveExtension>
+    <perspectiveExtension targetID="org.eclipse.wst.web.ui.webDevPerspective">
+      <newWizardShortcut id="com.google.cloud.tools.eclipse.dataflow.ui.wizard.NewDataflowProjectWizard" />
+    </perspectiveExtension>
+  </extension>
+</plugin>

@@ -66,7 +66,6 @@ public class AccountsPanel extends PopupDialog {
     this.imageLoader = imageLoader;
   }
 
-
   @Override
   protected Color getBackground() {
     return getShell().getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND);
@@ -113,12 +112,29 @@ public class AccountsPanel extends PopupDialog {
 
       if (account.getAvatarUrl() != null) {
         try {
-          imageLoader.loadImage(account.getAvatarUrl() + "?sz=" + avatarSize, avatar);
+          String url = resizedImageUrl(account.getAvatarUrl(), avatarSize);
+          imageLoader.loadImage(url, avatar);
         } catch (MalformedURLException ex) {
           logger.log(Level.WARNING, "malformed avatar image URL", ex);
         }
       }
     }
+  }
+
+  /**
+   * Apply a resize directive to an Google avatar URL, replacing any previous resize directives.
+   *
+   * @param avatarUrl the URL
+   * @param avatarSize the desired image size
+   * @return an amended URL
+   */
+  @VisibleForTesting
+  static String resizedImageUrl(String avatarUrl, int avatarSize) {
+    int index = avatarUrl.lastIndexOf('=');
+    if (index > 0) {
+      avatarUrl = avatarUrl.substring(0, index);
+    }
+    return avatarUrl + "=s" + avatarSize;
   }
 
   private void createButtons(Composite container) {

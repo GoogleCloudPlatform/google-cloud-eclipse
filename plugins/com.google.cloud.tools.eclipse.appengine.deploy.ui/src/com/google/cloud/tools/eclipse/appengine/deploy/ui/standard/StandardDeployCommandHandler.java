@@ -22,12 +22,15 @@ import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardStagingD
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployCommandHandler;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesDialog;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.util.jdt.JreDetector;
 import java.nio.file.Path;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
@@ -38,8 +41,11 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 public class StandardDeployCommandHandler extends DeployCommandHandler {
+  private static final Logger logger = Logger.getLogger(StandardDeployCommandHandler.class.getName());
 
   public StandardDeployCommandHandler() {
     super(AnalyticsEvents.APP_ENGINE_DEPLOY_STANDARD);
@@ -47,6 +53,29 @@ public class StandardDeployCommandHandler extends DeployCommandHandler {
 
   @Override
   protected boolean checkProject(Shell shell, IProject project) throws CoreException {
+    return checkJspConfiguration(shell, project)
+        && checkAppEngineRuntimeCompatibility(shell, project);
+  }
+
+  private boolean checkAppEngineRuntimeCompatibility(Shell shell, IProject project) {
+    try {
+      IFacetedProject facetedProject = ProjectFacetsManager.create(project);
+      if (facetedProject == null) {
+        return false;
+      }
+
+      if (AppEngineStandardFacet.usesObsoleteRuntime(facetedProject)) {
+        String message = Messages.getString("obsolete.runtime.message", project.getName());
+        MessageDialog.openError(shell, Messages.getString("obsolete.runtime.title"), message);
+        return false;
+      }
+    } catch(CoreException ex) {
+      logger.log(Level.WARNING, "Unable to check project use of obsolete App Engine runtime", ex);
+    }
+    return true;
+  }
+
+  protected boolean checkJspConfiguration(Shell shell, IProject project) throws CoreException {
     // If we have JSPs, ensure the project is configured with a JDK: required by staging
     // which precompiles the JSPs.  We could try to find a compatible JDK, but there's
     // a possibility that we select an inappropriate one and introduce problems.

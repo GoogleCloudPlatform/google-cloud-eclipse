@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import com.google.common.base.Preconditions;
 import java.util.logging.Logger;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -54,4 +55,13 @@ public class LibraryClasspathContainerResolverJob extends Job {
     }
     return resolverService.resolveAll(javaProject, monitor);
   }
+
+  @Override
+  public boolean belongsTo(Object family) {
+    // Consider container resolution as part of builds.  Simplifies
+    // our tests using {@code ProjectUtils.waitForProjects()}.
+    return family == ResourcesPlugin.FAMILY_MANUAL_BUILD;
+  }
+  
+  
 }

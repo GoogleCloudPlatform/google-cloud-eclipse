@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Google Inc.
+ * Copyright 2019 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,8 @@
 
 package com.google.cloud.tools.eclipse.usagetracker;
 
-import static org.hamcrest.Matchers.startsWith;
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
@@ -34,7 +31,6 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager.PingEvent;
 import com.google.common.collect.ImmutableMap;
-import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.junit.Before;
@@ -60,8 +56,7 @@ public class AnalyticsPingManagerTest {
     when(pingEventQueue.isEmpty()).thenReturn(true);
     when(preferences.get("ANALYTICS_CLIENT_ID", null)).thenReturn("clientId");
 
-    pingManager = new AnalyticsPingManager("https://non-null-url-to-enable-mananger",
-        preferences, pingEventQueue);
+    pingManager = new AnalyticsPingManager("https://example.com", preferences, pingEventQueue);
   }
 
   @Test
@@ -92,61 +87,6 @@ public class AnalyticsPingManagerTest {
     } catch (NullPointerException e) {
       assertEquals("metadata is null", e.getMessage());
     }
-  }
-
-  @Test
-  public void testEventTypeEventNameConvention() {
-    PingEvent event = new PingEvent("some.event-name", EMPTY_MAP, null);
-    Map<String, String> parameters = pingManager.buildParametersMap(event);
-    assertEquals("/virtual/gcloud-eclipse-tools/some.event-name", parameters.get("dp"));
-  }
-
-  @Test
-  public void testVirtualHostSet() {
-    PingEvent event = new PingEvent("some.event-name", EMPTY_MAP, null);
-    Map<String, String> parameters = pingManager.buildParametersMap(event);
-    assertThat(parameters.get("dh"), startsWith("virtual."));
-  }
-
-  @Test
-  public void testMetadataConvention() {
-    PingEvent event = new PingEvent("some.event-name",
-        ImmutableMap.of("times-happened", "1234"), null);
-    Map<String, String> parameters = pingManager.buildParametersMap(event);
-    assertThat(parameters.get("dt"), containsString("times-happened=1234"));
-  }
-
-  @Test
-  public void testMetadataConvention_multiplePairs() {
-    PingEvent event = new PingEvent("some.event-name",
-        ImmutableMap.of("times-happened", "1234", "mode", "debug"), null);
-    Map<String, String> parameters = pingManager.buildParametersMap(event);
-    assertThat(parameters.get("dt"), containsString("times-happened=1234"));
-    assertThat(parameters.get("dt"), containsString("mode=debug"));
-  }
-
-  @Test
-  public void testMetadataConvention_escaping() {
-    PingEvent event = new PingEvent("some.event-name",
-        ImmutableMap.of("key , \\ = k", "value , \\ = v"), null);
-    Map<String, String> parameters = pingManager.buildParametersMap(event);
-    assertThat(parameters.get("dt"), containsString("key \\, \\\\ \\= k=value \\, \\\\ \\= v"));
-  }
-
-  @Test
-  public void testMetadataContainsPlatformInfo() {
-    ImmutableMap<String, String> customMetadata = ImmutableMap.of("times-happened", "1234");
-    PingEvent event = new PingEvent("some.event-name", customMetadata, null);
-    Map<String, String> parameters = pingManager.buildParametersMap(event);
-    assertThat(parameters.get("dt"), containsString("ct4e-version="));
-    assertThat(parameters.get("dt"), containsString("eclipse-version="));
-  }
-
-  @Test
-  public void testClientId() {
-    PingEvent event = new PingEvent("some.event-name", EMPTY_MAP, null);
-    Map<String, String> parameters = pingManager.buildParametersMap(event);
-    assertEquals("clientId", parameters.get("cid"));
   }
 
   @Test
@@ -225,7 +165,7 @@ public class AnalyticsPingManagerTest {
   public void testGetAnonymizedClientId_generateNewId() {
     when(preferences.get(eq(AnalyticsPreferences.ANALYTICS_CLIENT_ID), anyString()))
         .thenReturn(null);  // Simulate that client ID has never been generated.
-    String clientId = AnalyticsPingManager.getAnonymizedClientId(preferences);
+    String clientId = pingManager.getAnonymizedClientId();
     assertFalse(clientId.isEmpty());
     verify(preferences).put(AnalyticsPreferences.ANALYTICS_CLIENT_ID, clientId);
   }
@@ -234,7 +174,7 @@ public class AnalyticsPingManagerTest {
   public void testGetAnonymizedClientId_useSavedId() {
     when(preferences.get(eq(AnalyticsPreferences.ANALYTICS_CLIENT_ID), anyString()))
         .thenReturn("some-unique-client-id");
-    String clientId = AnalyticsPingManager.getAnonymizedClientId(preferences);
+    String clientId = pingManager.getAnonymizedClientId();
     assertEquals("some-unique-client-id", clientId);
     verify(preferences, never()).put(AnalyticsPreferences.ANALYTICS_CLIENT_ID, clientId);
   }
@@ -312,5 +252,6 @@ public class AnalyticsPingManagerTest {
   @Test
   public void testSendPingArguments_validMetadataMap() {
     pingManager.sendPing("eventName", EMPTY_MAP);
-  }
+  } 
+  
 }

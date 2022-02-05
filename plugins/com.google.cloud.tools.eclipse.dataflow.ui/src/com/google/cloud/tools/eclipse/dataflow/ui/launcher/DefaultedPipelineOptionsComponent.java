@@ -236,4 +236,8 @@ public class DefaultedPipelineOptionsComponent {
   public void validate() {
     defaultOptions.validate();
   }
+
+  void setAccountRequired(boolean required) {
+    defaultOptions.setAccountRequired(required);
+  }
 }

@@ -123,6 +123,7 @@ public class RunOptionsDefaultsComponent {
    * {@link #isEnabled}.
    */
   private boolean canEnableChildren = true;
+  private boolean accountRequired;
 
   public RunOptionsDefaultsComponent(Composite target, int columns, MessageTarget messageTarget,
       DataflowPreferences preferences) {
@@ -393,6 +394,10 @@ public class RunOptionsDefaultsComponent {
    * to make their interconnected enablement correct.)
    */
   private boolean doIsolatedQuickChecks() {
+    if (accountRequired && Strings.isNullOrEmpty(getAccountEmail())) {
+      messageTarget.setError("No Google account selected for this launch.");
+      return false;
+    }
     String key = serviceAccountKey.getText();
     if (!Strings.isNullOrEmpty(key)) {
       Path path = Paths.get(key);
@@ -669,5 +674,10 @@ public class RunOptionsDefaultsComponent {
       checkProjectConfigurationJob.join();
     }
     projectInput.join();
+  }
+
+  public void setAccountRequired(boolean required) {
+    accountRequired = required;
+    validate();
   }
 }
