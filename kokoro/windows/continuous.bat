@@ -1,6 +1,12 @@
 @echo on
-rem Tycho 1.0.0 does not support Java 9
-set "JAVA_HOME=C:\Program Files\Java\jdk1.8.0_152"
+rem Tycho 2.5.0+ requires Java 11+
+curl --silent --show-error --location --output openjdk-11.zip "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.14.1+1/OpenJDK11U-jre_x64_windows_hotspot_11.0.14.1_1.zip"
+unzip -q -d "c:\Program Files\openjdk" openjdk-11.zip
+@rem need to update toolchains.xml with JRE path
+set "JAVA_HOME=c:\Program Files\openjdk\jdk-11.0.14.1+1-jre"
+set "PATH=%JAVA_HOME%\bin;%PATH%"
+@echo JAVA_HOME: %JAVA_HOME%
+java -version
 
 rem To speed up build, download and unpack an M2 repo cache.
 pushd %USERPROFILE%
@@ -18,7 +24,7 @@ call gcloud.cmd components install app-engine-java --quiet
 @echo on
 
 mvn -V -B -N io.takari:maven:wrapper -Dmaven=3.8.4
-call mvnw.cmd -V -B --fail-at-end -Pci-build verify
+call mvnw.cmd --toolchains=kokoro/windows/toolchains.xml -V -B --fail-at-end -Pci-build verify
 set MAVEN_BUILD_EXIT=%ERRORLEVEL%
 @echo on
 
