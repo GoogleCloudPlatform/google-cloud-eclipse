@@ -1,9 +1,9 @@
 @echo on
 rem Tycho 2.5.0+ requires Java 11+
-curl --silent --show-error --location --output openjdk-11.zip "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.14.1+1/OpenJDK11U-jre_x64_windows_hotspot_11.0.14.1_1.zip"
-unzip -q -d "c:\Program Files\openjdk" openjdk-11.zip
+curl --silent --show-error --location --output openjdk-17.zip "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.2+8/OpenJDK17U-jre_x64_windows_hotspot_17.0.2_8.zip"
+unzip -q -d "c:\Program Files\openjdk" openjdk-17.zip
 @rem need to update toolchains.xml with JRE path
-set "JAVA_HOME=c:\Program Files\openjdk\jdk-11.0.14.1+1-jre"
+set "JAVA_HOME=c:\Program Files\openjdk\jdk-17.0.2+8-jre"
 set "PATH=%JAVA_HOME%\bin;%PATH%"
 @echo JAVA_HOME: %JAVA_HOME%
 java -version
