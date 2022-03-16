@@ -57,8 +57,9 @@ jobs:
           export PATH="${HOME}/google-cloud-sdk/bin:${PATH}"
           gcloud components install app-engine-java --quiet
 
-         # 2018-09 was the last release to work on Java 8
+          # 2018-09 was the last release to work on Java 8
           xvfb-run mvn --show-version --batch-mode --fail-at-end \
+            --toolchains=.github/workflows/toolchains.xml \
             -Dtycho.toolchains=BREE -Dtycho.testToolchains=BREE \
             -Derrorprone -Dci-build -Declipse-target=${{ env.ECLIPSE_TARGET }} \
             clean verify
