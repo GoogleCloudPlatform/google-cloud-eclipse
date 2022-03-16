@@ -11,7 +11,6 @@ Require-Bundle: com.google.cloud.tools.eclipse.test.dependencies
 Import-Package: com.google.cloud.tools.eclipse.test.util,
  com.google.cloud.tools.eclipse.test.util.http,
  com.google.cloud.tools.eclipse.test.util.project,
- javax.inject;version="1.0.0",
  org.eclipse.jdt.core,
  org.eclipse.jst.common.project.facet.core
 Require-Capability: com.google.cloud.tools.facets.appengine;filter:="(type=jre8)"
