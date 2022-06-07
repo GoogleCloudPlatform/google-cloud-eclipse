@@ -42,7 +42,7 @@
       <unit id="org.slf4j.apis.log4j" version="1.7.30.v20200204-2150"/>
       <unit id="org.slf4j.bridge.jul" version="1.7.30.v20200204-2150"/>
       <unit id="ch.qos.logback.slf4j" version="1.2.3.v20200428-2012"/>
-      <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20200224183213/"/>
+      <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20200224183213/repository/"/>
     </location>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
       <unit id="org.dadacoalition.yedit.feature.feature.group" version="1.0.20.201509041456-RELEASE"/>
