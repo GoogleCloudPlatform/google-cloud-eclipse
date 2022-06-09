@@ -3,7 +3,8 @@
  */
 target "Cloud Tools for Eclipse: Common Dependencies"
 
-location "https://download.eclipse.org/tools/orbit/downloads/latest-R/" {
+
+location "https://download.eclipse.org/tools/orbit/downloads/drops/R20200529191137/repository/" {
   org.hamcrest.core [1.3.0,1.3.1)
   org.hamcrest.integration [1.3.0,1.3.1)
   org.hamcrest.library [1.3.0,1.3.1)
