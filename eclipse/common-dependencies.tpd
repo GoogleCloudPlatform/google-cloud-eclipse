@@ -5,6 +5,7 @@ target "Cloud Tools for Eclipse: Common Dependencies"
 
 location "https://download.eclipse.org/tools/orbit/downloads/latest-R/" {
   org.hamcrest [2.2, 2.3)
+  org.hamcrest.library [2.2, 2.3)
   org.slf4j.api
   org.slf4j.apis.jcl
   org.slf4j.apis.log4j
