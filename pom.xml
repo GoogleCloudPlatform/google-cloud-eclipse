@@ -151,7 +151,7 @@
       <!-- bundle: org.yaml.snakeyaml -->
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>
-      <version>1.31</version>
+      <version>1.32</version>
     </dependency>
     <dependency>
       <!-- bundle: org.glassfish.javax.json -->
