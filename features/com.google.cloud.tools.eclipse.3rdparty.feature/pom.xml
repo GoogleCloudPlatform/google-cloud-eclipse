@@ -10,15 +10,4 @@
   <artifactId>com.google.cloud.tools.eclipse.3rdparty.feature</artifactId>
   <version>0.1.0-SNAPSHOT</version>
   <packaging>eclipse-feature</packaging>
-
-  <properties>
-    <!--
-      Workaround https://github.com/eclipse-tycho/tycho/issues/1377 where
-      loading the tycho-buildtimestamp-jgit provider causes build failures
-      in this feature with Tycho 2.7.x.  This feature isn't surfaced to
-      users and so the build number is of no significance.
-    -->
-    <tycho.buildtimestamp.provider/>
-  </properties>
-
 </project>

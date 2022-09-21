@@ -39,8 +39,11 @@
     <!-- Execution environment supported by Cloud Tools for Eclipse -->
     <requiredExecutionEnvironment>JavaSE-1.8</requiredExecutionEnvironment>
 
-    <tycho.version>2.7.5</tycho.version>
-    <tycho-extras.version>2.7.5</tycho-extras.version>
+    <!-- use Tycho 2.6.0 for builds to avoid triggering
+        https://github.com/eclipse-tycho/tycho/issues/1377 -->
+    <tycho.version>2.6.0</tycho.version>
+    <tycho-extras.version>2.6.0</tycho-extras.version>
+
     <product.version.qualifier.suffix/>  <!-- 0-length string by default -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <eclipse.target>2018-09</eclipse.target> <!-- the default build -->
@@ -414,6 +417,28 @@
       </activation>
       <properties>
         <os-jvm-flags>-XstartOnFirstThread</os-jvm-flags>
+      </properties>
+    </profile>
+
+    <profile>
+      <!--
+        Tycho 2.7.4+ includes lifecycle mapping metadata to instruct
+        Eclipse/m2eclipse how to handle the various Tycho plugins.
+        But Tycho 2.7.4+ has a bug where loading the
+        tycho-buildtimestamp-jgit provider causes build failures
+        (https://github.com/eclipse-tycho/tycho/issues/1377),
+        so we can only use it when loading into m2eclipse.
+      -->
+      <id>only-eclipse</id>
+      <activation>
+        <property>
+          <name>m2e.version</name>
+        </property>
+      </activation>
+      <properties>
+        <tycho.version>2.7.5</tycho.version>
+        <tycho-extras.version>2.7.5</tycho-extras.version>
+        <tycho.buildtimestamp.provider/>
       </properties>
     </profile>
 
