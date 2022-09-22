@@ -8,7 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.google.cloud.tools.eclipse.test.dependencies.LogConfigurator
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
-Require-Bundle: org.junit;bundle-version="[4.12.0,4.12.1)";visibility:=reexport,
+Require-Bundle: org.junit;bundle-version="[4.12.0,4.13.2)";visibility:=reexport,
  org.hamcrest.core;bundle-version="[1.3.0,1.3.1)";visibility:=reexport,
  org.hamcrest.library;bundle-version="[1.3.0,1.3.1)";visibility:=reexport,
  org.eclipse.jst.standard.schemas;bundle-version="[1.2,2.0)",
