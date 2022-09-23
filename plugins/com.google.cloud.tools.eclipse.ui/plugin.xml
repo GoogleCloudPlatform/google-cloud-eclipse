@@ -98,5 +98,11 @@
     <keyword label="%cloudName"
              id="com.google.cloud.tools.eclipse.ui.CloudKeyword"/>
    </extension>
+   <extension
+         point="org.eclipse.ui.startup">
+     <startup
+            class="com.google.cloud.tools.eclipse.ui.privacytos.PrivacyTosStartup">
+     </startup>
+   </extension>
 
 </plugin>

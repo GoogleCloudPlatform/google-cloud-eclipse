@@ -11,6 +11,29 @@
       </link>
     </group>
   </extensionContent>
+  
+  <extensionContent id="com.google.cloud.tools.eclipse.tos" name="Cloud Tools for Eclipse Terms of Service"
+      path="overview/@" style="css/intro.css">
+    <group style-id="content-group">
+      <link id="cloud-tools-for-eclipse-tos-link"
+            label="Google Cloud Tools for Eclipse Terms of Service"
+            style-id="content-link"
+            url="https://policies.google.com/terms">"
+        <text>View Cloud tools for Eclipse Terms of Service</text>
+      </link>
+    </group>
+  </extensionContent>
+  <extensionContent id="com.google.cloud.tools.eclipse.tos" name="Cloud Tools for Eclipse Privacy Policy"
+      path="overview/@" style="css/intro.css">
+    <group style-id="content-group">
+      <link id="cloud-tools-for-eclipse-privacy-link"
+            label="Google Cloud Tools for Eclipse Privacy Policy"
+            style-id="content-link"
+            url="https://policies.google.com/privacy">"
+        <text>View Cloud tools for Eclipse Privacy Policy</text>
+      </link>
+    </group>
+  </extensionContent>
 
   <extensionContent id="com.google.cloud.tools.eclipse.tutorials" name="Cloud Tools for Eclipse Tutorials"
       path="tutorials/@" style="css/intro.css">
