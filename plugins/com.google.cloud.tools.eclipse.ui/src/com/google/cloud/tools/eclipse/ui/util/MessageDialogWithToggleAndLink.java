@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.util;
+package com.google.cloud.tools.eclipse.ui.util;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.program.Program;
+import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
+import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorDialogErrorHandler;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.swt.widgets.Composite;
@@ -111,25 +108,12 @@ public class MessageDialogWithToggleAndLink extends MessageDialogWithToggle {
     layout.marginWidth = 0;
     layout.marginHeight = 0;
     container.setLayout(layout);
-    container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    container.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, true));
     linkSources.stream().forEach(link -> {
       Link newLink = new Link(container, SWT.WRAP);
       newLink.setText(link);
       newLink.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL));
-      Pattern p = Pattern.compile(".*?<\\s*a\\s+.*?href\\s*=\\s*\"(\\S*?)\".*?>");
-      Matcher m = p.matcher(link);
-      try {
-        m.matches();
-        final String url = m.group(1); // this variable should contain the link URL  
-        newLink.addSelectionListener(new SelectionAdapter()  {
-          @Override
-          public void widgetSelected(SelectionEvent e) {
-              Program.launch(url);
-          }
-        });
-      } catch (IndexOutOfBoundsException ex) {
-        throw new IllegalArgumentException("malformed anchor link", ex);
-      }
+      newLink.addSelectionListener(new OpenUriSelectionListener(new ErrorDialogErrorHandler(container.getShell())));
       links.add(newLink);
     });
 

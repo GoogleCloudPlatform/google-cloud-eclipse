@@ -34,13 +34,12 @@
     <module>plugins</module>
     <module>third_party</module>
   </modules>
-
   <properties>
     <!-- Execution environment supported by Cloud Tools for Eclipse -->
     <requiredExecutionEnvironment>JavaSE-1.8</requiredExecutionEnvironment>
 
-    <tycho.version>2.5.0</tycho.version>
-    <tycho-extras.version>2.5.0</tycho-extras.version>
+    <tycho.version>2.7.5</tycho.version>
+    <tycho-extras.version>2.7.5</tycho-extras.version>
     <product.version.qualifier.suffix/>  <!-- 0-length string by default -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <eclipse.target>2018-09</eclipse.target> <!-- the default build -->

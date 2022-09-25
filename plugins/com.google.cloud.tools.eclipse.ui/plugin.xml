@@ -104,5 +104,13 @@
             class="com.google.cloud.tools.eclipse.ui.privacytos.PrivacyTosStartup">
      </startup>
    </extension>
+   
+   	<extension point="com.google.cloud.tools.eclipse.preferences.areas">
+    <area host="com.google.cloud.tools.eclipse.preferences.main"
+          title="%privacytos.tostitle"
+          class="com.google.cloud.tools.eclipse.ui.privacytos.TosPreferenceArea"
+          preferences="configuration://com.google.cloud.tools.eclipse.ui.privacytos">
+    </area>
+  </extension>
 
 </plugin>
