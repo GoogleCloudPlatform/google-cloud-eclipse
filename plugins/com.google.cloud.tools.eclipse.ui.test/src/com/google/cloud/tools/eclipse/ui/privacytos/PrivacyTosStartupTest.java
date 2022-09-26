@@ -18,18 +18,36 @@ package com.google.cloud.tools.eclipse.ui.privacytos;
 
 import static org.mockito.Mockito.verify;
 
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.jface.dialogs.MessageDialogWithToggle;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.osgi.service.prefs.Preferences;
 
 
 @RunWith(MockitoJUnitRunner.class)
 public class PrivacyTosStartupTest {
   @Mock private PrivacyTosStartup ptStartup;
   
+  public void configureShowAgain(boolean showAgain) {
+    IEclipsePreferences preferenceStore =
+        InstanceScope.INSTANCE.getNode(PrivacyTosStartup.PREFERENCE_NODE_KEY);
+    Preferences preferences = preferenceStore.node(PrivacyTosStartup.PREFERENCE_NODE_KEY);
+    preferences.put(PrivacyTosStartup.PREFERENCE_PERSISTENCE_KEY, showAgain ? MessageDialogWithToggle.PROMPT : MessageDialogWithToggle.NEVER);
+  }
+  
+  @BeforeClass
+  public void setup() {
+    configureShowAgain(false);
+  }
+  
   @Test
   public void testRunAtStartup() {
+    configureShowAgain(true);
     verify(ptStartup).earlyStartup();
   }
 }

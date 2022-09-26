@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.ui.privacytos;
 
 import com.google.cloud.tools.eclipse.ui.util.MessageDialogWithToggleAndLink;
 import com.google.cloud.tools.eclipse.ui.util.Messages;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import java.util.logging.Logger;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -38,8 +39,10 @@ public class PrivacyTosStartup implements IStartup {
   private static final Logger logger = Logger.getLogger(PrivacyTosStartup.class.getName());
   private static final String PRIVACY_TOS_TITLE = Messages.getString("privacytos.message.title");
   private static final String PRIVACY_TOS_MESSAGE = Messages.getString("privacytos.message");
-  private static final String PREFERENCE_PERSISTENCE_KEY = "com.google.cloud.tools.eclipse.ui.privacytos.displayprivacytos";
-  private static final String PREFERENCE_NODE_KEY = "com.google.cloud.tools.eclipse.ui.privacytos";
+  @VisibleForTesting
+  static final String PREFERENCE_PERSISTENCE_KEY = "com.google.cloud.tools.eclipse.ui.privacytos.displayprivacytos";
+  @VisibleForTesting
+  static final String PREFERENCE_NODE_KEY = "com.google.cloud.tools.eclipse.ui.privacytos";
   private static final String[] STATEMENT_LINKS = {
       Messages.getString("privacytos.links.privacy"),
       Messages.getString("privacytos.links.tos"),
