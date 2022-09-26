@@ -35,14 +35,17 @@ public class TosPreferenceAreaTest {
     assertEquals(tosPreferenceArea.getStatus(), Status.OK_STATUS);
   }
 
+  @Test
   public void testLoad() {
     verify(tosPreferenceArea).load();
   }
 
+  @Test
   public void loadDefault() {
     verify(tosPreferenceArea).loadDefault();
   }
 
+  @Test
   public void performApply() {
     verify(tosPreferenceArea, never()).performApply();
   }
