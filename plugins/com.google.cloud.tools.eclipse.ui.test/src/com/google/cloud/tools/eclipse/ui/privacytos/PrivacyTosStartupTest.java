@@ -33,7 +33,7 @@ import org.osgi.service.prefs.Preferences;
 public class PrivacyTosStartupTest {
   @Mock private PrivacyTosStartup ptStartup;
   
-  public void configureShowAgain(boolean showAgain) {
+  public static void configureShowAgain(boolean showAgain) {
     IEclipsePreferences preferenceStore =
         InstanceScope.INSTANCE.getNode(PrivacyTosStartup.PREFERENCE_NODE_KEY);
     Preferences preferences = preferenceStore.node(PrivacyTosStartup.PREFERENCE_NODE_KEY);
@@ -41,7 +41,7 @@ public class PrivacyTosStartupTest {
   }
   
   @BeforeClass
-  public void setup() {
+  public static void setup() {
     configureShowAgain(false);
   }
   
