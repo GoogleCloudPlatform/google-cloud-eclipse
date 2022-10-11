@@ -49,7 +49,6 @@ public class PrivacyTosStartup implements IStartup {
   };
   @Override
   public void earlyStartup() {
-    // TODO Determine persistent way of "do not show again"
     IWorkbench workbench = PlatformUI.getWorkbench();
     workbench.getDisplay().asyncExec(new Runnable() {
       @Override

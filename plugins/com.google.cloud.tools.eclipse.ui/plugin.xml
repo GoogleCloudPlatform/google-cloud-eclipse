@@ -105,7 +105,7 @@
      </startup>
    </extension>
    
-   	<extension point="com.google.cloud.tools.eclipse.preferences.areas">
+   <extension point="com.google.cloud.tools.eclipse.preferences.areas">
     <area host="com.google.cloud.tools.eclipse.preferences.main"
           title="%privacytos.tostitle"
           class="com.google.cloud.tools.eclipse.ui.privacytos.TosPreferenceArea"

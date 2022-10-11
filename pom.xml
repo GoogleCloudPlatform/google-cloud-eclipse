@@ -38,7 +38,6 @@
     <!-- Execution environment supported by Cloud Tools for Eclipse -->
     <requiredExecutionEnvironment>JavaSE-1.8</requiredExecutionEnvironment>
 
-
     <!-- use Tycho 2.6.0 for builds to avoid triggering
         https://github.com/eclipse-tycho/tycho/issues/1377 -->
     <tycho.version>2.6.0</tycho.version>

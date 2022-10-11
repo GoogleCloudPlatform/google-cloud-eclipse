@@ -34,7 +34,7 @@ import org.eclipse.swt.widgets.Shell;
 
 
 /**
- * Diplays a dialog with a list of html links besides the message, button and state checkbox
+ * Displays a dialog with a list of html links besides the message, button and state checkbox
  */
 public class MessageDialogWithToggleAndLink extends MessageDialogWithToggle {
 
@@ -148,8 +148,7 @@ public class MessageDialogWithToggleAndLink extends MessageDialogWithToggle {
       String message, 
       String toggleMessage,
       boolean toggleState, 
-      List<String> linkSources
-      ) {
+      List<String> linkSources) {
     LinkedHashMap<String, Integer> buttons = new LinkedHashMap<>();
     buttons.put("Confirm", 0);
     MessageDialogWithToggleAndLink dialog = new MessageDialogWithToggleAndLink(parent, title, null, message, INFORMATION,
