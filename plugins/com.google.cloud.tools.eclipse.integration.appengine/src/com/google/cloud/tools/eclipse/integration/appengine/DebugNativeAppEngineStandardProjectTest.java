@@ -63,7 +63,7 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
   private static final long TERMINATE_SERVER_TIMEOUT = 10000L;
 
   @Rule public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
-
+  
   /**
    * Launch a native application in debug mode and verify that:
    *

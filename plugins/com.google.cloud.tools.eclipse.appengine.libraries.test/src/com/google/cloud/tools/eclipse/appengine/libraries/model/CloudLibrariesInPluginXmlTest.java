@@ -168,7 +168,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(objectifyMavenCoordinates.getArtifactId(), is("objectify"));
     DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(
         objectifyMavenCoordinates.getVersion());
-    assertEquals(new DefaultArtifactVersion("6.0.7"), artifactVersion);
+    assertEquals(new DefaultArtifactVersion("6.0.9"), artifactVersion);
     assertThat(objectifyMavenCoordinates.getType(), is("jar"));
     assertNull(objectifyMavenCoordinates.getClassifier());
 
@@ -242,7 +242,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(guavaMavenCoordinates.getRepository(), is("central"));
     assertThat(guavaMavenCoordinates.getGroupId(), is("com.google.guava"));
     assertThat(guavaMavenCoordinates.getArtifactId(), is("guava"));
-    assertThat(guavaMavenCoordinates.getVersion(), is("28.1-android"));
+    assertThat(guavaMavenCoordinates.getVersion(), is("31.1-jre"));
     assertThat(guavaMavenCoordinates.getType(), is("jar"));
     assertNull(guavaMavenCoordinates.getClassifier());
 

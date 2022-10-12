@@ -17,37 +17,41 @@
 package com.google.cloud.tools.eclipse.ui.privacytos;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.mock;
 
+import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceStore;
+import org.eclipse.swt.widgets.Shell;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
+import org.mockito.AdditionalAnswers;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TosPreferenceAreaTest {
-  @Mock private TosPreferenceArea tosPreferenceArea;
+  @Rule public ShellTestResource shellResource = new ShellTestResource();
+  
+  private Shell shell;
+  private TosPreferenceArea area;
+  private IPreferenceStore preferences =
+      mock(IPreferenceStore.class, AdditionalAnswers.delegatesTo(new PreferenceStore()));
+  
+  private void createPreferenceArea() {
+    shell = shellResource.getShell();
+    area = new TosPreferenceArea();
+    area.setPreferenceStore(preferences);
+    area.createContents(shell);
+    area.load();
+  }
   
   @Test
   public void testStatus() {
-    assertEquals(tosPreferenceArea.getStatus(), Status.OK_STATUS);
+    createPreferenceArea();
+    assertEquals(area.getStatus(), Status.OK_STATUS);
   }
 
-  @Test
-  public void testLoad() {
-    verify(tosPreferenceArea).load();
-  }
-
-  @Test
-  public void loadDefault() {
-    verify(tosPreferenceArea).loadDefault();
-  }
-
-  @Test
-  public void performApply() {
-    verify(tosPreferenceArea, never()).performApply();
-  }
   
 }

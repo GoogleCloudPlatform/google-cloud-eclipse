@@ -45,6 +45,7 @@ public abstract class BaseProjectTest {
 
   @BeforeClass
   public static void setUp() throws Exception {
+    TestUtils.disablePrivacyTos();
     // verify we can find the Google Cloud SDK
     new CloudSdk.Builder().build().validateCloudSdk();
 
