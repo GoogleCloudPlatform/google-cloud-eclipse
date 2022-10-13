@@ -17,29 +17,50 @@
 package com.google.cloud.tools.eclipse.ui.privacytos;
 
 import com.google.cloud.tools.eclipse.preferences.areas.PreferenceArea;
-import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
-import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorDialogErrorHandler;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.cloud.tools.eclipse.ui.util.Messages;
+import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Link;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * Adds a section to main CTE preferences stating Google TOS
  */
 public class TosPreferenceArea extends PreferenceArea {
 
+  private final IWorkbench workbench;
+  
+  public TosPreferenceArea() {
+    this(PlatformUI.getWorkbench());
+  }
+  
+  @VisibleForTesting
+  TosPreferenceArea(IWorkbench workbench) {
+    this.workbench = workbench;
+  }
+  
+  
   @Override
   public Control createContents(Composite container) {
     String link = Messages.getString("privacytos.settings.disclaimer");
     Link newLink = new Link(container, SWT.WRAP);
     newLink.setText(link);
     newLink.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.GRAB_HORIZONTAL));
-    newLink.addSelectionListener(new OpenUriSelectionListener(new ErrorDialogErrorHandler(container.getShell())));
+    newLink.addSelectionListener(new SelectionAdapter() {
+      @Override
+      public void widgetSelected(SelectionEvent event) {
+        WorkbenchUtil.openInBrowser(workbench, event.text);
+      }
+    });
     return newLink;
   }
 

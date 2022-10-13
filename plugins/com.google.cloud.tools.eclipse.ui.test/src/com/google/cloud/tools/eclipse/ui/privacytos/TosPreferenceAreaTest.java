@@ -53,8 +53,7 @@ public class TosPreferenceAreaTest {
   
   private void createPreferenceArea() {
     shell = shellResource.getShell();
-    area = new TosPreferenceArea();
-    area.setWorkbench(workbench);
+    area = new TosPreferenceArea(workbench);
     area.setPreferenceStore(preferences);
     area.createContents(shell);
     area.load();
