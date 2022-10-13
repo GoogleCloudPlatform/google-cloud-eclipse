@@ -17,17 +17,22 @@
 package com.google.cloud.tools.eclipse.ui.privacytos;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceStore;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbench;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.AdditionalAnswers;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -38,10 +43,18 @@ public class TosPreferenceAreaTest {
   private TosPreferenceArea area;
   private IPreferenceStore preferences =
       mock(IPreferenceStore.class, AdditionalAnswers.delegatesTo(new PreferenceStore()));
+  @Mock private IWorkbench workbench;
+  @Mock private Display display;
+  
+  @Before
+  public void setup() {
+    doReturn(display).when(workbench).getDisplay();
+  }
   
   private void createPreferenceArea() {
     shell = shellResource.getShell();
     area = new TosPreferenceArea();
+    area.setWorkbench(workbench);
     area.setPreferenceStore(preferences);
     area.createContents(shell);
     area.load();

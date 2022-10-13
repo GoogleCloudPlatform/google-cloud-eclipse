@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.ui.privacytos;
 
 import com.google.cloud.tools.eclipse.ui.util.MessageDialogWithToggleAndLink;
 import com.google.cloud.tools.eclipse.ui.util.Messages;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import java.util.logging.Logger;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -44,9 +45,18 @@ public class PrivacyTosStartup implements IStartup {
       Messages.getString("privacytos.links.privacy"),
       Messages.getString("privacytos.links.tos"),
   };
+  private final IWorkbench workbench;
+  
+  public PrivacyTosStartup() {
+    this(PlatformUI.getWorkbench());
+  }
+  @VisibleForTesting
+  PrivacyTosStartup(IWorkbench workbench) {
+    this.workbench = workbench;
+  }
+  
   @Override
   public void earlyStartup() {
-    IWorkbench workbench = PlatformUI.getWorkbench();
     workbench.getDisplay().asyncExec(new Runnable() {
       @Override
       public void run() {
