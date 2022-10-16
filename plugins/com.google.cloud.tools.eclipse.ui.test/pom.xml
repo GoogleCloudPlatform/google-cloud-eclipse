@@ -16,6 +16,11 @@
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-surefire-plugin</artifactId>
+        <configuration>
+        <systemProperties>
+            <disablePrivacyTos>true</disablePrivacyTos>
+        </systemProperties>
+    </configuration>
       </plugin>
     </plugins>
   </build>

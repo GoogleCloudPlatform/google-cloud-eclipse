@@ -55,8 +55,16 @@ public class PrivacyTosStartup implements IStartup {
     this.workbench = workbench;
   }
   
+  private boolean isDisabled() {
+    String isDisabledStr = System.getProperty("disablePrivacyTos");
+    return isDisabledStr == null ? false : Boolean.valueOf(isDisabledStr);
+  }
+  
   @Override
   public void earlyStartup() {
+    if (isDisabled()) {
+      return;
+    }
     workbench.getDisplay().asyncExec(new Runnable() {
       @Override
       public void run() {
