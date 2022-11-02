@@ -17,6 +17,9 @@
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>target-platform-configuration</artifactId>
         <configuration>
+          <systemProperties>
+            <disablePrivacyTos>true</disablePrivacyTos>
+          </systemProperties>
           <dependency-resolution>
             <extraRequirements>
               <requirement>
