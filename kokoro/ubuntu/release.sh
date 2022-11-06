@@ -30,6 +30,8 @@ echo "PRODUCT_VERSION_SUFFIX: ${PRODUCT_VERSION_SUFFIX}"
 [[ -n "${OAUTH_CLIENT_SECRET}" ]]
 [[ -n "${FIRELOG_API_KEY}" ]]
 
+sudo update-java-alternatives --set java-1.11.0-openjdk-amd64
+
 cd github/google-cloud-eclipse
 
 # A few notes on the Maven command:
