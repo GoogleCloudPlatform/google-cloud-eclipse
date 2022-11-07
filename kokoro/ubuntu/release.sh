@@ -35,6 +35,9 @@ export JAVA_HOME=/usr/lib/jvm/java-1.11.0-openjdk-amd64
 
 cd github/google-cloud-eclipse
 
+sed -i.bak -e "s,JDK_8_HOME,/usr/lib/jvm/java-1.8.0-openjdk-amd64," .github/workflows/toolchains.xml
+sed -i.bak -e "s,JDK_11_HOME,/usr/lib/jvm/java-1.11.0-openjdk-amd64," .github/workflows/toolchains.xml
+
 # A few notes on the Maven command:
 #    - Need to unset `TMPDIR` for `xvfb-run` due to a bug:
 #      https://bugs.launchpad.net/ubuntu/+source/xorg-server/+bug/972324
@@ -42,6 +45,7 @@ cd github/google-cloud-eclipse
 #      since it should be appended as a constant string in a date format.
 TMPDIR= xvfb-run \
   mvn -V -B \
+      --toolchains=.github/workflows/toolchains.xml \
       -Doauth.client.id="${OAUTH_CLIENT_ID}" \
       -Doauth.client.secret="${OAUTH_CLIENT_SECRET}" \
       -Dfirelog.api.key="${FIRELOG_API_KEY}" \
