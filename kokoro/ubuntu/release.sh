@@ -31,6 +31,7 @@ echo "PRODUCT_VERSION_SUFFIX: ${PRODUCT_VERSION_SUFFIX}"
 [[ -n "${FIRELOG_API_KEY}" ]]
 
 sudo update-java-alternatives --set java-1.11.0-openjdk-amd64
+export JAVA_HOME=/usr/lib/jvm/java-1.11.0-openjdk-amd64
 
 cd github/google-cloud-eclipse
 
