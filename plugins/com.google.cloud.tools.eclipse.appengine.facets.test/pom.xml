@@ -16,14 +16,16 @@
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-surefire-plugin</artifactId>
+        <configuration>
+          <systemProperties>
+            <disablePrivacyTos>true</disablePrivacyTos>
+          </systemProperties>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>target-platform-configuration</artifactId>
         <configuration>
-          <systemProperties>
-            <disablePrivacyTos>true</disablePrivacyTos>
-          </systemProperties>
           <dependency-resolution>
             <extraRequirements>
               <requirement>
