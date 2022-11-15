@@ -345,6 +345,7 @@
               -Dorg.eclipse.swtbot.search.timeout=${org.eclipse.swtbot.search.timeout}
               -Xms40m -Xmx1G
               -Djava.awt.headless=true
+              -DdisablePrivacyTos=true
               -Dlogback.configurationFile=platform:/plugin/com.google.cloud.tools.eclipse.test.dependencies/logback.xml
               ${os-jvm-flags}
             </argLine>
