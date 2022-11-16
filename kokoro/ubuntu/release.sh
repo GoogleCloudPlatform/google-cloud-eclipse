@@ -49,5 +49,6 @@ TMPDIR= xvfb-run \
       -Doauth.client.id="${OAUTH_CLIENT_ID}" \
       -Doauth.client.secret="${OAUTH_CLIENT_SECRET}" \
       -Dfirelog.api.key="${FIRELOG_API_KEY}" \
+      -DdisablePrivacyTos=true \
       ${PRODUCT_VERSION_SUFFIX:+-Dproduct.version.qualifier.suffix="'${PRODUCT_VERSION_SUFFIX}'"} \
     clean verify
