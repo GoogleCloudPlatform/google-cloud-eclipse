@@ -43,11 +43,11 @@ sed -i.bak -e "s,JDK_11_HOME,/usr/lib/jvm/java-1.11.0-openjdk-amd64," .github/wo
 #      https://bugs.launchpad.net/ubuntu/+source/xorg-server/+bug/972324
 #    - Single-quotes are necessary for `-Dproduct.version.qualifier.suffix`,
 #      since it should be appended as a constant string in a date format.
-TMPDIR= xvfb-run \
-  mvn -V -B \
-      --toolchains=.github/workflows/toolchains.xml \
-      -Doauth.client.id="${OAUTH_CLIENT_ID}" \
-      -Doauth.client.secret="${OAUTH_CLIENT_SECRET}" \
-      -Dfirelog.api.key="${FIRELOG_API_KEY}" \
-      ${PRODUCT_VERSION_SUFFIX:+-Dproduct.version.qualifier.suffix="'${PRODUCT_VERSION_SUFFIX}'"} \
-    clean verify
+#TMPDIR= xvfb-run \
+  #mvn -V -B \
+      #--toolchains=.github/workflows/toolchains.xml \
+      #-Doauth.client.id="${OAUTH_CLIENT_ID}" \
+      #-Doauth.client.secret="${OAUTH_CLIENT_SECRET}" \
+      #-Dfirelog.api.key="${FIRELOG_API_KEY}" \
+      #${PRODUCT_VERSION_SUFFIX:+-Dproduct.version.qualifier.suffix="'${PRODUCT_VERSION_SUFFIX}'"} \
+    #clean verify
