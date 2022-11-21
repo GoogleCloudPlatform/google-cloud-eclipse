@@ -357,6 +357,9 @@
                  <autoStart>true</autoStart>
               </bundle>
            </bundleStartLevel>
+           <excludes>
+             <exclude>**/com.google.cloud.tools.eclipse.integration.appengine/*</exclude>
+           </excludes>
           </configuration>
         </plugin>
 
