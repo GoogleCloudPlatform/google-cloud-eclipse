@@ -46,8 +46,9 @@ sed -i.bak -e "s,JDK_11_HOME,/usr/lib/jvm/java-1.11.0-openjdk-amd64," .github/wo
 TMPDIR= xvfb-run \
   mvn -V -B \
       --toolchains=.github/workflows/toolchains.xml \
+      -DskipTests=true \
       -Doauth.client.id="${OAUTH_CLIENT_ID}" \
       -Doauth.client.secret="${OAUTH_CLIENT_SECRET}" \
       -Dfirelog.api.key="${FIRELOG_API_KEY}" \
       ${PRODUCT_VERSION_SUFFIX:+-Dproduct.version.qualifier.suffix="'${PRODUCT_VERSION_SUFFIX}'"} \
-    clean verify
+    clean install
