@@ -38,10 +38,8 @@
     <!-- Execution environment supported by Cloud Tools for Eclipse -->
     <requiredExecutionEnvironment>JavaSE-1.8</requiredExecutionEnvironment>
 
-    <!-- use Tycho 2.6.0 for builds to avoid triggering
-        https://github.com/eclipse-tycho/tycho/issues/1377 -->
-    <tycho.version>2.6.0</tycho.version>
-    <tycho-extras.version>2.6.0</tycho-extras.version>
+    <tycho.version>3.0.0</tycho.version>
+    <tycho-extras.version>3.0.0</tycho-extras.version>
 
     <product.version.qualifier.suffix/>  <!-- 0-length string by default -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -254,9 +252,9 @@
         <artifactId>tycho-packaging-plugin</artifactId>
         <dependencies>
           <dependency>
-            <groupId>org.eclipse.tycho.extras</groupId>
+            <groupId>org.eclipse.tycho</groupId>
             <artifactId>tycho-buildtimestamp-jgit</artifactId>
-            <version>${tycho-extras.version}</version>
+            <version>${tycho.version}</version>
           </dependency>
         </dependencies>
         <configuration>
