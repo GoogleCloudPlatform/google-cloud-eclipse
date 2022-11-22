@@ -9,7 +9,7 @@
   .p2.inf).  p2 generates unique qualifiers for categories, so it would be
   best for our non-release builds to have unique versions too.
 -->
-<product uid="com.google.cloud.tools.eclipse.dist" version="1.9.0.qualifier" useFeatures="true" includeLaunchers="false">
+<product uid="com.google.cloud.tools.eclipse.dist" version="1.9.1.qualifier" useFeatures="true" includeLaunchers="false">
 
    <configIni use="default">
    </configIni>
