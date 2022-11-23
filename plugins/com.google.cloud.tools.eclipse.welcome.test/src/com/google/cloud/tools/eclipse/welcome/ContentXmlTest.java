@@ -38,7 +38,7 @@ public class ContentXmlTest {
   @Test
   public void testWellFormed() throws ParserConfigurationException, IOException, SAXException {
     Document document = parseDocument("intro/cloud-tools-for-eclipse.xml");
-    assertEquals(6, document.getElementsByTagName("extensionContent").getLength());
+    assertEquals(4, document.getElementsByTagName("extensionContent").getLength());
   }
 
   @Test
