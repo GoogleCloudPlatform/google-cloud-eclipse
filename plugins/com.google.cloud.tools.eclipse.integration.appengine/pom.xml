@@ -9,7 +9,8 @@
   </parent>
   <artifactId>com.google.cloud.tools.eclipse.integration.appengine</artifactId>
   <version>0.1.0-SNAPSHOT</version>
-  <packaging>eclipse-test-plugin</packaging>
+  <!-- https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/3702 -->
+  <!-- <packaging>eclipse-test-plugin</packaging> -->
 
   <build>
     <plugins>
