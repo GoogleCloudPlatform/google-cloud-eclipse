@@ -25,7 +25,7 @@ Maven for building Eclipse bundles and features.
 
 4. The [Eclipse IDE](https://www.eclipse.org/downloads/eclipse-packages/).
    It's easiest to use the _Eclipse IDE for Java EE Developers_ package. You must use
-   Eclipse 4.9 - 4.21 (versions since 4.22 are currently not supported).  We use _target platforms_ to support building
+   Eclipse 4.8 - 4.21 (versions since 4.22 are currently not supported).  We use _target platforms_ to support building
    for earlier versions of Eclipse.  You also need the following:
 
    1. The [M2Eclipse plugin](http://www.eclipse.org/m2e/) (also called m2e) is
