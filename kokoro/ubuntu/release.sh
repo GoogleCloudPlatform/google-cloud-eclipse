@@ -5,8 +5,7 @@
 
 # Fail on any error.
 set -o errexit
-# Display commands being run.
-set -o xtrace
+
 
 gsutil -q cp "gs://ct4e-m2-repositories-for-kokoro/m2-cache.tar" - \
   | tar -C "${HOME}" -xf -
@@ -20,10 +19,6 @@ if [ -z "$CLOUDSDK_PYTHON" ]; then
 fi
 gcloud components install app-engine-java --quiet
 
-echo "OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID}"
-echo "OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET}"
-echo "FIRELOG_API_KEY: ${FIRELOG_API_KEY}"
-echo "PRODUCT_VERSION_SUFFIX: ${PRODUCT_VERSION_SUFFIX}"
 
 # Exit if undefined (zero-length).
 [[ -n "${OAUTH_CLIENT_ID}" ]]
