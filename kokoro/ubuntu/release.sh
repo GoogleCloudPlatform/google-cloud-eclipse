@@ -28,6 +28,8 @@ FIRELOG_API_KEY=$KOKORO_KEYSTORE_DIR/${KEYSTORE_CONFIG_ID}_FIRELOG_API_KEY
 [[ -n "${OAUTH_CLIENT_SECRET}" ]]
 [[ -n "${FIRELOG_API_KEY}" ]]
 
+echo 'cool :)'
+
 sudo update-java-alternatives --set java-1.11.0-openjdk-amd64
 export JAVA_HOME=/usr/lib/jvm/java-1.11.0-openjdk-amd64
 
