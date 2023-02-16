@@ -24,6 +24,7 @@ import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkNotFoundExce
 import com.google.cloud.tools.appengine.operations.Gcloud;
 import com.google.cloud.tools.appengine.operations.cloudsdk.process.LegacyProcessHandler;
 import com.google.cloud.tools.appengine.operations.cloudsdk.process.ProcessHandler;
+import com.google.cloud.tools.appengine.operations.cloudsdk.process.ProcessHandlerException;
 import com.google.cloud.tools.appengine.operations.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.appengine.operations.cloudsdk.process.StringBuilderProcessOutputLineListener;
 import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
@@ -36,9 +37,13 @@ import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
-import java.nio.file.Files;
+import java.io.IOException;
+//import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.console.MessageConsoleStream;
@@ -68,14 +73,24 @@ public class CloudSdkProcessWrapper {
    */
   public Deployment getAppEngineDeployment(Path credentialFile,
       MessageConsoleStream normalOutputStream) throws CloudSdkNotFoundException {
-    Preconditions.checkNotNull(credentialFile, "credential required for deploying");
-    Preconditions.checkArgument(Files.exists(credentialFile), "non-existing credential file");
+    //Preconditions.checkNotNull(credentialFile, "credential required for deploying");
+    //Preconditions.checkArgument(Files.exists(credentialFile), "non-existing credential file");
     Preconditions.checkState(!initialized, "process wrapper already set up");
     initialized = true;
 
     CloudSdk cloudSdk = new CloudSdk.Builder().build();
+    
+    Path sdkPath = cloudSdk.getPath();
+    java.util.logging.Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "sdkPath: " + sdkPath.toString());
+    Path appEnginePath = cloudSdk.getAppEngineSdkForJavaPath();
+    java.util.logging.Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "appEnginePath: " + appEnginePath.toString());
+    
+    Path testCredentials = Paths.get(System.getProperty("user.home"), ".config", "gcloud", "application_default_credentials.json");
+    java.util.logging.Logger.getLogger(this.getClass().getName()).log(Level.WARNING, testCredentials.toString() + " exists?: " + testCredentials.toFile().exists());
+    
     Gcloud gcloud = Gcloud.builder(cloudSdk)
-        .setCredentialFile(credentialFile.toFile().toPath())
+        //.setCredentialFile(credentialFile.toFile().toPath())
+        //.setCredentialFile(testCredentials)
         .setMetricsEnvironment(CloudToolsInfo.METRICS_NAME, CloudToolsInfo.getToolsVersion())
         .setShowStructuredLogs("always")  // turns on gcloud structured log
         .setOutputFormat("json")  // Deploy result will be in JSON.
@@ -122,6 +137,18 @@ public class CloudSdkProcessWrapper {
         .build();
 
     return AppCfg.builder(cloudSdk).build().newStaging(processHandler);
+  }
+  
+  public String getDefaultProject() throws CloudSdkNotFoundException, IOException, ProcessHandlerException {
+    CloudSdk cloudSdk = new CloudSdk.Builder().build();
+    
+    Gcloud gcloud = Gcloud.builder(cloudSdk)
+      .setMetricsEnvironment(CloudToolsInfo.METRICS_NAME, CloudToolsInfo.getToolsVersion())
+      .setShowStructuredLogs("always")  // turns on gcloud structured log
+      .setOutputFormat("json")  // Deploy result will be in JSON.
+      .build();
+    
+    return gcloud.runCommand(Arrays.asList("config", "get", "project"));
   }
 
   public void interrupt() {

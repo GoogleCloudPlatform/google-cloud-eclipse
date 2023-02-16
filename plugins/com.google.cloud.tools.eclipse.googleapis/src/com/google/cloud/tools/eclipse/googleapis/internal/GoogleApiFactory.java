@@ -17,22 +17,30 @@
 package com.google.cloud.tools.eclipse.googleapis.internal;
 
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.util.Utils;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.services.appengine.v1.Appengine;
 import com.google.api.services.appengine.v1.Appengine.Apps;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
 import com.google.api.services.iam.v1.Iam;
+import com.google.api.services.oauth2.Oauth2;
 import com.google.api.services.servicemanagement.ServiceManagement;
 import com.google.api.services.storage.Storage;
+import com.google.cloud.tools.eclipse.googleapis.Account;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
+import com.google.cloud.tools.eclipse.googleapis.UserInfo;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
+import java.io.IOException;
 import org.eclipse.core.net.proxy.IProxyChangeEvent;
 import org.eclipse.core.net.proxy.IProxyChangeListener;
 import org.eclipse.core.net.proxy.IProxyService;
@@ -54,6 +62,18 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   private final ProxyFactory proxyFactory;
   private LoadingCache<GoogleApi, HttpTransport> transportCache;
 
+  private static final HttpTransport transport = new NetHttpTransport();
+
+  private static final int USER_INFO_QUERY_HTTP_CONNECTION_TIMEOUT = 5000 /* ms */;
+  private static final int USER_INFO_QUERY_HTTP_READ_TIMEOUT = 3000 /* ms */;
+  private static final HttpRequestInitializer requestTimeoutSetter = new HttpRequestInitializer() {
+    @Override
+    public void initialize(HttpRequest httpRequest) throws IOException {
+      httpRequest.setConnectTimeout(USER_INFO_QUERY_HTTP_CONNECTION_TIMEOUT);
+      httpRequest.setReadTimeout(USER_INFO_QUERY_HTTP_READ_TIMEOUT);
+    }
+  };
+  
   private final IProxyChangeListener proxyChangeListener = new IProxyChangeListener() {
     @Override
     public void proxyInfoChanged(IProxyChangeEvent event) {
@@ -83,6 +103,28 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   }
 
   @Override
+  public Account getAccount() throws IOException {
+    return getAccount(GoogleCredential.getApplicationDefault());
+  }
+  Account getAccount(Credential credential) throws IOException {
+    HttpRequestInitializer chainedInitializer = new HttpRequestInitializer() {
+      @Override
+      public void initialize(HttpRequest httpRequest) throws IOException {
+        credential.initialize(httpRequest);
+        requestTimeoutSetter.initialize(httpRequest);
+      }
+    };
+    
+    Oauth2 oauth2 = new Oauth2.Builder(transport, jsonFactory, credential)
+        .setHttpRequestInitializer(chainedInitializer)
+        .setApplicationName(CloudToolsInfo.USER_AGENT)
+        .build();
+    
+    UserInfo userInfo = new UserInfo(oauth2.userinfo().get().execute());
+    return new Account(userInfo.getEmail(), credential, userInfo.getName(), userInfo.getPicture());
+  }
+  
+  @Override
   public Projects newProjectsApi(Credential credential) {
     Preconditions.checkNotNull(transportCache, "transportCache is null");
     HttpTransport transport = transportCache.getUnchecked(GoogleApi.CLOUDRESOURCE_MANAGER_API);
@@ -92,6 +134,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     CloudResourceManager resourceManager =
         new CloudResourceManager.Builder(transport, jsonFactory, credential)
             .setApplicationName(CloudToolsInfo.USER_AGENT).build();
+    
     return resourceManager.projects();
   }
 

@@ -20,7 +20,7 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.FixedMultiValidator;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.ProjectSelectorSelectionChangedListener;
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelectorObservableValue;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
@@ -126,7 +126,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
   private final FormToolkit formToolkit;
 
   public AppEngineDeployPreferencesPanel(Composite parent, IProject project,
-      IGoogleLoginService loginService, Runnable layoutChangedHandler, boolean requireValues,
+      IGoogleApiFactory apiFactory, Runnable layoutChangedHandler, boolean requireValues,
       ProjectRepository projectRepository, DeployPreferences model) {
     super(parent, SWT.NONE);
 
@@ -141,7 +141,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     colors.setForeground(null);
     formToolkit = new FormToolkit(colors);
 
-    createCredentialSection(loginService);
+    createCredentialSection(apiFactory);
     createProjectIdSection();
     setupAccountEmailDataBinding();
     setupProjectSelectorDataBinding();
@@ -344,12 +344,12 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     return accountSelector.getSelectedCredential();
   }
 
-  private void createCredentialSection(IGoogleLoginService loginService) {
+  private void createCredentialSection(IGoogleApiFactory apiFactory) {
     Label accountLabel = new Label(this, SWT.LEAD);
     accountLabel.setText(Messages.getString("deploy.preferences.dialog.label.selectAccount"));
     accountLabel.setToolTipText(Messages.getString("tooltip.account"));
 
-    accountSelector = new AccountSelector(this, loginService);
+    accountSelector = new AccountSelector(this, apiFactory);
     accountSelector.setToolTipText(Messages.getString("tooltip.account"));
     GridData accountSelectorGridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
     accountSelector.setLayoutData(accountSelectorGridData);

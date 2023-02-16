@@ -21,7 +21,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import org.eclipse.core.resources.IProject;
@@ -49,7 +48,7 @@ public class FlexDeployPreferencesDialogTest {
     when(project.getName()).thenReturn("");
     when(project.getLocation()).thenReturn(new Path("/"));
     dialog = new FlexDeployPreferencesDialog(null, "title", project,
-        mock(IGoogleLoginService.class), mock(IGoogleApiFactory.class));
+        mock(IGoogleApiFactory.class));
   }
 
   @Test

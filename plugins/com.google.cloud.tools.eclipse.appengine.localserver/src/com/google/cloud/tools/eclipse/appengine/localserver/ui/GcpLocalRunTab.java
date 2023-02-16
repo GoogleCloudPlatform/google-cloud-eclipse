@@ -151,7 +151,7 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
 
     // Account row
     new Label(composite, SWT.LEAD).setText(Messages.getString("label.account")); //$NON-NLS-1$
-    accountSelector = new AccountSelector(composite, loginService);
+    accountSelector = new AccountSelector(composite, googleApiFactory);
     accountSelector.addSelectionListener(() -> {
       updateProjectSelector();
 

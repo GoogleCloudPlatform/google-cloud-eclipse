@@ -164,7 +164,7 @@ public class DeployPropertyPage extends PropertyPage {
   private void createStandardPanelIfNeeded() {
     if (standardPreferencesPanel == null) {
       standardPreferencesPanel = new StandardDeployPreferencesPanel(
-          container, facetedProject.getProject(), loginService, this::handleLayoutChange,
+          container, facetedProject.getProject(), googleApiFactory, this::handleLayoutChange,
           false /* requireValues */, new ProjectRepository(googleApiFactory));
     }
   }
@@ -172,7 +172,7 @@ public class DeployPropertyPage extends PropertyPage {
   private void createFlexPanelIfNeeded() {
     if (flexPreferencesPanel == null) {
       flexPreferencesPanel = new FlexDeployPreferencesPanel(
-          container, facetedProject.getProject(), loginService, this::handleLayoutChange,
+          container, facetedProject.getProject(), googleApiFactory, this::handleLayoutChange,
           false /* requireValues */, new ProjectRepository(googleApiFactory));
     }
   }

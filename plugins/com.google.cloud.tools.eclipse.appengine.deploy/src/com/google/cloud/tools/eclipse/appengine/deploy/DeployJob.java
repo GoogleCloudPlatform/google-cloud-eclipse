@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.deploy;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.appengine.operations.cloudsdk.JsonParseException;
 import com.google.cloud.tools.appengine.operations.cloudsdk.serialization.AppEngineDeployResult;
+import com.google.cloud.tools.eclipse.appengine.deploy.util.CloudSdkProcessWrapper;
 import com.google.cloud.tools.eclipse.login.CredentialHelper;
 import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
@@ -27,6 +28,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.logging.Level;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -73,7 +75,7 @@ public class DeployJob extends WorkspaceJob {
       StagingDelegate stager) {
     super(Messages.getString("deploy.job.name")); //$NON-NLS-1$
     Preconditions.checkNotNull(deployPreferences.getProjectId());
-    Preconditions.checkArgument(!deployPreferences.getProjectId().isEmpty());
+ //   Preconditions.checkArgument(!deployPreferences.getProjectId().isEmpty());
     this.deployPreferences = deployPreferences;
     this.credential = credential;
     this.workDirectory = workDirectory;
@@ -98,13 +100,16 @@ public class DeployJob extends WorkspaceJob {
       }
 
       progress.subTask("Saving credential");
-      Path credentialFile = workDirectory.append(CREDENTIAL_FILENAME).toFile().toPath();
+      //Path credentialFile = workDirectory.append(CREDENTIAL_FILENAME).toFile().toPath();
+      Path credentialFile = null;
 
-      IStatus saveStatus = saveCredential(credentialFile);
-      if (saveStatus != Status.OK_STATUS) {
-        return saveStatus;
-      }
+      //IStatus saveStatus = saveCredential(credentialFile);
+      //if (saveStatus != Status.OK_STATUS) {
+      //  return saveStatus;
+      //}
 
+      java.util.logging.Logger.getLogger(CloudSdkProcessWrapper.class.getName()).log(Level.WARNING, "Skipping saving credentials");
+      
       progress.subTask("Staging project files");
       IPath stagingDirectory = workDirectory.append(STAGING_DIRECTORY_NAME);
       IStatus stagingStatus = stageProject(stagingDirectory, progress.newChild(30));
@@ -145,6 +150,7 @@ public class DeployJob extends WorkspaceJob {
   }
 
   private IStatus stageProject(IPath stagingDirectory, IProgressMonitor monitor) {
+    java.util.logging.Logger.getLogger(CloudSdkProcessWrapper.class.getName()).log(Level.WARNING, "Staging project");
     SubMonitor progress = SubMonitor.convert(monitor, 100);
 
     try {
@@ -160,6 +166,7 @@ public class DeployJob extends WorkspaceJob {
   }
 
   private IStatus deployProject(Path credentialFile, IPath stagingDirectory, IProgressMonitor monitor) {
+    java.util.logging.Logger.getLogger(CloudSdkProcessWrapper.class.getName()).log(Level.WARNING, "Deploying project");
     IPath optionalConfigurationFilesDirectory = null;
     if (deployPreferences.isIncludeOptionalConfigurationFiles()) {
       optionalConfigurationFilesDirectory = stager.getOptionalConfigurationFilesDirectory();

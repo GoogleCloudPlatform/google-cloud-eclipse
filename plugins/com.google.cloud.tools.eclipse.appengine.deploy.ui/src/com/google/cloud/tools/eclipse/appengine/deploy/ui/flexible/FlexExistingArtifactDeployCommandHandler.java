@@ -38,7 +38,7 @@ public class FlexExistingArtifactDeployCommandHandler extends FlexDeployCommandH
   protected DeployPreferencesDialog newDeployPreferencesDialog(Shell shell, IProject project,
       IGoogleLoginService loginService, IGoogleApiFactory googleApiFactory) {
     String title = Messages.getString("deploy.preferences.dialog.title.flexible");
-    return new FlexExistingArtifactDeployPreferencesDialog(shell, title, loginService,
+    return new FlexExistingArtifactDeployPreferencesDialog(shell, title,
         googleApiFactory);
   }
 

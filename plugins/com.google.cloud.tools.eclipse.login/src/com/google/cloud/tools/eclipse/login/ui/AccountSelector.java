@@ -17,16 +17,17 @@
 package com.google.cloud.tools.eclipse.login.ui;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.googleapis.Account;
+import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.Messages;
-import com.google.cloud.tools.login.Account;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.logging.Level;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -38,7 +39,7 @@ import org.eclipse.swt.widgets.Composite;
 
 public class AccountSelector extends Composite {
 
-  private IGoogleLoginService loginService;
+  private IGoogleApiFactory apiFactory;
   private String loginMessage;
   private Account selectedAccount;
   private ListenerList<Runnable> selectionListeners = new ListenerList<>();
@@ -46,14 +47,22 @@ public class AccountSelector extends Composite {
   @VisibleForTesting Combo combo;
   @VisibleForTesting LogInOnSelect logInOnSelect = new LogInOnSelect();
 
-  public AccountSelector(Composite parent, IGoogleLoginService loginService) {
+  public AccountSelector(Composite parent, IGoogleApiFactory apiFactory) {
     super(parent, SWT.NONE);
-    this.loginService = loginService;
+    this.apiFactory = apiFactory;
     loginMessage = Messages.getString("ACCOUNT_SELECTOR_LOGIN");
 
     combo = new Combo(this, SWT.READ_ONLY);
-
-    List<Account> sortedAccounts = new ArrayList<>(loginService.getAccounts());
+    
+    List<Account> sortedAccounts;
+    try {
+      selectedAccount = apiFactory.getAccount();
+      sortedAccounts = Collections.singletonList(selectedAccount);
+      
+    } catch (IOException ex) {
+      java.util.logging.Logger.getLogger(getClass().getName()).log(Level.WARNING, "Unable to access application default credentials.", ex);
+      sortedAccounts = Collections.emptyList();
+    }
     Collections.sort(sortedAccounts, new Comparator<Account>() {
       @Override
       public int compare(Account o1, Account o2) {
@@ -158,7 +167,7 @@ public class AccountSelector extends Composite {
     @Override
     public void widgetSelected(SelectionEvent event) {
       if (combo.getText().equals(loginMessage)) {
-        Account account = loginService.logIn();
+        Account account = selectedAccount;
         if (account != null) {
           // account is selected and saved
           addAndSelectAccount(account);

@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import org.eclipse.core.resources.IProject;
@@ -36,7 +36,7 @@ public class StandardDeployPreferencesPanelTest {
     IProject project = mock(IProject.class);
     when(project.getName()).thenReturn("");
     StandardDeployPreferencesPanel panel = new StandardDeployPreferencesPanel(
-        shellResource.getShell(), project, mock(IGoogleLoginService.class), mock(Runnable.class),
+        shellResource.getShell(), project, mock(IGoogleApiFactory.class), mock(Runnable.class),
         false, mock(ProjectRepository.class));
 
     assertEquals(

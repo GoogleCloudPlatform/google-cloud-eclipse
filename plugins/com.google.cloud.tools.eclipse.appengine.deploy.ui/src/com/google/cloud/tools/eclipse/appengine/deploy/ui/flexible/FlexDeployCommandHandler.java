@@ -50,7 +50,7 @@ public class FlexDeployCommandHandler extends DeployCommandHandler {
   protected DeployPreferencesDialog newDeployPreferencesDialog(Shell shell, IProject project,
       IGoogleLoginService loginService, IGoogleApiFactory googleApiFactory) {
     String title = Messages.getString("deploy.preferences.dialog.title.flexible");
-    return new FlexDeployPreferencesDialog(shell, title, project, loginService, googleApiFactory);
+    return new FlexDeployPreferencesDialog(shell, title, project, googleApiFactory);
   }
 
   @Override

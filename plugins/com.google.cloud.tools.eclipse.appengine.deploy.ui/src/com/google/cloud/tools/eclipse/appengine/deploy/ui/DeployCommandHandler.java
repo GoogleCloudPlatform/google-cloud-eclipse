@@ -37,6 +37,7 @@ import java.text.MessageFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
+import java.util.logging.Level;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -83,6 +84,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
     try {
+      java.util.logging.Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Starting DeployCommandHandler.execute()");
       IProject project = getSelectedProject(event);
 
       if (PlatformUI.isWorkbenchRunning()) {
@@ -110,7 +112,10 @@ public abstract class DeployCommandHandler extends AbstractHandler {
       DeployPreferencesDialog dialog =
           newDeployPreferencesDialog(shell, project, loginService, googleApiFactory);
       if (dialog.open() == Window.OK) {
+        java.util.logging.Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "dialog.open() now invoking launchDeployJob(");
         launchDeployJob(project, dialog.getCredential());
+      } else {
+        java.util.logging.Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "dialog.open() was not Window.OK");
       }
       // return value must be null, reserved for future use
       return null;
@@ -166,11 +171,17 @@ public abstract class DeployCommandHandler extends AbstractHandler {
 
   private void launchDeployJob(IProject project, Credential credential)
       throws IOException, CoreException {
+
+    java.util.logging.Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "launchDeployJob project " + project);
+    java.util.logging.Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "launchDeployJob credential " + credential);
+    
     sendAnalyticsPing(AnalyticsEvents.APP_ENGINE_DEPLOY);
 
     IPath workDirectory = createWorkDirectory();
     DeployPreferences deployPreferences = getDeployPreferences(project);
 
+    java.util.logging.Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "launchDeployJob deployPreferences " + deployPreferences);
+    
     DeployConsole messageConsole =
         MessageConsoleUtilities.createConsole(getConsoleName(deployPreferences.getProjectId()),
                                               new DeployConsole.Factory());
@@ -188,6 +199,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
 
     DeployJob deploy = new DeployJob(deployPreferences, credential, workDirectory,
         outputStream, errorStream, stagingDelegate);
+    java.util.logging.Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "launchDeployJob deploy.schedule()");
     messageConsole.setJob(deploy);
     deploy.addJobChangeListener(new JobChangeAdapter() {
 
@@ -199,6 +211,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
         launchCleanupJob();
       }
     });
+    java.util.logging.Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "launchDeployJob deploy.schedule()");
     deploy.schedule();
   }
 

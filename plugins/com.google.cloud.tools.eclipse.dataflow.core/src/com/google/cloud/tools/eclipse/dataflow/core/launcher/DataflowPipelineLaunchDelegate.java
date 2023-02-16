@@ -208,7 +208,7 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
 
       Credential credential = loginService.getCredential(accountEmail);
       if (credential == null) {
-        String message = "The Google account saved for this lanuch is not logged in.";
+        String message = "The Google account saved for this launch is not logged in.";
         throw new CoreException(new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, message));
       }
 

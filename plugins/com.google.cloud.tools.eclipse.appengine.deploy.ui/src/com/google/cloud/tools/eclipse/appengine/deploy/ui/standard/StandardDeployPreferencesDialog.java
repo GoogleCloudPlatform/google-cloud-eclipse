@@ -29,15 +29,15 @@ class StandardDeployPreferencesDialog extends DeployPreferencesDialog {
 
   StandardDeployPreferencesDialog(Shell parentShell, String title, IProject project,
       IGoogleLoginService loginService, IGoogleApiFactory googleApiFactory) {
-    super(parentShell, title, project, loginService, googleApiFactory);
+    super(parentShell, title, project, googleApiFactory);
   }
 
   @Override
   protected AppEngineDeployPreferencesPanel createDeployPreferencesPanel(Composite container,
-      IProject project, IGoogleLoginService loginService, Runnable layoutChangedHandler,
+      IProject project, IGoogleApiFactory apiFactory, Runnable layoutChangedHandler,
       ProjectRepository projectRepository) {
     boolean requireValues = true;
-    return new StandardDeployPreferencesPanel(container, project, loginService,
+    return new StandardDeployPreferencesPanel(container, project, apiFactory,
         layoutChangedHandler, requireValues, projectRepository);
   }
 

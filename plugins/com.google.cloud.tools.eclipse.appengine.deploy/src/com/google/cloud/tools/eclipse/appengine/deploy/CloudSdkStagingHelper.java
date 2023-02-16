@@ -21,6 +21,10 @@ import com.google.cloud.tools.appengine.configuration.AppEngineWebXmlProjectStag
 import com.google.cloud.tools.appengine.configuration.AppYamlProjectStageConfiguration;
 import com.google.cloud.tools.appengine.operations.AppEngineWebXmlProjectStaging;
 import com.google.cloud.tools.appengine.operations.AppYamlProjectStaging;
+import com.google.cloud.tools.appengine.operations.CloudSdk;
+import com.google.cloud.tools.eclipse.appengine.deploy.util.CloudSdkProcessWrapper;
+import java.nio.file.Path;
+import java.util.logging.Level;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -57,6 +61,14 @@ public class CloudSdkStagingHelper {
             .disableUpdateCheck(true)
             .build();
 
+
+    CloudSdk cloudSdk = new CloudSdk.Builder().build();
+
+    Path sdkPath = cloudSdk.getPath();
+    java.util.logging.Logger.getLogger(CloudSdkProcessWrapper.class.getName()).log(Level.WARNING, "sdkPath: " + sdkPath.toString());
+    Path appEnginePath = cloudSdk.getAppEngineSdkForJavaPath();
+    java.util.logging.Logger.getLogger(CloudSdkProcessWrapper.class.getName()).log(Level.WARNING, "appEnginePath: " + appEnginePath.toString());
+    
     appEngineStandardStaging.stageStandard(stagingConfig);
 
     progress.worked(1);

@@ -152,7 +152,7 @@ public class RunOptionsDefaultsComponent {
 
     Label accountLabel = new Label(target, SWT.NULL);
     accountLabel.setText(Messages.getString("account")); //$NON-NLS-1$
-    accountSelector = new AccountSelector(target, loginService);
+    accountSelector = new AccountSelector(target, apiFactory);
 
     Label projectInputLabel = new Label(target, SWT.NULL);
     projectInputLabel.setText(Messages.getString("cloud.platform.project.id")); //$NON-NLS-1$

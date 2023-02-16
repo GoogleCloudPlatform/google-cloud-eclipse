@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.AppEngineDeployPreferencesPanel;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.widgets.Composite;
@@ -27,16 +26,16 @@ import org.eclipse.swt.widgets.Shell;
 class FlexExistingArtifactDeployPreferencesDialog extends FlexDeployPreferencesDialog {
 
   FlexExistingArtifactDeployPreferencesDialog(Shell parentShell, String title,
-      IGoogleLoginService loginService, IGoogleApiFactory googleApiFactory) {
-    super(parentShell, title, null /*project*/, loginService, googleApiFactory);
+      IGoogleApiFactory googleApiFactory) {
+    super(parentShell, title, null /*project*/, googleApiFactory);
   }
 
   @Override
   protected AppEngineDeployPreferencesPanel createDeployPreferencesPanel(Composite container,
-      IProject project, IGoogleLoginService loginService, Runnable layoutChangedHandler,
+      IProject project, IGoogleApiFactory apiFactory, Runnable layoutChangedHandler,
       ProjectRepository projectRepository) {
     boolean requireValues = true;
-    return new FlexExistingArtifactDeployPreferencesPanel(container, loginService,
+    return new FlexExistingArtifactDeployPreferencesPanel(container, apiFactory,
         layoutChangedHandler, requireValues, projectRepository);
   }
 }
