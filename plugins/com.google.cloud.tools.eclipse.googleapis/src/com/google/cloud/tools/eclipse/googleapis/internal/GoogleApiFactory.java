@@ -17,30 +17,25 @@
 package com.google.cloud.tools.eclipse.googleapis.internal;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.util.Utils;
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.services.appengine.v1.Appengine;
 import com.google.api.services.appengine.v1.Appengine.Apps;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
 import com.google.api.services.iam.v1.Iam;
-import com.google.api.services.oauth2.Oauth2;
 import com.google.api.services.servicemanagement.ServiceManagement;
 import com.google.api.services.storage.Storage;
 import com.google.cloud.tools.eclipse.googleapis.Account;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
-import com.google.cloud.tools.eclipse.googleapis.UserInfo;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import java.io.IOException;
+import java.util.logging.Logger;
 import org.eclipse.core.net.proxy.IProxyChangeEvent;
 import org.eclipse.core.net.proxy.IProxyChangeListener;
 import org.eclipse.core.net.proxy.IProxyService;
@@ -56,23 +51,14 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 @Component
 public class GoogleApiFactory implements IGoogleApiFactory {
 
-  private IProxyService proxyService;
-
+  
   private final JsonFactory jsonFactory = Utils.getDefaultJsonFactory();
   private final ProxyFactory proxyFactory;
+  private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
+  
   private LoadingCache<GoogleApi, HttpTransport> transportCache;
-
-  private static final HttpTransport transport = new NetHttpTransport();
-
-  private static final int USER_INFO_QUERY_HTTP_CONNECTION_TIMEOUT = 5000 /* ms */;
-  private static final int USER_INFO_QUERY_HTTP_READ_TIMEOUT = 3000 /* ms */;
-  private static final HttpRequestInitializer requestTimeoutSetter = new HttpRequestInitializer() {
-    @Override
-    public void initialize(HttpRequest httpRequest) throws IOException {
-      httpRequest.setConnectTimeout(USER_INFO_QUERY_HTTP_CONNECTION_TIMEOUT);
-      httpRequest.setReadTimeout(USER_INFO_QUERY_HTTP_READ_TIMEOUT);
-    }
-  };
+  private IAccountProvider accountProvider;
+  private IProxyService proxyService;
   
   private final IProxyChangeListener proxyChangeListener = new IProxyChangeListener() {
     @Override
@@ -85,6 +71,13 @@ public class GoogleApiFactory implements IGoogleApiFactory {
 
   public GoogleApiFactory() {
     this(new ProxyFactory());
+    accountProvider = new DefaultAccountProvider();
+  }
+  
+  @VisibleForTesting
+  private GoogleApiFactory(IAccountProvider accountProvider) {
+    this(new ProxyFactory());
+    this.accountProvider = accountProvider;
   }
 
   @VisibleForTesting
@@ -102,47 +95,33 @@ public class GoogleApiFactory implements IGoogleApiFactory {
         CacheBuilder.newBuilder().weakValues().build(new TransportCacheLoader(proxyFactory));
   }
 
-  /**
-   * @return the application default credentials associated account
-   */
   @Override
   public Account getAccount() throws IOException {
-    return getAccount(GoogleCredential.getApplicationDefault());
+    return accountProvider.getAccount();
   }
   
-  /**
-   * Convenience method to determine if the user has ADC set
-   * @return true if the gcloud CLI has Application Default Credentials set
-   */
   @Override
   public boolean hasCredentialsSet() throws IOException {
-    return getAccount() != null && getAccount().getOAuth2Credential() != null;
+    return accountProvider.hasCredentialsSet();
   }
   
-  Account getAccount(Credential credential) throws IOException {
-    HttpRequestInitializer chainedInitializer = new HttpRequestInitializer() {
-      @Override
-      public void initialize(HttpRequest httpRequest) throws IOException {
-        credential.initialize(httpRequest);
-        requestTimeoutSetter.initialize(httpRequest);
-      }
-    };
-    
-    Oauth2 oauth2 = new Oauth2.Builder(transport, jsonFactory, credential)
-        .setHttpRequestInitializer(chainedInitializer)
-        .setApplicationName(CloudToolsInfo.USER_AGENT)
-        .build();
-    
-    UserInfo userInfo = new UserInfo(oauth2.userinfo().get().execute());
-    return new Account(userInfo.getEmail(), credential, userInfo.getName(), userInfo.getPicture());
+  private Credential getCredential() {
+    try {
+      return accountProvider.getCredential();
+    } catch (IOException ex) {
+      LOGGER.severe("Error when obtaining credential: " + ex);
+      return null;
+    }
   }
-  
+ 
   @Override
   public Projects newProjectsApi() {
     Preconditions.checkNotNull(transportCache, "transportCache is null");
     HttpTransport transport = transportCache.getUnchecked(GoogleApi.CLOUDRESOURCE_MANAGER_API);
     Preconditions.checkNotNull(transport, "transport is null");
     Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
+    Credential credential = getCredential();
+    Preconditions.checkNotNull(credential, "credential is null");
 
     CloudResourceManager resourceManager =
         new CloudResourceManager.Builder(transport, jsonFactory, credential)
@@ -157,6 +136,8 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     HttpTransport transport = transportCache.getUnchecked(GoogleApi.CLOUD_STORAGE_API);
     Preconditions.checkNotNull(transport, "transport is null");
     Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
+    Credential credential = getCredential();
+    Preconditions.checkNotNull(credential, "credential is null");
 
     Storage.Builder builder = new Storage.Builder(transport, jsonFactory, credential)
         .setApplicationName(CloudToolsInfo.USER_AGENT);
@@ -170,6 +151,8 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     HttpTransport transport = transportCache.getUnchecked(GoogleApi.APPENGINE_ADMIN_API);
     Preconditions.checkNotNull(transport, "transport is null");
     Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
+    Credential credential = getCredential();
+    Preconditions.checkNotNull(credential, "credential is null");
 
     Appengine appengine =
         new Appengine.Builder(transport, jsonFactory, credential)
@@ -183,6 +166,8 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     HttpTransport transport = transportCache.getUnchecked(GoogleApi.SERVICE_MANAGEMENT_API);
     Preconditions.checkNotNull(transport, "transport is null");
     Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
+    Credential credential = getCredential();
+    Preconditions.checkNotNull(credential, "credential is null");
 
     ServiceManagement serviceManagement =
         new ServiceManagement.Builder(transport, jsonFactory, credential)
@@ -196,6 +181,8 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     HttpTransport transport = transportCache.getUnchecked(GoogleApi.IAM_API);
     Preconditions.checkNotNull(transport, "transport is null");
     Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
+    Credential credential = getCredential();
+    Preconditions.checkNotNull(credential, "credential is null");
 
     Iam iam = new Iam.Builder(transport, jsonFactory, credential)
         .setApplicationName(CloudToolsInfo.USER_AGENT).build();
