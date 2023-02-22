@@ -87,14 +87,14 @@ public class AppEngineApplicationQueryJobTest {
   @Test
   public void testRun_projectHasNoApplication()
       throws ProjectRepositoryException, InterruptedException {
-    when(projectRepository.getAppEngineApplication(credential, "projectId"))
+    when(projectRepository.getAppEngineApplication("projectId"))
         .thenReturn(AppEngine.NO_APPENGINE_APPLICATION);
     assertNull(project.getAppEngine());
 
     queryJob.schedule();
     queryJob.join();
 
-    verify(projectRepository).getAppEngineApplication(credential, "projectId");
+    verify(projectRepository).getAppEngineApplication("projectId");
     verify(isLatestQueryJob).test(queryJob);
     verify(projectSelector).isDisposed();
     verify(projectSelection).isEmpty();
@@ -107,7 +107,7 @@ public class AppEngineApplicationQueryJobTest {
   @Test
   public void testRun_accountDoesNotHavePermission()
       throws ProjectRepositoryException, InterruptedException {
-    when(projectRepository.getAppEngineApplication(credential, "projectId"))
+    when(projectRepository.getAppEngineApplication("projectId"))
         .thenThrow(new ApplicationPermissionsException("testException", null));
 
     queryJob.schedule();
@@ -125,7 +125,7 @@ public class AppEngineApplicationQueryJobTest {
   public void testRun_projectHasApplication()
       throws ProjectRepositoryException, InterruptedException {
     AppEngine appEngine = AppEngine.withId("unique-id");
-    when(projectRepository.getAppEngineApplication(credential, "projectId")).thenReturn(appEngine);
+    when(projectRepository.getAppEngineApplication("projectId")).thenReturn(appEngine);
 
     queryJob.schedule();
     queryJob.join();
@@ -139,7 +139,7 @@ public class AppEngineApplicationQueryJobTest {
 
   @Test
   public void testRun_queryError() throws ProjectRepositoryException, InterruptedException {
-    when(projectRepository.getAppEngineApplication(credential, "projectId"))
+    when(projectRepository.getAppEngineApplication("projectId"))
         .thenThrow(new ProjectRepositoryException("testException"));
 
     queryJob.schedule();
@@ -155,7 +155,7 @@ public class AppEngineApplicationQueryJobTest {
   @Test
   public void testRun_abandonIfDisposed() throws InterruptedException, ProjectRepositoryException {
     when(projectSelector.isDisposed()).thenReturn(true);
-    when(projectRepository.getAppEngineApplication(credential, "projectId"))
+    when(projectRepository.getAppEngineApplication("projectId"))
         .thenReturn(AppEngine.NO_APPENGINE_APPLICATION);
 
     queryJob.schedule();
@@ -169,7 +169,7 @@ public class AppEngineApplicationQueryJobTest {
   public void testRun_abandonIfNotLatestJob()
       throws InterruptedException, ProjectRepositoryException {
     when(isLatestQueryJob.test(queryJob)).thenReturn(false);
-    when(projectRepository.getAppEngineApplication(credential, "projectId"))
+    when(projectRepository.getAppEngineApplication("projectId"))
         .thenReturn(AppEngine.NO_APPENGINE_APPLICATION);
 
     queryJob.schedule();
@@ -182,7 +182,7 @@ public class AppEngineApplicationQueryJobTest {
   @Test
   public void testRun_abandonIfProjectSelectorHasNoSelection()
       throws ProjectRepositoryException, InterruptedException {
-    when(projectRepository.getAppEngineApplication(credential, "projectId"))
+    when(projectRepository.getAppEngineApplication("projectId"))
         .thenReturn(AppEngine.NO_APPENGINE_APPLICATION);
     when(projectSelection.isEmpty()).thenReturn(true);
 
@@ -195,7 +195,7 @@ public class AppEngineApplicationQueryJobTest {
 
   @Test
   public void testRun_abandonStaleJob() throws InterruptedException, ProjectRepositoryException {
-    when(projectRepository.getAppEngineApplication(credential, "projectId"))
+    when(projectRepository.getAppEngineApplication("projectId"))
         .thenReturn(AppEngine.NO_APPENGINE_APPLICATION);
 
     // Prepare another concurrent query job.
@@ -203,7 +203,7 @@ public class AppEngineApplicationQueryJobTest {
 
     GcpProject staleProject = new GcpProject("name", "staleProjectId");
     ProjectRepository projectRepository2 = mock(ProjectRepository.class);
-    when(projectRepository2.getAppEngineApplication(staleCredential, "staleProjectId"))
+    when(projectRepository2.getAppEngineApplication("staleProjectId"))
         .thenThrow(new ProjectRepositoryException("testException"));
 
     // This second job is stale, i.e., it was fired, but user has selected another credential.
@@ -217,8 +217,8 @@ public class AppEngineApplicationQueryJobTest {
     staleJob.schedule();
     staleJob.join();
 
-    verify(projectRepository).getAppEngineApplication(credential, "projectId");
-    verify(projectRepository2).getAppEngineApplication(staleCredential, "staleProjectId");
+    verify(projectRepository).getAppEngineApplication("projectId");
+    verify(projectRepository2).getAppEngineApplication("staleProjectId");
 
     verify(projectSelector).setStatusLink(EXPECTED_MESSAGE_WHEN_NO_APPLICATION, EXPECTED_LINK);
     verify(projectSelector, never()).setStatusLink(EXPECTED_MESSAGE_WHEN_EXCEPTION, null);

@@ -229,7 +229,7 @@ public class MiniSelector implements ISelectionProvider {
 
     @Override
     protected GcpProject[] compute(IProgressMonitor monitor) throws Exception {
-      List<GcpProject> projects = projectRepository.getProjects(credential);
+      List<GcpProject> projects = projectRepository.getProjects();
       return projects.toArray(new GcpProject[projects.size()]);
     }
 

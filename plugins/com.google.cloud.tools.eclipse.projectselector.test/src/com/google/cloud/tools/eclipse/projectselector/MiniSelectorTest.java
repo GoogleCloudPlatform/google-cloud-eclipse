@@ -77,7 +77,7 @@ public class MiniSelectorTest {
   @Test
   public void testWithCredential() {
     Credential credential = mock(Credential.class);
-    mockProjectsList(credential, new GcpProject("foo", "foo.id"));
+    mockProjectsList(new GcpProject("foo", "foo.id"));
     MiniSelector selector = new MiniSelector(shellResource.getShell(), apiFactory, credential);
     assertEquals(credential, selector.getCredential());
     assertNotNull(selector.getSelection());
@@ -98,7 +98,7 @@ public class MiniSelectorTest {
   @Test
   public void testListenerFired() {
     Credential credential = mock(Credential.class);
-    mockProjectsList(credential, new GcpProject("foo", "foo.id"));
+    mockProjectsList(new GcpProject("foo", "foo.id"));
     MiniSelector selector = new MiniSelector(shellResource.getShell(), apiFactory, credential);
 
     assertNotNull(selector.getSelection());
@@ -139,7 +139,7 @@ public class MiniSelectorTest {
   }
 
 
-  private void mockProjectsList(Credential credential, GcpProject... gcpProjects) {
+  private void mockProjectsList(Credential cred, GcpProject... gcpProjects) {
     Projects projectsApi = mock(Projects.class);
     Projects.List listApi = mock(Projects.List.class);
     List<Project> projectsList = new ArrayList<>();
@@ -152,7 +152,7 @@ public class MiniSelectorTest {
     ListProjectsResponse response = new ListProjectsResponse();
     response.setProjects(projectsList);
     try {
-      doReturn(projectsApi).when(apiFactory).newProjectsApi(credential);
+      doReturn(projectsApi).when(apiFactory).newProjectsApi();
       doReturn(listApi).when(listApi).setPageSize(any(Integer.class));
       doReturn(listApi).when(projectsApi).list();
       doReturn(response).when(listApi).execute();

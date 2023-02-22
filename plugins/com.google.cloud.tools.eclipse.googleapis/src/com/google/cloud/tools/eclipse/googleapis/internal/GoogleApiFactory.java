@@ -102,10 +102,23 @@ public class GoogleApiFactory implements IGoogleApiFactory {
         CacheBuilder.newBuilder().weakValues().build(new TransportCacheLoader(proxyFactory));
   }
 
+  /**
+   * @return the application default credentials associated account
+   */
   @Override
   public Account getAccount() throws IOException {
     return getAccount(GoogleCredential.getApplicationDefault());
   }
+  
+  /**
+   * Convenience method to determine if the user has ADC set
+   * @return true if the gcloud CLI has Application Default Credentials set
+   */
+  @Override
+  public boolean hasCredentialsSet() throws IOException {
+    return getAccount() != null && getAccount().getOAuth2Credential() != null;
+  }
+  
   Account getAccount(Credential credential) throws IOException {
     HttpRequestInitializer chainedInitializer = new HttpRequestInitializer() {
       @Override
@@ -125,7 +138,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   }
   
   @Override
-  public Projects newProjectsApi(Credential credential) {
+  public Projects newProjectsApi() {
     Preconditions.checkNotNull(transportCache, "transportCache is null");
     HttpTransport transport = transportCache.getUnchecked(GoogleApi.CLOUDRESOURCE_MANAGER_API);
     Preconditions.checkNotNull(transport, "transport is null");
@@ -139,7 +152,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   }
 
   @Override
-  public Storage newStorageApi(Credential credential) {
+  public Storage newStorageApi() {
     Preconditions.checkNotNull(transportCache, "transportCache is null");
     HttpTransport transport = transportCache.getUnchecked(GoogleApi.CLOUD_STORAGE_API);
     Preconditions.checkNotNull(transport, "transport is null");
@@ -152,7 +165,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   }
 
   @Override
-  public Apps newAppsApi(Credential credential) {
+  public Apps newAppsApi() {
     Preconditions.checkNotNull(transportCache, "transportCache is null");
     HttpTransport transport = transportCache.getUnchecked(GoogleApi.APPENGINE_ADMIN_API);
     Preconditions.checkNotNull(transport, "transport is null");
@@ -165,7 +178,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   }
 
   @Override
-  public ServiceManagement newServiceManagementApi(Credential credential) {
+  public ServiceManagement newServiceManagementApi() {
     Preconditions.checkNotNull(transportCache, "transportCache is null");
     HttpTransport transport = transportCache.getUnchecked(GoogleApi.SERVICE_MANAGEMENT_API);
     Preconditions.checkNotNull(transport, "transport is null");
@@ -178,7 +191,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   }
 
   @Override
-  public Iam newIamApi(Credential credential) {
+  public Iam newIamApi() {
     Preconditions.checkNotNull(transportCache, "transportCache is null");
     HttpTransport transport = transportCache.getUnchecked(GoogleApi.IAM_API);
     Preconditions.checkNotNull(transport, "transport is null");

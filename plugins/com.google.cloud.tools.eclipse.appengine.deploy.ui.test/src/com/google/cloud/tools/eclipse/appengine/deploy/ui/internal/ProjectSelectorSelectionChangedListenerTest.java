@@ -99,7 +99,7 @@ public class ProjectSelectorSelectionChangedListenerTest {
   public void testSelectionChanged_repositoryException()
       throws ProjectRepositoryException, InterruptedException {
     initSelectionAndAccountSelector();
-    when(projectRepository.getAppEngineApplication(any(Credential.class), anyString()))
+    when(projectRepository.getAppEngineApplication(anyString()))
         .thenThrow(new ProjectRepositoryException("testException"));
 
     listener.selectionChanged(event);
@@ -112,7 +112,7 @@ public class ProjectSelectorSelectionChangedListenerTest {
   public void testSelectionChanged_noAppEngineApplication()
       throws ProjectRepositoryException, InterruptedException {
     initSelectionAndAccountSelector();
-    when(projectRepository.getAppEngineApplication(any(Credential.class), anyString()))
+    when(projectRepository.getAppEngineApplication(anyString()))
         .thenReturn(AppEngine.NO_APPENGINE_APPLICATION);
 
     listener.selectionChanged(event);
@@ -125,7 +125,7 @@ public class ProjectSelectorSelectionChangedListenerTest {
   public void testSelectionChanged_hasAppEngineApplication()
       throws ProjectRepositoryException, InterruptedException {
     initSelectionAndAccountSelector();
-    when(projectRepository.getAppEngineApplication(any(Credential.class), anyString()))
+    when(projectRepository.getAppEngineApplication(anyString()))
         .thenReturn(AppEngine.withId("id"));
 
     listener.selectionChanged(event);
@@ -141,7 +141,7 @@ public class ProjectSelectorSelectionChangedListenerTest {
 
     listener.selectionChanged(event);
     assertNull(listener.latestQueryJob);
-    verify(projectRepository, never()).getAppEngineApplication(any(Credential.class), anyString());
+    verify(projectRepository, never()).getAppEngineApplication(anyString());
     verify(projectSelector).clearStatusLink();
   }
 
@@ -154,16 +154,16 @@ public class ProjectSelectorSelectionChangedListenerTest {
 
     listener.selectionChanged(event);
     assertNull(listener.latestQueryJob);
-    verify(projectRepository, never()).getAppEngineApplication(any(Credential.class), anyString());
+    verify(projectRepository, never()).getAppEngineApplication(anyString());
     verify(projectSelector).setStatusLink(EXPECTED_MESSAGE_WHEN_NO_APPLICATION, EXPECTED_LINK);
   }
 
   @Test
   public void testSelectionChanged_changeSelectedProject()
       throws ProjectRepositoryException, InterruptedException {
-    when(projectRepository.getAppEngineApplication(any(Credential.class), eq("oldProjectId")))
+    when(projectRepository.getAppEngineApplication(eq("oldProjectId")))
         .thenThrow(new ProjectRepositoryException("testException"));
-    when(projectRepository.getAppEngineApplication(any(Credential.class), eq("projectId")))
+    when(projectRepository.getAppEngineApplication(eq("projectId")))
         .thenReturn(AppEngine.NO_APPENGINE_APPLICATION);
 
     initSelectionAndAccountSelector(new GcpProject("oldProjectName", "oldProjectId"));
@@ -181,8 +181,8 @@ public class ProjectSelectorSelectionChangedListenerTest {
     assertNotEquals(oldJob, newJob);
     newJob.join();
 
-    verify(projectRepository).getAppEngineApplication(any(Credential.class), eq("oldProjectId"));
-    verify(projectRepository).getAppEngineApplication(any(Credential.class), eq("projectId"));
+    verify(projectRepository).getAppEngineApplication(eq("oldProjectId"));
+    verify(projectRepository).getAppEngineApplication(eq("projectId"));
     verify(projectSelector).setStatusLink(EXPECTED_MESSAGE_WHEN_NO_APPLICATION, EXPECTED_LINK);
   }
 

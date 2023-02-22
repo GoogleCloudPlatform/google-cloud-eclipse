@@ -130,8 +130,8 @@ public class GcpLocalRunTabTest {
     when(account2.getOAuth2Credential()).thenReturn(credential2);
     when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
 
-    when(projectRepository.getProjects(credential1)).thenReturn(projectsOfEmail1);
-    when(projectRepository.getProjects(credential2)).thenReturn(projectsOfEmail2);
+    when(projectRepository.getProjects()).thenReturn(projectsOfEmail1);
+    when(projectRepository.getProjects()).thenReturn(projectsOfEmail2);
 
     tab = new GcpLocalRunTab(environmentTab, loginService, apiFactory, projectRepository);
     tab.createControl(shell);
@@ -393,7 +393,7 @@ public class GcpLocalRunTabTest {
     byte[] keyContent = "key data in JSON format".getBytes();
     serviceAccountKey.setPrivateKeyData(Base64.encodeBase64String(keyContent));
 
-    when(mockApiFactory.newIamApi(any(Credential.class))).thenReturn(iam);
+    when(mockApiFactory.newIamApi()).thenReturn(iam);
     when(iam.projects()).thenReturn(projects);
     when(projects.serviceAccounts()).thenReturn(serviceAccounts);
     when(serviceAccounts.keys()).thenReturn(keys);

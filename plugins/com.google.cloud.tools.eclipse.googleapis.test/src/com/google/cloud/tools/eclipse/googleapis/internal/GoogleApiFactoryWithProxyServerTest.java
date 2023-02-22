@@ -66,14 +66,14 @@ public class GoogleApiFactoryWithProxyServerTest {
 
   @Test
   public void testNewAppsApi_userAgentIsSet() throws IOException {
-    Apps api = googleApiFactory.newAppsApi(mock(Credential.class));
+    Apps api = googleApiFactory.newAppsApi();
     assertThat(api.get("").getRequestHeaders().getUserAgent(),
                containsString(CloudToolsInfo.USER_AGENT));
   }
 
   @Test
   public void testNewProjectsApi_userAgentIsSet() throws IOException {
-    Projects api = googleApiFactory.newProjectsApi(mock(Credential.class));
+    Projects api = googleApiFactory.newProjectsApi();
     assertThat(api.get("").getRequestHeaders().getUserAgent(),
                containsString(CloudToolsInfo.USER_AGENT));
   }

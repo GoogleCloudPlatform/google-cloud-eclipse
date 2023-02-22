@@ -539,8 +539,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
 
       Preconditions.checkArgument(fromObject instanceof String);
       try {
-        return projectRepository.getProject(accountSelector.getSelectedCredential(),
-                                           (String) fromObject);
+        return projectRepository.getProject((String) fromObject);
       } catch (ProjectRepositoryException ex) {
         return null;
       }

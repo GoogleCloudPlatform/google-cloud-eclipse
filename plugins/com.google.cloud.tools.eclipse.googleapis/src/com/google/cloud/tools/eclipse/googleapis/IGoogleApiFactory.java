@@ -38,27 +38,33 @@ public interface IGoogleApiFactory {
   public Account getAccount() throws IOException;
   
   /**
+   * @return true if the factory has an account with credentials set
+   * @throws IOException
+   */
+  public boolean hasCredentialsSet() throws IOException;
+  
+  /**
    * @return a Google Cloud Storage API client
    */
-  Storage newStorageApi(Credential credential);
+  Storage newStorageApi();
 
   /**
    * @return an Appengine Apps API client
    */
-  Apps newAppsApi(Credential credential);
+  Apps newAppsApi();
 
   /**
    * @return a CloudResourceManager/Projects API client
    */
-  Projects newProjectsApi(Credential credential);
+  Projects newProjectsApi();
 
   /**
    * @return a ServiceManagement API client
    */
-  ServiceManagement newServiceManagementApi(Credential credential);
+  ServiceManagement newServiceManagementApi();
 
   /**
    * @return an Identity and Access Management API client
    */
-  Iam newIamApi(Credential credential);
+  Iam newIamApi();
 }

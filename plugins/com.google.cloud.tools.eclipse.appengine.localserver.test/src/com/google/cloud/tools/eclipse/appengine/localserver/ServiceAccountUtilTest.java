@@ -52,7 +52,6 @@ public class ServiceAccountUtilTest {
 
   @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
-  @Mock private Credential credential;
   @Mock private IGoogleApiFactory apiFactory;
   @Mock private Keys keys;
   @Mock private Create create;
@@ -67,7 +66,7 @@ public class ServiceAccountUtilTest {
     Projects projects = mock(Projects.class);
     ServiceAccounts serviceAccounts = mock(ServiceAccounts.class);
         
-    when(apiFactory.newIamApi(any(Credential.class))).thenReturn(iam);
+    when(apiFactory.newIamApi()).thenReturn(iam);
     when(iam.projects()).thenReturn(projects);
     when(projects.serviceAccounts()).thenReturn(serviceAccounts);
     when(serviceAccounts.keys()).thenReturn(keys);
@@ -85,7 +84,7 @@ public class ServiceAccountUtilTest {
   @Test
   public void testCreateServiceAccountKey_destinationShouldBeAbsolute() throws IOException {
     try {
-      ServiceAccountUtil.createAppEngineDefaultServiceAccountKey(apiFactory, credential,
+      ServiceAccountUtil.createAppEngineDefaultServiceAccountKey(apiFactory, 
           "my-project", Paths.get("relative/path/to.json"));
       fail();
     } catch (IllegalArgumentException e) {
@@ -95,7 +94,7 @@ public class ServiceAccountUtilTest {
 
   @Test
   public void testCreateServiceAccountKey() throws IOException {
-    ServiceAccountUtil.createAppEngineDefaultServiceAccountKey(apiFactory, credential,
+    ServiceAccountUtil.createAppEngineDefaultServiceAccountKey(apiFactory, 
         "my-project", keyFile);
 
     byte[] bytesRead = Files.readAllBytes(keyFile);
@@ -108,7 +107,7 @@ public class ServiceAccountUtilTest {
         eq("projects/google.com:my-project/serviceAccounts/my-project.google.com@appspot.gserviceaccount.com"),
         any(CreateServiceAccountKeyRequest.class))).thenReturn(create);
 
-    ServiceAccountUtil.createAppEngineDefaultServiceAccountKey(apiFactory, credential,
+    ServiceAccountUtil.createAppEngineDefaultServiceAccountKey(apiFactory, 
         "google.com:my-project", keyFile);
 
     byte[] bytesRead = Files.readAllBytes(keyFile);
@@ -119,7 +118,7 @@ public class ServiceAccountUtilTest {
   public void testCreateServiceAccountKey_replacesExistingFile() throws IOException {
 
     Files.write(keyFile, new byte[] {0, 1, 2});
-    ServiceAccountUtil.createAppEngineDefaultServiceAccountKey(apiFactory, credential,
+    ServiceAccountUtil.createAppEngineDefaultServiceAccountKey(apiFactory, 
         "my-project", keyFile);
 
     byte[] bytesRead = Files.readAllBytes(keyFile);
@@ -132,7 +131,7 @@ public class ServiceAccountUtilTest {
     when(create.execute()).thenThrow(new IOException("log from unit test"));
     
     try {
-      ServiceAccountUtil.createAppEngineDefaultServiceAccountKey(apiFactory, credential,
+      ServiceAccountUtil.createAppEngineDefaultServiceAccountKey(apiFactory, 
           "my-project", keyFile);
       fail();
     } catch (IOException e) {
@@ -144,7 +143,7 @@ public class ServiceAccountUtilTest {
   @Test
   public void testCreateServiceAccountKey_createsRequiredDirectories() throws IOException {
     keyFile = tempFolder.getRoot().toPath().resolve("non/existing/directory/key.json");
-    ServiceAccountUtil.createAppEngineDefaultServiceAccountKey(apiFactory, credential,
+    ServiceAccountUtil.createAppEngineDefaultServiceAccountKey(apiFactory, 
         "my-project", keyFile);
 
     byte[] bytesRead = Files.readAllBytes(keyFile);

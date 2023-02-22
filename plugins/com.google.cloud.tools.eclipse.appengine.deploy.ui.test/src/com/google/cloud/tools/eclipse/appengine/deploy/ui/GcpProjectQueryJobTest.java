@@ -63,7 +63,7 @@ public class GcpProjectQueryJobTest {
         dataBindingContext, isLatestQueryJob);
 
     when(projectSelector.isDisposed()).thenReturn(false);
-    when(projectRepository.getProjects(credential)).thenReturn(projects);
+    when(projectRepository.getProjects()).thenReturn(projects);
     when(isLatestQueryJob.test(queryJob)).thenReturn(true);
   }
 
@@ -83,7 +83,7 @@ public class GcpProjectQueryJobTest {
     queryJob.schedule();
     queryJob.join();
 
-    verify(projectRepository).getProjects(credential);
+    verify(projectRepository).getProjects();
     verify(isLatestQueryJob).test(queryJob);
     verify(projectSelector).isDisposed();
     verify(projectSelector).setProjects(projects);
@@ -96,7 +96,7 @@ public class GcpProjectQueryJobTest {
     queryJob.schedule();
     queryJob.join();
 
-    verify(projectRepository).getProjects(credential);
+    verify(projectRepository).getProjects();
     verify(projectSelector, never()).setProjects(projects);
   }
 
@@ -108,7 +108,7 @@ public class GcpProjectQueryJobTest {
     queryJob.schedule();
     queryJob.join();
 
-    verify(projectRepository).getProjects(credential);
+    verify(projectRepository).getProjects();
     verify(projectSelector, never()).setProjects(projects);
   }
 
@@ -121,7 +121,7 @@ public class GcpProjectQueryJobTest {
     anotherProjectList.add(null); // so not equals to projects
     
     ProjectRepository projectRepository2 = mock(ProjectRepository.class);
-    when(projectRepository2.getProjects(staleCredential)).thenReturn(anotherProjectList);
+    when(projectRepository2.getProjects()).thenReturn(anotherProjectList);
 
     // This second job is stale, i.e., it was fired, but user has selected another credential.
     Predicate<Job> notLatest = job -> false;
@@ -134,8 +134,8 @@ public class GcpProjectQueryJobTest {
     staleJob.schedule();
     staleJob.join();
 
-    verify(projectRepository).getProjects(credential);
-    verify(projectRepository2).getProjects(staleCredential);
+    verify(projectRepository).getProjects();
+    verify(projectRepository2).getProjects();
 
     verify(projectSelector).setProjects(projects);
     verify(projectSelector, never()).setProjects(anotherProjectList);

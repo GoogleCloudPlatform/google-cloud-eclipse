@@ -43,8 +43,8 @@ public class GcsDataflowProjectClient {
   private final Storage gcsClient;
 
   public static GcsDataflowProjectClient create(
-      IGoogleApiFactory apiFactory, Credential credential) {
-    return new GcsDataflowProjectClient(apiFactory.newStorageApi(credential));
+      IGoogleApiFactory apiFactory) {
+    return new GcsDataflowProjectClient(apiFactory.newStorageApi());
   }
 
   private GcsDataflowProjectClient(Storage gcsClient) {

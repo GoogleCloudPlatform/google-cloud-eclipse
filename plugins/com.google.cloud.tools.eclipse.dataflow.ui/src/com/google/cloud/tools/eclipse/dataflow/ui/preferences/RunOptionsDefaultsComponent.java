@@ -44,6 +44,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableSortedSet;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -415,9 +416,8 @@ public class RunOptionsDefaultsComponent {
     return true;
   }
 
-  protected void checkProjectConfiguration() {
-    Credential selectedCredential = accountSelector.getSelectedCredential();
-    if (selectedCredential == null) {
+  protected void checkProjectConfiguration() throws IOException {
+    if (!apiFactory.hasCredentialsSet()) {
       return;
     }
     GcpProject project = projectInput.getProject();
@@ -433,15 +433,14 @@ public class RunOptionsDefaultsComponent {
     }
 
     checkProjectConfigurationJob =
-        new GcpProjectServicesJob(apiFactory, selectedCredential, project.getId());
+        new GcpProjectServicesJob(apiFactory, project.getId());
     checkProjectConfigurationJob.getFuture().addListener(this::validate, displayExecutor);
     checkProjectConfigurationJob.schedule();
   }
 
   private GcsDataflowProjectClient getGcsClient() {
     Preconditions.checkNotNull(accountSelector.getSelectedCredential());
-    Credential credential = accountSelector.getSelectedCredential();
-    return GcsDataflowProjectClient.create(apiFactory, credential);
+    return GcsDataflowProjectClient.create(apiFactory);
   }
 
   public Control getControl() {

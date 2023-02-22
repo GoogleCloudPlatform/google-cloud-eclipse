@@ -259,7 +259,7 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
 
     BusyIndicator.showWhile(projectSelector.getDisplay(), () -> {
       try {
-        List<GcpProject> gcpProjects = projectRepository.getProjects(credential);
+        List<GcpProject> gcpProjects = projectRepository.getProjects();
         projectSelector.setProjects(gcpProjects);
       } catch (ProjectRepositoryException e) {
         logger.log(Level.WARNING,
@@ -410,14 +410,13 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
 
   @VisibleForTesting
   void createServiceAccountKey(Path keyFile) {
-    Credential credential = accountSelector.getSelectedCredential();
     String projectId = projectSelector.getSelectedProjectId();
     Preconditions.checkNotNull(credential, "no account selected"); //$NON-NLS-1$
     Preconditions.checkState(!projectId.isEmpty(), "no project selected"); //$NON-NLS-1$
     
     try { 
       ServiceAccountUtil.createAppEngineDefaultServiceAccountKey(googleApiFactory,
-          credential, projectId, keyFile);
+          projectId, keyFile);
 
       serviceKeyInput.setText(keyFile.toString());
       String message = Messages.getString("service.key.created", keyFile); //$NON-NLS-1$
