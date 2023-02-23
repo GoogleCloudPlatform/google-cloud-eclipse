@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver;
 
-import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.util.Base64;
 import com.google.api.services.iam.v1.Iam;
 import com.google.api.services.iam.v1.Iam.Projects.ServiceAccounts.Keys;
@@ -41,8 +40,8 @@ public class ServiceAccountUtil {
   public static void createAppEngineDefaultServiceAccountKey(IGoogleApiFactory apiFactory, 
       String projectId, Path destination)
           throws FileAlreadyExistsException, IOException {
-    Preconditions.checkState(apiFactory.hasCredentialsSet(), "credentials not set");
-    Preconditions.checkState(!projectId.isEmpty(), "project ID empty");
+    Preconditions.checkArgument(apiFactory.hasCredentialsSet(), "credentials not set");
+    Preconditions.checkArgument(!projectId.isEmpty(), "project ID empty");
     Preconditions.checkArgument(destination.isAbsolute(), "destination not absolute");
 
     if (!Files.exists(destination.getParent())) {

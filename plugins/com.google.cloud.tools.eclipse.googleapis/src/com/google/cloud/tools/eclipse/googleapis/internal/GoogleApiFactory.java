@@ -35,6 +35,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.net.proxy.IProxyChangeEvent;
 import org.eclipse.core.net.proxy.IProxyChangeListener;
@@ -109,7 +110,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     try {
       return accountProvider.getCredential();
     } catch (IOException ex) {
-      LOGGER.severe("Error when obtaining credential: " + ex);
+      LOGGER.log(Level.SEVERE, "Error when obtaining credential: ", ex);
       return null;
     }
   }
