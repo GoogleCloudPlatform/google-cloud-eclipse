@@ -54,7 +54,7 @@ public class AppEngineProjectDeployer {
    * @param optionalConfigurationFilesDirectory if not {@code null}, searches optional configuration
    *     files (such as {@code cron.yaml}) in this directory and deploys them together
    */
-  public IStatus deploy(IPath stagingDirectory, Path credentialFile,
+  public IStatus deploy(IPath stagingDirectory,
       DeployPreferences deployPreferences, IPath optionalConfigurationFilesDirectory,
       MessageConsoleStream stdoutOutputStream, IProgressMonitor monitor) {
     if (monitor.isCanceled()) {
@@ -75,7 +75,7 @@ public class AppEngineProjectDeployer {
           DeployPreferencesConverter.toDeployConfiguration(deployPreferences, deployables);
       try { 
         Deployment deployment =
-            cloudSdkProcessWrapper.getAppEngineDeployment(credentialFile, stdoutOutputStream);
+            cloudSdkProcessWrapper.getAppEngineDeployment(stdoutOutputStream);
         deployment.deploy(configuration);
       } catch (AppEngineException ex) {
         return StatusUtil.error(this, "Error deploying project: " + ex.getMessage(), ex);
