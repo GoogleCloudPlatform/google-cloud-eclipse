@@ -16,11 +16,15 @@
 
 package com.google.cloud.tools.eclipse.login.ui;
 
+import com.google.cloud.tools.eclipse.googleapis.Account;
+import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
-import com.google.cloud.tools.eclipse.login.Messages;
-import com.google.cloud.tools.login.Account;
 import com.google.common.annotations.VisibleForTesting;
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.jface.dialogs.PopupDialog;
@@ -32,7 +36,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -48,6 +51,7 @@ public class AccountsPanel extends PopupDialog {
 
   private final IGoogleLoginService loginService;
   private final LabelImageLoader imageLoader;
+  private final IGoogleApiFactory apiFactory = new GoogleApiFactory();
 
   public AccountsPanel(Shell parent, IGoogleLoginService loginService) {
     this(parent, loginService, new LabelImageLoader());
@@ -82,13 +86,19 @@ public class AccountsPanel extends PopupDialog {
     GridLayoutFactory.swtDefaults().generateLayout(container);
 
     createAccountsPane(container);
-    createButtons(container);
     return container;
   }
 
   @VisibleForTesting
   void createAccountsPane(Composite accountArea) {
-    for (Account account : loginService.getAccounts()) {
+    List<Account> accounts;
+    try {
+      accounts = Collections.singletonList(apiFactory.getAccount());
+    } catch (IOException ex) {
+      logger.log(Level.SEVERE, "Could not obtain ADC account", ex);
+      accounts = Collections.emptyList();
+    }
+    for (Account account : accounts) {
       Composite accountRow = new Composite(accountArea, SWT.NONE);
       Label avatar = new Label(accountRow, SWT.NONE);
       Composite secondColumn = new Composite(accountRow, SWT.NONE);
@@ -105,14 +115,14 @@ public class AccountsPanel extends PopupDialog {
       GridLayoutFactory.fillDefaults().numColumns(2).applyTo(accountRow);
       GridLayoutFactory.fillDefaults().generateLayout(secondColumn);
 
-      if (account.getName() != null) {
-        name.setText(account.getName());
+      if (account.getName().isPresent()) {
+        name.setText(account.getName().get());
       }
       email.setText(account.getEmail());  // email is never null.
 
-      if (account.getAvatarUrl() != null) {
+      if (account.getAvatarUrl().isPresent()) {
         try {
-          String url = resizedImageUrl(account.getAvatarUrl(), avatarSize);
+          String url = resizedImageUrl(account.getAvatarUrl().get(), avatarSize);
           imageLoader.loadImage(url, avatar);
         } catch (MalformedURLException ex) {
           logger.log(Level.WARNING, "malformed avatar image URL", ex);
@@ -135,23 +145,6 @@ public class AccountsPanel extends PopupDialog {
       avatarUrl = avatarUrl.substring(0, index);
     }
     return avatarUrl + "=s" + avatarSize;
-  }
-
-  private void createButtons(Composite container) {
-    Composite buttonArea = new Composite(container, SWT.NONE);
-    GridLayoutFactory.fillDefaults().numColumns(2).applyTo(buttonArea);
-
-    Button addAccountButton = new Button(buttonArea, SWT.FLAT);
-    addAccountButton.setText(Messages.getString("BUTTON_ACCOUNTS_PANEL_ADD_ACCOUNT"));
-    addAccountButton.addSelectionListener(new LogInOnClick());
-    GridDataFactory.defaultsFor(addAccountButton).applyTo(addAccountButton);
-
-    if (loginService.hasAccounts()) {
-      Button logOutButton = new Button(buttonArea, SWT.FLAT);
-      logOutButton.setText(Messages.getString("BUTTON_ACCOUNTS_PANEL_LOGOUT"));
-      logOutButton.addSelectionListener(new LogOutOnClick());
-      GridDataFactory.defaultsFor(logOutButton).applyTo(logOutButton);
-    }
   }
 
   private class LogInOnClick extends SelectionAdapter {
