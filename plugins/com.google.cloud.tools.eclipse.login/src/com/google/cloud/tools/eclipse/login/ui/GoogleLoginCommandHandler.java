@@ -63,7 +63,7 @@ public class GoogleLoginCommandHandler extends AbstractHandler implements IEleme
       loggedIn = false;
     }
     isLoggedIn = loggedIn;
-    setEnabled(loggedIn);
+    setBaseEnabled(loggedIn);
   }
   
   @Override
