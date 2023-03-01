@@ -14,3 +14,4 @@ features/.project
 third_party/.project
 .idea
 .idea/*
+*.launch

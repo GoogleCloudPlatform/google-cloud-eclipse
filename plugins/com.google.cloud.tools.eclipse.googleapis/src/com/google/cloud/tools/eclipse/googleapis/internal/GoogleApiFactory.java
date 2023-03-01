@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.googleapis.internal;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.util.Utils;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestInitializer;
@@ -61,6 +60,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   private final JsonFactory jsonFactory = Utils.getDefaultJsonFactory();
   private final ProxyFactory proxyFactory;
   private LoadingCache<GoogleApi, HttpTransport> transportCache;
+  private NonCachedDefaultCredentialsProvider credentialsProvider = new NonCachedDefaultCredentialsProvider();
 
   private static final HttpTransport transport = new NetHttpTransport();
 
@@ -82,6 +82,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
       }
     }
   };
+  
 
   public GoogleApiFactory() {
     this(new ProxyFactory());
@@ -104,7 +105,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
 
   @Override
   public Account getAccount() throws IOException {
-    return getAccount(GoogleCredential.getApplicationDefault());
+    return getAccount(credentialsProvider.getDefaultCredential(transport, jsonFactory));
   }
   Account getAccount(Credential credential) throws IOException {
     HttpRequestInitializer chainedInitializer = new HttpRequestInitializer() {
