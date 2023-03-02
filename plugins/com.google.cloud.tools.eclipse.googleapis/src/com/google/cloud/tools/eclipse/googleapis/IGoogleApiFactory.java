@@ -37,6 +37,8 @@ public interface IGoogleApiFactory {
    */
   public Account getAccount() throws IOException;
   
+  public boolean isLoggedIn();
+  
   /**
    * @return a Google Cloud Storage API client
    */

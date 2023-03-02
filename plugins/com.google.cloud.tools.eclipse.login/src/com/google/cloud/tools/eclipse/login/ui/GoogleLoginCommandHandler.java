@@ -35,54 +35,16 @@ import org.eclipse.ui.menus.UIElement;
 public class GoogleLoginCommandHandler extends AbstractHandler implements IElementUpdater {
 
   static final IGoogleApiFactory apiFactory = new GoogleApiFactory();
-  static final long LOGGED_IN_CHECK_DELAY = 2000l; // update logged in every 2 seconds
-  static boolean isLoggedIn;
-  Timer loggedInCheckTask = new Timer();
-  
-  public GoogleLoginCommandHandler() {
-    loggedInCheckTask.schedule(new TimerTask() {
-
-      @Override
-      public void run() {
-        checkIsLoggedIn();
-      }
-      
-    }, 0l /*delay*/, LOGGED_IN_CHECK_DELAY);
-  }
-  
-  @Override
-  public boolean isEnabled() {
-    return isLoggedIn;
-  }
-  
-  private void checkIsLoggedIn() {
-    boolean loggedIn;
-    try {
-      loggedIn = apiFactory.getAccount() != null;
-    } catch (IOException ex) {
-      loggedIn = false;
-    }
-    isLoggedIn = loggedIn;
-    setBaseEnabled(loggedIn);
-  }
-  
+     
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
-    IGoogleLoginService loginService = ServiceUtils.getService(event, IGoogleLoginService.class);
-
-    if (isEnabled()) {
-      new AccountsPanel(HandlerUtil.getActiveShell(event), loginService).open();
-    }
-
+    new AccountsPanel(HandlerUtil.getActiveShell(event)).open();
     return null;
   }
   
   @Override
   public void updateElement(UIElement element, @SuppressWarnings("rawtypes") Map parameters) {
-    IGoogleLoginService loginService =
-        element.getServiceLocator().getService(IGoogleLoginService.class);
-    
-    element.setText(isEnabled() ? Messages.getString("LOGIN_MENU_LOGGED_IN")
+    element.setText(apiFactory.isLoggedIn() ? Messages.getString("LOGIN_MENU_LOGGED_IN")
         : Messages.getString("LOGIN_MENU_LOGGED_OUT"));
   }
 

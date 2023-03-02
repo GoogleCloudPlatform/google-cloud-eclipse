@@ -104,11 +104,20 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     transportCache =
         CacheBuilder.newBuilder().weakValues().build(new TransportCacheLoader(proxyFactory));
   }
-
+  
   @Override
   public Account getAccount() throws IOException {
     return getAccount(GoogleCredential.getApplicationDefault());
   }
+  
+  @Override public boolean isLoggedIn() {
+    try {
+      return getAccount() != null;
+    } catch (IOException ex) {
+      return false;
+    }
+  }
+  
   Account getAccount(Credential credential) throws IOException {
     if (credential == null) {
       return null;
