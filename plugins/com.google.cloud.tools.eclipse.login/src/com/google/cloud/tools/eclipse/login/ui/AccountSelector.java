@@ -21,71 +21,53 @@ import com.google.cloud.tools.eclipse.googleapis.Account;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.Messages;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.logging.Level;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 
 public class AccountSelector extends Composite {
 
   private IGoogleApiFactory apiFactory;
-  private String loginMessage;
   private Account selectedAccount;
   private ListenerList<Runnable> selectionListeners = new ListenerList<>();
 
-  @VisibleForTesting Combo combo;
-  @VisibleForTesting LogInOnSelect logInOnSelect = new LogInOnSelect();
+  @VisibleForTesting Label accountEmail;
 
   public AccountSelector(Composite parent, IGoogleApiFactory apiFactory) {
     super(parent, SWT.NONE);
     this.apiFactory = apiFactory;
-    loginMessage = Messages.getString("ACCOUNT_SELECTOR_LOGIN");
 
-    combo = new Combo(this, SWT.READ_ONLY);
+    accountEmail = new Label(this, SWT.READ_ONLY);
     
-    List<Account> sortedAccounts;
-    try {
-      selectedAccount = apiFactory.getAccount();
-      sortedAccounts = Collections.singletonList(selectedAccount);
-      
-    } catch (IOException ex) {
-      java.util.logging.Logger.getLogger(getClass().getName()).log(Level.WARNING, "Unable to access application default credentials.", ex);
-      sortedAccounts = Collections.emptyList();
+    if (apiFactory.isLoggedIn()) {
+      accountEmail.setText(getSelectedAccountEmail());
+    } else {
+      accountEmail.setText(Messages.getString("ACCOUNT_SELECTOR_LOGGED_OUT"));
     }
-    Collections.sort(sortedAccounts, new Comparator<Account>() {
-      @Override
-      public int compare(Account o1, Account o2) {
-        return o1.getEmail().compareTo(o2.getEmail());
-      }
-    });
-    for (Account account : sortedAccounts) {
-      combo.add(account.getEmail());
-      combo.setData(account.getEmail(), account);
-    }
-    combo.add(loginMessage);
-    combo.addSelectionListener(logInOnSelect);
 
-    GridDataFactory.fillDefaults().grab(true, false).applyTo(combo);
+    GridDataFactory.fillDefaults().grab(true, false).applyTo(accountEmail);
     GridLayoutFactory.fillDefaults().generateLayout(this);
   }
 
+  String getSelectedAccountEmail() {
+    try {
+      return apiFactory.getAccount().getEmail();
+    } catch (IOException ex) {
+      return null;
+    }
+  }
+  
   /**
    * @return true if this selector lists an account with {@code email}. For convenience of
    *     callers, {@code email} may be {@code null} or empty, which always returns false
    */
   public boolean isEmailAvailable(String email) {
-    return !Strings.isNullOrEmpty(email) && combo.indexOf(email) != -1;
+    return !Strings.isNullOrEmpty(email) && accountEmail.getText() == email;
   }
 
   /**
@@ -103,55 +85,11 @@ public class AccountSelector extends Composite {
    * Returns the currently selected email, or empty string if none; never {@code null}.
    */
   public String getSelectedEmail() {
-    return combo.getText();
-  }
-
-  /**
-   * @throws IllegalArgumentException if there is no account logged in
-   */
-  public String getFirstEmail() {
-    Preconditions.checkState(getAccountCount() > 0);
-    return combo.getItem(0);
-  }
-
-  /**
-   * Selects an account corresponding to the given {@code email} and returns its index of the combo
-   * item. If there is no account corresponding to the {@code email}, clears any selection and
-   * returns -1.
-   *
-   * @param email email address to use to select an account
-   * @return index of the newly selected combo item; -1 if {@code email} is {@code null} or the
-   *         empty string, or if there is no matching account
-   */
-  public int selectAccount(String email) {
-    int oldIndex = combo.getSelectionIndex();
-    int index = Strings.isNullOrEmpty(email) ? -1 : combo.indexOf(email);
-    if (index == -1) {
-      combo.deselectAll();
-      selectedAccount = null;
-    } else {
-      combo.select(index);
-      selectedAccount = (Account) combo.getData(email);
-    }
-
-    if (oldIndex != index) {
-      fireSelectionListeners();
-    }
-    return index;
+    return accountEmail.getText();
   }
 
   public boolean isSignedIn() {
-    return getAccountCount() > 0;
-  }
-
-  public int getAccountCount() {
-    return combo.getItemCount() - 1;  // <Sign into another account...> is always in the combo
-  }
-
-  private void fireSelectionListeners() {
-    for (Object o : selectionListeners.getListeners()) {
-      ((Runnable) o).run();
-    }
+    return apiFactory.isLoggedIn();
   }
 
   public void addSelectionListener(Runnable listener) {
@@ -162,58 +100,24 @@ public class AccountSelector extends Composite {
     selectionListeners.remove(listener);
   }
 
-  @VisibleForTesting
-  class LogInOnSelect extends SelectionAdapter {
-    @Override
-    public void widgetSelected(SelectionEvent event) {
-      if (combo.getText().equals(loginMessage)) {
-        Account account = selectedAccount;
-        if (account != null) {
-          // account is selected and saved
-          addAndSelectAccount(account);
-        } else {
-          // login failed, so restore to previous combo state
-          int index = selectedAccount != null ? combo.indexOf(selectedAccount.getEmail()) : -1;
-          if (index >= 0) {
-            combo.select(index);
-          } else {
-            combo.deselectAll();
-          }
-        }
-      } else {
-        selectedAccount = (Account) combo.getData(getSelectedEmail());
-        fireSelectionListeners();
-      }
-    }
-
-    private void addAndSelectAccount(Account account) {
-      // If the combo already has the email, just select it.
-      int index = combo.indexOf(account.getEmail());
-      if (index < 0) {
-        combo.add(account.getEmail(), 0 /* place at top */);
-        combo.setData(account.getEmail(), account);
-      }
-      selectAccount(account.getEmail());
-    }
-  }
-
+  
   @Override
   public void setToolTipText(String string) {
-    combo.setToolTipText(string);
+    accountEmail.setToolTipText(string);
   }
 
   @Override
   public String getToolTipText() {
-    return combo.getToolTipText();
+    return accountEmail.getToolTipText();
   }
 
   @Override
   public void setEnabled(boolean enabled) {
-    combo.setEnabled(enabled);
+    accountEmail.setEnabled(enabled);
   }
 
   @Override
   public boolean getEnabled() {
-    return combo.getEnabled();
+    return accountEmail.getEnabled();
   }
 }

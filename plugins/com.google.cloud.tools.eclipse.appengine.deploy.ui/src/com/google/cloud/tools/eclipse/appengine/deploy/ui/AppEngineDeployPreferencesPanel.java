@@ -140,11 +140,11 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     colors.setBackground(null);
     colors.setForeground(null);
     formToolkit = new FormToolkit(colors);
-
+    createDetectedAccountSection(apiFactory);
     createCredentialSection(apiFactory);
     createProjectIdSection();
     setupAccountEmailDataBinding();
-    setupProjectSelectorDataBinding();
+    setupProjectSelectorDataBinding(apiFactory);
 
     createCenterArea();
 
@@ -157,6 +157,10 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     GridLayoutFactory.swtDefaults().numColumns(2).applyTo(this);
   }
 
+  private void createDetectedAccountSection() {
+    // TODO display message of [un]detected credentials
+  }
+  
   protected void createCenterArea() {
     createProjectVersionSection();
     setupTextFieldDataBinding(version, "version", new ProjectVersionValidator());
@@ -176,8 +180,8 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
             Preconditions.checkArgument(savedEmail instanceof String);
             if (accountSelector.isEmailAvailable((String) savedEmail)) {
               return savedEmail;
-            } else if (requireValues && accountSelector.getAccountCount() == 1) {
-              return accountSelector.getFirstEmail();
+            } else if (requireValues && accountSelector.isSignedIn()) {
+              return accountSelector.getSelectedEmail();
             } else {
               return null;
             }
@@ -200,13 +204,13 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
         requireValues, accountSelector, accountSelectorObservableValue));
   }
 
-  private void setupProjectSelectorDataBinding() {
+  private void setupProjectSelectorDataBinding(IGoogleApiFactory apiFactory) {
     IViewerObservableValue projectInput =
         ViewerProperties.input().observe(projectSelector.getViewer());
     IViewerObservableValue projectSelection =
         ViewerProperties.singleSelection().observe(projectSelector.getViewer());
     bindingContext.addValidationStatusProvider(
-        new ProjectSelectionValidator(projectInput, projectSelection, requireValues));
+        new ProjectSelectionValidator(projectInput, projectSelection, requireValues, apiFactory));
 
     IViewerObservableValue projectList =
         ViewerProperties.singleSelection().observe(projectSelector.getViewer());
@@ -569,13 +573,16 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     private final IViewerObservableValue projectInput;
     private final IViewerObservableValue projectSelection;
     private final boolean requireValues;
+    private final IGoogleApiFactory apiFactory;
 
     private ProjectSelectionValidator(IViewerObservableValue projectInput,
                                       IViewerObservableValue projectSelection,
-                                      boolean requireValues) {
+                                      boolean requireValues,
+                                      IGoogleApiFactory apiFactory) {
       this.projectInput = projectInput;
       this.projectSelection = projectSelection;
       this.requireValues = requireValues;
+      this.apiFactory = apiFactory;
     }
 
     @Override
@@ -584,6 +591,10 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
       Collection<?> projects = (Collection<?>) projectInput.getValue();
       // this access is recorded and ensures that changes are tracked, don't move it inside the if
       Object selectedProject = projectSelection.getValue();
+      
+      if (!apiFactory.isLoggedIn()) {
+        return ValidationStatus.ok();
+      }
       if (projects.isEmpty()) {
         if (requireValues) {
           return ValidationStatus.error(Messages.getString("projectselector.no.projects")); //$NON-NLS-1$
