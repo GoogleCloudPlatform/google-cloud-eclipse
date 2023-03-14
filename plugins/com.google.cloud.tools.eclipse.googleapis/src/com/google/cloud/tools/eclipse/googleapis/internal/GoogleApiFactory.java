@@ -41,6 +41,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import org.eclipse.core.net.proxy.IProxyChangeEvent;
 import org.eclipse.core.net.proxy.IProxyChangeListener;
 import org.eclipse.core.net.proxy.IProxyService;
@@ -61,6 +63,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   private final JsonFactory jsonFactory = Utils.getDefaultJsonFactory();
   private final ProxyFactory proxyFactory;
   private LoadingCache<GoogleApi, HttpTransport> transportCache;
+  private Map<Credential, Account> accountCache = new HashMap<>();
 
   private static final HttpTransport transport = new NetHttpTransport();
 
@@ -101,12 +104,28 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     transportCache =
         CacheBuilder.newBuilder().weakValues().build(new TransportCacheLoader(proxyFactory));
   }
-
+  
   @Override
   public Account getAccount() throws IOException {
     return getAccount(GoogleCredential.getApplicationDefault());
   }
+  
+  @Override public boolean isLoggedIn() {
+    try {
+      return getAccount() != null;
+    } catch (IOException ex) {
+      return false;
+    }
+  }
+  
   Account getAccount(Credential credential) throws IOException {
+    if (credential == null) {
+      return null;
+    }
+    if (accountCache.containsKey(credential)) {
+      return accountCache.get(credential);
+    }
+    
     HttpRequestInitializer chainedInitializer = new HttpRequestInitializer() {
       @Override
       public void initialize(HttpRequest httpRequest) throws IOException {
@@ -121,7 +140,9 @@ public class GoogleApiFactory implements IGoogleApiFactory {
         .build();
     
     UserInfo userInfo = new UserInfo(oauth2.userinfo().get().execute());
-    return new Account(userInfo.getEmail(), credential, userInfo.getName(), userInfo.getPicture());
+    Account result = new Account(userInfo.getEmail(), credential, userInfo.getName(), userInfo.getPicture());
+    accountCache.put(credential, result);
+    return result;
   }
   
   @Override
