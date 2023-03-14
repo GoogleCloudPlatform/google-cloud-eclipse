@@ -126,10 +126,10 @@ public class AccountsPanel extends PopupDialog {
   void createNonLoggedInAccountsPane(Composite accountArea) {
     Composite messageRow = new Composite(accountArea, SWT.NONE);
     Label message = new Label(messageRow, SWT.NONE);
-    message.setText(Messages.getString("ACCOUNTS_PANEL_NO_ADC_DETECTED_MESSAGE"));
+    message.setText(Messages.getString("NO_ADC_DETECTED_MESSAGE"));
     Composite linkRow = new Composite(accountArea, SWT.NONE);
     Link helpLink = new Link(linkRow, SWT.NONE);
-    helpLink.setText(Messages.getString("ACCOUNTS_PANEL_NO_ADC_DETECTED_LINK"));
+    helpLink.setText(Messages.getString("NO_ADC_DETECTED_LINK"));
     helpLink.addSelectionListener(new OpenUriSelectionListener(new ErrorDialogErrorHandler(accountArea.getShell())));
     GridLayoutFactory.fillDefaults().numColumns(1).applyTo(messageRow);
     GridLayoutFactory.fillDefaults().generateLayout(linkRow);

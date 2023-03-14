@@ -20,15 +20,20 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.googleapis.Account;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.Messages;
+import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
+import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorDialogErrorHandler;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
+import java.util.function.Supplier;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 
 public class AccountSelector extends Composite {
 
@@ -36,18 +41,26 @@ public class AccountSelector extends Composite {
   private Account selectedAccount;
   private ListenerList<Runnable> selectionListeners = new ListenerList<>();
 
-  @VisibleForTesting Label accountEmail;
+  @VisibleForTesting Link accountEmail;
 
   public AccountSelector(Composite parent, IGoogleApiFactory apiFactory) {
     super(parent, SWT.NONE);
     this.apiFactory = apiFactory;
 
-    accountEmail = new Label(this, SWT.READ_ONLY);
+    accountEmail = new Link(this, SWT.READ_ONLY);
     
     if (apiFactory.isLoggedIn()) {
+      try {
+        selectedAccount = apiFactory.getAccount();
+      } catch (IOException ex) {
+        selectedAccount = null;
+      }
       accountEmail.setText(getSelectedAccountEmail());
     } else {
-      accountEmail.setText(Messages.getString("ACCOUNT_SELECTOR_LOGGED_OUT"));
+      accountEmail.setText(Messages.getString("NO_ADC_DETECTED_MESSAGE") + '\n' + Messages.getString("NO_ADC_DETECTED_LINK"));
+      accountEmail.addSelectionListener(new OpenUriSelectionListener(
+           () -> Collections.emptyMap() ,
+           new ErrorDialogErrorHandler(getShell())));
     }
 
     GridDataFactory.fillDefaults().grab(true, false).applyTo(accountEmail);
@@ -85,7 +98,11 @@ public class AccountSelector extends Composite {
    * Returns the currently selected email, or empty string if none; never {@code null}.
    */
   public String getSelectedEmail() {
-    return accountEmail.getText();
+    try {
+      return apiFactory.getAccount().getEmail();
+    } catch (IOException ex) {
+      return "";
+    }
   }
 
   public boolean isSignedIn() {
