@@ -44,7 +44,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableSortedSet;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -416,7 +415,7 @@ public class RunOptionsDefaultsComponent {
     return true;
   }
 
-  protected void checkProjectConfiguration() throws IOException {
+  protected void checkProjectConfiguration() {
     if (!apiFactory.hasCredentialsSet()) {
       return;
     }

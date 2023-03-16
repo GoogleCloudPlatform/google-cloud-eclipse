@@ -125,7 +125,7 @@ public class ProjectRepository {
    */
   public AppEngine getAppEngineApplication(Credential cred, String projectId)
       throws ProjectRepositoryException {
-    Preconditions.checkNotNull(apiFactory.getAccount().getOAuth2Credential());
+    Preconditions.checkState(apiFactory.hasCredentialsSet());
     Preconditions.checkArgument(!Strings.isNullOrEmpty(projectId));
 
     try {

@@ -102,7 +102,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   }
   
   @Override
-  public boolean hasCredentialsSet() throws IOException {
+  public boolean hasCredentialsSet() {
     return accountProvider.hasCredentialsSet();
   }
   

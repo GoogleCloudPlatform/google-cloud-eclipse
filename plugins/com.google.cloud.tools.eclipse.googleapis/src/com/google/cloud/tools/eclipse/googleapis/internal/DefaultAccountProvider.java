@@ -29,6 +29,7 @@ import com.google.cloud.tools.eclipse.googleapis.Account;
 import com.google.cloud.tools.eclipse.googleapis.UserInfo;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -41,6 +42,7 @@ public class DefaultAccountProvider implements IAccountProvider {
   private static final HttpTransport transport = new NetHttpTransport();
   
   private final JsonFactory jsonFactory = Utils.getDefaultJsonFactory();
+  private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
   
   private static final HttpRequestInitializer requestTimeoutSetter = new HttpRequestInitializer() {
     @Override
@@ -63,7 +65,7 @@ public class DefaultAccountProvider implements IAccountProvider {
    */
   @Override
   public Credential getCredential() throws IOException {
-    if (hasCredentialsSet()) {
+    if (!hasCredentialsSet()) {
       return null;
     }
     return getAccount().getOAuth2Credential();
@@ -74,8 +76,13 @@ public class DefaultAccountProvider implements IAccountProvider {
    * @return true if the gcloud CLI has Application Default Credentials set
    */
   @Override
-  public boolean hasCredentialsSet() throws IOException {
-    return getAccount() != null && getAccount().getOAuth2Credential() != null;  
+  public boolean hasCredentialsSet() {
+    try {
+      return getAccount() != null && getAccount().getOAuth2Credential() != null;  
+    } catch (IOException ex) {
+      LOGGER.log(Level.SEVERE,"Error occured when checking for credentials:", ex);
+      return false;
+    }
   }
   
   Account getAccount(Credential credential) throws IOException {
