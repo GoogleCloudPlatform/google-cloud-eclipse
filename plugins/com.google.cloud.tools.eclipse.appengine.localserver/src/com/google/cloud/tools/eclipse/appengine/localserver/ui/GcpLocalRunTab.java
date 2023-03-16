@@ -20,7 +20,6 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.appengine.localserver.ServiceAccountUtil;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepositoryException;
@@ -80,7 +79,6 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
   private Image gcpIcon;
 
   private final EnvironmentTab environmentTab;
-  private final IGoogleLoginService loginService;
   private final IGoogleApiFactory googleApiFactory;
   private final ProjectRepository projectRepository;
 
@@ -110,16 +108,14 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
 
   public GcpLocalRunTab(EnvironmentTab environmentTab) {
     this(environmentTab,
-        PlatformUI.getWorkbench().getService(IGoogleLoginService.class),
         PlatformUI.getWorkbench().getService(IGoogleApiFactory.class),
         new ProjectRepository(PlatformUI.getWorkbench().getService(IGoogleApiFactory.class)));
   }
 
   @VisibleForTesting
-  GcpLocalRunTab(EnvironmentTab environmentTab, IGoogleLoginService loginService,
+  GcpLocalRunTab(EnvironmentTab environmentTab,
       IGoogleApiFactory googleApiFactory, ProjectRepository projectRepository) {
     this.environmentTab = environmentTab;
-    this.loginService = loginService;
     this.googleApiFactory = googleApiFactory;
     this.projectRepository = projectRepository;
   }
@@ -411,7 +407,7 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
   @VisibleForTesting
   void createServiceAccountKey(Path keyFile) {
     String projectId = projectSelector.getSelectedProjectId();
-    Preconditions.checkNotNull(credential, "no account selected"); //$NON-NLS-1$
+    Preconditions.checkNotNull(googleApiFactory.hasCredentialsSet(), "no account selected"); //$NON-NLS-1$
     Preconditions.checkState(!projectId.isEmpty(), "no project selected"); //$NON-NLS-1$
     
     try { 

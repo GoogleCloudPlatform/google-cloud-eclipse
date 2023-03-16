@@ -27,5 +27,5 @@ public interface IAccountProvider {
 
   public Account getAccount() throws IOException;
   public Credential getCredential() throws IOException;
-  public boolean hasCredentialsSet()
+  public boolean hasCredentialsSet();
 }

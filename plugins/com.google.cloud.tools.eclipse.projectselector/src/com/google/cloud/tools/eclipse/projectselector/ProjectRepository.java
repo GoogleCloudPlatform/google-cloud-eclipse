@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.projectselector;
 
-import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.services.appengine.v1.model.Application;
@@ -123,7 +122,7 @@ public class ProjectRepository {
    * @throws ProjectRepositoryException if an error other than HTTP 404 happens while retrieving the
    *     App Engine application
    */
-  public AppEngine getAppEngineApplication(Credential cred, String projectId)
+  public AppEngine getAppEngineApplication(String projectId)
       throws ProjectRepositoryException {
     Preconditions.checkState(apiFactory.hasCredentialsSet());
     Preconditions.checkArgument(!Strings.isNullOrEmpty(projectId));
