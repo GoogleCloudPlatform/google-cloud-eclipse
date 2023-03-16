@@ -24,7 +24,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.util.Base64;
 import com.google.api.services.iam.v1.Iam;
 import com.google.api.services.iam.v1.Iam.Projects;

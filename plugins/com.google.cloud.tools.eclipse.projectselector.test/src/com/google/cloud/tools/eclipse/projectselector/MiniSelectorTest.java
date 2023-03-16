@@ -139,7 +139,7 @@ public class MiniSelectorTest {
   }
 
 
-  private void mockProjectsList(Credential cred, GcpProject... gcpProjects) {
+  private void mockProjectsList(GcpProject... gcpProjects) {
     Projects projectsApi = mock(Projects.class);
     Projects.List listApi = mock(Projects.List.class);
     List<Project> projectsList = new ArrayList<>();

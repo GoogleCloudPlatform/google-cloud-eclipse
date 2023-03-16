@@ -41,7 +41,6 @@ import com.google.api.services.iam.v1.Iam.Projects.ServiceAccounts.Keys.Create;
 import com.google.api.services.iam.v1.model.CreateServiceAccountKeyRequest;
 import com.google.api.services.iam.v1.model.ServiceAccountKey;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepositoryException;
@@ -58,7 +57,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
@@ -91,7 +89,6 @@ public class GcpLocalRunTabTest {
   @Rule public ShellTestResource shellResource = new ShellTestResource();
   @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
-  @Mock private IGoogleLoginService loginService;
   @Mock private IGoogleApiFactory apiFactory;
   @Mock private ProjectRepository projectRepository;
   @Mock private EnvironmentTab environmentTab;
@@ -128,12 +125,11 @@ public class GcpLocalRunTabTest {
     when(account2.getEmail()).thenReturn("account2@example.com");
     when(account1.getOAuth2Credential()).thenReturn(credential1);
     when(account2.getOAuth2Credential()).thenReturn(credential2);
-    when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
-
+    
     when(projectRepository.getProjects()).thenReturn(projectsOfEmail1);
     when(projectRepository.getProjects()).thenReturn(projectsOfEmail2);
 
-    tab = new GcpLocalRunTab(environmentTab, loginService, apiFactory, projectRepository);
+    tab = new GcpLocalRunTab(environmentTab, apiFactory, projectRepository);
     tab.createControl(shell);
 
     accountSelector = CompositeUtil.findControl(shell, AccountSelector.class);

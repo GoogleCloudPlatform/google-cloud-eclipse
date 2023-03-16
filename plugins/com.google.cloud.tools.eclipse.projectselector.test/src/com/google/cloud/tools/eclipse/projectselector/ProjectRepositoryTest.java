@@ -22,13 +22,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.googleapis.testing.json.GoogleJsonResponseExceptionFactoryTesting;
 import com.google.api.client.json.jackson.JacksonFactory;
@@ -66,7 +64,6 @@ public class ProjectRepositoryTest {
 
   @Test(expected = NullPointerException.class)
   public void testGetProjects_nullCredential() throws ProjectRepositoryException {
-    Credential credential = null;
     repository.getProjects();
   }
 
