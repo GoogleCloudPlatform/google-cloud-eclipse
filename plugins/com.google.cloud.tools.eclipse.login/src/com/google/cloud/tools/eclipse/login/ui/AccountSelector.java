@@ -47,7 +47,8 @@ public class AccountSelector extends Composite {
     super(parent, SWT.NONE);
     this.apiFactory = apiFactory;
 
-    accountEmail = new Link(this, SWT.READ_ONLY);
+    Composite accountEmailComposite = new Composite(this, SWT.NONE);
+    accountEmail = new Link(accountEmailComposite, SWT.WRAP);
     
     if (apiFactory.isLoggedIn()) {
       try {
@@ -57,13 +58,14 @@ public class AccountSelector extends Composite {
       }
       accountEmail.setText(getSelectedAccountEmail());
     } else {
-      accountEmail.setText(Messages.getString("NO_ADC_DETECTED_MESSAGE") + '\n' + Messages.getString("NO_ADC_DETECTED_LINK"));
+      accountEmail.setText(Messages.getString("NO_ADC_DETECTED_MESSAGE") + ". " + Messages.getString("NO_ADC_DETECTED_LINK"));
       accountEmail.addSelectionListener(new OpenUriSelectionListener(
            () -> Collections.emptyMap() ,
            new ErrorDialogErrorHandler(getShell())));
     }
-
-    GridDataFactory.fillDefaults().grab(true, false).applyTo(accountEmail);
+    GridDataFactory.fillDefaults().grab(true, false).applyTo(this);
+    GridDataFactory.fillDefaults().grab(true, false).applyTo(accountEmailComposite);
+    GridLayoutFactory.fillDefaults().generateLayout(accountEmailComposite);
     GridLayoutFactory.fillDefaults().generateLayout(this);
   }
 
