@@ -29,6 +29,8 @@ import com.google.cloud.tools.eclipse.googleapis.Account;
 import com.google.cloud.tools.eclipse.googleapis.UserInfo;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,6 +45,8 @@ public class DefaultAccountProvider implements IAccountProvider {
   
   private final JsonFactory jsonFactory = Utils.getDefaultJsonFactory();
   private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
+ 
+  private Map<Credential, Account> accountCache = new HashMap<>();
   
   private static final HttpRequestInitializer requestTimeoutSetter = new HttpRequestInitializer() {
     @Override
@@ -86,6 +90,9 @@ public class DefaultAccountProvider implements IAccountProvider {
   }
   
   Account getAccount(Credential credential) throws IOException {
+    if (accountCache.containsKey(credential)) {
+      return accountCache.get(credential);
+    }
     HttpRequestInitializer chainedInitializer = new HttpRequestInitializer() {
       @Override
       public void initialize(HttpRequest httpRequest) throws IOException {
@@ -100,6 +107,8 @@ public class DefaultAccountProvider implements IAccountProvider {
         .build();
     
     UserInfo userInfo = new UserInfo(oauth2.userinfo().get().execute());
-    return new Account(userInfo.getEmail(), credential, userInfo.getName(), userInfo.getPicture());
+    Account result = new Account(userInfo.getEmail(), credential, userInfo.getName(), userInfo.getPicture());
+    accountCache.put(credential, result);
+    return result;
   }
 }

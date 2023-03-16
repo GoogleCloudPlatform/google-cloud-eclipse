@@ -58,8 +58,10 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
   
   private LoadingCache<GoogleApi, HttpTransport> transportCache;
+
   private IAccountProvider accountProvider;
   private IProxyService proxyService;
+
   
   private final IProxyChangeListener proxyChangeListener = new IProxyChangeListener() {
     @Override
@@ -95,11 +97,20 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     transportCache =
         CacheBuilder.newBuilder().weakValues().build(new TransportCacheLoader(proxyFactory));
   }
-
+  
   @Override
   public Account getAccount() throws IOException {
     return accountProvider.getAccount();
   }
+  
+  @Override public boolean isLoggedIn() {
+    try {
+      return getAccount() != null;
+    } catch (IOException ex) {
+      return false;
+    }
+  }
+  
   
   @Override
   public boolean hasCredentialsSet() {

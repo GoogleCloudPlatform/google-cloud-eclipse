@@ -178,8 +178,6 @@ public class DefaultedPipelineOptionsComponent {
   }
 
   private void loadPreferences() {
-    String defaultAccountEmail = preferences.getDefaultAccountEmail();
-    defaultOptions.selectAccount(Strings.nullToEmpty(defaultAccountEmail));
     String defaultProject = preferences.getDefaultProject();
     defaultOptions.setCloudProjectText(Strings.nullToEmpty(defaultProject));
     String defaultStagingLocation = preferences.getDefaultStagingLocation();
@@ -189,8 +187,6 @@ public class DefaultedPipelineOptionsComponent {
   }
 
   private void loadCustomValues() {
-    String accountEmail = customValues.get(DataflowPreferences.ACCOUNT_EMAIL_PROPERTY);
-    defaultOptions.selectAccount(Strings.nullToEmpty(accountEmail));
     String project = customValues.get(DataflowPreferences.PROJECT_PROPERTY);
     defaultOptions.setCloudProjectText(Strings.nullToEmpty(project));
     String stagingLocation = customValues.get(DataflowPreferences.STAGING_LOCATION_PROPERTY);

@@ -170,7 +170,7 @@ public class RunOptionsDefaultsComponent {
     stagingLocationResults.setImage(errorImage);
     stagingLocationResults.hide();
 
-    accountSelector.selectAccount(preferences.getDefaultAccountEmail());
+    //accountSelector.selectAccount(preferences.getDefaultAccountEmail());
 
     // Initialize the Default Project, which is used to populate the Staging Location field
     projectInput.setCredential(accountSelector.getSelectedCredential());
@@ -451,10 +451,6 @@ public class RunOptionsDefaultsComponent {
    */
   public String getAccountEmail() {
     return accountSelector.getSelectedEmail();
-  }
-
-  public void selectAccount(String accountEmail) {
-    accountSelector.selectAccount(accountEmail);
   }
 
   /**

@@ -283,15 +283,11 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
 
   @Override
   public void initializeFrom(ILaunchConfiguration configuration) {
-    accountEmailModel = getAttribute(configuration, ATTRIBUTE_ACCOUNT_EMAIL, ""); //$NON-NLS-1$
-
     Map<String, String> environmentMap = getEnvironmentMap(configuration);
     gcpProjectIdModel = Strings.nullToEmpty(environmentMap.get(PROJECT_ID_ENVIRONMENT_VARIABLE));
     String serviceKey = Strings.nullToEmpty(environmentMap.get(SERVICE_KEY_ENVIRONMENT_VARIABLE));
 
     initializingUiValues = true;
-    // Selecting an account loads projects into the project selector synchronously (via a listener).
-    accountSelector.selectAccount(accountEmailModel);
     projectSelector.selectProjectId(gcpProjectIdModel);
     serviceKeyInput.setText(serviceKey);
     initializingUiValues = false;
