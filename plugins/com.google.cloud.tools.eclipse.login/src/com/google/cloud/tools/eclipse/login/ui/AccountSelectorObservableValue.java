@@ -50,9 +50,9 @@ public class AccountSelectorObservableValue extends AbstractObservableValue<Stri
   protected String doGetValue() {
     return accountSelector.getSelectedEmail();
   }
-
+  
   @Override
-  protected void doSetValue(final String value) {
-    accountSelector.selectAccount(value);
+  protected void doSetValue(String value) {
+    // nothing is done as this is externally managed
   }
 }
