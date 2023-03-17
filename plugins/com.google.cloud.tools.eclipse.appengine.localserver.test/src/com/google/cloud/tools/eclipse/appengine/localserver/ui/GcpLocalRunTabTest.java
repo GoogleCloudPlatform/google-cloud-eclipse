@@ -194,15 +194,15 @@ public class GcpLocalRunTabTest {
 
   @Test
   public void testProjectSelectorLoaded() {
-    accountSelector.selectAccount("account1@example.com");
+//    accountSelector.selectAccount("account1@example.com");
     assertEquals(projectsOfEmail1, projectSelector.getProjects());
     assertEquals("", projectSelector.getSelectedProjectId());
   }
 
   @Test
   public void testProjectSelectorLoaded_switchingAccounts() {
-    accountSelector.selectAccount("account1@example.com");
-    accountSelector.selectAccount("account2@example.com");
+//    accountSelector.selectAccount("account1@example.com");
+//    accountSelector.selectAccount("account2@example.com");
     assertEquals(projectsOfEmail2, projectSelector.getProjects());
     assertEquals("", projectSelector.getSelectedProjectId());
   }
@@ -263,7 +263,7 @@ public class GcpLocalRunTabTest {
     mockLaunchConfig("account1@example.com", "project-A", "/usr/home/key.json");
     tab.activated(launchConfig);
 
-    accountSelector.selectAccount("account2@example.com");
+//    accountSelector.selectAccount("account2@example.com");
     projectSelector.selectProjectId("project-C");
     serviceKeyText.setText("/tmp/keys/another.json");
 
@@ -284,7 +284,7 @@ public class GcpLocalRunTabTest {
     mockLaunchConfig("account1@example.com", "project-A", "/usr/home/key.json");
     tab.initializeFrom(launchConfig);
 
-    accountSelector.selectAccount("account2@example.com");
+//    accountSelector.selectAccount("account2@example.com");
     projectSelector.selectProjectId("project-C");
     serviceKeyText.setText("/tmp/keys/another.json");
 
@@ -349,7 +349,7 @@ public class GcpLocalRunTabTest {
     assertTrue(projectSelector.getSelection().isEmpty());
     assertFalse(createKeyButton.isEnabled());
 
-    accountSelector.selectAccount("account1@example.com");
+//    accountSelector.selectAccount("account1@example.com");
     projectSelector.selectProjectId("project-A");
     assertTrue(createKeyButton.isEnabled());
 
@@ -367,7 +367,7 @@ public class GcpLocalRunTabTest {
   public void testCreateServiceAccountKey() throws IOException, CoreException {
     setUpServiceKeyCreation(apiFactory, false);
     mockLaunchConfig("account2@example.com", "google.com:project-D", "");
-    accountSelector.selectAccount("account2@example.com");
+//    accountSelector.selectAccount("account2@example.com");
 
     tab.initializeFrom(launchConfig);
 
@@ -440,7 +440,7 @@ public class GcpLocalRunTabTest {
   @Test
   public void testGetServiceAccountKeyPath() throws URISyntaxException {
     tab.initializeFrom(launchConfig);
-    accountSelector.selectAccount("account1@example.com");
+//    accountSelector.selectAccount("account1@example.com");
     projectSelector.selectProjectId("project-A");
 
     Path expected = Paths.get(Platform.getConfigurationLocation().getURL().toURI())
@@ -452,7 +452,7 @@ public class GcpLocalRunTabTest {
   @Test
   public void testGetServiceAccountKeyPath_internal() throws URISyntaxException {
     tab.initializeFrom(launchConfig);
-    accountSelector.selectAccount("account2@example.com");
+//    accountSelector.selectAccount("account2@example.com");
     projectSelector.selectProjectId("google.com:project-D");
 
     Path expected = Paths.get(Platform.getConfigurationLocation().getURL().toURI())

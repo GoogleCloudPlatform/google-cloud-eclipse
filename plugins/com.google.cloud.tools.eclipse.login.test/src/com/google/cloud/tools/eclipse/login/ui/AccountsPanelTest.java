@@ -23,13 +23,10 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.cloud.tools.login.Account;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -53,8 +50,7 @@ public class AccountsPanelTest {
 
   @Rule public ShellTestResource shellTestResource = new ShellTestResource();
   private Shell shell;
-
-  @Mock private IGoogleLoginService loginService;
+  
   @Mock private Account account1;
   @Mock private Account account2;
   @Mock private Account account3;
@@ -74,9 +70,8 @@ public class AccountsPanelTest {
 
   @Test
   public void testLogOutButton_notLoggedIn() {
-    setUpLoginService();
 
-    AccountsPanel panel = new AccountsPanel(null, loginService, imageLoader);
+    AccountsPanel panel = new AccountsPanel(null, imageLoader);
     Control control = panel.createDialogArea(shell);
 
     List<String> buttonTexts = collectButtonTexts((Composite) control);
@@ -86,9 +81,8 @@ public class AccountsPanelTest {
 
   @Test
   public void testLogOutButton_loggedIn() {
-    setUpLoginService(Arrays.asList(account1));
 
-    AccountsPanel panel = new AccountsPanel(null, loginService, imageLoader);
+    AccountsPanel panel = new AccountsPanel(null, imageLoader);
     Control control = panel.createDialogArea(shell);
 
     List<String> buttonTexts = collectButtonTexts((Composite) control);
@@ -99,9 +93,8 @@ public class AccountsPanelTest {
 
   @Test
   public void testAccountsArea_zeroAccounts() {
-    setUpLoginService();
 
-    AccountsPanel panel = new AccountsPanel(null, loginService, imageLoader);
+    AccountsPanel panel = new AccountsPanel(null, imageLoader);
     Control control = panel.createDialogArea(shell);
 
     NamesEmails namesEmails = collectNamesEmails(control);
@@ -110,9 +103,8 @@ public class AccountsPanelTest {
 
   @Test
   public void testAccountsArea_oneAccount() {
-    setUpLoginService(Arrays.asList(account1));
 
-    AccountsPanel panel = new AccountsPanel(null, loginService, imageLoader);
+    AccountsPanel panel = new AccountsPanel(null, imageLoader);
     Control control = panel.createDialogArea(shell);
 
     NamesEmails namesEmails = collectNamesEmails(control);
@@ -123,9 +115,8 @@ public class AccountsPanelTest {
 
   @Test
   public void testAccountsArea_accountWithNullName() {
-    setUpLoginService(Arrays.asList(account2));
 
-    AccountsPanel panel = new AccountsPanel(null, loginService, imageLoader);
+    AccountsPanel panel = new AccountsPanel(null, imageLoader);
     Control control = panel.createDialogArea(shell);
 
     NamesEmails namesEmails = collectNamesEmails(control);
@@ -136,9 +127,8 @@ public class AccountsPanelTest {
 
   @Test
   public void testAccountsArea_avatarImageUrl() throws MalformedURLException {
-    setUpLoginService(Arrays.asList(account1));
 
-    AccountsPanel panel = new AccountsPanel(null, loginService, imageLoader);
+    AccountsPanel panel = new AccountsPanel(null, imageLoader);
     panel.createDialogArea(shell);
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
@@ -153,9 +143,8 @@ public class AccountsPanelTest {
 
   @Test
   public void testAccountsArea_threeAccounts() {
-    setUpLoginService(Arrays.asList(account1, account2, account3));
 
-    AccountsPanel panel = new AccountsPanel(null, loginService, imageLoader);
+    AccountsPanel panel = new AccountsPanel(null, imageLoader);
     Control control = panel.createDialogArea(shell);
 
     NamesEmails namesEmails = collectNamesEmails(control);
@@ -173,15 +162,6 @@ public class AccountsPanelTest {
     assertEquals("https://lh3/xxxx=s48", AccountsPanel.resizedImageUrl("https://lh3/xxxx", 48));
     assertEquals(
         "https://lh3/xxxx=s48", AccountsPanel.resizedImageUrl("https://lh3/xxxx=s96-c", 48));
-  }
-
-  private void setUpLoginService(List<Account> accounts) {
-    when(loginService.hasAccounts()).thenReturn(!accounts.isEmpty());
-    when(loginService.getAccounts()).thenReturn(new HashSet<>(accounts));
-  }
-
-  private void setUpLoginService() {
-    setUpLoginService(new ArrayList<Account>());  // Simulate no signed-in account.
   }
 
   private static List<String> collectButtonTexts(Composite composite) {

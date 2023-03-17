@@ -17,7 +17,7 @@
 package com.google.cloud.tools.eclipse.login;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.cloud.tools.eclipse.googleapis.Account;
+import com.google.cloud.tools.login.Account;
 import java.util.Set;
 
 /**

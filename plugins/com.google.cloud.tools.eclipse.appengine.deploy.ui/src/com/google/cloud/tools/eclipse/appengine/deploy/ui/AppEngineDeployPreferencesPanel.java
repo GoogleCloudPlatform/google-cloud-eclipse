@@ -154,7 +154,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
 
     Dialog.applyDialogFont(this);
     GridLayoutFactory.swtDefaults().numColumns(2).applyTo(this);
-    refreshProjectsForSelectedCredential();
+    refreshProjectsForSelectedCredential(apiFactory);
   }
 
   

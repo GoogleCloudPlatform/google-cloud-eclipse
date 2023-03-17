@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.util;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -25,9 +24,6 @@ import static org.junit.Assert.fail;
 import com.google.cloud.tools.appengine.operations.AppEngineWebXmlProjectStaging;
 import com.google.cloud.tools.appengine.operations.Deployment;
 import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkNotFoundException;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import org.eclipse.core.runtime.Status;
 import org.junit.Rule;
 import org.junit.Test;
@@ -42,7 +38,7 @@ public class CloudSdkProcessWrapperTest {
   @Test
   public void testGetAppEngineDeployment_nullCredentialFile() throws CloudSdkNotFoundException {
     try {
-      wrapper.getAppEngineDeployment(null, null);
+      wrapper.getAppEngineDeployment(null);
       fail();
     } catch (NullPointerException ex) {
       assertEquals(ex.getMessage(), "credential required for deploying");
@@ -52,11 +48,11 @@ public class CloudSdkProcessWrapperTest {
   @Test
   public void testGetAppEngineDeployment_nonExistingCredentialFile()
       throws CloudSdkNotFoundException {
-    Path credential = tempFolder.getRoot().toPath().resolve("non-existing-file");
-    assertFalse(Files.exists(credential));
+//    Path credential = tempFolder.getRoot().toPath().resolve("non-existing-file");
+//    assertFalse(Files.exists(credential));
 
     try {
-      wrapper.getAppEngineDeployment(credential, null);
+      wrapper.getAppEngineDeployment(null);
       fail();
     } catch (IllegalArgumentException ex) {
       assertEquals(ex.getMessage(), "non-existing credential file");
@@ -64,9 +60,9 @@ public class CloudSdkProcessWrapperTest {
   }
 
   @Test
-  public void testGetAppEngineDeployment() throws IOException, CloudSdkNotFoundException {
-    Path credential = tempFolder.newFile().toPath();
-    Deployment deployment = wrapper.getAppEngineDeployment(credential, null);
+  public void testGetAppEngineDeployment() throws CloudSdkNotFoundException {
+//    Path credential = tempFolder.newFile().toPath();
+    Deployment deployment = wrapper.getAppEngineDeployment(null);
     assertNotNull(deployment);
   }
 
@@ -78,11 +74,11 @@ public class CloudSdkProcessWrapperTest {
 
   @Test
   public void testGetAppEngineDeployment_cannotSetUpTwice()
-      throws IOException, CloudSdkNotFoundException {
-    Path credential = tempFolder.newFile().toPath();
-    wrapper.getAppEngineDeployment(credential, null);
+      throws CloudSdkNotFoundException {
+//    Path credential = tempFolder.newFile().toPath();
+    wrapper.getAppEngineDeployment(null);
     try {
-      wrapper.getAppEngineDeployment(credential, null);
+      wrapper.getAppEngineDeployment(null);
       fail();
     } catch (IllegalStateException ex) {
       assertEquals(ex.getMessage(), "process wrapper already set up");

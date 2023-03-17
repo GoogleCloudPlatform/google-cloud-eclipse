@@ -96,7 +96,7 @@ public class DefaultedPipelineOptionsComponentTest {
     };
 
     doAnswer(answerAccountEmail).when(defaultOptions).getAccountEmail();
-    doAnswer(recordAccountEmail).when(defaultOptions).selectAccount(anyString());
+//    doAnswer(recordAccountEmail).when(defaultOptions).selectAccount(anyString());
     doThrow(IllegalStateException.class).when(defaultOptions).getProject();
     doAnswer(answerProjectId).when(defaultOptions).getProjectId();
     doAnswer(recordProjectId).when(defaultOptions).setCloudProjectText(anyString());

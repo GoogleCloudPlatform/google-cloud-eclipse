@@ -26,8 +26,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Map;
-import java.util.function.Supplier;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -138,5 +136,13 @@ public class AccountSelector extends Composite {
   @Override
   public boolean getEnabled() {
     return accountEmail.getEnabled();
+  }
+
+  /**
+   * @return 1 if logged in, 0 if not
+   */
+  public int getAccountCount() {
+    // TODO Auto-generated method stub
+    return isSignedIn() ? 1 : 0;
   }
 }
