@@ -140,11 +140,10 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     colors.setBackground(null);
     colors.setForeground(null);
     formToolkit = new FormToolkit(colors);
-
     createCredentialSection(apiFactory);
-    createProjectIdSection();
+    createProjectIdSection(apiFactory);
     setupAccountEmailDataBinding();
-    setupProjectSelectorDataBinding();
+    setupProjectSelectorDataBinding(apiFactory);
 
     createCenterArea();
 
@@ -155,8 +154,11 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
 
     Dialog.applyDialogFont(this);
     GridLayoutFactory.swtDefaults().numColumns(2).applyTo(this);
+    refreshProjectsForSelectedCredential();
   }
 
+  
+  
   protected void createCenterArea() {
     createProjectVersionSection();
     setupTextFieldDataBinding(version, "version", new ProjectVersionValidator());
@@ -176,8 +178,8 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
             Preconditions.checkArgument(savedEmail instanceof String);
             if (accountSelector.isEmailAvailable((String) savedEmail)) {
               return savedEmail;
-            } else if (requireValues && accountSelector.getAccountCount() == 1) {
-              return accountSelector.getFirstEmail();
+            } else if (requireValues && accountSelector.isSignedIn()) {
+              return accountSelector.getSelectedEmail();
             } else {
               return null;
             }
@@ -200,13 +202,14 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
         requireValues, accountSelector, accountSelectorObservableValue));
   }
 
-  private void setupProjectSelectorDataBinding() {
+  private void setupProjectSelectorDataBinding(IGoogleApiFactory apiFactory) {
     IViewerObservableValue projectInput =
         ViewerProperties.input().observe(projectSelector.getViewer());
     IViewerObservableValue projectSelection =
         ViewerProperties.singleSelection().observe(projectSelector.getViewer());
+    
     bindingContext.addValidationStatusProvider(
-        new ProjectSelectionValidator(projectInput, projectSelection, requireValues));
+        new ProjectSelectionValidator(projectInput, projectSelection, requireValues, apiFactory));
 
     IViewerObservableValue projectList =
         ViewerProperties.singleSelection().observe(projectSelector.getViewer());
@@ -355,7 +358,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     accountSelector.setLayoutData(accountSelectorGridData);
   }
 
-  private void createProjectIdSection() {
+  private void createProjectIdSection(IGoogleApiFactory apiFactory) {
     Label projectIdLabel = new Label(this, SWT.LEAD);
     projectIdLabel.setText(Messages.getString("project"));
     projectIdLabel.setToolTipText(Messages.getString("tooltip.project.id"));
@@ -364,9 +367,15 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
 
     Composite linkComposite = new Composite(this, SWT.NONE);
     Link createNewProject = new Link(linkComposite, SWT.WRAP);
-    createNewProject.setText(Messages.getString("projectselector.createproject",
-                                                CREATE_GCP_PROJECT_URL));
-    createNewProject.setToolTipText(Messages.getString("projectselector.createproject.tooltip"));
+    if (apiFactory.isLoggedIn()) {
+      createNewProject.setText(Messages.getString("projectselector.createproject",
+          CREATE_GCP_PROJECT_URL));
+      createNewProject.setToolTipText(Messages.getString("projectselector.createproject.tooltip"));
+    } else {
+      createNewProject.setText(Messages.getString("error.account.missing.signedout"));
+    }
+    
+    
     FontUtil.convertFontToItalic(createNewProject);
     createNewProject.addSelectionListener(new OpenUriSelectionListener(
         () -> accountSelector.getSelectedEmail().isEmpty()
@@ -507,6 +516,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
       latestGcpProjectQueryJob = new GcpProjectQueryJob(selectedCredential,
           projectRepository, projectSelector, bindingContext, isLatestQueryJob);
       latestGcpProjectQueryJob.schedule();
+      
     }
   }
 
@@ -569,13 +579,16 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     private final IViewerObservableValue projectInput;
     private final IViewerObservableValue projectSelection;
     private final boolean requireValues;
+    private final IGoogleApiFactory apiFactory;
 
     private ProjectSelectionValidator(IViewerObservableValue projectInput,
                                       IViewerObservableValue projectSelection,
-                                      boolean requireValues) {
+                                      boolean requireValues,
+                                      IGoogleApiFactory apiFactory) {
       this.projectInput = projectInput;
       this.projectSelection = projectSelection;
       this.requireValues = requireValues;
+      this.apiFactory = apiFactory;
     }
 
     @Override
@@ -584,6 +597,10 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
       Collection<?> projects = (Collection<?>) projectInput.getValue();
       // this access is recorded and ensures that changes are tracked, don't move it inside the if
       Object selectedProject = projectSelection.getValue();
+      
+      if (!apiFactory.isLoggedIn()) {
+        return ValidationStatus.ok();
+      }
       if (projects.isEmpty()) {
         if (requireValues) {
           return ValidationStatus.error(Messages.getString("projectselector.no.projects")); //$NON-NLS-1$
@@ -630,8 +647,6 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
       if (requireValues && Strings.isNullOrEmpty(selectedEmail)) {
         if (accountSelector.isSignedIn()) {
           return ValidationStatus.error(Messages.getString("error.account.missing.signedin"));
-        } else {
-          return ValidationStatus.error(Messages.getString("error.account.missing.signedout"));
         }
       }
       return ValidationStatus.ok();
