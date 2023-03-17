@@ -112,17 +112,17 @@ public class RunOptionsDefaultsComponentTest {
     Credential credential1 = mock(Credential.class, "alice@example.com");
     when(account1.getEmail()).thenReturn("alice@example.com");
     when(account1.getOAuth2Credential()).thenReturn(credential1);
-    mockStorageApiBucketList(credential1, "project", "alice-bucket-1", "alice-bucket-2");
-    mockProjectList(credential1, new GcpProject("project", "project"));
-    mockServiceApi(credential1, "project", "dataflow.googleapis.com");
+    mockStorageApiBucketList("project", "alice-bucket-1", "alice-bucket-2");
+    mockProjectList(new GcpProject("project", "project"));
+    mockServiceApi("project", "dataflow.googleapis.com");
 
     Account account2 = mock(Account.class, "bob@example.com");
     Credential credential2 = mock(Credential.class, "bob@example.com");
     when(account2.getEmail()).thenReturn("bob@example.com");
     when(account2.getOAuth2Credential()).thenReturn(credential2);
-    mockStorageApiBucketList(credential2, "project", "bob-bucket");
-    mockProjectList(credential2, new GcpProject("project", "project"));
-    mockServiceApi(credential2, "project", "dataflow.googleapis.com");
+    mockStorageApiBucketList("project", "bob-bucket");
+    mockProjectList(new GcpProject("project", "project"));
+    mockServiceApi("project", "dataflow.googleapis.com");
 
     doCallRealMethod().when(page).setPageComplete(anyBoolean());
     doCallRealMethod().when(page).isPageComplete();
@@ -144,7 +144,7 @@ public class RunOptionsDefaultsComponentTest {
     browse = CompositeUtil.findButton(shell, "Browse...");
   }
 
-  private void mockProjectList(Credential credential, GcpProject... gcpProjects)
+  private void mockProjectList(GcpProject... gcpProjects)
       throws IOException {
     Projects projectsApi = mock(Projects.class);
     Projects.List listApi = mock(Projects.List.class);
@@ -157,13 +157,13 @@ public class RunOptionsDefaultsComponentTest {
     }
     ListProjectsResponse response = new ListProjectsResponse(); // cannot mock final classes
     response.setProjects(projectsList);
-    doReturn(projectsApi).when(apiFactory).newProjectsApi(credential);
+    doReturn(projectsApi).when(apiFactory).newProjectsApi();
     doReturn(listApi).when(listApi).setPageSize(anyInt());
     doReturn(listApi).when(projectsApi).list();
     doReturn(response).when(listApi).execute();
   }
 
-  private void mockStorageApiBucketList(Credential credential, String projectId,
+  private void mockStorageApiBucketList(String projectId,
       String... bucketNames) throws IOException {
     Storage storageApi = mock(Storage.class);
     Storage.Buckets bucketsApi = mock(Storage.Buckets.class);
@@ -171,7 +171,7 @@ public class RunOptionsDefaultsComponentTest {
     Buckets buckets = new Buckets();
     List<Bucket> bucketList = new ArrayList<>();
 
-    doReturn(storageApi).when(apiFactory).newStorageApi(credential);
+    doReturn(storageApi).when(apiFactory).newStorageApi();
     doReturn(bucketsApi).when(storageApi).buckets();
     doThrow(new IOException("not found")).when(bucketsApi).list(anyString());
     doReturn(listApi).when(bucketsApi).list(projectId);
@@ -203,14 +203,14 @@ public class RunOptionsDefaultsComponentTest {
     buckets.setItems(bucketList);
   }
 
-  private void mockServiceApi(Credential credential, String projectId, String... serviceIds)
+  private void mockServiceApi(String projectId, String... serviceIds)
       throws IOException {
     ServiceManagement servicesManagementApi = mock(ServiceManagement.class);
     Services servicesApi = mock(Services.class);
     Services.List request = mock(Services.List.class);
     ListServicesResponse response = new ListServicesResponse();
 
-    doReturn(servicesManagementApi).when(apiFactory).newServiceManagementApi(credential);
+    doReturn(servicesManagementApi).when(apiFactory).newServiceManagementApi();
     doReturn(servicesApi).when(servicesManagementApi).services();
 
     doReturn(request).when(servicesApi).list();

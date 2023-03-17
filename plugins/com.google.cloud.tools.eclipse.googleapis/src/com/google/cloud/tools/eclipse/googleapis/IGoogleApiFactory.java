@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.googleapis;
 
-import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.services.appengine.v1.Appengine.Apps;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
 import com.google.api.services.iam.v1.Iam;
@@ -37,30 +36,32 @@ public interface IGoogleApiFactory {
    */
   public Account getAccount() throws IOException;
   
-  public boolean isLoggedIn();
-  
+  /**
+   * @return true if the factory has an account with credentials set
+   */
+  public boolean hasCredentialsSet();
   /**
    * @return a Google Cloud Storage API client
    */
-  Storage newStorageApi(Credential credential);
+  Storage newStorageApi();
 
   /**
    * @return an Appengine Apps API client
    */
-  Apps newAppsApi(Credential credential);
+  Apps newAppsApi();
 
   /**
    * @return a CloudResourceManager/Projects API client
    */
-  Projects newProjectsApi(Credential credential);
+  Projects newProjectsApi();
 
   /**
    * @return a ServiceManagement API client
    */
-  ServiceManagement newServiceManagementApi(Credential credential);
+  ServiceManagement newServiceManagementApi();
 
   /**
    * @return an Identity and Access Management API client
    */
-  Iam newIamApi(Credential credential);
+  Iam newIamApi();
 }

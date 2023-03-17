@@ -20,14 +20,11 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.appengine.operations.cloudsdk.JsonParseException;
 import com.google.cloud.tools.appengine.operations.cloudsdk.serialization.AppEngineDeployResult;
 import com.google.cloud.tools.eclipse.appengine.deploy.util.CloudSdkProcessWrapper;
-import com.google.cloud.tools.eclipse.login.CredentialHelper;
 import com.google.cloud.tools.eclipse.sdk.CloudSdkManager;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.logging.Level;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -55,7 +52,6 @@ public class DeployJob extends WorkspaceJob {
 
   private static final String STAGING_DIRECTORY_NAME = "staging";
   private static final String SAFE_STAGING_WORK_DIRECTORY_NAME = "staging-work";
-  private static final String CREDENTIAL_FILENAME = "gcloud-credentials.json";
   private static final String DEFAULT_SERVICE = "default";
 
   private final Credential credential;
@@ -75,7 +71,7 @@ public class DeployJob extends WorkspaceJob {
       StagingDelegate stager) {
     super(Messages.getString("deploy.job.name")); //$NON-NLS-1$
     Preconditions.checkNotNull(deployPreferences.getProjectId());
- //   Preconditions.checkArgument(!deployPreferences.getProjectId().isEmpty());
+    Preconditions.checkArgument(!deployPreferences.getProjectId().isEmpty());
     this.deployPreferences = deployPreferences;
     this.credential = credential;
     this.workDirectory = workDirectory;
@@ -100,14 +96,7 @@ public class DeployJob extends WorkspaceJob {
       }
 
       progress.subTask("Saving credential");
-      //Path credentialFile = workDirectory.append(CREDENTIAL_FILENAME).toFile().toPath();
-      Path credentialFile = null;
-
-      //IStatus saveStatus = saveCredential(credentialFile);
-      //if (saveStatus != Status.OK_STATUS) {
-      //  return saveStatus;
-      //}
-
+      
       java.util.logging.Logger.getLogger(CloudSdkProcessWrapper.class.getName()).log(Level.WARNING, "Skipping saving credentials");
       
       progress.subTask("Staging project files");
@@ -120,7 +109,7 @@ public class DeployJob extends WorkspaceJob {
       }
 
       progress.subTask("Deploying staged project");
-      IStatus deployStatus = deployProject(credentialFile, stagingDirectory, progress.newChild(70));
+      IStatus deployStatus = deployProject(stagingDirectory, progress.newChild(70));
       if (deployStatus != Status.OK_STATUS) {
         return deployStatus;
       } else if (monitor.isCanceled()) {
@@ -140,17 +129,7 @@ public class DeployJob extends WorkspaceJob {
     super.canceling();
   }
 
-  private IStatus saveCredential(Path destination) {
-    try {
-      CredentialHelper.toJsonFile(credential, destination);
-      return Status.OK_STATUS;
-    } catch (IOException ex) {
-      return StatusUtil.error(this, Messages.getString("save.credential.failed"), ex);
-    }
-  }
-
   private IStatus stageProject(IPath stagingDirectory, IProgressMonitor monitor) {
-    java.util.logging.Logger.getLogger(CloudSdkProcessWrapper.class.getName()).log(Level.WARNING, "Staging project");
     SubMonitor progress = SubMonitor.convert(monitor, 100);
 
     try {
@@ -165,14 +144,13 @@ public class DeployJob extends WorkspaceJob {
     }
   }
 
-  private IStatus deployProject(Path credentialFile, IPath stagingDirectory, IProgressMonitor monitor) {
-    java.util.logging.Logger.getLogger(CloudSdkProcessWrapper.class.getName()).log(Level.WARNING, "Deploying project");
+  private IStatus deployProject(IPath stagingDirectory, IProgressMonitor monitor) {
     IPath optionalConfigurationFilesDirectory = null;
     if (deployPreferences.isIncludeOptionalConfigurationFiles()) {
       optionalConfigurationFilesDirectory = stager.getOptionalConfigurationFilesDirectory();
     }
 
-    return deployer.deploy(stagingDirectory, credentialFile, deployPreferences,
+    return deployer.deploy(stagingDirectory, deployPreferences,
         optionalConfigurationFilesDirectory, stdoutOutputStream, monitor);
   }
 
