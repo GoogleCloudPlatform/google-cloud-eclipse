@@ -416,8 +416,7 @@ public class RunOptionsDefaultsComponent {
   }
 
   protected void checkProjectConfiguration() {
-    Credential selectedCredential = accountSelector.getSelectedCredential();
-    if (selectedCredential == null) {
+    if (!apiFactory.hasCredentialsSet()) {
       return;
     }
     GcpProject project = projectInput.getProject();
@@ -433,15 +432,14 @@ public class RunOptionsDefaultsComponent {
     }
 
     checkProjectConfigurationJob =
-        new GcpProjectServicesJob(apiFactory, selectedCredential, project.getId());
+        new GcpProjectServicesJob(apiFactory, project.getId());
     checkProjectConfigurationJob.getFuture().addListener(this::validate, displayExecutor);
     checkProjectConfigurationJob.schedule();
   }
 
   private GcsDataflowProjectClient getGcsClient() {
     Preconditions.checkNotNull(accountSelector.getSelectedCredential());
-    Credential credential = accountSelector.getSelectedCredential();
-    return GcsDataflowProjectClient.create(apiFactory, credential);
+    return GcsDataflowProjectClient.create(apiFactory);
   }
 
   public Control getControl() {

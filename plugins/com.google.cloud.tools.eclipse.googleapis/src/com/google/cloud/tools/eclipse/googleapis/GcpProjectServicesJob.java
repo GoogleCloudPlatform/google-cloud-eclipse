@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.googleapis;
 
-import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.servicemanagement.ServiceManagement;
@@ -52,14 +51,9 @@ public class GcpProjectServicesJob extends FuturisticJob<List<String>> {
   /** The GCP Project ID to check. */
   private final String projectId;
 
-  /** The user credential for checks. */
-  private final Credential credential;
-
-  public GcpProjectServicesJob(IGoogleApiFactory apiFactory, Credential credential,
-      String projectId) {
+  public GcpProjectServicesJob(IGoogleApiFactory apiFactory, String projectId) {
     super("Checking GCP project configuration");
     this.apiFactory = apiFactory;
-    this.credential = credential;
     this.projectId = projectId;
   }
 
@@ -68,16 +62,11 @@ public class GcpProjectServicesJob extends FuturisticJob<List<String>> {
     return projectId;
   }
 
-  /** Get the user credential for check. */
-  public Credential getCredential() {
-    return credential;
-  }
-
   @Override
   protected List<String> compute(IProgressMonitor monitor)
       throws GoogleJsonResponseException, IOException {
     String originalProjectId = this.projectId;
-    ServiceManagement serviceManagement = apiFactory.newServiceManagementApi(credential);
+    ServiceManagement serviceManagement = apiFactory.newServiceManagementApi();
     ListServicesResponse response = null;
     Collection<String> serviceIds = new ArrayList<>();
     do {

@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.dataflow.core.project;
 
-import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.json.GoogleJsonError;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.storage.Storage;
@@ -43,8 +42,8 @@ public class GcsDataflowProjectClient {
   private final Storage gcsClient;
 
   public static GcsDataflowProjectClient create(
-      IGoogleApiFactory apiFactory, Credential credential) {
-    return new GcsDataflowProjectClient(apiFactory.newStorageApi(credential));
+      IGoogleApiFactory apiFactory) {
+    return new GcsDataflowProjectClient(apiFactory.newStorageApi());
   }
 
   private GcsDataflowProjectClient(Storage gcsClient) {

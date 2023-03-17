@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver;
 
-import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.util.Base64;
 import com.google.api.services.iam.v1.Iam;
 import com.google.api.services.iam.v1.Iam.Projects.ServiceAccounts.Keys;
@@ -38,18 +37,18 @@ public class ServiceAccountUtil {
    * @param projectId GCP project ID for {@code serviceAccountId} 
    * @param destination path of a key file to be saved
    */
-  public static void createAppEngineDefaultServiceAccountKey(IGoogleApiFactory apiFactory,
-      Credential credential, String projectId, Path destination)
+  public static void createAppEngineDefaultServiceAccountKey(IGoogleApiFactory apiFactory, 
+      String projectId, Path destination)
           throws FileAlreadyExistsException, IOException {
-    Preconditions.checkNotNull(credential, "credential not given");
-    Preconditions.checkState(!projectId.isEmpty(), "project ID empty");
+    Preconditions.checkArgument(apiFactory.hasCredentialsSet(), "credentials not set");
+    Preconditions.checkArgument(!projectId.isEmpty(), "project ID empty");
     Preconditions.checkArgument(destination.isAbsolute(), "destination not absolute");
 
     if (!Files.exists(destination.getParent())) {
       Files.createDirectories(destination.getParent());
     }
 
-    Iam iam = apiFactory.newIamApi(credential);
+    Iam iam = apiFactory.newIamApi();
     Keys keys = iam.projects().serviceAccounts().keys();
     
     String projectEmail = projectId;
