@@ -77,11 +77,9 @@ public class CloudSdkProcessWrapper {
       credential = new GoogleApiFactory().getAccount().getOAuth2Credential();
     }
     catch (IOException ex) {
-      // will be handled in finally block;
+      // will be handled in preconditions check;
     }
-    finally {
-      Preconditions.checkNotNull(credential, "credentials not set");
-    }
+    Preconditions.checkNotNull(credential, "credentials not set");
     
     Preconditions.checkState(!initialized, "process wrapper already set up");
     initialized = true;
