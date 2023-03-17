@@ -21,7 +21,8 @@ Require-Bundle: com.google.cloud.tools.appengine;bundle-version="0.8.1",
  org.eclipse.ui.workbench,
  org.eclipse.wst.common.modulecore,
  org.eclipse.wst.common.project.facet.core,
- org.eclipse.wst.server.core
+ org.eclipse.wst.server.core,
+ com.google.cloud.tools.eclipse.googleapis
 Export-Package: com.google.cloud.tools.eclipse.appengine.deploy,
  com.google.cloud.tools.eclipse.appengine.deploy.flex,
  com.google.cloud.tools.eclipse.appengine.deploy.standard

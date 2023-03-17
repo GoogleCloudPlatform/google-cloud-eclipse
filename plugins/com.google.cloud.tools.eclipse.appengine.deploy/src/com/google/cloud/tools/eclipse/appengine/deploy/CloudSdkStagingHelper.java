@@ -62,13 +62,6 @@ public class CloudSdkStagingHelper {
             .build();
 
 
-    CloudSdk cloudSdk = new CloudSdk.Builder().build();
-
-    Path sdkPath = cloudSdk.getPath();
-    java.util.logging.Logger.getLogger(CloudSdkProcessWrapper.class.getName()).log(Level.WARNING, "sdkPath: " + sdkPath.toString());
-    Path appEnginePath = cloudSdk.getAppEngineSdkForJavaPath();
-    java.util.logging.Logger.getLogger(CloudSdkProcessWrapper.class.getName()).log(Level.WARNING, "appEnginePath: " + appEnginePath.toString());
-    
     appEngineStandardStaging.stageStandard(stagingConfig);
 
     progress.worked(1);
