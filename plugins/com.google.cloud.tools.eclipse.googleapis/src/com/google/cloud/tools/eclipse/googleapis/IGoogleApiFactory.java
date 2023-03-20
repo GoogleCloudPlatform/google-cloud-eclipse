@@ -36,14 +36,10 @@ public interface IGoogleApiFactory {
    */
   public Account getAccount() throws IOException;
   
-  public boolean isLoggedIn();
-  
   /**
    * @return true if the factory has an account with credentials set
-   * @throws IOException
    */
   public boolean hasCredentialsSet();
-  
   /**
    * @return a Google Cloud Storage API client
    */

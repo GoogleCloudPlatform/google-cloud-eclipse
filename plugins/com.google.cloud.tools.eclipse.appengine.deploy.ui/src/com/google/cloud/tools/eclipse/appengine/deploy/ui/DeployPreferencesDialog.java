@@ -45,16 +45,16 @@ public abstract class DeployPreferencesDialog extends TitleAreaDialog {
   private AppEngineDeployPreferencesPanel content;
   private final String title;
   private final IProject project;
-  private final IGoogleApiFactory googleApiFactory;
+  private final IGoogleApiFactory apiFactory;
 
   public DeployPreferencesDialog(Shell parentShell, String title, IProject project,
-                                 IGoogleApiFactory googleApiFactory) {
+      IGoogleApiFactory apiFactory) {
     super(parentShell);
 
-    Preconditions.checkNotNull(googleApiFactory, "googleApiFactory is null");
+    Preconditions.checkNotNull(apiFactory, "googleApiFactory is null");
     this.title = title;
     this.project = project;
-    this.googleApiFactory = googleApiFactory;
+    this.apiFactory = apiFactory;
   }
 
   @Override
@@ -69,8 +69,8 @@ public abstract class DeployPreferencesDialog extends TitleAreaDialog {
     if (project == null) {
       setTitle(Messages.getString("deploy.preferences.dialog.subtitle"));
     } else {
-      setTitle(Messages.getString("deploy.preferences.dialog.subtitle.withProject",
-          project.getName()));
+      setTitle(
+          Messages.getString("deploy.preferences.dialog.subtitle.withProject", project.getName()));
     }
     setTitleImage(titleImage);
 
@@ -87,8 +87,8 @@ public abstract class DeployPreferencesDialog extends TitleAreaDialog {
     Composite area = (Composite) super.createDialogArea(parent);
 
     Composite container = new Composite(area, SWT.NONE);
-    content = createDeployPreferencesPanel(container, project, googleApiFactory,
-        this::handleLayoutChange, new ProjectRepository(googleApiFactory));
+    content = createDeployPreferencesPanel(container, project, apiFactory, this::handleLayoutChange,
+        new ProjectRepository(apiFactory));
     GridDataFactory.fillDefaults().grab(true, false).applyTo(content);
 
     // we pull in Dialog's content margins which are zeroed out by TitleAreaDialog
@@ -102,7 +102,7 @@ public abstract class DeployPreferencesDialog extends TitleAreaDialog {
           @Override
           public int getMessageType(ValidationStatusProvider statusProvider) {
             int type = super.getMessageType(statusProvider);
-            setValid(type != IMessageProvider.ERROR);
+            setValid(type != IMessageProvider.ERROR && apiFactory.hasCredentialsSet());
             return type;
           }
         });
