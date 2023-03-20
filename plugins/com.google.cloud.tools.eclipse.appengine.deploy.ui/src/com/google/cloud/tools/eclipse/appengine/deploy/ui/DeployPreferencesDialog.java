@@ -102,7 +102,7 @@ public abstract class DeployPreferencesDialog extends TitleAreaDialog {
           @Override
           public int getMessageType(ValidationStatusProvider statusProvider) {
             int type = super.getMessageType(statusProvider);
-            setValid(type != IMessageProvider.ERROR && apiFactory.isLoggedIn());
+            setValid(type != IMessageProvider.ERROR && apiFactory.hasCredentialsSet());
             return type;
           }
         });

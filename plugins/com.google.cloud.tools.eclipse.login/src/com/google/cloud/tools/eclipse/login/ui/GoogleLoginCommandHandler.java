@@ -39,7 +39,7 @@ public class GoogleLoginCommandHandler extends AbstractHandler implements IEleme
   
   @Override
   public void updateElement(UIElement element, @SuppressWarnings("rawtypes") Map parameters) {
-    element.setText(apiFactory.isLoggedIn() ? Messages.getString("LOGIN_MENU_LOGGED_IN")
+    element.setText(apiFactory.hasCredentialsSet() ? Messages.getString("LOGIN_MENU_LOGGED_IN")
         : Messages.getString("LOGIN_MENU_LOGGED_OUT"));
   }
 

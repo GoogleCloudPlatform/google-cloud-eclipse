@@ -103,14 +103,6 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     return accountProvider.getAccount();
   }
   
-  @Override public boolean isLoggedIn() {
-    try {
-      return getAccount() != null;
-    } catch (IOException ex) {
-      return false;
-    }
-  }
-  
   
   @Override
   public boolean hasCredentialsSet() {

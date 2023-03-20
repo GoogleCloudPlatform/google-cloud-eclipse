@@ -82,7 +82,7 @@ public class AccountsPanel extends PopupDialog {
     Composite container = (Composite) super.createDialogArea(parent);
     GridLayoutFactory.swtDefaults().generateLayout(container);
 
-    if (apiFactory.isLoggedIn()) {
+    if (apiFactory.hasCredentialsSet()) {
       createAccountsPane(container);
     } else {
       createNonLoggedInAccountsPane(container);

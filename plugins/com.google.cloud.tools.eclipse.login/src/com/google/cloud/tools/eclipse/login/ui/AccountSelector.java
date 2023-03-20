@@ -48,7 +48,7 @@ public class AccountSelector extends Composite {
     Composite accountEmailComposite = new Composite(this, SWT.NONE);
     accountEmail = new Link(accountEmailComposite, SWT.WRAP);
     
-    if (apiFactory.isLoggedIn()) {
+    if (apiFactory.hasCredentialsSet()) {
       try {
         selectedAccount = apiFactory.getAccount();
       } catch (IOException ex) {
@@ -106,7 +106,7 @@ public class AccountSelector extends Composite {
   }
 
   public boolean isSignedIn() {
-    return apiFactory.isLoggedIn();
+    return apiFactory.hasCredentialsSet();
   }
 
   public void addSelectionListener(Runnable listener) {
