@@ -28,12 +28,13 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
-import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
 import com.google.api.services.cloudresourcemanager.model.ListProjectsResponse;
 import com.google.api.services.cloudresourcemanager.model.Project;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider.State;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -61,11 +62,14 @@ public class MiniSelectorTest {
 
   @Before
   public void setUp() {
+    TestAccountProvider.setAsDefaultProvider();
+    TestAccountProvider.setProviderState(State.LOGGED_IN);
     bot = new SWTBot(shellResource.getShell());
   }
 
   @Test
   public void testNoCredential() {
+    TestAccountProvider.setProviderState(State.NOT_LOGGED_IN);
     MiniSelector selector = new MiniSelector(shellResource.getShell(), apiFactory);
     assertNull(selector.getCredential());
     assertNotNull(selector.getSelection());
@@ -76,10 +80,9 @@ public class MiniSelectorTest {
 
   @Test
   public void testWithCredential() {
-    Credential credential = mock(Credential.class);
     mockProjectsList(new GcpProject("foo", "foo.id"));
-    MiniSelector selector = new MiniSelector(shellResource.getShell(), apiFactory, credential);
-    assertEquals(credential, selector.getCredential());
+    MiniSelector selector = new MiniSelector(shellResource.getShell(), apiFactory);
+    assertEquals(apiFactory.getCredential(), selector.getCredential());
     assertNotNull(selector.getSelection());
     assertTrue(selector.getSelection().isEmpty());
     assertNull(selector.getProject());
@@ -97,9 +100,8 @@ public class MiniSelectorTest {
 
   @Test
   public void testListenerFired() {
-    Credential credential = mock(Credential.class);
     mockProjectsList(new GcpProject("foo", "foo.id"));
-    MiniSelector selector = new MiniSelector(shellResource.getShell(), apiFactory, credential);
+    MiniSelector selector = new MiniSelector(shellResource.getShell(), apiFactory);
 
     assertNotNull(selector.getSelection());
     assertTrue(selector.getSelection().isEmpty());
