@@ -36,6 +36,7 @@ import com.google.api.services.cloudresourcemanager.CloudResourceManager.Project
 import com.google.api.services.iam.v1.Iam;
 import com.google.api.services.servicemanagement.ServiceManagement;
 import com.google.api.services.storage.Storage;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.cache.LoadingCache;
 import java.io.IOException;
@@ -66,6 +67,7 @@ public class GoogleApiFactoryTest {
 
   @Before
   public void setUp() {
+    TestAccountProvider.setAsDefaultProvider();
     googleApiFactory = new GoogleApiFactory(proxyFactory);
     when(transportCache.getUnchecked(any(GoogleApi.class)))
         .thenReturn(mock(HttpTransport.class));
