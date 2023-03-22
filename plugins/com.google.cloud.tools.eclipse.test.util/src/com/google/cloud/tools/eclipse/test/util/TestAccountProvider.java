@@ -32,7 +32,6 @@ import java.util.Map;
  */
 public class TestAccountProvider implements IAccountProvider {
 
-  public static final TestAccountProvider INSTANCE = new TestAccountProvider();
   public static final String EMAIL_ACCOUNT_1 = "test-email-1@mail.com";
   public static final String EMAIL_ACCOUNT_2 = "test-email-2@mail.com";
   public static final String NAME_ACCOUNT_1 = "name-1";
@@ -53,6 +52,8 @@ public class TestAccountProvider implements IAccountProvider {
   
   private static Account account1;
   private static Account account2;
+  
+  public static final TestAccountProvider INSTANCE = new TestAccountProvider();
   
   private TestAccountProvider() {
     account1 = new Account(EMAIL_ACCOUNT_1, CREDENTIAL_ACCOUNT_1, NAME_ACCOUNT_1, null);
