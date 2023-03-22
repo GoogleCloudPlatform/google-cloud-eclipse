@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.googleapis;
 
+import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.services.appengine.v1.Appengine.Apps;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
 import com.google.api.services.iam.v1.Iam;
@@ -35,6 +36,11 @@ public interface IGoogleApiFactory {
    * @return the application default credentials account
    */
   public Account getAccount() throws IOException;
+  
+  /**
+   * @return Credentials if logged in, else null
+   */
+  public Credential getCredential();
   
   /**
    * @return true if the factory has an account with credentials set

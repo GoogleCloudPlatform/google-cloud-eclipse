@@ -108,7 +108,8 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     return accountProvider.hasCredentialsSet();
   }
   
-  private Credential getCredential() {
+  @Override
+  public Credential getCredential() {
     try {
       return accountProvider.getCredential();
     } catch (IOException ex) {
