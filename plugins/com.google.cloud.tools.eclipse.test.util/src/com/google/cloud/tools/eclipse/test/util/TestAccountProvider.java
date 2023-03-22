@@ -66,6 +66,11 @@ public class TestAccountProvider implements IAccountProvider {
     GoogleApiFactory.setAccountProvider(INSTANCE);
   }
   
+  public static void setAsDefaultProvider(State state) {
+    GoogleApiFactory.setAccountProvider(INSTANCE);
+    setProviderState(state);
+  }
+  
   public static void setProviderState(State state) {
     Preconditions.checkNotNull(state);
     TestAccountProvider.state = state;
