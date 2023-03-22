@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.test.util;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.util.Preconditions;
 import com.google.cloud.tools.eclipse.googleapis.Account;
 import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.googleapis.internal.IAccountProvider;
@@ -64,6 +65,7 @@ public class TestAccountProvider implements IAccountProvider {
   }
   
   public static void setProviderState(State state) {
+    Preconditions.checkNotNull(state);
     TestAccountProvider.state = state;
   }
   
