@@ -37,6 +37,8 @@ import com.google.cloud.tools.eclipse.dataflow.core.launcher.PipelineConfigurati
 import com.google.cloud.tools.eclipse.dataflow.core.launcher.PipelineLaunchConfiguration;
 import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowDependencyManager;
 import com.google.cloud.tools.eclipse.dataflow.core.project.MajorVersion;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider.State;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
@@ -101,6 +103,8 @@ public class PipelineArgumentsTabTest {
 
     @Before
     public void setUp() throws CoreException, InvocationTargetException, InterruptedException {
+      TestAccountProvider.setAsDefaultProvider();
+      TestAccountProvider.setProviderState(State.NOT_LOGGED_IN);
       workspaceRoot = mock(IWorkspaceRoot.class);
       dependencyManager = mock(DataflowDependencyManager.class);
 

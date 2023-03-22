@@ -54,6 +54,8 @@ import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider.State;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.cloud.tools.login.Account;
@@ -107,6 +109,7 @@ public class RunOptionsDefaultsComponentTest {
 
   @Before
   public void setUp() throws IOException {
+    TestAccountProvider.setAsDefaultProvider();
     Account account1 = mock(Account.class, "alice@example.com");
     Credential credential1 = mock(Credential.class, "alice@example.com");
     when(account1.getEmail()).thenReturn("alice@example.com");
@@ -244,7 +247,6 @@ public class RunOptionsDefaultsComponentTest {
   @Test
   public void testCloudProjectText() {
     Assert.assertNull(component.getProject());
-//    selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
     join();
     Assert.assertNotNull(component.getProject());
@@ -261,18 +263,17 @@ public class RunOptionsDefaultsComponentTest {
     Assert.assertNotNull(selector);
   }
 
-//  @Test
-//  public void testAccountSelector_init() {
-////    Assert.assertEquals(2, selector.getAccountCount());
-//
-//    int index1 = selector.selectAccount("alice@example.com");
-//    Assert.assertEquals(0, index1);
-//    Assert.assertEquals("alice@example.com", selector.getSelectedEmail());
-//
-//    int index2 = selector.selectAccount("bob@example.com");
-//    Assert.assertEquals(1, index2);
-//    Assert.assertEquals("bob@example.com", selector.getSelectedEmail());
-//  }
+  @Test
+  public void testAccountSelector_init() {
+    TestAccountProvider.setAsDefaultProvider(State.NOT_LOGGED_IN);
+    Assert.assertEquals(0, selector.getAccountCount());
+
+    TestAccountProvider.setAsDefaultProvider(State.LOGGED_IN);
+    Assert.assertEquals(TestAccountProvider.EMAIL_ACCOUNT_1, selector.getSelectedEmail());
+
+    TestAccountProvider.setAsDefaultProvider(State.LOGGED_IN_SECOND_ACCOUNT);
+    Assert.assertEquals(TestAccountProvider.EMAIL_ACCOUNT_2, selector.getSelectedEmail());
+  }
 
   @Test
   public void testEnablement_initial() {
@@ -287,7 +288,6 @@ public class RunOptionsDefaultsComponentTest {
 
   @Test
   public void testEnablement_selectedAccount() {
-//    selector.selectAccount("alice@example.com");
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
@@ -299,7 +299,6 @@ public class RunOptionsDefaultsComponentTest {
 
   @Test
   public void testEnablement_selectedProject() {
-//    selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
     join();
     assertTrue(selector.isEnabled());
@@ -313,7 +312,6 @@ public class RunOptionsDefaultsComponentTest {
 
   @Test
   public void testEnablement_nonExistentProject() {
-//    selector.selectAccount("alice@example.com");
     component.setCloudProjectText("doesnotexist");
     spinEvents();
     component.validate();
@@ -328,7 +326,6 @@ public class RunOptionsDefaultsComponentTest {
 
   @Test
   public void testEnablement_existingStagingLocation() {
-//    selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
     join();
     component.setStagingLocationText("alice-bucket-1");
@@ -347,7 +344,6 @@ public class RunOptionsDefaultsComponentTest {
 
   @Test
   public void testEnablement_nonExistentStagingLocation() {
-//    selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
     join();
     component.setStagingLocationText("non-existent-bucket");
@@ -373,7 +369,6 @@ public class RunOptionsDefaultsComponentTest {
 
   @Test
   public void testEnablement_disabledWhileAllValuesValid() {
-//    selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
     join();
     component.setStagingLocationText("alice-bucket-1");
@@ -393,7 +388,6 @@ public class RunOptionsDefaultsComponentTest {
 
   @Test
   public void testStagingLocation() {
-//    selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
     join();
 
@@ -403,12 +397,10 @@ public class RunOptionsDefaultsComponentTest {
 
   @Test
   public void testAccountSelector_loadBucketCombo() {
-//    selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
     join();
     assertStagingLocationCombo("gs://alice-bucket-1", "gs://alice-bucket-2");
 
-//    selector.selectAccount("bob@example.com");
     join();
     assertStagingLocationCombo("gs://bob-bucket");
   }
@@ -432,7 +424,6 @@ public class RunOptionsDefaultsComponentTest {
 
   @Test
   public void testBucketNameStatus_gcsPathWithObjectIsOk() {
-//    component.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
     join();
     component.setStagingLocationText("alice-bucket-2/object");
@@ -442,7 +433,6 @@ public class RunOptionsDefaultsComponentTest {
 
   @Test
   public void testBucketNameStatus_gcsUrlPathWithObjectIsOk() {
-//    component.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
     join();
     component.setStagingLocationText("gs://alice-bucket-2/object");
@@ -452,7 +442,6 @@ public class RunOptionsDefaultsComponentTest {
   
   @Test
   public void testBucketNameStatus_createIsOk() {
-//    component.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
     join();
     component.setStagingLocationText("gs://alice-bucket-non-existent");
@@ -499,7 +488,6 @@ public class RunOptionsDefaultsComponentTest {
   @Test
   public void testPartialValidity_account() {
     testPartialValidity_allEmpty();
-//    component.selectAccount("alice@example.com");
     assertTrue("should be complete with account", page.isPageComplete());
   }
 
