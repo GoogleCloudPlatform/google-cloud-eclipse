@@ -39,6 +39,7 @@ import com.google.api.services.cloudresourcemanager.model.Project;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.projectselector.model.AppEngine;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -58,6 +59,7 @@ public class ProjectRepositoryTest {
 
   @Before
   public void setUp() {
+    TestAccountProvider.setAsDefaultProvider();
     repository = new ProjectRepository(apiFactory);
     project.setName("projectName").setProjectId("projectId");
   }

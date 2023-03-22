@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNotNull;
 
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -44,9 +45,10 @@ public class OptInDialogTest {
   private Shell shell;
   private OptInDialog dialog;
   private Job dialogCloser;
-
+  
   @Before
   public void setUp() {
+    TestAccountProvider.setAsDefaultProvider();
     shell = shellResource.getShell();
     dialog = new OptInDialog(shell);
   }

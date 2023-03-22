@@ -52,14 +52,13 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 @Component
 public class GoogleApiFactory implements IGoogleApiFactory {
 
+  private static IAccountProvider accountProvider;
   
   private final JsonFactory jsonFactory = Utils.getDefaultJsonFactory();
   private final ProxyFactory proxyFactory;
   private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
   
   private LoadingCache<GoogleApi, HttpTransport> transportCache;
-
-  private IAccountProvider accountProvider;
   private IProxyService proxyService;
 
   
@@ -217,5 +216,14 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   @VisibleForTesting
   void setTransportCache(LoadingCache<GoogleApi, HttpTransport> transportCache) {
     this.transportCache = transportCache;
+  }
+  
+  /**
+   * Use case: set a test provider.
+   * TestAccountProvider is defined in com.google.(...).test.util, which is a non-test package
+   * @param provider the new account provider to be used by this class
+   */
+  public static void setAccountProvider(IAccountProvider provider) {
+    accountProvider = provider;
   }
 }
