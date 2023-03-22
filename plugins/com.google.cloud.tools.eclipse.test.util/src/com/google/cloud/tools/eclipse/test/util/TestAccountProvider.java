@@ -39,6 +39,8 @@ public class TestAccountProvider implements IAccountProvider {
   public static final String NAME_ACCOUNT_2 = "name-2";
   public static final Credential CREDENTIAL_ACCOUNT_1 = new GoogleCredential.Builder().build();
   public static final Credential CREDENTIAL_ACCOUNT_2 = new GoogleCredential.Builder().build();
+  public static final String AVATAR_URL_ACCOUNT_1 = "https://avatar.url/account1";
+  public static final String AVATAR_URL_ACCOUNT_2 = "https://avatar.url/account2";
   
   public enum State {
     NOT_LOGGED_IN,
