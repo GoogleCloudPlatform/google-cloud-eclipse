@@ -21,10 +21,10 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider.State;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
-import com.google.cloud.tools.login.Account;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,32 +51,25 @@ public class AccountsPanelTest {
   @Rule public ShellTestResource shellTestResource = new ShellTestResource();
   private Shell shell;
   
-  @Mock private Account account1;
-  @Mock private Account account2;
-  @Mock private Account account3;
   @Mock private LabelImageLoader imageLoader;
 
   @Before
   public void setUp() {
+    TestAccountProvider.setAsDefaultProvider();
+    TestAccountProvider.setProviderState(State.LOGGED_IN);
     shell = shellTestResource.getShell();
-    when(account1.getEmail()).thenReturn("alice@example.com");
-    when(account2.getEmail()).thenReturn("bob@example.com");
-    when(account3.getEmail()).thenReturn("charlie@example.com");
-    when(account1.getName()).thenReturn("Alice");
-    when(account2.getName()).thenReturn(null);
-    when(account3.getName()).thenReturn("Charlie");
-    when(account1.getAvatarUrl()).thenReturn("https://avatar.url/account1");
   }
 
   @Test
   public void testLogOutButton_notLoggedIn() {
 
+    TestAccountProvider.setProviderState(State.NOT_LOGGED_IN);
+    
     AccountsPanel panel = new AccountsPanel(null, imageLoader);
     Control control = panel.createDialogArea(shell);
 
     List<String> buttonTexts = collectButtonTexts((Composite) control);
-    assertEquals(1, buttonTexts.size());
-    assertEquals("Add Account...", buttonTexts.get(0));
+    assertEquals(0, buttonTexts.size());
   }
 
   @Test
@@ -86,31 +79,19 @@ public class AccountsPanelTest {
     Control control = panel.createDialogArea(shell);
 
     List<String> buttonTexts = collectButtonTexts((Composite) control);
-    assertEquals(2, buttonTexts.size());
-    assertTrue(buttonTexts.contains("Add Account..."));
-    assertTrue(buttonTexts.contains("Sign Out of All Accounts"));
+    assertEquals(0, buttonTexts.size());
   }
 
   @Test
   public void testAccountsArea_zeroAccounts() {
 
+    TestAccountProvider.setProviderState(State.NOT_LOGGED_IN);
+    
     AccountsPanel panel = new AccountsPanel(null, imageLoader);
     Control control = panel.createDialogArea(shell);
 
     NamesEmails namesEmails = collectNamesEmails(control);
     assertTrue(namesEmails.emails.isEmpty());
-  }
-
-  @Test
-  public void testAccountsArea_oneAccount() {
-
-    AccountsPanel panel = new AccountsPanel(null, imageLoader);
-    Control control = panel.createDialogArea(shell);
-
-    NamesEmails namesEmails = collectNamesEmails(control);
-    assertEquals(1, namesEmails.emails.size());
-    assertEquals("alice@example.com", namesEmails.emails.get(0));
-    assertEquals("Alice", namesEmails.names.get(0));
   }
 
   @Test
@@ -121,8 +102,8 @@ public class AccountsPanelTest {
 
     NamesEmails namesEmails = collectNamesEmails(control);
     assertEquals(1, namesEmails.emails.size());
-    assertEquals("bob@example.com", namesEmails.emails.get(0));
-    assertTrue(namesEmails.names.get(0).isEmpty());
+    assertEquals(TestAccountProvider.EMAIL_ACCOUNT_1, namesEmails.emails.get(0));
+    assertEquals(TestAccountProvider.NAME_ACCOUNT_1, namesEmails.names.get(0));
   }
 
   @Test
@@ -144,17 +125,15 @@ public class AccountsPanelTest {
   @Test
   public void testAccountsArea_threeAccounts() {
 
+    TestAccountProvider.setProviderState(State.LOGGED_IN_SECOND_ACCOUNT);
+    
     AccountsPanel panel = new AccountsPanel(null, imageLoader);
     Control control = panel.createDialogArea(shell);
 
     NamesEmails namesEmails = collectNamesEmails(control);
-    assertEquals(3, namesEmails.emails.size());
-    assertTrue(namesEmails.emails.contains("alice@example.com"));
-    assertTrue(namesEmails.emails.contains("bob@example.com"));
-    assertTrue(namesEmails.emails.contains("charlie@example.com"));
-    assertTrue(namesEmails.names.contains("Alice"));
-    assertTrue(namesEmails.names.contains(""));
-    assertTrue(namesEmails.names.contains("Charlie"));
+    assertEquals(1, namesEmails.emails.size());
+    assertTrue(namesEmails.emails.contains(TestAccountProvider.EMAIL_ACCOUNT_2));
+    assertTrue(namesEmails.names.contains(TestAccountProvider.NAME_ACCOUNT_2));
   }
 
   @Test
