@@ -107,15 +107,6 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   public boolean hasCredentialsSet() {
     return accountProvider.hasCredentialsSet();
   }
-  
-  private Credential getCredential() {
-    try {
-      return accountProvider.getCredential();
-    } catch (IOException ex) {
-      LOGGER.log(Level.SEVERE, "Error when obtaining credential: ", ex);
-      return null;
-    }
-  }
  
   @Override
   public Credential getCredential() {

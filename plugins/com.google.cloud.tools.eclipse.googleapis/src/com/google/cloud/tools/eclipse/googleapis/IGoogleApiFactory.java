@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.googleapis;
 
+import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.services.appengine.v1.Appengine.Apps;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
 import com.google.api.services.iam.v1.Iam;
