@@ -73,6 +73,13 @@ public class GoogleApiFactory implements IGoogleApiFactory {
 
   public GoogleApiFactory() {
     this(new ProxyFactory());
+    accountProvider = new DefaultAccountProvider();
+  }
+  
+  @VisibleForTesting
+  private GoogleApiFactory(IAccountProvider accountProvider) {
+    this(new ProxyFactory());
+    this.accountProvider = accountProvider;
   }
 
   @VisibleForTesting
@@ -95,12 +102,21 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     return accountProvider.getAccount();
   }
   
-  
+
   @Override
   public boolean hasCredentialsSet() {
     return accountProvider.hasCredentialsSet();
   }
   
+  private Credential getCredential() {
+    try {
+      return accountProvider.getCredential();
+    } catch (IOException ex) {
+      LOGGER.log(Level.SEVERE, "Error when obtaining credential: ", ex);
+      return null;
+    }
+  }
+ 
   @Override
   public Credential getCredential() {
     try {

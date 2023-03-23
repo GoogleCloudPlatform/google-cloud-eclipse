@@ -45,7 +45,7 @@ public class DefaultAccountProvider implements IAccountProvider {
   
   private final JsonFactory jsonFactory = Utils.getDefaultJsonFactory();
   private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
- 
+  
   private Map<Credential, Account> accountCache = new HashMap<>();
   
   private static final HttpRequestInitializer requestTimeoutSetter = new HttpRequestInitializer() {
