@@ -62,14 +62,13 @@ public class MiniSelectorTest {
 
   @Before
   public void setUp() {
-    TestAccountProvider.setAsDefaultProvider();
-    TestAccountProvider.setProviderState(State.LOGGED_IN);
+    doReturn(true).when(apiFactory).hasCredentialsSet();
     bot = new SWTBot(shellResource.getShell());
   }
 
   @Test
   public void testNoCredential() {
-    TestAccountProvider.setProviderState(State.NOT_LOGGED_IN);
+    doReturn(false).when(apiFactory).hasCredentialsSet();
     MiniSelector selector = new MiniSelector(shellResource.getShell(), apiFactory);
     assertNull(selector.getCredential());
     assertNotNull(selector.getSelection());

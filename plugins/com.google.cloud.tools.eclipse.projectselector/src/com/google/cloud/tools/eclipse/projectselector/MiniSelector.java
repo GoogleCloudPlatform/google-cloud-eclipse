@@ -119,6 +119,7 @@ public class MiniSelector implements ISelectionProvider {
 
     cancelFetch();
     if (!apiFactory.hasCredentialsSet()) {
+      logger.log(Level.WARNING, "Tried to fetch() projects without credentials set");
       return;
     }
 
