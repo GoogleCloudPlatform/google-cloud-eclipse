@@ -18,15 +18,17 @@ package com.google.cloud.tools.eclipse.login;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
+import com.google.cloud.tools.eclipse.googleapis.Account;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.ui.LoginServiceUi;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
-import com.google.cloud.tools.login.Account;
 import com.google.cloud.tools.login.GoogleLoginState;
 import com.google.cloud.tools.login.JavaPreferenceOAuthDataStore;
 import com.google.cloud.tools.login.LoggerFacade;
 import com.google.cloud.tools.login.OAuthDataStore;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -42,7 +44,7 @@ import org.eclipse.ui.PlatformUI;
  * Provides service related to login, e.g., account management, getting a credential, etc.
  */
 public class GoogleLoginService implements IGoogleLoginService {
-
+  
   private static final String PREFERENCE_PATH_OAUTH_DATA_STORE =
       "/com/google/cloud/tools/eclipse/login/datastore";
 
@@ -90,7 +92,7 @@ public class GoogleLoginService implements IGoogleLoginService {
         Constants.getOAuthClientId(), Constants.getOAuthClientSecret(), OAUTH_SCOPES,
         dataStore, uiFacade, loginServiceLogger);
     loginState.setApplicationName(CloudToolsInfo.USER_AGENT);
-    accounts = loginState.listAccounts();
+    updateAccounts();
   }
 
   /**
@@ -109,20 +111,34 @@ public class GoogleLoginService implements IGoogleLoginService {
   GoogleLoginService(GoogleLoginState loginState) {
     this.loginState = loginState;
     loginState.setApplicationName(CloudToolsInfo.USER_AGENT);
-    accounts = loginState.listAccounts();
   }
-
+  
+  /**
+   * Obtains an unary set of accounts from GoogleAPiFactory
+   * @return the found account, or null
+   */
+  private Account updateAccounts() {
+    GoogleApiFactory apiFactory = new GoogleApiFactory();
+    accounts = new HashSet<>();
+    Account account = null;
+    if (apiFactory.hasCredentialsSet()) {
+      try {
+        account = apiFactory.getAccount();
+        accounts.add(account);
+      } catch (IOException ex) {
+        logger.log(Level.SEVERE, "Exception when obtaining account", ex);
+      }
+    }
+    return account;
+  }
+  
   @Override
   public Account logIn() {
     // TODO: holding a lock for a long period of time (especially when waiting for UI events)
     // should be avoided. Make the login library thread-safe, and don't lock during UI events.
     // (https://github.com/GoogleCloudPlatform/ide-login/issues/21)
     synchronized (loginState) {
-      Account account = loginState.logInWithLocalServer(null /* no custom login message */);
-      if (account != null) {
-        accounts = loginState.listAccounts();
-      }
-      return account;
+      return updateAccounts();
     }
   }
 
