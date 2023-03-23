@@ -54,7 +54,7 @@ public class AccountSelector extends Composite {
       } catch (IOException ex) {
         selectedAccount = null;
       }
-      accountEmail.setText(getSelectedAccountEmail());
+      accountEmail.setText(getSelectedEmail());
     } else {
       accountEmail.setText(Messages.getString("NO_ADC_DETECTED_MESSAGE") + ". " + Messages.getString("NO_ADC_DETECTED_LINK"));
       accountEmail.addSelectionListener(new OpenUriSelectionListener(
@@ -65,14 +65,6 @@ public class AccountSelector extends Composite {
     GridDataFactory.fillDefaults().grab(true, false).applyTo(accountEmailComposite);
     GridLayoutFactory.fillDefaults().generateLayout(accountEmailComposite);
     GridLayoutFactory.fillDefaults().generateLayout(this);
-  }
-
-  String getSelectedAccountEmail() {
-    try {
-      return apiFactory.getAccount().getEmail();
-    } catch (IOException ex) {
-      return null;
-    }
   }
   
   /**
@@ -98,11 +90,15 @@ public class AccountSelector extends Composite {
    * Returns the currently selected email, or empty string if none; never {@code null}.
    */
   public String getSelectedEmail() {
-    try {
-      return apiFactory.getAccount().getEmail();
-    } catch (IOException ex) {
-      return "";
+    String result = "";
+    if (apiFactory.hasCredentialsSet()) {
+      try {
+          result = apiFactory.getAccount().getEmail();
+      } catch (IOException ex) {
+        // will return default
+      }
     }
+    return result;
   }
 
   public boolean isSignedIn() {

@@ -50,6 +50,7 @@ import com.google.api.services.storage.model.Bucket;
 import com.google.api.services.storage.model.Buckets;
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.MessageTarget;
+import com.google.cloud.tools.eclipse.googleapis.Account;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
@@ -58,7 +59,6 @@ import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
 import com.google.cloud.tools.eclipse.test.util.TestAccountProvider.State;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
-import com.google.cloud.tools.login.Account;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -109,7 +109,8 @@ public class RunOptionsDefaultsComponentTest {
 
   @Before
   public void setUp() throws IOException {
-    TestAccountProvider.setAsDefaultProvider();
+    
+    
     Account account1 = mock(Account.class, "alice@example.com");
     Credential credential1 = mock(Credential.class, "alice@example.com");
     when(account1.getEmail()).thenReturn("alice@example.com");
@@ -117,6 +118,9 @@ public class RunOptionsDefaultsComponentTest {
     mockStorageApiBucketList("project", "alice-bucket-1", "alice-bucket-2");
     mockProjectList(new GcpProject("project", "project"));
     mockServiceApi("project", "dataflow.googleapis.com");
+    
+    when(apiFactory.hasCredentialsSet()).thenReturn(true);
+    when(apiFactory.getAccount()).thenReturn(account1);
 
     Account account2 = mock(Account.class, "bob@example.com");
     Credential credential2 = mock(Credential.class, "bob@example.com");
