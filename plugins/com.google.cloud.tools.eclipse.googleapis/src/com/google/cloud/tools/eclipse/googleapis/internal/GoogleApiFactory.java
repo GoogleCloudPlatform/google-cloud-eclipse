@@ -52,7 +52,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 @Component
 public class GoogleApiFactory implements IGoogleApiFactory {
 
-  private static IAccountProvider accountProvider;
+  private static IAccountProvider accountProvider = new DefaultAccountProvider();
   
   private final JsonFactory jsonFactory = Utils.getDefaultJsonFactory();
   private final ProxyFactory proxyFactory;
@@ -73,13 +73,6 @@ public class GoogleApiFactory implements IGoogleApiFactory {
 
   public GoogleApiFactory() {
     this(new ProxyFactory());
-    accountProvider = new DefaultAccountProvider();
-  }
-  
-  @VisibleForTesting
-  private GoogleApiFactory(IAccountProvider accountProvider) {
-    this(new ProxyFactory());
-    this.accountProvider = accountProvider;
   }
 
   @VisibleForTesting
