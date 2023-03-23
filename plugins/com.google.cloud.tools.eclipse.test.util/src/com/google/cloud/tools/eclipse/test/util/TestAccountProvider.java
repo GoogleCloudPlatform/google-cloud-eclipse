@@ -56,8 +56,8 @@ public class TestAccountProvider implements IAccountProvider {
   public static final TestAccountProvider INSTANCE = new TestAccountProvider();
   
   private TestAccountProvider() {
-    account1 = new Account(EMAIL_ACCOUNT_1, CREDENTIAL_ACCOUNT_1, NAME_ACCOUNT_1, null);
-    account2 = new Account(EMAIL_ACCOUNT_2, CREDENTIAL_ACCOUNT_2, NAME_ACCOUNT_2, null);
+    account1 = new Account(EMAIL_ACCOUNT_1, CREDENTIAL_ACCOUNT_1, NAME_ACCOUNT_1, AVATAR_URL_ACCOUNT_1);
+    account2 = new Account(EMAIL_ACCOUNT_2, CREDENTIAL_ACCOUNT_2, NAME_ACCOUNT_2, AVATAR_URL_ACCOUNT_2);
     accounts.put(State.NOT_LOGGED_IN, null);
     accounts.put(State.LOGGED_IN, account1);
     accounts.put(State.LOGGED_IN_SECOND_ACCOUNT, account2);
