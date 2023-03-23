@@ -50,17 +50,17 @@ public class TestAccountProvider implements IAccountProvider {
   private static Map<State, Account> accounts = new HashMap<>();
   private static State state = State.LOGGED_IN;
   
-  private static Account account1;
-  private static Account account2;
+  public static Account ACCOUNT_1;
+  public static Account ACCOUNT_2;
   
   public static final TestAccountProvider INSTANCE = new TestAccountProvider();
   
   private TestAccountProvider() {
-    account1 = new Account(EMAIL_ACCOUNT_1, CREDENTIAL_ACCOUNT_1, NAME_ACCOUNT_1, AVATAR_URL_ACCOUNT_1);
-    account2 = new Account(EMAIL_ACCOUNT_2, CREDENTIAL_ACCOUNT_2, NAME_ACCOUNT_2, AVATAR_URL_ACCOUNT_2);
+    ACCOUNT_1 = new Account(EMAIL_ACCOUNT_1, CREDENTIAL_ACCOUNT_1, NAME_ACCOUNT_1, AVATAR_URL_ACCOUNT_1);
+    ACCOUNT_2 = new Account(EMAIL_ACCOUNT_2, CREDENTIAL_ACCOUNT_2, NAME_ACCOUNT_2, AVATAR_URL_ACCOUNT_2);
     accounts.put(State.NOT_LOGGED_IN, null);
-    accounts.put(State.LOGGED_IN, account1);
-    accounts.put(State.LOGGED_IN_SECOND_ACCOUNT, account2);
+    accounts.put(State.LOGGED_IN, ACCOUNT_1);
+    accounts.put(State.LOGGED_IN_SECOND_ACCOUNT, ACCOUNT_2);
   }
   
   public static void setAsDefaultProvider() {
@@ -68,8 +68,8 @@ public class TestAccountProvider implements IAccountProvider {
   }
   
   public static void setAsDefaultProvider(State state) {
-    GoogleApiFactory.setAccountProvider(INSTANCE);
     setProviderState(state);
+    setAsDefaultProvider();
   }
   
   public static void setProviderState(State state) {

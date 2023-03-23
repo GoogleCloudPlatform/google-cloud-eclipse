@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -58,14 +59,18 @@ public class ProjectRepositoryTest {
   private Project project = new Project();
 
   @Before
-  public void setUp() {
-    TestAccountProvider.setAsDefaultProvider();
+  public void setUp() throws IOException {
+    when(apiFactory.hasCredentialsSet()).thenReturn(true);
+    when(apiFactory.getAccount()).thenReturn(TestAccountProvider.ACCOUNT_1);
+    when(apiFactory.getCredential()).thenReturn(TestAccountProvider.ACCOUNT_1.getOAuth2Credential());
     repository = new ProjectRepository(apiFactory);
     project.setName("projectName").setProjectId("projectId");
   }
 
+  
   @Test(expected = NullPointerException.class)
   public void testGetProjects_nullCredential() throws ProjectRepositoryException {
+    setLoggedOut();
     repository.getProjects();
   }
 
@@ -147,6 +152,7 @@ public class ProjectRepositoryTest {
 
   @Test
   public void testGetProject_nullCredential() throws ProjectRepositoryException {
+    setLoggedOut();
     assertNull(repository.getProject("projectId"));
   }
 
@@ -186,8 +192,9 @@ public class ProjectRepositoryTest {
     assertThat(gcpProject.getId(), is("projectId"));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test(expected = IllegalStateException.class)
   public void testHasAppEngineApplication_nullCredential() throws ProjectRepositoryException {
+    setLoggedOut();
     repository.getAppEngineApplication("projectId");
   }
 
@@ -268,6 +275,16 @@ public class ProjectRepositoryTest {
     when(list.setPageSize(anyInt())).thenReturn(list);
     when(list.setPageToken(anyString())).thenReturn(list);
     return list;
+  }
+
+  private void setLoggedOut() {
+    try {
+      when(apiFactory.hasCredentialsSet()).thenReturn(false);
+      when(apiFactory.getAccount()).thenReturn(null);
+      when(apiFactory.getCredential()).thenReturn(null);
+    } catch (IOException ex) {
+      fail("IOException when setting mock");
+    }
   }
 
 }
