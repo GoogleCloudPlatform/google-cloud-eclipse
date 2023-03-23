@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * A panel listing all currently logged-in accounts. The panel allows adding new accounts and
@@ -130,10 +131,12 @@ public class AccountsPanel extends PopupDialog {
     Composite linkRow = new Composite(accountArea, SWT.NONE);
     Link helpLink = new Link(linkRow, SWT.NONE);
     helpLink.setText(Messages.getString("NO_ADC_DETECTED_LINK"));
-    helpLink.addSelectionListener(new OpenUriSelectionListener(new ErrorDialogErrorHandler(accountArea.getShell())));
+    // workbench is not running on tests
+    if (PlatformUI.isWorkbenchRunning()) {
+      helpLink.addSelectionListener(new OpenUriSelectionListener(new ErrorDialogErrorHandler(accountArea.getShell())));
+    }
     GridLayoutFactory.fillDefaults().numColumns(1).applyTo(messageRow);
     GridLayoutFactory.fillDefaults().generateLayout(linkRow);
-    
   }
   
   private Account getAccount() {

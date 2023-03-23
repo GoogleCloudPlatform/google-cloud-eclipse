@@ -55,8 +55,7 @@ public class AccountsPanelTest {
 
   @Before
   public void setUp() {
-    TestAccountProvider.setAsDefaultProvider();
-    TestAccountProvider.setProviderState(State.LOGGED_IN);
+    TestAccountProvider.setAsDefaultProvider(State.LOGGED_IN);
     shell = shellTestResource.getShell();
   }
 
@@ -162,9 +161,11 @@ public class AccountsPanelTest {
 
   private static NamesEmails collectNamesEmails(Control dialogArea) {
     NamesEmails namesEmails = new NamesEmails();
-
+    if (!TestAccountProvider.INSTANCE.hasCredentialsSet()) {
+      return namesEmails;
+    }
     Control[] controls = ((Composite) dialogArea).getChildren();
-    for (int i = 0; i + 2 < controls.length; i += 2) {
+    for (int i = 0; i + 2 <= controls.length; i += 2) {
       Composite accountRow = (Composite) controls[i];
       Composite secondColumn = (Composite) accountRow.getChildren()[1];
       Control[] labels = secondColumn.getChildren();
