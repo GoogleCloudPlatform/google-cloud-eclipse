@@ -21,12 +21,9 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeReque
 import com.google.cloud.tools.eclipse.googleapis.Account;
 import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.ui.LoginServiceUi;
-import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
-import com.google.cloud.tools.login.GoogleLoginState;
 import com.google.cloud.tools.login.JavaPreferenceOAuthDataStore;
 import com.google.cloud.tools.login.LoggerFacade;
 import com.google.cloud.tools.login.OAuthDataStore;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.util.Arrays;
@@ -68,7 +65,6 @@ public class GoogleLoginService implements IGoogleLoginService {
   }
 
   private Set<Account> accounts = new HashSet<>();
-  private GoogleLoginState loginState;
 
   /**
    * Called by OSGi Declarative Services Runtime when the {@link GoogleLoginService} is activated
@@ -88,10 +84,6 @@ public class GoogleLoginService implements IGoogleLoginService {
     LoginServiceUi uiFacade = new LoginServiceUi(shellProvider);
     OAuthDataStore dataStore =
         new JavaPreferenceOAuthDataStore(PREFERENCE_PATH_OAUTH_DATA_STORE, loginServiceLogger);
-    loginState = new GoogleLoginState(
-        Constants.getOAuthClientId(), Constants.getOAuthClientSecret(), OAUTH_SCOPES,
-        dataStore, uiFacade, loginServiceLogger);
-    loginState.setApplicationName(CloudToolsInfo.USER_AGENT);
     updateAccounts();
   }
 
@@ -100,18 +92,6 @@ public class GoogleLoginService implements IGoogleLoginService {
    * by {@link #activate()}.
    */
   public GoogleLoginService() {}
-
-  @VisibleForTesting
-  GoogleLoginService(OAuthDataStore dataStore, LoginServiceUi uiFacade, LoggerFacade loggerFacade) {
-    this(new GoogleLoginState(Constants.getOAuthClientId(), Constants.getOAuthClientSecret(),
-                              OAUTH_SCOPES, dataStore, uiFacade, loggerFacade));
-  }
-
-  @VisibleForTesting
-  GoogleLoginService(GoogleLoginState loginState) {
-    this.loginState = loginState;
-    loginState.setApplicationName(CloudToolsInfo.USER_AGENT);
-  }
   
   /**
    * Obtains an unary set of accounts from GoogleAPiFactory
@@ -137,29 +117,28 @@ public class GoogleLoginService implements IGoogleLoginService {
     // TODO: holding a lock for a long period of time (especially when waiting for UI events)
     // should be avoided. Make the login library thread-safe, and don't lock during UI events.
     // (https://github.com/GoogleCloudPlatform/ide-login/issues/21)
-    synchronized (loginState) {
+    synchronized (this) {
       return updateAccounts();
     }
   }
 
   @Override
   public void logOutAll() {
-    synchronized (loginState) {
-      loginState.logOutAll(false /* Don't prompt for logout. */);
+    synchronized (this) {
       accounts = new HashSet<>();
     }
   }
 
   @Override
   public boolean hasAccounts() {
-    synchronized (loginState) {
+    synchronized (this) {
       return !accounts.isEmpty();
     }
   }
 
   @Override
   public Set<Account> getAccounts() {
-    synchronized (loginState) {
+    synchronized (this) {
       return new HashSet<>(accounts);
     }
   }
@@ -167,7 +146,7 @@ public class GoogleLoginService implements IGoogleLoginService {
   @Override
   public Credential getCredential(String email) {
     Preconditions.checkNotNull(email, "email cannot be null.");
-    synchronized (loginState) {
+    synchronized (this) {
       for (Account account : accounts) {
         if (account.getEmail().equals(email)) {
           return account.getOAuth2Credential();
