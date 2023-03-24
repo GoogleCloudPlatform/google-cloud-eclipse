@@ -24,7 +24,10 @@ import static org.junit.Assert.fail;
 import com.google.cloud.tools.appengine.operations.AppEngineWebXmlProjectStaging;
 import com.google.cloud.tools.appengine.operations.Deployment;
 import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkNotFoundException;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider.State;
 import org.eclipse.core.runtime.Status;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -35,6 +38,11 @@ public class CloudSdkProcessWrapperTest {
 
   private final CloudSdkProcessWrapper wrapper = new CloudSdkProcessWrapper();
 
+  @Before
+  public void setUp() {
+    TestAccountProvider.setAsDefaultProvider(State.NOT_LOGGED_IN);
+  }
+  
   @Test
   public void testGetAppEngineDeployment_nullCredentialFile() throws CloudSdkNotFoundException {
     try {
@@ -46,22 +54,8 @@ public class CloudSdkProcessWrapperTest {
   }
 
   @Test
-  public void testGetAppEngineDeployment_nonExistingCredentialFile()
-      throws CloudSdkNotFoundException {
-//    Path credential = tempFolder.getRoot().toPath().resolve("non-existing-file");
-//    assertFalse(Files.exists(credential));
-
-    try {
-      wrapper.getAppEngineDeployment(null);
-      fail();
-    } catch (IllegalArgumentException ex) {
-      assertEquals(ex.getMessage(), "non-existing credential file");
-    }
-  }
-
-  @Test
   public void testGetAppEngineDeployment() throws CloudSdkNotFoundException {
-//    Path credential = tempFolder.newFile().toPath();
+    TestAccountProvider.setProviderState(State.LOGGED_IN);
     Deployment deployment = wrapper.getAppEngineDeployment(null);
     assertNotNull(deployment);
   }
@@ -75,7 +69,7 @@ public class CloudSdkProcessWrapperTest {
   @Test
   public void testGetAppEngineDeployment_cannotSetUpTwice()
       throws CloudSdkNotFoundException {
-//    Path credential = tempFolder.newFile().toPath();
+    TestAccountProvider.setProviderState(State.LOGGED_IN);
     wrapper.getAppEngineDeployment(null);
     try {
       wrapper.getAppEngineDeployment(null);
