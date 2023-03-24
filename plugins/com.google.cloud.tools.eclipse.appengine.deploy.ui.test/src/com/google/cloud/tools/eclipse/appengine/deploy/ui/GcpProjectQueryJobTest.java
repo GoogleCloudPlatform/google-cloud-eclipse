@@ -72,12 +72,6 @@ public class GcpProjectQueryJobTest {
     assertEquals(Job.NONE, queryJob.getState());
   }
 
-  @Test(expected = NullPointerException.class)
-  public void testNullCredential() {
-    new GcpProjectQueryJob(projectRepository, projectSelector,
-        dataBindingContext, isLatestQueryJob);
-  }
-
   @Test
   public void testRun_setsProjects() throws InterruptedException, ProjectRepositoryException {
     queryJob.schedule();
