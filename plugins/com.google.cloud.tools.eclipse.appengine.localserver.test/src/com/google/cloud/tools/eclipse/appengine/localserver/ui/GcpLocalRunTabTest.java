@@ -24,6 +24,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -40,6 +41,7 @@ import com.google.api.services.iam.v1.Iam.Projects.ServiceAccounts.Keys;
 import com.google.api.services.iam.v1.Iam.Projects.ServiceAccounts.Keys.Create;
 import com.google.api.services.iam.v1.model.CreateServiceAccountKeyRequest;
 import com.google.api.services.iam.v1.model.ServiceAccountKey;
+import com.google.cloud.tools.eclipse.googleapis.Account;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
@@ -48,7 +50,9 @@ import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
-import com.google.cloud.tools.login.Account;
+import com.google.common.base.Optional;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider.State;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -89,12 +93,12 @@ public class GcpLocalRunTabTest {
   @Rule public ShellTestResource shellResource = new ShellTestResource();
   @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
-  @Mock private IGoogleApiFactory apiFactory;
+  private IGoogleApiFactory apiFactory;
   @Mock private ProjectRepository projectRepository;
   @Mock private EnvironmentTab environmentTab;
 
-  @Mock private Account account1;
-  @Mock private Account account2;
+  private Account account1 = TestAccountProvider.ACCOUNT_1;
+  private Account account2 = TestAccountProvider.ACCOUNT_2;
   @Mock private Credential credential1;
   @Mock private Credential credential2;
 
@@ -118,17 +122,11 @@ public class GcpLocalRunTabTest {
   private Path keyFile;
 
   @Before
-  public void setUp() throws ProjectRepositoryException {
+  public void setUp() {
+    TestAccountProvider.setAsDefaultProvider(State.NOT_LOGGED_IN);
+    selectAccount(null);
     shell = shellResource.getShell();
-
-    when(account1.getEmail()).thenReturn("account1@example.com");
-    when(account2.getEmail()).thenReturn("account2@example.com");
-    when(account1.getOAuth2Credential()).thenReturn(credential1);
-    when(account2.getOAuth2Credential()).thenReturn(credential2);
     
-    when(projectRepository.getProjects()).thenReturn(projectsOfEmail1);
-    when(projectRepository.getProjects()).thenReturn(projectsOfEmail2);
-
     tab = new GcpLocalRunTab(environmentTab, apiFactory, projectRepository);
     tab.createControl(shell);
 
@@ -142,6 +140,26 @@ public class GcpLocalRunTabTest {
     keyFile = tempFolder.getRoot().toPath().resolve("key.json");
   }
 
+  private void selectAccount(Account account) {
+    try {
+      if (account == null) {
+        TestAccountProvider.setProviderState(State.NOT_LOGGED_IN);
+      } else {
+        if (account.equals(TestAccountProvider.ACCOUNT_1)) {
+          TestAccountProvider.setProviderState(State.LOGGED_IN);
+          when(projectRepository.getProjects()).thenReturn(projectsOfEmail1);
+        } else if (account.equals(TestAccountProvider.ACCOUNT_2)) {
+          TestAccountProvider.setProviderState(State.LOGGED_IN_SECOND_ACCOUNT);
+          when(projectRepository.getProjects()).thenReturn(projectsOfEmail2);
+        } else {
+          throw new IllegalArgumentException("Used a test account not belonging to TestAccountProvider");
+        }
+      }
+    } catch (ProjectRepositoryException ex) {
+      fail();
+    }
+  }
+  
   @After
   public void tearDown() {
     tab.dispose();
@@ -194,83 +212,60 @@ public class GcpLocalRunTabTest {
 
   @Test
   public void testProjectSelectorLoaded() {
-//    accountSelector.selectAccount("account1@example.com");
+    selectAccount(account1);
     assertEquals(projectsOfEmail1, projectSelector.getProjects());
     assertEquals("", projectSelector.getSelectedProjectId());
   }
 
   @Test
   public void testProjectSelectorLoaded_switchingAccounts() {
-//    accountSelector.selectAccount("account1@example.com");
-//    accountSelector.selectAccount("account2@example.com");
+    selectAccount(account1);
+    selectAccount(account2);
     assertEquals(projectsOfEmail2, projectSelector.getProjects());
     assertEquals("", projectSelector.getSelectedProjectId());
   }
 
   @Test
-  public void testInitializeFrom_accountSelected() throws CoreException {
-    mockLaunchConfig("account1@example.com", "", "");
-    tab.initializeFrom(launchConfig);
-    assertEquals("account1@example.com", accountSelector.getSelectedEmail());
-
-    mockLaunchConfig("account2@example.com", "", "");
-    tab.initializeFrom(launchConfig);
-    assertEquals("account2@example.com", accountSelector.getSelectedEmail());
-  }
-
-  @Test
   public void testInitializeFrom_projectSelected() throws CoreException {
-    mockLaunchConfig("account1@example.com", "project-A", "");
+    mockLaunchConfig(Optional.of(account1), "project-A", "");
     tab.initializeFrom(launchConfig);
     assertEquals("project-A", projectSelector.getSelectedProjectId());
 
-    mockLaunchConfig("account2@example.com", "google.com:project-D", "");
+    mockLaunchConfig(Optional.of(account1), "project-B", "");
     tab.initializeFrom(launchConfig);
-    assertEquals("google.com:project-D", projectSelector.getSelectedProjectId());
+    assertEquals("project-B", projectSelector.getSelectedProjectId());
   }
 
   @Test
   public void testInitializeFrom_serviceKeyEntered() throws CoreException {
-    mockLaunchConfig("", "", "/usr/home/keystore/my-key.json");
+    mockLaunchConfig(Optional.absent(), "", "/usr/home/keystore/my-key.json");
     tab.initializeFrom(launchConfig);
     assertEquals("/usr/home/keystore/my-key.json", serviceKeyText.getText());
   }
 
   @Test
   public void testActivated_initializesUi() throws CoreException {
-    mockLaunchConfig("account1@example.com", "project-A", "/usr/home/keystore/my-key.json");
+    selectAccount(account1);
+    mockLaunchConfig(Optional.of(account1), "project-A", "/usr/home/keystore/my-key.json");
     tab.activated(launchConfig);
-    assertEquals("account1@example.com", accountSelector.getSelectedEmail());
+    assertEquals(account1.getEmail(), accountSelector.getSelectedEmail());
     assertEquals("project-A", projectSelector.getSelectedProjectId());
     assertEquals("/usr/home/keystore/my-key.json", serviceKeyText.getText());
   }
 
-  private void mockLaunchConfig(String accountEmail, String gcpProjectId, String serviceKey)
-      throws CoreException {
-    when(launchConfig.getAttribute("com.google.cloud.tools.eclipse.gcpEmulation.accountEmail", ""))
-        .thenReturn(accountEmail);
-
-    Map<String, String> environmentMap = new HashMap<>();
-    environmentMap.put("GOOGLE_CLOUD_PROJECT", gcpProjectId);
-    environmentMap.put("GOOGLE_APPLICATION_CREDENTIALS", serviceKey);
-    when(launchConfig.getAttribute(eq(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES), 
-        Matchers.anyMapOf(String.class, String.class)))
-        .thenReturn(environmentMap);
-  }
-
   @Test
   public void testPerformApply_activated() throws CoreException {
-    mockLaunchConfig("account1@example.com", "project-A", "/usr/home/key.json");
+    mockLaunchConfig(Optional.of(account1), "project-A", "/usr/home/key.json");
     tab.activated(launchConfig);
 
-//    accountSelector.selectAccount("account2@example.com");
+    selectAccount(account2);
     projectSelector.selectProjectId("project-C");
     serviceKeyText.setText("/tmp/keys/another.json");
 
     tab.deactivated(launchConfig);
 
     verify(launchConfig).setAttribute("com.google.cloud.tools.eclipse.gcpEmulation.accountEmail",
-        "account2@example.com");
+        account2.getEmail());
 
     verify(launchConfig).setAttribute(eq(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES),
         mapCaptor.capture());
@@ -281,17 +276,17 @@ public class GcpLocalRunTabTest {
 
   @Test
   public void testPerformApply_notActivated() throws CoreException {
-    mockLaunchConfig("account1@example.com", "project-A", "/usr/home/key.json");
+    mockLaunchConfig(Optional.of(account1), "project-A", "/usr/home/key.json");
     tab.initializeFrom(launchConfig);
 
-//    accountSelector.selectAccount("account2@example.com");
+    selectAccount(account2);
     projectSelector.selectProjectId("project-C");
     serviceKeyText.setText("/tmp/keys/another.json");
 
     tab.performApply(launchConfig);
 
     verify(launchConfig, never()).setAttribute(
-        "com.google.cloud.tools.eclipse.gcpEmulation.accountEmail", "account2@example.com");
+        "com.google.cloud.tools.eclipse.gcpEmulation.accountEmail", account2.getEmail());
     verify(launchConfig, never()).setAttribute(
         eq(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES),
         Matchers.anyMapOf(String.class, String.class));
@@ -315,28 +310,28 @@ public class GcpLocalRunTabTest {
 
   @Test
   public void testIsValid_nullServiceKey() throws CoreException {
-    mockLaunchConfig("email", "gcpProjectId", null /* serviceKey */);
+    mockLaunchConfig(Optional.of(account1), "gcpProjectId", null /* serviceKey */);
     assertTrue(tab.isValid(launchConfig));
     assertNull(tab.getErrorMessage());
   }
 
   @Test
   public void testIsValid_emptyServiceKey() throws CoreException {
-    mockLaunchConfig("email", "gcpProjectId", "" /* serviceKey */);
+    mockLaunchConfig(Optional.of(account1), "gcpProjectId", "" /* serviceKey */);
     assertTrue(tab.isValid(launchConfig));
     assertNull(tab.getErrorMessage());
   }
 
   @Test
   public void testIsValid_nonExistingServicekeyPath() throws CoreException {
-    mockLaunchConfig("email", "gcpProjectId", "/non/existing/file.ever");
+    mockLaunchConfig(Optional.of(account1), "gcpProjectId", "/non/existing/file.ever");
     assertFalse(tab.isValid(launchConfig));
     assertEquals("/non/existing/file.ever does not exist.", tab.getErrorMessage());
   }
 
   @Test
   public void testIsValid_servicekeyPathIsDirectory() throws CoreException {
-    mockLaunchConfig("email", "gcpProjectId", "/");
+    mockLaunchConfig(Optional.of(account1), "gcpProjectId", "/");
     assertFalse(tab.isValid(launchConfig));
     assertEquals("/ is a directory.", tab.getErrorMessage());
   }
@@ -349,7 +344,7 @@ public class GcpLocalRunTabTest {
     assertTrue(projectSelector.getSelection().isEmpty());
     assertFalse(createKeyButton.isEnabled());
 
-//    accountSelector.selectAccount("account1@example.com");
+    selectAccount(account1);
     projectSelector.selectProjectId("project-A");
     assertTrue(createKeyButton.isEnabled());
 
@@ -359,15 +354,15 @@ public class GcpLocalRunTabTest {
 
   private void setUpServiceKeyCreation(boolean throwException) throws IOException, CoreException {
     setUpServiceKeyCreation(apiFactory, throwException);
-    mockLaunchConfig("account1@example.com", "project-A", "");
+    mockLaunchConfig(Optional.of(account1), "project-A", "");
     tab.initializeFrom(launchConfig);
   }
 
   @Test
   public void testCreateServiceAccountKey() throws IOException, CoreException {
     setUpServiceKeyCreation(apiFactory, false);
-    mockLaunchConfig("account2@example.com", "google.com:project-D", "");
-//    accountSelector.selectAccount("account2@example.com");
+    mockLaunchConfig(Optional.of(account2), "google.com:project-D", "");
+    selectAccount(account2);
 
     tab.initializeFrom(launchConfig);
 
@@ -377,31 +372,7 @@ public class GcpLocalRunTabTest {
     assertEquals("key data in JSON format", new String(bytesRead, StandardCharsets.UTF_8));
   }
 
-  private static void setUpServiceKeyCreation(
-      IGoogleApiFactory mockApiFactory, boolean throwException) throws IOException {
-    Iam iam = Mockito.mock(Iam.class);
-    Projects projects = Mockito.mock(Projects.class);
-    ServiceAccounts serviceAccounts = Mockito.mock(ServiceAccounts.class);
-    Keys keys = Mockito.mock(Keys.class);
-    Create create = Mockito.mock(Create.class);
-
-    ServiceAccountKey serviceAccountKey = new ServiceAccountKey();
-    byte[] keyContent = "key data in JSON format".getBytes();
-    serviceAccountKey.setPrivateKeyData(Base64.encodeBase64String(keyContent));
-
-    when(mockApiFactory.newIamApi()).thenReturn(iam);
-    when(iam.projects()).thenReturn(projects);
-    when(projects.serviceAccounts()).thenReturn(serviceAccounts);
-    when(serviceAccounts.keys()).thenReturn(keys);
-    when(keys.create(anyString(), Matchers.any(CreateServiceAccountKeyRequest.class)))
-        .thenReturn(create);
-
-    if (throwException) {
-      when(create.execute()).thenThrow(new IOException("log from unit test"));
-    } else {
-      when(create.execute()).thenReturn(serviceAccountKey);
-    }
-  }
+  
   
   @Test
   public void testCreateServiceAccountKey_replacesExistingKey() throws IOException, CoreException {
@@ -440,7 +411,7 @@ public class GcpLocalRunTabTest {
   @Test
   public void testGetServiceAccountKeyPath() throws URISyntaxException {
     tab.initializeFrom(launchConfig);
-//    accountSelector.selectAccount("account1@example.com");
+    selectAccount(account1);
     projectSelector.selectProjectId("project-A");
 
     Path expected = Paths.get(Platform.getConfigurationLocation().getURL().toURI())
@@ -452,12 +423,53 @@ public class GcpLocalRunTabTest {
   @Test
   public void testGetServiceAccountKeyPath_internal() throws URISyntaxException {
     tab.initializeFrom(launchConfig);
-//    accountSelector.selectAccount("account2@example.com");
+    selectAccount(account2);
     projectSelector.selectProjectId("google.com:project-D");
 
     Path expected = Paths.get(Platform.getConfigurationLocation().getURL().toURI())
         .resolve("com.google.cloud.tools.eclipse")
         .resolve("app-engine-default-service-account-key-google.com.project-D.json");
     assertEquals(expected, tab.getServiceAccountKeyPath());
+  }
+  
+  private void mockLaunchConfig(Optional<Account> account, String gcpProjectId, String serviceKey)
+      throws CoreException {
+    
+    if (account.isPresent()) {
+      when(launchConfig.getAttribute("com.google.cloud.tools.eclipse.gcpEmulation.accountEmail", ""))
+          .thenReturn(account.get().getEmail());
+    }
+
+    Map<String, String> environmentMap = new HashMap<>();
+    environmentMap.put("GOOGLE_CLOUD_PROJECT", gcpProjectId);
+    environmentMap.put("GOOGLE_APPLICATION_CREDENTIALS", serviceKey);
+    when(launchConfig.getAttribute(eq(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES), 
+        Matchers.anyMapOf(String.class, String.class)))
+        .thenReturn(environmentMap);
+  }
+  private static void setUpServiceKeyCreation(
+      IGoogleApiFactory mockApiFactory, boolean throwException) throws IOException {
+    Iam iam = Mockito.mock(Iam.class);
+    Projects projects = Mockito.mock(Projects.class);
+    ServiceAccounts serviceAccounts = Mockito.mock(ServiceAccounts.class);
+    Keys keys = Mockito.mock(Keys.class);
+    Create create = Mockito.mock(Create.class);
+
+    ServiceAccountKey serviceAccountKey = new ServiceAccountKey();
+    byte[] keyContent = "key data in JSON format".getBytes();
+    serviceAccountKey.setPrivateKeyData(Base64.encodeBase64String(keyContent));
+
+    when(mockApiFactory.newIamApi()).thenReturn(iam);
+    when(iam.projects()).thenReturn(projects);
+    when(projects.serviceAccounts()).thenReturn(serviceAccounts);
+    when(serviceAccounts.keys()).thenReturn(keys);
+    when(keys.create(anyString(), Matchers.any(CreateServiceAccountKeyRequest.class)))
+        .thenReturn(create);
+
+    if (throwException) {
+      when(create.execute()).thenThrow(new IOException("log from unit test"));
+    } else {
+      when(create.execute()).thenReturn(serviceAccountKey);
+    }
   }
 }
