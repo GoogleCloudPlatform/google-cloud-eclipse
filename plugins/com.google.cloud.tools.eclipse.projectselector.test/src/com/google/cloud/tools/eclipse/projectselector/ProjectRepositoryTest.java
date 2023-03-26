@@ -68,7 +68,7 @@ public class ProjectRepositoryTest {
   }
 
   
-  @Test(expected = NullPointerException.class)
+  @Test(expected = IllegalStateException.class)
   public void testGetProjects_nullCredential() throws ProjectRepositoryException {
     setLoggedOut();
     repository.getProjects();
