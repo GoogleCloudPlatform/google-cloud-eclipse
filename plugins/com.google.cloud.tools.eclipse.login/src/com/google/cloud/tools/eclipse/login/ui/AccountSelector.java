@@ -36,7 +36,6 @@ import org.eclipse.swt.widgets.Link;
 public class AccountSelector extends Composite {
 
   private IGoogleApiFactory apiFactory;
-  private Account selectedAccount;
   private ListenerList<Runnable> selectionListeners = new ListenerList<>();
 
   @VisibleForTesting Link accountEmail;
@@ -49,11 +48,6 @@ public class AccountSelector extends Composite {
     accountEmail = new Link(accountEmailComposite, SWT.WRAP);
     
     if (apiFactory.hasCredentialsSet()) {
-      try {
-        selectedAccount = apiFactory.getAccount();
-      } catch (IOException ex) {
-        selectedAccount = null;
-      }
       accountEmail.setText(getSelectedEmail());
     } else {
       accountEmail.setText(Messages.getString("NO_ADC_DETECTED_MESSAGE") + ". " + Messages.getString("NO_ADC_DETECTED_LINK"));
@@ -83,7 +77,7 @@ public class AccountSelector extends Composite {
    * (By its contract, {@link Account} never carries a {@code null} {@link Credential}.)
    */
   public Credential getSelectedCredential() {
-    return selectedAccount != null ? selectedAccount.getOAuth2Credential() : null;
+    return apiFactory.hasCredentialsSet() ? apiFactory.getCredential() : null;
   }
 
   /**

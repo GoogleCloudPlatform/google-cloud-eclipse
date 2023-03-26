@@ -524,6 +524,7 @@ public class RunOptionsDefaultsComponentTest {
   @Test
   public void testPartialValidity_account() {
     testPartialValidity_allEmpty();
+    loginAlice();
     assertTrue("should be complete with account", page.isPageComplete());
   }
 
