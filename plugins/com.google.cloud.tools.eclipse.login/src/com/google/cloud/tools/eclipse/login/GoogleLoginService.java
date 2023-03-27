@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.login;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
 import com.google.cloud.tools.eclipse.googleapis.Account;
+import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.ui.LoginServiceUi;
 import com.google.cloud.tools.login.JavaPreferenceOAuthDataStore;
@@ -52,6 +53,8 @@ public class GoogleLoginService implements IGoogleLoginService {
           "email", //$NON-NLS-1$
           "https://www.googleapis.com/auth/cloud-platform" //$NON-NLS-1$
       )));
+  
+  private static final IGoogleApiFactory apiFactory = new GoogleApiFactory();
 
   /**
    * Returns a URL through which users can login.
@@ -98,18 +101,8 @@ public class GoogleLoginService implements IGoogleLoginService {
    * @return the found account, or null
    */
   private Account updateAccounts() {
-    GoogleApiFactory apiFactory = new GoogleApiFactory();
-    accounts = new HashSet<>();
-    Account account = null;
-    if (apiFactory.hasCredentialsSet()) {
-      try {
-        account = apiFactory.getAccount();
-        accounts.add(account);
-      } catch (IOException ex) {
-        logger.log(Level.SEVERE, "Exception when obtaining account", ex);
-      }
-    }
-    return account;
+    accounts = getAccounts();
+    return accounts.isEmpty() ? null : accounts.iterator().next();
   }
   
   @Override
@@ -131,23 +124,27 @@ public class GoogleLoginService implements IGoogleLoginService {
 
   @Override
   public boolean hasAccounts() {
-    synchronized (this) {
-      return !accounts.isEmpty();
-    }
+    return !getAccounts().isEmpty();
   }
 
   @Override
   public Set<Account> getAccounts() {
-    synchronized (this) {
-      return new HashSet<>(accounts);
+    Set<Account> result = new HashSet<>();
+    try {
+      if (apiFactory.hasCredentialsSet()) {
+        result.add(apiFactory.getAccount());
+      }
+    } catch (IOException ex) {
+      logger.log(Level.SEVERE, "Error in login service when obtaining gcloud CLI account", ex);
     }
+    return result;
   }
 
   @Override
   public Credential getCredential(String email) {
     Preconditions.checkNotNull(email, "email cannot be null.");
     synchronized (this) {
-      for (Account account : accounts) {
+      for (Account account : getAccounts()) {
         if (account.getEmail().equals(email)) {
           return account.getOAuth2Credential();
         }
