@@ -27,6 +27,7 @@ import com.google.cloud.tools.eclipse.test.util.TestAccountProvider.State;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -92,6 +93,7 @@ public class AccountsPanelTest {
     NamesEmails namesEmails = collectNamesEmails(control);
     assertTrue(namesEmails.emails.isEmpty());
   }
+
 
   @Test
   public void testAccountsArea_accountWithNullName() {
@@ -167,8 +169,10 @@ public class AccountsPanelTest {
     Control[] controls = ((Composite) dialogArea).getChildren();
     for (int i = 0; i + 2 <= controls.length; i += 2) {
       Composite accountRow = (Composite) controls[i];
+      assertTrue(accountRow.getChildren().length >= 2);
       Composite secondColumn = (Composite) accountRow.getChildren()[1];
       Control[] labels = secondColumn.getChildren();
+      assertTrue(labels.length >= 2);
       namesEmails.names.add(((Label) labels[0]).getText());
       namesEmails.emails.add(((Label) labels[1]).getText());
 
