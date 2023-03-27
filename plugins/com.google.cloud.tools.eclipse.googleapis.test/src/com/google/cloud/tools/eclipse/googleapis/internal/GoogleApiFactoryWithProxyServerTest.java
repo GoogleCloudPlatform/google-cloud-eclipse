@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.googleapis.internal;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -65,6 +66,7 @@ public class GoogleApiFactoryWithProxyServerTest {
     when(transportCache.getUnchecked(any(GoogleApi.class)))
         .thenReturn(mock(HttpTransport.class));
     googleApiFactory.setTransportCache(transportCache);
+    assertTrue(googleApiFactory.hasCredentialsSet());
   }
 
   @Test

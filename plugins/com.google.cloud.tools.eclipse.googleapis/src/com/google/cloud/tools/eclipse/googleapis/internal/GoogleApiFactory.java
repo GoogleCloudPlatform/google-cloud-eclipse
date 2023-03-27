@@ -73,13 +73,6 @@ public class GoogleApiFactory implements IGoogleApiFactory {
 
   public GoogleApiFactory() {
     this(new ProxyFactory());
-    accountProvider = new DefaultAccountProvider();
-  }
-  
-  @VisibleForTesting
-  private GoogleApiFactory(IAccountProvider accountProvider) {
-    this(new ProxyFactory());
-    this.accountProvider = accountProvider;
   }
 
   @VisibleForTesting
