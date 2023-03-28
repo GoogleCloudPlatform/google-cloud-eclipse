@@ -343,7 +343,8 @@ public class RunOptionsDefaultsComponentTest {
     loginAlice();
     component.setCloudProjectText("doesnotexist");
     spinEvents();
-    component.validate();
+    ValidationStatus result = component.validate();
+    assertEquals(result, ValidationStatus.PROJECT_SERVICE_CHECK_ERROR);
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
@@ -361,7 +362,8 @@ public class RunOptionsDefaultsComponentTest {
     component.setStagingLocationText("alice-bucket-1");
     component.startStagingLocationCheck(0); // force right now
     join();
-    component.validate();
+    ValidationStatus result = component.validate();
+    assertEquals(result, ValidationStatus.BUCKET_ACCESSIBLE);
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
@@ -380,6 +382,8 @@ public class RunOptionsDefaultsComponentTest {
     component.setStagingLocationText("non-existent-bucket");
     join();
     ValidationStatus result = component.validate();
+    spinEvents();
+    join();
     assertEquals(result, ValidationStatus.BUCKET_CAN_BE_CREATED);
     assertTrue(component.getCanEnableChildren());
     assertTrue(selector.isEnabled());
