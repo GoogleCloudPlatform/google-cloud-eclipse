@@ -100,7 +100,7 @@ public class AccountSelector extends Composite {
         // will return default
       }
     }
-    if (account.equals(prevAccount)) {
+    if (!account.equals(prevAccount)) {
       fireSelectionListeners();
       prevAccount = account;
     }
