@@ -49,6 +49,7 @@ import com.google.api.services.storage.model.Bucket;
 import com.google.api.services.storage.model.Buckets;
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.MessageTarget;
+import com.google.cloud.tools.eclipse.dataflow.ui.preferences.RunOptionsDefaultsComponent.ValidationStatus;
 import com.google.cloud.tools.eclipse.googleapis.Account;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
@@ -377,12 +378,15 @@ public class RunOptionsDefaultsComponentTest {
     component.setCloudProjectText("project");
     join();
     component.setStagingLocationText("non-existent-bucket");
-    component.startStagingLocationCheck(0); // force right now
     join();
-    component.validate();
-    bot.waitUntil(widgetIsEnabled(new SWTBotButton(createButton)));
+    ValidationStatus result = component.validate();
+    assertEquals(result, ValidationStatus.BUCKET_CAN_BE_CREATED);
+    assertTrue(component.getCanEnableChildren());
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
+    assertFalse(component.getControl().isDisposed());
+    assertNotNull(component.getProject());
+    bot.waitUntil(widgetIsEnabled(new SWTBotButton(createButton)));
     assertTrue(projectID.isEnabled());
     assertTrue(stagingLocations.isEnabled());
     assertTrue(createButton.isEnabled());
