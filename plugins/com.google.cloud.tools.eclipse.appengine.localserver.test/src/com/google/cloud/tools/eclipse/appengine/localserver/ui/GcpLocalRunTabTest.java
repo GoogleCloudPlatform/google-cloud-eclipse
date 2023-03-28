@@ -206,7 +206,7 @@ public class GcpLocalRunTabTest {
 
   @Test
   public void testAccountSelectorLoaded() {
-    assertEquals(2, accountSelector.getAccountCount());
+    assertEquals(0, accountSelector.getAccountCount());
     assertEquals("", accountSelector.getSelectedEmail());
   }
 
@@ -296,6 +296,7 @@ public class GcpLocalRunTabTest {
   public void testPerformApply_updatesEnvironmentTab() throws CoreException {
     when(launchConfig.getAttribute(anyString(), anyString()))
       .thenAnswer(AdditionalAnswers.returnsSecondArg());
+    selectAccount(account1);
     tab.activated(launchConfig);
     tab.deactivated(launchConfig);
     verify(environmentTab).initializeFrom(any(ILaunchConfiguration.class));
@@ -350,12 +351,6 @@ public class GcpLocalRunTabTest {
 
     projectSelector.setSelection(new StructuredSelection());
     assertFalse(createKeyButton.isEnabled());
-  }
-
-  private void setUpServiceKeyCreation(boolean throwException) throws IOException, CoreException {
-    setUpServiceKeyCreation(apiFactory, throwException);
-    mockLaunchConfig(Optional.of(account1), "project-A", "");
-    tab.initializeFrom(launchConfig);
   }
 
   @Test
@@ -438,6 +433,7 @@ public class GcpLocalRunTabTest {
     if (account.isPresent()) {
       when(launchConfig.getAttribute("com.google.cloud.tools.eclipse.gcpEmulation.accountEmail", ""))
           .thenReturn(account.get().getEmail());
+      selectAccount(account.get());
     }
 
     Map<String, String> environmentMap = new HashMap<>();
@@ -447,6 +443,13 @@ public class GcpLocalRunTabTest {
         Matchers.anyMapOf(String.class, String.class)))
         .thenReturn(environmentMap);
   }
+
+  private void setUpServiceKeyCreation(boolean throwException) throws IOException, CoreException {
+    selectAccount(account1);
+    mockLaunchConfig(Optional.of(account1), "project-A", "");
+    tab.initializeFrom(launchConfig);
+  }
+  
   private static void setUpServiceKeyCreation(
       IGoogleApiFactory mockApiFactory, boolean throwException) throws IOException {
     Iam iam = Mockito.mock(Iam.class);
