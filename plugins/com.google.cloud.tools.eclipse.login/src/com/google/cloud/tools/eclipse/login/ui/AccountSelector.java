@@ -26,6 +26,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Optional;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -37,6 +38,7 @@ public class AccountSelector extends Composite {
 
   private IGoogleApiFactory apiFactory;
   private ListenerList<Runnable> selectionListeners = new ListenerList<>();
+  private Optional<Account> prevAccount = Optional.empty();
 
   @VisibleForTesting Link accountEmail;
 
@@ -66,7 +68,7 @@ public class AccountSelector extends Composite {
    *     callers, {@code email} may be {@code null} or empty, which always returns false
    */
   public boolean isEmailAvailable(String email) {
-    return !Strings.isNullOrEmpty(email) && accountEmail.getText() == email;
+    return !Strings.isNullOrEmpty(email) && getSelectedEmail() == email;
   }
 
   /**
@@ -77,26 +79,36 @@ public class AccountSelector extends Composite {
    * (By its contract, {@link Account} never carries a {@code null} {@link Credential}.)
    */
   public Credential getSelectedCredential() {
-    return apiFactory.hasCredentialsSet() ? apiFactory.getCredential() : null;
+    Optional<Account> account = getSelectedAccount();
+    return account.isPresent() ? account.get().getOAuth2Credential() : null;
   }
 
   /**
    * Returns the currently selected email, or empty string if none; never {@code null}.
    */
   public String getSelectedEmail() {
-    String result = "";
+    Optional<Account> account = getSelectedAccount();
+    return account.isPresent() ? account.get().getEmail() : "";
+  }
+  
+  private Optional<Account> getSelectedAccount() {
+    Optional<Account> account = Optional.empty();
     if (apiFactory.hasCredentialsSet()) {
       try {
-          result = apiFactory.getAccount().getEmail();
+        account = Optional.of(apiFactory.getAccount());
       } catch (IOException ex) {
         // will return default
       }
     }
-    return result;
+    if (account.equals(prevAccount)) {
+      fireSelectionListeners();
+      prevAccount = account;
+    }
+    return account;
   }
 
   public boolean isSignedIn() {
-    return apiFactory.hasCredentialsSet();
+    return getSelectedAccount().isPresent();
   }
 
   public void addSelectionListener(Runnable listener) {
@@ -134,5 +146,11 @@ public class AccountSelector extends Composite {
   public int getAccountCount() {
     // TODO Auto-generated method stub
     return isSignedIn() ? 1 : 0;
+  }
+  
+  private void fireSelectionListeners() {
+     for (Object o : selectionListeners.getListeners()) {
+       ((Runnable) o).run();
+    }
   }
 }
