@@ -153,7 +153,7 @@ public class GcpLocalRunTabTest {
         } else {
           throw new IllegalArgumentException("Used a test account not belonging to TestAccountProvider");
         }
-        accountSelector.getSelectedEmail();
+        accountSelector.forceAccountCheck();
       }
     } catch (ProjectRepositoryException | IOException ex) {
       fail();

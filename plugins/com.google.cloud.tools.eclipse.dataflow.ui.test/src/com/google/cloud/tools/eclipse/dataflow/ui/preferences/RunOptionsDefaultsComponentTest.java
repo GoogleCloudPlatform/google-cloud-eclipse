@@ -148,21 +148,22 @@ public class RunOptionsDefaultsComponentTest {
         when(apiFactory.getCredential()).thenReturn(null);
         when(apiFactory.hasCredentialsSet()).thenReturn(false);
         when(loginService.getAccounts()).thenReturn(Sets.newHashSet());
-        return;
-      }
-      when(apiFactory.getAccount()).thenReturn(account.get());
-      when(apiFactory.getCredential()).thenReturn(account.get().getOAuth2Credential());
-      when(apiFactory.hasCredentialsSet()).thenReturn(true); 
-      when(loginService.getAccounts()).thenReturn(Sets.newHashSet(account.get()));
-      if (account.get().equals(TestAccountProvider.ACCOUNT_1)) {
-        mockStorageApiBucketList("project", "alice-bucket-1", "alice-bucket-2");
-        mockProjectList(new GcpProject("project", "project"));
-        mockServiceApi("project", "dataflow.googleapis.com");
       } else {
-        mockStorageApiBucketList("project", "bob-bucket");
-        mockProjectList(new GcpProject("project", "project"));
-        mockServiceApi("project", "dataflow.googleapis.com");
+        when(apiFactory.getAccount()).thenReturn(account.get());
+        when(apiFactory.getCredential()).thenReturn(account.get().getOAuth2Credential());
+        when(apiFactory.hasCredentialsSet()).thenReturn(true); 
+        when(loginService.getAccounts()).thenReturn(Sets.newHashSet(account.get()));
+        if (account.get().equals(TestAccountProvider.ACCOUNT_1)) {
+          mockStorageApiBucketList("project", "alice-bucket-1", "alice-bucket-2");
+          mockProjectList(new GcpProject("project", "project"));
+          mockServiceApi("project", "dataflow.googleapis.com");
+        } else {
+          mockStorageApiBucketList("project", "bob-bucket");
+          mockProjectList(new GcpProject("project", "project"));
+          mockServiceApi("project", "dataflow.googleapis.com");
+        }
       }
+      selector.forceAccountCheck();
       
     } catch (IOException ex) {
       fail("Unexpected IOException when setting up mocks");

@@ -27,6 +27,8 @@ import com.google.common.base.Strings;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -39,6 +41,7 @@ public class AccountSelector extends Composite {
   private IGoogleApiFactory apiFactory;
   private ListenerList<Runnable> selectionListeners = new ListenerList<>();
   private Optional<Account> prevAccount = Optional.empty();
+  private static Logger logger = Logger.getLogger(AccountSelector.class.getName());
 
   @VisibleForTesting Link accountEmail;
 
@@ -119,6 +122,17 @@ public class AccountSelector extends Composite {
     selectionListeners.remove(listener);
   }
 
+  /**
+   * used to trigger selection listeners in tests
+   */
+  @VisibleForTesting
+  void forceAccountCheck() {
+    Optional<Account> prev = prevAccount;
+    getSelectedAccount();
+    if (prev.equals(prevAccount)) {
+      logger.log(Level.FINE, "forceAccountCheck() detected an account change");
+    }
+  }
   
   @Override
   public void setToolTipText(String string) {
