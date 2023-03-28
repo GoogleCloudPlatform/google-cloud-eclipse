@@ -101,8 +101,8 @@ public class AccountSelector extends Composite {
       }
     }
     if (!account.equals(prevAccount)) {
-      fireSelectionListeners();
       prevAccount = account;
+      fireSelectionListeners();
     }
     return account;
   }
