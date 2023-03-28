@@ -8,7 +8,8 @@ Bundle-Vendor: %providerName
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Localization: plugin
 Require-Bundle: com.google.cloud.tools.eclipse.test.dependencies
-Import-Package: com.google.cloud.tools.eclipse.swtbot,
+Import-Package: com.google.cloud.tools.eclipse.googleapis.internal,
+ com.google.cloud.tools.eclipse.swtbot,
  com.google.cloud.tools.eclipse.test.util,
  com.google.cloud.tools.eclipse.test.util.project,
  com.google.cloud.tools.eclipse.test.util.ui,
