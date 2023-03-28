@@ -43,7 +43,6 @@ import com.google.api.services.iam.v1.model.CreateServiceAccountKeyRequest;
 import com.google.api.services.iam.v1.model.ServiceAccountKey;
 import com.google.cloud.tools.eclipse.googleapis.Account;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
-import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepositoryException;
@@ -53,7 +52,6 @@ import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.common.base.Optional;
 import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
-import com.google.cloud.tools.eclipse.test.util.TestAccountProvider.State;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -94,7 +92,7 @@ public class GcpLocalRunTabTest {
   @Rule public ShellTestResource shellResource = new ShellTestResource();
   @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
-  private IGoogleApiFactory apiFactory;
+  @Mock private IGoogleApiFactory apiFactory;
   @Mock private ProjectRepository projectRepository;
   @Mock private EnvironmentTab environmentTab;
 
@@ -124,10 +122,8 @@ public class GcpLocalRunTabTest {
 
   @Before
   public void setUp() {
-    TestAccountProvider.setAsDefaultProvider(State.NOT_LOGGED_IN);
     selectAccount(null);
     shell = shellResource.getShell();
-    apiFactory = new GoogleApiFactory();
     tab = new GcpLocalRunTab(environmentTab, apiFactory, projectRepository);
     tab.createControl(shell);
 
@@ -143,20 +139,23 @@ public class GcpLocalRunTabTest {
 
   private void selectAccount(Account account) {
     try {
+      when(apiFactory.getAccount()).thenReturn(account);
       if (account == null) {
-        TestAccountProvider.setProviderState(State.NOT_LOGGED_IN);
+        when(apiFactory.hasCredentialsSet()).thenReturn(false);
+        when(apiFactory.getCredential()).thenReturn(null);
       } else {
+        when(apiFactory.hasCredentialsSet()).thenReturn(true);
+        when(apiFactory.getCredential()).thenReturn(account.getOAuth2Credential());
         if (account.equals(TestAccountProvider.ACCOUNT_1)) {
-          TestAccountProvider.setProviderState(State.LOGGED_IN);
           when(projectRepository.getProjects()).thenReturn(projectsOfEmail1);
         } else if (account.equals(TestAccountProvider.ACCOUNT_2)) {
-          TestAccountProvider.setProviderState(State.LOGGED_IN_SECOND_ACCOUNT);
           when(projectRepository.getProjects()).thenReturn(projectsOfEmail2);
         } else {
           throw new IllegalArgumentException("Used a test account not belonging to TestAccountProvider");
         }
+        accountSelector.getSelectedEmail();
       }
-    } catch (ProjectRepositoryException ex) {
+    } catch (ProjectRepositoryException | IOException ex) {
       fail();
     }
   }
