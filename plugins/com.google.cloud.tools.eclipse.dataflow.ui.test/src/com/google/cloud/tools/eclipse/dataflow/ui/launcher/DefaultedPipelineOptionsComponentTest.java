@@ -94,7 +94,7 @@ public class DefaultedPipelineOptionsComponentTest {
       return null;
     };
 
-    doReturn(TestAccountProvider.EMAIL_ACCOUNT_1).when(preferences.getDefaultAccountEmail());
+    doReturn(TestAccountProvider.EMAIL_ACCOUNT_1).when(preferences).getDefaultAccountEmail();
     doAnswer(answerAccountEmail).when(defaultOptions).getAccountEmail();
     doThrow(IllegalStateException.class).when(defaultOptions).getProject();
     doAnswer(answerProjectId).when(defaultOptions).getProjectId();
