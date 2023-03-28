@@ -48,7 +48,7 @@ public class CloudSdkProcessWrapperTest {
     try {
       wrapper.getAppEngineDeployment(null);
       fail();
-    } catch (NullPointerException ex) {
+    } catch (IllegalStateException ex) {
       assertEquals(ex.getMessage(), "credential required for deploying");
     }
   }

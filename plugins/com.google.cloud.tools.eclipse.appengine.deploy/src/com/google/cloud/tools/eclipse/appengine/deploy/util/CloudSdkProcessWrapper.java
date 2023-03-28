@@ -31,6 +31,7 @@ import com.google.cloud.tools.appengine.operations.cloudsdk.process.StringBuilde
 import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
 import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardStagingDelegate;
+import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.sdk.GcloudStructuredLogErrorMessageCollector;
 import com.google.cloud.tools.eclipse.sdk.MessageConsoleWriterListener;
@@ -72,15 +73,7 @@ public class CloudSdkProcessWrapper {
    */
   public Deployment getAppEngineDeployment(MessageConsoleStream normalOutputStream) 
       throws CloudSdkNotFoundException {
-    Credential credential = null;
-    try {
-      credential = new GoogleApiFactory().getAccount().getOAuth2Credential();
-    }
-    catch (IOException ex) {
-      // will be handled in preconditions check;
-    }
-    Preconditions.checkNotNull(credential, "credentials not set");
-    
+    Preconditions.checkState(new GoogleApiFactory().hasCredentialsSet(), "credential required for deploying");
     Preconditions.checkState(!initialized, "process wrapper already set up");
     initialized = true;
 
