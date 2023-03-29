@@ -60,6 +60,7 @@ import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -131,20 +132,26 @@ public class RunOptionsDefaultsComponentTest {
     browse = CompositeUtil.findButton(shell, "Browse...");
   }
   
-  private void loginAlice() {
-    setUpApiFactory(Optional.of(TestAccountProvider.ACCOUNT_1), true);
+  private boolean loginAlice() {
+    return setUpApiFactory(Optional.of(TestAccountProvider.ACCOUNT_1), true);
   }
-  private void loginBob() {
-    setUpApiFactory(Optional.of(TestAccountProvider.ACCOUNT_2), true);
+  private boolean loginBob() {
+    return setUpApiFactory(Optional.of(TestAccountProvider.ACCOUNT_2), true);
   }
-  private void logout() {
-    setUpApiFactory(Optional.absent(), true);
+  private boolean logout() {
+    return setUpApiFactory(Optional.absent(), true);
   }
-  private void logout(boolean forceAccountCheck) {
-    setUpApiFactory(Optional.absent(), forceAccountCheck);
+  private boolean logout(boolean forceAccountCheck) {
+    return setUpApiFactory(Optional.absent(), forceAccountCheck);
   }
   
-  private void setUpApiFactory(Optional<Account> account, boolean forceAccountCheck) {
+  /**
+   * 
+   * @param account
+   * @param forceAccountCheck
+   * @return true if an account change was detected in {@code AccountSelector}
+   */
+  private boolean setUpApiFactory(Optional<Account> account, boolean forceAccountCheck) {
     Preconditions.checkNotNull(account);
     try {
       if (!account.isPresent()) {
@@ -168,12 +175,13 @@ public class RunOptionsDefaultsComponentTest {
         }
       }
       if (forceAccountCheck) {
-        selector.forceAccountCheck();
+        return selector.forceAccountCheck();
       }
       
     } catch (IOException ex) {
       fail("Unexpected IOException when setting up mocks");
     }
+    return false;
   }
 
   private void mockProjectList(GcpProject... gcpProjects)
@@ -551,8 +559,12 @@ public class RunOptionsDefaultsComponentTest {
   @Test
   public void testPartialValidity_account() {
     testPartialValidity_allEmpty();
-    loginAlice();
-    assertEquals(ValidationStatus.EMPTY_BUCKET_NAME, component.validate());
+    assertTrue(loginAlice());
+    join();
+    assertFalse(Strings.isNullOrEmpty(component.getAccountEmail()));
+    assertTrue(Strings.isNullOrEmpty(component.getServiceAccountKey()));
+    assertTrue(component.doIsolatedQuickChecks());
+    assertEquals(ValidationStatus.NULL_PROJECT, component.validate());
     assertTrue("should be complete with account", page.isPageComplete());
   }
 

@@ -411,7 +411,8 @@ public class RunOptionsDefaultsComponent {
    * tightly coupled regarding enablement of the input widgets and should always be validated
    * to make their interconnected enablement correct.)
    */
-  private boolean doIsolatedQuickChecks() {
+  @VisibleForTesting
+  boolean doIsolatedQuickChecks() {
     if (accountRequired && Strings.isNullOrEmpty(getAccountEmail())) {
       messageTarget.setError("No Google account selected for this launch.");
       return false;

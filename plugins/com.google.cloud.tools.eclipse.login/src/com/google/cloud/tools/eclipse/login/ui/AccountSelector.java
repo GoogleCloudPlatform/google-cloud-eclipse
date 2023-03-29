@@ -125,12 +125,14 @@ public class AccountSelector extends Composite {
   /**
    * used to trigger selection listeners in tests
    */
-  public void forceAccountCheck() {
+  public boolean forceAccountCheck() {
     Optional<Account> prev = prevAccount;
     getSelectedAccount();
     if (prev.equals(prevAccount)) {
       logger.log(Level.FINE, "forceAccountCheck() detected an account change");
+      return true;
     }
+    return false;
   }
   
   @Override
