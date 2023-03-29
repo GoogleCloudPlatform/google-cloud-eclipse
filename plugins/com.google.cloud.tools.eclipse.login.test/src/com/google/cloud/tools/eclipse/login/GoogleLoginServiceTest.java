@@ -107,6 +107,7 @@ public class GoogleLoginServiceTest {
     assertEquals(1, accounts1.size());
     assertTrue(accounts1.contains(TestAccountProvider.ACCOUNT_1));
 
+    TestAccountProvider.setProviderState(State.LOGGED_IN_SECOND_ACCOUNT);
     loginService.logIn();
     Set<Account> accounts2 = loginService.getAccounts();
     assertEquals(1, accounts2.size());
