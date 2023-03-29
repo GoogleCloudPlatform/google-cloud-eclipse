@@ -349,7 +349,7 @@ public class RunOptionsDefaultsComponentTest {
     component.setCloudProjectText("doesnotexist");
     spinEvents();
     ValidationStatus result = component.validate();
-    assertEquals(result, ValidationStatus.PROJECT_SERVICE_CHECK_ERROR);
+    assertEquals(ValidationStatus.PROJECT_SERVICE_CHECK_ERROR, result);
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
@@ -368,7 +368,7 @@ public class RunOptionsDefaultsComponentTest {
     component.startStagingLocationCheck(0); // force right now
     join();
     ValidationStatus result = component.validate();
-    assertEquals(result, ValidationStatus.BUCKET_ACCESSIBLE);
+    assertEquals(ValidationStatus.BUCKET_ACCESSIBLE, result);
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
@@ -389,12 +389,14 @@ public class RunOptionsDefaultsComponentTest {
     ValidationStatus result = component.validate();
     spinEvents();
     join();
-    assertEquals(result, ValidationStatus.BUCKET_CAN_BE_CREATED);
+    join();
     assertTrue(component.getCanEnableChildren());
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertFalse(component.getControl().isDisposed());
     assertNotNull(component.getProject());
+    verifyProjectsLoaded("project");
+    assertEquals(ValidationStatus.BUCKET_CAN_BE_CREATED, result);
     bot.waitUntil(widgetIsEnabled(new SWTBotButton(createButton)));
     assertTrue(projectID.isEnabled());
     assertTrue(stagingLocations.isEnabled());
@@ -402,6 +404,17 @@ public class RunOptionsDefaultsComponentTest {
     assertFalse(page.isPageComplete());
     assertTrue(serviceAccountKey.isEnabled());
     assertTrue(browse.isEnabled());
+  }
+  
+  private void verifyProjectsLoaded(String... projectIds) {
+    try {
+      List<Project> projects = apiFactory.newProjectsApi().list().execute().getProjects();
+      for (String projectId : projectIds) {
+        assertTrue(projects.stream().allMatch(project -> project.getProjectId() == projectId));
+      }
+    } catch (IOException ex) {
+      fail();
+    }
   }
 
   @Test
