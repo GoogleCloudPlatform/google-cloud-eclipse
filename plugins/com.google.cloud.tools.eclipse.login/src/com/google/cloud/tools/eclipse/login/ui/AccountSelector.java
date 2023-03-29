@@ -125,8 +125,7 @@ public class AccountSelector extends Composite {
   /**
    * used to trigger selection listeners in tests
    */
-  @VisibleForTesting
-  void forceAccountCheck() {
+  public void forceAccountCheck() {
     Optional<Account> prev = prevAccount;
     getSelectedAccount();
     if (prev.equals(prevAccount)) {
