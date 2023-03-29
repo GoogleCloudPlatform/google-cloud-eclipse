@@ -111,7 +111,7 @@ public class RunOptionsDefaultsComponentTest {
 
   @Before
   public void setUp() {
-    logout();
+    logout(false /* forceAccountCheck*/);
     
     doCallRealMethod().when(page).setPageComplete(anyBoolean());
     doCallRealMethod().when(page).isPageComplete();
@@ -132,16 +132,19 @@ public class RunOptionsDefaultsComponentTest {
   }
   
   private void loginAlice() {
-    setUpApiFactory(Optional.of(TestAccountProvider.ACCOUNT_1));
+    setUpApiFactory(Optional.of(TestAccountProvider.ACCOUNT_1), true);
   }
   private void loginBob() {
-    setUpApiFactory(Optional.of(TestAccountProvider.ACCOUNT_2));
+    setUpApiFactory(Optional.of(TestAccountProvider.ACCOUNT_2), true);
   }
   private void logout() {
-    setUpApiFactory(Optional.absent());
+    setUpApiFactory(Optional.absent(), true);
+  }
+  private void logout(boolean forceAccountCheck) {
+    setUpApiFactory(Optional.absent(), forceAccountCheck);
   }
   
-  private void setUpApiFactory(Optional<Account> account) {
+  private void setUpApiFactory(Optional<Account> account, boolean forceAccountCheck) {
     Preconditions.checkNotNull(account);
     try {
       if (!account.isPresent()) {
@@ -164,7 +167,9 @@ public class RunOptionsDefaultsComponentTest {
           mockServiceApi("project", "dataflow.googleapis.com");
         }
       }
-      selector.forceAccountCheck();
+      if (forceAccountCheck) {
+        selector.forceAccountCheck();
+      }
       
     } catch (IOException ex) {
       fail("Unexpected IOException when setting up mocks");
