@@ -109,6 +109,12 @@ public class MiniSelector implements ISelectionProvider {
     return apiFactory.getCredential();
   }
 
+  /**
+   * Used to re-fetch the projects in case a credential has changed
+   */
+  public void updateProjectsList() {
+    fetch();
+  }
 
   /**
    * Fetch and update the projects list, preserving the current selection.

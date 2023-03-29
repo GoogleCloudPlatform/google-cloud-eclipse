@@ -240,6 +240,7 @@ public class RunOptionsDefaultsComponent {
       // Don't use "removeAll()", as it will clear the text field too.
       stagingLocationInput.remove(0, stagingLocationInput.getItemCount() - 1);
       completionListener.setContents(ImmutableSortedSet.<String>of());
+      projectInput.updateProjectsList();
       updateStagingLocations(0); // no delay
       validate();
     });
