@@ -381,7 +381,7 @@ public class GcpLocalRunTabTest {
   }
 
   @Test
-  public void testCreateServiceAccountKey_uiResult() throws CoreException {
+  public void testCreateServiceAccountKey_uiResult() throws CoreException, IOException {
     setUpServiceKeyCreation(false);
 
     tab.createServiceAccountKey(keyFile);
@@ -392,7 +392,7 @@ public class GcpLocalRunTabTest {
   }
 
   @Test
-  public void testCreateServiceAccountKey_ioException() throws CoreException {
+  public void testCreateServiceAccountKey_ioException() throws CoreException, IOException {
     setUpServiceKeyCreation(true);
 
     tab.createServiceAccountKey(keyFile);
@@ -444,8 +444,8 @@ public class GcpLocalRunTabTest {
         .thenReturn(environmentMap);
   }
 
-  private void setUpServiceKeyCreation(boolean throwException) throws CoreException {
-    selectAccount(account1);
+  private void setUpServiceKeyCreation(boolean throwException) throws CoreException, IOException {
+    setUpServiceKeyCreation(apiFactory, throwException);
     mockLaunchConfig(Optional.of(account1), "project-A", "");
     tab.initializeFrom(launchConfig);
   }
