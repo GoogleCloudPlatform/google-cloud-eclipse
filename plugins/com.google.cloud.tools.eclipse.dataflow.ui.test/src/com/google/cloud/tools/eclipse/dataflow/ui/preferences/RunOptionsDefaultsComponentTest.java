@@ -349,7 +349,7 @@ public class RunOptionsDefaultsComponentTest {
     component.setCloudProjectText("doesnotexist");
     spinEvents();
     ValidationStatus result = component.validate();
-    assertEquals(ValidationStatus.PROJECT_SERVICE_CHECK_ERROR, result);
+    assertEquals(ValidationStatus.NULL_PROJECT, result);
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
@@ -552,13 +552,13 @@ public class RunOptionsDefaultsComponentTest {
   public void testPartialValidity_account() {
     testPartialValidity_allEmpty();
     loginAlice();
+    assertEquals(ValidationStatus.EMPTY_BUCKET_NAME, component.validate());
     assertTrue("should be complete with account", page.isPageComplete());
   }
 
   @Test
   public void testPartialValidity_account_project() {
     testPartialValidity_account();
-    loginAlice();
     component.setCloudProjectText("project");
     join();
     assertTrue("should be complete with account and project", page.isPageComplete());
