@@ -381,7 +381,7 @@ public class GcpLocalRunTabTest {
   }
 
   @Test
-  public void testCreateServiceAccountKey_uiResult() throws IOException, CoreException {
+  public void testCreateServiceAccountKey_uiResult() throws CoreException {
     setUpServiceKeyCreation(false);
 
     tab.createServiceAccountKey(keyFile);
@@ -392,7 +392,7 @@ public class GcpLocalRunTabTest {
   }
 
   @Test
-  public void testCreateServiceAccountKey_ioException() throws IOException, CoreException {
+  public void testCreateServiceAccountKey_ioException() throws CoreException {
     setUpServiceKeyCreation(true);
 
     tab.createServiceAccountKey(keyFile);
