@@ -444,7 +444,7 @@ public class GcpLocalRunTabTest {
         .thenReturn(environmentMap);
   }
 
-  private void setUpServiceKeyCreation(boolean throwException) throws IOException, CoreException {
+  private void setUpServiceKeyCreation(boolean throwException) throws CoreException {
     selectAccount(account1);
     mockLaunchConfig(Optional.of(account1), "project-A", "");
     tab.initializeFrom(launchConfig);
