@@ -58,13 +58,13 @@ import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -111,7 +111,7 @@ public class RunOptionsDefaultsComponentTest {
   private Button browse;
 
   @Before
-  public void setUp() {
+  public void setUp() throws IOException {
     logout(false /* forceAccountCheck*/);
     
     doCallRealMethod().when(page).setPageComplete(anyBoolean());
@@ -132,17 +132,17 @@ public class RunOptionsDefaultsComponentTest {
     browse = CompositeUtil.findButton(shell, "Browse...");
   }
   
-  private boolean loginAlice() {
+  private boolean loginAlice() throws IOException {
     return setUpApiFactory(Optional.of(TestAccountProvider.ACCOUNT_1), true);
   }
-  private boolean loginBob() {
+  private boolean loginBob() throws IOException {
     return setUpApiFactory(Optional.of(TestAccountProvider.ACCOUNT_2), true);
   }
-  private boolean logout() {
-    return setUpApiFactory(Optional.absent(), true);
+  private boolean logout() throws IOException {
+    return setUpApiFactory(Optional.empty(), true);
   }
-  private boolean logout(boolean forceAccountCheck) {
-    return setUpApiFactory(Optional.absent(), forceAccountCheck);
+  private boolean logout(boolean forceAccountCheck) throws IOException {
+    return setUpApiFactory(Optional.empty(), forceAccountCheck);
   }
   
   /**
@@ -151,36 +151,33 @@ public class RunOptionsDefaultsComponentTest {
    * @param forceAccountCheck
    * @return true if an account change was detected in {@code AccountSelector}
    */
-  private boolean setUpApiFactory(Optional<Account> account, boolean forceAccountCheck) {
+  private boolean setUpApiFactory(Optional<Account> account, boolean forceAccountCheck) 
+    throws IOException {
     Preconditions.checkNotNull(account);
-    try {
-      if (!account.isPresent()) {
-        when(apiFactory.getAccount()).thenReturn(null);
-        when(apiFactory.getCredential()).thenReturn(null);
-        when(apiFactory.hasCredentialsSet()).thenReturn(false);
-        when(loginService.getAccounts()).thenReturn(Sets.newHashSet());
+    if (!account.isPresent()) {
+      when(apiFactory.getAccount()).thenReturn(null);
+      when(apiFactory.getCredential()).thenReturn(null);
+      when(apiFactory.hasCredentialsSet()).thenReturn(false);
+      when(loginService.getAccounts()).thenReturn(Sets.newHashSet());
+    } else {
+      when(apiFactory.getAccount()).thenReturn(account.get());
+      when(apiFactory.getCredential()).thenReturn(account.get().getOAuth2Credential());
+      when(apiFactory.hasCredentialsSet()).thenReturn(true); 
+      when(loginService.getAccounts()).thenReturn(Sets.newHashSet(account.get()));
+      if (account.get().equals(TestAccountProvider.ACCOUNT_1)) {
+        mockStorageApiBucketList("project", "alice-bucket-1", "alice-bucket-2");
+        mockProjectList(new GcpProject("project", "project"));
+        mockServiceApi("project", "dataflow.googleapis.com");
       } else {
-        when(apiFactory.getAccount()).thenReturn(account.get());
-        when(apiFactory.getCredential()).thenReturn(account.get().getOAuth2Credential());
-        when(apiFactory.hasCredentialsSet()).thenReturn(true); 
-        when(loginService.getAccounts()).thenReturn(Sets.newHashSet(account.get()));
-        if (account.get().equals(TestAccountProvider.ACCOUNT_1)) {
-          mockStorageApiBucketList("project", "alice-bucket-1", "alice-bucket-2");
-          mockProjectList(new GcpProject("project", "project"));
-          mockServiceApi("project", "dataflow.googleapis.com");
-        } else {
-          mockStorageApiBucketList("project", "bob-bucket");
-          mockProjectList(new GcpProject("project", "project"));
-          mockServiceApi("project", "dataflow.googleapis.com");
-        }
+        mockStorageApiBucketList("project", "bob-bucket");
+        mockProjectList(new GcpProject("project", "project"));
+        mockServiceApi("project", "dataflow.googleapis.com");
       }
-      if (forceAccountCheck) {
-        return selector.forceAccountCheck();
-      }
-      
-    } catch (IOException ex) {
-      fail("Unexpected IOException when setting up mocks");
     }
+    if (forceAccountCheck) {
+      return selector.forceAccountCheck();
+    }
+   
     return false;
   }
 
@@ -283,7 +280,7 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testCloudProjectText() {
+  public void testCloudProjectText() throws IOException {
     Assert.assertNull(component.getProject());
     loginAlice();
     component.setCloudProjectText("project");
@@ -303,7 +300,7 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testAccountSelector_init() {
+  public void testAccountSelector_init() throws IOException {
     logout();
     Assert.assertEquals(0, selector.getAccountCount());
 
@@ -326,7 +323,7 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testEnablement_selectedAccount() {
+  public void testEnablement_selectedAccount() throws IOException {
     loginAlice();
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
@@ -338,7 +335,7 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testEnablement_selectedProject() {
+  public void testEnablement_selectedProject() throws IOException {
     loginAlice();
     component.setCloudProjectText("project");
     join();
@@ -352,7 +349,7 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testEnablement_nonExistentProject() {
+  public void testEnablement_nonExistentProject() throws IOException {
     loginAlice();
     component.setCloudProjectText("doesnotexist");
     spinEvents();
@@ -368,7 +365,7 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testEnablement_existingStagingLocation() {
+  public void testEnablement_existingStagingLocation() throws IOException {
     loginAlice();
     component.setCloudProjectText("project");
     join();
@@ -388,7 +385,7 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testEnablement_nonExistentStagingLocation() {
+  public void testEnablement_nonExistentStagingLocation() throws IOException {
     loginAlice();
     component.setCloudProjectText("project");
     join();
@@ -398,7 +395,7 @@ public class RunOptionsDefaultsComponentTest {
     spinEvents();
     join();
     join();
-    assertTrue(component.getCanEnableChildren());
+    assertTrue(component.canEnableChildren());
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertFalse(component.getControl().isDisposed());
@@ -414,14 +411,10 @@ public class RunOptionsDefaultsComponentTest {
     assertTrue(browse.isEnabled());
   }
   
-  private void verifyProjectsLoaded(String... projectIds) {
-    try {
-      List<Project> projects = apiFactory.newProjectsApi().list().execute().getProjects();
-      for (String projectId : projectIds) {
-        assertTrue(projects.stream().allMatch(project -> project.getProjectId() == projectId));
-      }
-    } catch (IOException ex) {
-      fail();
+  private void verifyProjectsLoaded(String... projectIds) throws IOException {
+    List<Project> projects = apiFactory.newProjectsApi().list().execute().getProjects();
+    for (String projectId : projectIds) {
+      assertTrue(projects.stream().anyMatch(project -> project.getProjectId() == projectId));
     }
   }
 
@@ -432,7 +425,7 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testEnablement_disabledWhileAllValuesValid() {
+  public void testEnablement_disabledWhileAllValuesValid() throws IOException {
     loginAlice();
     component.setCloudProjectText("project");
     join();
@@ -452,7 +445,7 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testStagingLocation() {
+  public void testStagingLocation() throws IOException {
     loginAlice();
     component.setCloudProjectText("project");
     join();
@@ -462,7 +455,7 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testAccountSelector_loadBucketCombo() {
+  public void testAccountSelector_loadBucketCombo() throws IOException {
     loginAlice();
     component.setCloudProjectText("project");
     join();
@@ -491,7 +484,7 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testBucketNameStatus_gcsPathWithObjectIsOk() {
+  public void testBucketNameStatus_gcsPathWithObjectIsOk() throws IOException {
     loginAlice();
     component.setCloudProjectText("project");
     join();
@@ -501,7 +494,7 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testBucketNameStatus_gcsUrlPathWithObjectIsOk() {
+  public void testBucketNameStatus_gcsUrlPathWithObjectIsOk() throws IOException {
     loginAlice();
     component.setCloudProjectText("project");
     join();
@@ -511,7 +504,7 @@ public class RunOptionsDefaultsComponentTest {
   }
   
   @Test
-  public void testBucketNameStatus_createIsOk() {
+  public void testBucketNameStatus_createIsOk() throws IOException {
     loginAlice();
     component.setCloudProjectText("project");
     join();
@@ -557,7 +550,7 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testPartialValidity_account() {
+  public void testPartialValidity_account() throws IOException {
     testPartialValidity_allEmpty();
     assertTrue(loginAlice());
     join();
@@ -569,7 +562,7 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testPartialValidity_account_project() {
+  public void testPartialValidity_account_project() throws IOException {
     testPartialValidity_account();
     component.setCloudProjectText("project");
     join();

@@ -186,7 +186,7 @@ public class DefaultedPipelineOptionsComponentTest {
     component.setCustomValues(customValues);
     assertTrue(component.isUseDefaultOptions()); // no side effects
     component.setUseDefaultValues(false);
-    assertTrue(!component.isUseDefaultOptions());
+    assertFalse(component.isUseDefaultOptions());
 
     Map<String, String> values = component.getValues();
     // obtained from ADC

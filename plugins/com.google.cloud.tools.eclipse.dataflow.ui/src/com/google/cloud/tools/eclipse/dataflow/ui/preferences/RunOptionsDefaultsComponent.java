@@ -549,7 +549,7 @@ public class RunOptionsDefaultsComponent {
   }
   
   @VisibleForTesting
-  boolean getCanEnableChildren() {
+  boolean canEnableChildren() {
     return canEnableChildren;
   }
 
