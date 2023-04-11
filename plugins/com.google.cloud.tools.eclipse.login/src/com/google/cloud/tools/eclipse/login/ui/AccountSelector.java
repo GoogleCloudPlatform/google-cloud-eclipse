@@ -159,7 +159,6 @@ public class AccountSelector extends Composite {
    * @return 1 if logged in, 0 if not
    */
   public int getAccountCount() {
-    // TODO Auto-generated method stub
     return isSignedIn() ? 1 : 0;
   }
   
