@@ -23,7 +23,7 @@ import com.google.cloud.tools.eclipse.googleapis.Account;
 import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.googleapis.internal.IAccountProvider;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 
@@ -47,7 +47,7 @@ public class TestAccountProvider implements IAccountProvider {
     LOGGED_IN_SECOND_ACCOUNT
   }
   
-  private static Map<State, Account> accounts = new HashMap<>();
+  private static Map<State, Account> accounts = new EnumMap<>(State.class);
   private static State state = State.LOGGED_IN;
   
   public static Account ACCOUNT_1;
