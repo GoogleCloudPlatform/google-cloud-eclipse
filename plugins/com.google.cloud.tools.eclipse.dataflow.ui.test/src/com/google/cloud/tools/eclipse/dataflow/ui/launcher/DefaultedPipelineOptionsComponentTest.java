@@ -45,6 +45,9 @@ import org.mockito.stubbing.Answer;
 /**
  * DefaultedPipelineOptionsComponent is responsible for saving and restoring custom values when the
  * user toggles the <em>use defaults</em> button.
+ * 
+ * 
+ * The email is now obtained from ADC regardless of whether the default options are being used 
  */
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultedPipelineOptionsComponentTest {
@@ -114,8 +117,9 @@ public class DefaultedPipelineOptionsComponentTest {
 
     assertTrue(component.isUseDefaultOptions());
     Map<String, String> values = component.getValues();
-    // all empty/null settings should be turned to empty strings
+    // obtained from ADC
     assertEquals(TestAccountProvider.EMAIL_ACCOUNT_1, values.get(DataflowPreferences.ACCOUNT_EMAIL_PROPERTY));
+    // the empty/null customValues should return empty strings
     assertEquals("", values.get(DataflowPreferences.PROJECT_PROPERTY));
     assertEquals("", values.get(DataflowPreferences.STAGING_LOCATION_PROPERTY));
     assertEquals("", values.get(DataflowPreferences.GCP_TEMP_LOCATION_PROPERTY));
@@ -155,9 +159,10 @@ public class DefaultedPipelineOptionsComponentTest {
     component.setCustomValues(new HashMap<String, String>());
     component.setUseDefaultValues(false);
 
-    // the empty/null customValues should override the preferences
     Map<String, String> values = component.getValues();
+    // obtained from ADC
     assertEquals(TestAccountProvider.EMAIL_ACCOUNT_1, values.get(DataflowPreferences.ACCOUNT_EMAIL_PROPERTY));
+    // the empty/null customValues should override the preferences
     assertEquals("", values.get(DataflowPreferences.PROJECT_PROPERTY));
     assertEquals("", values.get(DataflowPreferences.STAGING_LOCATION_PROPERTY));
     assertEquals("", values.get(DataflowPreferences.GCP_TEMP_LOCATION_PROPERTY));
@@ -184,7 +189,9 @@ public class DefaultedPipelineOptionsComponentTest {
     assertTrue(!component.isUseDefaultOptions());
 
     Map<String, String> values = component.getValues();
+    // obtained from ADC
     assertEquals(TestAccountProvider.EMAIL_ACCOUNT_1, values.get(DataflowPreferences.ACCOUNT_EMAIL_PROPERTY));
+    // should return the custom values
     assertEquals("newProject", values.get(DataflowPreferences.PROJECT_PROPERTY));
     assertEquals("newStagingLocation", values.get(DataflowPreferences.STAGING_LOCATION_PROPERTY));
     assertEquals("newStagingLocation", values.get(DataflowPreferences.GCP_TEMP_LOCATION_PROPERTY));
@@ -212,15 +219,16 @@ public class DefaultedPipelineOptionsComponentTest {
     assertTrue(component.isUseDefaultOptions());
     component.setCustomValues(customValues);
     assertTrue(component.isUseDefaultOptions()); // no side effects
-    // preferences should be returned, despite customValues being set
     Map<String, String> values = component.getValues();
+    // obtained from ADC
     assertEquals(TestAccountProvider.EMAIL_ACCOUNT_1, values.get(DataflowPreferences.ACCOUNT_EMAIL_PROPERTY));
+    // default preferences should be returned, despite customValues being set
     assertEquals("pref-project", values.get(DataflowPreferences.PROJECT_PROPERTY));
     assertEquals("gs://pref-staging", values.get(DataflowPreferences.STAGING_LOCATION_PROPERTY));
     assertEquals("gs://pref-staging", values.get(DataflowPreferences.GCP_TEMP_LOCATION_PROPERTY));
     assertEquals("/key/file.json", values.get(DataflowPreferences.SERVICE_ACCOUNT_KEY_PROPERTY));
 
-    // setting useDefaultValues=false should store current values and restore any custom values
+    // setting useDefaultValues=false should store current values and restore any custom values (except for email)
     component.setUseDefaultValues(false);
     values = component.getValues();
     assertEquals(TestAccountProvider.EMAIL_ACCOUNT_1, values.get(DataflowPreferences.ACCOUNT_EMAIL_PROPERTY));
