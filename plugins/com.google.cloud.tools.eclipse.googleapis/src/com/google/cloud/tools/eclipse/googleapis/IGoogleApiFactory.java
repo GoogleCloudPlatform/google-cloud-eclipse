@@ -22,7 +22,7 @@ import com.google.api.services.cloudresourcemanager.CloudResourceManager.Project
 import com.google.api.services.iam.v1.Iam;
 import com.google.api.services.servicemanagement.ServiceManagement;
 import com.google.api.services.storage.Storage;
-import java.io.IOException;
+import java.util.Optional;
 
 /**
  * Interface for factory classes to create clients for Google APIs.
@@ -35,17 +35,12 @@ public interface IGoogleApiFactory {
   /**
    * @return the application default credentials account
    */
-  public Account getAccount() throws IOException;
+  public Optional<Account> getAccount();
   
   /**
    * @return Credentials if logged in, else null
    */
-  public Credential getCredential();
-  
-  /**
-   * @return true if the factory has an account with credentials set
-   */
-  public boolean hasCredentialsSet();
+  public Optional<Credential> getCredential();
   
   /**
    * @return a Google Cloud Storage API client

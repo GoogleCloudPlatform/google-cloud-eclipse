@@ -26,11 +26,13 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.services.oauth2.Oauth2;
 import com.google.cloud.tools.eclipse.googleapis.Account;
+import com.google.cloud.tools.eclipse.googleapis.IAccountProvider;
 import com.google.cloud.tools.eclipse.googleapis.UserInfo;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -60,33 +62,26 @@ public class DefaultAccountProvider implements IAccountProvider {
    * @return the application default credentials associated account
    */
   @Override
-  public Account getAccount() throws IOException{
-     return getAccount(GoogleCredential.getApplicationDefault());
+  public Optional<Account> getAccount(){
+    try {
+      return Optional.of(getAccount(GoogleCredential.getApplicationDefault()));
+    } catch (IOException ex) {
+      LOGGER.log(Level.SEVERE, "IOException occurred when obtaining ADC", ex);
+      return Optional.empty();
+    }
+    
   }
   
   /**
    * @return the ADC if set
    */
   @Override
-  public Credential getCredential() throws IOException {
-    if (!hasCredentialsSet()) {
-      return null;
+  public Optional<Credential> getCredential() {
+    Optional<Account> account = getAccount();
+    if (account.isPresent()) {
+      return Optional.of(account.get().getOAuth2Credential());
     }
-    return getAccount().getOAuth2Credential();
-  }
-  
-  /**
-   * Convenience method to determine if the user has ADC set
-   * @return true if the gcloud CLI has Application Default Credentials set
-   */
-  @Override
-  public boolean hasCredentialsSet() {
-    try {
-      return getAccount() != null && getAccount().getOAuth2Credential() != null;  
-    } catch (IOException ex) {
-      LOGGER.log(Level.SEVERE,"Error occured when checking for credentials:", ex);
-      return false;
-    }
+    return Optional.empty();
   }
   
   Account getAccount(Credential credential) throws IOException {
