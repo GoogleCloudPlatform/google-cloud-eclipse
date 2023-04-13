@@ -22,9 +22,9 @@ import com.google.api.client.util.Preconditions;
 import com.google.cloud.tools.eclipse.googleapis.Account;
 import com.google.cloud.tools.eclipse.googleapis.IAccountProvider;
 import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
-import java.io.IOException;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Optional;
 
 
 /**
@@ -47,7 +47,7 @@ public class TestAccountProvider implements IAccountProvider {
     LOGGED_IN_SECOND_ACCOUNT
   }
   
-  private static Map<State, Account> accounts = new EnumMap<>(State.class);
+  private static Map<State, Optional<Account>> accounts = new EnumMap<>(State.class);
   private static State state = State.LOGGED_IN;
   
   public static Account ACCOUNT_1;
@@ -58,9 +58,9 @@ public class TestAccountProvider implements IAccountProvider {
   private TestAccountProvider() {
     ACCOUNT_1 = new Account(EMAIL_ACCOUNT_1, CREDENTIAL_ACCOUNT_1, NAME_ACCOUNT_1, AVATAR_URL_ACCOUNT_1);
     ACCOUNT_2 = new Account(EMAIL_ACCOUNT_2, CREDENTIAL_ACCOUNT_2, NAME_ACCOUNT_2, AVATAR_URL_ACCOUNT_2);
-    accounts.put(State.NOT_LOGGED_IN, null);
-    accounts.put(State.LOGGED_IN, ACCOUNT_1);
-    accounts.put(State.LOGGED_IN_SECOND_ACCOUNT, ACCOUNT_2);
+    accounts.put(State.NOT_LOGGED_IN, Optional.empty());
+    accounts.put(State.LOGGED_IN, Optional.of(ACCOUNT_1));
+    accounts.put(State.LOGGED_IN_SECOND_ACCOUNT, Optional.of(ACCOUNT_2));
   }
   
   public static void setAsDefaultProvider() {
@@ -78,16 +78,15 @@ public class TestAccountProvider implements IAccountProvider {
   }
   
   @Override
-  public Account getAccount() throws IOException {
+  public Optional<Account> getAccount() {
     return accounts.get(state);
   }
 
   @Override
-  public Credential getCredential() throws IOException {
-    return hasCredentialsSet() ? getAccount().getOAuth2Credential() : null;
+  public Optional<Credential> getCredential() {
+    return getAccount().isPresent() ? Optional.of(getAccount().get().getOAuth2Credential()) : Optional.empty();
   }
 
-  @Override
   public boolean hasCredentialsSet() {
     return state != State.NOT_LOGGED_IN;
   }
