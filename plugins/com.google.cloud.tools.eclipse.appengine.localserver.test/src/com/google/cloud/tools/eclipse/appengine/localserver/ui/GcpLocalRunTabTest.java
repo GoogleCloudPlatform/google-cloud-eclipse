@@ -143,6 +143,7 @@ public class GcpLocalRunTabTest {
         when(apiFactory.getAccount()).thenReturn(Optional.empty());
         when(apiFactory.getCredential()).thenReturn(Optional.empty());
       } else {
+        when(apiFactory.getAccount()).thenReturn(Optional.of(account));
         when(apiFactory.getCredential()).thenReturn(Optional.of(account.getOAuth2Credential()));
         if (account.equals(TestAccountProvider.ACCOUNT_1)) {
           when(projectRepository.getProjects()).thenReturn(projectsOfEmail1);
