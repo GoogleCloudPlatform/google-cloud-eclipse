@@ -83,7 +83,8 @@ public class MiniSelectorTest {
   public void testWithCredential() {
     mockProjectsList(new GcpProject("foo", "foo.id"));
     MiniSelector selector = new MiniSelector(shellResource.getShell(), apiFactory);
-    assertEquals(apiFactory.getCredential(), selector.getCredential());
+    assertTrue(apiFactory.getCredential().isPresent());
+    assertEquals(apiFactory.getCredential().get(), selector.getCredential());
     assertNotNull(selector.getSelection());
     assertTrue(selector.getSelection().isEmpty());
     assertNull(selector.getProject());

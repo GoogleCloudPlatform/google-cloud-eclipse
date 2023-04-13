@@ -68,6 +68,7 @@ public class ServiceAccountUtilTest {
     ServiceAccounts serviceAccounts = mock(ServiceAccounts.class);
     
     when(apiFactory.getAccount()).thenReturn(Optional.of(TestAccountProvider.ACCOUNT_1));
+    when(apiFactory.getCredential()).thenReturn(Optional.of(TestAccountProvider.CREDENTIAL_ACCOUNT_1));
     when(apiFactory.newIamApi()).thenReturn(iam);
     when(iam.projects()).thenReturn(projects);
     when(projects.serviceAccounts()).thenReturn(serviceAccounts);

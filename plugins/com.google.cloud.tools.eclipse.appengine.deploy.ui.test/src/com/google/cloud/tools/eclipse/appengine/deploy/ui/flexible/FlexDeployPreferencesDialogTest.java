@@ -17,12 +17,15 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible;
 
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
+import com.google.common.base.Optional;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.widgets.Composite;
@@ -31,6 +34,7 @@ import org.eclipse.swt.widgets.Link;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.Mock;
 
 public class FlexDeployPreferencesDialogTest {
 
@@ -38,17 +42,23 @@ public class FlexDeployPreferencesDialogTest {
       + "flexible environment. Visit <a href=\"https://cloud.google.com/appengine/pricing\">"
       + "GCP Pricing</a> for pricing information.";
 
-  @Rule public ShellTestResource shellResource = new ShellTestResource();
+  @Rule
+  public ShellTestResource shellResource = new ShellTestResource();
 
   private FlexDeployPreferencesDialog dialog;
 
+  @Mock
+  private IGoogleApiFactory googleApiFactory;
+
   @Before
   public void setUp() {
+    doReturn(Optional.of(TestAccountProvider.ACCOUNT_1)).when(googleApiFactory).getAccount();
+    doReturn(Optional.of(TestAccountProvider.CREDENTIAL_ACCOUNT_1)).when(googleApiFactory)
+        .getCredential();
     IProject project = mock(IProject.class);
     when(project.getName()).thenReturn("");
     when(project.getLocation()).thenReturn(new Path("/"));
-    dialog = new FlexDeployPreferencesDialog(null, "title", project,
-        mock(IGoogleApiFactory.class));
+    dialog = new FlexDeployPreferencesDialog(null, "title", project, googleApiFactory);
   }
 
   @Test
@@ -61,8 +71,7 @@ public class FlexDeployPreferencesDialogTest {
   }
 
   private static Control findGcpPricingLink(Composite dialogArea) {
-    return CompositeUtil.findControl(dialogArea,
-        control -> control instanceof Link && GCP_PRICING_MESSAGE.equals(((Link) control).getText())
-    );
+    return CompositeUtil.findControl(dialogArea, control -> control instanceof Link
+        && GCP_PRICING_MESSAGE.equals(((Link) control).getText()));
   }
 }

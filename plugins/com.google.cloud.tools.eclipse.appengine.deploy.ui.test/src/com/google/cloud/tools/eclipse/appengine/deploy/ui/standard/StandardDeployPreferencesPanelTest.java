@@ -17,12 +17,15 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.standard;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
+import com.google.common.base.Optional;
 import org.eclipse.core.resources.IProject;
 import org.junit.Rule;
 import org.junit.Test;
@@ -33,10 +36,14 @@ public class StandardDeployPreferencesPanelTest {
 
   @Test
   public void testGetHelpContextId() {
+    IGoogleApiFactory apiFactory = mock(IGoogleApiFactory.class);
+    doReturn(Optional.of(TestAccountProvider.ACCOUNT_1)).when(apiFactory).getAccount();
+    doReturn(Optional.of(TestAccountProvider.CREDENTIAL_ACCOUNT_1)).when(apiFactory)
+        .getCredential();
     IProject project = mock(IProject.class);
     when(project.getName()).thenReturn("");
     StandardDeployPreferencesPanel panel = new StandardDeployPreferencesPanel(
-        shellResource.getShell(), project, mock(IGoogleApiFactory.class), mock(Runnable.class),
+        shellResource.getShell(), project, apiFactory, mock(Runnable.class),
         false, mock(ProjectRepository.class));
 
     assertEquals(

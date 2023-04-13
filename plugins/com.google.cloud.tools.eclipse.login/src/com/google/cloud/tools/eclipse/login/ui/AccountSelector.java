@@ -23,6 +23,7 @@ import com.google.cloud.tools.eclipse.login.Messages;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorDialogErrorHandler;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.Collections;
 import java.util.Optional;
@@ -46,6 +47,7 @@ public class AccountSelector extends Composite {
 
   public AccountSelector(Composite parent, IGoogleApiFactory apiFactory) {
     super(parent, SWT.NONE);
+    Preconditions.checkNotNull(apiFactory);
     this.apiFactory = apiFactory;
 
     Composite accountEmailComposite = new Composite(this, SWT.NONE);
