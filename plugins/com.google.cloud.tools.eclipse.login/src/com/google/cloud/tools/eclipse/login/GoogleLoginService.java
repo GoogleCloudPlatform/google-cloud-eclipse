@@ -26,10 +26,10 @@ import com.google.cloud.tools.login.JavaPreferenceOAuthDataStore;
 import com.google.cloud.tools.login.LoggerFacade;
 import com.google.cloud.tools.login.OAuthDataStore;
 import com.google.common.base.Preconditions;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -130,12 +130,9 @@ public class GoogleLoginService implements IGoogleLoginService {
   @Override
   public Set<Account> getAccounts() {
     Set<Account> result = new HashSet<>();
-    try {
-      if (apiFactory.hasCredentialsSet()) {
-        result.add(apiFactory.getAccount());
-      }
-    } catch (IOException ex) {
-      logger.log(Level.SEVERE, "Error in login service when obtaining gcloud CLI account", ex);
+    Optional<Account> account = apiFactory.getAccount();  
+    if (account.isPresent()) {
+        result.add(account.get());
     }
     return result;
   }
