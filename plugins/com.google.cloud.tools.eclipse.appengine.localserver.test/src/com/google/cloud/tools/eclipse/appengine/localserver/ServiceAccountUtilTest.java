@@ -39,6 +39,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -66,8 +67,7 @@ public class ServiceAccountUtilTest {
     Projects projects = mock(Projects.class);
     ServiceAccounts serviceAccounts = mock(ServiceAccounts.class);
     
-    when(apiFactory.hasCredentialsSet()).thenReturn(true);
-    when(apiFactory.getAccount()).thenReturn(TestAccountProvider.ACCOUNT_1);
+    when(apiFactory.getAccount()).thenReturn(Optional.of(TestAccountProvider.ACCOUNT_1));
     when(apiFactory.newIamApi()).thenReturn(iam);
     when(iam.projects()).thenReturn(projects);
     when(projects.serviceAccounts()).thenReturn(serviceAccounts);
