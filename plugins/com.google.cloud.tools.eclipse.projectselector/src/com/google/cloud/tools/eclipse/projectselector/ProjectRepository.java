@@ -54,7 +54,7 @@ public class ProjectRepository {
    * @throws ProjectRepositoryException if an error happens while communicating with the backend
    */
   public List<GcpProject> getProjects() throws ProjectRepositoryException {
-    Preconditions.checkState(apiFactory.hasCredentialsSet());
+    Preconditions.checkState(apiFactory.getCredential().isPresent());
     // TODO cache results https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1374
     try {
       Projects projects = apiFactory.newProjectsApi();
@@ -88,7 +88,7 @@ public class ProjectRepository {
   public GcpProject getProject(String projectId)
       throws ProjectRepositoryException {
     try {
-      if (apiFactory.hasCredentialsSet() && !Strings.isNullOrEmpty(projectId)) {
+      if (apiFactory.getCredential().isPresent() && !Strings.isNullOrEmpty(projectId)) {
         return convertToGcpProject(apiFactory.newProjectsApi().get(projectId).execute());
       } else {
         return null;
@@ -124,7 +124,7 @@ public class ProjectRepository {
    */
   public AppEngine getAppEngineApplication(String projectId)
       throws ProjectRepositoryException {
-    Preconditions.checkState(apiFactory.hasCredentialsSet());
+    Preconditions.checkState(apiFactory.getCredential().isPresent());
     Preconditions.checkArgument(!Strings.isNullOrEmpty(projectId));
 
     try {
