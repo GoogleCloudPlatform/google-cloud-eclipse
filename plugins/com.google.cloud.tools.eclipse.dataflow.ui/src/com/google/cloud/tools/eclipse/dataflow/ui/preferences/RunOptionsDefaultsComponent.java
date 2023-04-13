@@ -435,7 +435,7 @@ public class RunOptionsDefaultsComponent {
   }
 
   protected void checkProjectConfiguration() {
-    if (!apiFactory.hasCredentialsSet()) {
+    if (!apiFactory.getCredential().isPresent()) {
       return;
     }
     GcpProject project = projectInput.getProject();
