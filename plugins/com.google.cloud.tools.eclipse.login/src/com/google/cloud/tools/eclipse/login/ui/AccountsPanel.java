@@ -23,7 +23,6 @@ import com.google.cloud.tools.eclipse.login.Messages;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorDialogErrorHandler;
 import com.google.common.annotations.VisibleForTesting;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -83,7 +82,7 @@ public class AccountsPanel extends PopupDialog {
     Composite container = (Composite) super.createDialogArea(parent);
     GridLayoutFactory.swtDefaults().generateLayout(container);
 
-    if (apiFactory.hasCredentialsSet()) {
+    if (apiFactory.getCredential().isPresent()) {
       createAccountsPane(container);
     } else {
       createNonLoggedInAccountsPane(container);
@@ -140,11 +139,7 @@ public class AccountsPanel extends PopupDialog {
   }
   
   private Account getAccount() {
-    try {
-      return apiFactory.getAccount();
-    } catch (IOException ex) {
-      return null;
-    }
+    return apiFactory.getAccount().orElse(null);
   }
 
   /**
