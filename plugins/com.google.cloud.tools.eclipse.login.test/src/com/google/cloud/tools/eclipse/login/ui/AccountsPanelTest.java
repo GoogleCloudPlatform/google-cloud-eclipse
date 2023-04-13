@@ -162,7 +162,7 @@ public class AccountsPanelTest {
 
   private static NamesEmails collectNamesEmails(Control dialogArea) {
     NamesEmails namesEmails = new NamesEmails();
-    if (!TestAccountProvider.INSTANCE.hasCredentialsSet()) {
+    if (!TestAccountProvider.INSTANCE.getCredential().isPresent()) {
       return namesEmails;
     }
     Control[] controls = ((Composite) dialogArea).getChildren();

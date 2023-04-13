@@ -86,9 +86,5 @@ public class TestAccountProvider implements IAccountProvider {
   public Optional<Credential> getCredential() {
     return getAccount().isPresent() ? Optional.of(getAccount().get().getOAuth2Credential()) : Optional.empty();
   }
-
-  public boolean hasCredentialsSet() {
-    return state != State.NOT_LOGGED_IN;
-  }
   
 }
