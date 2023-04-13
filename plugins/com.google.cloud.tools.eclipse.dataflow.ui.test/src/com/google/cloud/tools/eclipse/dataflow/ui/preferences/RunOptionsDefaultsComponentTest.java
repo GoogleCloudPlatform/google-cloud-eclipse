@@ -155,14 +155,12 @@ public class RunOptionsDefaultsComponentTest {
     throws IOException {
     Preconditions.checkNotNull(account);
     if (!account.isPresent()) {
-      when(apiFactory.getAccount()).thenReturn(null);
-      when(apiFactory.getCredential()).thenReturn(null);
-      when(apiFactory.hasCredentialsSet()).thenReturn(false);
+      when(apiFactory.getAccount()).thenReturn(Optional.empty());
+      when(apiFactory.getCredential()).thenReturn(Optional.empty());
       when(loginService.getAccounts()).thenReturn(Sets.newHashSet());
     } else {
-      when(apiFactory.getAccount()).thenReturn(account.get());
-      when(apiFactory.getCredential()).thenReturn(account.get().getOAuth2Credential());
-      when(apiFactory.hasCredentialsSet()).thenReturn(true); 
+      when(apiFactory.getAccount()).thenReturn(account);
+      when(apiFactory.getCredential()).thenReturn(Optional.of(account.get().getOAuth2Credential()));
       when(loginService.getAccounts()).thenReturn(Sets.newHashSet(account.get()));
       if (account.get().equals(TestAccountProvider.ACCOUNT_1)) {
         mockStorageApiBucketList("project", "alice-bucket-1", "alice-bucket-2");
