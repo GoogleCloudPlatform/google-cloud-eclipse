@@ -40,7 +40,7 @@ public class ServiceAccountUtil {
   public static void createAppEngineDefaultServiceAccountKey(IGoogleApiFactory apiFactory, 
       String projectId, Path destination)
           throws FileAlreadyExistsException, IOException {
-    Preconditions.checkArgument(apiFactory.hasCredentialsSet(), "credentials not set");
+    Preconditions.checkArgument(apiFactory.getCredential().isPresent(), "credentials not set");
     Preconditions.checkArgument(!projectId.isEmpty(), "project ID empty");
     Preconditions.checkArgument(destination.isAbsolute(), "destination not absolute");
 
