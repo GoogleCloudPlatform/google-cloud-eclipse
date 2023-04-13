@@ -106,7 +106,7 @@ public class MiniSelector implements ISelectionProvider {
   }
 
   public Credential getCredential() {
-    return apiFactory.getCredential();
+    return apiFactory.getCredential().orElse(null);
   }
 
   /**
@@ -124,7 +124,7 @@ public class MiniSelector implements ISelectionProvider {
     comboViewer.setInput(EMPTY_PROJECTS);
 
     cancelFetch();
-    if (!apiFactory.hasCredentialsSet()) {
+    if (!apiFactory.getCredential().isPresent()) {
       logger.log(Level.WARNING, "Tried to fetch() projects without credentials set");
       return;
     }
@@ -222,7 +222,7 @@ public class MiniSelector implements ISelectionProvider {
 
     public FetchProjectsJob() {
       super("Determining accessible projects");
-      credential = MiniSelector.this.apiFactory.getCredential();
+      credential = MiniSelector.this.apiFactory.getCredential().orElse(null);
     }
 
     @Override
@@ -234,7 +234,7 @@ public class MiniSelector implements ISelectionProvider {
     @Override
     protected boolean isStale() {
       // check if the MiniSelector's credential has changed
-      return credential != MiniSelector.this.apiFactory.getCredential();
+      return credential != MiniSelector.this.apiFactory.getCredential().orElse(null);
     }
   }
 }

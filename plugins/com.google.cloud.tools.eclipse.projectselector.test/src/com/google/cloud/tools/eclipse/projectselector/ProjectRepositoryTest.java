@@ -61,7 +61,7 @@ public class ProjectRepositoryTest {
   @Before
   public void setUp() {
     when(apiFactory.getAccount()).thenReturn(Optional.of(TestAccountProvider.ACCOUNT_1));
-    when(apiFactory.getCredential()).thenReturn(Optional.of(TestAccountProvider.ACCOUNT_1.getOAuth2Credential()));
+    when(apiFactory.getCredential()).thenReturn(Optional.of(TestAccountProvider.CREDENTIAL_ACCOUNT_1));
     repository = new ProjectRepository(apiFactory);
     project.setName("projectName").setProjectId("projectId");
   }

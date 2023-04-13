@@ -33,10 +33,12 @@ import com.google.api.services.cloudresourcemanager.model.ListProjectsResponse;
 import com.google.api.services.cloudresourcemanager.model.Project;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Display;
@@ -60,13 +62,15 @@ public class MiniSelectorTest {
 
   @Before
   public void setUp() {
-    doReturn(true).when(apiFactory).hasCredentialsSet();
+    doReturn(Optional.of(TestAccountProvider.ACCOUNT_1)).when(apiFactory).getAccount();
+    doReturn(Optional.of(TestAccountProvider.CREDENTIAL_ACCOUNT_1)).when(apiFactory).getCredential();
     bot = new SWTBot(shellResource.getShell());
   }
 
   @Test
   public void testNoCredential() {
-    doReturn(false).when(apiFactory).hasCredentialsSet();
+    doReturn(Optional.empty()).when(apiFactory).getAccount();
+    doReturn(Optional.empty()).when(apiFactory).getCredential();
     MiniSelector selector = new MiniSelector(shellResource.getShell(), apiFactory);
     assertNull(selector.getCredential());
     assertNotNull(selector.getSelection());
