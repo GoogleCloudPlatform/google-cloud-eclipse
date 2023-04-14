@@ -50,7 +50,6 @@ import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
-import com.google.common.base.Optional;
 import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -62,6 +61,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -139,13 +139,12 @@ public class GcpLocalRunTabTest {
 
   private void selectAccount(Account account) {
     try {
-      when(apiFactory.getAccount()).thenReturn(account);
       if (account == null) {
-        when(apiFactory.hasCredentialsSet()).thenReturn(false);
-        when(apiFactory.getCredential()).thenReturn(null);
+        when(apiFactory.getAccount()).thenReturn(Optional.empty());
+        when(apiFactory.getCredential()).thenReturn(Optional.empty());
       } else {
-        when(apiFactory.hasCredentialsSet()).thenReturn(true);
-        when(apiFactory.getCredential()).thenReturn(account.getOAuth2Credential());
+        when(apiFactory.getAccount()).thenReturn(Optional.of(account));
+        when(apiFactory.getCredential()).thenReturn(Optional.of(account.getOAuth2Credential()));
         if (account.equals(TestAccountProvider.ACCOUNT_1)) {
           when(projectRepository.getProjects()).thenReturn(projectsOfEmail1);
         } else if (account.equals(TestAccountProvider.ACCOUNT_2)) {
@@ -155,7 +154,7 @@ public class GcpLocalRunTabTest {
         }
         accountSelector.forceAccountCheck();
       }
-    } catch (ProjectRepositoryException | IOException ex) {
+    } catch (ProjectRepositoryException ex) {
       fail();
     }
   }
@@ -238,7 +237,7 @@ public class GcpLocalRunTabTest {
 
   @Test
   public void testInitializeFrom_serviceKeyEntered() throws CoreException {
-    mockLaunchConfig(Optional.absent(), "", "/usr/home/keystore/my-key.json");
+    mockLaunchConfig(Optional.empty(), "", "/usr/home/keystore/my-key.json");
     tab.initializeFrom(launchConfig);
     assertEquals("/usr/home/keystore/my-key.json", serviceKeyText.getText());
   }

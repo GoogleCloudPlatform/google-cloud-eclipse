@@ -71,7 +71,7 @@ public class CloudSdkProcessWrapper {
    */
   public Deployment getAppEngineDeployment(MessageConsoleStream normalOutputStream) 
       throws CloudSdkNotFoundException {
-    Preconditions.checkState(new GoogleApiFactory().hasCredentialsSet(), "credential required for deploying");
+    Preconditions.checkState(new GoogleApiFactory().getCredential().isPresent(), "credential required for deploying");
     Preconditions.checkState(!initialized, "process wrapper already set up");
     initialized = true;
 

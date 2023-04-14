@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.googleapis.internal;
+package com.google.cloud.tools.eclipse.googleapis;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.cloud.tools.eclipse.googleapis.Account;
-import java.io.IOException;
+import java.util.Optional;
 
 /**
  * 
  */
 public interface IAccountProvider {
 
-  public Account getAccount() throws IOException;
-  public Credential getCredential() throws IOException;
-  public boolean hasCredentialsSet();
+  public Optional<Account> getAccount();
+  public Optional<Credential> getCredential();
 }

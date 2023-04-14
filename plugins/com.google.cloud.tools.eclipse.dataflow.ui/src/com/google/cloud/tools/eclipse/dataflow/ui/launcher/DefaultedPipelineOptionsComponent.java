@@ -19,13 +19,13 @@ package com.google.cloud.tools.eclipse.dataflow.ui.launcher;
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.MessageTarget;
 import com.google.cloud.tools.eclipse.dataflow.ui.preferences.RunOptionsDefaultsComponent;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
+import com.google.cloud.tools.eclipse.googleapis.Account;
 import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -140,13 +140,9 @@ public class DefaultedPipelineOptionsComponent {
   }
 
   private String getCurrentEmail() {
-    IGoogleApiFactory apiFactory = new GoogleApiFactory();
-    if (apiFactory.hasCredentialsSet()) {
-      try {
-        return apiFactory.getAccount().getEmail();
-      } catch (IOException ex) {
-        // will return default
-      }
+    Optional<Account> account = new GoogleApiFactory().getAccount();
+    if (account.isPresent()) {
+      return account.get().getEmail();
     }
     return "";
   }

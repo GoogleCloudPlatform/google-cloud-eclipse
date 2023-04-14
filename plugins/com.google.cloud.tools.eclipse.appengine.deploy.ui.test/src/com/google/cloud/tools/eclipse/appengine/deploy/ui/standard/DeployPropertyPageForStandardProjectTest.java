@@ -29,9 +29,9 @@ public class DeployPropertyPageForStandardProjectTest
     extends DeployPropertyPageTest<AppEngineDeployPreferencesPanel> {
 
   @Rule
-  public TestProjectCreator standardProjectCreator = new TestProjectCreator().withFacets(
-      JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31,
-      AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8);
+  public TestProjectCreator standardProjectCreator =
+      new TestProjectCreator().withFacets(JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31,
+          AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8);
 
   @Override
   protected IProject getProject() {

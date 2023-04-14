@@ -66,7 +66,7 @@ public class GoogleApiFactoryWithProxyServerTest {
     when(transportCache.getUnchecked(any(GoogleApi.class)))
         .thenReturn(mock(HttpTransport.class));
     googleApiFactory.setTransportCache(transportCache);
-    assertTrue(googleApiFactory.hasCredentialsSet());
+    assertTrue(googleApiFactory.getCredential().isPresent());
   }
 
   @Test

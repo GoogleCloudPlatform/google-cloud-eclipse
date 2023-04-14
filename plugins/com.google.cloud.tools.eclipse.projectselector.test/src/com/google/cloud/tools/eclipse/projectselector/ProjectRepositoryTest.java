@@ -22,7 +22,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -44,6 +43,7 @@ import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,10 +59,9 @@ public class ProjectRepositoryTest {
   private Project project = new Project();
 
   @Before
-  public void setUp() throws IOException {
-    when(apiFactory.hasCredentialsSet()).thenReturn(true);
-    when(apiFactory.getAccount()).thenReturn(TestAccountProvider.ACCOUNT_1);
-    when(apiFactory.getCredential()).thenReturn(TestAccountProvider.ACCOUNT_1.getOAuth2Credential());
+  public void setUp() {
+    when(apiFactory.getAccount()).thenReturn(Optional.of(TestAccountProvider.ACCOUNT_1));
+    when(apiFactory.getCredential()).thenReturn(Optional.of(TestAccountProvider.CREDENTIAL_ACCOUNT_1));
     repository = new ProjectRepository(apiFactory);
     project.setName("projectName").setProjectId("projectId");
   }
@@ -278,13 +277,8 @@ public class ProjectRepositoryTest {
   }
 
   private void setLoggedOut() {
-    try {
-      when(apiFactory.hasCredentialsSet()).thenReturn(false);
-      when(apiFactory.getAccount()).thenReturn(null);
-      when(apiFactory.getCredential()).thenReturn(null);
-    } catch (IOException ex) {
-      fail("IOException when setting mock");
-    }
+    when(apiFactory.getAccount()).thenReturn(Optional.empty());
+    when(apiFactory.getCredential()).thenReturn(Optional.empty());
   }
 
 }
