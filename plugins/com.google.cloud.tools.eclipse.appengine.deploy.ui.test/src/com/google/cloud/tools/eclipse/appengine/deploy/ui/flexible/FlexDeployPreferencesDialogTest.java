@@ -34,7 +34,6 @@ import org.eclipse.swt.widgets.Link;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.Mock;
 
 public class FlexDeployPreferencesDialogTest {
 
