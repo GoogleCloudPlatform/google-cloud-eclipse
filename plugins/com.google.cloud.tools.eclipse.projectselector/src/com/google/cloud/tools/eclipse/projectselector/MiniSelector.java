@@ -56,19 +56,14 @@ public class MiniSelector implements ISelectionProvider {
 
   private Executor displayExecutor;
   private ComboViewer comboViewer;
-  private Credential credential;
   private FetchProjectsJob fetchProjectsJob;
+  private IGoogleApiFactory apiFactory;
 
   /** Stashed projectID to be selected when fetch-project-list completes. */
   private String toBeSelectedProjectId;
 
   public MiniSelector(Composite container, IGoogleApiFactory apiFactory) {
-    this(container, apiFactory, null);
-  }
-
-  @VisibleForTesting
-  MiniSelector(Composite container, IGoogleApiFactory apiFactory, Credential credential) {
-    this.credential = credential;
+    this.apiFactory = apiFactory;
     projectRepository = new ProjectRepository(apiFactory);
     create(container);
   }
@@ -111,11 +106,13 @@ public class MiniSelector implements ISelectionProvider {
   }
 
   public Credential getCredential() {
-    return credential;
+    return apiFactory.getCredential().orElse(null);
   }
 
-  public void setCredential(Credential credential) {
-    this.credential = credential;
+  /**
+   * Used to re-fetch the projects in case a credential has changed
+   */
+  public void updateProjectsList() {
     fetch();
   }
 
@@ -127,7 +124,8 @@ public class MiniSelector implements ISelectionProvider {
     comboViewer.setInput(EMPTY_PROJECTS);
 
     cancelFetch();
-    if (credential == null) {
+    if (!apiFactory.getCredential().isPresent()) {
+      logger.log(Level.WARNING, "Tried to fetch() projects without credentials set");
       return;
     }
 
@@ -224,7 +222,7 @@ public class MiniSelector implements ISelectionProvider {
 
     public FetchProjectsJob() {
       super("Determining accessible projects");
-      credential = MiniSelector.this.credential;
+      credential = MiniSelector.this.apiFactory.getCredential().orElse(null);
     }
 
     @Override
@@ -236,7 +234,7 @@ public class MiniSelector implements ISelectionProvider {
     @Override
     protected boolean isStale() {
       // check if the MiniSelector's credential has changed
-      return credential != MiniSelector.this.credential;
+      return credential != MiniSelector.this.apiFactory.getCredential().orElse(null);
     }
   }
 }

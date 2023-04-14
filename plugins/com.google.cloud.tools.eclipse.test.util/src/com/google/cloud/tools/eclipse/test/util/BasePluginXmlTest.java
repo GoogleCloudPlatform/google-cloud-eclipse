@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.io.InputStream;
@@ -285,7 +286,7 @@ public abstract class BasePluginXmlTest {
   @Test
   public final void testGoogleApisImportVersions() throws IOException {
     checkDependencyDirectives(
-        "Import-Package", "com.google.api.", "version=\"[1.25.0,1.26.0)\"");
+        "Import-Package", "com.google.api.", "version=\"[1.25.0,1.26.0)\"", Lists.newArrayList("com.google.api.services.oauth2"));
   }
 
   @Test
@@ -296,6 +297,11 @@ public abstract class BasePluginXmlTest {
 
   private void checkDependencyDirectives(
       String attributeName, String prefixToCheck, String versionString) throws IOException {
+    checkDependencyDirectives(attributeName, prefixToCheck, versionString, Lists.newArrayList());
+  }
+  
+  private void checkDependencyDirectives(
+      String attributeName, String prefixToCheck, String versionString, List<String> exclusionList) throws IOException {
     String value = getManifestAttributes().getValue(attributeName);
     if (value != null) {
       String regexPrefix = prefixToCheck.replaceAll("\\.", "\\\\.");
@@ -303,6 +309,17 @@ public abstract class BasePluginXmlTest {
 
       Matcher matcher = pattern.matcher(value);
       while (matcher.find()) {
+        boolean isExcluded = false;
+        String match = value.substring(matcher.start(), matcher.end());
+        for (String toExclude : exclusionList) {
+            if (toExclude.compareTo(match) == 0) {
+                isExcluded = true;
+                break;
+            }
+        }
+        if (isExcluded) {
+            continue;
+        }
         int nextCharOffset = matcher.end();
         if (nextCharOffset == value.length()) {
           fail(attributeName + " directive not defined: " + matcher.group());

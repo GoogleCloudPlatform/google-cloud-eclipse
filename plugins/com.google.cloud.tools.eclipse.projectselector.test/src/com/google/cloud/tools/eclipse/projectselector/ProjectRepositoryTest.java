@@ -39,9 +39,11 @@ import com.google.api.services.cloudresourcemanager.model.Project;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.projectselector.model.AppEngine;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,12 +60,16 @@ public class ProjectRepositoryTest {
 
   @Before
   public void setUp() {
+    when(apiFactory.getAccount()).thenReturn(Optional.of(TestAccountProvider.ACCOUNT_1));
+    when(apiFactory.getCredential()).thenReturn(Optional.of(TestAccountProvider.CREDENTIAL_ACCOUNT_1));
     repository = new ProjectRepository(apiFactory);
     project.setName("projectName").setProjectId("projectId");
   }
 
-  @Test(expected = NullPointerException.class)
+  
+  @Test(expected = IllegalStateException.class)
   public void testGetProjects_nullCredential() throws ProjectRepositoryException {
+    setLoggedOut();
     repository.getProjects();
   }
 
@@ -145,6 +151,7 @@ public class ProjectRepositoryTest {
 
   @Test
   public void testGetProject_nullCredential() throws ProjectRepositoryException {
+    setLoggedOut();
     assertNull(repository.getProject("projectId"));
   }
 
@@ -184,8 +191,9 @@ public class ProjectRepositoryTest {
     assertThat(gcpProject.getId(), is("projectId"));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test(expected = IllegalStateException.class)
   public void testHasAppEngineApplication_nullCredential() throws ProjectRepositoryException {
+    setLoggedOut();
     repository.getAppEngineApplication("projectId");
   }
 
@@ -266,6 +274,11 @@ public class ProjectRepositoryTest {
     when(list.setPageSize(anyInt())).thenReturn(list);
     when(list.setPageToken(anyString())).thenReturn(list);
     return list;
+  }
+
+  private void setLoggedOut() {
+    when(apiFactory.getAccount()).thenReturn(Optional.empty());
+    when(apiFactory.getCredential()).thenReturn(Optional.empty());
   }
 
 }

@@ -21,10 +21,6 @@ import com.google.cloud.tools.appengine.configuration.AppEngineWebXmlProjectStag
 import com.google.cloud.tools.appengine.configuration.AppYamlProjectStageConfiguration;
 import com.google.cloud.tools.appengine.operations.AppEngineWebXmlProjectStaging;
 import com.google.cloud.tools.appengine.operations.AppYamlProjectStaging;
-import com.google.cloud.tools.appengine.operations.CloudSdk;
-import com.google.cloud.tools.eclipse.appengine.deploy.util.CloudSdkProcessWrapper;
-import java.nio.file.Path;
-import java.util.logging.Level;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;

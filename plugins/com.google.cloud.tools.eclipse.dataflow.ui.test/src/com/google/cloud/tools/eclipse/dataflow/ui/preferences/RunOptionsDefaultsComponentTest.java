@@ -36,7 +36,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
 import com.google.api.services.cloudresourcemanager.model.ListProjectsResponse;
 import com.google.api.services.cloudresourcemanager.model.Project;
@@ -50,17 +49,22 @@ import com.google.api.services.storage.model.Bucket;
 import com.google.api.services.storage.model.Buckets;
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.MessageTarget;
+import com.google.cloud.tools.eclipse.dataflow.ui.preferences.RunOptionsDefaultsComponent.ValidationStatus;
+import com.google.cloud.tools.eclipse.googleapis.Account;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
-import com.google.cloud.tools.login.Account;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -108,26 +112,10 @@ public class RunOptionsDefaultsComponentTest {
 
   @Before
   public void setUp() throws IOException {
-    Account account1 = mock(Account.class, "alice@example.com");
-    Credential credential1 = mock(Credential.class, "alice@example.com");
-    when(account1.getEmail()).thenReturn("alice@example.com");
-    when(account1.getOAuth2Credential()).thenReturn(credential1);
-    mockStorageApiBucketList("project", "alice-bucket-1", "alice-bucket-2");
-    mockProjectList(new GcpProject("project", "project"));
-    mockServiceApi("project", "dataflow.googleapis.com");
-
-    Account account2 = mock(Account.class, "bob@example.com");
-    Credential credential2 = mock(Credential.class, "bob@example.com");
-    when(account2.getEmail()).thenReturn("bob@example.com");
-    when(account2.getOAuth2Credential()).thenReturn(credential2);
-    mockStorageApiBucketList("project", "bob-bucket");
-    mockProjectList(new GcpProject("project", "project"));
-    mockServiceApi("project", "dataflow.googleapis.com");
-
+    logout(false /* forceAccountCheck*/);
+    
     doCallRealMethod().when(page).setPageComplete(anyBoolean());
     doCallRealMethod().when(page).isPageComplete();
-
-    when(loginService.getAccounts()).thenReturn(Sets.newHashSet(account1, account2));
 
     shell = shellResource.getShell();
     bot = new SWTBot(shell);
@@ -142,6 +130,53 @@ public class RunOptionsDefaultsComponentTest {
     createButton = CompositeUtil.findButton(shell, "&Create Bucket");
     serviceAccountKey = CompositeUtil.findControl(shell, Text.class);
     browse = CompositeUtil.findButton(shell, "Browse...");
+  }
+  
+  private boolean loginAlice() throws IOException {
+    return setUpApiFactory(Optional.of(TestAccountProvider.ACCOUNT_1), true);
+  }
+  private boolean loginBob() throws IOException {
+    return setUpApiFactory(Optional.of(TestAccountProvider.ACCOUNT_2), true);
+  }
+  private boolean logout() throws IOException {
+    return setUpApiFactory(Optional.empty(), true);
+  }
+  private boolean logout(boolean forceAccountCheck) throws IOException {
+    return setUpApiFactory(Optional.empty(), forceAccountCheck);
+  }
+  
+  /**
+   * 
+   * @param account
+   * @param forceAccountCheck
+   * @return true if an account change was detected in {@code AccountSelector}
+   */
+  private boolean setUpApiFactory(Optional<Account> account, boolean forceAccountCheck) 
+    throws IOException {
+    Preconditions.checkNotNull(account);
+    if (!account.isPresent()) {
+      when(apiFactory.getAccount()).thenReturn(Optional.empty());
+      when(apiFactory.getCredential()).thenReturn(Optional.empty());
+      when(loginService.getAccounts()).thenReturn(Sets.newHashSet());
+    } else {
+      when(apiFactory.getAccount()).thenReturn(account);
+      when(apiFactory.getCredential()).thenReturn(Optional.of(account.get().getOAuth2Credential()));
+      when(loginService.getAccounts()).thenReturn(Sets.newHashSet(account.get()));
+      if (account.get().equals(TestAccountProvider.ACCOUNT_1)) {
+        mockStorageApiBucketList("project", "alice-bucket-1", "alice-bucket-2");
+        mockProjectList(new GcpProject("project", "project"));
+        mockServiceApi("project", "dataflow.googleapis.com");
+      } else {
+        mockStorageApiBucketList("project", "bob-bucket");
+        mockProjectList(new GcpProject("project", "project"));
+        mockServiceApi("project", "dataflow.googleapis.com");
+      }
+    }
+    if (forceAccountCheck) {
+      return selector.forceAccountCheck();
+    }
+   
+    return false;
   }
 
   private void mockProjectList(GcpProject... gcpProjects)
@@ -243,9 +278,9 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testCloudProjectText() {
+  public void testCloudProjectText() throws IOException {
     Assert.assertNull(component.getProject());
-    selector.selectAccount("alice@example.com");
+    loginAlice();
     component.setCloudProjectText("project");
     join();
     Assert.assertNotNull(component.getProject());
@@ -263,16 +298,15 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testAccountSelector_init() {
-    Assert.assertEquals(2, selector.getAccountCount());
+  public void testAccountSelector_init() throws IOException {
+    logout();
+    Assert.assertEquals(0, selector.getAccountCount());
 
-    int index1 = selector.selectAccount("alice@example.com");
-    Assert.assertEquals(0, index1);
-    Assert.assertEquals("alice@example.com", selector.getSelectedEmail());
+    loginAlice();
+    Assert.assertEquals(TestAccountProvider.EMAIL_ACCOUNT_1, selector.getSelectedEmail());
 
-    int index2 = selector.selectAccount("bob@example.com");
-    Assert.assertEquals(1, index2);
-    Assert.assertEquals("bob@example.com", selector.getSelectedEmail());
+    loginBob();
+    Assert.assertEquals(TestAccountProvider.EMAIL_ACCOUNT_2, selector.getSelectedEmail());
   }
 
   @Test
@@ -287,8 +321,8 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testEnablement_selectedAccount() {
-    selector.selectAccount("alice@example.com");
+  public void testEnablement_selectedAccount() throws IOException {
+    loginAlice();
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
@@ -299,8 +333,8 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testEnablement_selectedProject() {
-    selector.selectAccount("alice@example.com");
+  public void testEnablement_selectedProject() throws IOException {
+    loginAlice();
     component.setCloudProjectText("project");
     join();
     assertTrue(selector.isEnabled());
@@ -313,11 +347,12 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testEnablement_nonExistentProject() {
-    selector.selectAccount("alice@example.com");
+  public void testEnablement_nonExistentProject() throws IOException {
+    loginAlice();
     component.setCloudProjectText("doesnotexist");
     spinEvents();
-    component.validate();
+    ValidationStatus result = component.validate();
+    assertEquals(ValidationStatus.NULL_PROJECT, result);
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
@@ -328,14 +363,15 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testEnablement_existingStagingLocation() {
-    selector.selectAccount("alice@example.com");
+  public void testEnablement_existingStagingLocation() throws IOException {
+    loginAlice();
     component.setCloudProjectText("project");
     join();
     component.setStagingLocationText("alice-bucket-1");
     component.startStagingLocationCheck(0); // force right now
     join();
-    component.validate();
+    ValidationStatus result = component.validate();
+    assertEquals(ValidationStatus.BUCKET_ACCESSIBLE, result);
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
@@ -347,23 +383,37 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testEnablement_nonExistentStagingLocation() {
-    selector.selectAccount("alice@example.com");
+  public void testEnablement_nonExistentStagingLocation() throws IOException {
+    loginAlice();
     component.setCloudProjectText("project");
     join();
     component.setStagingLocationText("non-existent-bucket");
-    component.startStagingLocationCheck(0); // force right now
     join();
-    component.validate();
-    bot.waitUntil(widgetIsEnabled(new SWTBotButton(createButton)));
+    ValidationStatus result = component.validate();
+    spinEvents();
+    join();
+    join();
+    assertTrue(component.canEnableChildren());
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
+    assertFalse(component.getControl().isDisposed());
+    assertNotNull(component.getProject());
+    verifyProjectsLoaded("project");
+    assertEquals(ValidationStatus.BUCKET_CAN_BE_CREATED, result);
+    bot.waitUntil(widgetIsEnabled(new SWTBotButton(createButton)));
     assertTrue(projectID.isEnabled());
     assertTrue(stagingLocations.isEnabled());
     assertTrue(createButton.isEnabled());
     assertFalse(page.isPageComplete());
     assertTrue(serviceAccountKey.isEnabled());
     assertTrue(browse.isEnabled());
+  }
+  
+  private void verifyProjectsLoaded(String... projectIds) throws IOException {
+    List<Project> projects = apiFactory.newProjectsApi().list().execute().getProjects();
+    for (String projectId : projectIds) {
+      assertTrue(projects.stream().anyMatch(project -> project.getProjectId() == projectId));
+    }
   }
 
   @Test
@@ -373,8 +423,8 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testEnablement_disabledWhileAllValuesValid() {
-    selector.selectAccount("alice@example.com");
+  public void testEnablement_disabledWhileAllValuesValid() throws IOException {
+    loginAlice();
     component.setCloudProjectText("project");
     join();
     component.setStagingLocationText("alice-bucket-1");
@@ -393,8 +443,8 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testStagingLocation() {
-    selector.selectAccount("alice@example.com");
+  public void testStagingLocation() throws IOException {
+    loginAlice();
     component.setCloudProjectText("project");
     join();
 
@@ -403,13 +453,13 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testAccountSelector_loadBucketCombo() {
-    selector.selectAccount("alice@example.com");
+  public void testAccountSelector_loadBucketCombo() throws IOException {
+    loginAlice();
     component.setCloudProjectText("project");
     join();
     assertStagingLocationCombo("gs://alice-bucket-1", "gs://alice-bucket-2");
 
-    selector.selectAccount("bob@example.com");
+    loginBob();
     join();
     assertStagingLocationCombo("gs://bob-bucket");
   }
@@ -432,8 +482,8 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testBucketNameStatus_gcsPathWithObjectIsOk() {
-    component.selectAccount("alice@example.com");
+  public void testBucketNameStatus_gcsPathWithObjectIsOk() throws IOException {
+    loginAlice();
     component.setCloudProjectText("project");
     join();
     component.setStagingLocationText("alice-bucket-2/object");
@@ -442,8 +492,8 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testBucketNameStatus_gcsUrlPathWithObjectIsOk() {
-    component.selectAccount("alice@example.com");
+  public void testBucketNameStatus_gcsUrlPathWithObjectIsOk() throws IOException {
+    loginAlice();
     component.setCloudProjectText("project");
     join();
     component.setStagingLocationText("gs://alice-bucket-2/object");
@@ -452,8 +502,8 @@ public class RunOptionsDefaultsComponentTest {
   }
   
   @Test
-  public void testBucketNameStatus_createIsOk() {
-    component.selectAccount("alice@example.com");
+  public void testBucketNameStatus_createIsOk() throws IOException {
+    loginAlice();
     component.setCloudProjectText("project");
     join();
     component.setStagingLocationText("gs://alice-bucket-non-existent");
@@ -498,14 +548,19 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testPartialValidity_account() {
+  public void testPartialValidity_account() throws IOException {
     testPartialValidity_allEmpty();
-    component.selectAccount("alice@example.com");
+    assertTrue(loginAlice());
+    join();
+    assertFalse(Strings.isNullOrEmpty(component.getAccountEmail()));
+    assertTrue(Strings.isNullOrEmpty(component.getServiceAccountKey()));
+    assertTrue(component.doIsolatedQuickChecks());
+    assertEquals(ValidationStatus.NULL_PROJECT, component.validate());
     assertTrue("should be complete with account", page.isPageComplete());
   }
 
   @Test
-  public void testPartialValidity_account_project() {
+  public void testPartialValidity_account_project() throws IOException {
     testPartialValidity_account();
     component.setCloudProjectText("project");
     join();

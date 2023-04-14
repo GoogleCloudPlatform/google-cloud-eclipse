@@ -192,7 +192,7 @@ public class DataflowPipelineLaunchDelegateTest {
       dataflowDelegate.setCredential(configurationWorkingCopy, pipelineArguments);
       fail();
     } catch (CoreException ex) {
-      assertEquals("The Google account saved for this lanuch is not logged in.", ex.getMessage());
+      assertEquals("The Google account saved for this launch is not logged in.", ex.getMessage());
     }
   }
 

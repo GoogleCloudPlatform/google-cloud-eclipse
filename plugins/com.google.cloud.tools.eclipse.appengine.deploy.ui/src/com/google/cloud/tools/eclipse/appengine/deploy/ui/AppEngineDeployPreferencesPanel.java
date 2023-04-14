@@ -367,7 +367,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
 
     Composite linkComposite = new Composite(this, SWT.NONE);
     Link createNewProject = new Link(linkComposite, SWT.WRAP);
-    if (apiFactory.hasCredentialsSet()) {
+    if (apiFactory.getCredential().isPresent()) {
       createNewProject.setText(Messages.getString("projectselector.createproject",
           CREATE_GCP_PROJECT_URL));
       createNewProject.setToolTipText(Messages.getString("projectselector.createproject.tooltip"));
@@ -510,7 +510,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     projectSelector.setProjects(Collections.<GcpProject>emptyList());
     latestGcpProjectQueryJob = null;
 
-    if (apiFactory.hasCredentialsSet()) {
+    if (apiFactory.getCredential().isPresent()) {
       Predicate<Job> isLatestQueryJob = job -> job == latestGcpProjectQueryJob;
       latestGcpProjectQueryJob = new GcpProjectQueryJob(projectRepository, 
           projectSelector, bindingContext, isLatestQueryJob);
@@ -598,7 +598,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
       // this access is recorded and ensures that changes are tracked, don't move it inside the if
       Object selectedProject = projectSelection.getValue();
       
-      if (!apiFactory.hasCredentialsSet()) {
+      if (!apiFactory.getCredential().isPresent()) {
         return ValidationStatus.ok();
       }
       if (projects.isEmpty()) {

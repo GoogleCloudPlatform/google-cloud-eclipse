@@ -16,6 +16,8 @@
 
 package com.google.cloud.tools.eclipse.dataflow.ui.page;
 
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider.State;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import org.junit.Assert;
 import org.junit.Before;
@@ -30,6 +32,8 @@ public class NewDataflowProjectWizardDefaultRunOptionsPageTest {
   
   @Before
   public void setUp() {
+    TestAccountProvider.setAsDefaultProvider();
+    TestAccountProvider.setProviderState(State.NOT_LOGGED_IN);
     page = new NewDataflowProjectWizardDefaultRunOptionsPage();
   }
   

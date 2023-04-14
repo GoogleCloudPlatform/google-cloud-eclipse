@@ -26,9 +26,13 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.services.oauth2.Oauth2;
 import com.google.cloud.tools.eclipse.googleapis.Account;
+import com.google.cloud.tools.eclipse.googleapis.IAccountProvider;
 import com.google.cloud.tools.eclipse.googleapis.UserInfo;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,6 +48,8 @@ public class DefaultAccountProvider implements IAccountProvider {
   private final JsonFactory jsonFactory = Utils.getDefaultJsonFactory();
   private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
   
+  private Map<Credential, Account> accountCache = new HashMap<>();
+  
   private static final HttpRequestInitializer requestTimeoutSetter = new HttpRequestInitializer() {
     @Override
     public void initialize(HttpRequest httpRequest) throws IOException {
@@ -56,36 +62,28 @@ public class DefaultAccountProvider implements IAccountProvider {
    * @return the application default credentials associated account
    */
   @Override
-  public Account getAccount() throws IOException{
-     return getAccount(GoogleCredential.getApplicationDefault());
+  public Optional<Account> getAccount(){
+    try {
+      return Optional.of(getAccount(GoogleCredential.getApplicationDefault()));
+    } catch (IOException ex) {
+      LOGGER.log(Level.SEVERE, "IOException occurred when obtaining ADC", ex);
+      return Optional.empty();
+    }
+    
   }
   
   /**
    * @return the ADC if set
    */
   @Override
-  public Credential getCredential() throws IOException {
-    if (!hasCredentialsSet()) {
-      return null;
-    }
-    return getAccount().getOAuth2Credential();
-  }
-  
-  /**
-   * Convenience method to determine if the user has ADC set
-   * @return true if the gcloud CLI has Application Default Credentials set
-   */
-  @Override
-  public boolean hasCredentialsSet() {
-    try {
-      return getAccount() != null && getAccount().getOAuth2Credential() != null;  
-    } catch (IOException ex) {
-      LOGGER.log(Level.SEVERE,"Error occured when checking for credentials:", ex);
-      return false;
-    }
+  public Optional<Credential> getCredential() {
+    return getAccount().map(Account::getOAuth2Credential);
   }
   
   Account getAccount(Credential credential) throws IOException {
+    if (accountCache.containsKey(credential)) {
+      return accountCache.get(credential);
+    }
     HttpRequestInitializer chainedInitializer = new HttpRequestInitializer() {
       @Override
       public void initialize(HttpRequest httpRequest) throws IOException {
@@ -100,6 +98,8 @@ public class DefaultAccountProvider implements IAccountProvider {
         .build();
     
     UserInfo userInfo = new UserInfo(oauth2.userinfo().get().execute());
-    return new Account(userInfo.getEmail(), credential, userInfo.getName(), userInfo.getPicture());
+    Account result = new Account(userInfo.getEmail(), credential, userInfo.getName(), userInfo.getPicture());
+    accountCache.put(credential, result);
+    return result;
   }
 }

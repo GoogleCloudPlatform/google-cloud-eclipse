@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.googleapis.internal;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -28,6 +29,8 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.services.appengine.v1.Appengine.Apps;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider.State;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.cache.LoadingCache;
 import java.io.IOException;
@@ -58,10 +61,12 @@ public class GoogleApiFactoryWithProxyServerTest {
 
   @Before
   public void setUp() {
+    TestAccountProvider.setAsDefaultProvider(State.LOGGED_IN);
     googleApiFactory = new GoogleApiFactory();
     when(transportCache.getUnchecked(any(GoogleApi.class)))
         .thenReturn(mock(HttpTransport.class));
     googleApiFactory.setTransportCache(transportCache);
+    assertTrue(googleApiFactory.getCredential().isPresent());
   }
 
   @Test

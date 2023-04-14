@@ -21,21 +21,18 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.cloud.tools.eclipse.googleapis.Account;
 import com.google.cloud.tools.eclipse.login.ui.LoginServiceUi;
-import com.google.cloud.tools.login.Account;
-import com.google.cloud.tools.login.GoogleLoginState;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider.State;
 import com.google.cloud.tools.login.LoggerFacade;
 import com.google.cloud.tools.login.OAuthData;
 import com.google.cloud.tools.login.OAuthDataStore;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import org.junit.Before;
@@ -47,7 +44,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class GoogleLoginServiceTest {
 
-  @Mock private GoogleLoginState loginState;
   @Mock private OAuthDataStore dataStore;
   @Mock private OAuthData savedOAuthData;
   @Mock private LoginServiceUi uiFacade;
@@ -57,14 +53,9 @@ public class GoogleLoginServiceTest {
   @Mock private Account account2;
   @Mock private Account account3;
 
-  private static final Set<String> OAUTH_SCOPES = Collections.unmodifiableSet(
-      new HashSet<>(Arrays.asList(
-          "email",
-          "https://www.googleapis.com/auth/cloud-platform"
-      )));
-
   @Before
   public void setUp() throws IOException {
+    TestAccountProvider.setAsDefaultProvider(State.NOT_LOGGED_IN);
     when(account1.getEmail()).thenReturn("some-email-1@example.com");
     when(account2.getEmail()).thenReturn("some-email-2@example.com");
     when(account3.getEmail()).thenReturn("some-email-3@example.com");
@@ -75,13 +66,13 @@ public class GoogleLoginServiceTest {
 
   @Test
   public void testIsLoggedIn() {
-    GoogleLoginService loginService = new GoogleLoginService(dataStore, uiFacade, loggerFacade);
+    GoogleLoginService loginService = new GoogleLoginService();
     assertFalse(loginService.hasAccounts());
   }
 
   @Test
   public void testGetAccount() {
-    GoogleLoginService loginService = new GoogleLoginService(dataStore, uiFacade, loggerFacade);
+    GoogleLoginService loginService = new GoogleLoginService();
     assertTrue(loginService.getAccounts().isEmpty());
   }
 
@@ -90,11 +81,11 @@ public class GoogleLoginServiceTest {
     GoogleLoginService loginService = newLoginServiceWithMockLoginState(true /* set up logins */);
     Account account = loginService.logIn();
 
-    assertEquals(account1, account);
+    assertEquals(TestAccountProvider.ACCOUNT_1, account);
     assertTrue(loginService.hasAccounts());
     // Comparison between accounts is conveniently based only on email. (See 'Account.equals().')
     assertEquals(1, loginService.getAccounts().size());
-    assertEquals(account1, loginService.getAccounts().iterator().next());
+    assertEquals(TestAccountProvider.ACCOUNT_1, loginService.getAccounts().iterator().next());
   }
 
   @Test
@@ -114,20 +105,13 @@ public class GoogleLoginServiceTest {
     loginService.logIn();
     Set<Account> accounts1 = loginService.getAccounts();
     assertEquals(1, accounts1.size());
-    assertTrue(accounts1.contains(account1));
+    assertTrue(accounts1.contains(TestAccountProvider.ACCOUNT_1));
 
+    TestAccountProvider.setProviderState(State.LOGGED_IN_SECOND_ACCOUNT);
     loginService.logIn();
     Set<Account> accounts2 = loginService.getAccounts();
-    assertEquals(2, accounts2.size());
-    assertTrue(accounts2.contains(account1));
-    assertTrue(accounts2.contains(account2));
-
-    loginService.logIn();
-    Set<Account> accounts3 = loginService.getAccounts();
-    assertEquals(3, accounts3.size());
-    assertTrue(accounts3.contains(account1));
-    assertTrue(accounts3.contains(account2));
-    assertTrue(accounts3.contains(account3));
+    assertEquals(1, accounts2.size());
+    assertTrue(accounts2.contains(TestAccountProvider.ACCOUNT_2));
   }
 
   @Test
@@ -135,13 +119,11 @@ public class GoogleLoginServiceTest {
     GoogleLoginService loginService = newLoginServiceWithMockLoginState(true);
 
     loginService.logIn();
-    loginService.logIn();
-    loginService.logIn();
 
     assertTrue(loginService.hasAccounts());
     assertFalse(loginService.getAccounts().isEmpty());
 
-    loginService.logOutAll();
+    TestAccountProvider.setProviderState(State.NOT_LOGGED_IN);
 
     assertFalse(loginService.hasAccounts());
     assertTrue(loginService.getAccounts().isEmpty());
@@ -150,7 +132,7 @@ public class GoogleLoginServiceTest {
   @Test
   public void testGetCredential_nullEmail() {
     try {
-      new GoogleLoginService(loginState).getCredential(null);
+      new GoogleLoginService().getCredential(null);
       fail();
     } catch (NullPointerException ex) {
       assertEquals("email cannot be null.", ex.getMessage());
@@ -163,8 +145,8 @@ public class GoogleLoginServiceTest {
     loginService.logIn();
     assertEquals(1, loginService.getAccounts().size());
 
-    Credential credential = loginService.getCredential("some-email-1@example.com");
-    assertEquals(account1.getOAuth2Credential(), credential);
+    Credential credential = loginService.getCredential(TestAccountProvider.EMAIL_ACCOUNT_1);
+    assertEquals(TestAccountProvider.ACCOUNT_1.getOAuth2Credential(), credential);
   }
 
   @Test
@@ -176,67 +158,9 @@ public class GoogleLoginServiceTest {
     assertNull(loginService.getCredential("non-existing@example.com"));
   }
 
-  @Test
-  public void testGoogleLoginService_removeSavedCredentialIfNullRefreshToken() 
-      throws IOException {
-    when(savedOAuthData.getEmail()).thenReturn("my-email@example.com");
-    when(savedOAuthData.getStoredScopes()).thenReturn(OAUTH_SCOPES);
-    when(savedOAuthData.getRefreshToken()).thenReturn(null);
-
-    new GoogleLoginService(dataStore, uiFacade, loggerFacade);
-    verify(dataStore).removeOAuthData("my-email@example.com");
-  }
-
-  @Test
-  public void testGoogleLoginService_removeSavedCredentialIfScopesChanged()
-      throws IOException {
-    // Credential in the data store has an out-dated scopes.
-    Set<String> newScope = new HashSet<>(Arrays.asList("new_scope"));
-    when(savedOAuthData.getEmail()).thenReturn("my-email@example.com");
-    when(savedOAuthData.getStoredScopes()).thenReturn(newScope);
-    when(savedOAuthData.getRefreshToken()).thenReturn("fake_refresh_token");
-
-    new GoogleLoginService(dataStore, uiFacade, loggerFacade);
-    verify(dataStore).removeOAuthData("my-email@example.com");
-  }
-
-  @Test
-  public void testGoogleLoginService_restoreSavedCredential()
-      throws IOException {
-    // Credential in the data store is valid.
-    when(savedOAuthData.getEmail()).thenReturn("my-email@example.com");
-    when(savedOAuthData.getStoredScopes()).thenReturn(OAUTH_SCOPES);
-    when(savedOAuthData.getRefreshToken()).thenReturn("fake_refresh_token");
-
-    new GoogleLoginService(dataStore, uiFacade, loggerFacade);
-    verify(dataStore, never()).removeOAuthData("my-email@example.com");
-    verify(dataStore, never()).clearStoredOAuthData();
-  }
-
-  @Test
-  public void testGetGoogleLoginUrl() {
-    String customRedirectUrl = "http://127.0.0.1:12345/Consumer";
-
-    String loginUrl = GoogleLoginService.getGoogleLoginUrl(customRedirectUrl);
-    assertTrue(loginUrl.startsWith("https://accounts.google.com/o/oauth2/auth?"));
-    assertTrue(loginUrl.contains("redirect_uri=" + customRedirectUrl));
-  }
 
   private GoogleLoginService newLoginServiceWithMockLoginState(boolean setUpSuccessfulLogins) {
-    GoogleLoginService loginService = new GoogleLoginService(loginState);
-
-    if (setUpSuccessfulLogins) {
-      when(loginState.logInWithLocalServer(anyString()))
-          .thenReturn(account1).thenReturn(account2).thenReturn(account3);
-      when(loginState.listAccounts())
-          .thenReturn(new HashSet<>(Arrays.asList(account1)))
-          .thenReturn(new HashSet<>(Arrays.asList(account1, account2)))
-          .thenReturn(new HashSet<>(Arrays.asList(account1, account2, account3)));
-    } else {
-      when(loginState.logInWithLocalServer(anyString())).thenReturn(null);
-      when(loginState.listAccounts()).thenReturn(new HashSet<Account>());
-    }
-
-    return loginService;
+    TestAccountProvider.setProviderState(setUpSuccessfulLogins ? State.LOGGED_IN : State.NOT_LOGGED_IN);
+    return new GoogleLoginService();
   }
 }

@@ -19,10 +19,13 @@ package com.google.cloud.tools.eclipse.dataflow.ui.launcher;
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.MessageTarget;
 import com.google.cloud.tools.eclipse.dataflow.ui.preferences.RunOptionsDefaultsComponent;
+import com.google.cloud.tools.eclipse.googleapis.Account;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -136,9 +139,17 @@ public class DefaultedPipelineOptionsComponent {
     defaultOptions.setEnabled(enabled);
   }
 
+  private String getCurrentEmail() {
+    Optional<Account> account = new GoogleApiFactory().getAccount();
+    if (account.isPresent()) {
+      return account.get().getEmail();
+    }
+    return "";
+  }
+  
   public Map<String, String> getValues() {
     Map<String, String> values = new HashMap<>();
-    values.put(DataflowPreferences.ACCOUNT_EMAIL_PROPERTY, defaultOptions.getAccountEmail());
+    values.put(DataflowPreferences.ACCOUNT_EMAIL_PROPERTY, getCurrentEmail());
     values.put(DataflowPreferences.PROJECT_PROPERTY, defaultOptions.getProjectId());
     values.put(DataflowPreferences.STAGING_LOCATION_PROPERTY, defaultOptions.getStagingLocation());
     // TODO: Give this a separate input

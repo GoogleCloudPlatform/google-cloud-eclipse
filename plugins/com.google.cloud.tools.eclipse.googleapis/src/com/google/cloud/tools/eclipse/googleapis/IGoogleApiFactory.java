@@ -16,12 +16,13 @@
 
 package com.google.cloud.tools.eclipse.googleapis;
 
+import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.services.appengine.v1.Appengine.Apps;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
 import com.google.api.services.iam.v1.Iam;
 import com.google.api.services.servicemanagement.ServiceManagement;
 import com.google.api.services.storage.Storage;
-import java.io.IOException;
+import java.util.Optional;
 
 /**
  * Interface for factory classes to create clients for Google APIs.
@@ -34,12 +35,13 @@ public interface IGoogleApiFactory {
   /**
    * @return the application default credentials account
    */
-  public Account getAccount() throws IOException;
+  public Optional<Account> getAccount();
   
   /**
-   * @return true if the factory has an account with credentials set
+   * @return Credentials if logged in, else null
    */
-  public boolean hasCredentialsSet();
+  public Optional<Credential> getCredential();
+  
   /**
    * @return a Google Cloud Storage API client
    */

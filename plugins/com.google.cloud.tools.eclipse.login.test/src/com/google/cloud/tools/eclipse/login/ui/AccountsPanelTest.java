@@ -21,15 +21,12 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider.State;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
-import com.google.cloud.tools.login.Account;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -53,92 +50,66 @@ public class AccountsPanelTest {
 
   @Rule public ShellTestResource shellTestResource = new ShellTestResource();
   private Shell shell;
-
-  @Mock private IGoogleLoginService loginService;
-  @Mock private Account account1;
-  @Mock private Account account2;
-  @Mock private Account account3;
+  
   @Mock private LabelImageLoader imageLoader;
 
   @Before
   public void setUp() {
+    TestAccountProvider.setAsDefaultProvider(State.LOGGED_IN);
     shell = shellTestResource.getShell();
-    when(account1.getEmail()).thenReturn("alice@example.com");
-    when(account2.getEmail()).thenReturn("bob@example.com");
-    when(account3.getEmail()).thenReturn("charlie@example.com");
-    when(account1.getName()).thenReturn("Alice");
-    when(account2.getName()).thenReturn(null);
-    when(account3.getName()).thenReturn("Charlie");
-    when(account1.getAvatarUrl()).thenReturn("https://avatar.url/account1");
   }
 
   @Test
   public void testLogOutButton_notLoggedIn() {
-    setUpLoginService();
 
-    AccountsPanel panel = new AccountsPanel(null, loginService, imageLoader);
+    TestAccountProvider.setProviderState(State.NOT_LOGGED_IN);
+    
+    AccountsPanel panel = new AccountsPanel(null, imageLoader);
     Control control = panel.createDialogArea(shell);
 
     List<String> buttonTexts = collectButtonTexts((Composite) control);
-    assertEquals(1, buttonTexts.size());
-    assertEquals("Add Account...", buttonTexts.get(0));
+    assertEquals(0, buttonTexts.size());
   }
 
   @Test
   public void testLogOutButton_loggedIn() {
-    setUpLoginService(Arrays.asList(account1));
 
-    AccountsPanel panel = new AccountsPanel(null, loginService, imageLoader);
+    AccountsPanel panel = new AccountsPanel(null, imageLoader);
     Control control = panel.createDialogArea(shell);
 
     List<String> buttonTexts = collectButtonTexts((Composite) control);
-    assertEquals(2, buttonTexts.size());
-    assertTrue(buttonTexts.contains("Add Account..."));
-    assertTrue(buttonTexts.contains("Sign Out of All Accounts"));
+    assertEquals(0, buttonTexts.size());
   }
 
   @Test
   public void testAccountsArea_zeroAccounts() {
-    setUpLoginService();
 
-    AccountsPanel panel = new AccountsPanel(null, loginService, imageLoader);
+    TestAccountProvider.setProviderState(State.NOT_LOGGED_IN);
+    
+    AccountsPanel panel = new AccountsPanel(null, imageLoader);
     Control control = panel.createDialogArea(shell);
 
     NamesEmails namesEmails = collectNamesEmails(control);
     assertTrue(namesEmails.emails.isEmpty());
   }
 
-  @Test
-  public void testAccountsArea_oneAccount() {
-    setUpLoginService(Arrays.asList(account1));
-
-    AccountsPanel panel = new AccountsPanel(null, loginService, imageLoader);
-    Control control = panel.createDialogArea(shell);
-
-    NamesEmails namesEmails = collectNamesEmails(control);
-    assertEquals(1, namesEmails.emails.size());
-    assertEquals("alice@example.com", namesEmails.emails.get(0));
-    assertEquals("Alice", namesEmails.names.get(0));
-  }
 
   @Test
   public void testAccountsArea_accountWithNullName() {
-    setUpLoginService(Arrays.asList(account2));
 
-    AccountsPanel panel = new AccountsPanel(null, loginService, imageLoader);
+    AccountsPanel panel = new AccountsPanel(null, imageLoader);
     Control control = panel.createDialogArea(shell);
 
     NamesEmails namesEmails = collectNamesEmails(control);
     assertEquals(1, namesEmails.emails.size());
-    assertEquals("bob@example.com", namesEmails.emails.get(0));
-    assertTrue(namesEmails.names.get(0).isEmpty());
+    assertEquals(TestAccountProvider.EMAIL_ACCOUNT_1, namesEmails.emails.get(0));
+    assertEquals(TestAccountProvider.NAME_ACCOUNT_1, namesEmails.names.get(0));
   }
 
   @Test
   public void testAccountsArea_avatarImageUrl() throws MalformedURLException {
-    setUpLoginService(Arrays.asList(account1));
 
-    AccountsPanel panel = new AccountsPanel(null, loginService, imageLoader);
+    AccountsPanel panel = new AccountsPanel(null, imageLoader);
     panel.createDialogArea(shell);
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
@@ -153,19 +124,16 @@ public class AccountsPanelTest {
 
   @Test
   public void testAccountsArea_threeAccounts() {
-    setUpLoginService(Arrays.asList(account1, account2, account3));
 
-    AccountsPanel panel = new AccountsPanel(null, loginService, imageLoader);
+    TestAccountProvider.setProviderState(State.LOGGED_IN_SECOND_ACCOUNT);
+    
+    AccountsPanel panel = new AccountsPanel(null, imageLoader);
     Control control = panel.createDialogArea(shell);
 
     NamesEmails namesEmails = collectNamesEmails(control);
-    assertEquals(3, namesEmails.emails.size());
-    assertTrue(namesEmails.emails.contains("alice@example.com"));
-    assertTrue(namesEmails.emails.contains("bob@example.com"));
-    assertTrue(namesEmails.emails.contains("charlie@example.com"));
-    assertTrue(namesEmails.names.contains("Alice"));
-    assertTrue(namesEmails.names.contains(""));
-    assertTrue(namesEmails.names.contains("Charlie"));
+    assertEquals(1, namesEmails.emails.size());
+    assertTrue(namesEmails.emails.contains(TestAccountProvider.EMAIL_ACCOUNT_2));
+    assertTrue(namesEmails.names.contains(TestAccountProvider.NAME_ACCOUNT_2));
   }
 
   @Test
@@ -173,15 +141,6 @@ public class AccountsPanelTest {
     assertEquals("https://lh3/xxxx=s48", AccountsPanel.resizedImageUrl("https://lh3/xxxx", 48));
     assertEquals(
         "https://lh3/xxxx=s48", AccountsPanel.resizedImageUrl("https://lh3/xxxx=s96-c", 48));
-  }
-
-  private void setUpLoginService(List<Account> accounts) {
-    when(loginService.hasAccounts()).thenReturn(!accounts.isEmpty());
-    when(loginService.getAccounts()).thenReturn(new HashSet<>(accounts));
-  }
-
-  private void setUpLoginService() {
-    setUpLoginService(new ArrayList<Account>());  // Simulate no signed-in account.
   }
 
   private static List<String> collectButtonTexts(Composite composite) {
@@ -203,12 +162,16 @@ public class AccountsPanelTest {
 
   private static NamesEmails collectNamesEmails(Control dialogArea) {
     NamesEmails namesEmails = new NamesEmails();
-
+    if (!TestAccountProvider.INSTANCE.getCredential().isPresent()) {
+      return namesEmails;
+    }
     Control[] controls = ((Composite) dialogArea).getChildren();
-    for (int i = 0; i + 2 < controls.length; i += 2) {
+    for (int i = 0; i + 2 <= controls.length; i += 2) {
       Composite accountRow = (Composite) controls[i];
+      assertTrue(accountRow.getChildren().length >= 2);
       Composite secondColumn = (Composite) accountRow.getChildren()[1];
       Control[] labels = secondColumn.getChildren();
+      assertTrue(labels.length >= 2);
       namesEmails.names.add(((Label) labels[0]).getText());
       namesEmails.emails.add(((Label) labels[1]).getText());
 

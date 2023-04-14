@@ -23,7 +23,6 @@ import com.google.cloud.tools.eclipse.login.Messages;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorDialogErrorHandler;
 import com.google.common.annotations.VisibleForTesting;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,6 +38,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * A panel listing all currently logged-in accounts. The panel allows adding new accounts and
@@ -82,7 +82,7 @@ public class AccountsPanel extends PopupDialog {
     Composite container = (Composite) super.createDialogArea(parent);
     GridLayoutFactory.swtDefaults().generateLayout(container);
 
-    if (apiFactory.isLoggedIn()) {
+    if (apiFactory.getCredential().isPresent()) {
       createAccountsPane(container);
     } else {
       createNonLoggedInAccountsPane(container);
@@ -130,18 +130,16 @@ public class AccountsPanel extends PopupDialog {
     Composite linkRow = new Composite(accountArea, SWT.NONE);
     Link helpLink = new Link(linkRow, SWT.NONE);
     helpLink.setText(Messages.getString("NO_ADC_DETECTED_LINK"));
-    helpLink.addSelectionListener(new OpenUriSelectionListener(new ErrorDialogErrorHandler(accountArea.getShell())));
+    // workbench is not running on tests
+    if (PlatformUI.isWorkbenchRunning()) {
+      helpLink.addSelectionListener(new OpenUriSelectionListener(new ErrorDialogErrorHandler(accountArea.getShell())));
+    }
     GridLayoutFactory.fillDefaults().numColumns(1).applyTo(messageRow);
     GridLayoutFactory.fillDefaults().generateLayout(linkRow);
-    
   }
   
   private Account getAccount() {
-    try {
-      return apiFactory.getAccount();
-    } catch (IOException ex) {
-      return null;
-    }
+    return apiFactory.getAccount().orElse(null);
   }
 
   /**

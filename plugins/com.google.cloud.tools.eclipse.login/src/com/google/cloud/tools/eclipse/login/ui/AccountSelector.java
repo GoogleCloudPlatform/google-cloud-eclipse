@@ -23,11 +23,12 @@ import com.google.cloud.tools.eclipse.login.Messages;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorDialogErrorHandler;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import java.io.IOException;
 import java.util.Collections;
-import java.util.Map;
-import java.util.function.Supplier;
+import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -38,25 +39,22 @@ import org.eclipse.swt.widgets.Link;
 public class AccountSelector extends Composite {
 
   private IGoogleApiFactory apiFactory;
-  private Account selectedAccount;
   private ListenerList<Runnable> selectionListeners = new ListenerList<>();
+  private Optional<Account> prevAccount = Optional.empty();
+  private static Logger logger = Logger.getLogger(AccountSelector.class.getName());
 
   @VisibleForTesting Link accountEmail;
 
   public AccountSelector(Composite parent, IGoogleApiFactory apiFactory) {
     super(parent, SWT.NONE);
+    Preconditions.checkNotNull(apiFactory);
     this.apiFactory = apiFactory;
 
     Composite accountEmailComposite = new Composite(this, SWT.NONE);
     accountEmail = new Link(accountEmailComposite, SWT.WRAP);
     
-    if (apiFactory.isLoggedIn()) {
-      try {
-        selectedAccount = apiFactory.getAccount();
-      } catch (IOException ex) {
-        selectedAccount = null;
-      }
-      accountEmail.setText(getSelectedAccountEmail());
+    if (apiFactory.getCredential().isPresent()) {
+      accountEmail.setText(getSelectedEmail());
     } else {
       accountEmail.setText(Messages.getString("NO_ADC_DETECTED_MESSAGE") + ". " + Messages.getString("NO_ADC_DETECTED_LINK"));
       accountEmail.addSelectionListener(new OpenUriSelectionListener(
@@ -68,21 +66,13 @@ public class AccountSelector extends Composite {
     GridLayoutFactory.fillDefaults().generateLayout(accountEmailComposite);
     GridLayoutFactory.fillDefaults().generateLayout(this);
   }
-
-  String getSelectedAccountEmail() {
-    try {
-      return apiFactory.getAccount().getEmail();
-    } catch (IOException ex) {
-      return null;
-    }
-  }
   
   /**
    * @return true if this selector lists an account with {@code email}. For convenience of
    *     callers, {@code email} may be {@code null} or empty, which always returns false
    */
   public boolean isEmailAvailable(String email) {
-    return !Strings.isNullOrEmpty(email) && accountEmail.getText() == email;
+    return !Strings.isNullOrEmpty(email) && getSelectedEmail() == email;
   }
 
   /**
@@ -93,22 +83,29 @@ public class AccountSelector extends Composite {
    * (By its contract, {@link Account} never carries a {@code null} {@link Credential}.)
    */
   public Credential getSelectedCredential() {
-    return selectedAccount != null ? selectedAccount.getOAuth2Credential() : null;
+    Optional<Account> account = getSelectedAccount();
+    return account.isPresent() ? account.get().getOAuth2Credential() : null;
   }
 
   /**
    * Returns the currently selected email, or empty string if none; never {@code null}.
    */
   public String getSelectedEmail() {
-    try {
-      return apiFactory.getAccount().getEmail();
-    } catch (IOException ex) {
-      return "";
+    Optional<Account> account = getSelectedAccount();
+    return account.isPresent() ? account.get().getEmail() : "";
+  }
+  
+  private Optional<Account> getSelectedAccount() {
+    Optional<Account> account = apiFactory.getAccount();
+    if (!account.equals(prevAccount)) {
+      prevAccount = account;
+      fireSelectionListeners();
     }
+    return account;
   }
 
   public boolean isSignedIn() {
-    return apiFactory.isLoggedIn();
+    return getSelectedAccount().isPresent();
   }
 
   public void addSelectionListener(Runnable listener) {
@@ -119,6 +116,18 @@ public class AccountSelector extends Composite {
     selectionListeners.remove(listener);
   }
 
+  /**
+   * used to trigger selection listeners in tests
+   */
+  public boolean forceAccountCheck() {
+    Optional<Account> prev = prevAccount;
+    getSelectedAccount();
+    if (!prev.equals(prevAccount)) {
+      logger.log(Level.FINE, "forceAccountCheck() detected an account change");
+      return true;
+    }
+    return false;
+  }
   
   @Override
   public void setToolTipText(String string) {
@@ -138,5 +147,18 @@ public class AccountSelector extends Composite {
   @Override
   public boolean getEnabled() {
     return accountEmail.getEnabled();
+  }
+
+  /**
+   * @return 1 if logged in, 0 if not
+   */
+  public int getAccountCount() {
+    return isSignedIn() ? 1 : 0;
+  }
+  
+  private void fireSelectionListeners() {
+     for (Object o : selectionListeners.getListeners()) {
+       ((Runnable) o).run();
+    }
   }
 }

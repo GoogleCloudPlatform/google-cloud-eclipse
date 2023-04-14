@@ -18,13 +18,8 @@ package com.google.cloud.tools.eclipse.login.ui;
 
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.Messages;
-import com.google.cloud.tools.eclipse.ui.util.ServiceUtils;
-import java.io.IOException;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -44,7 +39,7 @@ public class GoogleLoginCommandHandler extends AbstractHandler implements IEleme
   
   @Override
   public void updateElement(UIElement element, @SuppressWarnings("rawtypes") Map parameters) {
-    element.setText(apiFactory.isLoggedIn() ? Messages.getString("LOGIN_MENU_LOGGED_IN")
+    element.setText(apiFactory.getCredential().isPresent() ? Messages.getString("LOGIN_MENU_LOGGED_IN")
         : Messages.getString("LOGIN_MENU_LOGGED_OUT"));
   }
 

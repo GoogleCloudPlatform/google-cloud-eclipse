@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.util;
 
 import com.google.cloud.tools.appengine.operations.Deployment;
-import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.appengine.operations.AppCfg;
 import com.google.cloud.tools.appengine.operations.AppEngineWebXmlProjectStaging;
 import com.google.cloud.tools.appengine.operations.CloudSdk;
@@ -72,15 +71,7 @@ public class CloudSdkProcessWrapper {
    */
   public Deployment getAppEngineDeployment(MessageConsoleStream normalOutputStream) 
       throws CloudSdkNotFoundException {
-    Credential credential = null;
-    try {
-      credential = new GoogleApiFactory().getAccount().getOAuth2Credential();
-    }
-    catch (IOException ex) {
-      // will be handled in preconditions check;
-    }
-    Preconditions.checkNotNull(credential, "credentials not set");
-    
+    Preconditions.checkState(new GoogleApiFactory().getCredential().isPresent(), "credential required for deploying");
     Preconditions.checkState(!initialized, "process wrapper already set up");
     initialized = true;
 

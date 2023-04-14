@@ -28,15 +28,14 @@ import com.google.api.services.iam.v1.Iam;
 import com.google.api.services.servicemanagement.ServiceManagement;
 import com.google.api.services.storage.Storage;
 import com.google.cloud.tools.eclipse.googleapis.Account;
+import com.google.cloud.tools.eclipse.googleapis.IAccountProvider;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Optional;
 import org.eclipse.core.net.proxy.IProxyChangeEvent;
 import org.eclipse.core.net.proxy.IProxyChangeListener;
 import org.eclipse.core.net.proxy.IProxyService;
@@ -52,14 +51,14 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 @Component
 public class GoogleApiFactory implements IGoogleApiFactory {
 
+  private static IAccountProvider accountProvider = new DefaultAccountProvider();
   
   private final JsonFactory jsonFactory = Utils.getDefaultJsonFactory();
   private final ProxyFactory proxyFactory;
-  private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
   
   private LoadingCache<GoogleApi, HttpTransport> transportCache;
-  private IAccountProvider accountProvider;
   private IProxyService proxyService;
+
   
   private final IProxyChangeListener proxyChangeListener = new IProxyChangeListener() {
     @Override
@@ -72,13 +71,6 @@ public class GoogleApiFactory implements IGoogleApiFactory {
 
   public GoogleApiFactory() {
     this(new ProxyFactory());
-    accountProvider = new DefaultAccountProvider();
-  }
-  
-  @VisibleForTesting
-  private GoogleApiFactory(IAccountProvider accountProvider) {
-    this(new ProxyFactory());
-    this.accountProvider = accountProvider;
   }
 
   @VisibleForTesting
@@ -97,22 +89,19 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   }
   
   @Override
-  public Account getAccount() throws IOException {
+  public Optional<Account> getAccount() {
     return accountProvider.getAccount();
   }
-  
+ 
   @Override
-  public boolean hasCredentialsSet() {
-    return accountProvider.hasCredentialsSet();
+  public Optional<Credential> getCredential() {
+    return accountProvider.getCredential();
   }
   
-  private Credential getCredential() {
-    try {
-      return accountProvider.getCredential();
-    } catch (IOException ex) {
-      LOGGER.log(Level.SEVERE, "Error when obtaining credential: ", ex);
-      return null;
-    }
+  private Credential getCredentialOrFail() {
+    Optional<Credential> credential = getCredential();
+    Preconditions.checkState(credential.isPresent(), "credential is not present");
+    return credential.get();
   }
  
   @Override
@@ -121,9 +110,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     HttpTransport transport = transportCache.getUnchecked(GoogleApi.CLOUDRESOURCE_MANAGER_API);
     Preconditions.checkNotNull(transport, "transport is null");
     Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
-    Credential credential = getCredential();
-    Preconditions.checkNotNull(credential, "credential is null");
-
+    Credential credential = getCredentialOrFail();
     CloudResourceManager resourceManager =
         new CloudResourceManager.Builder(transport, jsonFactory, credential)
             .setApplicationName(CloudToolsInfo.USER_AGENT).build();
@@ -137,8 +124,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     HttpTransport transport = transportCache.getUnchecked(GoogleApi.CLOUD_STORAGE_API);
     Preconditions.checkNotNull(transport, "transport is null");
     Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
-    Credential credential = getCredential();
-    Preconditions.checkNotNull(credential, "credential is null");
+    Credential credential = getCredentialOrFail();
 
     Storage.Builder builder = new Storage.Builder(transport, jsonFactory, credential)
         .setApplicationName(CloudToolsInfo.USER_AGENT);
@@ -152,8 +138,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     HttpTransport transport = transportCache.getUnchecked(GoogleApi.APPENGINE_ADMIN_API);
     Preconditions.checkNotNull(transport, "transport is null");
     Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
-    Credential credential = getCredential();
-    Preconditions.checkNotNull(credential, "credential is null");
+    Credential credential = getCredentialOrFail();
 
     Appengine appengine =
         new Appengine.Builder(transport, jsonFactory, credential)
@@ -167,8 +152,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     HttpTransport transport = transportCache.getUnchecked(GoogleApi.SERVICE_MANAGEMENT_API);
     Preconditions.checkNotNull(transport, "transport is null");
     Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
-    Credential credential = getCredential();
-    Preconditions.checkNotNull(credential, "credential is null");
+    Credential credential = getCredentialOrFail();
 
     ServiceManagement serviceManagement =
         new ServiceManagement.Builder(transport, jsonFactory, credential)
@@ -182,8 +166,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     HttpTransport transport = transportCache.getUnchecked(GoogleApi.IAM_API);
     Preconditions.checkNotNull(transport, "transport is null");
     Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
-    Credential credential = getCredential();
-    Preconditions.checkNotNull(credential, "credential is null");
+    Credential credential = getCredentialOrFail();
 
     Iam iam = new Iam.Builder(transport, jsonFactory, credential)
         .setApplicationName(CloudToolsInfo.USER_AGENT).build();
@@ -214,5 +197,14 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   @VisibleForTesting
   void setTransportCache(LoadingCache<GoogleApi, HttpTransport> transportCache) {
     this.transportCache = transportCache;
+  }
+  
+  /**
+   * Use case: set a test provider.
+   * TestAccountProvider is defined in com.google.(...).test.util, which is a non-test package
+   * @param provider the new account provider to be used by this class
+   */
+  public static void setAccountProvider(IAccountProvider provider) {
+    accountProvider = provider;
   }
 }

@@ -81,6 +81,23 @@ import org.eclipse.ui.PlatformUI;
  * Assumed to be executed solely within the SWT UI thread.
  */
 public class RunOptionsDefaultsComponent {
+  
+  public enum ValidationStatus {
+    TARGET_DISPOSED,
+    NULL_CREDENTIAL, NULL_PROJECT, 
+    PROJECT_SERVICE_CHECK_IN_PROGRESS, 
+    PROJECT_SERVICE_CHECK_ERROR, 
+    PROJECT_NOT_ENABLED_FOR_DATAFLOW, 
+    STAGING_LOCATION_CHECK_ERROR, 
+    STAGING_LOCATION_CHECK_IN_PROGRESS, 
+    EMPTY_BUCKET_NAME, 
+    BUCKET_ACCESSIBLE, 
+    STAGING_LOCATION_FETCH_ERROR, 
+    STAGING_LOCATION_FETCH_IN_PROGRESS, 
+    INVALID_BUCKET_NAME, 
+    BUCKET_CAN_BE_CREATED,
+  }
+  
   private static final int PROJECT_INPUT_SPENT_COLUMNS = 1;
   private static final int STAGING_LOCATION_SPENT_COLUMNS = 2;
   private static final int ACCOUNT_SPENT_COLUMNS = 1;
@@ -173,7 +190,6 @@ public class RunOptionsDefaultsComponent {
     //accountSelector.selectAccount(preferences.getDefaultAccountEmail());
 
     // Initialize the Default Project, which is used to populate the Staging Location field
-    projectInput.setCredential(accountSelector.getSelectedCredential());
     String projectId = preferences.getDefaultProject();
     projectInput.setProject(projectId);
 
@@ -224,7 +240,7 @@ public class RunOptionsDefaultsComponent {
       // Don't use "removeAll()", as it will clear the text field too.
       stagingLocationInput.remove(0, stagingLocationInput.getItemCount() - 1);
       completionListener.setContents(ImmutableSortedSet.<String>of());
-      projectInput.setCredential(accountSelector.getSelectedCredential());
+      projectInput.updateProjectsList();
       updateStagingLocations(0); // no delay
       validate();
     });
@@ -267,12 +283,12 @@ public class RunOptionsDefaultsComponent {
       button.setLayoutData(gridData);
     }
   }
-
-  public void validate() {
+  
+  public ValidationStatus validate() {
     Preconditions.checkState(Display.getCurrent() != null, "Must be called on SWT UI thread");
     // may be from deferred event
     if (target.isDisposed()) {
-      return;
+      return ValidationStatus.TARGET_DISPOSED;
     }
 
     // we set pageComplete to the value of `allowIncomplete` if the fields are valid
@@ -289,7 +305,7 @@ public class RunOptionsDefaultsComponent {
       stagingLocationInput.setEnabled(false);
       createButton.setEnabled(false);
       setPageComplete(quickChecksOk && allowIncomplete);
-      return;
+      return ValidationStatus.NULL_CREDENTIAL;
     }
 
     projectInput.setEnabled(canEnableChildren);
@@ -297,14 +313,14 @@ public class RunOptionsDefaultsComponent {
       stagingLocationInput.setEnabled(false);
       createButton.setEnabled(false);
       setPageComplete(quickChecksOk && allowIncomplete);
-      return;
+      return ValidationStatus.NULL_PROJECT;
     }
 
     if (checkProjectConfigurationJob != null && checkProjectConfigurationJob.isCurrent()) {
       Optional<Object> result = checkProjectConfigurationJob.getComputation();
       if (!result.isPresent()) {
         messageTarget.setInfo("Verifying that project is enabled for dataflow...");
-        return;
+        return ValidationStatus.PROJECT_SERVICE_CHECK_IN_PROGRESS;
       } else if (result.get() instanceof Exception) {
         DataflowUiPlugin.logError((Exception) result.get(),
             "Error checking project config for " + checkProjectConfigurationJob.getProjectId());
@@ -314,12 +330,12 @@ public class RunOptionsDefaultsComponent {
         } else {
           messageTarget.setError("Could not check project: " + result.get());
         }
-        return;
+        return ValidationStatus.PROJECT_SERVICE_CHECK_ERROR;
       } else {
         Verify.verify(result.get() instanceof Collection);
         if (!((Collection<?>) result.get()).contains(GoogleApi.DATAFLOW_API.getServiceId())) {
           messageTarget.setError("Project is not enabled for Cloud Dataflow");
-          return;
+          return ValidationStatus.PROJECT_NOT_ENABLED_FOR_DATAFLOW;
         }
       }
     }
@@ -335,11 +351,11 @@ public class RunOptionsDefaultsComponent {
           DataflowUiPlugin.logError(error.get(), "Exception while retrieving staging locations"); //$NON-NLS-1$
           messageTarget.setError(Messages.getString("could.not.retrieve.buckets.for.project", //$NON-NLS-1$
               projectInput.getProject().getName()));
-          return;
+          return ValidationStatus.STAGING_LOCATION_FETCH_ERROR;
         }
       } else {
         // check is still in progress or a new job is pending
-        return;
+        return ValidationStatus.STAGING_LOCATION_FETCH_IN_PROGRESS;
       }
     }
 
@@ -349,14 +365,14 @@ public class RunOptionsDefaultsComponent {
       // interesting messaging.
       createButton.setEnabled(false);
       setPageComplete(quickChecksOk && allowIncomplete);
-      return;
+      return ValidationStatus.EMPTY_BUCKET_NAME;
     }
 
     IStatus status = bucketNameValidator.validate(bucketNamePart);
     if (!status.isOK()) {
       messageTarget.setError(status.getMessage());
       createButton.setEnabled(false);
-      return;
+      return ValidationStatus.INVALID_BUCKET_NAME;
     }
 
     Optional<Object> verificationResult =
@@ -366,12 +382,12 @@ public class RunOptionsDefaultsComponent {
     if (!verificationResult.isPresent()) {
       messageTarget.setInfo("Verifying staging location...");
       createButton.setEnabled(false);
-      return;
+      return ValidationStatus.STAGING_LOCATION_CHECK_IN_PROGRESS;
     } else if (verificationResult.get() instanceof Exception) {
       Exception error = (Exception) verificationResult.get();
       DataflowUiPlugin.logWarning("Unable to verify staging location", error);
       messageTarget.setError(Messages.getString("unable.verify.staging.location", bucketNamePart)); //$NON-NLS-1$
-      return;
+      return ValidationStatus.STAGING_LOCATION_CHECK_ERROR;
     } else {
       Verify.verify(verificationResult.get() instanceof VerifyStagingLocationResult);
       VerifyStagingLocationResult result = (VerifyStagingLocationResult) verificationResult.get();
@@ -379,10 +395,12 @@ public class RunOptionsDefaultsComponent {
         messageTarget.setInfo(Messages.getString("verified.bucket.is.accessible", bucketNamePart)); //$NON-NLS-1$
         createButton.setEnabled(false);
         setPageComplete(quickChecksOk);
+        return ValidationStatus.BUCKET_ACCESSIBLE;
       } else {
         // user must create this bucket; feels odd that this is flagged as an error
         messageTarget.setError(Messages.getString("could.not.fetch.bucket", bucketNamePart)); //$NON-NLS-1$
         createButton.setEnabled(canEnableChildren);
+        return ValidationStatus.BUCKET_CAN_BE_CREATED;
       }
     }
   }
@@ -393,7 +411,8 @@ public class RunOptionsDefaultsComponent {
    * tightly coupled regarding enablement of the input widgets and should always be validated
    * to make their interconnected enablement correct.)
    */
-  private boolean doIsolatedQuickChecks() {
+  @VisibleForTesting
+  boolean doIsolatedQuickChecks() {
     if (accountRequired && Strings.isNullOrEmpty(getAccountEmail())) {
       messageTarget.setError("No Google account selected for this launch.");
       return false;
@@ -416,7 +435,7 @@ public class RunOptionsDefaultsComponent {
   }
 
   protected void checkProjectConfiguration() {
-    if (!apiFactory.hasCredentialsSet()) {
+    if (!apiFactory.getCredential().isPresent()) {
       return;
     }
     GcpProject project = projectInput.getProject();
@@ -527,6 +546,11 @@ public class RunOptionsDefaultsComponent {
     if (enabled) {
       validate();  // Some widgets may need to be disabled depending on their values.
     }
+  }
+  
+  @VisibleForTesting
+  boolean canEnableChildren() {
+    return canEnableChildren;
   }
 
   /**
