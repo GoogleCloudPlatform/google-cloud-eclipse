@@ -47,11 +47,11 @@ public class FlexDeployPreferencesDialogTest {
 
   private FlexDeployPreferencesDialog dialog;
 
-  @Mock
   private IGoogleApiFactory googleApiFactory;
 
   @Before
   public void setUp() {
+    googleApiFactory = mock(IGoogleApiFactory.class);
     doReturn(Optional.of(TestAccountProvider.ACCOUNT_1)).when(googleApiFactory).getAccount();
     doReturn(Optional.of(TestAccountProvider.CREDENTIAL_ACCOUNT_1)).when(googleApiFactory)
         .getCredential();
