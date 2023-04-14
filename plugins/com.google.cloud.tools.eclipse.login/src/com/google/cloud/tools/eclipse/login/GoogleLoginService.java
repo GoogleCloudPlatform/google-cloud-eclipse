@@ -29,7 +29,6 @@ import com.google.common.base.Preconditions;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -129,11 +128,8 @@ public class GoogleLoginService implements IGoogleLoginService {
 
   @Override
   public Set<Account> getAccounts() {
-    Set<Account> result = new HashSet<>();
-    Optional<Account> account = apiFactory.getAccount();  
-    if (account.isPresent()) {
-        result.add(account.get());
-    }
+    Set<Account> result = new HashSet<>();  
+    apiFactory.getAccount().ifPresent(result::add);
     return result;
   }
 

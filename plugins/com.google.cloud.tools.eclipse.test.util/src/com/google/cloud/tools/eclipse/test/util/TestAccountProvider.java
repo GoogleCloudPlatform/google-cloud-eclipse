@@ -84,7 +84,7 @@ public class TestAccountProvider implements IAccountProvider {
 
   @Override
   public Optional<Credential> getCredential() {
-    return getAccount().isPresent() ? Optional.of(getAccount().get().getOAuth2Credential()) : Optional.empty();
+    return getAccount().map(Account::getOAuth2Credential);
   }
   
 }

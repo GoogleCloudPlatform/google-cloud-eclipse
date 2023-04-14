@@ -77,11 +77,7 @@ public class DefaultAccountProvider implements IAccountProvider {
    */
   @Override
   public Optional<Credential> getCredential() {
-    Optional<Account> account = getAccount();
-    if (account.isPresent()) {
-      return Optional.of(account.get().getOAuth2Credential());
-    }
-    return Optional.empty();
+    return getAccount().map(Account::getOAuth2Credential);
   }
   
   Account getAccount(Credential credential) throws IOException {
