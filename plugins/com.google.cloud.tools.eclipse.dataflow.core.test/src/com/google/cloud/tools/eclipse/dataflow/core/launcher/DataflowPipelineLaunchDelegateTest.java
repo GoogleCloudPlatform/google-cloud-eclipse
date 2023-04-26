@@ -187,7 +187,7 @@ public class DataflowPipelineLaunchDelegateTest {
   @Test
   public void testSetCredential_savedAccountNotLoggedIn() {
     pipelineArguments.put("accountEmail", "bogus@example.com");
-    when(apiFactory.getCredential()).thenReturn(null);  // not logged in
+    when(apiFactory.getCredential()).thenReturn(Optional.empty());  // not logged in
 
     try {
       dataflowDelegate.setCredential(configurationWorkingCopy, pipelineArguments);
