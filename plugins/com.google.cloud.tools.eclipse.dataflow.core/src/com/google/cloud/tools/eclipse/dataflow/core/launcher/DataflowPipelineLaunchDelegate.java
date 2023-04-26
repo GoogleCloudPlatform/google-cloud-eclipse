@@ -89,7 +89,8 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
         new JavaLaunchDelegate(),
         new ClasspathPipelineOptionsHierarchyFactory(),
         DataflowDependencyManager.create(),
-        ResourcesPlugin.getWorkspace().getRoot());
+        ResourcesPlugin.getWorkspace().getRoot(),
+        new GoogleApiFactory());
   }
 
   @VisibleForTesting
@@ -97,12 +98,13 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
       JavaLaunchDelegate javaLaunchDelegate,
       PipelineOptionsHierarchyFactory optionsHierarchyFactory,
       DataflowDependencyManager dependencyManager,
-      IWorkspaceRoot workspaceRoot) {
+      IWorkspaceRoot workspaceRoot,
+      IGoogleApiFactory apiFactory) {
     delegate = javaLaunchDelegate;
     optionsRetrieverFactory = optionsHierarchyFactory;
     this.dependencyManager = dependencyManager;
     this.workspaceRoot = workspaceRoot;
-    this.googleApiFactory = new GoogleApiFactory();
+    this.googleApiFactory = apiFactory;
   }
 
   @Override
