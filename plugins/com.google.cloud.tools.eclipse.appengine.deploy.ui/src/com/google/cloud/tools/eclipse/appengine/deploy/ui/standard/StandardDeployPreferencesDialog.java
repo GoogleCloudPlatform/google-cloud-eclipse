@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui.standard;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.AppEngineDeployPreferencesPanel;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesDialog;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.widgets.Composite;
@@ -28,7 +27,7 @@ import org.eclipse.swt.widgets.Shell;
 class StandardDeployPreferencesDialog extends DeployPreferencesDialog {
 
   StandardDeployPreferencesDialog(Shell parentShell, String title, IProject project,
-      IGoogleLoginService loginService, IGoogleApiFactory googleApiFactory) {
+      IGoogleApiFactory googleApiFactory) {
     super(parentShell, title, project, googleApiFactory);
   }
 

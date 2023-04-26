@@ -21,7 +21,6 @@ import com.google.cloud.tools.eclipse.appengine.deploy.ui.standard.StandardDeplo
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexWarFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.util.AdapterUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -52,8 +51,6 @@ public class DeployPropertyPage extends PropertyPage {
   private static final Logger logger = Logger.getLogger(DeployPropertyPage.class.getName());
 
   @Inject
-  private IGoogleLoginService loginService;
-  @Inject
   private IGoogleApiFactory googleApiFactory;
 
   private IFacetedProject facetedProject = null;
@@ -68,8 +65,7 @@ public class DeployPropertyPage extends PropertyPage {
   }
 
   @VisibleForTesting
-  DeployPropertyPage(IGoogleLoginService loginService, IGoogleApiFactory googleApiFactory) {
-    this.loginService = loginService;
+  DeployPropertyPage(IGoogleApiFactory googleApiFactory) {
     this.googleApiFactory = googleApiFactory;
   }
 
