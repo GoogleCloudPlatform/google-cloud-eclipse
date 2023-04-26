@@ -20,7 +20,6 @@ import static org.mockito.Mockito.when;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.googleapis.Account;
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import org.eclipse.swt.widgets.Shell;
 import org.junit.Before;
@@ -38,7 +37,6 @@ public class AccountSelectorTest {
   @Rule public ShellTestResource shellTestResource = new ShellTestResource();
   private Shell shell;
 
-  @Mock private IGoogleLoginService loginService;
   @Mock private Account account1;
   @Mock private Account account2;
   @Mock private Account account3;
