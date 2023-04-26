@@ -23,8 +23,9 @@ import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferen
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.ProjectOrWorkspaceDataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowDependencyManager;
 import com.google.cloud.tools.eclipse.dataflow.core.project.MajorVersion;
+import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.CredentialHelper;
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
@@ -40,6 +41,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -56,8 +58,6 @@ import org.eclipse.debug.core.model.ILaunchConfigurationDelegate;
 import org.eclipse.debug.core.model.ILaunchConfigurationDelegate2;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
 
 /**
  * The {@link ILaunchConfigurationDelegate} to launch a Google Cloud Dataflow Pipeline.
@@ -82,15 +82,14 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
   private final PipelineOptionsHierarchyFactory optionsRetrieverFactory;
   private final IWorkspaceRoot workspaceRoot;
   private final DataflowDependencyManager dependencyManager;
-  private final IGoogleLoginService loginService;
+  private final IGoogleApiFactory googleApiFactory;
 
   public DataflowPipelineLaunchDelegate() {
     this(
         new JavaLaunchDelegate(),
         new ClasspathPipelineOptionsHierarchyFactory(),
         DataflowDependencyManager.create(),
-        ResourcesPlugin.getWorkspace().getRoot(),
-        getLoginService());
+        ResourcesPlugin.getWorkspace().getRoot());
   }
 
   @VisibleForTesting
@@ -98,13 +97,12 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
       JavaLaunchDelegate javaLaunchDelegate,
       PipelineOptionsHierarchyFactory optionsHierarchyFactory,
       DataflowDependencyManager dependencyManager,
-      IWorkspaceRoot workspaceRoot,
-      IGoogleLoginService loginService) {
+      IWorkspaceRoot workspaceRoot) {
     delegate = javaLaunchDelegate;
     optionsRetrieverFactory = optionsHierarchyFactory;
     this.dependencyManager = dependencyManager;
     this.workspaceRoot = workspaceRoot;
-    this.loginService = loginService;
+    this.googleApiFactory = new GoogleApiFactory();
   }
 
   @Override
@@ -206,14 +204,14 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
         throw new CoreException(new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, message));
       }
 
-      Credential credential = loginService.getCredential(accountEmail);
-      if (credential == null) {
+      Optional<Credential> credential = googleApiFactory.getCredential();
+      if (!credential.isPresent()) {
         String message = "The Google account saved for this launch is not logged in.";
         throw new CoreException(new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, message));
       }
 
       Path jsonCredential = Files.createTempFile("google-ct4e-" + workingCopy.getName(), ".json");
-      CredentialHelper.toJsonFile(credential, jsonCredential);
+      CredentialHelper.toJsonFile(credential.get(), jsonCredential);
       jsonCredential.toFile().deleteOnExit();
 
       String path = jsonCredential.toAbsolutePath().toString();
@@ -239,12 +237,6 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
     Map<String, String> variableMapCopy = new HashMap<>(variableMap);
     variableMapCopy.put(GOOGLE_APPLICATION_CREDENTIALS_ENVIRONMENT_VARIABLE, value);
     workingCopy.setAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, variableMapCopy);
-  }
-
-  private static IGoogleLoginService getLoginService() {
-    BundleContext bundleContext =
-        FrameworkUtil.getBundle(DataflowPipelineLaunchDelegate.class).getBundleContext();
-    return bundleContext.getService(bundleContext.getServiceReference(IGoogleLoginService.class));
   }
 
   private List<String> getArguments(
