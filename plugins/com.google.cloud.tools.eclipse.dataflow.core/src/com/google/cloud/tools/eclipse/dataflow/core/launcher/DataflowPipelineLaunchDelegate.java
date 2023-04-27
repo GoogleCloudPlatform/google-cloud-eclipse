@@ -41,7 +41,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -206,14 +205,14 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
         throw new CoreException(new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, message));
       }
 
-      Optional<Credential> credential = googleApiFactory.getCredential();
-      if (!credential.isPresent()) {
-        String message = "The Google account saved for this launch is not logged in.";
-        throw new CoreException(new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, message));
-      }
+      Credential credential = googleApiFactory.getCredential()
+          .orElseThrow(() -> new CoreException(new Status(
+              Status.ERROR, 
+              DataflowCorePlugin.PLUGIN_ID, 
+              "The Google account saved for this launch is not logged in.")));
 
       Path jsonCredential = Files.createTempFile("google-ct4e-" + workingCopy.getName(), ".json");
-      CredentialHelper.toJsonFile(credential.get(), jsonCredential);
+      CredentialHelper.toJsonFile(credential, jsonCredential);
       jsonCredential.toFile().deleteOnExit();
 
       String path = jsonCredential.toAbsolutePath().toString();
