@@ -23,7 +23,6 @@ import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexExistingDeployAr
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesDialog;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
@@ -36,7 +35,7 @@ public class FlexExistingArtifactDeployCommandHandler extends FlexDeployCommandH
 
   @Override
   protected DeployPreferencesDialog newDeployPreferencesDialog(Shell shell, IProject project,
-      IGoogleLoginService loginService, IGoogleApiFactory googleApiFactory) {
+      IGoogleApiFactory googleApiFactory) {
     String title = Messages.getString("deploy.preferences.dialog.title.flexible");
     return new FlexExistingArtifactDeployPreferencesDialog(shell, title,
         googleApiFactory);

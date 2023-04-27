@@ -43,7 +43,6 @@ public class AccountSelectorTest {
 
   @Rule public ShellTestResource shellTestResource = new ShellTestResource();
   private Shell shell;
-  
   @Mock private Account account1;
   @Mock private Account account2;
   @Mock private Account account3;
