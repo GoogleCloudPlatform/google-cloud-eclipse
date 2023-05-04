@@ -148,6 +148,7 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     // Account row
     new Label(composite, SWT.LEAD).setText(Messages.getString("label.account")); //$NON-NLS-1$
     accountSelector = new AccountSelector(composite, googleApiFactory);
+    accountEmailModel = accountSelector.getSelectedEmail();
     accountSelector.addSelectionListener(() -> {
       updateProjectSelector();
 
@@ -244,6 +245,7 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     GridLayoutFactory.swtDefaults().numColumns(4).generateLayout(composite);
 
     setControl(composite);
+    updateProjectSelector();
   }
 
   private void updateProjectSelector() {
