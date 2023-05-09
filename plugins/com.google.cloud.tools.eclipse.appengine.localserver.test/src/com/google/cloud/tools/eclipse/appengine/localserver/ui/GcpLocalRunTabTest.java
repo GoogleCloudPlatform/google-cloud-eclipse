@@ -122,12 +122,12 @@ public class GcpLocalRunTabTest {
 
   @Before
   public void setUp() {
+    accountSelector = CompositeUtil.findControl(shell, AccountSelector.class);
     selectAccount(account1);
     shell = shellResource.getShell();
     tab = new GcpLocalRunTab(environmentTab, apiFactory, projectRepository);
     tab.createControl(shell);
 
-    accountSelector = CompositeUtil.findControl(shell, AccountSelector.class);
     projectSelector = CompositeUtil.findControl(shell, ProjectSelector.class);
     serviceKeyText = CompositeUtil.findControlAfterLabel(shell, Text.class, "Service key:");
     assertNotNull(accountSelector);
