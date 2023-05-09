@@ -122,7 +122,7 @@ public class GcpLocalRunTabTest {
 
   @Before
   public void setUp() {
-    selectAccount(null);
+    selectAccount(account1);
     shell = shellResource.getShell();
     tab = new GcpLocalRunTab(environmentTab, apiFactory, projectRepository);
     tab.createControl(shell);
@@ -205,6 +205,7 @@ public class GcpLocalRunTabTest {
 
   @Test
   public void testAccountSelectorLoaded() {
+    selectAccount(null);
     assertEquals(0, accountSelector.getAccountCount());
     assertEquals("", accountSelector.getSelectedEmail());
   }
@@ -226,6 +227,7 @@ public class GcpLocalRunTabTest {
 
   @Test
   public void testInitializeFrom_projectSelected() throws CoreException {
+    selectAccount(account1);
     mockLaunchConfig(Optional.of(account1), "project-A", "");
     tab.initializeFrom(launchConfig);
     assertEquals("project-A", projectSelector.getSelectedProjectId());
@@ -237,6 +239,7 @@ public class GcpLocalRunTabTest {
 
   @Test
   public void testInitializeFrom_serviceKeyEntered() throws CoreException {
+    selectAccount(account1);
     mockLaunchConfig(Optional.empty(), "", "/usr/home/keystore/my-key.json");
     tab.initializeFrom(launchConfig);
     assertEquals("/usr/home/keystore/my-key.json", serviceKeyText.getText());
@@ -338,6 +341,7 @@ public class GcpLocalRunTabTest {
 
   @Test
   public void testCreateKeyButtonEnablement() {
+    selectAccount(account1);
     Button createKeyButton = CompositeUtil.findButton(shell, "Create New Key");
     tab.initializeFrom(launchConfig);
 
@@ -354,6 +358,7 @@ public class GcpLocalRunTabTest {
 
   @Test
   public void testCreateServiceAccountKey() throws IOException, CoreException {
+    selectAccount(account1);
     setUpServiceKeyCreation(apiFactory, false);
     mockLaunchConfig(Optional.of(account2), "google.com:project-D", "");
     selectAccount(account2);
@@ -370,6 +375,7 @@ public class GcpLocalRunTabTest {
   
   @Test
   public void testCreateServiceAccountKey_replacesExistingKey() throws IOException, CoreException {
+    selectAccount(account1);
     setUpServiceKeyCreation(false);
 
     Files.write(keyFile, new byte[] {0, 1, 2});
@@ -381,6 +387,7 @@ public class GcpLocalRunTabTest {
 
   @Test
   public void testCreateServiceAccountKey_uiResult() throws CoreException, IOException {
+    selectAccount(account1);
     setUpServiceKeyCreation(false);
 
     tab.createServiceAccountKey(keyFile);
@@ -392,6 +399,7 @@ public class GcpLocalRunTabTest {
 
   @Test
   public void testCreateServiceAccountKey_ioException() throws CoreException, IOException {
+    selectAccount(account1);
     setUpServiceKeyCreation(true);
 
     tab.createServiceAccountKey(keyFile);
