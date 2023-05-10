@@ -15,7 +15,7 @@ Export-Package: com.google.cloud.tools.eclipse.dataflow.core,
  com.google.cloud.tools.eclipse.dataflow.core.natures,
  com.google.cloud.tools.eclipse.dataflow.core.preferences,
  com.google.cloud.tools.eclipse.dataflow.core.project
-Import-Package: com.google.api.client.auth.oauth2;version="[1.25.0,1.26.0)",
+Import-Package: com.google.auth;version="1.16.0",
  com.google.api.client.googleapis.json;version="[1.25.0,1.26.0)",
  com.google.api.client.googleapis.services;version="[1.25.0,1.26.0)",
  com.google.api.client.http;version="[1.25.0,1.26.0)",

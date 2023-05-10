@@ -27,7 +27,9 @@ Bundle-Classpath: .,
  lib/google-oauth-client-1.33.3.jar,
  lib/google-oauth-client-java6-1.33.3.jar,
  lib/google-oauth-client-jetty-1.33.3.jar,
- lib/plugins-login-common-0.2.2.jar
+ lib/plugins-login-common-0.2.2.jar,
+ lib/google-auth-library-credentials-1.16.0.jar,
+ lib/google-auth-library-oauth2-http-1.16.0.jar
 Require-Bundle: com.google.guava;bundle-version="[30.0.0,31.0.0)"
 Export-Package: com.google.api.client.extensions.jetty.auth.oauth2;version="1.25.0",
  com.google.api.client.googleapis;version="1.25.0",
@@ -55,7 +57,7 @@ Export-Package: com.google.api.client.extensions.jetty.auth.oauth2;version="1.25
  com.google.api.services.storage.model;version="1.25.0",
  com.google.cloud.tools.eclipse.googleapis,
  com.google.cloud.tools.eclipse.googleapis.internal,
- com.google.cloud.tools.login;version="0.2.2"
+ com.google.cloud.tools.login;version="0.2.2",
  com.google.auth;version="1.16.0"
 Import-Package: com.fasterxml.jackson.core,
  com.google.cloud.tools.eclipse.util,
