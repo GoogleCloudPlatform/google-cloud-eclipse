@@ -17,8 +17,6 @@
 package com.google.cloud.tools.eclipse.googleapis.internal;
 
 import com.google.auth.Credentials;
-import com.google.api.client.auth.oauth2.BearerToken;
-import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.util.Utils;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -114,7 +112,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
     Credentials credential = getCredentialOrFail();
     CloudResourceManager resourceManager =
-        new CloudResourceManager.Builder(transport, jsonFactory, credential)
+        new CloudResourceManager.Builder(transport, jsonFactory, null)
             .setApplicationName(CloudToolsInfo.USER_AGENT).build();
     
     return resourceManager.projects();
@@ -128,7 +126,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
     Credentials credential = getCredentialOrFail();
 
-    Storage.Builder builder = new Storage.Builder(transport, jsonFactory, credential)
+    Storage.Builder builder = new Storage.Builder(transport, jsonFactory, null)
         .setApplicationName(CloudToolsInfo.USER_AGENT);
     Storage storage = builder.build();
     return storage;
@@ -143,7 +141,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     Credentials credential = getCredentialOrFail();
 
     Appengine appengine =
-        new Appengine.Builder(transport, jsonFactory, credential)
+        new Appengine.Builder(transport, jsonFactory, null)
             .setApplicationName(CloudToolsInfo.USER_AGENT).build();
     return appengine.apps();
   }
@@ -157,7 +155,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     Credentials credential = getCredentialOrFail();
 
     ServiceManagement serviceManagement =
-        new ServiceManagement.Builder(transport, jsonFactory, credential)
+        new ServiceManagement.Builder(transport, jsonFactory, null)
             .setApplicationName(CloudToolsInfo.USER_AGENT).build();
     return serviceManagement;
   }
@@ -170,7 +168,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
     Credentials credential = getCredentialOrFail();
 
-    Iam iam = new Iam.Builder(transport, jsonFactory, credential)
+    Iam iam = new Iam.Builder(transport, jsonFactory, null)
         .setApplicationName(CloudToolsInfo.USER_AGENT).build();
     return iam;
   }
