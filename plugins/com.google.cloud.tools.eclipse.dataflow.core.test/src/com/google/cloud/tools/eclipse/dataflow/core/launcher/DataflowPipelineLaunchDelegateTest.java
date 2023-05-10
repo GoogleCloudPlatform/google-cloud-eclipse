@@ -32,8 +32,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.auth.oauth2.Credentials
+import com.google.api.auth.oauth2.GoogleCredentials;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.cloud.tools.eclipse.dataflow.core.launcher.options.PipelineOptionsHierarchy;
@@ -101,7 +101,7 @@ public class DataflowPipelineLaunchDelegateTest {
   private final Map<String, String> pipelineArguments = new HashMap<>();
   private final Map<String, String> environmentMap = new HashMap<>();
 
-  private Credential credential;
+  private Credentials credential;
 
   @Before
   public void setup() throws Exception {
@@ -109,7 +109,7 @@ public class DataflowPipelineLaunchDelegateTest {
             eq(project), eq(MajorVersion.ONE), any(IProgressMonitor.class)))
         .thenReturn(pipelineOptionsHierarchy);
 
-    credential = new GoogleCredential.Builder()
+    credential = new GoogleCredentials.Builder()
         .setJsonFactory(mock(JsonFactory.class))
         .setTransport(mock(HttpTransport.class))
         .setClientSecrets("clientId", "clientSecret").build();

@@ -17,7 +17,9 @@
 package com.google.cloud.tools.eclipse.googleapis.internal;
 
 import com.google.api.client.auth.oauth2.BearerToken;
+import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.auth.oauth2.Credential.AccessMethod;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.util.Utils;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpExecuteInterceptor;
@@ -30,9 +32,12 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.auth.Credentials;
+import com.google.auth.oauth2.GoogleAuthUtils;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.tools.eclipse.googleapis.Account;
 import com.google.cloud.tools.eclipse.googleapis.IAccountProvider;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -68,7 +73,9 @@ public class DefaultAccountProvider implements IAccountProvider {
   @Override
   public Optional<Account> getAccount(){
     try {
-      return Optional.of(getAccount(GoogleCredentials.getApplicationDefault()));
+      File wellKnownADCPath = new File(GoogleAuthUtils.getWellKnownCredentialsPath());
+      Credential credential = GoogleCredential.fromStream(new FileInputStream(wellKnownADCPath));
+      return Optional.of(getAccount(credential));
     } catch (IOException ex) {
       LOGGER.log(Level.SEVERE, "IOException occurred when obtaining ADC", ex);
       return Optional.empty();
@@ -88,24 +95,6 @@ public class DefaultAccountProvider implements IAccountProvider {
     if (accountCache.containsKey(credential)) {
       return accountCache.get(credential);
     }
-//    HttpRequestInitializer chainedInitializer = new HttpRequestInitializer() {
-//      @Override
-//      public void initialize(HttpRequest httpRequest) throws IOException {
-//        credential.initialize(httpRequest);
-//        requestTimeoutSetter.initialize(httpRequest);
-//      }
-//    };
-//    Oauth2 oauth2 = new Oauth2.Builder(transport, jsonFactory, credential)
-//        .setHttpRequestInitializer(chainedInitializer)
-//        .setApplicationName(CloudToolsInfo.USER_AGENT)
-//        .build();
-//    // oauth2.userinfo().get().execute() gets the user info
-//    UserInfo userInfo = new UserInfo(oauth2.userinfo().get().execute());
-    
-//    if (credential.createScopedRequired()) {
-//      credential = credential.createScoped(Arrays.asList("https://www.googleapis.com/auth/userinfo.email"));
-//    }
-    
     
     HttpRequestFactory requestFactory = transport.createRequestFactory(new HttpRequestInitializer() {
       @Override
@@ -116,7 +105,6 @@ public class DefaultAccountProvider implements IAccountProvider {
     });
     HttpResponse response = requestFactory.buildGetRequest(
         new GenericUrl("https://www.googleapis.com/oauth2/v3/userinfo"))
-//        .setHeaders(new HttpHeaders().setAuthorization("Bearer " + accessToken))
         .execute();
     Userinfoplus userInfo = response.parseAs(Userinfoplus.class);
     Account result = new Account(userInfo.getEmail(), credential, userInfo.getName(), userInfo.getPicture());

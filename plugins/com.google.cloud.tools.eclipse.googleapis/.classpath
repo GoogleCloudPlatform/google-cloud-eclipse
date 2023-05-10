@@ -21,8 +21,8 @@
         <classpathentry exported="true" kind="lib" path="lib/google-oauth-client-1.33.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-oauth-client-java6-1.33.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-oauth-client-jetty-1.33.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/google-auth-library-credentials-1.16.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/google-auth-library-oauth2-http-1.16.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-auth-library-credentials-1.17.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-auth-library-oauth2-http-1.17.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/plugins-login-common-0.2.2.jar" sourcepath="/usr/local/google/home/burkedavison/eclipse-workspace/google-cloud-eclipse/ide-login/src/main"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

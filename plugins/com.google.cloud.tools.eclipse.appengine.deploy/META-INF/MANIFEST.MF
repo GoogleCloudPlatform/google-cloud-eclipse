@@ -26,7 +26,7 @@ Require-Bundle: com.google.cloud.tools.appengine;bundle-version="0.8.1",
 Export-Package: com.google.cloud.tools.eclipse.appengine.deploy,
  com.google.cloud.tools.eclipse.appengine.deploy.flex,
  com.google.cloud.tools.eclipse.appengine.deploy.standard
-Import-Package: com.google.auth;version="1.16.0",
+Import-Package: com.google.auth;version="1.17.0",
  com.google.cloud.tools.eclipse.login,
  com.google.cloud.tools.eclipse.sdk,
  com.google.cloud.tools.eclipse.ui.util,

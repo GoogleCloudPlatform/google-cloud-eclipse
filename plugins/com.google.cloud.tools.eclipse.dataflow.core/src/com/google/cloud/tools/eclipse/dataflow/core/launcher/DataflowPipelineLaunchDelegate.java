@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.dataflow.core.launcher;
 
-import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.dataflow.core.DataflowCorePlugin;
 import com.google.cloud.tools.eclipse.dataflow.core.launcher.options.PipelineOptionsHierarchy;
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferences;
@@ -206,7 +205,7 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
         throw new CoreException(new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, message));
       }
 
-      Credential credential = loginService.getCredential(accountEmail);
+      Credentials credential = loginService.getCredential(accountEmail);
       if (credential == null) {
         String message = "The Google account saved for this launch is not logged in.";
         throw new CoreException(new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, message));
