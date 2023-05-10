@@ -28,7 +28,9 @@ Bundle-Classpath: .,
  lib/google-oauth-client-1.33.3.jar,
  lib/google-oauth-client-java6-1.33.3.jar,
  lib/google-oauth-client-jetty-1.33.3.jar,
- lib/plugins-login-common-0.2.2.jar
+ lib/plugins-login-common-0.2.2.jar,
+ lib/google-auth-library-credentials-1.17.0.jar,
+ lib/google-auth-library-oauth2-http-1.17.0.jar
 Require-Bundle: com.google.guava;bundle-version="[30.0.0,31.0.0)"
 Export-Package: com.google.api.client.auth.oauth2;version="1.25.0",
  com.google.api.client.extensions.jetty.auth.oauth2;version="1.25.0",

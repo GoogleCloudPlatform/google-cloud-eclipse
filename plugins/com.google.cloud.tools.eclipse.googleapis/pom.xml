@@ -120,6 +120,11 @@
       <artifactId>plugins-login-common</artifactId>
       <version>0.2.2</version>
     </dependency>
+    <dependency>
+  	  <groupId>com.google.auth</groupId>
+  	  <artifactId>google-auth-library-oauth2-http</artifactId>
+  	  <version>1.17.0</version>
+	</dependency>
   </dependencies>
 
   <build>
@@ -143,6 +148,7 @@
                 com.google.oauth-client,
                 com.google.http-client,
                 com.google.cloud.tools.login,
+                com.google.auth,
               </includeGroupIds>
               <outputDirectory>lib</outputDirectory>
             </configuration>

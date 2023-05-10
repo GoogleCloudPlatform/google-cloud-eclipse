@@ -25,10 +25,13 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.services.oauth2.Oauth2;
+import com.google.auth.oauth2.GoogleAuthUtils;
 import com.google.cloud.tools.eclipse.googleapis.Account;
 import com.google.cloud.tools.eclipse.googleapis.IAccountProvider;
 import com.google.cloud.tools.eclipse.googleapis.UserInfo;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,7 +66,9 @@ public class DefaultAccountProvider implements IAccountProvider {
    */
   @Override
   public Optional<Account> getAccount(){
-    try {
+    String adcWellKnownPath = GoogleAuthUtils.getWellKnownCredentialsPath();
+    File credsFile = new File(adcWellKnownPath);
+    try (FileInputStream credsStream = new FileInputStream(credsFile)) {
       return Optional.of(getAccount(GoogleCredential.getApplicationDefault()));
     } catch (IOException ex) {
       LOGGER.log(Level.SEVERE, "IOException occurred when obtaining ADC", ex);
