@@ -137,6 +137,7 @@
                 com.google.oauth-client,
                 com.google.http-client,
                 com.google.cloud.tools.login,
+                com.google.auth,
               </includeGroupIds>
               <outputDirectory>lib</outputDirectory>
             </configuration>
