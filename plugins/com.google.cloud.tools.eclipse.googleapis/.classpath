@@ -23,6 +23,6 @@
             <attribute name="maven.pomderived" value="true"/>
             <attribute name="org.eclipse.jst.component.nondependency" value=""/>
           </attributes>
-        </classpathentry>
+        </classpathentry> 
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

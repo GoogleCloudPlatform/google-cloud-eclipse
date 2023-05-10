@@ -16,6 +16,8 @@
 
 package com.google.cloud.tools.eclipse.googleapis.internal;
 
+import com.google.auth.Credentials;
+import com.google.api.client.auth.oauth2.BearerToken;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.util.Utils;
 import com.google.api.client.http.HttpTransport;
@@ -94,12 +96,12 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   }
  
   @Override
-  public Optional<Credential> getCredential() {
+  public Optional<Credentials> getCredential() {
     return accountProvider.getCredential();
   }
   
-  private Credential getCredentialOrFail() {
-    Optional<Credential> credential = getCredential();
+  private Credentials getCredentialOrFail() {
+    Optional<Credentials> credential = getCredential();
     Preconditions.checkState(credential.isPresent(), "credential is not present");
     return credential.get();
   }
@@ -110,7 +112,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     HttpTransport transport = transportCache.getUnchecked(GoogleApi.CLOUDRESOURCE_MANAGER_API);
     Preconditions.checkNotNull(transport, "transport is null");
     Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
-    Credential credential = getCredentialOrFail();
+    Credentials credential = getCredentialOrFail();
     CloudResourceManager resourceManager =
         new CloudResourceManager.Builder(transport, jsonFactory, credential)
             .setApplicationName(CloudToolsInfo.USER_AGENT).build();
@@ -124,7 +126,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     HttpTransport transport = transportCache.getUnchecked(GoogleApi.CLOUD_STORAGE_API);
     Preconditions.checkNotNull(transport, "transport is null");
     Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
-    Credential credential = getCredentialOrFail();
+    Credentials credential = getCredentialOrFail();
 
     Storage.Builder builder = new Storage.Builder(transport, jsonFactory, credential)
         .setApplicationName(CloudToolsInfo.USER_AGENT);
@@ -138,7 +140,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     HttpTransport transport = transportCache.getUnchecked(GoogleApi.APPENGINE_ADMIN_API);
     Preconditions.checkNotNull(transport, "transport is null");
     Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
-    Credential credential = getCredentialOrFail();
+    Credentials credential = getCredentialOrFail();
 
     Appengine appengine =
         new Appengine.Builder(transport, jsonFactory, credential)
@@ -152,7 +154,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     HttpTransport transport = transportCache.getUnchecked(GoogleApi.SERVICE_MANAGEMENT_API);
     Preconditions.checkNotNull(transport, "transport is null");
     Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
-    Credential credential = getCredentialOrFail();
+    Credentials credential = getCredentialOrFail();
 
     ServiceManagement serviceManagement =
         new ServiceManagement.Builder(transport, jsonFactory, credential)
@@ -166,7 +168,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     HttpTransport transport = transportCache.getUnchecked(GoogleApi.IAM_API);
     Preconditions.checkNotNull(transport, "transport is null");
     Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
-    Credential credential = getCredentialOrFail();
+    Credentials credential = getCredentialOrFail();
 
     Iam iam = new Iam.Builder(transport, jsonFactory, credential)
         .setApplicationName(CloudToolsInfo.USER_AGENT).build();
