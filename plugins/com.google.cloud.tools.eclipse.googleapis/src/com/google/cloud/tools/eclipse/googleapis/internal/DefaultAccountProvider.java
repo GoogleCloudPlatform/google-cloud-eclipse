@@ -27,22 +27,25 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.services.oauth2.Oauth2;
 import com.google.auth.oauth2.GoogleAuthUtils;
 import com.google.cloud.tools.eclipse.googleapis.Account;
-import com.google.cloud.tools.eclipse.googleapis.IAccountProvider;
 import com.google.cloud.tools.eclipse.googleapis.UserInfo;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
+import com.google.common.base.Strings;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.eclipse.core.runtime.ListenerList;
 
 /**
  * 
  */
-public class DefaultAccountProvider implements IAccountProvider {
+public class DefaultAccountProvider extends AccountProvider {
 
   private static final int USER_INFO_QUERY_HTTP_CONNECTION_TIMEOUT = 5000 /* ms */;
   private static final int USER_INFO_QUERY_HTTP_READ_TIMEOUT = 3000 /* ms */;
@@ -52,6 +55,40 @@ public class DefaultAccountProvider implements IAccountProvider {
   private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
   
   private Map<Credential, Account> accountCache = new HashMap<>();
+  private static ListenerList<Runnable> adcPathChangeListeners = new ListenerList<>();
+  private static String currentAdcPath = GoogleAuthUtils.getWellKnownCredentialsPath();
+  private static Timer adcPathPoller;
+  
+  static {
+    TimerTask task = new TimerTask() {
+      @Override
+      public void run() {
+          checkIfAdcPathChanged();
+      }
+  };
+
+    // Schedule the task to run every second
+    adcPathPoller.scheduleAtFixedRate(task, 0, 1000);
+  }
+  
+  @Override
+  protected ListenerList<Runnable> getListeners() {
+    return adcPathChangeListeners;
+  }
+  
+  private static final void checkIfAdcPathChanged() {
+    String newAdcPath = GoogleAuthUtils.getWellKnownCredentialsPath();
+    if (!Strings.nullToEmpty(currentAdcPath).equals(Strings.nullToEmpty(newAdcPath))) {
+      currentAdcPath = newAdcPath; 
+      propagateAdcPathChange();
+    }
+  }
+  
+  private static final void propagateAdcPathChange() {
+    for (Object o : adcPathChangeListeners.getListeners()) {
+      ((Runnable) o).run();
+    }
+  }
   
   private static final HttpRequestInitializer requestTimeoutSetter = new HttpRequestInitializer() {
     @Override

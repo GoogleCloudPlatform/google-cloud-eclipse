@@ -65,6 +65,9 @@ public class AccountSelector extends Composite {
     GridDataFactory.fillDefaults().grab(true, false).applyTo(accountEmailComposite);
     GridLayoutFactory.fillDefaults().generateLayout(accountEmailComposite);
     GridLayoutFactory.fillDefaults().generateLayout(this);
+    apiFactory.addCredentialChangeListener(() -> {
+      forceAccountCheck();
+    });
   }
   
   /**

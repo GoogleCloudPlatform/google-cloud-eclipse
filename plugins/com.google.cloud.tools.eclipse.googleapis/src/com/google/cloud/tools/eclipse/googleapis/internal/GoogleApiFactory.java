@@ -28,7 +28,6 @@ import com.google.api.services.iam.v1.Iam;
 import com.google.api.services.servicemanagement.ServiceManagement;
 import com.google.api.services.storage.Storage;
 import com.google.cloud.tools.eclipse.googleapis.Account;
-import com.google.cloud.tools.eclipse.googleapis.IAccountProvider;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.annotations.VisibleForTesting;
@@ -51,7 +50,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 @Component
 public class GoogleApiFactory implements IGoogleApiFactory {
 
-  private static IAccountProvider accountProvider = new DefaultAccountProvider();
+  private static AccountProvider accountProvider = new DefaultAccountProvider();
   
   private final JsonFactory jsonFactory = Utils.getDefaultJsonFactory();
   private final ProxyFactory proxyFactory;
@@ -86,6 +85,16 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     // we cannot reuse the same httptransport.
     transportCache =
         CacheBuilder.newBuilder().weakValues().build(new TransportCacheLoader(proxyFactory));
+  }
+  
+  @Override
+  public void addCredentialChangeListener(Runnable listener) {
+    accountProvider.addCredentialChangeListener(listener);
+  }
+
+  @Override
+  public void removeCredentialChangeListener(Runnable listener) {
+    accountProvider.removeCredentialChangeListener(listener);
   }
   
   @Override
@@ -204,7 +213,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
    * TestAccountProvider is defined in com.google.(...).test.util, which is a non-test package
    * @param provider the new account provider to be used by this class
    */
-  public static void setAccountProvider(IAccountProvider provider) {
+  public static void setAccountProvider(AccountProvider provider) {
     accountProvider = provider;
   }
 }

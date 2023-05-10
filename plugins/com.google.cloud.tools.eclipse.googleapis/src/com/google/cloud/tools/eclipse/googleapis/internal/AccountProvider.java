@@ -14,16 +14,28 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.googleapis;
+package com.google.cloud.tools.eclipse.googleapis.internal;
 
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.cloud.tools.eclipse.googleapis.Account;
 import java.util.Optional;
+import org.eclipse.core.runtime.ListenerList;
 
 /**
  * 
  */
-public interface IAccountProvider {
+public abstract class AccountProvider {
 
-  public Optional<Account> getAccount();
-  public Optional<Credential> getCredential();
+  public abstract Optional<Account> getAccount();
+  public abstract Optional<Credential> getCredential();
+  protected abstract ListenerList<Runnable> getListeners();
+  
+  protected void addCredentialChangeListener(Runnable listener) {
+    getListeners().add(listener);
+  }
+
+  protected void removeCredentialChangeListener(Runnable listener) {
+    getListeners().remove(listener);
+  }
+  
 }
