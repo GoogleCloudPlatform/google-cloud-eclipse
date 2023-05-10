@@ -16,19 +16,23 @@
 
 package com.google.cloud.tools.eclipse.googleapis.internal;
 
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.auth.oauth2.BearerToken;
+import com.google.api.client.auth.oauth2.Credential.AccessMethod;
 import com.google.api.client.googleapis.util.Utils;
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpExecuteInterceptor;
 import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.services.oauth2.Oauth2;
+import com.google.api.services.oauth2.model.Userinfoplus;
+import com.google.auth.Credentials;
+import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.tools.eclipse.googleapis.Account;
 import com.google.cloud.tools.eclipse.googleapis.IAccountProvider;
-import com.google.cloud.tools.eclipse.googleapis.UserInfo;
-import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -48,7 +52,7 @@ public class DefaultAccountProvider implements IAccountProvider {
   private final JsonFactory jsonFactory = Utils.getDefaultJsonFactory();
   private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
   
-  private Map<Credential, Account> accountCache = new HashMap<>();
+  private Map<Credentials, Account> accountCache = new HashMap<>();
   
   private static final HttpRequestInitializer requestTimeoutSetter = new HttpRequestInitializer() {
     @Override
@@ -64,7 +68,7 @@ public class DefaultAccountProvider implements IAccountProvider {
   @Override
   public Optional<Account> getAccount(){
     try {
-      return Optional.of(getAccount(GoogleCredential.getApplicationDefault()));
+      return Optional.of(getAccount(GoogleCredentials.getApplicationDefault()));
     } catch (IOException ex) {
       LOGGER.log(Level.SEVERE, "IOException occurred when obtaining ADC", ex);
       return Optional.empty();
@@ -76,30 +80,65 @@ public class DefaultAccountProvider implements IAccountProvider {
    * @return the ADC if set
    */
   @Override
-  public Optional<Credential> getCredential() {
+  public Optional<Credentials> getCredential() {
     return getAccount().map(Account::getOAuth2Credential);
   }
   
-  Account getAccount(Credential credential) throws IOException {
+  Account getAccount(final GoogleCredentials credential) throws IOException {
     if (accountCache.containsKey(credential)) {
       return accountCache.get(credential);
     }
-    HttpRequestInitializer chainedInitializer = new HttpRequestInitializer() {
+//    HttpRequestInitializer chainedInitializer = new HttpRequestInitializer() {
+//      @Override
+//      public void initialize(HttpRequest httpRequest) throws IOException {
+//        credential.initialize(httpRequest);
+//        requestTimeoutSetter.initialize(httpRequest);
+//      }
+//    };
+//    Oauth2 oauth2 = new Oauth2.Builder(transport, jsonFactory, credential)
+//        .setHttpRequestInitializer(chainedInitializer)
+//        .setApplicationName(CloudToolsInfo.USER_AGENT)
+//        .build();
+//    // oauth2.userinfo().get().execute() gets the user info
+//    UserInfo userInfo = new UserInfo(oauth2.userinfo().get().execute());
+    
+//    if (credential.createScopedRequired()) {
+//      credential = credential.createScoped(Arrays.asList("https://www.googleapis.com/auth/userinfo.email"));
+//    }
+    
+    
+    HttpRequestFactory requestFactory = transport.createRequestFactory(new HttpRequestInitializer() {
       @Override
-      public void initialize(HttpRequest httpRequest) throws IOException {
-        credential.initialize(httpRequest);
-        requestTimeoutSetter.initialize(httpRequest);
+      public void initialize(HttpRequest request) throws IOException {
+        request.setInterceptor(new CredentialInterceptor(credential));
+        request.setParser(jsonFactory.createJsonObjectParser());
       }
-    };
-    
-    Oauth2 oauth2 = new Oauth2.Builder(transport, jsonFactory, credential)
-        .setHttpRequestInitializer(chainedInitializer)
-        .setApplicationName(CloudToolsInfo.USER_AGENT)
-        .build();
-    
-    UserInfo userInfo = new UserInfo(oauth2.userinfo().get().execute());
+    });
+    HttpResponse response = requestFactory.buildGetRequest(
+        new GenericUrl("https://www.googleapis.com/oauth2/v3/userinfo"))
+//        .setHeaders(new HttpHeaders().setAuthorization("Bearer " + accessToken))
+        .execute();
+    Userinfoplus userInfo = response.parseAs(Userinfoplus.class);
     Account result = new Account(userInfo.getEmail(), credential, userInfo.getName(), userInfo.getPicture());
     accountCache.put(credential, result);
     return result;
+  }
+  
+  private class CredentialInterceptor implements HttpExecuteInterceptor {
+    
+    private GoogleCredentials credential;
+    private AccessMethod method;
+    
+    public CredentialInterceptor(GoogleCredentials credential) {
+      this.credential = credential;
+      this.method = BearerToken.authorizationHeaderAccessMethod();
+    }
+    
+    @Override
+    public void intercept(HttpRequest request) throws IOException {
+      // TODO Auto-generated method stub
+      method.intercept(request, credential.getAccessToken().getTokenValue());
+    }
+    
   }
 }

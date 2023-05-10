@@ -16,7 +16,8 @@
 
 package com.google.cloud.tools.eclipse.googleapis;
 
-import com.google.api.client.auth.oauth2.Credential;
+import com.google.auth.Credentials;
+import com.google.auth.oauth2.OAuth2Credentials;
 import com.google.common.base.Preconditions;
 import java.util.Optional;
 
@@ -26,11 +27,11 @@ import java.util.Optional;
 public class Account {
 
   private final String email;
-  private final Credential oAuth2Credential;
+  private final Credentials oAuth2Credential;
   private final String name;
   private final String avatarUrl;
 
-  public Account(String email, Credential oAuth2Credential, String name, String avatarUrl) {
+  public Account(String email, Credentials oAuth2Credential, String name, String avatarUrl) {
     Preconditions.checkNotNull(email);
     Preconditions.checkNotNull(oAuth2Credential);
 
@@ -52,7 +53,7 @@ public class Account {
     return Optional.ofNullable(avatarUrl);
   }
 
-  public Credential getOAuth2Credential() {
+  public Credentials getOAuth2Credential() {
     return oAuth2Credential;
   }
 
@@ -60,18 +61,14 @@ public class Account {
    * Identical to {@code getOAuth2Credential().getAccessToken()}.
    */
   public Optional<String> getAccessToken() {
-    return Optional.ofNullable(oAuth2Credential.getAccessToken());
-  }
-
-  /**
-   * Identical to {@code getOAuth2Credential().getRefreshToken()}.
-   */
-  public Optional<String> getRefreshToken() {
-    return Optional.ofNullable(oAuth2Credential.getRefreshToken());
+    return Optional.ofNullable(((OAuth2Credentials) oAuth2Credential).getAccessToken().getTokenValue());
   }
 
   long getAccessTokenExpiryTime() {
-    return oAuth2Credential.getExpirationTimeMilliseconds();
+    return ((OAuth2Credentials) oAuth2Credential)
+        .getAccessToken()
+        .getExpirationTime()
+        .getTime(); // 1970 millis
   }
 
   @Override

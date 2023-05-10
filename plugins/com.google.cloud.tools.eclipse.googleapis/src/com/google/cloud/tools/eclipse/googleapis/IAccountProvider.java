@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.googleapis;
 
-import com.google.api.client.auth.oauth2.Credential;
+import com.google.auth.Credentials;
 import java.util.Optional;
 
 /**
@@ -25,5 +25,5 @@ import java.util.Optional;
 public interface IAccountProvider {
 
   public Optional<Account> getAccount();
-  public Optional<Credential> getCredential();
+  public Optional<Credentials> getCredential();
 }

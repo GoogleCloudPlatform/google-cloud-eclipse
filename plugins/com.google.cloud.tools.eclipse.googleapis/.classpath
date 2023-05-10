@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry kind="src" path="src/"/>
+	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-client-1.25.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-appengine-v1-rev80-1.25.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-bigquery-v2-rev405-1.25.0.jar"/>
@@ -11,16 +11,18 @@
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-dataflow-v1b3-rev259-1.25.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-datastore-v1-rev63-1.25.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-iam-v1-rev261-1.25.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/google-api-services-oauth2-v2-rev141-1.25.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-pubsub-v1-rev403-1.25.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-servicemanagement-v1-rev412-1.25.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-storage-v1-rev138-1.25.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-http-client-1.25.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-http-client-jackson-1.25.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-http-client-jackson2-1.25.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/google-oauth-client-1.33.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/google-oauth-client-java6-1.33.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/google-oauth-client-jetty-1.33.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/plugins-login-common-0.2.2.jar" sourcepath="/usr/local/google/home/burkedavison/eclipse-workspace/google-cloud-eclipse/ide-login/src/main"/>
+        <classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
+          <attributes>
+            <attribute name="maven.pomderived" value="true"/>
+            <attribute name="org.eclipse.jst.component.nondependency" value=""/>
+          </attributes>
+        </classpathentry>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
