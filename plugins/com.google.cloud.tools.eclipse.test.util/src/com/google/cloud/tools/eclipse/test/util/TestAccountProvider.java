@@ -16,8 +16,8 @@
 
 package com.google.cloud.tools.eclipse.test.util;
 
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.auth.Credentials;
+import com.google.auth.oauth2.GoogleCredentials;
 import com.google.api.client.util.Preconditions;
 import com.google.cloud.tools.eclipse.googleapis.Account;
 import com.google.cloud.tools.eclipse.googleapis.IAccountProvider;
@@ -36,8 +36,8 @@ public class TestAccountProvider implements IAccountProvider {
   public static final String EMAIL_ACCOUNT_2 = "test-email-2@mail.com";
   public static final String NAME_ACCOUNT_1 = "name-1";
   public static final String NAME_ACCOUNT_2 = "name-2";
-  public static final Credential CREDENTIAL_ACCOUNT_1 = new GoogleCredential.Builder().build();
-  public static final Credential CREDENTIAL_ACCOUNT_2 = new GoogleCredential.Builder().build();
+  public static final Credentials CREDENTIAL_ACCOUNT_1 = GoogleCredentials.newBuilder().build();
+  public static final Credentials CREDENTIAL_ACCOUNT_2 = GoogleCredentials.newBuilder().build();
   public static final String AVATAR_URL_ACCOUNT_1 = "https://avatar.url/account1";
   public static final String AVATAR_URL_ACCOUNT_2 = "https://avatar.url/account2";
   
@@ -83,7 +83,7 @@ public class TestAccountProvider implements IAccountProvider {
   }
 
   @Override
-  public Optional<Credential> getCredential() {
+  public Optional<Credentials> getCredential() {
     return getAccount().map(Account::getOAuth2Credential);
   }
   
