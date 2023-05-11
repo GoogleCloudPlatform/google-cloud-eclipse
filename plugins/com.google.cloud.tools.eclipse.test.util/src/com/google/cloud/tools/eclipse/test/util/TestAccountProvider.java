@@ -25,7 +25,6 @@ import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
-import org.eclipse.core.runtime.ListenerList;
 
 
 /**
@@ -50,7 +49,6 @@ public class TestAccountProvider extends AccountProvider {
   
   private static Map<State, Optional<Account>> accounts = new EnumMap<>(State.class);
   private static State state = State.LOGGED_IN;
-  private static ListenerList<Runnable> adcPathChangeListeners = new ListenerList<>();
   
   
   public static Account ACCOUNT_1;
@@ -66,17 +64,6 @@ public class TestAccountProvider extends AccountProvider {
     accounts.put(State.LOGGED_IN_SECOND_ACCOUNT, Optional.of(ACCOUNT_2));
   }
   
-  @Override
-  protected ListenerList<Runnable> getListeners() {
-    return adcPathChangeListeners;
-  }
-  
-  private static final void propagateAdcPathChange() {
-    for (Object o : adcPathChangeListeners.getListeners()) {
-      ((Runnable) o).run();
-    }
-  }
-  
   public static void setAsDefaultProvider() {
     GoogleApiFactory.setAccountProvider(INSTANCE);
   }
@@ -90,7 +77,7 @@ public class TestAccountProvider extends AccountProvider {
     Preconditions.checkNotNull(state);
     if (TestAccountProvider.state != state) {
       TestAccountProvider.state = state;
-      propagateAdcPathChange();
+      INSTANCE.propagateCredentialChange();
     }
   }
   
