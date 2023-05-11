@@ -26,16 +26,21 @@ import org.eclipse.core.runtime.ListenerList;
  */
 public abstract class AccountProvider {
 
+  private ListenerList<Runnable> credentialChangeListeners = new ListenerList<>();
+  
   public abstract Optional<Account> getAccount();
   public abstract Optional<Credential> getCredential();
-  protected abstract ListenerList<Runnable> getListeners();
   
   protected void addCredentialChangeListener(Runnable listener) {
-    getListeners().add(listener);
+    credentialChangeListeners.add(listener);
   }
 
   protected void removeCredentialChangeListener(Runnable listener) {
-    getListeners().remove(listener);
+    credentialChangeListeners.remove(listener);
+  }
+  
+  protected final void propagateCredentialChange() {
+    credentialChangeListeners.forEach(listener -> listener.run());
   }
   
 }

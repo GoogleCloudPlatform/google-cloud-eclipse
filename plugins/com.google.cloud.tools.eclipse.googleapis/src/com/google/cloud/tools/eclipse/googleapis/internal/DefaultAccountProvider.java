@@ -29,66 +29,57 @@ import com.google.auth.oauth2.GoogleAuthUtils;
 import com.google.cloud.tools.eclipse.googleapis.Account;
 import com.google.cloud.tools.eclipse.googleapis.UserInfo;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
-import com.google.common.base.Strings;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.eclipse.core.runtime.ListenerList;
 
 /**
  * 
  */
 public class DefaultAccountProvider extends AccountProvider {
 
+  private static final String ADC_PATH = GoogleAuthUtils.getWellKnownCredentialsPath();
+  public static final DefaultAccountProvider INSTANCE = new DefaultAccountProvider();
   private static final int USER_INFO_QUERY_HTTP_CONNECTION_TIMEOUT = 5000 /* ms */;
   private static final int USER_INFO_QUERY_HTTP_READ_TIMEOUT = 3000 /* ms */;
   private static final HttpTransport transport = new NetHttpTransport();
-  
+   
   private final JsonFactory jsonFactory = Utils.getDefaultJsonFactory();
   private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
   
-  private Map<Credential, Account> accountCache = new HashMap<>();
-  private static ListenerList<Runnable> adcPathChangeListeners = new ListenerList<>();
-  private static String currentAdcPath = GoogleAuthUtils.getWellKnownCredentialsPath();
-  private static Timer adcPathPoller;
+  private Optional<Credential> currentCred = computeCredential();
+  private Optional<Account> cachedAccount = Optional.empty();
+  private Timer adcPathPoller;
   
-  static {
+  private DefaultAccountProvider() {
+    adcPathPoller = new Timer();
     TimerTask task = new TimerTask() {
       @Override
       public void run() {
           checkIfAdcPathChanged();
       }
-  };
+    };
 
     // Schedule the task to run every second
     adcPathPoller.scheduleAtFixedRate(task, 0, 1000);
   }
   
-  @Override
-  protected ListenerList<Runnable> getListeners() {
-    return adcPathChangeListeners;
-  }
-  
-  private static final void checkIfAdcPathChanged() {
-    String newAdcPath = GoogleAuthUtils.getWellKnownCredentialsPath();
-    if (!Strings.nullToEmpty(currentAdcPath).equals(Strings.nullToEmpty(newAdcPath))) {
-      currentAdcPath = newAdcPath; 
-      propagateAdcPathChange();
+  private final void checkIfAdcPathChanged() {
+    Optional<Credential> newCred = computeCredential();
+    String newToken = newCred.map(Credential::getRefreshToken).orElse("");
+    String currtoken = currentCred.map(Credential::getRefreshToken).orElse("");
+    if (newToken.compareTo(currtoken) != 0) {
+      currentCred = newCred;
+      cachedAccount = Optional.empty(); // lazily recompute the account
+      propagateCredentialChange();
     }
   }
   
-  private static final void propagateAdcPathChange() {
-    for (Object o : adcPathChangeListeners.getListeners()) {
-      ((Runnable) o).run();
-    }
-  }
   
   private static final HttpRequestInitializer requestTimeoutSetter = new HttpRequestInitializer() {
     @Override
@@ -103,15 +94,40 @@ public class DefaultAccountProvider extends AccountProvider {
    */
   @Override
   public Optional<Account> getAccount(){
-    String adcWellKnownPath = GoogleAuthUtils.getWellKnownCredentialsPath();
-    File credsFile = new File(adcWellKnownPath);
-    try (FileInputStream credsStream = new FileInputStream(credsFile)) {
-      return Optional.of(getAccount(GoogleCredential.getApplicationDefault()));
-    } catch (IOException ex) {
-      LOGGER.log(Level.SEVERE, "IOException occurred when obtaining ADC", ex);
+    return INSTANCE.computeAccount();
+  }
+  
+  private Optional<Account> computeAccount() {
+    if (!currentCred.isPresent()) {
       return Optional.empty();
     }
-    
+    if (cachedAccount.isPresent()) {
+      return cachedAccount;
+    }
+    Credential credential = currentCred.get();
+    try {
+      HttpRequestInitializer chainedInitializer = new HttpRequestInitializer() {
+        @Override
+        public void initialize(HttpRequest httpRequest) throws IOException {
+          credential.initialize(httpRequest);
+          requestTimeoutSetter.initialize(httpRequest);
+        }
+      };
+      
+      Oauth2 oauth2 = new Oauth2.Builder(transport, jsonFactory, credential)
+          .setHttpRequestInitializer(chainedInitializer)
+          .setApplicationName(CloudToolsInfo.USER_AGENT)
+          .build();
+      
+      UserInfo userInfo = new UserInfo(oauth2.userinfo().get().execute());
+      Optional<Account> result = Optional.of(new Account(
+          userInfo.getEmail(), credential, userInfo.getName(), userInfo.getPicture()));
+      cachedAccount = result;
+      return result;
+    } catch (IOException ex) {
+      LOGGER.log(Level.SEVERE, "Error when computing account from ADC file", ex);
+      return Optional.empty();
+    }
   }
   
   /**
@@ -119,29 +135,24 @@ public class DefaultAccountProvider extends AccountProvider {
    */
   @Override
   public Optional<Credential> getCredential() {
-    return getAccount().map(Account::getOAuth2Credential);
+    return currentCred;
   }
   
-  Account getAccount(Credential credential) throws IOException {
-    if (accountCache.containsKey(credential)) {
-      return accountCache.get(credential);
+  private Optional<Credential> computeCredential() {
+    File credsFile = getCredentialFile();
+    try (FileInputStream credsStream = new FileInputStream(credsFile)) {
+      return Optional.ofNullable(GoogleCredential.fromStream(credsStream));
+    } catch (IOException ex) {
+      LOGGER.log(Level.SEVERE, "Error when computing credentials from ADC file", ex);
+      return Optional.empty();
     }
-    HttpRequestInitializer chainedInitializer = new HttpRequestInitializer() {
-      @Override
-      public void initialize(HttpRequest httpRequest) throws IOException {
-        credential.initialize(httpRequest);
-        requestTimeoutSetter.initialize(httpRequest);
-      }
-    };
-    
-    Oauth2 oauth2 = new Oauth2.Builder(transport, jsonFactory, credential)
-        .setHttpRequestInitializer(chainedInitializer)
-        .setApplicationName(CloudToolsInfo.USER_AGENT)
-        .build();
-    
-    UserInfo userInfo = new UserInfo(oauth2.userinfo().get().execute());
-    Account result = new Account(userInfo.getEmail(), credential, userInfo.getName(), userInfo.getPicture());
-    accountCache.put(credential, result);
-    return result;
+  }
+  
+  private Optional<File> getCredentialFile() {
+    File credsFile = new File(ADC_PATH);
+    if (!credsFile.exists()) {
+      return Optional.empty();
+    }
+    return Optional.of(credsFile);
   }
 }
