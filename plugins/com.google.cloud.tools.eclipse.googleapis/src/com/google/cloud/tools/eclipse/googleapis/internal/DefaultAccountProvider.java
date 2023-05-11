@@ -29,8 +29,12 @@ import com.google.auth.oauth2.GoogleAuthUtils;
 import com.google.cloud.tools.eclipse.googleapis.Account;
 import com.google.cloud.tools.eclipse.googleapis.UserInfo;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.gson.stream.JsonReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.Timer;
@@ -70,11 +74,10 @@ public class DefaultAccountProvider extends AccountProvider {
   }
   
   private final void checkIfAdcPathChanged() {
-    Optional<Credential> newCred = computeCredential();
-    String newToken = newCred.map(Credential::getRefreshToken).orElse("");
+    String newToken = getRefreshTokenFromCredentialFile();
     String currtoken = currentCred.map(Credential::getRefreshToken).orElse("");
     if (newToken.compareTo(currtoken) != 0) {
-      currentCred = newCred;
+      currentCred = computeCredential();
       cachedAccount = Optional.empty(); // lazily recompute the account
       propagateCredentialChange();
     }
@@ -139,8 +142,11 @@ public class DefaultAccountProvider extends AccountProvider {
   }
   
   private Optional<Credential> computeCredential() {
-    File credsFile = getCredentialFile();
-    try (FileInputStream credsStream = new FileInputStream(credsFile)) {
+    Optional<File> credsFile = getCredentialFile();
+    if (!credsFile.get().exists()) { 
+      return Optional.empty();
+    }
+    try (FileInputStream credsStream = new FileInputStream(credsFile.get())) {
       return Optional.ofNullable(GoogleCredential.fromStream(credsStream));
     } catch (IOException ex) {
       LOGGER.log(Level.SEVERE, "Error when computing credentials from ADC file", ex);
@@ -149,10 +155,28 @@ public class DefaultAccountProvider extends AccountProvider {
   }
   
   private Optional<File> getCredentialFile() {
-    File credsFile = new File(ADC_PATH);
-    if (!credsFile.exists()) {
-      return Optional.empty();
+    return Optional.of(new File(ADC_PATH));
+  }
+  
+  /**
+   * Manually reads the refresh token from the credential file. 
+   * This saves a server trip that obtains an access token when instantiating credentials
+   * @return refresh token from ADC well-known file
+   */
+  private String getRefreshTokenFromCredentialFile() {
+    Optional<File> credsFile = getCredentialFile();
+    if (!credsFile.map(File::exists).orElse(false)) {
+      return "";
     }
-    return Optional.of(credsFile);
+    
+    try (JsonReader reader = new JsonReader(new FileReader(credsFile.get()))) {
+      JsonElement root = JsonParser.parseReader(reader);
+      return root.getAsJsonObject().get("refresh_token").getAsString();
+    } catch (IOException ex) {
+      LOGGER.log(Level.SEVERE, "Could not open credentials file");
+    }
+    return "";
+     
+    
   }
 }
