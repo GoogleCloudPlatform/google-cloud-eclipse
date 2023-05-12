@@ -142,11 +142,11 @@ public class DefaultAccountProvider extends AccountProvider {
   }
   
   private Optional<Credential> computeCredential() {
-    Optional<File> credsFile = getCredentialFile();
-    if (!credsFile.get().exists()) { 
+    File credsFile = getCredentialFile();
+    if (!credsFile.exists()) { 
       return Optional.empty();
     }
-    try (FileInputStream credsStream = new FileInputStream(credsFile.get())) {
+    try (FileInputStream credsStream = new FileInputStream(credsFile)) {
       return Optional.ofNullable(GoogleCredential.fromStream(credsStream));
     } catch (IOException ex) {
       LOGGER.log(Level.SEVERE, "Error when computing credentials from ADC file", ex);
@@ -154,8 +154,8 @@ public class DefaultAccountProvider extends AccountProvider {
     }
   }
   
-  private Optional<File> getCredentialFile() {
-    return Optional.of(new File(ADC_PATH));
+  private File getCredentialFile() {
+    return new File(ADC_PATH);
   }
   
   /**
@@ -164,12 +164,12 @@ public class DefaultAccountProvider extends AccountProvider {
    * @return refresh token from ADC well-known file
    */
   private String getRefreshTokenFromCredentialFile() {
-    Optional<File> credsFile = getCredentialFile();
-    if (!credsFile.map(File::exists).orElse(false)) {
+    File credsFile = getCredentialFile();
+    if (!credsFile.exists()) {
       return "";
     }
     
-    try (JsonReader reader = new JsonReader(new FileReader(credsFile.get()))) {
+    try (JsonReader reader = new JsonReader(new FileReader(credsFile))) {
       JsonElement root = JsonParser.parseReader(reader);
       return root.getAsJsonObject().get("refresh_token").getAsString();
     } catch (IOException ex) {
