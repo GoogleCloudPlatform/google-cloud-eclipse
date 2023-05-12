@@ -33,6 +33,8 @@ import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Link;
 
@@ -42,6 +44,7 @@ public class AccountSelector extends Composite {
   private ListenerList<Runnable> selectionListeners = new ListenerList<>();
   private Optional<Account> prevAccount = Optional.empty();
   private static Logger logger = Logger.getLogger(AccountSelector.class.getName());
+  private Runnable onCredentialChange = () -> forceAccountCheck();
 
   @VisibleForTesting Link accountEmail;
 
@@ -65,9 +68,15 @@ public class AccountSelector extends Composite {
     GridDataFactory.fillDefaults().grab(true, false).applyTo(accountEmailComposite);
     GridLayoutFactory.fillDefaults().generateLayout(accountEmailComposite);
     GridLayoutFactory.fillDefaults().generateLayout(this);
-    apiFactory.addCredentialChangeListener(() -> {
-      forceAccountCheck();
+    apiFactory.addCredentialChangeListener(onCredentialChange);
+    addDisposeListener(new DisposeListener() {
+      
+      @Override
+      public void widgetDisposed(DisposeEvent e) {
+        apiFactory.removeCredentialChangeListener(onCredentialChange);
+      }
     });
+    
   }
   
   /**
