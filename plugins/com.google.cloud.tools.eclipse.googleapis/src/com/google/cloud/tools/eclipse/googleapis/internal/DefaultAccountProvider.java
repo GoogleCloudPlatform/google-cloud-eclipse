@@ -36,9 +36,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
 import java.util.Optional;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -47,7 +54,7 @@ import java.util.logging.Logger;
  */
 public class DefaultAccountProvider extends AccountProvider {
 
-  private static final String ADC_PATH = GoogleAuthUtils.getWellKnownCredentialsPath();
+  private static final Path ADC_PATH = Paths.get(GoogleAuthUtils.getWellKnownCredentialsPath()).toAbsolutePath();
   public static final DefaultAccountProvider INSTANCE = new DefaultAccountProvider();
   private static final int USER_INFO_QUERY_HTTP_CONNECTION_TIMEOUT = 5000 /* ms */;
   private static final int USER_INFO_QUERY_HTTP_READ_TIMEOUT = 3000 /* ms */;
@@ -58,22 +65,48 @@ public class DefaultAccountProvider extends AccountProvider {
   
   private Optional<Credential> currentCred = computeCredential();
   private Optional<Account> cachedAccount = Optional.empty();
-  private Timer adcPathPoller;
+  private WatchService watchService;
+  private final ExecutorService executorService = Executors.newSingleThreadExecutor();
   
   private DefaultAccountProvider() {
-    adcPathPoller = new Timer();
-    TimerTask task = new TimerTask() {
-      @Override
-      public void run() {
-          checkIfAdcPathChanged();
-      }
-    };
-
-    // Schedule the task to run every second
-    adcPathPoller.scheduleAtFixedRate(task, 0, 1000);
+    initWatchService();
   }
   
-  private final void checkIfAdcPathChanged() {
+  private void initWatchService() {
+    Path adcFolderPath = ADC_PATH.getParent();
+    try {
+      watchService = FileSystems.getDefault().newWatchService();
+      adcFolderPath.register(watchService, 
+          StandardWatchEventKinds.ENTRY_MODIFY,
+          StandardWatchEventKinds.ENTRY_DELETE,
+          StandardWatchEventKinds.ENTRY_CREATE);
+    } catch (IOException ex) {
+      LOGGER.log(Level.SEVERE, "Error creating watch service", ex);
+    }
+    executorService.execute(() -> {
+      while (true) {
+        WatchKey key;
+        try {
+          key = watchService.take();
+        } catch (InterruptedException ex) {
+          LOGGER.log(Level.SEVERE, "Error creating watch service", ex);
+          continue;
+        }
+        for (WatchEvent<?> event : key.pollEvents()) {
+          LOGGER.log(Level.FINE, "Detected change in ADC file");
+          Path affectedFile = Paths.get(adcFolderPath.toAbsolutePath().toString(), 
+              ((Path) event.context()).toString()).toAbsolutePath();
+          if (affectedFile.equals(ADC_PATH)) {
+            confirmAdcCredsChanged();
+            break; // prevent propagation for two events on same file and different kind
+          }
+        }
+        key.reset();
+      }
+    });
+  }
+  
+  private final void confirmAdcCredsChanged() {
     String newToken = getRefreshTokenFromCredentialFile();
     String currtoken = currentCred.map(Credential::getRefreshToken).orElse("");
     if (newToken.compareTo(currtoken) != 0) {
@@ -155,7 +188,7 @@ public class DefaultAccountProvider extends AccountProvider {
   }
   
   private File getCredentialFile() {
-    return new File(ADC_PATH);
+    return ADC_PATH.toFile();
   }
   
   /**
