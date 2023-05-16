@@ -125,6 +125,7 @@ public class GcpLocalRunTabTest {
     shell = shellResource.getShell();
     tab = new GcpLocalRunTab(environmentTab, apiFactory, projectRepository);
     tab.createControl(shell);
+    selectAccount(null);
     accountSelector = CompositeUtil.findControl(shell, AccountSelector.class);
     selectAccount(account1);
 
