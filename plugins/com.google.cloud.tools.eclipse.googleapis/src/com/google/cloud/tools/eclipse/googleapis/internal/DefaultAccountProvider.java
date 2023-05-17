@@ -54,7 +54,8 @@ import java.util.logging.Logger;
  */
 public class DefaultAccountProvider extends AccountProvider {
 
-  private static final Path ADC_PATH = Paths.get(GoogleAuthUtils.getWellKnownCredentialsPath()).toAbsolutePath();
+  protected Path ADC_PATH = Paths.get(GoogleAuthUtils.getWellKnownCredentialsPath()).toAbsolutePath();
+  
   public static final DefaultAccountProvider INSTANCE = new DefaultAccountProvider();
   private static final int USER_INFO_QUERY_HTTP_CONNECTION_TIMEOUT = 5000 /* ms */;
   private static final int USER_INFO_QUERY_HTTP_READ_TIMEOUT = 3000 /* ms */;
@@ -68,11 +69,12 @@ public class DefaultAccountProvider extends AccountProvider {
   private WatchService watchService;
   private final ExecutorService executorService = Executors.newSingleThreadExecutor();
   
-  private DefaultAccountProvider() {
+  
+  protected DefaultAccountProvider() {
     initWatchService();
   }
   
-  private void initWatchService() {
+  protected void initWatchService() {
     Path adcFolderPath = ADC_PATH.getParent();
     try {
       watchService = FileSystems.getDefault().newWatchService();
@@ -133,7 +135,7 @@ public class DefaultAccountProvider extends AccountProvider {
     return INSTANCE.computeAccount();
   }
   
-  private Optional<Account> computeAccount() {
+  protected Optional<Account> computeAccount() {
     if (!currentCred.isPresent()) {
       return Optional.empty();
     }
@@ -174,7 +176,7 @@ public class DefaultAccountProvider extends AccountProvider {
     return currentCred;
   }
   
-  private Optional<Credential> computeCredential() {
+  protected Optional<Credential> computeCredential() {
     File credsFile = getCredentialFile();
     if (!credsFile.exists()) { 
       return Optional.empty();
@@ -187,7 +189,7 @@ public class DefaultAccountProvider extends AccountProvider {
     }
   }
   
-  private File getCredentialFile() {
+  protected File getCredentialFile() {
     return ADC_PATH.toFile();
   }
   
@@ -196,7 +198,7 @@ public class DefaultAccountProvider extends AccountProvider {
    * This saves a server trip that obtains an access token when instantiating credentials
    * @return refresh token from ADC well-known file
    */
-  private String getRefreshTokenFromCredentialFile() {
+  protected String getRefreshTokenFromCredentialFile() {
     File credsFile = getCredentialFile();
     if (!credsFile.exists()) {
       return "";
