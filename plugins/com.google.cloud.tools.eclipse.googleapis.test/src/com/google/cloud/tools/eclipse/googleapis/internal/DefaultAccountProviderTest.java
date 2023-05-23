@@ -63,7 +63,7 @@ public class DefaultAccountProviderTest {
   static final String TEMP_ADC_FILENAME = "test_adc.json";
   
   @Rule
-  protected TemporaryFolder tempFolder = new TemporaryFolder();
+  public TemporaryFolder tempFolder = new TemporaryFolder();
   
   @Before
   public void setup() {
