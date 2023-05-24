@@ -39,7 +39,7 @@ public abstract class AccountProvider {
     credentialChangeListeners.remove(listener);
   }
   
-  protected final void propagateCredentialChange() {
+  protected void propagateCredentialChange() {
     credentialChangeListeners.forEach(listener -> listener.run());
   }
   

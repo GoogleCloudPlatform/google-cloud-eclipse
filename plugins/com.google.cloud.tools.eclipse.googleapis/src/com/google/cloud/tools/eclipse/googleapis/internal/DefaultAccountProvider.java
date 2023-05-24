@@ -108,7 +108,7 @@ public class DefaultAccountProvider extends AccountProvider {
     });
   }
   
-  private final void confirmAdcCredsChanged() {
+  protected void confirmAdcCredsChanged() {
     String newToken = getRefreshTokenFromCredentialFile();
     String currtoken = currentCred.map(Credential::getRefreshToken).orElse("");
     if (newToken.compareTo(currtoken) != 0) {

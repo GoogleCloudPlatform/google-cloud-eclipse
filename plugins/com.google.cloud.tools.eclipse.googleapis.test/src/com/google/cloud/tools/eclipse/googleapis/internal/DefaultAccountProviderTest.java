@@ -31,9 +31,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -77,18 +75,25 @@ public class DefaultAccountProviderTest {
   
   @Test
   public void testFileWriteTriggersListeners() {
-    List<Integer> changeDetectedCounter = Collections.singletonList(Integer.valueOf(0));
-    Runnable listener = () -> changeDetectedCounter.replaceAll(x -> x + 1);
-    provider.addCredentialChangeListener(listener);
+    CredentialChangeListener listener = new CredentialChangeListener();
+    provider.addCredentialChangeListener(listener::onFileChanged);
     login(TOKEN_1);
-    assertEquals(1, changeDetectedCounter.get(0).intValue());
+    assertEquals(1, listener.getCallCount());
+    assertEquals(2, provider.getNumberOfCredentialChangeChecks());
+    assertEquals(2, provider.getNumberOfCredentialPropagations());
     login(TOKEN_2);
-    assertEquals(2, changeDetectedCounter.get(0).intValue());
+    assertEquals(2, listener.getCallCount());
+    assertEquals(3, provider.getNumberOfCredentialChangeChecks());
+    assertEquals(3, provider.getNumberOfCredentialPropagations());
+    provider.removeCredentialChangeListener(listener::onFileChanged);
     login(TOKEN_1);
-    assertEquals(3, changeDetectedCounter.get(0).intValue());
-    provider.removeCredentialChangeListener(listener);
+    assertEquals(2, listener.getCallCount());
+    assertEquals(4, provider.getNumberOfCredentialChangeChecks());
+    assertEquals(4, provider.getNumberOfCredentialPropagations());
     logout();
-    assertEquals(3, changeDetectedCounter.get(0).intValue());
+    assertEquals(2, listener.getCallCount());
+    assertEquals(5, provider.getNumberOfCredentialChangeChecks());
+    assertEquals(5, provider.getNumberOfCredentialPropagations());
   }
   
   @Test
@@ -157,11 +162,25 @@ public class DefaultAccountProviderTest {
     }
   }
   
-  
+  public class CredentialChangeListener {
+
+    private int callCount = 0;
+
+    public void onFileChanged() {
+        callCount++;
+    }
+
+    public int getCallCount() {
+        return callCount;
+    }
+
+}
   
   public class TestDefaultAccountProvider extends DefaultAccountProvider {
     
     final Map<String, Account> accountMap = new HashMap<>();
+    private int numberOfCredentialChangeChecks = 0;
+    private int numberOfCredentialPropagations = 0;
     
         
     public TestDefaultAccountProvider() {
@@ -171,6 +190,26 @@ public class DefaultAccountProviderTest {
         fail();
       }
       initWatchService();
+    }
+    
+    public int getNumberOfCredentialChangeChecks() {
+      return numberOfCredentialChangeChecks;
+    }
+    
+    public int getNumberOfCredentialPropagations() {
+      return numberOfCredentialPropagations;
+    }
+    
+    @Override
+    protected void confirmAdcCredsChanged() {
+      numberOfCredentialChangeChecks++;
+      super.confirmAdcCredsChanged();
+    }
+    
+    @Override
+    protected void propagateCredentialChange() {
+      numberOfCredentialPropagations++;
+      super.propagateCredentialChange();
     }
     
     public void addAccount(String refreshToken, Account acct) {
