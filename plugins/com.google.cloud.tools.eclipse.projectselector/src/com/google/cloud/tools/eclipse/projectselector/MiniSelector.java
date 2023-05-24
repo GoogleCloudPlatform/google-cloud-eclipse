@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.projectselector;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.ui.util.DisplayExecutor;
 import com.google.cloud.tools.eclipse.util.jobs.FuturisticJob;
@@ -57,14 +58,12 @@ public class MiniSelector implements ISelectionProvider {
   private Executor displayExecutor;
   private ComboViewer comboViewer;
   private FetchProjectsJob fetchProjectsJob;
-  private IGoogleApiFactory apiFactory;
 
   /** Stashed projectID to be selected when fetch-project-list completes. */
   private String toBeSelectedProjectId;
 
-  public MiniSelector(Composite container, IGoogleApiFactory apiFactory) {
-    this.apiFactory = apiFactory;
-    projectRepository = new ProjectRepository(apiFactory);
+  public MiniSelector(Composite container) {
+    projectRepository = new ProjectRepository();
     create(container);
   }
 
@@ -106,7 +105,7 @@ public class MiniSelector implements ISelectionProvider {
   }
 
   public Credential getCredential() {
-    return apiFactory.getCredential().orElse(null);
+    return GoogleApiFactory.INSTANCE.getCredential().orElse(null);
   }
 
   /**
@@ -124,7 +123,7 @@ public class MiniSelector implements ISelectionProvider {
     comboViewer.setInput(EMPTY_PROJECTS);
 
     cancelFetch();
-    if (!apiFactory.getCredential().isPresent()) {
+    if (!GoogleApiFactory.INSTANCE.getCredential().isPresent()) {
       logger.log(Level.WARNING, "Tried to fetch() projects without credentials set");
       return;
     }
@@ -222,7 +221,7 @@ public class MiniSelector implements ISelectionProvider {
 
     public FetchProjectsJob() {
       super("Determining accessible projects");
-      credential = MiniSelector.this.apiFactory.getCredential().orElse(null);
+      credential = GoogleApiFactory.INSTANCE.getCredential().orElse(null);
     }
 
     @Override
@@ -234,7 +233,7 @@ public class MiniSelector implements ISelectionProvider {
     @Override
     protected boolean isStale() {
       // check if the MiniSelector's credential has changed
-      return credential != MiniSelector.this.apiFactory.getCredential().orElse(null);
+      return credential != GoogleApiFactory.INSTANCE.getCredential().orElse(null);
     }
   }
 }
