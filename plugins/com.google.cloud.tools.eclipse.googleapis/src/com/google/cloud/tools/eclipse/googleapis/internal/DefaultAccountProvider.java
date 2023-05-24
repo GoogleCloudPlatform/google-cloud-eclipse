@@ -82,7 +82,7 @@ public class DefaultAccountProvider extends AccountProvider {
           StandardWatchEventKinds.ENTRY_MODIFY,
           StandardWatchEventKinds.ENTRY_DELETE,
           StandardWatchEventKinds.ENTRY_CREATE);
-      LOGGER.log(Level.FINE, "Watching for file changes in: " + adcFolderPath.toString());
+      LOGGER.log(Level.INFO, "Watching for file changes in: " + adcFolderPath.toString());
       System.out.println("xxxxxx");
     } catch (IOException ex) {
       LOGGER.log(Level.SEVERE, "Error creating watch service", ex);
@@ -97,7 +97,7 @@ public class DefaultAccountProvider extends AccountProvider {
           continue;
         }
         for (WatchEvent<?> event : key.pollEvents()) {
-          LOGGER.log(Level.FINE, "Detected change in ADC file");
+          LOGGER.log(Level.INFO, "Detected change in ADC file");
           Path affectedFile = Paths.get(adcFolderPath.toAbsolutePath().toString(), 
               ((Path) event.context()).toString()).toAbsolutePath();
           if (affectedFile.equals(ADC_PATH)) {
