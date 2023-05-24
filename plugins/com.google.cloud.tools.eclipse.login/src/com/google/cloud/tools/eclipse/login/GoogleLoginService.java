@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.login;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
 import com.google.cloud.tools.eclipse.googleapis.Account;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.ui.LoginServiceUi;
 import com.google.cloud.tools.login.JavaPreferenceOAuthDataStore;
@@ -53,7 +52,6 @@ public class GoogleLoginService implements IGoogleLoginService {
           "https://www.googleapis.com/auth/cloud-platform" //$NON-NLS-1$
       )));
   
-  private static final IGoogleApiFactory apiFactory = new GoogleApiFactory();
 
   /**
    * Returns a URL through which users can login.
@@ -129,7 +127,7 @@ public class GoogleLoginService implements IGoogleLoginService {
   @Override
   public Set<Account> getAccounts() {
     Set<Account> result = new HashSet<>();  
-    apiFactory.getAccount().ifPresent(result::add);
+    GoogleApiFactory.INSTANCE.getAccount().ifPresent(result::add);
     return result;
   }
 
