@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.googleapis.Account;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import java.util.Optional;
 import org.eclipse.swt.widgets.Shell;
@@ -54,6 +55,7 @@ public class AccountSelectorTest {
   @Before
   public void setUp() {
     shell = shellTestResource.getShell();
+    GoogleApiFactory.setInstance((GoogleApiFactory) apiFactory);
     when(account1.getEmail()).thenReturn("some-email-1@example.com");
     when(account1.getOAuth2Credential()).thenReturn(credential1);
     when(account2.getEmail()).thenReturn("some-email-2@example.com");
@@ -75,7 +77,7 @@ public class AccountSelectorTest {
  
   @Test
   public void testComboSetup_noAccount() {
-    AccountSelector selector = new AccountSelector(shell, apiFactory);
+    AccountSelector selector = new AccountSelector(shell);
     assertEquals(0, selector.getAccountCount());
     assertNull(selector.getSelectedCredential());
     assertTrue(selector.getSelectedEmail().isEmpty());
@@ -89,7 +91,7 @@ public class AccountSelectorTest {
   public void testComboSetup_oneAccount() {
     setAccount(account1);
     
-    AccountSelector selector = new AccountSelector(shell, apiFactory);
+    AccountSelector selector = new AccountSelector(shell);
     assertNotNull(selector.getSelectedCredential());
     assertFalse(selector.getSelectedEmail().isEmpty());
     assertEquals(1, selector.getAccountCount());
@@ -111,14 +113,14 @@ public class AccountSelectorTest {
 
   @Test
   public void testIsEmailAvailable_noAccount() {
-    AccountSelector selector = new AccountSelector(shell, apiFactory);
+    AccountSelector selector = new AccountSelector(shell);
     assertFalse(selector.isEmailAvailable(null));
     assertFalse(selector.isEmailAvailable(""));
   }
 
   @Test
   public void testGetSelectedCredential() {
-    AccountSelector selector = new AccountSelector(shell, apiFactory);
+    AccountSelector selector = new AccountSelector(shell);
 
     assertTrue(selector.getSelectedEmail().isEmpty());
     assertNull(selector.getSelectedCredential());
@@ -136,14 +138,14 @@ public class AccountSelectorTest {
 
   @Test
   public void testIsSignedIn_notSignedIn() {
-    AccountSelector selector = new AccountSelector(shell, apiFactory);
+    AccountSelector selector = new AccountSelector(shell);
     assertFalse(selector.isSignedIn());
   }
 
   @Test
   public void testIsSignedIn_signedIn() {
     setAccount(account1);
-    AccountSelector selector = new AccountSelector(shell, apiFactory);
+    AccountSelector selector = new AccountSelector(shell);
     assertTrue(selector.isSignedIn());
   }
 }
