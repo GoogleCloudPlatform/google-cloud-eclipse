@@ -198,6 +198,7 @@ public class DefaultAccountProviderTest {
     public TestDefaultAccountProvider() {
       try {
         ADC_PATH = tempFolder.newFile(TEMP_ADC_FILENAME).toPath();
+        System.out.println("TestDefaultAccountProvider.ADC_PATH: " + ADC_PATH.toString());
       } catch (IOException ex) {
         fail();
       }
@@ -214,12 +215,14 @@ public class DefaultAccountProviderTest {
     
     @Override
     protected void confirmAdcCredsChanged() {
+      System.out.println("confirmAdcCredsChanged()");
       numberOfCredentialChangeChecks++;
       super.confirmAdcCredsChanged();
     }
     
     @Override
     protected void propagateCredentialChange() {
+      System.out.println("propagateCredentialChange()");
       numberOfCredentialPropagations++;
       super.propagateCredentialChange();
     }

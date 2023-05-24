@@ -82,6 +82,8 @@ public class DefaultAccountProvider extends AccountProvider {
           StandardWatchEventKinds.ENTRY_MODIFY,
           StandardWatchEventKinds.ENTRY_DELETE,
           StandardWatchEventKinds.ENTRY_CREATE);
+      LOGGER.log(Level.FINE, "Watching for file changes in: " + adcFolderPath.toString());
+      System.out.println("xxxxxx");
     } catch (IOException ex) {
       LOGGER.log(Level.SEVERE, "Error creating watch service", ex);
     }
