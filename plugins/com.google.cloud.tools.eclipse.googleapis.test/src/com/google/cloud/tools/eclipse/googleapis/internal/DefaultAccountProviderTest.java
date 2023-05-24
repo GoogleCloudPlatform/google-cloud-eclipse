@@ -65,6 +65,7 @@ public class DefaultAccountProviderTest {
   
   @Before
   public void setup() {
+    System.out.println("Temp folder location: " + tempFolder.getRoot().toPath().toString());
     provider = new TestDefaultAccountProvider();
     Account acct1 = new Account(EMAIL_1, mock(Credential.class), NAME_1, AVATAR_1);
     Account acct2 = new Account(EMAIL_2, mock(Credential.class), NAME_2, AVATAR_2);
@@ -138,18 +139,29 @@ public class DefaultAccountProviderTest {
   
   
   private Path getTempAdcPath() {
-    return tempFolder.getRoot().toPath().resolve(TEMP_ADC_FILENAME);
+    Path result = tempFolder.getRoot().toPath().resolve(TEMP_ADC_FILENAME);
+    System.out.println("getTempAdcPath(): " + result.toString());
+    return result;
   }
   
   private void login(String token) {
     try {
       File adcFile = getTempAdcPath().toFile();
+      System.out.println("login() adcFile path: " + adcFile.toPath().toString());
       if (!adcFile.exists()) {
+          System.out.println("login() creating new file");
           adcFile = tempFolder.newFile(TEMP_ADC_FILENAME);
       }
+      System.out.println(
+          "login() pre-write contents: " + Files.readAllLines(adcFile.toPath())
+          .stream().collect(Collectors.joining()));
+      assertTrue(adcFile.exists());
       try (FileWriter writer = new FileWriter(adcFile)) {
         writer.write(token);
       }
+      System.out.println(
+          "login() post-write contents: " + Files.readAllLines(adcFile.toPath())
+          .stream().collect(Collectors.joining()));
     } catch (IOException ex) {
       fail(ex.getMessage());
     }
