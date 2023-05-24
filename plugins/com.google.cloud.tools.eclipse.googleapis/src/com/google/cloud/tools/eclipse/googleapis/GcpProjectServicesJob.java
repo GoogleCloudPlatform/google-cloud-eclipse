@@ -22,6 +22,7 @@ import com.google.api.services.servicemanagement.ServiceManagement;
 import com.google.api.services.servicemanagement.ServiceManagement.Services;
 import com.google.api.services.servicemanagement.model.ListServicesResponse;
 import com.google.api.services.servicemanagement.model.ManagedService;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.util.jobs.FuturisticJob;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
@@ -46,14 +47,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
  * </pre>
  */
 public class GcpProjectServicesJob extends FuturisticJob<List<String>> {
-  private final IGoogleApiFactory apiFactory;
 
   /** The GCP Project ID to check. */
   private final String projectId;
 
-  public GcpProjectServicesJob(IGoogleApiFactory apiFactory, String projectId) {
+  public GcpProjectServicesJob(String projectId) {
     super("Checking GCP project configuration");
-    this.apiFactory = apiFactory;
     this.projectId = projectId;
   }
 
@@ -66,7 +65,7 @@ public class GcpProjectServicesJob extends FuturisticJob<List<String>> {
   protected List<String> compute(IProgressMonitor monitor)
       throws GoogleJsonResponseException, IOException {
     String originalProjectId = this.projectId;
-    ServiceManagement serviceManagement = apiFactory.newServiceManagementApi();
+    ServiceManagement serviceManagement = GoogleApiFactory.INSTANCE.newServiceManagementApi();
     ListServicesResponse response = null;
     Collection<String> serviceIds = new ArrayList<>();
     do {
