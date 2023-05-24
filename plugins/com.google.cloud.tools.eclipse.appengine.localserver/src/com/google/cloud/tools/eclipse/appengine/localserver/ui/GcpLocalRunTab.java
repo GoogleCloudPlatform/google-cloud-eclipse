@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.appengine.localserver.ServiceAccountUtil;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
@@ -145,6 +144,7 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     // Account row
     new Label(composite, SWT.LEAD).setText(Messages.getString("label.account")); //$NON-NLS-1$
     accountSelector = new AccountSelector(composite);
+    accountEmailModel = accountSelector.getSelectedEmail();
     accountSelector.addSelectionListener(() -> {
       updateProjectSelector();
 
@@ -241,6 +241,7 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     GridLayoutFactory.swtDefaults().numColumns(4).generateLayout(composite);
 
     setControl(composite);
+    updateProjectSelector();
   }
 
   private void updateProjectSelector() {

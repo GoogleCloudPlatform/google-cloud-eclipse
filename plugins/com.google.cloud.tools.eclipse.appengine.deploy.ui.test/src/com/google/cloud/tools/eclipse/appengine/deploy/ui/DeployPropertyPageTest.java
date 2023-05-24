@@ -23,8 +23,6 @@ import static org.mockito.Mockito.doReturn;
 
 import com.google.cloud.tools.eclipse.googleapis.Account;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
-import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
@@ -46,8 +44,6 @@ public abstract class DeployPropertyPageTest<P extends DeployPreferencesPanel> {
 
   @Rule
   public ShellTestResource shellTestResource = new ShellTestResource();
-  @Mock
-  private IGoogleLoginService loginService;
 
   @Before
   public void setup() {
@@ -56,7 +52,7 @@ public abstract class DeployPropertyPageTest<P extends DeployPreferencesPanel> {
   
   @Test
   public void testCorrectPanelIsShownForFacetedProject() {
-    DeployPropertyPage page = new DeployPropertyPage(loginService);
+    DeployPropertyPage page = new DeployPropertyPage();
     Shell parent = shellTestResource.getShell();
     page.setElement(getProject());
     page.createControl(parent);

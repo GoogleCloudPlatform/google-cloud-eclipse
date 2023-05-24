@@ -79,8 +79,7 @@ public class AccountSelector extends Composite {
    * (By its contract, {@link Account} never carries a {@code null} {@link Credential}.)
    */
   public Credential getSelectedCredential() {
-    Optional<Account> account = getSelectedAccount();
-    return account.isPresent() ? account.get().getOAuth2Credential() : null;
+    return getSelectedAccount().map(Account::getOAuth2Credential).orElse(null);
   }
 
   /**

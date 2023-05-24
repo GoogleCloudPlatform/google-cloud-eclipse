@@ -26,7 +26,6 @@ import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesDialo
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexJarFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexWarFacet;
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
@@ -46,8 +45,7 @@ public class FlexDeployCommandHandler extends DeployCommandHandler {
   }
 
   @Override
-  protected DeployPreferencesDialog newDeployPreferencesDialog(Shell shell, IProject project,
-      IGoogleLoginService loginService) {
+  protected DeployPreferencesDialog newDeployPreferencesDialog(Shell shell, IProject project) {
     String title = Messages.getString("deploy.preferences.dialog.title.flexible");
     return new FlexDeployPreferencesDialog(shell, title, project);
   }

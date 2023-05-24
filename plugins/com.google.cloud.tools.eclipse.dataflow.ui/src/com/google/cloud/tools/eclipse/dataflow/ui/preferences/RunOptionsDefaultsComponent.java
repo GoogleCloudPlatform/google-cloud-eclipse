@@ -32,8 +32,6 @@ import com.google.cloud.tools.eclipse.dataflow.ui.util.SelectFirstMatchingPrefix
 import com.google.cloud.tools.eclipse.googleapis.GcpProjectServicesJob;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApi;
-import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.projectselector.MiniSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
@@ -150,13 +148,21 @@ public class RunOptionsDefaultsComponent {
   public RunOptionsDefaultsComponent(Composite target, int columns, MessageTarget messageTarget,
       DataflowPreferences preferences, WizardPage page, boolean allowIncomplete) {
     this(target, columns, messageTarget, preferences, page, allowIncomplete,
+<<<<<<< HEAD
         PlatformUI.getWorkbench().getService(IGoogleLoginService.class));
+=======
+        PlatformUI.getWorkbench().getService(IGoogleApiFactory.class));
+>>>>>>> origin/gcloud-cli-creds
   }
 
   @VisibleForTesting
   RunOptionsDefaultsComponent(Composite target, int columns, MessageTarget messageTarget,
       DataflowPreferences preferences, WizardPage page, boolean allowIncomplete,
+<<<<<<< HEAD
       IGoogleLoginService loginService) {
+=======
+      IGoogleApiFactory apiFactory) {
+>>>>>>> origin/gcloud-cli-creds
     Preconditions.checkArgument(columns >= 3,
         "DefaultRunOptions must be in a Grid with at least 3 columns"); //$NON-NLS-1$
     this.target = target;
