@@ -209,4 +209,9 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   public static void setAccountProvider(IAccountProvider provider) {
     accountProvider = provider;
   }
+  
+  @VisibleForTesting
+  public static void setInstance(GoogleApiFactory instance) {
+    INSTANCE = instance;
+  }
 }

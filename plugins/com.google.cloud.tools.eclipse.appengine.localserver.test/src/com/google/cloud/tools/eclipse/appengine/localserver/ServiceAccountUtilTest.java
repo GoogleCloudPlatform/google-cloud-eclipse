@@ -33,6 +33,7 @@ import com.google.api.services.iam.v1.Iam.Projects.ServiceAccounts.Keys.Create;
 import com.google.api.services.iam.v1.model.CreateServiceAccountKeyRequest;
 import com.google.api.services.iam.v1.model.ServiceAccountKey;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -70,6 +71,7 @@ public class ServiceAccountUtilTest {
     when(apiFactory.getAccount()).thenReturn(Optional.of(TestAccountProvider.ACCOUNT_1));
     when(apiFactory.getCredential()).thenReturn(Optional.of(TestAccountProvider.CREDENTIAL_ACCOUNT_1));
     when(apiFactory.newIamApi()).thenReturn(iam);
+    GoogleApiFactory.setInstance((GoogleApiFactory) apiFactory);
     when(iam.projects()).thenReturn(projects);
     when(projects.serviceAccounts()).thenReturn(serviceAccounts);
     when(serviceAccounts.keys()).thenReturn(keys);
