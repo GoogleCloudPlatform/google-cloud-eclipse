@@ -78,7 +78,6 @@ public class AppEngineDeployPreferencesPanelTest {
   private HashSet<Account> oneAccountSet;
   private HashSet<Account> twoAccountSet;
   @Mock private IProject project;
-  @Mock private IGoogleApiFactory apiFactory;
   @Mock private Runnable layoutChangedHandler;
   @Mock private Account account1;
   @Mock private Account account2;
