@@ -37,9 +37,8 @@ import org.eclipse.swt.widgets.Shell;
 
 class FlexDeployPreferencesDialog extends DeployPreferencesDialog {
 
-  FlexDeployPreferencesDialog(Shell parentShell, String title, IProject project,
-      IGoogleApiFactory googleApiFactory) {
-    super(parentShell, title, project, googleApiFactory);
+  FlexDeployPreferencesDialog(Shell parentShell, String title, IProject project) {
+    super(parentShell, title, project);
   }
 
   @Override
@@ -64,10 +63,10 @@ class FlexDeployPreferencesDialog extends DeployPreferencesDialog {
 
   @Override
   protected AppEngineDeployPreferencesPanel createDeployPreferencesPanel(Composite container,
-      IProject project, IGoogleApiFactory apiFactory, Runnable layoutChangedHandler,
+      IProject project, Runnable layoutChangedHandler,
       ProjectRepository projectRepository) {
     boolean requireValues = true;
-    return new FlexDeployPreferencesPanel(container, project, apiFactory, layoutChangedHandler,
+    return new FlexDeployPreferencesPanel(container, project, layoutChangedHandler,
         requireValues, projectRepository);
   }
 }

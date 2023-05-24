@@ -28,16 +28,16 @@ import org.eclipse.swt.widgets.Shell;
 class StandardDeployPreferencesDialog extends DeployPreferencesDialog {
 
   StandardDeployPreferencesDialog(Shell parentShell, String title, IProject project,
-      IGoogleLoginService loginService, IGoogleApiFactory googleApiFactory) {
-    super(parentShell, title, project, googleApiFactory);
+      IGoogleLoginService loginService) {
+    super(parentShell, title, project);
   }
 
   @Override
   protected AppEngineDeployPreferencesPanel createDeployPreferencesPanel(Composite container,
-      IProject project, IGoogleApiFactory apiFactory, Runnable layoutChangedHandler,
+      IProject project, Runnable layoutChangedHandler,
       ProjectRepository projectRepository) {
     boolean requireValues = true;
-    return new StandardDeployPreferencesPanel(container, project, apiFactory,
+    return new StandardDeployPreferencesPanel(container, project,
         layoutChangedHandler, requireValues, projectRepository);
   }
 

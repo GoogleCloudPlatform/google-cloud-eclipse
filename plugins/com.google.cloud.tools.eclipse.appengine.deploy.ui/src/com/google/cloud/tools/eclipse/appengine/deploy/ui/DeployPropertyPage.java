@@ -53,8 +53,6 @@ public class DeployPropertyPage extends PropertyPage {
 
   @Inject
   private IGoogleLoginService loginService;
-  @Inject
-  private IGoogleApiFactory googleApiFactory;
 
   private IFacetedProject facetedProject = null;
   private FlexDeployPreferencesPanel flexPreferencesPanel;
@@ -68,9 +66,8 @@ public class DeployPropertyPage extends PropertyPage {
   }
 
   @VisibleForTesting
-  DeployPropertyPage(IGoogleLoginService loginService, IGoogleApiFactory googleApiFactory) {
+  DeployPropertyPage(IGoogleLoginService loginService) {
     this.loginService = loginService;
-    this.googleApiFactory = googleApiFactory;
   }
 
   @Override
@@ -164,8 +161,8 @@ public class DeployPropertyPage extends PropertyPage {
   private void createStandardPanelIfNeeded() {
     if (standardPreferencesPanel == null) {
       standardPreferencesPanel = new StandardDeployPreferencesPanel(
-          container, facetedProject.getProject(), googleApiFactory, this::handleLayoutChange,
-          false /* requireValues */, new ProjectRepository(googleApiFactory));
+          container, facetedProject.getProject(), this::handleLayoutChange,
+          false /* requireValues */, new ProjectRepository());
     }
   }
 

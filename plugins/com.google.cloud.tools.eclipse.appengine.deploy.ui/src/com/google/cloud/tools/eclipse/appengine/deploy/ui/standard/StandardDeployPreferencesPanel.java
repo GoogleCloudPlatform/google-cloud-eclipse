@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui.standard;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.AppEngineDeployPreferencesPanel;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.widgets.Button;
@@ -28,9 +27,9 @@ import org.eclipse.swt.widgets.Composite;
 public class StandardDeployPreferencesPanel extends AppEngineDeployPreferencesPanel {
 
   public StandardDeployPreferencesPanel(Composite parent, IProject project,
-      IGoogleApiFactory apiFactory, Runnable layoutChangedHandler, boolean requireValues,
+      Runnable layoutChangedHandler, boolean requireValues,
       ProjectRepository projectRepository) {
-    super(parent, project, apiFactory, layoutChangedHandler, requireValues, projectRepository,
+    super(parent, project, layoutChangedHandler, requireValues, projectRepository,
         new DeployPreferences(project));
   }
 
