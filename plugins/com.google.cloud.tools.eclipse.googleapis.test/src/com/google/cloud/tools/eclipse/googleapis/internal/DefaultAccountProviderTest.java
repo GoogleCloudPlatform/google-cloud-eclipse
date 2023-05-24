@@ -78,22 +78,22 @@ public class DefaultAccountProviderTest {
     CredentialChangeListener listener = new CredentialChangeListener();
     provider.addCredentialChangeListener(listener::onFileChanged);
     login(TOKEN_1);
-    assertEquals(1, listener.getCallCount());
     assertEquals(2, provider.getNumberOfCredentialChangeChecks());
     assertEquals(2, provider.getNumberOfCredentialPropagations());
+    assertEquals(1, listener.getCallCount());
     login(TOKEN_2);
-    assertEquals(2, listener.getCallCount());
     assertEquals(3, provider.getNumberOfCredentialChangeChecks());
     assertEquals(3, provider.getNumberOfCredentialPropagations());
+    assertEquals(2, listener.getCallCount());
     provider.removeCredentialChangeListener(listener::onFileChanged);
     login(TOKEN_1);
-    assertEquals(2, listener.getCallCount());
     assertEquals(4, provider.getNumberOfCredentialChangeChecks());
     assertEquals(4, provider.getNumberOfCredentialPropagations());
-    logout();
     assertEquals(2, listener.getCallCount());
+    logout();
     assertEquals(5, provider.getNumberOfCredentialChangeChecks());
     assertEquals(5, provider.getNumberOfCredentialPropagations());
+    assertEquals(2, listener.getCallCount());
   }
   
   @Test
