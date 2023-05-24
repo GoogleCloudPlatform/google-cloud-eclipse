@@ -94,7 +94,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   public Optional<Account> getAccount() {
     return accountProvider.getAccount();
   }
- 
+  
   @Override
   public Optional<Credential> getCredential() {
     return accountProvider.getCredential();
