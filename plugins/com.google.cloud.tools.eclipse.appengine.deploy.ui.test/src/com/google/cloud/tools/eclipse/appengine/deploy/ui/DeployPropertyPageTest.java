@@ -21,7 +21,9 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 
+import com.google.cloud.tools.eclipse.googleapis.Account;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
@@ -46,18 +48,15 @@ public abstract class DeployPropertyPageTest<P extends DeployPreferencesPanel> {
   public ShellTestResource shellTestResource = new ShellTestResource();
   @Mock
   private IGoogleLoginService loginService;
-  @Mock
-  private IGoogleApiFactory googleApiFactory;
 
   @Before
   public void setup() {
-    doReturn(Optional.of(TestAccountProvider.ACCOUNT_1)).when(googleApiFactory).getAccount();
-    doReturn(Optional.of(TestAccountProvider.CREDENTIAL_ACCOUNT_1)).when(googleApiFactory).getCredential();
+    TestAccountProvider.setAsDefaultProvider();
   }
   
   @Test
   public void testCorrectPanelIsShownForFacetedProject() {
-    DeployPropertyPage page = new DeployPropertyPage(loginService, googleApiFactory);
+    DeployPropertyPage page = new DeployPropertyPage(loginService);
     Shell parent = shellTestResource.getShell();
     page.setElement(getProject());
     page.createControl(parent);

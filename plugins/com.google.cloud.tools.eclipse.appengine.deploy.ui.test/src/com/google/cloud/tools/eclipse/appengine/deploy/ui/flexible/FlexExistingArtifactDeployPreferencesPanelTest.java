@@ -47,7 +47,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class FlexExistingArtifactDeployPreferencesPanelTest {
 
-  @Mock private IGoogleApiFactory apiFactory;
   @Mock private ProjectRepository projectRepository;
   @Mock private Runnable layoutHandler;
 
@@ -55,9 +54,7 @@ public class FlexExistingArtifactDeployPreferencesPanelTest {
 
   @Before
   public void setup() {
-    doReturn(Optional.of(TestAccountProvider.ACCOUNT_1)).when(apiFactory).getAccount();
-    doReturn(Optional.of(TestAccountProvider.CREDENTIAL_ACCOUNT_1)).when(apiFactory)
-        .getCredential();
+    TestAccountProvider.setAsDefaultProvider();
   }
   
   @Test
@@ -95,7 +92,7 @@ public class FlexExistingArtifactDeployPreferencesPanelTest {
 
   private AppEngineDeployPreferencesPanel createPanel() {
     return new FlexExistingArtifactDeployPreferencesPanel(shellResource.getShell(),
-        apiFactory, layoutHandler, true /* requireValues */, projectRepository);
+        layoutHandler, true /* requireValues */, projectRepository);
   }
 
   private static IStatus getDeployArtifactPathValidationStatus(

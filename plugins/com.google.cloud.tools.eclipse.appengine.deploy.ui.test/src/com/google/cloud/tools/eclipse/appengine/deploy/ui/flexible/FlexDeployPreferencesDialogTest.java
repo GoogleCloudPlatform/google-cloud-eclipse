@@ -21,7 +21,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
@@ -46,18 +45,13 @@ public class FlexDeployPreferencesDialogTest {
 
   private FlexDeployPreferencesDialog dialog;
 
-  private IGoogleApiFactory googleApiFactory;
-
   @Before
   public void setUp() {
-    googleApiFactory = mock(IGoogleApiFactory.class);
-    doReturn(Optional.of(TestAccountProvider.ACCOUNT_1)).when(googleApiFactory).getAccount();
-    doReturn(Optional.of(TestAccountProvider.CREDENTIAL_ACCOUNT_1)).when(googleApiFactory)
-        .getCredential();
+    TestAccountProvider.setAsDefaultProvider();
     IProject project = mock(IProject.class);
     when(project.getName()).thenReturn("");
     when(project.getLocation()).thenReturn(new Path("/"));
-    dialog = new FlexDeployPreferencesDialog(null, "title", project, googleApiFactory);
+    dialog = new FlexDeployPreferencesDialog(null, "title", project);
   }
 
   @Test

@@ -36,14 +36,11 @@ public class StandardDeployPreferencesPanelTest {
 
   @Test
   public void testGetHelpContextId() {
-    IGoogleApiFactory apiFactory = mock(IGoogleApiFactory.class);
-    doReturn(Optional.of(TestAccountProvider.ACCOUNT_1)).when(apiFactory).getAccount();
-    doReturn(Optional.of(TestAccountProvider.CREDENTIAL_ACCOUNT_1)).when(apiFactory)
-        .getCredential();
+    TestAccountProvider.setAsDefaultProvider();
     IProject project = mock(IProject.class);
     when(project.getName()).thenReturn("");
     StandardDeployPreferencesPanel panel = new StandardDeployPreferencesPanel(
-        shellResource.getShell(), project, apiFactory, mock(Runnable.class),
+        shellResource.getShell(), project, mock(Runnable.class),
         false, mock(ProjectRepository.class));
 
     assertEquals(

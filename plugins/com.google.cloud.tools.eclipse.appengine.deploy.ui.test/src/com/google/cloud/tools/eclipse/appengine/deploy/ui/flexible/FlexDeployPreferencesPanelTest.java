@@ -52,7 +52,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class FlexDeployPreferencesPanelTest {
 
-  @Mock private IGoogleApiFactory apiFactory;
   @Mock private ProjectRepository projectRepository;
   @Mock private Runnable layoutHandler;
 
@@ -64,9 +63,7 @@ public class FlexDeployPreferencesPanelTest {
 
   @Before
   public void setUp() {
-    doReturn(Optional.of(TestAccountProvider.ACCOUNT_1)).when(apiFactory).getAccount();
-    doReturn(Optional.of(TestAccountProvider.CREDENTIAL_ACCOUNT_1)).when(apiFactory)
-        .getCredential();
+    TestAccountProvider.setAsDefaultProvider();
     project = projectCreator.getProject();
   }
 
@@ -120,7 +117,7 @@ public class FlexDeployPreferencesPanelTest {
 
   private FlexDeployPreferencesPanel createPanel(boolean requireValues) {
     return new FlexDeployPreferencesPanel(shellResource.getShell(),
-        project, apiFactory, layoutHandler, requireValues, projectRepository);
+        project, layoutHandler, requireValues, projectRepository);
   }
 
   private static IStatus getAppYamlPathValidationStatus(FlexDeployPreferencesPanel panel) {
