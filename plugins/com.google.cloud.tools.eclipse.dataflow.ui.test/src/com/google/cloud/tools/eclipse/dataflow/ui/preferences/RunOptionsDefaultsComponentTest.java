@@ -52,6 +52,7 @@ import com.google.cloud.tools.eclipse.dataflow.ui.page.MessageTarget;
 import com.google.cloud.tools.eclipse.dataflow.ui.preferences.RunOptionsDefaultsComponent.ValidationStatus;
 import com.google.cloud.tools.eclipse.googleapis.Account;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
@@ -116,12 +117,11 @@ public class RunOptionsDefaultsComponentTest {
     
     doCallRealMethod().when(page).setPageComplete(anyBoolean());
     doCallRealMethod().when(page).isPageComplete();
-
+    GoogleApiFactory.setInstance((GoogleApiFactory) apiFactory);
     shell = shellResource.getShell();
     bot = new SWTBot(shell);
     component = new RunOptionsDefaultsComponent(
-        shell, 3, messageTarget, preferences, page, false /* allowIncomplete */, loginService,
-        apiFactory);
+        shell, 3, messageTarget, preferences, page, false /* allowIncomplete */, loginService);
     selector = CompositeUtil.findControl(shell, AccountSelector.class);
     projectID =
         CompositeUtil.findControlAfterLabel(shell, Combo.class, "Cloud Platform &project ID:");
