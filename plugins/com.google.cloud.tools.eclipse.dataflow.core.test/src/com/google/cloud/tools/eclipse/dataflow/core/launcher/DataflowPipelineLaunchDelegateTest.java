@@ -43,6 +43,7 @@ import com.google.cloud.tools.eclipse.dataflow.core.preferences.WritableDataflow
 import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowDependencyManager;
 import com.google.cloud.tools.eclipse.dataflow.core.project.MajorVersion;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
@@ -106,6 +107,7 @@ public class DataflowPipelineLaunchDelegateTest {
 
   @Before
   public void setup() throws Exception {
+    GoogleApiFactory.setInstance((GoogleApiFactory) apiFactory);
     when(pipelineOptionsHierarchyFactory.forProject(
             eq(project), eq(MajorVersion.ONE), any(IProgressMonitor.class)))
         .thenReturn(pipelineOptionsHierarchy);
@@ -119,7 +121,7 @@ public class DataflowPipelineLaunchDelegateTest {
 
     when(dependencyManager.getProjectMajorVersion(project)).thenReturn(MajorVersion.ONE);
     dataflowDelegate = new DataflowPipelineLaunchDelegate(javaDelegate,
-        pipelineOptionsHierarchyFactory, dependencyManager, workspaceRoot, apiFactory);
+        pipelineOptionsHierarchyFactory, dependencyManager, workspaceRoot);
 
     pipelineArguments.put("accountEmail", "");
     when(configurationWorkingCopy.getAttribute(
