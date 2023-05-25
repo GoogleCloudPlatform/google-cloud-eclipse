@@ -73,7 +73,7 @@ public class DefaultAccountProviderTest {
     provider.addAccount(TOKEN_1, acct1);
     provider.addAccount(TOKEN_2, acct2);
     logout();
-    CredentialChangeListener listener = new CredentialChangeListener();
+    listener = new CredentialChangeListener();
     provider.addCredentialChangeListener(listener::onFileChanged);
   }
   
