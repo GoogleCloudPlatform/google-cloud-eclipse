@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.AppEngineDeployPreferencesPanel;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.widgets.Composite;

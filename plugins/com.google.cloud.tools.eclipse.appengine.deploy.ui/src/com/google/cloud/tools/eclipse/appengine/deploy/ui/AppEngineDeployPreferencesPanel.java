@@ -20,7 +20,6 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.FixedMultiValidator;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.ProjectSelectorSelectionChangedListener;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelectorObservableValue;

@@ -18,10 +18,8 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
-import com.google.common.base.Preconditions;
 import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.databinding.dialog.TitleAreaDialogSupport;

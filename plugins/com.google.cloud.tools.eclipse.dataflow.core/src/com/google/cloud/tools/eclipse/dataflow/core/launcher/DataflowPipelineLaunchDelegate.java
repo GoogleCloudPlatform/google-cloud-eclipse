@@ -23,7 +23,6 @@ import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferen
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.ProjectOrWorkspaceDataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowDependencyManager;
 import com.google.cloud.tools.eclipse.dataflow.core.project.MajorVersion;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.CredentialHelper;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
@@ -81,15 +80,13 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
   private final PipelineOptionsHierarchyFactory optionsRetrieverFactory;
   private final IWorkspaceRoot workspaceRoot;
   private final DataflowDependencyManager dependencyManager;
-  private final IGoogleApiFactory googleApiFactory;
 
   public DataflowPipelineLaunchDelegate() {
     this(
         new JavaLaunchDelegate(),
         new ClasspathPipelineOptionsHierarchyFactory(),
         DataflowDependencyManager.create(),
-        ResourcesPlugin.getWorkspace().getRoot(),
-        new GoogleApiFactory());
+        ResourcesPlugin.getWorkspace().getRoot());
   }
 
   @VisibleForTesting
@@ -97,13 +94,11 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
       JavaLaunchDelegate javaLaunchDelegate,
       PipelineOptionsHierarchyFactory optionsHierarchyFactory,
       DataflowDependencyManager dependencyManager,
-      IWorkspaceRoot workspaceRoot,
-      IGoogleApiFactory apiFactory) {
+      IWorkspaceRoot workspaceRoot) {
     delegate = javaLaunchDelegate;
     optionsRetrieverFactory = optionsHierarchyFactory;
     this.dependencyManager = dependencyManager;
     this.workspaceRoot = workspaceRoot;
-    this.googleApiFactory = apiFactory;
   }
 
   @Override
@@ -205,7 +200,7 @@ public class DataflowPipelineLaunchDelegate implements ILaunchConfigurationDeleg
         throw new CoreException(new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, message));
       }
 
-      Credential credential = googleApiFactory.getCredential()
+      Credential credential = GoogleApiFactory.INSTANCE.getCredential()
           .orElseThrow(() -> new CoreException(new Status(
               Status.ERROR, 
               DataflowCorePlugin.PLUGIN_ID, 
