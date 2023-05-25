@@ -528,14 +528,14 @@ public class RunOptionsDefaultsComponentTest {
   @Test
   public void testPartialValidity_allEmpty() {
     component = new RunOptionsDefaultsComponent(shell, 3, messageTarget, preferences, page,
-        true /* allowIncomplete */, apiFactory);
+        true /* allowIncomplete */);
     assertTrue("should be complete when totally empty", page.isPageComplete());
   }
 
   @Test
   public void testPartialValidity_invalidServiceAccountKey() {
     component = new RunOptionsDefaultsComponent(shell, 3, messageTarget, preferences, page,
-        true /* allowIncomplete */, apiFactory);
+        true /* allowIncomplete */);
     serviceAccountKey.setText("/non/existing/file.ext");
 
     assertFalse("should be incomplete with invalid service key even if allowInComplete is true",
