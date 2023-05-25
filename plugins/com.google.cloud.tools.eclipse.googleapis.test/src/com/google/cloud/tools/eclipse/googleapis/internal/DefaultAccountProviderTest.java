@@ -197,13 +197,6 @@ public class DefaultAccountProviderTest {
         
     public TestDefaultAccountProvider(Path adcPath) {
       super(adcPath);
-      try {
-        ADC_PATH = tempFolder.newFile(TEMP_ADC_FILENAME).toPath();
-        System.out.println("TestDefaultAccountProvider.ADC_PATH: " + ADC_PATH.toString());
-      } catch (IOException ex) {
-        fail();
-      }
-      initWatchService();
     }
     
     public int getNumberOfCredentialChangeChecks() {

@@ -54,7 +54,7 @@ import java.util.logging.Logger;
  */
 public class DefaultAccountProvider extends AccountProvider {
 
-  protected Path ADC_PATH = Paths.get(GoogleAuthUtils.getWellKnownCredentialsPath()).toAbsolutePath();
+  protected Path adcPath = Paths.get(GoogleAuthUtils.getWellKnownCredentialsPath()).toAbsolutePath();
   
   public static final DefaultAccountProvider INSTANCE = new DefaultAccountProvider();
   private static final int USER_INFO_QUERY_HTTP_CONNECTION_TIMEOUT = 5000 /* ms */;
@@ -71,16 +71,18 @@ public class DefaultAccountProvider extends AccountProvider {
   
   
   protected DefaultAccountProvider() {
+    LOGGER.info("Default constructor");
     initWatchService();
   }
   
   protected DefaultAccountProvider(Path adcPath) {
-    ADC_PATH = adcPath;
+    LOGGER.info("Constructor with path: " + adcPath.toString());
+    this.adcPath = adcPath;
     initWatchService();
   }
   
   protected void initWatchService() {
-    Path adcFolderPath = ADC_PATH.getParent();
+    Path adcFolderPath = adcPath.getParent();
     try {
       watchService = FileSystems.getDefault().newWatchService();
       adcFolderPath.register(watchService, 
@@ -88,7 +90,6 @@ public class DefaultAccountProvider extends AccountProvider {
           StandardWatchEventKinds.ENTRY_DELETE,
           StandardWatchEventKinds.ENTRY_CREATE);
       LOGGER.log(Level.INFO, "Watching for file changes in: " + adcFolderPath.toString());
-      System.out.println("xxxxxx");
     } catch (IOException ex) {
       LOGGER.log(Level.SEVERE, "Error creating watch service", ex);
     }
@@ -105,7 +106,7 @@ public class DefaultAccountProvider extends AccountProvider {
           LOGGER.log(Level.INFO, "Detected change in ADC file");
           Path affectedFile = Paths.get(adcFolderPath.toAbsolutePath().toString(), 
               ((Path) event.context()).toString()).toAbsolutePath();
-          if (affectedFile.equals(ADC_PATH)) {
+          if (affectedFile.equals(adcPath)) {
             confirmAdcCredsChanged();
             break; // prevent propagation for two events on same file and different kind
           }
@@ -197,7 +198,7 @@ public class DefaultAccountProvider extends AccountProvider {
   }
   
   protected File getCredentialFile() {
-    return ADC_PATH.toFile();
+    return adcPath.toFile();
   }
   
   /**
