@@ -30,8 +30,8 @@ import com.google.cloud.tools.eclipse.dataflow.ui.page.MessageTarget;
 import com.google.cloud.tools.eclipse.dataflow.ui.util.ButtonFactory;
 import com.google.cloud.tools.eclipse.dataflow.ui.util.SelectFirstMatchingPrefixListener;
 import com.google.cloud.tools.eclipse.googleapis.GcpProjectServicesJob;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApi;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.projectselector.MiniSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
@@ -73,7 +73,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.PlatformUI;
 
 /**
  * Collects default run options for Dataflow Pipelines and provides means to create and modify them.
@@ -145,24 +144,9 @@ public class RunOptionsDefaultsComponent {
     this(target, columns, messageTarget, preferences, null, false /* allowIncomplete */);
   }
 
-  public RunOptionsDefaultsComponent(Composite target, int columns, MessageTarget messageTarget,
-      DataflowPreferences preferences, WizardPage page, boolean allowIncomplete) {
-    this(target, columns, messageTarget, preferences, page, allowIncomplete,
-<<<<<<< HEAD
-        PlatformUI.getWorkbench().getService(IGoogleLoginService.class));
-=======
-        PlatformUI.getWorkbench().getService(IGoogleApiFactory.class));
->>>>>>> origin/gcloud-cli-creds
-  }
-
   @VisibleForTesting
   RunOptionsDefaultsComponent(Composite target, int columns, MessageTarget messageTarget,
-      DataflowPreferences preferences, WizardPage page, boolean allowIncomplete,
-<<<<<<< HEAD
-      IGoogleLoginService loginService) {
-=======
-      IGoogleApiFactory apiFactory) {
->>>>>>> origin/gcloud-cli-creds
+      DataflowPreferences preferences, WizardPage page, boolean allowIncomplete) {
     Preconditions.checkArgument(columns >= 3,
         "DefaultRunOptions must be in a Grid with at least 3 columns"); //$NON-NLS-1$
     this.target = target;
