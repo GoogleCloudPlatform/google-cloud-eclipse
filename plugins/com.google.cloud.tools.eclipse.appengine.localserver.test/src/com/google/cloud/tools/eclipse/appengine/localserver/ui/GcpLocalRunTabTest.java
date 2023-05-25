@@ -43,6 +43,7 @@ import com.google.api.services.iam.v1.model.CreateServiceAccountKeyRequest;
 import com.google.api.services.iam.v1.model.ServiceAccountKey;
 import com.google.cloud.tools.eclipse.googleapis.Account;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepositoryException;
@@ -122,9 +123,10 @@ public class GcpLocalRunTabTest {
 
   @Before
   public void setUp() {
+    GoogleApiFactory.setInstance((GoogleApiFactory) apiFactory);
     shell = shellResource.getShell();
     selectAccount(null);
-    tab = new GcpLocalRunTab(environmentTab, apiFactory, projectRepository);
+    tab = new GcpLocalRunTab(environmentTab, projectRepository);
     tab.createControl(shell);
     accountSelector = CompositeUtil.findControl(shell, AccountSelector.class);
     selectAccount(account1);
