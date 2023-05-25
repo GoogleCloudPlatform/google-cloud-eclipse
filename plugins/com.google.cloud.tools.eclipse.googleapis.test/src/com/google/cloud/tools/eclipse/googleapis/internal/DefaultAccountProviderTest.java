@@ -64,9 +64,9 @@ public class DefaultAccountProviderTest {
   public TemporaryFolder tempFolder = new TemporaryFolder();
   
   @Before
-  public void setup() {
+  public void setup() throws IOException {
     System.out.println("Temp folder location: " + tempFolder.getRoot().toPath().toString());
-    provider = new TestDefaultAccountProvider();
+    provider = new TestDefaultAccountProvider(tempFolder.newFile(TEMP_ADC_FILENAME).toPath());
     Account acct1 = new Account(EMAIL_1, mock(Credential.class), NAME_1, AVATAR_1);
     Account acct2 = new Account(EMAIL_2, mock(Credential.class), NAME_2, AVATAR_2);
     provider.addAccount(TOKEN_1, acct1);
@@ -195,7 +195,8 @@ public class DefaultAccountProviderTest {
     private int numberOfCredentialPropagations = 0;
     
         
-    public TestDefaultAccountProvider() {
+    public TestDefaultAccountProvider(Path adcPath) {
+      super(adcPath);
       try {
         ADC_PATH = tempFolder.newFile(TEMP_ADC_FILENAME).toPath();
         System.out.println("TestDefaultAccountProvider.ADC_PATH: " + ADC_PATH.toString());

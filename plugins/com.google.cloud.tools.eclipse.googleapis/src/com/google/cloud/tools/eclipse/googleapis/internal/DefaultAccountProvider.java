@@ -74,6 +74,11 @@ public class DefaultAccountProvider extends AccountProvider {
     initWatchService();
   }
   
+  protected DefaultAccountProvider(Path adcPath) {
+    ADC_PATH = adcPath;
+    initWatchService();
+  }
+  
   protected void initWatchService() {
     Path adcFolderPath = ADC_PATH.getParent();
     try {
