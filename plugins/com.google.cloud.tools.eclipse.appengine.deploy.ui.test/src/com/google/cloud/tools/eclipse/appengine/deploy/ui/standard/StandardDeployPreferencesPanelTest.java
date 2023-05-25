@@ -17,15 +17,12 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.standard;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
-import java.util.Optional;
 import org.eclipse.core.resources.IProject;
 import org.junit.Rule;
 import org.junit.Test;

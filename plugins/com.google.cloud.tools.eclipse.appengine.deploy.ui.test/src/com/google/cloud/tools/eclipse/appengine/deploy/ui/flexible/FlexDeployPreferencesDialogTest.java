@@ -17,14 +17,12 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible;
 
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
-import java.util.Optional;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.widgets.Composite;

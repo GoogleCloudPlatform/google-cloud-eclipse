@@ -144,8 +144,7 @@ public class RunOptionsDefaultsComponent {
     this(target, columns, messageTarget, preferences, null, false /* allowIncomplete */);
   }
 
-  @VisibleForTesting
-  RunOptionsDefaultsComponent(Composite target, int columns, MessageTarget messageTarget,
+  public RunOptionsDefaultsComponent(Composite target, int columns, MessageTarget messageTarget,
       DataflowPreferences preferences, WizardPage page, boolean allowIncomplete) {
     Preconditions.checkArgument(columns >= 3,
         "DefaultRunOptions must be in a Grid with at least 3 columns"); //$NON-NLS-1$
