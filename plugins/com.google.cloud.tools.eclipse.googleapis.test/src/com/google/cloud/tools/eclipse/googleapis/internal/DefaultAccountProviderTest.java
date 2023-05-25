@@ -57,6 +57,7 @@ public class DefaultAccountProviderTest {
   final String TOKEN_2 = "token2";
   final String NAME_2 = "name2";
   final String AVATAR_2 = "avatar2";
+  private CredentialChangeListener listener;
   
   static final String TEMP_ADC_FILENAME = "test_adc.json";
   
@@ -72,26 +73,30 @@ public class DefaultAccountProviderTest {
     provider.addAccount(TOKEN_1, acct1);
     provider.addAccount(TOKEN_2, acct2);
     logout();
+    CredentialChangeListener listener = new CredentialChangeListener();
+    provider.addCredentialChangeListener(listener::onFileChanged);
   }
   
   @Test
-  public void testFileWriteTriggersListeners() {
-    CredentialChangeListener listener = new CredentialChangeListener();
-    provider.addCredentialChangeListener(listener::onFileChanged);
+  public void testFileWriteTriggersListeners() throws InterruptedException {
     login(TOKEN_1);
+    listener.waitUntilChange();
     assertEquals(2, provider.getNumberOfCredentialChangeChecks());
     assertEquals(2, provider.getNumberOfCredentialPropagations());
     assertEquals(1, listener.getCallCount());
     login(TOKEN_2);
+    listener.waitUntilChange();
     assertEquals(3, provider.getNumberOfCredentialChangeChecks());
     assertEquals(3, provider.getNumberOfCredentialPropagations());
     assertEquals(2, listener.getCallCount());
     provider.removeCredentialChangeListener(listener::onFileChanged);
     login(TOKEN_1);
+    Thread.sleep(1000);
     assertEquals(4, provider.getNumberOfCredentialChangeChecks());
     assertEquals(4, provider.getNumberOfCredentialPropagations());
     assertEquals(2, listener.getCallCount());
     logout();
+    Thread.sleep(1000);
     assertEquals(5, provider.getNumberOfCredentialChangeChecks());
     assertEquals(5, provider.getNumberOfCredentialPropagations());
     assertEquals(2, listener.getCallCount());
@@ -103,18 +108,21 @@ public class DefaultAccountProviderTest {
     assertFalse(acct.isPresent());
     
     login(TOKEN_1);
+    listener.waitUntilChange();
     acct = provider.getAccount();
     assertTrue(acct.isPresent());
     assertEquals(EMAIL_1, acct.get().getEmail());
     assertEquals(TOKEN_1, acct.get().getOAuth2Credential().getRefreshToken());
     
     login(TOKEN_2);
+    listener.waitUntilChange();
     acct = provider.getAccount();
     assertTrue(acct.isPresent());
     assertEquals(EMAIL_2, acct.get().getEmail());
     assertEquals(TOKEN_2, acct.get().getOAuth2Credential().getRefreshToken());
     
     logout();
+    listener.waitUntilChange();
     assertFalse(acct.isPresent());
   }
   
@@ -124,16 +132,19 @@ public class DefaultAccountProviderTest {
     assertFalse(cred.isPresent());
     
     login(TOKEN_1);
+    listener.waitUntilChange();
     cred = provider.getCredential();
     assertTrue(cred.isPresent());
     assertEquals(TOKEN_1, cred.get().getRefreshToken());
     
     login(TOKEN_2);
+    listener.waitUntilChange();
     cred = provider.getCredential();
     assertTrue(cred.isPresent());
     assertEquals(TOKEN_2, cred.get().getRefreshToken());
     
     logout();
+    listener.waitUntilChange();
     assertFalse(cred.isPresent());
   }
   
@@ -177,6 +188,8 @@ public class DefaultAccountProviderTest {
   public class CredentialChangeListener {
 
     private int callCount = 0;
+    private static final int WAIT_INTERVAL_MS = 100;
+    private static final long DEFAULT_WAIT_INTERVAL_MS = 2000;
 
     public void onFileChanged() {
         callCount++;
@@ -184,6 +197,27 @@ public class DefaultAccountProviderTest {
 
     public int getCallCount() {
         return callCount;
+    }
+    
+    public void waitUntilChange() {
+      waitUntilChange(DEFAULT_WAIT_INTERVAL_MS);
+    }
+    
+    public void waitUntilChange(long timeoutMs) {
+      final int initialCallCount = callCount;
+      long msWaited = 0;
+      while (msWaited < timeoutMs) {
+        try {
+          msWaited += WAIT_INTERVAL_MS;
+          Thread.sleep(WAIT_INTERVAL_MS);
+          if (initialCallCount != callCount) {
+            return;
+          }
+        } catch (InterruptedException ex) {
+          continue;
+        }
+      }
+      fail("Timeout of " + timeoutMs + " exceeded");
     }
 
 }
