@@ -31,7 +31,6 @@ import static org.mockito.Mockito.mock;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
 import com.google.api.services.cloudresourcemanager.model.ListProjectsResponse;
 import com.google.api.services.cloudresourcemanager.model.Project;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
@@ -55,7 +54,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class MiniSelectorTest {
   @Mock
-  public IGoogleApiFactory apiFactory;
+  public GoogleApiFactory apiFactory;
   @Rule
   public ShellTestResource shellResource = new ShellTestResource();
   
@@ -63,7 +62,7 @@ public class MiniSelectorTest {
 
   @Before
   public void setUp() {
-    GoogleApiFactory.setInstance((GoogleApiFactory) apiFactory);
+    GoogleApiFactory.setInstance(apiFactory);
     doReturn(Optional.of(TestAccountProvider.ACCOUNT_1)).when(apiFactory).getAccount();
     doReturn(Optional.of(TestAccountProvider.CREDENTIAL_ACCOUNT_1)).when(apiFactory).getCredential();
     bot = new SWTBot(shellResource.getShell());

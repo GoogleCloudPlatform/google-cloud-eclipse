@@ -51,7 +51,6 @@ import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferen
 import com.google.cloud.tools.eclipse.dataflow.ui.page.MessageTarget;
 import com.google.cloud.tools.eclipse.dataflow.ui.preferences.RunOptionsDefaultsComponent.ValidationStatus;
 import com.google.cloud.tools.eclipse.googleapis.Account;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
@@ -94,7 +93,7 @@ public class RunOptionsDefaultsComponentTest {
 
   @Mock private DataflowPreferences preferences;
   @Mock private MessageTarget messageTarget;
-  @Mock private IGoogleApiFactory apiFactory;
+  @Mock private GoogleApiFactory apiFactory;
   @Mock private WizardPage page;
 
   private SWTBot bot;
@@ -114,7 +113,7 @@ public class RunOptionsDefaultsComponentTest {
     
     doCallRealMethod().when(page).setPageComplete(anyBoolean());
     doCallRealMethod().when(page).isPageComplete();
-    GoogleApiFactory.setInstance((GoogleApiFactory) apiFactory);
+    GoogleApiFactory.setInstance(apiFactory);
     shell = shellResource.getShell();
     bot = new SWTBot(shell);
     component = new RunOptionsDefaultsComponent(

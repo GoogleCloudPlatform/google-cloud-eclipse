@@ -42,7 +42,6 @@ import com.google.cloud.tools.eclipse.dataflow.core.launcher.options.PipelineOpt
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.WritableDataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowDependencyManager;
 import com.google.cloud.tools.eclipse.dataflow.core.project.MajorVersion;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -98,7 +97,7 @@ public class DataflowPipelineLaunchDelegateTest {
   @Mock private PipelineOptionsHierarchyFactory pipelineOptionsHierarchyFactory;
   @Mock private PipelineOptionsHierarchy pipelineOptionsHierarchy;
   @Mock private ILaunchConfigurationWorkingCopy configurationWorkingCopy;
-  @Mock private IGoogleApiFactory apiFactory;
+  @Mock private GoogleApiFactory apiFactory;
 
   private final Map<String, String> pipelineArguments = new HashMap<>();
   private final Map<String, String> environmentMap = new HashMap<>();
@@ -107,7 +106,7 @@ public class DataflowPipelineLaunchDelegateTest {
 
   @Before
   public void setup() throws Exception {
-    GoogleApiFactory.setInstance((GoogleApiFactory) apiFactory);
+    GoogleApiFactory.setInstance(apiFactory);
     when(pipelineOptionsHierarchyFactory.forProject(
             eq(project), eq(MajorVersion.ONE), any(IProgressMonitor.class)))
         .thenReturn(pipelineOptionsHierarchy);

@@ -93,7 +93,7 @@ public class GcpLocalRunTabTest {
   @Rule public ShellTestResource shellResource = new ShellTestResource();
   @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
-  @Mock private IGoogleApiFactory apiFactory;
+  @Mock private GoogleApiFactory apiFactory;
   @Mock private ProjectRepository projectRepository;
   @Mock private EnvironmentTab environmentTab;
 
@@ -123,7 +123,7 @@ public class GcpLocalRunTabTest {
 
   @Before
   public void setUp() {
-    GoogleApiFactory.setInstance((GoogleApiFactory) apiFactory);
+    GoogleApiFactory.setInstance(apiFactory);
     shell = shellResource.getShell();
     selectAccount(null);
     tab = new GcpLocalRunTab(environmentTab, projectRepository);

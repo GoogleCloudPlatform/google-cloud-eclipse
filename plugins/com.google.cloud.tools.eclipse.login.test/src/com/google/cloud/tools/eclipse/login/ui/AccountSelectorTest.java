@@ -25,7 +25,6 @@ import static org.mockito.Mockito.when;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.googleapis.Account;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import java.util.Optional;
@@ -50,12 +49,12 @@ public class AccountSelectorTest {
   @Mock private Credential credential1;
   @Mock private Credential credential2;
   @Mock private Credential credential3;
-  @Mock private IGoogleApiFactory apiFactory;
+  @Mock private GoogleApiFactory apiFactory;
 
   @Before
   public void setUp() {
     shell = shellTestResource.getShell();
-    GoogleApiFactory.setInstance((GoogleApiFactory) apiFactory);
+    GoogleApiFactory.setInstance(apiFactory);
     when(account1.getEmail()).thenReturn("some-email-1@example.com");
     when(account1.getOAuth2Credential()).thenReturn(credential1);
     when(account2.getEmail()).thenReturn("some-email-2@example.com");
