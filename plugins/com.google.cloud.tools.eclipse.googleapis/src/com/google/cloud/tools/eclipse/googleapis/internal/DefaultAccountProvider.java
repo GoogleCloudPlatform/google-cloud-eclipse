@@ -108,6 +108,7 @@ public class DefaultAccountProvider extends AccountProvider {
               ((Path) event.context()).toString()).toAbsolutePath();
           if (affectedFile.equals(adcPath)) {
             confirmAdcCredsChanged();
+            key.reset();
             break; // prevent propagation for two events on same file and different kind
           }
         }
