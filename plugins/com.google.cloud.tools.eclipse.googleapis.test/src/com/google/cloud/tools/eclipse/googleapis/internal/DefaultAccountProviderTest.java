@@ -317,7 +317,7 @@ public class DefaultAccountProviderTest {
     }
   }
   
-  private class CredentialWithId extends Credential {
+  public class CredentialWithId extends Credential {
     
     protected CredentialWithId(Builder builder) {
       super(builder);
