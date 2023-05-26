@@ -24,7 +24,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.cloud.tools.eclipse.googleapis.Account;
 import java.io.File;
 import java.io.FileWriter;
@@ -112,14 +111,14 @@ public class DefaultAccountProviderTest {
     acct = provider.getAccount();
     assertTrue(acct.isPresent());
     assertEquals(EMAIL_1, acct.get().getEmail());
-    assertEquals(TOKEN_1, acct.get().getOAuth2Credential().getRefreshToken());
+    assertEquals(TOKEN_1, ((CredentialWithId) acct.get().getOAuth2Credential()).getRefreshToken());
     
     login(TOKEN_2);
     listener.waitUntilChange();
     acct = provider.getAccount();
     assertTrue(acct.isPresent());
     assertEquals(EMAIL_2, acct.get().getEmail());
-    assertEquals(TOKEN_2, acct.get().getOAuth2Credential().getRefreshToken());
+    assertEquals(TOKEN_2, ((CredentialWithId) acct.get().getOAuth2Credential()).getRefreshToken());
     
     logout();
     listener.waitUntilChange();
@@ -135,13 +134,13 @@ public class DefaultAccountProviderTest {
     listener.waitUntilChange();
     cred = provider.getCredential();
     assertTrue(cred.isPresent());
-    assertEquals(TOKEN_1, cred.get().getRefreshToken());
+    assertEquals(TOKEN_1, ((CredentialWithId) cred.get()).getId());
     
     login(TOKEN_2);
     listener.waitUntilChange();
     cred = provider.getCredential();
     assertTrue(cred.isPresent());
-    assertEquals(TOKEN_2, cred.get().getRefreshToken());
+    assertEquals(TOKEN_2, ((CredentialWithId) cred.get()).getId());
     
     logout();
     listener.waitUntilChange();
@@ -312,9 +311,21 @@ public class DefaultAccountProviderTest {
       if (!credsFile.exists()) { 
         return Optional.empty();
       }
-      GoogleCredential cred = mock(GoogleCredential.class);
-      when(cred.getRefreshToken()).thenReturn(getFileContents());
+      CredentialWithId cred = mock(CredentialWithId.class);
+      when(cred.getId()).thenReturn(getFileContents());
       return Optional.of(cred);
+    }
+  }
+  
+  private class CredentialWithId extends Credential {
+    
+    protected CredentialWithId(Builder builder) {
+      super(builder);
+    }
+
+    public String getId() {
+      // should be overriden by mock
+      return null;
     }
   }
 }
