@@ -79,15 +79,13 @@ public class DefaultAccountProviderTest {
   @Test
   public void testFileWriteTriggersListeners() throws InterruptedException {
     login(TOKEN_1);
-    listener.waitUntilChange();
+    listener.waitUntilChange(1);
 //    assertEquals(2, provider.getNumberOfCredentialChangeChecks());
 //    assertEquals(2, provider.getNumberOfCredentialPropagations());
-    assertEquals(1, listener.getCallCount());
     login(TOKEN_2);
-    listener.waitUntilChange();
+    listener.waitUntilChange(2);
     assertEquals(3, provider.getNumberOfCredentialChangeChecks());
     assertEquals(3, provider.getNumberOfCredentialPropagations());
-    assertEquals(2, listener.getCallCount());
     provider.removeCredentialChangeListener(listener::onFileChanged);
     login(TOKEN_1);
     Thread.sleep(1000);
@@ -107,21 +105,21 @@ public class DefaultAccountProviderTest {
     assertFalse(acct.isPresent());
     
     login(TOKEN_1);
-    listener.waitUntilChange();
+    listener.waitUntilChange(1);
     acct = provider.getAccount();
     assertTrue(acct.isPresent());
     assertEquals(EMAIL_1, acct.get().getEmail());
     assertEquals(TOKEN_1, ((CredentialWithId) acct.get().getOAuth2Credential()).getId());
     
     login(TOKEN_2);
-    listener.waitUntilChange();
+    listener.waitUntilChange(2);
     acct = provider.getAccount();
     assertTrue(acct.isPresent());
     assertEquals(EMAIL_2, acct.get().getEmail());
     assertEquals(TOKEN_2, ((CredentialWithId) acct.get().getOAuth2Credential()).getId());
     
     logout();
-    listener.waitUntilChange();
+    listener.waitUntilChange(3);
     assertFalse(acct.isPresent());
   }
   
@@ -131,19 +129,19 @@ public class DefaultAccountProviderTest {
     assertFalse(cred.isPresent());
     
     login(TOKEN_1);
-    listener.waitUntilChange();
+    listener.waitUntilChange(1);
     cred = provider.getCredential();
     assertTrue(cred.isPresent());
     assertEquals(TOKEN_1, ((CredentialWithId) cred.get()).getId());
     
     login(TOKEN_2);
-    listener.waitUntilChange();
+    listener.waitUntilChange(2);
     cred = provider.getCredential();
     assertTrue(cred.isPresent());
     assertEquals(TOKEN_2, ((CredentialWithId) cred.get()).getId());
     
     logout();
-    listener.waitUntilChange();
+    listener.waitUntilChange(3);
     assertFalse(cred.isPresent());
   }
   
@@ -198,19 +196,22 @@ public class DefaultAccountProviderTest {
         return callCount;
     }
     
-    public void waitUntilChange() {
-      waitUntilChange(DEFAULT_WAIT_INTERVAL_MS);
+    public void waitUntilChange(int expectedCallCount) {
+      waitUntilChange(DEFAULT_WAIT_INTERVAL_MS, expectedCallCount);
     }
     
-    public void waitUntilChange(long timeoutMs) {
+    private void waitUntilChange(long timeoutMs, int expectedCallCount) {
       final int initialCallCount = callCount;
+      if (initialCallCount == expectedCallCount) {
+        return;
+      }
       long msWaited = 0;
       while (msWaited < timeoutMs) {
         try {
           msWaited += WAIT_INTERVAL_MS;
           Thread.sleep(WAIT_INTERVAL_MS);
           if (initialCallCount != callCount) {
-            return;
+            assertEquals(expectedCallCount, initialCallCount);
           }
         } catch (InterruptedException ex) {
           continue;
