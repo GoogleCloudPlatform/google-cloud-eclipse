@@ -211,7 +211,7 @@ public class DefaultAccountProviderTest {
           msWaited += WAIT_INTERVAL_MS;
           Thread.sleep(WAIT_INTERVAL_MS);
           if (initialCallCount != callCount) {
-            assertEquals(expectedCallCount, initialCallCount);
+            assertEquals(expectedCallCount, callCount);
           }
         } catch (InterruptedException ex) {
           continue;
