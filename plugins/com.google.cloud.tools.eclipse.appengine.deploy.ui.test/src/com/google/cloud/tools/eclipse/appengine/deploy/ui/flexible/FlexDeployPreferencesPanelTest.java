@@ -21,17 +21,14 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.AppYamlValidator;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexWarFacet;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
-import java.util.Optional;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.resources.IProject;
@@ -52,7 +49,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class FlexDeployPreferencesPanelTest {
 
-  @Mock private IGoogleApiFactory apiFactory;
   @Mock private ProjectRepository projectRepository;
   @Mock private Runnable layoutHandler;
 
@@ -64,9 +60,7 @@ public class FlexDeployPreferencesPanelTest {
 
   @Before
   public void setUp() {
-    doReturn(Optional.of(TestAccountProvider.ACCOUNT_1)).when(apiFactory).getAccount();
-    doReturn(Optional.of(TestAccountProvider.CREDENTIAL_ACCOUNT_1)).when(apiFactory)
-        .getCredential();
+    TestAccountProvider.setAsDefaultProvider();
     project = projectCreator.getProject();
   }
 
@@ -120,7 +114,7 @@ public class FlexDeployPreferencesPanelTest {
 
   private FlexDeployPreferencesPanel createPanel(boolean requireValues) {
     return new FlexDeployPreferencesPanel(shellResource.getShell(),
-        project, apiFactory, layoutHandler, requireValues, projectRepository);
+        project, layoutHandler, requireValues, projectRepository);
   }
 
   private static IStatus getAppYamlPathValidationStatus(FlexDeployPreferencesPanel panel) {

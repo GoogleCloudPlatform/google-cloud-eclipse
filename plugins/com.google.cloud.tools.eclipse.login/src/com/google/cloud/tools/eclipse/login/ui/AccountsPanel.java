@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.login.ui;
 
 import com.google.cloud.tools.eclipse.googleapis.Account;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.Messages;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
@@ -49,7 +48,6 @@ public class AccountsPanel extends PopupDialog {
   private static final Logger logger = Logger.getLogger(AccountsPanel.class.getName());
 
   private final LabelImageLoader imageLoader;
-  private final IGoogleApiFactory apiFactory = new GoogleApiFactory();
 
   public AccountsPanel(Shell parent) {
     this(parent, new LabelImageLoader());
@@ -82,7 +80,7 @@ public class AccountsPanel extends PopupDialog {
     Composite container = (Composite) super.createDialogArea(parent);
     GridLayoutFactory.swtDefaults().generateLayout(container);
 
-    if (apiFactory.getCredential().isPresent()) {
+    if (GoogleApiFactory.INSTANCE.getCredential().isPresent()) {
       createAccountsPane(container);
     } else {
       createNonLoggedInAccountsPane(container);
@@ -139,7 +137,7 @@ public class AccountsPanel extends PopupDialog {
   }
   
   private Account getAccount() {
-    return apiFactory.getAccount().orElse(null);
+    return GoogleApiFactory.INSTANCE.getAccount().orElse(null);
   }
 
   /**

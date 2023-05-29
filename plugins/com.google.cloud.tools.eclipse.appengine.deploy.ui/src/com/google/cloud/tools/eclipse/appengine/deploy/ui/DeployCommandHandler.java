@@ -21,7 +21,6 @@ import com.google.cloud.tools.eclipse.appengine.deploy.CleanupOldDeploysJob;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployJob;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
 import com.google.cloud.tools.eclipse.ui.util.ProjectFromSelectionHelper;
@@ -104,9 +103,8 @@ public abstract class DeployCommandHandler extends AbstractHandler {
         return null;
       }
 
-      IGoogleApiFactory googleApiFactory = ServiceUtils.getService(event, IGoogleApiFactory.class);
       DeployPreferencesDialog dialog =
-          newDeployPreferencesDialog(shell, project, googleApiFactory);
+          newDeployPreferencesDialog(shell, project);
       if (dialog.open() == Window.OK) {
         launchDeployJob(project, dialog.getCredential());
       } 
@@ -149,7 +147,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
   }
 
   protected abstract DeployPreferencesDialog newDeployPreferencesDialog(Shell shell,
-      IProject project, IGoogleApiFactory googleApiFactory);
+      IProject project);
 
   // It should better be named "getDeployPreferencesSnapshot" or something implying that. The
   // snapshot then should be propagated as a single source of truth for the entire duration of

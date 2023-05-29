@@ -18,12 +18,11 @@ package com.google.cloud.tools.eclipse.login.ui;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.googleapis.Account;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.Messages;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorDialogErrorHandler;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.Collections;
 import java.util.Optional;
@@ -38,22 +37,19 @@ import org.eclipse.swt.widgets.Link;
 
 public class AccountSelector extends Composite {
 
-  private IGoogleApiFactory apiFactory;
   private ListenerList<Runnable> selectionListeners = new ListenerList<>();
   private Optional<Account> prevAccount = Optional.empty();
   private static Logger logger = Logger.getLogger(AccountSelector.class.getName());
 
   @VisibleForTesting Link accountEmail;
 
-  public AccountSelector(Composite parent, IGoogleApiFactory apiFactory) {
+  public AccountSelector(Composite parent) {
     super(parent, SWT.NONE);
-    Preconditions.checkNotNull(apiFactory);
-    this.apiFactory = apiFactory;
 
     Composite accountEmailComposite = new Composite(this, SWT.NONE);
     accountEmail = new Link(accountEmailComposite, SWT.WRAP);
     
-    if (apiFactory.getCredential().isPresent()) {
+    if (GoogleApiFactory.INSTANCE.getCredential().isPresent()) {
       accountEmail.setText(getSelectedEmail());
     } else {
       accountEmail.setText(Messages.getString("NO_ADC_DETECTED_MESSAGE") + ". " + Messages.getString("NO_ADC_DETECTED_LINK"));
@@ -95,7 +91,7 @@ public class AccountSelector extends Composite {
   }
   
   private Optional<Account> getSelectedAccount() {
-    Optional<Account> account = apiFactory.getAccount();
+    Optional<Account> account = GoogleApiFactory.INSTANCE.getAccount();
     if (!account.equals(prevAccount)) {
       prevAccount = account;
       fireSelectionListeners();

@@ -51,7 +51,7 @@ import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferen
 import com.google.cloud.tools.eclipse.dataflow.ui.page.MessageTarget;
 import com.google.cloud.tools.eclipse.dataflow.ui.preferences.RunOptionsDefaultsComponent.ValidationStatus;
 import com.google.cloud.tools.eclipse.googleapis.Account;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
@@ -93,7 +93,7 @@ public class RunOptionsDefaultsComponentTest {
 
   @Mock private DataflowPreferences preferences;
   @Mock private MessageTarget messageTarget;
-  @Mock private IGoogleApiFactory apiFactory;
+  @Mock private GoogleApiFactory apiFactory;
   @Mock private WizardPage page;
 
   private SWTBot bot;
@@ -113,12 +113,11 @@ public class RunOptionsDefaultsComponentTest {
     
     doCallRealMethod().when(page).setPageComplete(anyBoolean());
     doCallRealMethod().when(page).isPageComplete();
-
+    GoogleApiFactory.setInstance(apiFactory);
     shell = shellResource.getShell();
     bot = new SWTBot(shell);
     component = new RunOptionsDefaultsComponent(
-        shell, 3, messageTarget, preferences, page, false /* allowIncomplete */, 
-        apiFactory);
+        shell, 3, messageTarget, preferences, page, false /* allowIncomplete */);
     selector = CompositeUtil.findControl(shell, AccountSelector.class);
     projectID =
         CompositeUtil.findControlAfterLabel(shell, Combo.class, "Cloud Platform &project ID:");
@@ -528,14 +527,14 @@ public class RunOptionsDefaultsComponentTest {
   @Test
   public void testPartialValidity_allEmpty() {
     component = new RunOptionsDefaultsComponent(shell, 3, messageTarget, preferences, page,
-        true /* allowIncomplete */, apiFactory);
+        true /* allowIncomplete */);
     assertTrue("should be complete when totally empty", page.isPageComplete());
   }
 
   @Test
   public void testPartialValidity_invalidServiceAccountKey() {
     component = new RunOptionsDefaultsComponent(shell, 3, messageTarget, preferences, page,
-        true /* allowIncomplete */, apiFactory);
+        true /* allowIncomplete */);
     serviceAccountKey.setText("/non/existing/file.ext");
 
     assertFalse("should be incomplete with invalid service key even if allowInComplete is true",

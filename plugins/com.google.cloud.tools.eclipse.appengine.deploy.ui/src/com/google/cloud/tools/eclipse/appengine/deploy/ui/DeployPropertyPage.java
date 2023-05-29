@@ -20,13 +20,10 @@ import com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible.FlexDeployPre
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.standard.StandardDeployPreferencesPanel;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexWarFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.util.AdapterUtil;
-import com.google.common.annotations.VisibleForTesting;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.inject.Inject;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.databinding.preference.PreferencePageSupport;
@@ -50,8 +47,6 @@ public class DeployPropertyPage extends PropertyPage {
 
   private static final Logger logger = Logger.getLogger(DeployPropertyPage.class.getName());
 
-  @Inject
-  private IGoogleApiFactory googleApiFactory;
 
   private IFacetedProject facetedProject = null;
   private FlexDeployPreferencesPanel flexPreferencesPanel;
@@ -62,11 +57,6 @@ public class DeployPropertyPage extends PropertyPage {
   private DeployPreferencesPanel activeControl;
 
   public DeployPropertyPage() {  // 0-arg required for injection
-  }
-
-  @VisibleForTesting
-  DeployPropertyPage(IGoogleApiFactory googleApiFactory) {
-    this.googleApiFactory = googleApiFactory;
   }
 
   @Override
@@ -160,16 +150,16 @@ public class DeployPropertyPage extends PropertyPage {
   private void createStandardPanelIfNeeded() {
     if (standardPreferencesPanel == null) {
       standardPreferencesPanel = new StandardDeployPreferencesPanel(
-          container, facetedProject.getProject(), googleApiFactory, this::handleLayoutChange,
-          false /* requireValues */, new ProjectRepository(googleApiFactory));
+          container, facetedProject.getProject(), this::handleLayoutChange,
+          false /* requireValues */, new ProjectRepository());
     }
   }
 
   private void createFlexPanelIfNeeded() {
     if (flexPreferencesPanel == null) {
       flexPreferencesPanel = new FlexDeployPreferencesPanel(
-          container, facetedProject.getProject(), googleApiFactory, this::handleLayoutChange,
-          false /* requireValues */, new ProjectRepository(googleApiFactory));
+          container, facetedProject.getProject(), this::handleLayoutChange,
+          false /* requireValues */, new ProjectRepository());
     }
   }
 }

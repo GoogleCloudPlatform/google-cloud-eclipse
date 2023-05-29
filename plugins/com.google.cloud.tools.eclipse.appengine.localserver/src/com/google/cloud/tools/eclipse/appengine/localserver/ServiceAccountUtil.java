@@ -21,7 +21,7 @@ import com.google.api.services.iam.v1.Iam;
 import com.google.api.services.iam.v1.Iam.Projects.ServiceAccounts.Keys;
 import com.google.api.services.iam.v1.model.CreateServiceAccountKeyRequest;
 import com.google.api.services.iam.v1.model.ServiceAccountKey;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
@@ -37,10 +37,9 @@ public class ServiceAccountUtil {
    * @param projectId GCP project ID for {@code serviceAccountId} 
    * @param destination path of a key file to be saved
    */
-  public static void createAppEngineDefaultServiceAccountKey(IGoogleApiFactory apiFactory, 
-      String projectId, Path destination)
+  public static void createAppEngineDefaultServiceAccountKey(String projectId, Path destination)
           throws FileAlreadyExistsException, IOException {
-    Preconditions.checkArgument(apiFactory.getCredential().isPresent(), "credentials not set");
+    Preconditions.checkArgument(GoogleApiFactory.INSTANCE.getCredential().isPresent(), "credentials not set");
     Preconditions.checkArgument(!projectId.isEmpty(), "project ID empty");
     Preconditions.checkArgument(destination.isAbsolute(), "destination not absolute");
 
@@ -48,7 +47,7 @@ public class ServiceAccountUtil {
       Files.createDirectories(destination.getParent());
     }
 
-    Iam iam = apiFactory.newIamApi();
+    Iam iam = GoogleApiFactory.INSTANCE.newIamApi();
     Keys keys = iam.projects().serviceAccounts().keys();
     
     String projectEmail = projectId;
