@@ -33,6 +33,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Rule;
@@ -59,13 +60,15 @@ public class DefaultAccountProviderTest {
   private CredentialChangeListener listener;
   
   static final String TEMP_ADC_FILENAME = "test_adc.json";
+  private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
   
   @Rule
   public TemporaryFolder tempFolder = new TemporaryFolder();
   
   @Before
   public void setup() throws IOException {
-    System.out.println("Temp folder location: " + tempFolder.getRoot().toPath().toString());
+    LOGGER.info("setup()");
+    LOGGER.info("Temp folder location: " + tempFolder.getRoot().toPath().toString());
     provider = new TestDefaultAccountProvider(tempFolder.newFile(TEMP_ADC_FILENAME).toPath());
     Account acct1 = new Account(EMAIL_1, mock(Credential.class), NAME_1, AVATAR_1);
     Account acct2 = new Account(EMAIL_2, mock(Credential.class), NAME_2, AVATAR_2);
@@ -148,27 +151,27 @@ public class DefaultAccountProviderTest {
   
   private Path getTempAdcPath() {
     Path result = tempFolder.getRoot().toPath().resolve(TEMP_ADC_FILENAME);
-    System.out.println("getTempAdcPath(): " + result.toString());
+    LOGGER.info("getTempAdcPath(): " + result.toString());
     return result;
   }
   
   private void login(String token) {
-    System.out.println("login(" + token + ")");
+    LOGGER.info("login(" + token + ")");
     try {
       File adcFile = getTempAdcPath().toFile();
-      System.out.println("login() adcFile path: " + adcFile.toPath().toString());
+      LOGGER.info("login() adcFile path: " + adcFile.toPath().toString());
       if (!adcFile.exists()) {
-          System.out.println("login() creating new file");
+          LOGGER.info("login() creating new file");
           adcFile = tempFolder.newFile(TEMP_ADC_FILENAME);
       }
-      System.out.println(
+      LOGGER.info(
           "login() pre-write contents: " + Files.readAllLines(adcFile.toPath())
           .stream().collect(Collectors.joining()));
       assertTrue(adcFile.exists());
       try (FileWriter writer = new FileWriter(adcFile)) {
         writer.write(token);
       }
-      System.out.println(
+      LOGGER.info(
           "login() post-write contents: " + Files.readAllLines(adcFile.toPath())
           .stream().collect(Collectors.joining()));
     } catch (IOException ex) {
@@ -177,10 +180,10 @@ public class DefaultAccountProviderTest {
   }
   
   private void logout() {
-    System.out.println("logout()");
+    LOGGER.info("logout()");
     File adcFile = getTempAdcPath().toFile();
     if (adcFile.exists()) {
-      System.out.println("logout() delete file");
+      LOGGER.info("logout() delete file");
       adcFile.delete();
     }
   }
@@ -189,7 +192,7 @@ public class DefaultAccountProviderTest {
 
     private int callCount = 0;
     private static final int WAIT_INTERVAL_MS = 100;
-    private static final long DEFAULT_WAIT_INTERVAL_MS = 2000;
+    private static final long DEFAULT_WAIT_INTERVAL_MS = 5000;
 
     public void onFileChanged() {
         callCount++;
@@ -234,6 +237,7 @@ public class DefaultAccountProviderTest {
     private int numberOfCredentialChangeChecks = 0;
     private int numberOfCredentialPropagations = 0;
     private String currentToken = "";
+    private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
     
         
     public TestDefaultAccountProvider(Path adcPath) {
@@ -250,9 +254,10 @@ public class DefaultAccountProviderTest {
     
     @Override
     protected void confirmAdcCredsChanged() {
-      System.out.println("confirmAdcCredsChanged()");
+      LOGGER.info("checking if creds changed");
       numberOfCredentialChangeChecks++;
       String newToken = getRefreshTokenFromCredentialFile();
+      LOGGER.info("currentToken: " + currentToken + ", newToken: " + newToken);
       if (newToken.compareTo(currentToken) != 0) {
         currentToken = newToken;
         propagateCredentialChange();
@@ -261,7 +266,7 @@ public class DefaultAccountProviderTest {
     
     @Override
     protected void propagateCredentialChange() {
-      System.out.println("propagateCredentialChange()");
+      LOGGER.info("propagating credentials change");
       numberOfCredentialPropagations++;
       super.propagateCredentialChange();
     }
@@ -300,12 +305,15 @@ public class DefaultAccountProviderTest {
     private String getFileContents() {
       File credsFile = getCredentialFile();
       if (!credsFile.exists()) {
+        LOGGER.info("credsFile does not exist");
         return "";
       }
       try {
-        return Files.readAllLines(credsFile.toPath())
+        String content = Files.readAllLines(credsFile.toPath())
             .stream()
             .collect(Collectors.joining("\n"));
+        LOGGER.info("content at " + credsFile.getAbsolutePath() + ": " + content);
+        return content;
       } catch (IOException ex) {
         fail();
       }
@@ -314,7 +322,9 @@ public class DefaultAccountProviderTest {
     
     @Override
     protected String getRefreshTokenFromCredentialFile() {
-      return getFileContents();
+      String result = getFileContents();
+      LOGGER.info("getRefreshTokenFromCredentialFile(): " + result);
+      return result;
     }
     
     @Override

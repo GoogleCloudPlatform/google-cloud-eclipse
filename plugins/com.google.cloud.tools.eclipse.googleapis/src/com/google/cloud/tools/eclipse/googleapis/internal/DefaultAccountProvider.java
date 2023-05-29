@@ -107,17 +107,22 @@ public class DefaultAccountProvider extends AccountProvider {
           continue;
         }
         for (WatchEvent<?> event : key.pollEvents()) {
-          LOGGER.log(Level.INFO, "Events detected in ADC folder");
+          LOGGER.log(Level.INFO, this.hashCode() + ": Events detected in ADC folder");
           Path affectedFile = Paths.get(adcFolderPath.toAbsolutePath().toString(), 
               ((Path) event.context()).toString()).toAbsolutePath();
           if (affectedFile.equals(adcPath)) {
-            LOGGER.info("ADC file has changed");
+            LOGGER.info(this.hashCode() + ": ADC file has changed");
             confirmAdcCredsChanged();
-            key.reset();
             break; // prevent propagation for two events on same file and different kind
           }
         }
         key.reset();
+        try {
+          Thread.sleep(100);
+        } catch (InterruptedException ex) {
+          LOGGER.log(Level.SEVERE, "Error when waiting for next polling action", ex);
+          continue;
+        }
       }
     });
   }
