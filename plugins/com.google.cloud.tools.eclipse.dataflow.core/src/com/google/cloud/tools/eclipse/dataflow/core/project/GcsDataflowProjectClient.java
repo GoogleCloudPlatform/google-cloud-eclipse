@@ -21,7 +21,7 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.Bucket;
 import com.google.api.services.storage.model.Buckets;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import java.io.IOException;
@@ -41,9 +41,8 @@ public class GcsDataflowProjectClient {
 
   private final Storage gcsClient;
 
-  public static GcsDataflowProjectClient create(
-      IGoogleApiFactory apiFactory) {
-    return new GcsDataflowProjectClient(apiFactory.newStorageApi());
+  public static GcsDataflowProjectClient create() {
+    return new GcsDataflowProjectClient(GoogleApiFactory.INSTANCE.newStorageApi());
   }
 
   private GcsDataflowProjectClient(Storage gcsClient) {

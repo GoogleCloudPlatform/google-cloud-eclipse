@@ -18,9 +18,8 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
-import com.google.common.base.Preconditions;
 import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.databinding.dialog.TitleAreaDialogSupport;
@@ -45,16 +44,12 @@ public abstract class DeployPreferencesDialog extends TitleAreaDialog {
   private AppEngineDeployPreferencesPanel content;
   private final String title;
   private final IProject project;
-  private final IGoogleApiFactory apiFactory;
 
-  public DeployPreferencesDialog(Shell parentShell, String title, IProject project,
-      IGoogleApiFactory apiFactory) {
+  public DeployPreferencesDialog(Shell parentShell, String title, IProject project) {
     super(parentShell);
 
-    Preconditions.checkNotNull(apiFactory, "googleApiFactory is null");
     this.title = title;
     this.project = project;
-    this.apiFactory = apiFactory;
   }
 
   @Override
@@ -87,8 +82,8 @@ public abstract class DeployPreferencesDialog extends TitleAreaDialog {
     Composite area = (Composite) super.createDialogArea(parent);
 
     Composite container = new Composite(area, SWT.NONE);
-    content = createDeployPreferencesPanel(container, project, apiFactory, this::handleLayoutChange,
-        new ProjectRepository(apiFactory));
+    content = createDeployPreferencesPanel(container, project, this::handleLayoutChange,
+        new ProjectRepository());
     GridDataFactory.fillDefaults().grab(true, false).applyTo(content);
 
     // we pull in Dialog's content margins which are zeroed out by TitleAreaDialog
@@ -102,7 +97,7 @@ public abstract class DeployPreferencesDialog extends TitleAreaDialog {
           @Override
           public int getMessageType(ValidationStatusProvider statusProvider) {
             int type = super.getMessageType(statusProvider);
-            setValid(type != IMessageProvider.ERROR && apiFactory.getCredential().isPresent());
+            setValid(type != IMessageProvider.ERROR && GoogleApiFactory.INSTANCE.getCredential().isPresent());
             return type;
           }
         });
@@ -110,7 +105,7 @@ public abstract class DeployPreferencesDialog extends TitleAreaDialog {
   }
 
   protected abstract AppEngineDeployPreferencesPanel createDeployPreferencesPanel(
-      Composite container, IProject project, IGoogleApiFactory apiFactory,
+      Composite container, IProject project, 
       Runnable layoutChangedHandler, ProjectRepository projectRepository);
 
   private void handleLayoutChange() {

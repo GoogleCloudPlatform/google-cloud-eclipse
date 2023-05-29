@@ -24,8 +24,6 @@ import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesDialo
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.util.jdt.JreDetector;
 import java.nio.file.Path;
@@ -113,12 +111,10 @@ public class StandardDeployCommandHandler extends DeployCommandHandler {
   @Override
   protected DeployPreferencesDialog newDeployPreferencesDialog(
       Shell shell,
-      IProject project,
-      IGoogleLoginService loginService,
-      IGoogleApiFactory googleApiFactory) {
+      IProject project) {
     String title = Messages.getString("deploy.preferences.dialog.title.standard");
     return new StandardDeployPreferencesDialog(
-        shell, title, project, loginService, googleApiFactory);
+        shell, title, project);
   }
 
   @Override

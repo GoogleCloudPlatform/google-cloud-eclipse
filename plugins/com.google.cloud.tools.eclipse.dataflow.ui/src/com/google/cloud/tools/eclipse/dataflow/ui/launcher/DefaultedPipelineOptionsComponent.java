@@ -140,7 +140,7 @@ public class DefaultedPipelineOptionsComponent {
   }
 
   private String getCurrentEmail() {
-    Optional<Account> account = new GoogleApiFactory().getAccount();
+    Optional<Account> account = GoogleApiFactory.INSTANCE.getAccount();
     if (account.isPresent()) {
       return account.get().getEmail();
     }

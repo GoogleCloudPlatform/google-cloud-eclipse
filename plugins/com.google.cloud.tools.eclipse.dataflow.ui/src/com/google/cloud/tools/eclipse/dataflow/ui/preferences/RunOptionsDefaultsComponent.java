@@ -30,9 +30,8 @@ import com.google.cloud.tools.eclipse.dataflow.ui.page.MessageTarget;
 import com.google.cloud.tools.eclipse.dataflow.ui.util.ButtonFactory;
 import com.google.cloud.tools.eclipse.dataflow.ui.util.SelectFirstMatchingPrefixListener;
 import com.google.cloud.tools.eclipse.googleapis.GcpProjectServicesJob;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApi;
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.projectselector.MiniSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
@@ -74,7 +73,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.PlatformUI;
 
 /**
  * Collects default run options for Dataflow Pipelines and provides means to create and modify them.
@@ -108,7 +106,6 @@ public class RunOptionsDefaultsComponent {
 
   private static final BucketNameValidator bucketNameValidator = new BucketNameValidator();
 
-  private final IGoogleApiFactory apiFactory;
   private final WizardPage page;
   private final DisplayExecutor displayExecutor;
   private final MessageTarget messageTarget;
@@ -149,31 +146,21 @@ public class RunOptionsDefaultsComponent {
 
   public RunOptionsDefaultsComponent(Composite target, int columns, MessageTarget messageTarget,
       DataflowPreferences preferences, WizardPage page, boolean allowIncomplete) {
-    this(target, columns, messageTarget, preferences, page, allowIncomplete,
-        PlatformUI.getWorkbench().getService(IGoogleLoginService.class),
-        PlatformUI.getWorkbench().getService(IGoogleApiFactory.class));
-  }
-
-  @VisibleForTesting
-  RunOptionsDefaultsComponent(Composite target, int columns, MessageTarget messageTarget,
-      DataflowPreferences preferences, WizardPage page, boolean allowIncomplete,
-      IGoogleLoginService loginService, IGoogleApiFactory apiFactory) {
     Preconditions.checkArgument(columns >= 3,
         "DefaultRunOptions must be in a Grid with at least 3 columns"); //$NON-NLS-1$
     this.target = target;
     this.page = page;
     this.messageTarget = messageTarget;
     displayExecutor = DisplayExecutor.create(target.getDisplay());
-    this.apiFactory = apiFactory;
     this.allowIncomplete = allowIncomplete;
 
     Label accountLabel = new Label(target, SWT.NULL);
     accountLabel.setText(Messages.getString("account")); //$NON-NLS-1$
-    accountSelector = new AccountSelector(target, apiFactory);
+    accountSelector = new AccountSelector(target);
 
     Label projectInputLabel = new Label(target, SWT.NULL);
     projectInputLabel.setText(Messages.getString("cloud.platform.project.id")); //$NON-NLS-1$
-    projectInput = new MiniSelector(target, apiFactory);
+    projectInput = new MiniSelector(target);
 
     Label comboLabel = new Label(target, SWT.NULL);
     stagingLocationInput = new Combo(target, SWT.DROP_DOWN);
@@ -435,7 +422,7 @@ public class RunOptionsDefaultsComponent {
   }
 
   protected void checkProjectConfiguration() {
-    if (!apiFactory.getCredential().isPresent()) {
+    if (!GoogleApiFactory.INSTANCE.getCredential().isPresent()) {
       return;
     }
     GcpProject project = projectInput.getProject();
@@ -451,14 +438,14 @@ public class RunOptionsDefaultsComponent {
     }
 
     checkProjectConfigurationJob =
-        new GcpProjectServicesJob(apiFactory, project.getId());
+        new GcpProjectServicesJob(project.getId());
     checkProjectConfigurationJob.getFuture().addListener(this::validate, displayExecutor);
     checkProjectConfigurationJob.schedule();
   }
 
   private GcsDataflowProjectClient getGcsClient() {
     Preconditions.checkNotNull(accountSelector.getSelectedCredential());
-    return GcsDataflowProjectClient.create(apiFactory);
+    return GcsDataflowProjectClient.create();
   }
 
   public Control getControl() {

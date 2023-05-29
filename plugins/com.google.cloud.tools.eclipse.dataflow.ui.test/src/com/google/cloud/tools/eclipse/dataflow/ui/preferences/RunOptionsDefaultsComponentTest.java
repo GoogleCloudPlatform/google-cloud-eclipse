@@ -51,8 +51,7 @@ import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferen
 import com.google.cloud.tools.eclipse.dataflow.ui.page.MessageTarget;
 import com.google.cloud.tools.eclipse.dataflow.ui.preferences.RunOptionsDefaultsComponent.ValidationStatus;
 import com.google.cloud.tools.eclipse.googleapis.Account;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
@@ -60,7 +59,6 @@ import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -95,8 +93,7 @@ public class RunOptionsDefaultsComponentTest {
 
   @Mock private DataflowPreferences preferences;
   @Mock private MessageTarget messageTarget;
-  @Mock private IGoogleLoginService loginService;
-  @Mock private IGoogleApiFactory apiFactory;
+  @Mock private GoogleApiFactory apiFactory;
   @Mock private WizardPage page;
 
   private SWTBot bot;
@@ -116,12 +113,11 @@ public class RunOptionsDefaultsComponentTest {
     
     doCallRealMethod().when(page).setPageComplete(anyBoolean());
     doCallRealMethod().when(page).isPageComplete();
-
+    GoogleApiFactory.setInstance(apiFactory);
     shell = shellResource.getShell();
     bot = new SWTBot(shell);
     component = new RunOptionsDefaultsComponent(
-        shell, 3, messageTarget, preferences, page, false /* allowIncomplete */, loginService,
-        apiFactory);
+        shell, 3, messageTarget, preferences, page, false /* allowIncomplete */);
     selector = CompositeUtil.findControl(shell, AccountSelector.class);
     projectID =
         CompositeUtil.findControlAfterLabel(shell, Combo.class, "Cloud Platform &project ID:");
@@ -157,11 +153,9 @@ public class RunOptionsDefaultsComponentTest {
     if (!account.isPresent()) {
       when(apiFactory.getAccount()).thenReturn(Optional.empty());
       when(apiFactory.getCredential()).thenReturn(Optional.empty());
-      when(loginService.getAccounts()).thenReturn(Sets.newHashSet());
     } else {
       when(apiFactory.getAccount()).thenReturn(account);
       when(apiFactory.getCredential()).thenReturn(Optional.of(account.get().getOAuth2Credential()));
-      when(loginService.getAccounts()).thenReturn(Sets.newHashSet(account.get()));
       if (account.get().equals(TestAccountProvider.ACCOUNT_1)) {
         mockStorageApiBucketList("project", "alice-bucket-1", "alice-bucket-2");
         mockProjectList(new GcpProject("project", "project"));
@@ -533,14 +527,14 @@ public class RunOptionsDefaultsComponentTest {
   @Test
   public void testPartialValidity_allEmpty() {
     component = new RunOptionsDefaultsComponent(shell, 3, messageTarget, preferences, page,
-        true /* allowIncomplete */, loginService, apiFactory);
+        true /* allowIncomplete */);
     assertTrue("should be complete when totally empty", page.isPageComplete());
   }
 
   @Test
   public void testPartialValidity_invalidServiceAccountKey() {
     component = new RunOptionsDefaultsComponent(shell, 3, messageTarget, preferences, page,
-        true /* allowIncomplete */, loginService, apiFactory);
+        true /* allowIncomplete */);
     serviceAccountKey.setText("/non/existing/file.ext");
 
     assertFalse("should be incomplete with invalid service key even if allowInComplete is true",

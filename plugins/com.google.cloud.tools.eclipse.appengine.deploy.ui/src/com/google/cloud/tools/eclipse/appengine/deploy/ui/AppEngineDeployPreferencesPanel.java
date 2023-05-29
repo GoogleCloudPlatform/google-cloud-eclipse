@@ -20,7 +20,7 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.FixedMultiValidator;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.ProjectSelectorSelectionChangedListener;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelectorObservableValue;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
@@ -125,8 +125,8 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
   private final ProjectRepository projectRepository;
   private final FormToolkit formToolkit;
 
-  public AppEngineDeployPreferencesPanel(Composite parent, IProject project,
-      IGoogleApiFactory apiFactory, Runnable layoutChangedHandler, boolean requireValues,
+  public AppEngineDeployPreferencesPanel(Composite parent, IProject project, 
+      Runnable layoutChangedHandler, boolean requireValues,
       ProjectRepository projectRepository, DeployPreferences model) {
     super(parent, SWT.NONE);
 
@@ -140,10 +140,10 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     colors.setBackground(null);
     colors.setForeground(null);
     formToolkit = new FormToolkit(colors);
-    createCredentialSection(apiFactory);
-    createProjectIdSection(apiFactory);
+    createCredentialSection();
+    createProjectIdSection();
     setupAccountEmailDataBinding();
-    setupProjectSelectorDataBinding(apiFactory);
+    setupProjectSelectorDataBinding();
 
     createCenterArea();
 
@@ -154,7 +154,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
 
     Dialog.applyDialogFont(this);
     GridLayoutFactory.swtDefaults().numColumns(2).applyTo(this);
-    refreshProjectsForSelectedCredential(apiFactory);
+    refreshProjectsForSelectedCredential();
   }
 
   
@@ -202,14 +202,14 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
         requireValues, accountSelector, accountSelectorObservableValue));
   }
 
-  private void setupProjectSelectorDataBinding(IGoogleApiFactory apiFactory) {
+  private void setupProjectSelectorDataBinding() {
     IViewerObservableValue projectInput =
         ViewerProperties.input().observe(projectSelector.getViewer());
     IViewerObservableValue projectSelection =
         ViewerProperties.singleSelection().observe(projectSelector.getViewer());
     
     bindingContext.addValidationStatusProvider(
-        new ProjectSelectionValidator(projectInput, projectSelection, requireValues, apiFactory));
+        new ProjectSelectionValidator(projectInput, projectSelection, requireValues));
 
     IViewerObservableValue projectList =
         ViewerProperties.singleSelection().observe(projectSelector.getViewer());
@@ -347,18 +347,18 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     return accountSelector.getSelectedCredential();
   }
 
-  private void createCredentialSection(IGoogleApiFactory apiFactory) {
+  private void createCredentialSection() {
     Label accountLabel = new Label(this, SWT.LEAD);
     accountLabel.setText(Messages.getString("deploy.preferences.dialog.label.selectAccount"));
     accountLabel.setToolTipText(Messages.getString("tooltip.account"));
 
-    accountSelector = new AccountSelector(this, apiFactory);
+    accountSelector = new AccountSelector(this);
     accountSelector.setToolTipText(Messages.getString("tooltip.account"));
     GridData accountSelectorGridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
     accountSelector.setLayoutData(accountSelectorGridData);
   }
 
-  private void createProjectIdSection(IGoogleApiFactory apiFactory) {
+  private void createProjectIdSection() {
     Label projectIdLabel = new Label(this, SWT.LEAD);
     projectIdLabel.setText(Messages.getString("project"));
     projectIdLabel.setToolTipText(Messages.getString("tooltip.project.id"));
@@ -367,7 +367,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
 
     Composite linkComposite = new Composite(this, SWT.NONE);
     Link createNewProject = new Link(linkComposite, SWT.WRAP);
-    if (apiFactory.getCredential().isPresent()) {
+    if (GoogleApiFactory.INSTANCE.getCredential().isPresent()) {
       createNewProject.setText(Messages.getString("projectselector.createproject",
           CREATE_GCP_PROJECT_URL));
       createNewProject.setToolTipText(Messages.getString("projectselector.createproject.tooltip"));
@@ -406,12 +406,12 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     refreshProjectsButton.addSelectionListener(new SelectionAdapter() {
       @Override
       public void widgetSelected(SelectionEvent event) {
-        refreshProjectsForSelectedCredential(apiFactory);
+        refreshProjectsForSelectedCredential();
       }
     });
 
     accountSelector.addSelectionListener(
-        new RefreshProjectOnAccountSelection(refreshProjectsButton, apiFactory));
+        new RefreshProjectOnAccountSelection(refreshProjectsButton));
 
     projectSelector.addSelectionChangedListener(
         new ProjectSelectorSelectionChangedListener(accountSelector,
@@ -506,11 +506,11 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
   @VisibleForTesting
   public Job latestGcpProjectQueryJob;  // Must be updated/accessed in the UI context.
 
-  private void refreshProjectsForSelectedCredential(IGoogleApiFactory apiFactory) {
+  private void refreshProjectsForSelectedCredential() {
     projectSelector.setProjects(Collections.<GcpProject>emptyList());
     latestGcpProjectQueryJob = null;
 
-    if (apiFactory.getCredential().isPresent()) {
+    if (GoogleApiFactory.INSTANCE.getCredential().isPresent()) {
       Predicate<Job> isLatestQueryJob = job -> job == latestGcpProjectQueryJob;
       latestGcpProjectQueryJob = new GcpProjectQueryJob(projectRepository, 
           projectSelector, bindingContext, isLatestQueryJob);
@@ -522,16 +522,14 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
   private final class RefreshProjectOnAccountSelection implements Runnable {
 
     private final Button refreshProjectsButton;
-    private final IGoogleApiFactory apiFactory;
 
-    public RefreshProjectOnAccountSelection(Button refreshProjectsButton, IGoogleApiFactory apiFactory) {
+    public RefreshProjectOnAccountSelection(Button refreshProjectsButton) {
       this.refreshProjectsButton = refreshProjectsButton;
-      this.apiFactory = apiFactory;
     }
 
     @Override
     public void run() {
-      refreshProjectsForSelectedCredential(apiFactory);
+      refreshProjectsForSelectedCredential();
       refreshProjectsButton.setEnabled(accountSelector.getSelectedCredential() != null);
     }
   }
@@ -579,16 +577,13 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     private final IViewerObservableValue projectInput;
     private final IViewerObservableValue projectSelection;
     private final boolean requireValues;
-    private final IGoogleApiFactory apiFactory;
 
     private ProjectSelectionValidator(IViewerObservableValue projectInput,
                                       IViewerObservableValue projectSelection,
-                                      boolean requireValues,
-                                      IGoogleApiFactory apiFactory) {
+                                      boolean requireValues) {
       this.projectInput = projectInput;
       this.projectSelection = projectSelection;
       this.requireValues = requireValues;
-      this.apiFactory = apiFactory;
     }
 
     @Override
@@ -598,7 +593,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
       // this access is recorded and ensures that changes are tracked, don't move it inside the if
       Object selectedProject = projectSelection.getValue();
       
-      if (!apiFactory.getCredential().isPresent()) {
+      if (!GoogleApiFactory.INSTANCE.getCredential().isPresent()) {
         return ValidationStatus.ok();
       }
       if (projects.isEmpty()) {

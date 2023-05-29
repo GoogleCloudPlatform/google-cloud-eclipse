@@ -19,7 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.appengine.localserver.ServiceAccountUtil;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepositoryException;
@@ -62,7 +62,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.PlatformUI;
 
 public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
 
@@ -79,7 +78,6 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
   private Image gcpIcon;
 
   private final EnvironmentTab environmentTab;
-  private final IGoogleApiFactory googleApiFactory;
   private final ProjectRepository projectRepository;
 
   private AccountSelector accountSelector;
@@ -108,15 +106,12 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
 
   public GcpLocalRunTab(EnvironmentTab environmentTab) {
     this(environmentTab,
-        PlatformUI.getWorkbench().getService(IGoogleApiFactory.class),
-        new ProjectRepository(PlatformUI.getWorkbench().getService(IGoogleApiFactory.class)));
+        new ProjectRepository());
   }
 
   @VisibleForTesting
-  GcpLocalRunTab(EnvironmentTab environmentTab,
-      IGoogleApiFactory googleApiFactory, ProjectRepository projectRepository) {
+  GcpLocalRunTab(EnvironmentTab environmentTab, ProjectRepository projectRepository) {
     this.environmentTab = environmentTab;
-    this.googleApiFactory = googleApiFactory;
     this.projectRepository = projectRepository;
   }
 
@@ -147,7 +142,8 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
 
     // Account row
     new Label(composite, SWT.LEAD).setText(Messages.getString("label.account")); //$NON-NLS-1$
-    accountSelector = new AccountSelector(composite, googleApiFactory);
+    accountSelector = new AccountSelector(composite);
+    accountEmailModel = accountSelector.getSelectedEmail();
     accountSelector.addSelectionListener(() -> {
       updateProjectSelector();
 
@@ -244,6 +240,7 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
     GridLayoutFactory.swtDefaults().numColumns(4).generateLayout(composite);
 
     setControl(composite);
+    updateProjectSelector();
   }
 
   private void updateProjectSelector() {
@@ -403,12 +400,11 @@ public class GcpLocalRunTab extends AbstractLaunchConfigurationTab {
   @VisibleForTesting
   void createServiceAccountKey(Path keyFile) {
     String projectId = projectSelector.getSelectedProjectId();
-    Preconditions.checkState(googleApiFactory.getCredential().isPresent(), "no account selected"); //$NON-NLS-1$
+    Preconditions.checkState(GoogleApiFactory.INSTANCE.getCredential().isPresent(), "no account selected"); //$NON-NLS-1$
     Preconditions.checkState(!projectId.isEmpty(), "no project selected"); //$NON-NLS-1$
     
     try { 
-      ServiceAccountUtil.createAppEngineDefaultServiceAccountKey(googleApiFactory,
-          projectId, keyFile);
+      ServiceAccountUtil.createAppEngineDefaultServiceAccountKey(projectId, keyFile);
 
       serviceKeyInput.setText(keyFile.toString());
       String message = Messages.getString("service.key.created", keyFile); //$NON-NLS-1$

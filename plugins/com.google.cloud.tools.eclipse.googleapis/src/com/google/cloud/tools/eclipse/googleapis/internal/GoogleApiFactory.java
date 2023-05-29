@@ -58,6 +58,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   private LoadingCache<GoogleApi, HttpTransport> transportCache;
   private IProxyService proxyService;
 
+  public static GoogleApiFactory INSTANCE = new GoogleApiFactory();
   
   private final IProxyChangeListener proxyChangeListener = new IProxyChangeListener() {
     @Override
@@ -68,12 +69,13 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     }
   };
 
-  public GoogleApiFactory() {
+  @VisibleForTesting
+  GoogleApiFactory() {
     this(new ProxyFactory());
   }
 
   @VisibleForTesting
-  public GoogleApiFactory(ProxyFactory proxyFactory) {
+  GoogleApiFactory(ProxyFactory proxyFactory) {
     Preconditions.checkNotNull(proxyFactory, "proxyFactory is null");
     this.proxyFactory = proxyFactory;
   }
@@ -101,7 +103,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   public Optional<Account> getAccount() {
     return accountProvider.getAccount();
   }
- 
+  
   @Override
   public Optional<Credential> getCredential() {
     return accountProvider.getCredential();
@@ -215,5 +217,10 @@ public class GoogleApiFactory implements IGoogleApiFactory {
    */
   public static void setAccountProvider(AccountProvider provider) {
     accountProvider = provider;
+  }
+  
+  @VisibleForTesting
+  public static void setInstance(GoogleApiFactory instance) {
+    INSTANCE = instance;
   }
 }

@@ -33,7 +33,6 @@ import static org.mockito.Mockito.when;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
 //import com.google.cloud.tools.eclipse.appengine.deploy.ui.AppEngineDeployPreferencesPanel.ProjectSelectionValidator;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 //import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 //import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 //import com.google.cloud.tools.eclipse.login.ui.AccountSelectorObservableValue;
@@ -78,7 +77,6 @@ public class AppEngineDeployPreferencesPanelTest {
   private HashSet<Account> oneAccountSet;
   private HashSet<Account> twoAccountSet;
   @Mock private IProject project;
-  @Mock private IGoogleApiFactory apiFactory;
   @Mock private Runnable layoutChangedHandler;
   @Mock private Account account1;
   @Mock private Account account2;
