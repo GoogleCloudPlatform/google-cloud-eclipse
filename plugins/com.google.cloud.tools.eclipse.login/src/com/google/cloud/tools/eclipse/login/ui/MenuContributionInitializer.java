@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.login.ui;
 
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import org.eclipse.ui.IStartup;
 import org.eclipse.ui.IWorkbench;
@@ -24,12 +23,11 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 
 public class MenuContributionInitializer implements IStartup {
-  IGoogleApiFactory apiFactory = new GoogleApiFactory();
   
   @Override
   public void earlyStartup() {
     updateLoginCommand();
-    apiFactory.addCredentialChangeListener(() -> updateLoginCommand());
+    GoogleApiFactory.INSTANCE.addCredentialChangeListener(() -> updateLoginCommand());
   }
 
   static void updateLoginCommand() {
