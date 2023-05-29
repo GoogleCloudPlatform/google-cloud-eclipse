@@ -153,6 +153,7 @@ public class DefaultAccountProviderTest {
   }
   
   private void login(String token) {
+    System.out.println("login(" + token + ")");
     try {
       File adcFile = getTempAdcPath().toFile();
       System.out.println("login() adcFile path: " + adcFile.toPath().toString());
@@ -176,8 +177,10 @@ public class DefaultAccountProviderTest {
   }
   
   private void logout() {
+    System.out.println("logout()");
     File adcFile = getTempAdcPath().toFile();
     if (adcFile.exists()) {
+      System.out.println("logout() delete file");
       adcFile.delete();
     }
   }
@@ -205,6 +208,9 @@ public class DefaultAccountProviderTest {
       if (initialCallCount == expectedCallCount) {
         return;
       }
+      else if (initialCallCount > expectedCallCount) {
+        fail("already called more times than expected");
+      }
       long msWaited = 0;
       while (msWaited < timeoutMs) {
         try {
@@ -227,6 +233,7 @@ public class DefaultAccountProviderTest {
     final Map<String, Account> accountMap = new HashMap<>();
     private int numberOfCredentialChangeChecks = 0;
     private int numberOfCredentialPropagations = 0;
+    private String currentToken = "";
     
         
     public TestDefaultAccountProvider(Path adcPath) {
@@ -245,7 +252,11 @@ public class DefaultAccountProviderTest {
     protected void confirmAdcCredsChanged() {
       System.out.println("confirmAdcCredsChanged()");
       numberOfCredentialChangeChecks++;
-      super.confirmAdcCredsChanged();
+      String newToken = getRefreshTokenFromCredentialFile();
+      if (newToken.compareTo(currentToken) != 0) {
+        currentToken = newToken;
+        propagateCredentialChange();
+      }
     }
     
     @Override

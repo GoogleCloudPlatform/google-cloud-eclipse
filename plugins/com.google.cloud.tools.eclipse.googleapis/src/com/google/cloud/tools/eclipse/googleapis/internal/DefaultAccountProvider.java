@@ -56,7 +56,7 @@ public class DefaultAccountProvider extends AccountProvider {
 
   protected Path adcPath = Paths.get(GoogleAuthUtils.getWellKnownCredentialsPath()).toAbsolutePath();
   
-  public static final DefaultAccountProvider INSTANCE = new DefaultAccountProvider();
+  public static final DefaultAccountProvider INSTANCE;
   private static final int USER_INFO_QUERY_HTTP_CONNECTION_TIMEOUT = 5000 /* ms */;
   private static final int USER_INFO_QUERY_HTTP_READ_TIMEOUT = 3000 /* ms */;
   private static final HttpTransport transport = new NetHttpTransport();
@@ -69,10 +69,13 @@ public class DefaultAccountProvider extends AccountProvider {
   private WatchService watchService;
   private final ExecutorService executorService = Executors.newSingleThreadExecutor();
   
+  static {
+    INSTANCE = new DefaultAccountProvider();
+    INSTANCE.initWatchService();
+  }
   
-  protected DefaultAccountProvider() {
+  private DefaultAccountProvider() {
     LOGGER.info("Default constructor");
-    initWatchService();
   }
   
   protected DefaultAccountProvider(Path adcPath) {
@@ -82,6 +85,7 @@ public class DefaultAccountProvider extends AccountProvider {
   }
   
   protected void initWatchService() {
+    LOGGER.info("Instance # " + this.hashCode() + " inits watch service");
     Path adcFolderPath = adcPath.getParent();
     try {
       watchService = FileSystems.getDefault().newWatchService();
@@ -103,10 +107,11 @@ public class DefaultAccountProvider extends AccountProvider {
           continue;
         }
         for (WatchEvent<?> event : key.pollEvents()) {
-          LOGGER.log(Level.INFO, "Detected change in ADC file");
+          LOGGER.log(Level.INFO, "Events detected in ADC folder");
           Path affectedFile = Paths.get(adcFolderPath.toAbsolutePath().toString(), 
               ((Path) event.context()).toString()).toAbsolutePath();
           if (affectedFile.equals(adcPath)) {
+            LOGGER.info("ADC file has changed");
             confirmAdcCredsChanged();
             key.reset();
             break; // prevent propagation for two events on same file and different kind
