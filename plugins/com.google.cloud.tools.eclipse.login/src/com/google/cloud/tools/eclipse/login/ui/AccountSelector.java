@@ -64,12 +64,12 @@ public class AccountSelector extends Composite {
     GridDataFactory.fillDefaults().grab(true, false).applyTo(accountEmailComposite);
     GridLayoutFactory.fillDefaults().generateLayout(accountEmailComposite);
     GridLayoutFactory.fillDefaults().generateLayout(this);
-    apiFactory.addCredentialChangeListener(onCredentialChange);
+    GoogleApiFactory.INSTANCE.addCredentialChangeListener(onCredentialChange);
     addDisposeListener(new DisposeListener() {
       
       @Override
       public void widgetDisposed(DisposeEvent e) {
-        apiFactory.removeCredentialChangeListener(onCredentialChange);
+        GoogleApiFactory.INSTANCE.removeCredentialChangeListener(onCredentialChange);
       }
     });
     
