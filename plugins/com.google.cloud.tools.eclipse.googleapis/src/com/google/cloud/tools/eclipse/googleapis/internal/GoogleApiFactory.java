@@ -38,7 +38,6 @@ import java.util.Optional;
 import org.eclipse.core.net.proxy.IProxyChangeEvent;
 import org.eclipse.core.net.proxy.IProxyChangeListener;
 import org.eclipse.core.net.proxy.IProxyService;
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -69,7 +68,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     }
   };
 
-  @VisibleForTesting
+  @VisibleForTesting 
   GoogleApiFactory() {
     this(new ProxyFactory());
   }
@@ -78,10 +77,6 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   GoogleApiFactory(ProxyFactory proxyFactory) {
     Preconditions.checkNotNull(proxyFactory, "proxyFactory is null");
     this.proxyFactory = proxyFactory;
-  }
-
-  @Activate
-  public void init() {
     // NetHttpTransport advises: "For maximum efficiency, applications should use a single
     // globally-shared instance of the HTTP transport." But as we need a separate proxy per URL,
     // we cannot reuse the same httptransport.
