@@ -75,17 +75,15 @@ public class DefaultAccountProvider extends AccountProvider {
   }
   
   private DefaultAccountProvider() {
-    LOGGER.info("Default constructor");
   }
   
   protected DefaultAccountProvider(Path adcPath) {
-    LOGGER.info("Constructor with path: " + adcPath.toString());
+    LOGGER.fine("Constructor with path: " + adcPath.toString());
     this.adcPath = adcPath;
     initWatchService();
   }
   
   protected void initWatchService() {
-    LOGGER.info("Instance # " + this.hashCode() + " inits watch service");
     Path adcFolderPath = adcPath.getParent();
     try {
       watchService = FileSystems.getDefault().newWatchService();
@@ -107,7 +105,7 @@ public class DefaultAccountProvider extends AccountProvider {
           continue;
         }
         for (WatchEvent<?> event : key.pollEvents()) {
-          LOGGER.log(Level.INFO, this.hashCode() + ": Events detected in ADC folder");
+          LOGGER.log(Level.FINE, this.hashCode() + ": Events detected in ADC folder");
           Path affectedFile = Paths.get(adcFolderPath.toAbsolutePath().toString(), 
               ((Path) event.context()).toString()).toAbsolutePath();
           if (affectedFile.equals(adcPath)) {
