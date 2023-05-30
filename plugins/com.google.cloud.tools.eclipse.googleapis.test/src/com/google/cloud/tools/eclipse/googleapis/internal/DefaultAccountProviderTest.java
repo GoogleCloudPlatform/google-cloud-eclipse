@@ -298,10 +298,16 @@ public class DefaultAccountProviderTest {
     @Override
     protected Optional<Account> computeAccount() {
       Optional<Credential> cred = getCredential();
-      if (!cred.isPresent() || !accountMap.containsKey(((CredentialWithId)cred.get()).getId())) {
+      if (!cred.isPresent()) {
+        LOGGER.info("computeAccount(): credential is not present");
         return Optional.empty();
       }
-      Account data = accountMap.get(((CredentialWithId)cred.get()).getId());
+      String id = ((CredentialWithId)cred.get()).getId();
+      if (!accountMap.containsKey(id)) {
+        LOGGER.info("computeAccount(): accountMap does not contain ID: " + id);
+        return Optional.empty();
+      }
+      Account data = accountMap.get(id);
       return Optional.of(new Account(
           data.getEmail(),
           cred.get(),
@@ -339,10 +345,14 @@ public class DefaultAccountProviderTest {
     protected Optional<Credential> computeCredential() {
       File credsFile = getCredentialFile();
       if (!credsFile.exists()) { 
+        LOGGER.info("computeCredential: credsFile does not exist");
         return Optional.empty();
       }
+      String id = getFileContents();
+      LOGGER.info("computeCredential(): creating credential with ID: " + id);
       CredentialWithId cred = mock(CredentialWithId.class);
-      when(cred.getId()).thenReturn(getFileContents());
+      when(cred.getId()).thenReturn(id);
+      
       return Optional.of(cred);
     }
   }
