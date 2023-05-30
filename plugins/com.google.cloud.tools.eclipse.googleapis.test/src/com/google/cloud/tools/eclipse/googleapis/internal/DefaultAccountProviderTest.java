@@ -195,12 +195,12 @@ public class DefaultAccountProviderTest {
     private static final long DEFAULT_WAIT_INTERVAL_MS = 5000;
     private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
 
-    public void onFileChanged() {
+    public synchronized void onFileChanged() {
       callCount++;
       LOGGER.info(this.hashCode() + ": callCount increased to " + callCount);
     }
 
-    public int getCallCount() {
+    public synchronized int getCallCount() {
         return callCount;
     }
     
@@ -209,7 +209,7 @@ public class DefaultAccountProviderTest {
     }
     
     private void waitUntilChange(long timeoutMs, int expectedCallCount) {
-      final int initialCallCount = callCount;
+      final int initialCallCount = getCallCount();
       LOGGER.info(this.hashCode() + ": initialCallCount: " + initialCallCount + ", expectedCallCount: " + expectedCallCount);
       if (initialCallCount == expectedCallCount) {
         LOGGER.info(this.hashCode() + ": Already on expected call count");
@@ -224,8 +224,8 @@ public class DefaultAccountProviderTest {
           msWaited += WAIT_INTERVAL_MS;
           Thread.sleep(WAIT_INTERVAL_MS);
           LOGGER.info(this.hashCode() + " (loop): initialCallCount: " + initialCallCount + ", callCount: " + expectedCallCount);
-          if (initialCallCount != callCount) {
-            assertEquals(expectedCallCount, callCount);
+          if (initialCallCount != getCallCount()) {
+            assertEquals(expectedCallCount, getCallCount());
           }
         } catch (InterruptedException ex) {
           LOGGER.info("interrupted");
