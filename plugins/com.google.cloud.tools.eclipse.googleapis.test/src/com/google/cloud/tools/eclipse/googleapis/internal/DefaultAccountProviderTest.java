@@ -191,8 +191,8 @@ public class DefaultAccountProviderTest {
   public class CredentialChangeListener {
 
     private int callCount = 0;
-    private static final int WAIT_INTERVAL_MS = 100;
-    private static final long DEFAULT_WAIT_INTERVAL_MS = 5000;
+    private static final long WAIT_INTERVAL_MS = 100;
+    private static final long DEFAULT_WAIT_TIME_MS = 5000;
     private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
 
     public synchronized void onFileChanged() {
@@ -205,7 +205,7 @@ public class DefaultAccountProviderTest {
     }
     
     public void waitUntilChange(int expectedCallCount) {
-      waitUntilChange(DEFAULT_WAIT_INTERVAL_MS, expectedCallCount);
+      waitUntilChange(DEFAULT_WAIT_TIME_MS, expectedCallCount);
     }
     
     private void waitUntilChange(long timeoutMs, int expectedCallCount) {
@@ -223,7 +223,8 @@ public class DefaultAccountProviderTest {
         try {
           msWaited += WAIT_INTERVAL_MS;
           Thread.sleep(WAIT_INTERVAL_MS);
-          LOGGER.info(this.hashCode() + " (loop): initialCallCount: " + initialCallCount + ", callCount: " + expectedCallCount);
+          LOGGER.info(this.hashCode() + " (loop): initialCallCount: " + initialCallCount 
+              + ", callCount: " + expectedCallCount + ", msWaited: " + msWaited + ", timeoutMs: " + timeoutMs);
           if (initialCallCount != getCallCount()) {
             assertEquals(expectedCallCount, getCallCount());
           }
