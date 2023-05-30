@@ -224,9 +224,10 @@ public class DefaultAccountProviderTest {
           msWaited += WAIT_INTERVAL_MS;
           Thread.sleep(WAIT_INTERVAL_MS);
           LOGGER.info(this.hashCode() + " (loop): initialCallCount: " + initialCallCount 
-              + ", callCount: " + expectedCallCount + ", msWaited: " + msWaited + ", timeoutMs: " + timeoutMs);
+              + ", callCount: " + getCallCount() + ", msWaited: " + msWaited + ", timeoutMs: " + timeoutMs);
           if (initialCallCount != getCallCount()) {
             assertEquals(expectedCallCount, getCallCount());
+            return;
           }
         } catch (InterruptedException ex) {
           LOGGER.info("interrupted");
