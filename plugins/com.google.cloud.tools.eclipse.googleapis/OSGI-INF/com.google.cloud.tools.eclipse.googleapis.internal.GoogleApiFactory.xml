@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="init" name="com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory">
-   <service>
-      <provide interface="com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory"/>
-   </service>
-   <reference bind="setProxyService" cardinality="0..1" interface="org.eclipse.core.net.proxy.IProxyService" name="ProxyService" policy="dynamic" unbind="unsetProxyService"/>
-   <implementation class="com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory"/>
-</scr:component>

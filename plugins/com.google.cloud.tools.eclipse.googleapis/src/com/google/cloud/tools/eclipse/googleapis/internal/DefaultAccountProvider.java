@@ -62,10 +62,10 @@ public class DefaultAccountProvider extends AccountProvider {
   private static final HttpTransport transport = new NetHttpTransport();
    
   private final JsonFactory jsonFactory = Utils.getDefaultJsonFactory();
-  private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
+  private static final Logger LOGGER = Logger.getLogger(DefaultAccountProvider.class.getName());
   
-  private volatile Optional<Credential> currentCred = computeCredential();
-  private volatile Optional<Account> cachedAccount = Optional.empty();
+  protected volatile Optional<Credential> currentCred = computeCredential();
+  protected volatile Optional<Account> cachedAccount = Optional.empty();
   private WatchService watchService;
   private final ExecutorService executorService = Executors.newSingleThreadExecutor();
   

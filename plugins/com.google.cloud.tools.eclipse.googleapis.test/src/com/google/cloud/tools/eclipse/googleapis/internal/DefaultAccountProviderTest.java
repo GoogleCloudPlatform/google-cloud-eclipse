@@ -21,7 +21,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.googleapis.Account;
@@ -30,8 +29,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -58,6 +55,7 @@ public class DefaultAccountProviderTest {
   final String NAME_2 = "name2";
   final String AVATAR_2 = "avatar2";
   private CredentialChangeListener listener;
+  private Runnable listenerFunction;
   
   static final String TEMP_ADC_FILENAME = "test_adc.json";
   private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
@@ -69,14 +67,15 @@ public class DefaultAccountProviderTest {
   public void setup() throws IOException {
     LOGGER.info("setup()");
     LOGGER.info("Temp folder location: " + tempFolder.getRoot().toPath().toString());
-    provider = new TestDefaultAccountProvider(tempFolder.newFile(TEMP_ADC_FILENAME).toPath());
+    provider = new TestDefaultAccountProvider(tempFolder.newFile(TEMP_ADC_FILENAME).toPath(), tempFolder);
     Account acct1 = new Account(EMAIL_1, mock(Credential.class), NAME_1, AVATAR_1);
     Account acct2 = new Account(EMAIL_2, mock(Credential.class), NAME_2, AVATAR_2);
     provider.addAccount(TOKEN_1, acct1);
     provider.addAccount(TOKEN_2, acct2);
     logout();
     listener = new CredentialChangeListener();
-    provider.addCredentialChangeListener(listener::onFileChanged);
+    listenerFunction = listener::onFileChanged;
+    provider.addCredentialChangeListener(listenerFunction);
   }
   
   @Test
@@ -89,7 +88,7 @@ public class DefaultAccountProviderTest {
     listener.waitUntilChange(2);
     assertEquals(3, provider.getNumberOfCredentialChangeChecks());
     assertEquals(2, provider.getNumberOfCredentialPropagations());
-    provider.removeCredentialChangeListener(listener::onFileChanged);
+    provider.removeCredentialChangeListener(listenerFunction);
     login(TOKEN_1);
     Thread.sleep(3000);
     assertEquals(4, provider.getNumberOfCredentialChangeChecks());
@@ -123,6 +122,7 @@ public class DefaultAccountProviderTest {
     
     logout();
     listener.waitUntilChange(3);
+    acct = provider.getAccount();
     assertFalse(acct.isPresent());
   }
   
@@ -145,6 +145,7 @@ public class DefaultAccountProviderTest {
     
     logout();
     listener.waitUntilChange(3);
+    cred = provider.getCredential();
     assertFalse(cred.isPresent());
   }
   
@@ -237,135 +238,5 @@ public class DefaultAccountProviderTest {
       fail("Timeout of " + timeoutMs + " exceeded");
     }
 
-}
-  
-  public class TestDefaultAccountProvider extends DefaultAccountProvider {
-    
-    final Map<String, Account> accountMap = new HashMap<>();
-    private int numberOfCredentialChangeChecks = 0;
-    private int numberOfCredentialPropagations = 0;
-    private String currentToken = "";
-    private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
-    
-        
-    public TestDefaultAccountProvider(Path adcPath) {
-      super(adcPath);
-    }
-    
-    public int getNumberOfCredentialChangeChecks() {
-      return numberOfCredentialChangeChecks;
-    }
-    
-    public int getNumberOfCredentialPropagations() {
-      return numberOfCredentialPropagations;
-    }
-    
-    @Override
-    protected void confirmAdcCredsChanged() {
-      LOGGER.info("checking if creds changed");
-      numberOfCredentialChangeChecks++;
-      String newToken = getRefreshTokenFromCredentialFile();
-      LOGGER.info("currentToken: " + currentToken + ", newToken: " + newToken);
-      if (newToken.compareTo(currentToken) != 0) {
-        currentToken = newToken;
-        propagateCredentialChange();
-      }
-    }
-    
-    @Override
-    protected void propagateCredentialChange() {
-      LOGGER.info("propagating credentials change");
-      numberOfCredentialPropagations++;
-      super.propagateCredentialChange();
-    }
-    
-    public void addAccount(String id, Account acct) {
-      accountMap.put(id, acct);
-    }
-    
-    public TemporaryFolder getTempFolder() {
-      return tempFolder;
-    }
-    
-    /**
-     * @return the application default credentials associated account
-     */
-    @Override
-    public Optional<Account> getAccount(){
-      return computeAccount();
-    }
-    
-    @Override
-    protected Optional<Account> computeAccount() {
-      Optional<Credential> cred = getCredential();
-      if (!cred.isPresent()) {
-        LOGGER.info("computeAccount(): credential is not present");
-        return Optional.empty();
-      }
-      String id = ((CredentialWithId)cred.get()).getId();
-      if (!accountMap.containsKey(id)) {
-        LOGGER.info("computeAccount(): accountMap does not contain ID: " + id);
-        return Optional.empty();
-      }
-      Account data = accountMap.get(id);
-      return Optional.of(new Account(
-          data.getEmail(),
-          cred.get(),
-          data.getName().orElse(null),
-          data.getAvatarUrl().orElse(null)
-      ));
-    }
-    
-    private String getFileContents() {
-      File credsFile = getCredentialFile();
-      if (!credsFile.exists()) {
-        LOGGER.info("credsFile does not exist at location: " + credsFile.getAbsolutePath());
-        return "";
-      }
-      try {
-        String content = Files.readAllLines(credsFile.toPath())
-            .stream()
-            .collect(Collectors.joining("\n"));
-        LOGGER.info("content at " + credsFile.getAbsolutePath() + ": " + content);
-        return content;
-      } catch (IOException ex) {
-        fail();
-      }
-      return "";
-    }
-    
-    @Override
-    protected String getRefreshTokenFromCredentialFile() {
-      String result = getFileContents();
-      LOGGER.info("getRefreshTokenFromCredentialFile(): " + result);
-      return result;
-    }
-    
-    @Override
-    protected Optional<Credential> computeCredential() {
-      File credsFile = getCredentialFile();
-      if (!credsFile.exists()) { 
-        LOGGER.info("computeCredential: credsFile does not exist");
-        return Optional.empty();
-      }
-      String id = getFileContents();
-      LOGGER.info("computeCredential(): creating credential with ID: " + id);
-      CredentialWithId cred = mock(CredentialWithId.class);
-      when(cred.getId()).thenReturn(id);
-      
-      return Optional.of(cred);
-    }
-  }
-  
-  public class CredentialWithId extends Credential {
-    
-    protected CredentialWithId(Builder builder) {
-      super(builder);
-    }
-
-    public String getId() {
-      // should be overriden by mock
-      return null;
-    }
   }
 }

@@ -8,7 +8,6 @@ Bundle-Vendor: %providerName
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
-Service-Component: OSGI-INF/com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory.xml
 Bundle-Classpath: .,
  lib/google-api-client-1.25.0.jar,
  lib/google-api-services-appengine-v1-rev80-1.25.0.jar,
