@@ -193,9 +193,11 @@ public class DefaultAccountProviderTest {
     private int callCount = 0;
     private static final int WAIT_INTERVAL_MS = 100;
     private static final long DEFAULT_WAIT_INTERVAL_MS = 5000;
+    private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
 
     public void onFileChanged() {
-        callCount++;
+      callCount++;
+      LOGGER.info("callCount increased to " + callCount);
     }
 
     public int getCallCount() {
@@ -305,7 +307,7 @@ public class DefaultAccountProviderTest {
     private String getFileContents() {
       File credsFile = getCredentialFile();
       if (!credsFile.exists()) {
-        LOGGER.info("credsFile does not exist");
+        LOGGER.info("credsFile does not exist at location: " + credsFile.getAbsolutePath());
         return "";
       }
       try {
