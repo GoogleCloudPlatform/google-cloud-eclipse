@@ -106,8 +106,7 @@ public class DefaultAccountProvider extends AccountProvider {
         }
         for (WatchEvent<?> event : key.pollEvents()) {
           LOGGER.log(Level.FINE, this.hashCode() + ": Events detected in ADC folder");
-          Path affectedFile = Paths.get(adcFolderPath.toAbsolutePath().toString(), 
-              ((Path) event.context()).toString()).toAbsolutePath();
+          Path affectedFile = adcFolderPath.resolve((Path) event.context());
           if (affectedFile.equals(adcPath)) {
             LOGGER.info(this.hashCode() + ": ADC file has changed");
             confirmAdcCredsChanged();
