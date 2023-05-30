@@ -20,7 +20,7 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.util.Preconditions;
 import com.google.cloud.tools.eclipse.googleapis.Account;
-import com.google.cloud.tools.eclipse.googleapis.IAccountProvider;
+import com.google.cloud.tools.eclipse.googleapis.internal.AccountProvider;
 import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import java.util.EnumMap;
 import java.util.Map;
@@ -30,7 +30,7 @@ import java.util.Optional;
 /**
  * Test account provider
  */
-public class TestAccountProvider implements IAccountProvider {
+public class TestAccountProvider extends AccountProvider {
 
   public static final String EMAIL_ACCOUNT_1 = "test-email-1@mail.com";
   public static final String EMAIL_ACCOUNT_2 = "test-email-2@mail.com";
@@ -49,6 +49,7 @@ public class TestAccountProvider implements IAccountProvider {
   
   private static Map<State, Optional<Account>> accounts = new EnumMap<>(State.class);
   private static State state = State.LOGGED_IN;
+  
   
   public static Account ACCOUNT_1;
   public static Account ACCOUNT_2;
@@ -74,7 +75,10 @@ public class TestAccountProvider implements IAccountProvider {
   
   public static void setProviderState(State state) {
     Preconditions.checkNotNull(state);
-    TestAccountProvider.state = state;
+    if (TestAccountProvider.state != state) {
+      TestAccountProvider.state = state;
+      INSTANCE.propagateCredentialChange();
+    }
   }
   
   @Override

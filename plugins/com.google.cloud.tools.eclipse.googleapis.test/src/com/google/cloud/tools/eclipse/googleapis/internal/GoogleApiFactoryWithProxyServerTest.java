@@ -88,8 +88,6 @@ public class GoogleApiFactoryWithProxyServerTest {
     when(proxyService.select(any(URI.class))).thenReturn(new IProxyData[0]);
     googleApiFactory.setProxyService(proxyService);
 
-    googleApiFactory.init();
-
     verify(proxyService).addProxyChangeListener(any(IProxyChangeListener.class));
   }
 }

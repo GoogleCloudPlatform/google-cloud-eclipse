@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.googleapis;
+package com.google.cloud.tools.eclipse.googleapis.internal;
 
 import com.google.api.client.auth.oauth2.Credential;
-import java.util.Optional;
 
-/**
- * 
- */
-public interface IAccountProvider {
+public class CredentialWithId extends Credential {
+  
+  protected CredentialWithId(Builder builder) {
+    super(builder);
+  }
 
-  public Optional<Account> getAccount();
-  public Optional<Credential> getCredential();
+  public String getId() {
+    // should be overriden by mock
+    return null;
+  }
 }

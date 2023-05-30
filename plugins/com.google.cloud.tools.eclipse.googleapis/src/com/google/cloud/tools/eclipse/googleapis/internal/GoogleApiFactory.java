@@ -28,7 +28,6 @@ import com.google.api.services.iam.v1.Iam;
 import com.google.api.services.servicemanagement.ServiceManagement;
 import com.google.api.services.storage.Storage;
 import com.google.cloud.tools.eclipse.googleapis.Account;
-import com.google.cloud.tools.eclipse.googleapis.IAccountProvider;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.annotations.VisibleForTesting;
@@ -39,7 +38,6 @@ import java.util.Optional;
 import org.eclipse.core.net.proxy.IProxyChangeEvent;
 import org.eclipse.core.net.proxy.IProxyChangeListener;
 import org.eclipse.core.net.proxy.IProxyService;
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -51,7 +49,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 @Component
 public class GoogleApiFactory implements IGoogleApiFactory {
 
-  private static IAccountProvider accountProvider = new DefaultAccountProvider();
+  private static AccountProvider accountProvider = DefaultAccountProvider.INSTANCE;
   
   private final JsonFactory jsonFactory = Utils.getDefaultJsonFactory();
   private final ProxyFactory proxyFactory;
@@ -70,7 +68,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     }
   };
 
-  @VisibleForTesting
+  @VisibleForTesting 
   GoogleApiFactory() {
     this(new ProxyFactory());
   }
@@ -79,15 +77,21 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   GoogleApiFactory(ProxyFactory proxyFactory) {
     Preconditions.checkNotNull(proxyFactory, "proxyFactory is null");
     this.proxyFactory = proxyFactory;
-  }
-
-  @Activate
-  public void init() {
     // NetHttpTransport advises: "For maximum efficiency, applications should use a single
     // globally-shared instance of the HTTP transport." But as we need a separate proxy per URL,
     // we cannot reuse the same httptransport.
     transportCache =
         CacheBuilder.newBuilder().weakValues().build(new TransportCacheLoader(proxyFactory));
+  }
+  
+  @Override
+  public void addCredentialChangeListener(Runnable listener) {
+    accountProvider.addCredentialChangeListener(listener);
+  }
+
+  @Override
+  public void removeCredentialChangeListener(Runnable listener) {
+    accountProvider.removeCredentialChangeListener(listener);
   }
   
   @Override
@@ -206,7 +210,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
    * TestAccountProvider is defined in com.google.(...).test.util, which is a non-test package
    * @param provider the new account provider to be used by this class
    */
-  public static void setAccountProvider(IAccountProvider provider) {
+  public static void setAccountProvider(AccountProvider provider) {
     accountProvider = provider;
   }
   

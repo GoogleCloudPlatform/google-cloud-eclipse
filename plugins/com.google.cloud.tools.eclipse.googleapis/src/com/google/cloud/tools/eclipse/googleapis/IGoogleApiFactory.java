@@ -43,6 +43,18 @@ public interface IGoogleApiFactory {
   public Optional<Credential> getCredential();
   
   /**
+   * Subscribes to changes in the ADC well known file
+   * @param listener action to be performed upon change
+   */
+  void addCredentialChangeListener(Runnable listener);
+
+  /**
+   * Removes subscription to changes in the ADC well known file
+   * @param listener action to be removed
+   */
+  void removeCredentialChangeListener(Runnable listener);
+  
+  /**
    * @return a Google Cloud Storage API client
    */
   Storage newStorageApi();
