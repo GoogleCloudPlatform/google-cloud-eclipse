@@ -64,8 +64,8 @@ public class DefaultAccountProvider extends AccountProvider {
   private final JsonFactory jsonFactory = Utils.getDefaultJsonFactory();
   private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
   
-  private Optional<Credential> currentCred = computeCredential();
-  private Optional<Account> cachedAccount = Optional.empty();
+  private volatile Optional<Credential> currentCred = computeCredential();
+  private volatile Optional<Account> cachedAccount = Optional.empty();
   private WatchService watchService;
   private final ExecutorService executorService = Executors.newSingleThreadExecutor();
   

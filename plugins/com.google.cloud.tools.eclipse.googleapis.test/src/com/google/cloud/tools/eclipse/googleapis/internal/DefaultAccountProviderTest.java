@@ -83,22 +83,22 @@ public class DefaultAccountProviderTest {
   public void testFileWriteTriggersListeners() throws InterruptedException {
     login(TOKEN_1);
     listener.waitUntilChange(1);
-//    assertEquals(2, provider.getNumberOfCredentialChangeChecks());
-//    assertEquals(2, provider.getNumberOfCredentialPropagations());
+    assertEquals(2, provider.getNumberOfCredentialChangeChecks());
+    assertEquals(1, provider.getNumberOfCredentialPropagations());
     login(TOKEN_2);
     listener.waitUntilChange(2);
     assertEquals(3, provider.getNumberOfCredentialChangeChecks());
-    assertEquals(3, provider.getNumberOfCredentialPropagations());
+    assertEquals(2, provider.getNumberOfCredentialPropagations());
     provider.removeCredentialChangeListener(listener::onFileChanged);
     login(TOKEN_1);
-    Thread.sleep(1000);
+    Thread.sleep(3000);
     assertEquals(4, provider.getNumberOfCredentialChangeChecks());
-    assertEquals(4, provider.getNumberOfCredentialPropagations());
+    assertEquals(3, provider.getNumberOfCredentialPropagations());
     assertEquals(2, listener.getCallCount());
     logout();
-    Thread.sleep(1000);
+    Thread.sleep(3000);
     assertEquals(5, provider.getNumberOfCredentialChangeChecks());
-    assertEquals(5, provider.getNumberOfCredentialPropagations());
+    assertEquals(4, provider.getNumberOfCredentialPropagations());
     assertEquals(2, listener.getCallCount());
   }
   
@@ -148,7 +148,7 @@ public class DefaultAccountProviderTest {
     assertFalse(cred.isPresent());
   }
   
-  
+   
   private Path getTempAdcPath() {
     Path result = tempFolder.getRoot().toPath().resolve(TEMP_ADC_FILENAME);
     LOGGER.info("getTempAdcPath(): " + result.toString());
