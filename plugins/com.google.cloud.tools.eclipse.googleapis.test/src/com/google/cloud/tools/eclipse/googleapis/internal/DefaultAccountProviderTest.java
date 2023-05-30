@@ -197,7 +197,7 @@ public class DefaultAccountProviderTest {
 
     public void onFileChanged() {
       callCount++;
-      LOGGER.info("callCount increased to " + callCount);
+      LOGGER.info(this.hashCode() + ": callCount increased to " + callCount);
     }
 
     public int getCallCount() {
@@ -210,9 +210,9 @@ public class DefaultAccountProviderTest {
     
     private void waitUntilChange(long timeoutMs, int expectedCallCount) {
       final int initialCallCount = callCount;
-      LOGGER.info("initialCallCount: " + initialCallCount);
-      LOGGER.info("expectedCallCount: " + expectedCallCount);
+      LOGGER.info(this.hashCode() + ": initialCallCount: " + initialCallCount + ", expectedCallCount: " + expectedCallCount);
       if (initialCallCount == expectedCallCount) {
+        LOGGER.info(this.hashCode() + ": Already on expected call count");
         return;
       }
       else if (initialCallCount > expectedCallCount) {
@@ -223,10 +223,12 @@ public class DefaultAccountProviderTest {
         try {
           msWaited += WAIT_INTERVAL_MS;
           Thread.sleep(WAIT_INTERVAL_MS);
+          LOGGER.info(this.hashCode() + " (loop): initialCallCount: " + initialCallCount + ", callCount: " + expectedCallCount);
           if (initialCallCount != callCount) {
             assertEquals(expectedCallCount, callCount);
           }
         } catch (InterruptedException ex) {
+          LOGGER.info("interrupted");
           continue;
         }
       }
