@@ -210,6 +210,8 @@ public class DefaultAccountProviderTest {
     
     private void waitUntilChange(long timeoutMs, int expectedCallCount) {
       final int initialCallCount = callCount;
+      LOGGER.info("initialCallCount: " + initialCallCount);
+      LOGGER.info("expectedCallCount: " + expectedCallCount);
       if (initialCallCount == expectedCallCount) {
         return;
       }

@@ -118,7 +118,7 @@ public class DefaultAccountProvider extends AccountProvider {
         }
         key.reset();
         try {
-          Thread.sleep(100);
+          Thread.sleep(1000);
         } catch (InterruptedException ex) {
           LOGGER.log(Level.SEVERE, "Error when waiting for next polling action", ex);
           continue;
