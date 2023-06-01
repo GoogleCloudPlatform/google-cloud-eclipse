@@ -42,7 +42,7 @@ public class AccountSelector extends Composite {
   private ListenerList<Runnable> selectionListeners = new ListenerList<>();
   private Optional<Account> prevAccount = Optional.empty();
   private static Logger logger = Logger.getLogger(AccountSelector.class.getName());
-  private Runnable onCredentialChange = () -> forceAccountCheck();
+  private Runnable onCredentialChange = this::forceAccountCheck;
 
   @VisibleForTesting Link accountEmail;
 
@@ -51,15 +51,8 @@ public class AccountSelector extends Composite {
 
     Composite accountEmailComposite = new Composite(this, SWT.NONE);
     accountEmail = new Link(accountEmailComposite, SWT.WRAP);
+    updateEmail();
     
-    if (GoogleApiFactory.INSTANCE.getCredential().isPresent()) {
-      accountEmail.setText(getSelectedEmail());
-    } else {
-      accountEmail.setText(Messages.getString("NO_ADC_DETECTED_MESSAGE") + ". " + Messages.getString("NO_ADC_DETECTED_LINK"));
-      accountEmail.addSelectionListener(new OpenUriSelectionListener(
-           () -> Collections.emptyMap() ,
-           new ErrorDialogErrorHandler(getShell())));
-    }
     GridDataFactory.fillDefaults().grab(true, false).applyTo(this);
     GridDataFactory.fillDefaults().grab(true, false).applyTo(accountEmailComposite);
     GridLayoutFactory.fillDefaults().generateLayout(accountEmailComposite);
@@ -73,6 +66,17 @@ public class AccountSelector extends Composite {
       }
     });
     
+  }
+  
+  private void updateEmail() {
+    if (GoogleApiFactory.INSTANCE.getCredential().isPresent()) {
+      accountEmail.setText(getSelectedEmail());
+    } else {
+      accountEmail.setText(Messages.getString("NO_ADC_DETECTED_MESSAGE") + ". " + Messages.getString("NO_ADC_DETECTED_LINK"));
+      accountEmail.addSelectionListener(new OpenUriSelectionListener(
+           () -> Collections.emptyMap() ,
+           new ErrorDialogErrorHandler(getShell())));
+    }
   }
   
   /**
@@ -106,6 +110,7 @@ public class AccountSelector extends Composite {
     Optional<Account> account = GoogleApiFactory.INSTANCE.getAccount();
     if (!account.equals(prevAccount)) {
       prevAccount = account;
+      updateEmail();
       fireSelectionListeners();
     }
     return account;

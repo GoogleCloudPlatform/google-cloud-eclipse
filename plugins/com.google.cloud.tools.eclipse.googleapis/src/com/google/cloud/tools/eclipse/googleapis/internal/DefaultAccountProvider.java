@@ -48,6 +48,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.eclipse.swt.widgets.Display;
 
 /**
  * 
@@ -109,7 +110,7 @@ public class DefaultAccountProvider extends AccountProvider {
           Path affectedFile = adcFolderPath.resolve((Path) event.context());
           if (affectedFile.equals(adcPath)) {
             LOGGER.info(this.hashCode() + ": ADC file has changed");
-            confirmAdcCredsChanged();
+            Display.getDefault().asyncExec(() -> confirmAdcCredsChanged());
             break; // prevent propagation for two events on same file and different kind
           }
         }
@@ -224,7 +225,9 @@ public class DefaultAccountProvider extends AccountProvider {
       JsonElement root = JsonParser.parseReader(reader);
       return root.getAsJsonObject().get("refresh_token").getAsString();
     } catch (IOException ex) {
-      LOGGER.log(Level.SEVERE, "Could not open credentials file");
+      LOGGER.log(Level.SEVERE, "Could not open credentials file", ex);
+    } catch (IllegalArgumentException ex) {
+      LOGGER.log(Level.SEVERE, "Invalid JSON", ex);
     }
     return "";
      
