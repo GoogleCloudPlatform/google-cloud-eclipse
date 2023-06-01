@@ -530,7 +530,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
 
     @Override
     public void run() {
-      Display.getDefault().asyncExec(() -> { // New code
+      Display.getDefault().asyncExec(() -> { 
         refreshProjectsForSelectedCredential();
         refreshProjectsButton.setEnabled(accountSelector.getSelectedCredential() != null);
       });

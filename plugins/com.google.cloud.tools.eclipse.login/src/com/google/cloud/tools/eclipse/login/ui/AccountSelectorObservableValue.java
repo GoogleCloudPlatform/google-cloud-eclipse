@@ -36,7 +36,7 @@ public class AccountSelectorObservableValue extends AbstractObservableValue<Stri
 
     accountSelector.addSelectionListener(() -> {
       String newValue = accountSelector.getSelectedEmail();
-      DisplayRealm.getRealm(accountSelector.getDisplay()).asyncExec(() -> // New code
+      DisplayRealm.getRealm(accountSelector.getDisplay()).asyncExec(() -> 
         fireValueChange(Diffs.createValueDiff(oldValue, newValue)));
       oldValue = newValue;
     });
