@@ -56,6 +56,15 @@ public class TestDefaultAccountProvider extends DefaultAccountProvider {
       }
     }
     
+    /**
+     * Waiting logic in {@link CredentialChangeListener} also uses main thread
+     * This override uses the listener thread to simultaneously wait and updated the creds object
+     */
+    @Override
+    protected void onAdcFileChanged() {
+      confirmAdcCredsChanged();
+    }
+    
     @Override
     protected void propagateCredentialChange() {
       LOGGER.info("propagating credentials change");

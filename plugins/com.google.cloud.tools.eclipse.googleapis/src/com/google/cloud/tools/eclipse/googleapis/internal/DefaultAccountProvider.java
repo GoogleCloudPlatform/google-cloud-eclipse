@@ -110,12 +110,7 @@ public class DefaultAccountProvider extends AccountProvider {
           Path affectedFile = adcFolderPath.resolve((Path) event.context());
           if (affectedFile.equals(adcPath)) {
             LOGGER.info(this.hashCode() + ": ADC file has changed");
-            try {
-              Thread.sleep(50); // grace period for gcloud CLI to write file after creating it
-              Display.getDefault().asyncExec(() -> confirmAdcCredsChanged());
-            } catch (InterruptedException ex) {
-              LOGGER.log(Level.SEVERE, "Error when delaying credentials file check", ex);
-            }
+            onAdcFileChanged();
             break; // prevent propagation for two events on same file and different kind
           }
         }
@@ -128,6 +123,15 @@ public class DefaultAccountProvider extends AccountProvider {
         }
       }
     });
+  }
+  
+  protected void onAdcFileChanged() {
+    try {
+      Thread.sleep(50); // grace period for gcloud CLI to write file after creating it
+      Display.getDefault().asyncExec(() -> confirmAdcCredsChanged());
+    } catch (InterruptedException ex) {
+      LOGGER.log(Level.SEVERE, "Error when delaying credentials file check", ex);
+    }
   }
   
   protected void confirmAdcCredsChanged() {
