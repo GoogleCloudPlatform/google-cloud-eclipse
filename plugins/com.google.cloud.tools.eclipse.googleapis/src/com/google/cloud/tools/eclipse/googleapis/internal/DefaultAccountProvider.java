@@ -226,7 +226,7 @@ public class DefaultAccountProvider extends AccountProvider {
       return root.getAsJsonObject().get("refresh_token").getAsString();
     } catch (IOException ex) {
       LOGGER.log(Level.SEVERE, "Could not open credentials file", ex);
-    } catch (IllegalArgumentException ex) {
+    } catch (IllegalStateException ex) {
       LOGGER.log(Level.SEVERE, "Invalid JSON", ex);
     }
     return "";
