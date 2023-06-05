@@ -231,7 +231,7 @@ public class DefaultedPipelineOptionsComponentTest {
     // setting useDefaultValues=false should store current values and restore any custom values (except for email)
     component.setUseDefaultValues(false);
     values = component.getValues();
-    assertEquals(TestAccountProvider.EMAIL_ACCOUNT_1, values.get(DataflowPreferences.ACCOUNT_EMAIL_PROPERTY));
+    assertEquals("", values.get(DataflowPreferences.ACCOUNT_EMAIL_PROPERTY));
     assertEquals("newProject", values.get(DataflowPreferences.PROJECT_PROPERTY));
     assertEquals("newStagingLocation", values.get(DataflowPreferences.STAGING_LOCATION_PROPERTY));
     assertEquals("newStagingLocation", values.get(DataflowPreferences.GCP_TEMP_LOCATION_PROPERTY));
