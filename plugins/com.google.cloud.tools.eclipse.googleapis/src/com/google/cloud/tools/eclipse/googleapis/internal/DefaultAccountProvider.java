@@ -212,6 +212,9 @@ public class DefaultAccountProvider extends AccountProvider {
     } catch (IOException ex) {
       LOGGER.log(Level.SEVERE, "Error when computing credentials from ADC file", ex);
       return Optional.empty();
+    } catch (IllegalArgumentException | IllegalStateException ex) { // bad json
+      LOGGER.log(Level.SEVERE, "Bad JSON passed as credentials");
+      return Optional.empty();
     }
   }
   

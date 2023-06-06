@@ -216,4 +216,8 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   public static void setInstance(GoogleApiFactory instance) {
     INSTANCE = instance;
   }
+  
+  public static void resetInstance() {
+    INSTANCE = new GoogleApiFactory();
+  }
 }

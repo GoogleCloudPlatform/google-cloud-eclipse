@@ -68,6 +68,7 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -128,6 +129,11 @@ public class DataflowPipelineLaunchDelegateTest {
         .thenReturn(environmentMap);
   }
 
+  @After
+  public void tearDown() {
+    GoogleApiFactory.resetInstance();
+  }
+  
   @Test
   public void testGoogleApplicationCredentialsEnvironmentVariable() {
     assertEquals("GOOGLE_APPLICATION_CREDENTIALS",
