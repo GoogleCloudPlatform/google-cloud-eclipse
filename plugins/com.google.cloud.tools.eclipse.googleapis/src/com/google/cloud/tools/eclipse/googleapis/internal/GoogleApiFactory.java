@@ -38,7 +38,6 @@ import java.util.Optional;
 import org.eclipse.core.net.proxy.IProxyChangeEvent;
 import org.eclipse.core.net.proxy.IProxyChangeListener;
 import org.eclipse.core.net.proxy.IProxyService;
-import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -46,7 +45,6 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 /**
  * Class to obtain various Google Cloud Platform related APIs.
  */
-@Component
 public class GoogleApiFactory implements IGoogleApiFactory {
 
   private static AccountProvider accountProvider = DefaultAccountProvider.INSTANCE;
@@ -217,5 +215,9 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   @VisibleForTesting
   public static void setInstance(GoogleApiFactory instance) {
     INSTANCE = instance;
+  }
+  
+  public static void resetInstance() {
+    INSTANCE = new GoogleApiFactory();
   }
 }

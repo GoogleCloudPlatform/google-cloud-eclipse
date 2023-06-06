@@ -75,6 +75,7 @@ import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotCombo;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -126,6 +127,11 @@ public class RunOptionsDefaultsComponentTest {
     createButton = CompositeUtil.findButton(shell, "&Create Bucket");
     serviceAccountKey = CompositeUtil.findControl(shell, Text.class);
     browse = CompositeUtil.findButton(shell, "Browse...");
+  }
+  
+  @After
+  public void tearDown() {
+    GoogleApiFactory.resetInstance();
   }
   
   private boolean loginAlice() throws IOException {

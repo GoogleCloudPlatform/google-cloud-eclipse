@@ -165,6 +165,7 @@ public class GcpLocalRunTabTest {
   @After
   public void tearDown() {
     tab.dispose();
+    GoogleApiFactory.resetInstance();
   }
 
   @Test

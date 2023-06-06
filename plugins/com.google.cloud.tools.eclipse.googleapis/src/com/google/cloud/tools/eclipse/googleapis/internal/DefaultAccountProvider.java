@@ -48,6 +48,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.eclipse.swt.widgets.Display;
 
 /**
  * 
@@ -109,7 +110,7 @@ public class DefaultAccountProvider extends AccountProvider {
           Path affectedFile = adcFolderPath.resolve((Path) event.context());
           if (affectedFile.equals(adcPath)) {
             LOGGER.info(this.hashCode() + ": ADC file has changed");
-            confirmAdcCredsChanged();
+            onAdcFileChanged();
             break; // prevent propagation for two events on same file and different kind
           }
         }
@@ -122,6 +123,15 @@ public class DefaultAccountProvider extends AccountProvider {
         }
       }
     });
+  }
+  
+  protected void onAdcFileChanged() {
+    try {
+      Thread.sleep(50); // grace period for gcloud CLI to write file after creating it
+      Display.getDefault().asyncExec(() -> confirmAdcCredsChanged());
+    } catch (InterruptedException ex) {
+      LOGGER.log(Level.SEVERE, "Error when delaying credentials file check", ex);
+    }
   }
   
   protected void confirmAdcCredsChanged() {
@@ -202,6 +212,9 @@ public class DefaultAccountProvider extends AccountProvider {
     } catch (IOException ex) {
       LOGGER.log(Level.SEVERE, "Error when computing credentials from ADC file", ex);
       return Optional.empty();
+    } catch (IllegalArgumentException | IllegalStateException ex) { // bad json
+      LOGGER.log(Level.SEVERE, "Bad JSON passed as credentials");
+      return Optional.empty();
     }
   }
   
@@ -224,7 +237,9 @@ public class DefaultAccountProvider extends AccountProvider {
       JsonElement root = JsonParser.parseReader(reader);
       return root.getAsJsonObject().get("refresh_token").getAsString();
     } catch (IOException ex) {
-      LOGGER.log(Level.SEVERE, "Could not open credentials file");
+      LOGGER.log(Level.SEVERE, "Could not open credentials file", ex);
+    } catch (IllegalStateException ex) {
+      LOGGER.log(Level.SEVERE, "Invalid JSON", ex);
     }
     return "";
      
