@@ -2,7 +2,7 @@
 <feature
       id="com.google.cloud.tools.eclipse.suite.feature"
       label="Google Cloud Platform for Eclipse"
-      version="1.9.1.qualifier"
+      version="1.10.1.qualifier"
       provider-name="Google LLC"
       plugin="com.google.cloud.tools.eclipse.ui"
       license-feature="com.google.licenses.apache_v2">
