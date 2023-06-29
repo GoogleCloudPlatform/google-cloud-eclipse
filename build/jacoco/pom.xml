@@ -195,30 +195,6 @@
     </dependency>
     <dependency>
       <groupId>com.google.cloud.tools.eclipse</groupId>
-      <artifactId>com.google.cloud.tools.eclipse.dataflow.core.test</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.google.cloud.tools.eclipse</groupId>
-      <artifactId>com.google.cloud.tools.eclipse.dataflow.core</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.google.cloud.tools.eclipse</groupId>
-      <artifactId>com.google.cloud.tools.eclipse.dataflow.ui.test</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.google.cloud.tools.eclipse</groupId>
-      <artifactId>com.google.cloud.tools.eclipse.dataflow.ui</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.google.cloud.tools.eclipse</groupId>
       <artifactId>com.google.cloud.tools.eclipse.googleapis.test</artifactId>
       <version>0.1.0-SNAPSHOT</version>
       <scope>test</scope>

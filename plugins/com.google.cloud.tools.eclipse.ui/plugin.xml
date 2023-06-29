@@ -56,10 +56,6 @@
                  visible="false">
            </separator>
            <separator
-                 name="dataflow"
-                 visible="false">
-           </separator>
-           <separator
                  name="additions">
            </separator>
         </menu>
