@@ -13,7 +13,7 @@ gsutil -q cp "gs://ct4e-m2-repositories-for-kokoro/m2-cache.tar" - \
 export CLOUDSDK_CORE_DISABLE_USAGE_REPORTING=true
 gcloud components update --quiet
 
-# More recent Cloud SDK requires Python 3.5 (b/194714889)
+# More recent Cloud SDK requires Python 3.8 - 3.12
 if [ -z "$CLOUDSDK_PYTHON" ]; then
     export CLOUDSDK_PYTHON=python3.12
 fi
