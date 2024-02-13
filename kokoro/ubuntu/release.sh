@@ -15,7 +15,7 @@ gcloud components update --quiet
 
 # More recent Cloud SDK requires Python 3.8 - 3.12
 if [ -z "$CLOUDSDK_PYTHON" ]; then
-    export CLOUDSDK_PYTHON=python3.12
+    export CLOUDSDK_PYTHON=python3.10
 fi
 gcloud components install app-engine-java --quiet
 
