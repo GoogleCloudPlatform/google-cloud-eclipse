@@ -32,6 +32,8 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.UUID;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -58,13 +60,16 @@ public class DefaultAccountProviderTest {
   private Runnable listenerFunction;
   
   static final String TEMP_ADC_FILENAME = "test_adc.json";
-  private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
+  private Logger LOGGER;
   
   @Rule
   public TemporaryFolder tempFolder = new TemporaryFolder();
   
   @Before
   public void setup() throws IOException {
+    String uuid = UUID.randomUUID().toString();
+    String uuidShort = uuid.substring(uuid.lastIndexOf('-'));
+    LOGGER = Logger.getLogger(this.getClass().getName() + uuidShort);
     LOGGER.info("setup()");
     LOGGER.info("Temp folder location: " + tempFolder.getRoot().toPath().toString());
     provider = new TestDefaultAccountProvider(tempFolder.newFile(TEMP_ADC_FILENAME).toPath(), tempFolder);
@@ -76,6 +81,11 @@ public class DefaultAccountProviderTest {
     listener = new CredentialChangeListener();
     listenerFunction = listener::onFileChanged;
     provider.addCredentialChangeListener(listenerFunction);
+  }
+  
+  @After
+  public void tearDown() {
+    LOGGER.info("Test finished");
   }
   
   @Test
