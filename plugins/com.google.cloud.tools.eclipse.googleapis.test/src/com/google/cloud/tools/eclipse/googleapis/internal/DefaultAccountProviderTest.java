@@ -68,6 +68,7 @@ public class DefaultAccountProviderTest {
   
   @Before
   public void setup() throws IOException, InterruptedException {
+    // we add a small ID to the logger statements to distinguish among test cases
     String uuid = UUID.randomUUID().toString();
     String uuidShort = uuid.substring(uuid.lastIndexOf('-'));
     LOGGER = Logger.getLogger(this.getClass().getName() + uuidShort);
