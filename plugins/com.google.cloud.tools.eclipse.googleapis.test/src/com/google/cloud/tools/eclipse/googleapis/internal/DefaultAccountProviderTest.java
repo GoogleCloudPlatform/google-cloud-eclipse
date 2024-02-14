@@ -32,6 +32,8 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.UUID;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -58,13 +60,18 @@ public class DefaultAccountProviderTest {
   private Runnable listenerFunction;
   
   static final String TEMP_ADC_FILENAME = "test_adc.json";
-  private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
+  private Logger LOGGER;
+  private static final long FILE_CHANGE_WAIT_MS = 500;
   
   @Rule
   public TemporaryFolder tempFolder = new TemporaryFolder();
   
   @Before
-  public void setup() throws IOException {
+  public void setup() throws IOException, InterruptedException {
+    // we add a small ID to the logger statements to distinguish among test cases
+    String uuid = UUID.randomUUID().toString();
+    String uuidShort = uuid.substring(uuid.lastIndexOf('-'));
+    LOGGER = Logger.getLogger(this.getClass().getName() + uuidShort);
     LOGGER.info("setup()");
     LOGGER.info("Temp folder location: " + tempFolder.getRoot().toPath().toString());
     provider = new TestDefaultAccountProvider(tempFolder.newFile(TEMP_ADC_FILENAME).toPath(), tempFolder);
@@ -76,6 +83,11 @@ public class DefaultAccountProviderTest {
     listener = new CredentialChangeListener();
     listenerFunction = listener::onFileChanged;
     provider.addCredentialChangeListener(listenerFunction);
+  }
+  
+  @After
+  public void tearDown() {
+    LOGGER.info("Test finished");
   }
   
   @Test
@@ -102,7 +114,7 @@ public class DefaultAccountProviderTest {
   }
   
   @Test
-  public void testFileWriteChangesReturnedAccount() {
+  public void testFileWriteChangesReturnedAccount() throws InterruptedException {
     Optional<Account> acct = provider.getAccount();
     assertFalse(acct.isPresent());
     
@@ -127,7 +139,7 @@ public class DefaultAccountProviderTest {
   }
   
   @Test
-  public void testFileWriteChangesReturnedCredential() {
+  public void testFileWriteChangesReturnedCredential() throws InterruptedException {
     Optional<Credential> cred = provider.getCredential();
     assertFalse(cred.isPresent());
     
@@ -156,7 +168,7 @@ public class DefaultAccountProviderTest {
     return result;
   }
   
-  private void login(String token) {
+  private void login(String token) throws InterruptedException {
     LOGGER.info("login(" + token + ")");
     try {
       File adcFile = getTempAdcPath().toFile();
@@ -175,17 +187,19 @@ public class DefaultAccountProviderTest {
       LOGGER.info(
           "login() post-write contents: " + Files.readAllLines(adcFile.toPath())
           .stream().collect(Collectors.joining()));
+      Thread.sleep(FILE_CHANGE_WAIT_MS);
     } catch (IOException ex) {
       fail(ex.getMessage());
     }
   }
   
-  private void logout() {
+  private void logout() throws InterruptedException {
     LOGGER.info("logout()");
     File adcFile = getTempAdcPath().toFile();
     if (adcFile.exists()) {
       LOGGER.info("logout() delete file");
       adcFile.delete();
+      Thread.sleep(FILE_CHANGE_WAIT_MS);
     }
   }
   
