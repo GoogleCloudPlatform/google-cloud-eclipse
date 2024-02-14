@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.googleapis.internal;
 
 import com.google.api.services.appengine.v1.Appengine;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager;
-import com.google.api.services.dataflow.Dataflow;
 import com.google.api.services.iam.v1.Iam;
 import com.google.api.services.servicemanagement.ServiceManagement;
 import com.google.api.services.storage.Storage;
@@ -35,7 +34,6 @@ import java.net.URISyntaxException;
  */
 public enum GoogleApi {
   APPENGINE_ADMIN_API(Appengine.DEFAULT_BASE_URL, "appengine.googleapis.com"),
-  DATAFLOW_API(Dataflow.DEFAULT_BASE_URL, "dataflow.googleapis.com"),
   CLOUDRESOURCE_MANAGER_API(
       CloudResourceManager.DEFAULT_BASE_URL, "cloudresourcemanager.googleapis.com"),
   CLOUD_STORAGE_API(Storage.DEFAULT_BASE_URL, "storage-api.googleapis.com"),
