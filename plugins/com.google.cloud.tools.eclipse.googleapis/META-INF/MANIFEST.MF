@@ -76,3 +76,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.mortbay.jetty,
  org.mortbay.jetty.handler,
  org.osgi.service.component.annotations;version="1.2.0"
+Service-Component: OSGI-INF/com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory.xml

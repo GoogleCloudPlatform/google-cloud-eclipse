@@ -28,4 +28,4 @@ Import-Package: com.google.cloud.tools.eclipse.appengine.facets,
  org.eclipse.ui;ui.workbench=split,
  org.eclipse.wst.common.project.facet.core
 Require-Bundle: org.eclipse.core.expressions
-Export-Package: com.google.cloud.tools.eclipse.appengine.compat.cte13;x-friends:="com.google.cloud.tools.eclipse.integration.appengine"
+Export-Package: com.google.cloud.tools.eclipse.appengine.compat.cte13

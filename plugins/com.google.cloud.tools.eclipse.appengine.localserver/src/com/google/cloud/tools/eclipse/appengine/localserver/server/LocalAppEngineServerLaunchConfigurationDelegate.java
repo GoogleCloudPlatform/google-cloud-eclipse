@@ -39,6 +39,7 @@ import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.net.InetAddresses;
 import java.net.InetAddress;
@@ -313,6 +314,8 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       expanded.put(entry.getKey(), variableEngine.performStringSubstitution(entry.getValue()));
     }
     builder.environment(expanded);
+    
+//    builder.additionalArguments(ImmutableList.of("--projectJdkVersion", "1.8"));
 
     return builder.build();
   }
