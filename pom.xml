@@ -129,7 +129,7 @@
       <!-- bundle: com.fasterxml.jackson.core.jackson-core -->
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
-      <version>2.9.6</version>
+      <version>2.13.0</version>
     </dependency>
     <dependency>
       <!-- bundle: org.mortbay.jetty.server -->
