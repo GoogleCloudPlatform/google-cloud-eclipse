@@ -1,10 +1,10 @@
 [![stable](http://badges.github.io/stability-badges/dist/stable.svg)](http://github.com/badges/stability-badges)
 
-**Deprecation Note**: Cloud Tools for Eclipse is only compatible with the App Engine Java 8 runtime, which will reach the [end of support](/appengine/docs/standard/lifecycle/runtime-lifecycle#end_of_support)
+**Deprecation Note**: Cloud Tools for Eclipse is only compatible with the App Engine Java 8 runtime, which will reach the [end of support](https://cloud.google.com/appengine/docs/standard/lifecycle/runtime-lifecycle#end_of_support)
 on January 31, 2024. After this date, your existing Java 8 applications will continue
 to run and receive traffic. However, you cannot deploy new or update existing applications
-that use runtimes [after their end of support date](/appengine/docs/standard/lifecycle/support-schedule#java).
-We recommend that you [migrate to the latest supported version of Java](/appengine/migration-center/standard/migrate-to-second-gen/java-differences).
+that use runtimes [after their end of support date](https://cloud.google.com/appengine/docs/standard/lifecycle/support-schedule#java).
+We recommend that you [migrate to the latest supported version of Java](https://cloud.google.com/appengine/migration-center/standard/migrate-to-second-gen/java-differences).
 
 This project provides an Eclipse plugin for building, debugging, and deploying Google Cloud Platform applications.
 
