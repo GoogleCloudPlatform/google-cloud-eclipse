@@ -7,7 +7,7 @@
             label="Google Cloud Tools for Eclipse"
             style-id="content-link"
             url="https://cloud.google.com/eclipse/docs/">
-        <text>Learn how to create, build, run, debug, and deploy App Engine and Cloud Dataflow applications from Eclipse</text>
+        <text>Learn how to create, build, run, debug, and deploy App Engine applications from Eclipse</text>
       </link>
     </group>
   </extensionContent>
@@ -25,12 +25,6 @@
             style-id="content-link"
             url="https://cloud.google.com/eclipse/docs/create-flex-app">
         <text>Learn how to build, run, debug, and deploy App Engine flexible environment applications with Eclipse</text>
-      </link>
-      <link id="cloud-tools-for-eclipse-dataflow-link"
-            label="Cloud Dataflow"
-            style-id="content-link"
-            url="https://cloud.google.com/eclipse/docs/quickstart-dataflow">
-        <text>Learn how to build, run, and deploy Cloud Dataflow pipelines with Eclipse</text>
       </link>
     </group>
   </extensionContent>

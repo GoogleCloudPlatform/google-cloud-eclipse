@@ -8,7 +8,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-bigquery-v2-rev405-1.25.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-cloudresourcemanager-v1-rev507-1.25.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-compute-v1-rev198-1.25.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/google-api-services-dataflow-v1b3-rev259-1.25.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-datastore-v1-rev63-1.25.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-iam-v1-rev261-1.25.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-oauth2-v2-rev141-1.25.0.jar"/>

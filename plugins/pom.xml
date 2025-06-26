@@ -37,10 +37,6 @@
     <module>com.google.cloud.tools.eclipse.appengine.validation.test</module>
     <module>com.google.cloud.tools.eclipse.bugreport</module>
     <module>com.google.cloud.tools.eclipse.bugreport.test</module>
-    <module>com.google.cloud.tools.eclipse.dataflow.core</module>
-    <module>com.google.cloud.tools.eclipse.dataflow.core.test</module>
-    <module>com.google.cloud.tools.eclipse.dataflow.ui</module>
-    <module>com.google.cloud.tools.eclipse.dataflow.ui.test</module>
     <module>com.google.cloud.tools.eclipse.googleapis</module>
     <module>com.google.cloud.tools.eclipse.googleapis.test</module>
     <module>com.google.cloud.tools.eclipse.login</module>

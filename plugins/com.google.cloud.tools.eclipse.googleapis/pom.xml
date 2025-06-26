@@ -56,11 +56,6 @@
     </dependency>
     <dependency>
       <groupId>com.google.apis</groupId>
-      <artifactId>google-api-services-dataflow</artifactId>
-      <version>v1b3-rev259-1.25.0</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.apis</groupId>
       <artifactId>google-api-services-bigquery</artifactId>
       <version>v2-rev405-1.25.0</version>
     </dependency>
