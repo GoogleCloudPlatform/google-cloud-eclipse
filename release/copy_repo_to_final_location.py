@@ -63,18 +63,18 @@ def _IsVersionString(string):
 def _GcsLocationExists(gcs_location):
   try:
     subprocess.check_output(
-        ["gsutil", "ls", gcs_location], stderr=subprocess.STDOUT)
+        ["gcloud", "storage", "ls", gcs_location], stderr=subprocess.STDOUT)
     return True
   except subprocess.CalledProcessError:
     return False
 
 
 def _GetCopyCommand(origin, destination):
-  return ["gsutil", "-m", "cp", "-R", origin, destination]
+  return ["gcloud", "storage", "cp", "--recursive", origin, destination]
 
 
 def _GetPublicAccessCommand(target):
-  return ["gsutil", "-m", "acl", "ch", "-R", "-u", "AllUsers:R", target]
+  return ["gcloud", "storage", "objects", "update", "--recursive", "--add-acl-grant=entity=AllUsers,role=READER", target]
 
 
 def main(argv):
@@ -89,7 +89,7 @@ def main(argv):
     print("# entered is correct, delete it first and try again.")
     print("#")
     print("# Command to delete:")
-    print("# gsutil -m rm " + gcs_destination + "/**")
+    print("# gcloud storage rm --recursive " + gcs_destination)
     exit(1)
 
   # Copy the repo

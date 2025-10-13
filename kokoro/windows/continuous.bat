@@ -10,7 +10,7 @@ java -version
 
 rem To speed up build, download and unpack an M2 repo cache.
 pushd %USERPROFILE%
-call gsutil.cmd -q cp "gs://ct4e-m2-repositories-for-kokoro/m2-cache.tar" .
+call gcloud.cmd storage cp "gs://ct4e-m2-repositories-for-kokoro/m2-cache.tar" .
 @echo on
 tar xf m2-cache.tar && del m2-cache.tar
 popd
