@@ -55,12 +55,12 @@ class CopyRepoToFinalLocationTest(unittest.TestCase):
         _GcsLocationExists("gs://cloud-tools-for-eclipse/non-existing"))
 
   def testGetCopyCommand(self):
-    self.assertEquals(["gsutil", "-m", "cp", "-R", "origin", "destination"],
+    self.assertEquals(["gcloud", "storage", "cp", "--recursive", "origin", "destination"],
         _GetCopyCommand("origin", "destination"))
 
   def testGetPublicAccessCommand(self):
     self.assertEquals(
-        ["gsutil", "-m", "acl", "ch", "-R", "-u", "AllUsers:R", "target"],
+        ["gcloud", "storage", "objects", "update", "--recursive", "--add-acl-grant=allUsers=R", "target"],
         _GetPublicAccessCommand("target"))
 
 
