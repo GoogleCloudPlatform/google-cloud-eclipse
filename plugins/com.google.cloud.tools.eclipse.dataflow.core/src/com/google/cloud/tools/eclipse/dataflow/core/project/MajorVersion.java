@@ -172,8 +172,8 @@ public enum MajorVersion {
    * defined by {@link #hasStableApi()}, this will truncate the version range
    * at both ends, to ensure the available versions are not incompatible with the current version.
    *
-   * @param latestVersion The minimum version of the returned version range
-   * @param currentVersionRange A version range that ends at the maximum version of the returned
+   * @param latestVersion the minimum version of the returned version range
+   * @param currentVersionRange a version range that ends at the maximum version of the returned
    *                            version range
    */
   public static VersionRange truncateAtLatest(

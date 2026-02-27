@@ -83,11 +83,11 @@ public class WebXmlValidatorPluginTest {
     document.appendChild(root);
 
     WebXmlValidator validator = new WebXmlValidator();
-    ArrayList<BannedElement> blacklist = validator.checkForElements(resource, document);
+    ArrayList<ElementProblem> problems = validator.checkForProblems(resource, document);
 
-    assertEquals(1, blacklist.size());
+    assertEquals(1, problems.size());
     String markerId = "com.google.cloud.tools.eclipse.appengine.validation.undefinedServletMarker";
-    assertEquals(markerId, blacklist.get(0).getMarkerId());
+    assertEquals(markerId, problems.get(0).getMarkerId());
   }
 
   @Test
@@ -107,9 +107,9 @@ public class WebXmlValidatorPluginTest {
     document.appendChild(root);
 
     WebXmlValidator validator = new WebXmlValidator();
-    ArrayList<BannedElement> blacklist = validator.checkForElements(resource, document);
+    ArrayList<ElementProblem> problems = validator.checkForProblems(resource, document);
 
-    assertTrue(blacklist.isEmpty());
+    assertTrue(problems.isEmpty());
   }
 
   @Test

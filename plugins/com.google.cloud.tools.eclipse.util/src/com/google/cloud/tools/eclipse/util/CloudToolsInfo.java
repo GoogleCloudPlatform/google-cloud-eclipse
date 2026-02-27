@@ -36,10 +36,13 @@ public class CloudToolsInfo {
   @VisibleForTesting
   static final String CLOUD_TOOLS_FOR_ECLIPSE_FEATURE_ID =
       "com.google.cloud.tools.eclipse.suite.feature";
-
+  
   // Don't change the value; this name is used as an originating "application" of usage metrics.
   public static final String METRICS_NAME = "gcloud-eclipse-tools";
-
+  
+  // for Concord Clearcut
+  public static final String CONSOLE_TYPE = "CLOUD_TOOLS_FOR_ECLIPSE";
+  
   public static final String USER_AGENT = METRICS_NAME + "/" + getToolsVersion();
 
   /** Return the version of associated Cloud Tools for Eclipse feature, or 0.0.0 if unknown. */

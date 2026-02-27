@@ -17,7 +17,7 @@
 package com.google.cloud.tools.eclipse.projectselector;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.ui.util.DisplayExecutor;
 import com.google.cloud.tools.eclipse.util.jobs.FuturisticJob;
@@ -56,20 +56,13 @@ public class MiniSelector implements ISelectionProvider {
 
   private Executor displayExecutor;
   private ComboViewer comboViewer;
-  private Credential credential;
   private FetchProjectsJob fetchProjectsJob;
 
   /** Stashed projectID to be selected when fetch-project-list completes. */
   private String toBeSelectedProjectId;
 
-  public MiniSelector(Composite container, IGoogleApiFactory apiFactory) {
-    this(container, apiFactory, null);
-  }
-
-  @VisibleForTesting
-  MiniSelector(Composite container, IGoogleApiFactory apiFactory, Credential credential) {
-    this.credential = credential;
-    projectRepository = new ProjectRepository(apiFactory);
+  public MiniSelector(Composite container) {
+    projectRepository = new ProjectRepository();
     create(container);
   }
 
@@ -111,11 +104,13 @@ public class MiniSelector implements ISelectionProvider {
   }
 
   public Credential getCredential() {
-    return credential;
+    return GoogleApiFactory.INSTANCE.getCredential().orElse(null);
   }
 
-  public void setCredential(Credential credential) {
-    this.credential = credential;
+  /**
+   * Used to re-fetch the projects in case a credential has changed
+   */
+  public void updateProjectsList() {
     fetch();
   }
 
@@ -127,7 +122,8 @@ public class MiniSelector implements ISelectionProvider {
     comboViewer.setInput(EMPTY_PROJECTS);
 
     cancelFetch();
-    if (credential == null) {
+    if (!GoogleApiFactory.INSTANCE.getCredential().isPresent()) {
+      logger.log(Level.WARNING, "Tried to fetch() projects without credentials set");
       return;
     }
 
@@ -224,19 +220,19 @@ public class MiniSelector implements ISelectionProvider {
 
     public FetchProjectsJob() {
       super("Determining accessible projects");
-      credential = MiniSelector.this.credential;
+      credential = GoogleApiFactory.INSTANCE.getCredential().orElse(null);
     }
 
     @Override
     protected GcpProject[] compute(IProgressMonitor monitor) throws Exception {
-      List<GcpProject> projects = projectRepository.getProjects(credential);
+      List<GcpProject> projects = projectRepository.getProjects();
       return projects.toArray(new GcpProject[projects.size()]);
     }
 
     @Override
     protected boolean isStale() {
       // check if the MiniSelector's credential has changed
-      return credential != MiniSelector.this.credential;
+      return credential != GoogleApiFactory.INSTANCE.getCredential().orElse(null);
     }
   }
 }

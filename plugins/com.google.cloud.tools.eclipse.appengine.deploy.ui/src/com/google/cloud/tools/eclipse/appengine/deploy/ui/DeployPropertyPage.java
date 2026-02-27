@@ -20,25 +20,21 @@ import com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible.FlexDeployPre
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.standard.StandardDeployPreferencesPanel;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexWarFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.util.AdapterUtil;
-import com.google.common.annotations.VisibleForTesting;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.inject.Inject;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.databinding.preference.PreferencePageSupport;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PropertyPage;
+import org.eclipse.ui.forms.widgets.SharedScrolledComposite;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
@@ -51,33 +47,24 @@ public class DeployPropertyPage extends PropertyPage {
 
   private static final Logger logger = Logger.getLogger(DeployPropertyPage.class.getName());
 
-  @Inject
-  private IGoogleLoginService loginService;
-  @Inject
-  private IGoogleApiFactory googleApiFactory;
 
   private IFacetedProject facetedProject = null;
   private FlexDeployPreferencesPanel flexPreferencesPanel;
   private StandardDeployPreferencesPanel standardPreferencesPanel;
   private BlankDeployPreferencesPanel blankPreferencesPanel;
-  private StackLayout stackLayout;
   private PreferencePageSupport databindingSupport;
-  private Composite container;
+  private SharedScrolledComposite container;
+  private DeployPreferencesPanel activeControl;
 
   public DeployPropertyPage() {  // 0-arg required for injection
   }
 
-  @VisibleForTesting
-  DeployPropertyPage(IGoogleLoginService loginService, IGoogleApiFactory googleApiFactory) {
-    this.loginService = loginService;
-    this.googleApiFactory = googleApiFactory;
-  }
-
   @Override
   protected Control createContents(Composite parent) {
-    container = new Composite(parent, SWT.NONE);
-    stackLayout = new StackLayout();
-    container.setLayout(stackLayout);
+    container = new SharedScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL) {};
+    container.setExpandHorizontal(true);
+    container.setExpandVertical(true);
+    container.setLayout(new GridLayout());
 
     IProject project = AdapterUtil.adapt(getElement(), IProject.class);
 
@@ -89,7 +76,7 @@ public class DeployPropertyPage extends PropertyPage {
     }
 
     GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
-
+    evaluateFacetConfiguration();
     return container;
   }
 
@@ -102,17 +89,7 @@ public class DeployPropertyPage extends PropertyPage {
   }
 
   private void handleLayoutChange() {
-    // resize the page to work around https://bugs.eclipse.org/bugs/show_bug.cgi?id=265237
-    Composite parent = getActivePanel().getParent();
-    while (parent != null) {
-      if (parent instanceof ScrolledComposite) {
-        ScrolledComposite scrolledComposite = (ScrolledComposite) parent;
-        scrolledComposite.setMinSize(getActivePanel().getParent().computeSize(SWT.DEFAULT, SWT.DEFAULT));
-        getActivePanel().layout();
-        return;
-      }
-      parent = parent.getParent();
-    }
+    container.reflow(true);
   }
 
   @Override
@@ -131,15 +108,7 @@ public class DeployPropertyPage extends PropertyPage {
   }
 
   private DeployPreferencesPanel getActivePanel() {
-    return (DeployPreferencesPanel) stackLayout.topControl;
-  }
-
-  @Override
-  public void setVisible(boolean visible) {
-    super.setVisible(visible);
-    if (visible) {
-      evaluateFacetConfiguration();
-    }
+    return activeControl;
   }
 
   /**
@@ -161,15 +130,15 @@ public class DeployPropertyPage extends PropertyPage {
       createBlankPanelIfNeeded();
       showPanel(blankPreferencesPanel);
     }
-    container.layout();
   }
 
   private void showPanel(DeployPreferencesPanel deployPreferencesPanel) {
-    stackLayout.topControl = deployPreferencesPanel;
+    activeControl = deployPreferencesPanel;
     databindingSupport =
         PreferencePageSupport.create(this, deployPreferencesPanel.getDataBindingContext());
     PlatformUI.getWorkbench().getHelpSystem().setHelp(container.getParent(),
                                                       deployPreferencesPanel.getHelpContextId());
+    container.setContent(deployPreferencesPanel);
   }
 
   private void createBlankPanelIfNeeded() {
@@ -181,16 +150,16 @@ public class DeployPropertyPage extends PropertyPage {
   private void createStandardPanelIfNeeded() {
     if (standardPreferencesPanel == null) {
       standardPreferencesPanel = new StandardDeployPreferencesPanel(
-          container, facetedProject.getProject(), loginService, this::handleLayoutChange,
-          false /* requireValues */, new ProjectRepository(googleApiFactory));
+          container, facetedProject.getProject(), this::handleLayoutChange,
+          false /* requireValues */, new ProjectRepository());
     }
   }
 
   private void createFlexPanelIfNeeded() {
     if (flexPreferencesPanel == null) {
       flexPreferencesPanel = new FlexDeployPreferencesPanel(
-          container, facetedProject.getProject(), loginService, this::handleLayoutChange,
-          false /* requireValues */, new ProjectRepository(googleApiFactory));
+          container, facetedProject.getProject(), this::handleLayoutChange,
+          false /* requireValues */, new ProjectRepository());
     }
   }
 }

@@ -42,6 +42,7 @@ import org.eclipse.wst.sse.ui.internal.reconcile.validator.IncrementalReporter;
 import org.eclipse.wst.validation.internal.core.ValidationException;
 import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 import org.eclipse.wst.validation.internal.provisional.core.IValidationContext;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -50,8 +51,8 @@ public class XmlSourceValidatorTest {
 
   private static final String APPLICATION_XML =
       "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
-      + "<application>"
-      + "</application>"
+      + "<application></application>"
+      + "<runtime>java8</runtime>"
       + "</appengine-web-app>";
 
   private final IncrementalReporter reporter = new IncrementalReporter(null);
@@ -106,12 +107,23 @@ public class XmlSourceValidatorTest {
   }
 
   @Test
-  public void testValidate_noBannedElements() throws IOException {
+  public void testValidate_noProblemElements() throws IOException, CoreException {
     XmlSourceValidator validator = new XmlSourceValidator();
     validator.setHelper(new AppEngineWebXmlValidator());
-    byte[] xml = "<test></test>".getBytes(StandardCharsets.UTF_8);
-    validator.validate(reporter, null, xml);
-    assertTrue(reporter.getMessages().isEmpty());
+    String xml = "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
+        + "<runtime>java8</runtime>"
+        + "</appengine-web-app>";
+    
+    IProject project = appEngineStandardProject.getProject();
+    IFile file = project.getFile("testdata.xml");
+    
+    file.create(ValidationTestUtils.stringToInputStream(xml), 0, null);
+    
+    validator.validate(reporter, file, xml.getBytes(StandardCharsets.UTF_8));
+    List<IMessage> messages = reporter.getMessages();
+    if (!messages.isEmpty()) {
+      Assert.fail(messages.get(0).getText());
+    }
   }
 
   @Test
@@ -122,7 +134,10 @@ public class XmlSourceValidatorTest {
     IFile file = Mockito.mock(IFile.class);
     when(file.getProject()).thenReturn(appEngineStandardProject.getProject());
     validator.validate(reporter, file, xml.getBytes(StandardCharsets.UTF_8));
-    assertEquals(1, reporter.getMessages().size());
+    List<IMessage> messages = reporter.getMessages();
+    assertEquals(1, messages.size());
+    assertEquals(
+        "App Engine Standard does not support this servlet version", messages.get(0).getText());
   }
 
   @Test
@@ -138,8 +153,8 @@ public class XmlSourceValidatorTest {
   public void testCreateMessage() {
     XmlSourceValidator validator = new XmlSourceValidator();
     validator.setHelper(new AppEngineWebXmlValidator());
-    BannedElement element =
-        new AppEngineBlacklistElement("application", new DocumentLocation(5, 17), 0);
+    ElementProblem element =
+        new AppEngineDeprecatedElement("application", new DocumentLocation(5, 17), 0);
     validator.createMessage(reporter, element, 0);
     List<IMessage> messages = reporter.getMessages();
     assertEquals(1, messages.size());

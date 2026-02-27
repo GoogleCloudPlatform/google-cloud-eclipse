@@ -18,15 +18,16 @@ package com.google.cloud.tools.eclipse.appengine.deploy;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.tools.appengine.api.AppEngineException;
-import com.google.cloud.tools.appengine.api.deploy.AppEngineStandardStaging;
-import com.google.cloud.tools.appengine.cloudsdk.AppCfg;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
-import com.google.cloud.tools.appengine.cloudsdk.process.LegacyProcessHandler;
-import com.google.cloud.tools.appengine.cloudsdk.process.ProcessHandler;
+import com.google.cloud.tools.appengine.AppEngineException;
+import com.google.cloud.tools.appengine.operations.AppCfg;
+import com.google.cloud.tools.appengine.operations.AppEngineWebXmlProjectStaging;
+import com.google.cloud.tools.appengine.operations.CloudSdk;
+import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkNotFoundException;
+import com.google.cloud.tools.appengine.operations.cloudsdk.process.LegacyProcessHandler;
+import com.google.cloud.tools.appengine.operations.cloudsdk.process.ProcessHandler;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import java.io.ByteArrayInputStream;
@@ -54,7 +55,7 @@ public class CloudSdkStagingHelperTest {
   private static final String APP_YAML = "runtime: java\nenv: flex";
   private static final String APPENGINE_WEB_XML =
       "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
-      + "<threadsafe>true</threadsafe></appengine-web-app>";
+      + "<threadsafe>true</threadsafe><runtime>java8</runtime></appengine-web-app>";
   private static final String WEB_XML = "<web-app/>";
 
   private static final String CRON_XML = "<cronentries/>";
@@ -82,7 +83,8 @@ public class CloudSdkStagingHelperTest {
   public void testStage_cancelled() throws AppEngineException {
     when(monitor.isCanceled()).thenReturn(true);
     try {
-      CloudSdkStagingHelper.stageStandard(null, null, null, monitor);
+      CloudSdkStagingHelper.stageStandard(null, stagingDirectory, null, monitor);
+      fail();
     } catch (OperationCanceledException ex) {
       assertEquals("canceled early", ex.getMessage());
     }
@@ -90,7 +92,7 @@ public class CloudSdkStagingHelperTest {
 
   @Test
   public void testStageStandard() throws AppEngineException, CoreException {
-    AppEngineStandardStaging staging = setUpAppEngineStaging();
+    AppEngineWebXmlProjectStaging staging = setUpAppEngineStaging();
 
     IPath explodedWarDirectory = project.getFolder("WebContent").getLocation();
     CloudSdkStagingHelper.stageStandard(explodedWarDirectory, stagingDirectory, staging, monitor);
@@ -116,7 +118,7 @@ public class CloudSdkStagingHelperTest {
   @Test
   public void testCloudSdkStaging_xmlConfigFilesConvertedToYaml()
       throws CoreException, AppEngineException {
-    AppEngineStandardStaging staging = setUpAppEngineStaging();
+    AppEngineWebXmlProjectStaging staging = setUpAppEngineStaging();
 
     createConfigFile("cron.xml", CRON_XML);
     createConfigFile("datastore-indexes.xml", DATASTORE_INDEXES_XML);
@@ -137,7 +139,7 @@ public class CloudSdkStagingHelperTest {
     assertTrue(stagingGenerated.append("queue.yaml").toFile().exists());
   }
 
-  private AppEngineStandardStaging setUpAppEngineStaging()
+  private AppEngineWebXmlProjectStaging setUpAppEngineStaging()
       throws CloudSdkNotFoundException, CoreException {
     createFile("WebContent/WEB-INF/appengine-web.xml", APPENGINE_WEB_XML);
     createFile("WebContent/WEB-INF/web.xml", WEB_XML);

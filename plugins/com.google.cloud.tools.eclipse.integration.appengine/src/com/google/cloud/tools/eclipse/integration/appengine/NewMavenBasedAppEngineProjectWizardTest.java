@@ -26,7 +26,6 @@ import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.test.util.ArrayAssertions;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
-import com.google.cloud.tools.eclipse.test.util.project.JavaRuntimeUtils;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 import java.io.File;
@@ -46,7 +45,6 @@ import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
-import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -59,24 +57,19 @@ public class NewMavenBasedAppEngineProjectWizardTest extends BaseProjectTest {
   public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
   @Test
-  public void testHelloWorld_java7() throws Exception {
-    String[] projectFiles =
-        {"src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
-    createAndCheck("appWithPackageProject", null, "com.example.baz",
-        AppEngineRuntime.STANDARD_JAVA_7, projectFiles);
-    assertEquals("1.7", getPomProperty(project, "maven.compiler.source"));
-    assertEquals("1.7", getPomProperty(project, "maven.compiler.target"));
-  }
-
-  @Test
   public void testHelloWorld_java8() throws Exception {
-    Assume.assumeTrue("Requires a Java 8 JRE", JavaRuntimeUtils.hasJavaSE8());
     String[] projectFiles =
         {"src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
     createAndCheck("appWithPackageProject_java8", null, "com.example.baz",
         AppEngineRuntime.STANDARD_JAVA_8, projectFiles);
-    assertEquals("1.8", getPomProperty(project, "maven.compiler.source"));
-    assertEquals("1.8", getPomProperty(project, "maven.compiler.target"));
+  }
+
+  @Test
+  public void testHelloWorld_java8Servlet25() throws Exception {
+    String[] projectFiles =
+        {"src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
+    createAndCheck("appWithPackageProject_java8Servlet25", null, "com.example.baz",
+        AppEngineRuntime.STANDARD_JAVA_8_SERVLET_25, projectFiles);
   }
 
   @Test
@@ -88,7 +81,7 @@ public class NewMavenBasedAppEngineProjectWizardTest extends BaseProjectTest {
     String[] projectFiles =
         {"src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
     createAndCheck("appWithPackageProjectInTemp", location.getAbsolutePath(), "com.example.foo",
-        AppEngineRuntime.STANDARD_JAVA_7, projectFiles);
+        AppEngineRuntime.STANDARD_JAVA_8, projectFiles);
   }
 
   private static String getPomProperty(IProject project, String propertyName)
@@ -113,21 +106,25 @@ public class NewMavenBasedAppEngineProjectWizardTest extends BaseProjectTest {
 
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     assertNotNull("m2e-wtp should create a faceted project", facetedProject);
-    if (runtime == null || runtime == AppEngineRuntime.STANDARD_JAVA_7) {
-      assertEquals("Project does not have standard facet", AppEngineStandardFacet.JRE7,
-          facetedProject.getProjectFacetVersion(AppEngineStandardFacet.FACET));
-      assertEquals(JavaFacet.VERSION_1_7, facetedProject.getProjectFacetVersion(JavaFacet.FACET));
+
+    assertEquals("1.8", getPomProperty(project, "maven.compiler.source"));
+    assertEquals("1.8", getPomProperty(project, "maven.compiler.target"));
+
+    // we don't currently export a JRE8 facet version
+    assertNotNull("Project does not have standard facet",
+        facetedProject.getProjectFacetVersion(AppEngineStandardFacet.FACET));
+    assertEquals("Project does not have standard facet", "JRE8",
+        facetedProject.getProjectFacetVersion(AppEngineStandardFacet.FACET).getVersionString());
+    assertEquals(JavaFacet.VERSION_1_8, facetedProject.getProjectFacetVersion(JavaFacet.FACET));
+
+    if (runtime == null || runtime == AppEngineRuntime.STANDARD_JAVA_8) {
+      assertEquals(WebFacetUtils.WEB_31,
+          facetedProject.getProjectFacetVersion(WebFacetUtils.WEB_FACET));
+    } else if (runtime == AppEngineRuntime.STANDARD_JAVA_8_SERVLET_25) {
       assertEquals(WebFacetUtils.WEB_25,
           facetedProject.getProjectFacetVersion(WebFacetUtils.WEB_FACET));
     } else {
-      // we don't currently export a JRE8 facet version
-      assertNotNull("Project does not have standard facet",
-          facetedProject.getProjectFacetVersion(AppEngineStandardFacet.FACET));
-      assertEquals("Project does not have standard facet", "JRE8",
-          facetedProject.getProjectFacetVersion(AppEngineStandardFacet.FACET).getVersionString());
-      assertEquals(JavaFacet.VERSION_1_8, facetedProject.getProjectFacetVersion(JavaFacet.FACET));
-      assertEquals(WebFacetUtils.WEB_31,
-          facetedProject.getProjectFacetVersion(WebFacetUtils.WEB_FACET));
+      fail("Runtime not handled: " + runtime);
     }
 
     for (String projectFile : projectFiles) {

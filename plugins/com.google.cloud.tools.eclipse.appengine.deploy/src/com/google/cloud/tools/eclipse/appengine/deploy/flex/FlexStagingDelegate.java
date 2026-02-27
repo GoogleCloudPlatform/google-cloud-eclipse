@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.flex;
 
-import com.google.cloud.tools.appengine.api.AppEngineException;
+import com.google.cloud.tools.appengine.AppEngineException;
 import com.google.cloud.tools.eclipse.appengine.deploy.CloudSdkStagingHelper;
 import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;

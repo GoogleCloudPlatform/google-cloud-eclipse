@@ -26,7 +26,7 @@ public class CompositeUtil {
 
   @SuppressWarnings("unchecked")
   public static <T> T findControl(Composite composite, final Class<T> type) {
-    return (T) findControl(composite, control -> type.isInstance(control));
+    return (T) findControl(composite, type::isInstance);
   }
 
   public static Button findButton(Composite composite, final String text) {

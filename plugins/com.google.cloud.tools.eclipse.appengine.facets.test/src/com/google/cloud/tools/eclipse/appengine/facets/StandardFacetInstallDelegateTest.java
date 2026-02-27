@@ -16,10 +16,10 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets;
 
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertEquals;
 
 import com.google.cloud.tools.appengine.AppEngineDescriptor;
-import com.google.cloud.tools.appengine.api.AppEngineException;
+import com.google.cloud.tools.appengine.AppEngineException;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import java.io.ByteArrayInputStream;
@@ -60,7 +60,8 @@ public class StandardFacetInstallDelegateTest {
 
     try (InputStream in = appengineWebXml.getContents(true)) {
       AppEngineDescriptor descriptor = AppEngineDescriptor.parse(in);
-      assertNull(descriptor.getRuntime());
+      // AppEngineDescriptor treats an empty runtime as java7 as of 0.6.
+      assertEquals("java7", descriptor.getRuntime());
     }
   }
 

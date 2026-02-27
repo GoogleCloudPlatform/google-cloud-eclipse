@@ -63,7 +63,7 @@ public class AppEngineApplicationQueryJob extends Job {
   @Override
   protected IStatus run(IProgressMonitor monitor) {
     try {
-      AppEngine appEngine = projectRepository.getAppEngineApplication(credential, project.getId());
+      AppEngine appEngine = projectRepository.getAppEngineApplication(project.getId());
       project.setAppEngine(appEngine);
 
       if (appEngine == AppEngine.NO_APPENGINE_APPLICATION) {

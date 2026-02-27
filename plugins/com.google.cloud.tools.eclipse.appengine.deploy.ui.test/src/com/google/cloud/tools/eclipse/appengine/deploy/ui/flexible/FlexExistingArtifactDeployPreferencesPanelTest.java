@@ -24,8 +24,8 @@ import static org.junit.Assert.assertThat;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.AppEngineDeployPreferencesPanel;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.DeployArtifactValidator;
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import org.eclipse.core.databinding.DataBindingContext;
@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,12 +44,16 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class FlexExistingArtifactDeployPreferencesPanelTest {
 
-  @Mock private IGoogleLoginService loginService;
   @Mock private ProjectRepository projectRepository;
   @Mock private Runnable layoutHandler;
 
   @Rule public ShellTestResource shellResource = new ShellTestResource();
 
+  @Before
+  public void setup() {
+    TestAccountProvider.setAsDefaultProvider();
+  }
+  
   @Test
   public void testDeployArtifactPathField() {
     AppEngineDeployPreferencesPanel panel = createPanel();
@@ -84,7 +89,7 @@ public class FlexExistingArtifactDeployPreferencesPanelTest {
 
   private AppEngineDeployPreferencesPanel createPanel() {
     return new FlexExistingArtifactDeployPreferencesPanel(shellResource.getShell(),
-        loginService, layoutHandler, true /* requireValues */, projectRepository);
+        layoutHandler, true /* requireValues */, projectRepository);
   }
 
   private static IStatus getDeployArtifactPathValidationStatus(

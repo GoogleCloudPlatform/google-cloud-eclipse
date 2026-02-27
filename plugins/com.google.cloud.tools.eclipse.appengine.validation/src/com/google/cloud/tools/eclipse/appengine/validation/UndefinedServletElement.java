@@ -22,7 +22,7 @@ import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 /**
  * A servlet class element that will receive an undefined servlet marker. 
  */
-public class UndefinedServletElement extends BannedElement {
+public class UndefinedServletElement extends ElementProblem {
 
   private static final String MARKERID = 
       "com.google.cloud.tools.eclipse.appengine.validation.undefinedServletMarker";

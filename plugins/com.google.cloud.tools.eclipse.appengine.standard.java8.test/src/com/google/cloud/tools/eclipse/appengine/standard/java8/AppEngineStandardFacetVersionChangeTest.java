@@ -18,14 +18,13 @@ package com.google.cloud.tools.eclipse.appengine.standard.java8;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.cloud.tools.appengine.AppEngineDescriptor;
-import com.google.cloud.tools.appengine.api.AppEngineException;
+import com.google.cloud.tools.appengine.AppEngineException;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineConfigurationUtil;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.io.IOException;
@@ -124,7 +123,8 @@ public class AppEngineStandardFacetVersionChangeTest {
   private static AppEngineDescriptor parseDescriptor(IFacetedProject project)
       throws IOException, CoreException, SAXException {
     IFile descriptorFile =
-        WebProjectUtil.findInWebInf(project.getProject(), new Path("appengine-web.xml"));
+        AppEngineConfigurationUtil.findConfigurationFile(
+            project.getProject(), new Path("appengine-web.xml"));
     assertNotNull("appengine-web.xml not found", descriptorFile);
     assertTrue("appengine-web.xml does not exist", descriptorFile.exists());
 
@@ -137,7 +137,7 @@ public class AppEngineStandardFacetVersionChangeTest {
       throws IOException, CoreException, SAXException, AppEngineException {
     AppEngineDescriptor descriptor = parseDescriptor(project);
     assertNotNull(descriptor);
-    assertNull("should have no <runtime> element", descriptor.getRuntime());
+    assertEquals("should report java7 runtime", "java7", descriptor.getRuntime());
   }
 
   private static void assertDescriptorRuntimeIsJre8(IFacetedProject project)

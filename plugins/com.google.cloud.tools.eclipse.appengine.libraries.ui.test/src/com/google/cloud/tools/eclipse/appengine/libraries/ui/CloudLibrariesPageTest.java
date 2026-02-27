@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexWarFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
@@ -118,6 +119,23 @@ public class CloudLibrariesPageTest {
   }
 
   @Test
+  public void testNonAppEngineLibraries_foundOnPlainJavaProject() {
+    IJavaProject javaProject = plainJavaProjectCreator.getJavaProject();
+    page.initialize(javaProject, null);
+    page.createControl(shellTestResource.getShell());
+    assertThat(page.libraryGroups, Matchers.hasKey(CloudLibraries.NON_APP_ENGINE_STANDARD_GROUP));
+  }
+
+  @Test
+  public void testNonAppEngineLibraries_foundOnAppEngineFlexProject() {
+    IJavaProject javaProject = plainJavaProjectCreator
+        .withFacets(WebFacetUtils.WEB_31, AppEngineFlexWarFacet.FACET_VERSION).getJavaProject();
+    page.initialize(javaProject, null);
+    page.createControl(shellTestResource.getShell());
+    assertThat(page.libraryGroups, Matchers.hasKey(CloudLibraries.NON_APP_ENGINE_STANDARD_GROUP));
+  }
+
+  @Test
   public void testSelectionMaintained() {
     // explicitly configure App Engine and GCP libraries
     IJavaProject javaProject = plainJavaProjectCreator.getJavaProject();
@@ -140,7 +158,7 @@ public class CloudLibrariesPageTest {
 
     // check the page's selected libraries
     List<Library> returnedLibraries = page.getSelectedLibraries();
-    Assert.assertEquals(2, returnedLibraries.size());
+    Assert.assertEquals(1 , returnedLibraries.size());
     assertThat(returnedLibraries, Matchers.hasItem(new LibraryMatcher("objectify")));
 
     // select GCS
@@ -153,8 +171,7 @@ public class CloudLibrariesPageTest {
         Matchers.hasItem(new LibraryMatcher("googlecloudstorage")));
 
     returnedLibraries = page.getSelectedLibraries();
-    Assert.assertEquals(3, returnedLibraries.size());
-    assertThat(returnedLibraries, Matchers.hasItem(new LibraryMatcher("appengine-api")));
+    Assert.assertEquals(2, returnedLibraries.size());
     assertThat(returnedLibraries, Matchers.hasItem(new LibraryMatcher("objectify")));
     assertThat(returnedLibraries, Matchers.hasItem(new LibraryMatcher("googlecloudstorage")));
 

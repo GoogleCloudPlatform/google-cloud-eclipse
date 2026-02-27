@@ -20,7 +20,7 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.FixedMultiValidator;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.ProjectSelectorSelectionChangedListener;
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelectorObservableValue;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
@@ -74,6 +74,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
@@ -125,8 +126,8 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
   private final ProjectRepository projectRepository;
   private final FormToolkit formToolkit;
 
-  public AppEngineDeployPreferencesPanel(Composite parent, IProject project,
-      IGoogleLoginService loginService, Runnable layoutChangedHandler, boolean requireValues,
+  public AppEngineDeployPreferencesPanel(Composite parent, IProject project, 
+      Runnable layoutChangedHandler, boolean requireValues,
       ProjectRepository projectRepository, DeployPreferences model) {
     super(parent, SWT.NONE);
 
@@ -140,8 +141,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     colors.setBackground(null);
     colors.setForeground(null);
     formToolkit = new FormToolkit(colors);
-
-    createCredentialSection(loginService);
+    createCredentialSection();
     createProjectIdSection();
     setupAccountEmailDataBinding();
     setupProjectSelectorDataBinding();
@@ -155,8 +155,11 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
 
     Dialog.applyDialogFont(this);
     GridLayoutFactory.swtDefaults().numColumns(2).applyTo(this);
+    refreshProjectsForSelectedCredential();
   }
 
+  
+  
   protected void createCenterArea() {
     createProjectVersionSection();
     setupTextFieldDataBinding(version, "version", new ProjectVersionValidator());
@@ -176,8 +179,8 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
             Preconditions.checkArgument(savedEmail instanceof String);
             if (accountSelector.isEmailAvailable((String) savedEmail)) {
               return savedEmail;
-            } else if (requireValues && accountSelector.getAccountCount() == 1) {
-              return accountSelector.getFirstEmail();
+            } else if (requireValues && accountSelector.isSignedIn()) {
+              return accountSelector.getSelectedEmail();
             } else {
               return null;
             }
@@ -205,6 +208,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
         ViewerProperties.input().observe(projectSelector.getViewer());
     IViewerObservableValue projectSelection =
         ViewerProperties.singleSelection().observe(projectSelector.getViewer());
+    
     bindingContext.addValidationStatusProvider(
         new ProjectSelectionValidator(projectInput, projectSelection, requireValues));
 
@@ -344,12 +348,12 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     return accountSelector.getSelectedCredential();
   }
 
-  private void createCredentialSection(IGoogleLoginService loginService) {
+  private void createCredentialSection() {
     Label accountLabel = new Label(this, SWT.LEAD);
     accountLabel.setText(Messages.getString("deploy.preferences.dialog.label.selectAccount"));
     accountLabel.setToolTipText(Messages.getString("tooltip.account"));
 
-    accountSelector = new AccountSelector(this, loginService);
+    accountSelector = new AccountSelector(this);
     accountSelector.setToolTipText(Messages.getString("tooltip.account"));
     GridData accountSelectorGridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
     accountSelector.setLayoutData(accountSelectorGridData);
@@ -364,9 +368,15 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
 
     Composite linkComposite = new Composite(this, SWT.NONE);
     Link createNewProject = new Link(linkComposite, SWT.WRAP);
-    createNewProject.setText(Messages.getString("projectselector.createproject",
-                                                CREATE_GCP_PROJECT_URL));
-    createNewProject.setToolTipText(Messages.getString("projectselector.createproject.tooltip"));
+    if (GoogleApiFactory.INSTANCE.getCredential().isPresent()) {
+      createNewProject.setText(Messages.getString("projectselector.createproject",
+          CREATE_GCP_PROJECT_URL));
+      createNewProject.setToolTipText(Messages.getString("projectselector.createproject.tooltip"));
+    } else {
+      createNewProject.setText(Messages.getString("error.account.missing.signedout"));
+    }
+    
+    
     FontUtil.convertFontToItalic(createNewProject);
     createNewProject.addSelectionListener(new OpenUriSelectionListener(
         () -> accountSelector.getSelectedEmail().isEmpty()
@@ -444,17 +454,24 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     return checkBox;
   }
 
-  private void createAdvancedSection() {
+  protected void createAdvancedSection() {
     createExpandableComposite();
-    final Composite bucketComposite = createBucketSection(expandableComposite);
+    Composite advancedSection = new Composite(expandableComposite, SWT.NONE);
+    populateAdvancedSection(advancedSection);
+    GridLayoutFactory.swtDefaults().applyTo(advancedSection);
 
-    expandableComposite.setClient(bucketComposite);
+    expandableComposite.setClient(advancedSection);
     expandableComposite.addExpansionListener(new ExpansionAdapter() {
       @Override
       public void expansionStateChanged(ExpansionEvent event) {
         layoutChangedHandler.run();
       }
     });
+  }
+
+  /** Populate the "Advanced" twistie section. */
+  protected void populateAdvancedSection(Composite advancedSection) {
+    createBucketSection(advancedSection);
   }
 
   private void createExpandableComposite() {
@@ -494,12 +511,12 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     projectSelector.setProjects(Collections.<GcpProject>emptyList());
     latestGcpProjectQueryJob = null;
 
-    Credential selectedCredential = accountSelector.getSelectedCredential();
-    if (selectedCredential != null) {
+    if (GoogleApiFactory.INSTANCE.getCredential().isPresent()) {
       Predicate<Job> isLatestQueryJob = job -> job == latestGcpProjectQueryJob;
-      latestGcpProjectQueryJob = new GcpProjectQueryJob(selectedCredential,
-          projectRepository, projectSelector, bindingContext, isLatestQueryJob);
+      latestGcpProjectQueryJob = new GcpProjectQueryJob(projectRepository, 
+          projectSelector, bindingContext, isLatestQueryJob);
       latestGcpProjectQueryJob.schedule();
+      
     }
   }
 
@@ -513,8 +530,11 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
 
     @Override
     public void run() {
-      refreshProjectsForSelectedCredential();
-      refreshProjectsButton.setEnabled(accountSelector.getSelectedCredential() != null);
+      Display.getDefault().asyncExec(() -> { 
+        refreshProjectsForSelectedCredential();
+        refreshProjectsButton.setEnabled(accountSelector.getSelectedCredential() != null);
+      });
+
     }
   }
 
@@ -532,8 +552,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
 
       Preconditions.checkArgument(fromObject instanceof String);
       try {
-        return projectRepository.getProject(accountSelector.getSelectedCredential(),
-                                           (String) fromObject);
+        return projectRepository.getProject((String) fromObject);
       } catch (ProjectRepositoryException ex) {
         return null;
       }
@@ -557,7 +576,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     }
   }
 
-  static class ProjectSelectionValidator extends FixedMultiValidator {
+  class ProjectSelectionValidator extends FixedMultiValidator {
 
     private final IViewerObservableValue projectInput;
     private final IViewerObservableValue projectSelection;
@@ -577,6 +596,10 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
       Collection<?> projects = (Collection<?>) projectInput.getValue();
       // this access is recorded and ensures that changes are tracked, don't move it inside the if
       Object selectedProject = projectSelection.getValue();
+      
+      if (!GoogleApiFactory.INSTANCE.getCredential().isPresent()) {
+        return ValidationStatus.ok();
+      }
       if (projects.isEmpty()) {
         if (requireValues) {
           return ValidationStatus.error(Messages.getString("projectselector.no.projects")); //$NON-NLS-1$
@@ -588,6 +611,10 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
         if (selectedProject == null) {
           return ValidationStatus.error(Messages.getString("projectselector.project.not.selected")); //$NON-NLS-1$
         }
+      }
+      if (selectedProject != null && project != null) {
+        return ValidationStatus.info(Messages.getString("deploy.project.summary", project.getName(),
+            ((GcpProject) selectedProject).getName()));
       }
       return ValidationStatus.ok();
     }
@@ -619,8 +646,6 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
       if (requireValues && Strings.isNullOrEmpty(selectedEmail)) {
         if (accountSelector.isSignedIn()) {
           return ValidationStatus.error(Messages.getString("error.account.missing.signedin"));
-        } else {
-          return ValidationStatus.error(Messages.getString("error.account.missing.signedout"));
         }
       }
       return ValidationStatus.ok();

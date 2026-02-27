@@ -38,7 +38,7 @@ import org.junit.Test;
 public class FlexWarStagingDelegateTest {
 
   @Rule public TestProjectCreator projectCreator =
-      new TestProjectCreator().withFacets(JavaFacet.VERSION_1_7);
+      new TestProjectCreator().withFacets(JavaFacet.VERSION_1_8);
 
   private IProject project;
   private IPath safeWorkDirectory;
@@ -54,7 +54,7 @@ public class FlexWarStagingDelegateTest {
 
   @Test
   public void testStage() {
-    setUpProject(WebFacetUtils.WEB_25, AppEngineFlexWarFacet.FACET_VERSION);
+    setUpProject(WebFacetUtils.WEB_31, AppEngineFlexWarFacet.FACET_VERSION);
     StagingDelegate delegate = new FlexWarStagingDelegate(project, appEngineDirectory);
     IStatus status = delegate.stage(stagingDirectory, safeWorkDirectory,
         null, null, new NullProgressMonitor());

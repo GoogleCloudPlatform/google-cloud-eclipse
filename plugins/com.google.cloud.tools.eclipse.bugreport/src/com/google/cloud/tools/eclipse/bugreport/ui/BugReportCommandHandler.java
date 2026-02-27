@@ -16,8 +16,8 @@
 
 package com.google.cloud.tools.eclipse.bugreport.ui;
 
-import com.google.cloud.tools.appengine.api.AppEngineException;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.AppEngineException;
+import com.google.cloud.tools.appengine.operations.CloudSdk;
 import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkPreferences;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.annotations.VisibleForTesting;
@@ -34,29 +34,28 @@ public class BugReportCommandHandler extends AbstractHandler {
   private static final String BUG_REPORT_URL =
       "https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/new";
 
-  //@formatter:off
   // should be kept up to date with .github/ISSUE_TEMPLATE.md
   private static final String BODY_TEMPLATE =
-      "Before reporting a possible bug:\n\n" 
-      + "1. Please ensure you are running the latest version of CT4E with _Help > Check for Updates_\n"
-      + "2. If the problem occurs when you deploy or after the application has been deployed, "
-      + "try deploying from the command line using gcloud or Maven. "
-      + "If the problem does not go away, then the issue is likely "
-      + "not with Cloud Tools for Eclipse.\n\n"
-      + "- Cloud Tools for Eclipse version: {0}\n"
-      + "- Google Cloud SDK version: {1} {2}\n"
-      + "- Eclipse version: {3}\n"
-      + "- OS: {4} {5}\n"
-      + "- Java version: {6}\n"
-      + "\n"
-      + "**What did you do?**\n"
-      + "\n"
-      + "**What did you expect to see?**\n"
-      + "\n"
-      + "**What did you see instead?**\n"
-      + "\n"
-      + "Screenshots and stacktraces are helpful.";
-  //@formatter:on
+      "<!--\n"
+          + "Before reporting a possible bug:\n\n"
+          + "1. Please ensure you are running the latest version of CT4E with _Help > Check for Updates_\n"
+          + "2. If the problem occurs when you deploy or after the application has been deployed, "
+          + "try deploying from the command line using gcloud or Maven. "
+          + "If the problem does not go away, then the issue is likely "
+          + "not with Cloud Tools for Eclipse.\n-->\n"
+          + "- Cloud Tools for Eclipse version: {0}\n"
+          + "- Google Cloud SDK version: {1} {2}\n"
+          + "- Eclipse version: {3}\n"
+          + "- OS: {4} {5}\n"
+          + "- Java version: {6}\n"
+          + "\n"
+          + "**What did you do?**\n"
+          + "\n"
+          + "**What did you expect to see?**\n"
+          + "\n"
+          + "**What did you see instead?**\n"
+          + "\n"
+          + "<!-- Screenshots and stacktraces are helpful. -->";
 
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {

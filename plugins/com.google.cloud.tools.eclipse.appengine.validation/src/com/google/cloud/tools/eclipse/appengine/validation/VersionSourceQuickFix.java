@@ -17,7 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 /**
- * Quick fix for appengine-web.xml available in source editor.
+ * Quick fix that removes version element from appengine-web.xml in source editor.
  */
 public class VersionSourceQuickFix extends XsltSourceQuickFix {
   

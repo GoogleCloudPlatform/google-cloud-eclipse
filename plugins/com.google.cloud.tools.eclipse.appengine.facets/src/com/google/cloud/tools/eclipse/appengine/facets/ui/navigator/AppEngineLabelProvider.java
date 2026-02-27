@@ -16,22 +16,15 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets.ui.navigator;
 
-import com.google.cloud.tools.appengine.AppEngineDescriptor;
-import com.google.cloud.tools.appengine.api.AppEngineException;
-import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
+import com.google.cloud.tools.appengine.AppEngineException;
+import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineProjectElement;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineResourceElement;
-import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineStandardProjectElement;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.DatastoreIndexesDescriptor;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 import com.google.cloud.tools.eclipse.ui.util.images.SharedImages;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-import java.io.IOException;
-import java.io.InputStream;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.resource.LocalResourceManager;
 import org.eclipse.jface.resource.ResourceManager;
@@ -39,7 +32,6 @@ import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelP
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Image;
-import org.xml.sax.SAXException;
 
 public class AppEngineLabelProvider extends LabelProvider implements IStyledLabelProvider {
   private final ResourceManager resources;
@@ -61,10 +53,10 @@ public class AppEngineLabelProvider extends LabelProvider implements IStyledLabe
 
   @Override
   public StyledString getStyledText(Object element) {
-    if (element instanceof IProject && AppEngineContentProvider.isStandard((IProject) element)) {
-      return getAppEngineStandardProjectText((IProject) element);
-    } else if (element instanceof AppEngineStandardProjectElement) {
-      return ((AppEngineStandardProjectElement) element).getStyledLabel();
+    if (element instanceof IProject && AppEngineContentProvider.isAppEngine((IProject) element)) {
+      return getAppEngineProjectText((IProject) element);
+    } else if (element instanceof AppEngineProjectElement) {
+      return ((AppEngineProjectElement) element).getStyledLabel();
     } else if (element instanceof AppEngineResourceElement) {
       return ((AppEngineResourceElement) element).getStyledLabel();
     }
@@ -72,59 +64,59 @@ public class AppEngineLabelProvider extends LabelProvider implements IStyledLabe
   }
 
   @VisibleForTesting
-  static StyledString getAppEngineStandardProjectText(IProject project) {
-    // FIXME: this is grotty; can we not get the content provider?
-    IFile appEngineWeb = WebProjectUtil.findInWebInf(project, new Path("appengine-web.xml"));
-    if (appEngineWeb == null || !appEngineWeb.exists()) {
-      // continue on to the next
-      return null;
-    }
-    StyledString result = new StyledString(project.getName());
-    try (InputStream input = appEngineWeb.getContents()) {
-      AppEngineDescriptor descriptor = AppEngineDescriptor.parse(input);
-      String qualifier = getVersionTuple(descriptor);
+  static StyledString getAppEngineProjectText(IProject project) {
+    try {
+      AppEngineProjectElement projectElement = AppEngineContentProvider.loadRepresentation(project);
+      StyledString result = new StyledString(project.getName());
+      String qualifier = getVersionTuple(projectElement);
       if (qualifier.length() > 0) {
         result.append(" [", StyledString.QUALIFIER_STYLER); //$NON-NLS-1$
         result.append(qualifier.toString(), StyledString.QUALIFIER_STYLER);
         result.append("]", StyledString.QUALIFIER_STYLER); //$NON-NLS-1$
       }
-    } catch (IOException | CoreException | SAXException | AppEngineException ex) {
+      return result;
+    } catch (AppEngineException ex) {
       // ignore
     }
-    return result;
+    return null; // carry onto the next label provider
   }
 
-  /** Returns a <em>project:service:version</em> tuple from the appengine-web descriptor. */
+  /** Returns a <em>project:service:version</em> tuple from the App Engine descriptor. */
   @VisibleForTesting
-  static String getVersionTuple(AppEngineDescriptor descriptor) throws AppEngineException {
+  static String getVersionTuple(AppEngineProjectElement projectElement) {
     StringBuilder qualifier = new StringBuilder();
-    if (descriptor != null) {
-      if (!Strings.isNullOrEmpty(descriptor.getProjectId())) {
-        qualifier.append(descriptor.getProjectId());
+
+    String projectId = projectElement.getProjectId();
+    if (!Strings.isNullOrEmpty(projectId)) {
+      qualifier.append(projectId);
+    }
+
+    String serviceId = projectElement.getServiceId();
+    if (!Strings.isNullOrEmpty(serviceId)) {
+      if (qualifier.length() > 0) {
+        qualifier.append(':');
       }
-      if (!Strings.isNullOrEmpty(descriptor.getServiceId())) {
-        if (qualifier.length() > 0) {
-          qualifier.append(':');
-        }
-        qualifier.append(descriptor.getServiceId());
+      qualifier.append(serviceId);
+    }
+
+    String projectVersion = projectElement.getProjectVersion();
+    if (!Strings.isNullOrEmpty(projectVersion)) {
+      if (qualifier.length() > 0) {
+        qualifier.append(':');
       }
-      if (!Strings.isNullOrEmpty(descriptor.getProjectVersion())) {
-        if (qualifier.length() > 0) {
-          qualifier.append(':');
-        }
-        qualifier.append(descriptor.getProjectVersion());
-      }
+      qualifier.append(projectVersion);
     }
     return qualifier.toString();
   }
 
   @Override
   public Image getImage(Object element) {
-    if (element instanceof IProject && AppEngineContentProvider.isStandard((IProject) element)) {
+    if (element instanceof IProject && AppEngineContentProvider.isAppEngine((IProject) element)) {
       return resources.createImage(AppEngineImages.APPENGINE_IMAGE_DESCRIPTOR);
     } else if (element instanceof DatastoreIndexesDescriptor) {
       return resources.createImage(SharedImages.DATASTORE_GREY_IMAGE_DESCRIPTOR);
-    } else if (element instanceof AppEngineResourceElement) {
+    } else if (element instanceof AppEngineProjectElement
+        || element instanceof AppEngineResourceElement) {
       // todo Get better images for these resource elements
       // CronDescriptor could be a timer/clock?
       // DenialOfServiceDescriptor could be a do-not-enter?

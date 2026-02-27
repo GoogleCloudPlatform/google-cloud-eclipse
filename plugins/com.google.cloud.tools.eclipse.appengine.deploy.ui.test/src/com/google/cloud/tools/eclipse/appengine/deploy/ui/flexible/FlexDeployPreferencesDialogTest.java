@@ -20,8 +20,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import org.eclipse.core.resources.IProject;
@@ -39,17 +38,18 @@ public class FlexDeployPreferencesDialogTest {
       + "flexible environment. Visit <a href=\"https://cloud.google.com/appengine/pricing\">"
       + "GCP Pricing</a> for pricing information.";
 
-  @Rule public ShellTestResource shellResource = new ShellTestResource();
+  @Rule
+  public ShellTestResource shellResource = new ShellTestResource();
 
   private FlexDeployPreferencesDialog dialog;
 
   @Before
   public void setUp() {
+    TestAccountProvider.setAsDefaultProvider();
     IProject project = mock(IProject.class);
     when(project.getName()).thenReturn("");
     when(project.getLocation()).thenReturn(new Path("/"));
-    dialog = new FlexDeployPreferencesDialog(null, "title", project,
-        mock(IGoogleLoginService.class), mock(IGoogleApiFactory.class));
+    dialog = new FlexDeployPreferencesDialog(null, "title", project);
   }
 
   @Test
@@ -62,8 +62,7 @@ public class FlexDeployPreferencesDialogTest {
   }
 
   private static Control findGcpPricingLink(Composite dialogArea) {
-    return CompositeUtil.findControl(dialogArea,
-        control -> control instanceof Link && GCP_PRICING_MESSAGE.equals(((Link) control).getText())
-    );
+    return CompositeUtil.findControl(dialogArea, control -> control instanceof Link
+        && GCP_PRICING_MESSAGE.equals(((Link) control).getText()));
   }
 }

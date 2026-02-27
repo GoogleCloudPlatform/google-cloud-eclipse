@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineConfigurationUtil;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
@@ -59,7 +60,9 @@ public class AppEngineStandardProjectConvertJobTest {
     // verify App Engine standard files are present
     IFile webXml = WebProjectUtil.findInWebInf(project, new Path("web.xml"));
     assertTrue(webXml.exists());
-    assertTrue(WebProjectUtil.findInWebInf(project, new Path("appengine-web.xml")).exists());
+    IFile appEngineWebXml =
+        AppEngineConfigurationUtil.findConfigurationFile(project, new Path("appengine-web.xml"));
+    assertTrue(appEngineWebXml.exists());
 
     // verify no overlap in WEB-INF and source paths
     // Java 1.7 facet sets the source path to src/ which will overlap with the

@@ -3,7 +3,8 @@
  */
 target "Cloud Tools for Eclipse: Common Dependencies"
 
-location "http://download.eclipse.org/tools/orbit/downloads/latest-R/" {
+
+location "https://download.eclipse.org/tools/orbit/downloads/drops/R20200529191137/repository/" {
   org.hamcrest.core [1.3.0,1.3.1)
   org.hamcrest.integration [1.3.0,1.3.1)
   org.hamcrest.library [1.3.0,1.3.1)
@@ -18,8 +19,7 @@ location "http://dadacoalition.org/yedit/" {
   org.dadacoalition.yedit.feature.feature.group
 }
 
-// SWTBot 2.7.0 will be released with Photon, and supports Neon, Oxygen, and Photon
-// Once released, link will be http://download.eclipse.org/technology/swtbot/releases/2.7.0
-location "http://download.eclipse.org/technology/swtbot/milestones/photon-rc4/" {
+// SWTBot 2.8.0 supports Oxygen and later (https://wiki.eclipse.org/SWTBot#Latest_Release)
+location "https://download.eclipse.org/technology/swtbot/releases/2.8.0/" {
   org.eclipse.swtbot.eclipse.feature.group
 }

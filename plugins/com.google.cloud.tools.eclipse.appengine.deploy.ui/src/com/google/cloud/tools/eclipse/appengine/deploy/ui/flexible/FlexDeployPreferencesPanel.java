@@ -21,7 +21,6 @@ import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexDeployPreference
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.AppEngineDeployPreferencesPanel;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.AppYamlValidator;
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.ui.util.event.RelativeFileFieldSetter;
 import org.eclipse.core.resources.IProject;
@@ -37,16 +36,16 @@ import org.eclipse.swt.widgets.Text;
 public class FlexDeployPreferencesPanel extends AppEngineDeployPreferencesPanel {
 
   public FlexDeployPreferencesPanel(Composite parent, IProject project,
-      IGoogleLoginService loginService, Runnable layoutChangedHandler, boolean requireValues,
+      Runnable layoutChangedHandler, boolean requireValues,
       ProjectRepository projectRepository) {
-    this(parent, project, loginService, layoutChangedHandler, requireValues, projectRepository,
+    this(parent, project, layoutChangedHandler, requireValues, projectRepository,
         new FlexDeployPreferences(project));
   }
 
   protected FlexDeployPreferencesPanel(Composite parent, IProject project,
-      IGoogleLoginService loginService, Runnable layoutChangedHandler, boolean requireValues,
+      Runnable layoutChangedHandler, boolean requireValues,
       ProjectRepository projectRepository, DeployPreferences model) {
-    super(parent, project, loginService, layoutChangedHandler, requireValues, projectRepository,
+    super(parent, project, layoutChangedHandler, requireValues, projectRepository,
         model);
   }
 

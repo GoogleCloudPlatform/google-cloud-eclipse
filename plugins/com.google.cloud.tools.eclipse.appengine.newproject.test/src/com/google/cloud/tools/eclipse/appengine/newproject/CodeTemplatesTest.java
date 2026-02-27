@@ -60,6 +60,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -79,56 +80,26 @@ public class CodeTemplatesTest {
   }
 
   @Test
-  public void testMaterializeAppEngineStandardFiles()
-      throws CoreException, ParserConfigurationException, SAXException, IOException {
-    AppEngineProjectConfig config = new AppEngineProjectConfig();
-    IFile mostImportant = CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
-    validateNonConfigFiles(mostImportant, "http://java.sun.com/xml/ns/javaee",
-        "http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd", "2.5");
-    validateAppEngineWebXml(AppEngineRuntime.STANDARD_JAVA_7);
-    validateLoggingProperties();
-  }
-
-  @Test
   public void testMaterializeAppEngineStandardFiles_java8()
       throws CoreException, ParserConfigurationException, SAXException, IOException {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
-    config.setRuntimeId(AppEngineRuntime.STANDARD_JAVA_8.getId());
+    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8);
     IFile mostImportant = CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
     validateNonConfigFiles(mostImportant, "http://xmlns.jcp.org/xml/ns/javaee",
         "http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd", "3.1");
-    validateAppEngineWebXml(AppEngineRuntime.STANDARD_JAVA_8);
+    validateAppEngineWebXml(config.getRuntime());
     validateLoggingProperties();
-  }
-
-  @Test
-  public void testMaterializeAppEngineStandardFiles_noObjectifyWithJava7()
-      throws CoreException, ParserConfigurationException, SAXException, IOException {
-    AppEngineProjectConfig config = new AppEngineProjectConfig();
-    CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
-    assertFalse(objectifyFilterClassExists());
-    validateObjectifyFilterConfigInWebXml(false);
-  }
-
-  @Test
-  public void testMaterializeAppEngineStandardFiles_objectifyWithJava7()
-      throws CoreException, ParserConfigurationException, SAXException, IOException {
-    AppEngineProjectConfig config = new AppEngineProjectConfig();
-    config.setAppEngineLibraries(Collections.singleton(new Library("objectify")));
-
-    CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
-    assertFalse(objectifyFilterClassExists());
-    validateObjectifyFilterConfigInWebXml(true);
   }
 
   @Test
   public void testMaterializeAppEngineStandardFiles_noObjectifyWithJava8()
       throws CoreException, ParserConfigurationException, SAXException, IOException {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
-    config.setRuntimeId(AppEngineRuntime.STANDARD_JAVA_8.getId());
+    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8);
 
     CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
     assertFalse(objectifyFilterClassExists());
+    assertFalse(objectifyListenerClassExists());
     validateObjectifyFilterConfigInWebXml(false);
   }
 
@@ -136,12 +107,69 @@ public class CodeTemplatesTest {
   public void testMaterializeAppEngineStandardFiles_objectifyWithJava8()
       throws CoreException, ParserConfigurationException, SAXException, IOException {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
-    config.setRuntimeId(AppEngineRuntime.STANDARD_JAVA_8.getId());
-    config.setAppEngineLibraries(Collections.singleton(new Library("objectify")));
+    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8);
+    config.setLibraries(Collections.singleton(new Library("objectify")));
 
     CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
     assertTrue(objectifyFilterClassExists());
+    assertTrue(objectifyListenerClassExists());
     validateObjectifyFilterConfigInWebXml(false);
+  }
+
+  @Test
+  public void testMaterializeAppEngineStandardFiles_java8Servlet25()
+      throws CoreException, ParserConfigurationException, SAXException, IOException {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8_SERVLET_25);
+    IFile mostImportant = CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
+    validateNonConfigFiles(mostImportant, "http://java.sun.com/xml/ns/javaee",
+        "http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd", "2.5");
+    validateAppEngineWebXml(config.getRuntime());
+    validateLoggingProperties();
+  }
+
+  @Test
+  public void testMaterializeAppEngineStandardFiles_noObjectifyWithJava8Servlet25()
+      throws CoreException, ParserConfigurationException, SAXException, IOException {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8_SERVLET_25);
+
+    CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
+    assertFalse(objectifyFilterClassExists());
+    assertFalse(objectifyListenerClassExists());
+    validateObjectifyFilterConfigInWebXml(false);
+  }
+
+  @Test
+  public void testMaterializeAppEngineStandardFiles_objectifyWithJava8Servlet25()
+      throws CoreException, ParserConfigurationException, SAXException, IOException {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8_SERVLET_25);
+    config.setLibraries(Collections.singleton(new Library("objectify")));
+
+    CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
+    assertFalse(objectifyFilterClassExists());
+    assertTrue(objectifyListenerClassExists());
+    validateObjectifyFilterConfigInWebXml(true);
+  }
+
+  @Test
+  public void testMaterializeAppEnginFlexFiles_noObjectifyListener()
+      throws CoreException {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+
+    CodeTemplates.materializeAppEngineFlexFiles(project, config, monitor);
+    assertFalse(objectifyListenerClassExists());
+  }
+
+  @Test
+  public void testMaterializeAppEngineFlexFiles_objectifyListenerWithObjectify6()
+      throws CoreException {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setLibraries(Collections.singleton(new Library("objectify6")));
+
+    CodeTemplates.materializeAppEngineFlexFiles(project, config, monitor);
+    assertTrue(objectifyListenerClassExists());
   }
 
   @Test
@@ -157,7 +185,7 @@ public class CodeTemplatesTest {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     config.setUseMaven("my.project.group.id", "my-project-artifact-id", "98.76.54");
     CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
-    validateStandardPomXml();
+    validatePom();
   }
 
   @Test
@@ -183,7 +211,7 @@ public class CodeTemplatesTest {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     config.setUseMaven("my.project.group.id", "my-project-artifact-id", "98.76.54");
     CodeTemplates.materializeAppEngineFlexFiles(project, config, monitor);
-    validateFlexPomXml();
+    validatePom();
   }
 
   @Test
@@ -197,7 +225,7 @@ public class CodeTemplatesTest {
     List<Library> libraries = Arrays.asList(new Library("a-library"), new Library("objectify"));
 
     AppEngineProjectConfig config = new AppEngineProjectConfig();
-    config.setAppEngineLibraries(libraries);
+    config.setLibraries(libraries);
 
     assertTrue(CodeTemplates.isObjectifySelected(config));
   }
@@ -207,23 +235,32 @@ public class CodeTemplatesTest {
     List<Library> libraries = Arrays.asList(new Library("objectify6"), new Library("a-library"));
 
     AppEngineProjectConfig config = new AppEngineProjectConfig();
-    config.setAppEngineLibraries(libraries);
+    config.setLibraries(libraries);
 
     assertTrue(CodeTemplates.isObjectifySelected(config));
   }
 
   @Test
-  public void testIsStandardJava7RuntimeSelected_java7() {
-    AppEngineProjectConfig config = new AppEngineProjectConfig();
-    config.setRuntimeId(null);  // null runtime corresponds to Java 7 runtime
-    assertTrue(CodeTemplates.isStandardJava7RuntimeSelected(config));
+  public void testIsServlet25Selected_nullRuntime() {
+    assertFalse(CodeTemplates.isServlet25Selected(new AppEngineProjectConfig()));
   }
 
   @Test
-  public void testIsStandardJava7RuntimeSelected_java8() {
+  public void testIsServlet25Selected_java8Runtime() {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
-    config.setRuntimeId("java8");
-    assertFalse(CodeTemplates.isStandardJava7RuntimeSelected(config));
+    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8);
+    assertFalse(CodeTemplates.isServlet25Selected(config));
+  }
+
+  @Test
+  public void testIsServlet25Selected_java8Servlet25Runtime() {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8_SERVLET_25);
+    assertTrue(CodeTemplates.isServlet25Selected(config));
+  }
+
+  private boolean objectifyListenerClassExists() {
+    return project.getFile("src/main/java/ObjectifyWebListener.java").exists();
   }
 
   private boolean objectifyFilterClassExists() {
@@ -237,6 +274,8 @@ public class CodeTemplatesTest {
 
     NodeList filterNames =
         root.getElementsByTagNameNS("http://java.sun.com/xml/ns/javaee", "filter-name");
+    NodeList listenerClasses =
+        root.getElementsByTagNameNS("http://java.sun.com/xml/ns/javaee", "listener-class");
     if (configExpected) {
       assertEquals(2, filterNames.getLength());
       assertEquals("ObjectifyFilter", filterNames.item(0).getTextContent());
@@ -246,8 +285,12 @@ public class CodeTemplatesTest {
           root.getElementsByTagNameNS("http://java.sun.com/xml/ns/javaee", "filter-class");
       assertEquals(
           "com.googlecode.objectify.ObjectifyFilter", filterClass.item(0).getTextContent());
+      
+      assertEquals(1, listenerClasses.getLength());
+      assertEquals("ObjectifyWebListener", listenerClasses.item(0).getTextContent());
     } else {
       assertEquals(0, filterNames.getLength());
+      assertEquals(0, listenerClasses.getLength());
     }
   }
 
@@ -309,12 +352,12 @@ public class CodeTemplatesTest {
 
     NodeList runtimeElements = doc.getDocumentElement().getElementsByTagNameNS(
         "http://appengine.google.com/ns/1.0", "runtime");
-    if (runtime.getId() == null) {
+    if (runtime.getRuntimeId() == null) {
       Assert.assertEquals("should not have a <runtime> element", 0, runtimeElements.getLength());
     } else {
       Assert.assertEquals("should have exactly 1 <runtime> element", 1,
           runtimeElements.getLength());
-      Assert.assertEquals(runtime.getId(), runtimeElements.item(0).getTextContent());
+      Assert.assertEquals(runtime.getRuntimeId(), runtimeElements.item(0).getTextContent());
     }
   }
 
@@ -341,19 +384,6 @@ public class CodeTemplatesTest {
       Assert.assertEquals(1, properties.keySet().size());
       Assert.assertEquals("WARNING", properties.getProperty(".level"));
     }
-  }
-
-  private void validateStandardPomXml() throws ParserConfigurationException, SAXException,
-      IOException, CoreException, XPathExpressionException {
-    Element root = validatePom();
-    
-    String sdkVersion = root
-        .getElementsByTagNameNS("http://maven.apache.org/POM/4.0.0", "appengine.api.sdk.version")
-        .item(0).getTextContent();
-    DefaultArtifactVersion sdkArtifactVersion =
-        new DefaultArtifactVersion(sdkVersion);
-    DefaultArtifactVersion expectedSdk = new DefaultArtifactVersion("1.9.62");
-    Assert.assertTrue(sdkVersion, sdkArtifactVersion.compareTo(expectedSdk) >= 0);    
   }
 
   private Element validatePom() throws ParserConfigurationException, SAXException, IOException,
@@ -383,7 +413,8 @@ public class CodeTemplatesTest {
         new DefaultArtifactVersion(pluginVersion.getTextContent());
     DefaultArtifactVersion expected = new DefaultArtifactVersion("1.3.2");
     Assert.assertTrue(artifactVersion.compareTo(expected) >= 0);
-    
+
+    // Validate use of Cloud BOM
     XPath xpath = XPathFactory.newInstance().newXPath();
     xpath.setNamespaceContext(new MappedNamespaceContext("m", "http://maven.apache.org/POM/4.0.0"));
     NodeList dependencyManagementNodes = (NodeList) xpath.evaluate(
@@ -401,14 +432,14 @@ public class CodeTemplatesTest {
         "string(./m:dependencyManagement/m:dependencies/m:dependency/m:artifactId)",
         root,
         XPathConstants.STRING);
-    Assert.assertEquals("google-cloud-bom", bomArtifactId);
+    Assert.assertEquals("libraries-bom", bomArtifactId);
 
     DefaultArtifactVersion bomVersion = new DefaultArtifactVersion((String) xpath.evaluate(
         "string(./m:dependencyManagement/m:dependencies/m:dependency/m:version)",
         root,
         XPathConstants.STRING));
     Assert.assertTrue(
-        bomVersion.compareTo(new DefaultArtifactVersion("0.42.0-alpha")) >= 0);
+        bomVersion.compareTo(new DefaultArtifactVersion("0.53.0-alpha")) >= 0);
 
     String scope = (String) xpath.evaluate(
         "string(./m:dependencyManagement/m:dependencies/m:dependency/m:scope)",
@@ -421,13 +452,28 @@ public class CodeTemplatesTest {
         root,
         XPathConstants.STRING);
     Assert.assertEquals("pom", type);
-    
-    return root;
-  }
 
-  private void validateFlexPomXml() throws ParserConfigurationException, SAXException, IOException,
-      CoreException, XPathExpressionException {
-    validatePom();
+    // Validate use of maven-enforcer-plugin
+    Node enforcerNode =
+        (Node)
+            xpath.evaluate(
+                "./m:build/m:plugins/m:plugin/m:artifactId[text()='maven-enforcer-plugin']/..",
+                root,
+                XPathConstants.NODE);
+    Assert.assertNotNull(enforcerNode);
+
+    String enforcerVersion =
+        (String) xpath.evaluate("string(./m:version)", enforcerNode, XPathConstants.STRING);
+    Assert.assertEquals("3.0.0-M3", enforcerVersion);
+    String requiredMavenVersion =
+        (String)
+            xpath.evaluate(
+                "string(./m:executions/m:execution/m:configuration/m:rules/m:requireMavenVersion/m:version)",
+                enforcerNode,
+                XPathConstants.STRING);
+    Assert.assertEquals("3.5.0", requiredMavenVersion);
+
+    return root;
   }
 
   private Document buildDocument(IFile xml)

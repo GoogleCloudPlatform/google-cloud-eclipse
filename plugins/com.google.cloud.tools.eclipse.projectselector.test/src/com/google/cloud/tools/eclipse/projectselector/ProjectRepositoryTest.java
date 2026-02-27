@@ -22,13 +22,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.googleapis.testing.json.GoogleJsonResponseExceptionFactoryTesting;
 import com.google.api.client.json.jackson.JacksonFactory;
@@ -38,12 +36,14 @@ import com.google.api.services.cloudresourcemanager.CloudResourceManager.Project
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects.Get;
 import com.google.api.services.cloudresourcemanager.model.ListProjectsResponse;
 import com.google.api.services.cloudresourcemanager.model.Project;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.projectselector.model.AppEngine;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -54,20 +54,24 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectRepositoryTest {
 
-  @Mock private IGoogleApiFactory apiFactory;
+  @Mock private GoogleApiFactory apiFactory;
   private ProjectRepository repository;
   private Project project = new Project();
 
   @Before
   public void setUp() {
-    repository = new ProjectRepository(apiFactory);
+    when(apiFactory.getAccount()).thenReturn(Optional.of(TestAccountProvider.ACCOUNT_1));
+    when(apiFactory.getCredential()).thenReturn(Optional.of(TestAccountProvider.CREDENTIAL_ACCOUNT_1));
+    GoogleApiFactory.setInstance(apiFactory);
+    repository = new ProjectRepository();
     project.setName("projectName").setProjectId("projectId");
   }
 
-  @Test(expected = NullPointerException.class)
+  
+  @Test(expected = IllegalStateException.class)
   public void testGetProjects_nullCredential() throws ProjectRepositoryException {
-    Credential credential = null;
-    repository.getProjects(credential);
+    setLoggedOut();
+    repository.getProjects();
   }
 
   @Test(expected = ProjectRepositoryException.class)
@@ -75,7 +79,7 @@ public class ProjectRepositoryTest {
     Projects.List list = initializeListRequest();
     when(list.execute()).thenThrow(new IOException("test exception"));
 
-    repository.getProjects(mock(Credential.class));
+    repository.getProjects();
   }
 
   @Test
@@ -85,7 +89,7 @@ public class ProjectRepositoryTest {
     response.setProjects(Collections.singletonList(project));
     when(list.execute()).thenReturn(response);
 
-    List<GcpProject> gcpProjects = repository.getProjects(mock(Credential.class));
+    List<GcpProject> gcpProjects = repository.getProjects();
 
     assertNotNull(gcpProjects);
     assertThat(gcpProjects.size(), is(1));
@@ -101,7 +105,7 @@ public class ProjectRepositoryTest {
     response.setProjects(null);
     when(list.execute()).thenReturn(response);
 
-    List<GcpProject> gcpProjects = repository.getProjects(mock(Credential.class));
+    List<GcpProject> gcpProjects = repository.getProjects();
 
     assertNotNull(gcpProjects);
   }
@@ -120,7 +124,7 @@ public class ProjectRepositoryTest {
     
     when(list.execute()).thenReturn(response1, response2);
 
-    List<GcpProject> gcpProjects = repository.getProjects(mock(Credential.class));
+    List<GcpProject> gcpProjects = repository.getProjects();
 
     assertThat(gcpProjects.size(), is(2));
     GcpProject gcpProject = gcpProjects.get(0);
@@ -140,7 +144,7 @@ public class ProjectRepositoryTest {
     project.setLifecycleState("DELETE_REQUESTED");
     when(list.execute()).thenReturn(response);
 
-    List<GcpProject> gcpProjects = repository.getProjects(mock(Credential.class));
+    List<GcpProject> gcpProjects = repository.getProjects();
 
     assertNotNull(gcpProjects);
     assertTrue(gcpProjects.isEmpty());
@@ -148,58 +152,60 @@ public class ProjectRepositoryTest {
 
   @Test
   public void testGetProject_nullCredential() throws ProjectRepositoryException {
-    assertNull(repository.getProject(null /*credential */, "projectId"));
+    setLoggedOut();
+    assertNull(repository.getProject("projectId"));
   }
 
   @Test
   public void testGetProject_nullProjectId() throws ProjectRepositoryException {
-    assertNull(repository.getProject(mock(Credential.class), null /* projectId */));
+    assertNull(repository.getProject(null /* projectId */));
   }
 
   @Test
   public void testGetProject_emptyProjectId() throws ProjectRepositoryException {
-    assertNull(repository.getProject(mock(Credential.class), ""));
+    assertNull(repository.getProject(""));
   }
 
   @Test(expected = ProjectRepositoryException.class)
   public void testGetProject_exceptionInRequest() throws IOException, ProjectRepositoryException {
     Projects projects = mock(Projects.class);
-    when(apiFactory.newProjectsApi(any(Credential.class))).thenReturn(projects);
+    when(apiFactory.newProjectsApi()).thenReturn(projects);
     Get get = mock(Get.class);
     when(projects.get(anyString())).thenReturn(get);
     when(get.execute()).thenThrow(new IOException("test exception"));
 
-    repository.getProject(mock(Credential.class), "projectId");
+    repository.getProject("projectId");
   }
 
   @Test
   public void testGetProject_successful() throws IOException, ProjectRepositoryException {
     Projects projects = mock(Projects.class);
-    when(apiFactory.newProjectsApi(any(Credential.class))).thenReturn(projects);
+    when(apiFactory.newProjectsApi()).thenReturn(projects);
     Get get = mock(Get.class);
     when(projects.get(anyString())).thenReturn(get);
     when(get.execute()).thenReturn(project);
 
-    GcpProject gcpProject = repository.getProject(mock(Credential.class), "projectId");
+    GcpProject gcpProject = repository.getProject("projectId");
 
     assertNotNull(gcpProject);
     assertThat(gcpProject.getName(), is("projectName"));
     assertThat(gcpProject.getId(), is("projectId"));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test(expected = IllegalStateException.class)
   public void testHasAppEngineApplication_nullCredential() throws ProjectRepositoryException {
-    repository.getAppEngineApplication(null, "projectId");
+    setLoggedOut();
+    repository.getAppEngineApplication("projectId");
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testHasAppEngineApplication_nullProjectId() throws ProjectRepositoryException {
-    repository.getAppEngineApplication(mock(Credential.class), null);
+    repository.getAppEngineApplication(null);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testHasAppEngineApplication_emptyProjectId() throws ProjectRepositoryException {
-    repository.getAppEngineApplication(mock(Credential.class), "");
+    repository.getAppEngineApplication("");
   }
 
   @Test
@@ -210,7 +216,7 @@ public class ProjectRepositoryTest {
     application.setId("id");
     when(get.execute()).thenReturn(application);
 
-    assertThat(repository.getAppEngineApplication(mock(Credential.class), "projectId"),
+    assertThat(repository.getAppEngineApplication("projectId"),
         is(not(AppEngine.NO_APPENGINE_APPLICATION)));
   }
 
@@ -222,7 +228,7 @@ public class ProjectRepositoryTest {
         GoogleJsonResponseExceptionFactoryTesting.newMock(new JacksonFactory(), 404, "Not found");
     when(get.execute()).thenThrow(notFoundException);
 
-    assertThat(repository.getAppEngineApplication(mock(Credential.class), "projectId"),
+    assertThat(repository.getAppEngineApplication("projectId"),
         is(AppEngine.NO_APPENGINE_APPLICATION));
   }
 
@@ -232,7 +238,7 @@ public class ProjectRepositoryTest {
     Apps.Get get = initializeGetRequest();
     when(get.execute()).thenThrow(new IOException("test exception"));
 
-    repository.getAppEngineApplication(mock(Credential.class), "projectId");
+    repository.getAppEngineApplication("projectId");
   }
 
   @Test(expected = ProjectRepositoryException.class)
@@ -243,7 +249,7 @@ public class ProjectRepositoryTest {
         .newMock(new JacksonFactory(), 500, "Server Error");
     when(get.execute()).thenThrow(exception);
 
-    repository.getAppEngineApplication(mock(Credential.class), "projectId");
+    repository.getAppEngineApplication("projectId");
   }
 
   @Test
@@ -254,7 +260,7 @@ public class ProjectRepositoryTest {
 
   private Apps.Get initializeGetRequest() throws IOException {
     Apps apps = mock(Apps.class);
-    when(apiFactory.newAppsApi(any(Credential.class))).thenReturn(apps);
+    when(apiFactory.newAppsApi()).thenReturn(apps);
 
     Apps.Get get = mock(Apps.Get.class);
     when(apps.get(anyString())).thenReturn(get);
@@ -263,12 +269,17 @@ public class ProjectRepositoryTest {
 
   private Projects.List initializeListRequest() throws IOException {
     Projects projects = mock(Projects.class);
-    when(apiFactory.newProjectsApi(any(Credential.class))).thenReturn(projects);
+    when(apiFactory.newProjectsApi()).thenReturn(projects);
     Projects.List list = mock(Projects.List.class);
     when(projects.list()).thenReturn(list);
     when(list.setPageSize(anyInt())).thenReturn(list);
     when(list.setPageToken(anyString())).thenReturn(list);
     return list;
+  }
+
+  private void setLoggedOut() {
+    when(apiFactory.getAccount()).thenReturn(Optional.empty());
+    when(apiFactory.getCredential()).thenReturn(Optional.empty());
   }
 
 }

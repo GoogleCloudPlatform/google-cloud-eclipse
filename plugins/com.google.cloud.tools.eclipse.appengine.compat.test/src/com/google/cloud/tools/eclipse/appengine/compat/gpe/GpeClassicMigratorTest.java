@@ -57,7 +57,9 @@ public class GpeClassicMigratorTest {
 
   @After
   public void tearDown() throws CoreException {
-    gpeProject.delete(true /* force */,  monitor);
+    if (gpeProject != null) {
+      gpeProject.delete(true /* force */,  monitor);
+    }
   }
 
   @Test

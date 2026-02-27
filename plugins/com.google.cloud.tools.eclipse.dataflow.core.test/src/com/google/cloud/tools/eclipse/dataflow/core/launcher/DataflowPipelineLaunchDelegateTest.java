@@ -42,7 +42,7 @@ import com.google.cloud.tools.eclipse.dataflow.core.launcher.options.PipelineOpt
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.WritableDataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowDependencyManager;
 import com.google.cloud.tools.eclipse.dataflow.core.project.MajorVersion;
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
@@ -55,6 +55,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -67,6 +68,7 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -95,8 +97,8 @@ public class DataflowPipelineLaunchDelegateTest {
   @Mock private IProject project;
   @Mock private PipelineOptionsHierarchyFactory pipelineOptionsHierarchyFactory;
   @Mock private PipelineOptionsHierarchy pipelineOptionsHierarchy;
-  @Mock private IGoogleLoginService loginService;
   @Mock private ILaunchConfigurationWorkingCopy configurationWorkingCopy;
+  @Mock private GoogleApiFactory apiFactory;
 
   private final Map<String, String> pipelineArguments = new HashMap<>();
   private final Map<String, String> environmentMap = new HashMap<>();
@@ -105,6 +107,7 @@ public class DataflowPipelineLaunchDelegateTest {
 
   @Before
   public void setup() throws Exception {
+    GoogleApiFactory.setInstance(apiFactory);
     when(pipelineOptionsHierarchyFactory.forProject(
             eq(project), eq(MajorVersion.ONE), any(IProgressMonitor.class)))
         .thenReturn(pipelineOptionsHierarchy);
@@ -114,11 +117,11 @@ public class DataflowPipelineLaunchDelegateTest {
         .setTransport(mock(HttpTransport.class))
         .setClientSecrets("clientId", "clientSecret").build();
     credential.setRefreshToken("fake-refresh-token");
-    when(loginService.getCredential("bogus@example.com")).thenReturn(credential);
+    when(apiFactory.getCredential()).thenReturn(Optional.of(credential));
 
     when(dependencyManager.getProjectMajorVersion(project)).thenReturn(MajorVersion.ONE);
     dataflowDelegate = new DataflowPipelineLaunchDelegate(javaDelegate,
-        pipelineOptionsHierarchyFactory, dependencyManager, workspaceRoot, loginService);
+        pipelineOptionsHierarchyFactory, dependencyManager, workspaceRoot);
 
     pipelineArguments.put("accountEmail", "");
     when(configurationWorkingCopy.getAttribute(
@@ -126,6 +129,11 @@ public class DataflowPipelineLaunchDelegateTest {
         .thenReturn(environmentMap);
   }
 
+  @After
+  public void tearDown() {
+    GoogleApiFactory.resetInstance();
+  }
+  
   @Test
   public void testGoogleApplicationCredentialsEnvironmentVariable() {
     assertEquals("GOOGLE_APPLICATION_CREDENTIALS",
@@ -186,13 +194,13 @@ public class DataflowPipelineLaunchDelegateTest {
   @Test
   public void testSetCredential_savedAccountNotLoggedIn() {
     pipelineArguments.put("accountEmail", "bogus@example.com");
-    when(loginService.getCredential("bogus@example.com")).thenReturn(null);  // not logged in
+    when(apiFactory.getCredential()).thenReturn(Optional.empty());  // not logged in
 
     try {
       dataflowDelegate.setCredential(configurationWorkingCopy, pipelineArguments);
       fail();
     } catch (CoreException ex) {
-      assertEquals("The Google account saved for this lanuch is not logged in.", ex.getMessage());
+      assertEquals("The Google account saved for this launch is not logged in.", ex.getMessage());
     }
   }
 

@@ -24,8 +24,8 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.AppYamlValidator;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexWarFacet;
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
@@ -49,7 +49,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class FlexDeployPreferencesPanelTest {
 
-  @Mock private IGoogleLoginService loginService;
   @Mock private ProjectRepository projectRepository;
   @Mock private Runnable layoutHandler;
 
@@ -61,6 +60,7 @@ public class FlexDeployPreferencesPanelTest {
 
   @Before
   public void setUp() {
+    TestAccountProvider.setAsDefaultProvider();
     project = projectCreator.getProject();
   }
 
@@ -114,7 +114,7 @@ public class FlexDeployPreferencesPanelTest {
 
   private FlexDeployPreferencesPanel createPanel(boolean requireValues) {
     return new FlexDeployPreferencesPanel(shellResource.getShell(),
-        project, loginService, layoutHandler, requireValues, projectRepository);
+        project, layoutHandler, requireValues, projectRepository);
   }
 
   private static IStatus getAppYamlPathValidationStatus(FlexDeployPreferencesPanel panel) {

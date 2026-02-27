@@ -18,8 +18,8 @@ package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import com.google.api.client.util.Preconditions;
 import com.google.cloud.tools.appengine.AppEngineDescriptor;
-import com.google.cloud.tools.appengine.api.AppEngineException;
-import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
+import com.google.cloud.tools.appengine.AppEngineException;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineConfigurationUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -48,7 +48,8 @@ public class ModuleUtils {
    */
   public static String getServiceId(IModule module) {
     IFile descriptorFile =
-        WebProjectUtil.findInWebInf(module.getProject(), new Path("appengine-web.xml"));
+        AppEngineConfigurationUtil.findConfigurationFile(
+            module.getProject(), new Path("appengine-web.xml"));
     if (descriptorFile != null) {
       try (InputStream contents = descriptorFile.getContents()) {
         AppEngineDescriptor descriptor = AppEngineDescriptor.parse(contents);

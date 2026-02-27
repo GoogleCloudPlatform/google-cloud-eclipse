@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.sdk.ui;
 
-import com.google.cloud.tools.appengine.cloudsdk.serialization.CloudSdkVersion;
+import com.google.cloud.tools.appengine.operations.cloudsdk.serialization.CloudSdkVersion;
 import org.junit.Assert;
 import org.junit.Test;
 

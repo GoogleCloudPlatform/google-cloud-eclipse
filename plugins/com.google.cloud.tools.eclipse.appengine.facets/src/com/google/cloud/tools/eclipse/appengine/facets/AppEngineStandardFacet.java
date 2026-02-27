@@ -32,14 +32,11 @@ import java.util.logging.Logger;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.ILock;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
-import org.eclipse.wst.common.componentcore.internal.builder.DependencyGraphImpl;
-import org.eclipse.wst.common.componentcore.internal.builder.IDependencyGraph;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IFacetedProjectBase;
 import org.eclipse.wst.common.project.facet.core.IFacetedProjectWorkingCopy;
@@ -51,7 +48,6 @@ import org.eclipse.wst.server.core.IRuntimeType;
 import org.eclipse.wst.server.core.IRuntimeWorkingCopy;
 import org.eclipse.wst.server.core.ServerCore;
 
-@SuppressWarnings("restriction") // For DependencyGraphImpl and IDependencyGraph
 public class AppEngineStandardFacet {
   private static final Logger logger = Logger.getLogger(AppEngineStandardFacet.class.getName());
 
@@ -60,6 +56,7 @@ public class AppEngineStandardFacet {
   public static final IProjectFacet FACET = ProjectFacetsManager.getProjectFacet(ID);
   // See AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8 too
   public static final IProjectFacetVersion JRE7 = FACET.getVersion("JRE7");
+  public static final IProjectFacetVersion JRE8 = FACET.getVersion("JRE8");
 
   static final String DEFAULT_RUNTIME_ID =
       "com.google.cloud.tools.eclipse.appengine.standard.runtime";
@@ -104,6 +101,28 @@ public class AppEngineStandardFacet {
   }
 
   /**
+   * Return true if the project uses an obsolete App Engine Standard facet. Returns false if there
+   * is no App Engine Standard facet or if the version is not marked as obsolete.
+   *
+   * @param facetedProject should not be null
+   * @return true if project uses an obsolete App Engine Standard facet and false otherwise
+   */
+  public static boolean usesObsoleteRuntime(IFacetedProject facetedProject) {
+    Preconditions.checkNotNull(facetedProject);
+    IProjectFacetVersion facetVersion = facetedProject.getProjectFacetVersion(FACET);
+    return facetVersion != null && usesObsoleteRuntime(facetVersion);
+  }
+
+  @VisibleForTesting
+  public static boolean usesObsoleteRuntime(IProjectFacetVersion facetVersion) {
+    Object obsoleteProperty = facetVersion.getProperty("appengine.runtime.obsolete");
+    if (obsoleteProperty instanceof String) {
+      return Boolean.parseBoolean((String) obsoleteProperty);
+    }
+    return Boolean.TRUE == obsoleteProperty;
+  }
+
+  /**
    * Return the App Engine standard facet for the given project, or {@code null} if none.
    */
   public static IProjectFacetVersion getProjectFacetVersion(IProject project) {
@@ -120,8 +139,8 @@ public class AppEngineStandardFacet {
 
   /**
    * Check that the given Servlet API version string (expected to be from the
-   * <tt>&lt;web-app version="xxx"&gt;</tt> attribute), is compatible with this project's App Engine
-   * settings.
+   * <code>&lt;web-app version="N.N"&gt;</code> attribute), is compatible with
+   * this project's App Engine settings.
    *
    * @return {@code true} if supported or {@code false} otherwise
    * @throws NullPointerException if the project does not have an App Engine Standard facet
@@ -198,8 +217,8 @@ public class AppEngineStandardFacet {
    * @param monitor the progress monitor
    * @throws CoreException if anything goes wrong during install
    */
-  public static void installAppEngineFacet(final IFacetedProject facetedProject,
-      final boolean installDependentFacets, final IProgressMonitor monitor) throws CoreException {
+  public static void installAppEngineFacet(IFacetedProject facetedProject,
+      boolean installDependentFacets, IProgressMonitor monitor) throws CoreException {
     ILock lock = acquireLock(facetedProject.getProject());
     try {
       SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
@@ -343,19 +362,7 @@ public class AppEngineStandardFacet {
       }
 
 
-      // Workaround deadlock bug described in Eclipse bug (https://bugs.eclipse.org/511793).
-      // There are graph update jobs triggered by the completion of the CreateProjectOperation
-      // above (from resource notifications) and from other resource changes from modifying the
-      // project facets. So we force the dependency graph to defer updates.
       try {
-        IDependencyGraph.INSTANCE.preUpdate();
-        try {
-          Job.getJobManager().join(DependencyGraphImpl.GRAPH_UPDATE_JOB_FAMILY,
-              progress.newChild(10));
-        } catch (OperationCanceledException | InterruptedException ex) {
-          logger.log(Level.WARNING, "Exception waiting for WTP Graph Update job", ex);
-        }
-
         org.eclipse.wst.server.core.IRuntime[] appEngineRuntimes = getAppEngineRuntimes();
         if (appEngineRuntimes.length > 0) {
           IRuntime appEngineFacetRuntime = null;
@@ -394,8 +401,6 @@ public class AppEngineStandardFacet {
         }
       } catch (CoreException ex) {
         logger.log(Level.SEVERE, "Exception occurred when installing App Engine Runtime", ex);
-      } finally {
-        IDependencyGraph.INSTANCE.postUpdate();
       }
     } finally {
       lock.release();

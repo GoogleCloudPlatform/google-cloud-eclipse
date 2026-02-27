@@ -21,8 +21,8 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineConfigurationUtil;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.util.Collections;
@@ -84,8 +84,9 @@ public class AppEngineWebBuilderTest {
         .getFacetedProject();
     assertProjectHasBuilder();
 
-    IFile appEngineWebDescriptor = WebProjectUtil.findInWebInf(testProject.getProject(),
-        new Path("appengine-web.xml"));
+    IFile appEngineWebDescriptor =
+        AppEngineConfigurationUtil.findConfigurationFile(
+            testProject.getProject(), new Path("appengine-web.xml"));
     assertTrue("should have appengine-web.xml",
         appEngineWebDescriptor != null && appEngineWebDescriptor.exists());
 
@@ -109,7 +110,8 @@ public class AppEngineWebBuilderTest {
     assertProjectHasBuilder();
 
     IFile appEngineWebDescriptor =
-        WebProjectUtil.findInWebInf(testProject.getProject(), new Path("appengine-web.xml"));
+        AppEngineConfigurationUtil.findConfigurationFile(
+            testProject.getProject(), new Path("appengine-web.xml"));
     assertTrue("should have appengine-web.xml",
         appEngineWebDescriptor != null && appEngineWebDescriptor.exists());
 
@@ -130,7 +132,8 @@ public class AppEngineWebBuilderTest {
     assertProjectHasBuilder();
 
     IFile appEngineWebDescriptor =
-        WebProjectUtil.findInWebInf(testProject.getProject(), new Path("appengine-web.xml"));
+        AppEngineConfigurationUtil.findConfigurationFile(
+            testProject.getProject(), new Path("appengine-web.xml"));
     assertTrue("should have appengine-web.xml",
         appEngineWebDescriptor != null && appEngineWebDescriptor.exists());
 

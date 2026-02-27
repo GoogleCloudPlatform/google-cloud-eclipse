@@ -22,8 +22,6 @@ import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexExistingArtifact
 import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexExistingDeployArtifactStagingDelegate;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesDialog;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
@@ -35,11 +33,9 @@ import org.eclipse.swt.widgets.Shell;
 public class FlexExistingArtifactDeployCommandHandler extends FlexDeployCommandHandler {
 
   @Override
-  protected DeployPreferencesDialog newDeployPreferencesDialog(Shell shell, IProject project,
-      IGoogleLoginService loginService, IGoogleApiFactory googleApiFactory) {
+  protected DeployPreferencesDialog newDeployPreferencesDialog(Shell shell, IProject project) {
     String title = Messages.getString("deploy.preferences.dialog.title.flexible");
-    return new FlexExistingArtifactDeployPreferencesDialog(shell, title, loginService,
-        googleApiFactory);
+    return new FlexExistingArtifactDeployPreferencesDialog(shell, title);
   }
 
   @Override

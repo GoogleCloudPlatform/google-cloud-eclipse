@@ -38,7 +38,6 @@ import org.eclipse.swt.widgets.Display;
  */
 public class GcpProjectQueryJob extends Job {
 
-  private final Credential credential;
   private final ProjectRepository projectRepository;
   private final ProjectSelector projectSelector;
   private final DataBindingContext dataBindingContext;
@@ -52,11 +51,10 @@ public class GcpProjectQueryJob extends Job {
    *     which determines if the job should update {@link ProjectSelector} or die silently. This
    *     predicate is executed in the UI context
    */
-  GcpProjectQueryJob(Credential credential, ProjectRepository projectRepository,
+  GcpProjectQueryJob(ProjectRepository projectRepository,
       ProjectSelector projectSelector, DataBindingContext dataBindingContext,
       Predicate<Job> isLatestQueryJob) {
     super("Google Cloud Platform Projects Query Job");
-    this.credential = Preconditions.checkNotNull(credential);
     this.projectRepository = Preconditions.checkNotNull(projectRepository);
     this.projectSelector = Preconditions.checkNotNull(projectSelector);
     this.dataBindingContext = Preconditions.checkNotNull(dataBindingContext);
@@ -68,7 +66,7 @@ public class GcpProjectQueryJob extends Job {
   protected IStatus run(IProgressMonitor monitor) {
     try {
       final Job thisJob = this;
-      final List<GcpProject> projects = projectRepository.getProjects(credential);
+      final List<GcpProject> projects = projectRepository.getProjects();
 
       // The selector may have been disposed (i.e., dialog closed); check it in the UI thread.
       display.syncExec(() -> {

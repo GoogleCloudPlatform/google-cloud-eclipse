@@ -30,9 +30,8 @@ import com.google.cloud.tools.eclipse.dataflow.ui.page.MessageTarget;
 import com.google.cloud.tools.eclipse.dataflow.ui.util.ButtonFactory;
 import com.google.cloud.tools.eclipse.dataflow.ui.util.SelectFirstMatchingPrefixListener;
 import com.google.cloud.tools.eclipse.googleapis.GcpProjectServicesJob;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApi;
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.projectselector.MiniSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
@@ -74,13 +73,29 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.PlatformUI;
 
 /**
  * Collects default run options for Dataflow Pipelines and provides means to create and modify them.
  * Assumed to be executed solely within the SWT UI thread.
  */
 public class RunOptionsDefaultsComponent {
+  
+  public enum ValidationStatus {
+    TARGET_DISPOSED,
+    NULL_CREDENTIAL, NULL_PROJECT, 
+    PROJECT_SERVICE_CHECK_IN_PROGRESS, 
+    PROJECT_SERVICE_CHECK_ERROR, 
+    PROJECT_NOT_ENABLED_FOR_DATAFLOW, 
+    STAGING_LOCATION_CHECK_ERROR, 
+    STAGING_LOCATION_CHECK_IN_PROGRESS, 
+    EMPTY_BUCKET_NAME, 
+    BUCKET_ACCESSIBLE, 
+    STAGING_LOCATION_FETCH_ERROR, 
+    STAGING_LOCATION_FETCH_IN_PROGRESS, 
+    INVALID_BUCKET_NAME, 
+    BUCKET_CAN_BE_CREATED,
+  }
+  
   private static final int PROJECT_INPUT_SPENT_COLUMNS = 1;
   private static final int STAGING_LOCATION_SPENT_COLUMNS = 2;
   private static final int ACCOUNT_SPENT_COLUMNS = 1;
@@ -91,7 +106,6 @@ public class RunOptionsDefaultsComponent {
 
   private static final BucketNameValidator bucketNameValidator = new BucketNameValidator();
 
-  private final IGoogleApiFactory apiFactory;
   private final WizardPage page;
   private final DisplayExecutor displayExecutor;
   private final MessageTarget messageTarget;
@@ -123,6 +137,7 @@ public class RunOptionsDefaultsComponent {
    * {@link #isEnabled}.
    */
   private boolean canEnableChildren = true;
+  private boolean accountRequired;
 
   public RunOptionsDefaultsComponent(Composite target, int columns, MessageTarget messageTarget,
       DataflowPreferences preferences) {
@@ -131,31 +146,21 @@ public class RunOptionsDefaultsComponent {
 
   public RunOptionsDefaultsComponent(Composite target, int columns, MessageTarget messageTarget,
       DataflowPreferences preferences, WizardPage page, boolean allowIncomplete) {
-    this(target, columns, messageTarget, preferences, page, allowIncomplete,
-        PlatformUI.getWorkbench().getService(IGoogleLoginService.class),
-        PlatformUI.getWorkbench().getService(IGoogleApiFactory.class));
-  }
-
-  @VisibleForTesting
-  RunOptionsDefaultsComponent(Composite target, int columns, MessageTarget messageTarget,
-      DataflowPreferences preferences, WizardPage page, boolean allowIncomplete,
-      IGoogleLoginService loginService, IGoogleApiFactory apiFactory) {
     Preconditions.checkArgument(columns >= 3,
         "DefaultRunOptions must be in a Grid with at least 3 columns"); //$NON-NLS-1$
     this.target = target;
     this.page = page;
     this.messageTarget = messageTarget;
     displayExecutor = DisplayExecutor.create(target.getDisplay());
-    this.apiFactory = apiFactory;
     this.allowIncomplete = allowIncomplete;
 
     Label accountLabel = new Label(target, SWT.NULL);
     accountLabel.setText(Messages.getString("account")); //$NON-NLS-1$
-    accountSelector = new AccountSelector(target, loginService);
+    accountSelector = new AccountSelector(target);
 
     Label projectInputLabel = new Label(target, SWT.NULL);
     projectInputLabel.setText(Messages.getString("cloud.platform.project.id")); //$NON-NLS-1$
-    projectInput = new MiniSelector(target, apiFactory);
+    projectInput = new MiniSelector(target);
 
     Label comboLabel = new Label(target, SWT.NULL);
     stagingLocationInput = new Combo(target, SWT.DROP_DOWN);
@@ -169,10 +174,9 @@ public class RunOptionsDefaultsComponent {
     stagingLocationResults.setImage(errorImage);
     stagingLocationResults.hide();
 
-    accountSelector.selectAccount(preferences.getDefaultAccountEmail());
+    //accountSelector.selectAccount(preferences.getDefaultAccountEmail());
 
     // Initialize the Default Project, which is used to populate the Staging Location field
-    projectInput.setCredential(accountSelector.getSelectedCredential());
     String projectId = preferences.getDefaultProject();
     projectInput.setProject(projectId);
 
@@ -223,7 +227,7 @@ public class RunOptionsDefaultsComponent {
       // Don't use "removeAll()", as it will clear the text field too.
       stagingLocationInput.remove(0, stagingLocationInput.getItemCount() - 1);
       completionListener.setContents(ImmutableSortedSet.<String>of());
-      projectInput.setCredential(accountSelector.getSelectedCredential());
+      projectInput.updateProjectsList();
       updateStagingLocations(0); // no delay
       validate();
     });
@@ -266,12 +270,12 @@ public class RunOptionsDefaultsComponent {
       button.setLayoutData(gridData);
     }
   }
-
-  public void validate() {
+  
+  public ValidationStatus validate() {
     Preconditions.checkState(Display.getCurrent() != null, "Must be called on SWT UI thread");
     // may be from deferred event
     if (target.isDisposed()) {
-      return;
+      return ValidationStatus.TARGET_DISPOSED;
     }
 
     // we set pageComplete to the value of `allowIncomplete` if the fields are valid
@@ -288,7 +292,7 @@ public class RunOptionsDefaultsComponent {
       stagingLocationInput.setEnabled(false);
       createButton.setEnabled(false);
       setPageComplete(quickChecksOk && allowIncomplete);
-      return;
+      return ValidationStatus.NULL_CREDENTIAL;
     }
 
     projectInput.setEnabled(canEnableChildren);
@@ -296,14 +300,14 @@ public class RunOptionsDefaultsComponent {
       stagingLocationInput.setEnabled(false);
       createButton.setEnabled(false);
       setPageComplete(quickChecksOk && allowIncomplete);
-      return;
+      return ValidationStatus.NULL_PROJECT;
     }
 
     if (checkProjectConfigurationJob != null && checkProjectConfigurationJob.isCurrent()) {
       Optional<Object> result = checkProjectConfigurationJob.getComputation();
       if (!result.isPresent()) {
         messageTarget.setInfo("Verifying that project is enabled for dataflow...");
-        return;
+        return ValidationStatus.PROJECT_SERVICE_CHECK_IN_PROGRESS;
       } else if (result.get() instanceof Exception) {
         DataflowUiPlugin.logError((Exception) result.get(),
             "Error checking project config for " + checkProjectConfigurationJob.getProjectId());
@@ -313,12 +317,12 @@ public class RunOptionsDefaultsComponent {
         } else {
           messageTarget.setError("Could not check project: " + result.get());
         }
-        return;
+        return ValidationStatus.PROJECT_SERVICE_CHECK_ERROR;
       } else {
         Verify.verify(result.get() instanceof Collection);
         if (!((Collection<?>) result.get()).contains(GoogleApi.DATAFLOW_API.getServiceId())) {
           messageTarget.setError("Project is not enabled for Cloud Dataflow");
-          return;
+          return ValidationStatus.PROJECT_NOT_ENABLED_FOR_DATAFLOW;
         }
       }
     }
@@ -334,11 +338,11 @@ public class RunOptionsDefaultsComponent {
           DataflowUiPlugin.logError(error.get(), "Exception while retrieving staging locations"); //$NON-NLS-1$
           messageTarget.setError(Messages.getString("could.not.retrieve.buckets.for.project", //$NON-NLS-1$
               projectInput.getProject().getName()));
-          return;
+          return ValidationStatus.STAGING_LOCATION_FETCH_ERROR;
         }
       } else {
         // check is still in progress or a new job is pending
-        return;
+        return ValidationStatus.STAGING_LOCATION_FETCH_IN_PROGRESS;
       }
     }
 
@@ -348,14 +352,14 @@ public class RunOptionsDefaultsComponent {
       // interesting messaging.
       createButton.setEnabled(false);
       setPageComplete(quickChecksOk && allowIncomplete);
-      return;
+      return ValidationStatus.EMPTY_BUCKET_NAME;
     }
 
     IStatus status = bucketNameValidator.validate(bucketNamePart);
     if (!status.isOK()) {
       messageTarget.setError(status.getMessage());
       createButton.setEnabled(false);
-      return;
+      return ValidationStatus.INVALID_BUCKET_NAME;
     }
 
     Optional<Object> verificationResult =
@@ -365,12 +369,12 @@ public class RunOptionsDefaultsComponent {
     if (!verificationResult.isPresent()) {
       messageTarget.setInfo("Verifying staging location...");
       createButton.setEnabled(false);
-      return;
+      return ValidationStatus.STAGING_LOCATION_CHECK_IN_PROGRESS;
     } else if (verificationResult.get() instanceof Exception) {
       Exception error = (Exception) verificationResult.get();
       DataflowUiPlugin.logWarning("Unable to verify staging location", error);
       messageTarget.setError(Messages.getString("unable.verify.staging.location", bucketNamePart)); //$NON-NLS-1$
-      return;
+      return ValidationStatus.STAGING_LOCATION_CHECK_ERROR;
     } else {
       Verify.verify(verificationResult.get() instanceof VerifyStagingLocationResult);
       VerifyStagingLocationResult result = (VerifyStagingLocationResult) verificationResult.get();
@@ -378,10 +382,12 @@ public class RunOptionsDefaultsComponent {
         messageTarget.setInfo(Messages.getString("verified.bucket.is.accessible", bucketNamePart)); //$NON-NLS-1$
         createButton.setEnabled(false);
         setPageComplete(quickChecksOk);
+        return ValidationStatus.BUCKET_ACCESSIBLE;
       } else {
         // user must create this bucket; feels odd that this is flagged as an error
         messageTarget.setError(Messages.getString("could.not.fetch.bucket", bucketNamePart)); //$NON-NLS-1$
         createButton.setEnabled(canEnableChildren);
+        return ValidationStatus.BUCKET_CAN_BE_CREATED;
       }
     }
   }
@@ -392,7 +398,12 @@ public class RunOptionsDefaultsComponent {
    * tightly coupled regarding enablement of the input widgets and should always be validated
    * to make their interconnected enablement correct.)
    */
-  private boolean doIsolatedQuickChecks() {
+  @VisibleForTesting
+  boolean doIsolatedQuickChecks() {
+    if (accountRequired && Strings.isNullOrEmpty(getAccountEmail())) {
+      messageTarget.setError("No Google account selected for this launch.");
+      return false;
+    }
     String key = serviceAccountKey.getText();
     if (!Strings.isNullOrEmpty(key)) {
       Path path = Paths.get(key);
@@ -411,8 +422,7 @@ public class RunOptionsDefaultsComponent {
   }
 
   protected void checkProjectConfiguration() {
-    Credential selectedCredential = accountSelector.getSelectedCredential();
-    if (selectedCredential == null) {
+    if (!GoogleApiFactory.INSTANCE.getCredential().isPresent()) {
       return;
     }
     GcpProject project = projectInput.getProject();
@@ -428,15 +438,14 @@ public class RunOptionsDefaultsComponent {
     }
 
     checkProjectConfigurationJob =
-        new GcpProjectServicesJob(apiFactory, selectedCredential, project.getId());
+        new GcpProjectServicesJob(project.getId());
     checkProjectConfigurationJob.getFuture().addListener(this::validate, displayExecutor);
     checkProjectConfigurationJob.schedule();
   }
 
   private GcsDataflowProjectClient getGcsClient() {
     Preconditions.checkNotNull(accountSelector.getSelectedCredential());
-    Credential credential = accountSelector.getSelectedCredential();
-    return GcsDataflowProjectClient.create(apiFactory, credential);
+    return GcsDataflowProjectClient.create();
   }
 
   public Control getControl() {
@@ -448,10 +457,6 @@ public class RunOptionsDefaultsComponent {
    */
   public String getAccountEmail() {
     return accountSelector.getSelectedEmail();
-  }
-
-  public void selectAccount(String accountEmail) {
-    accountSelector.selectAccount(accountEmail);
   }
 
   /**
@@ -528,6 +533,11 @@ public class RunOptionsDefaultsComponent {
     if (enabled) {
       validate();  // Some widgets may need to be disabled depending on their values.
     }
+  }
+  
+  @VisibleForTesting
+  boolean canEnableChildren() {
+    return canEnableChildren;
   }
 
   /**
@@ -669,5 +679,10 @@ public class RunOptionsDefaultsComponent {
       checkProjectConfigurationJob.join();
     }
     projectInput.join();
+  }
+
+  public void setAccountRequired(boolean required) {
+    accountRequired = required;
+    validate();
   }
 }

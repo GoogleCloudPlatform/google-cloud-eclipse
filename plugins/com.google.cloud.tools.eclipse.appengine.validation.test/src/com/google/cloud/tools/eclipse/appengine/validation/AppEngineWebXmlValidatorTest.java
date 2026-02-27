@@ -18,31 +18,108 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
+import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 public class AppEngineWebXmlValidatorTest {
   
-  @Test
-  public void testCheckForElements() throws ParserConfigurationException {
+  private Document document;
+  private final AppEngineWebXmlValidator validator = new AppEngineWebXmlValidator();
+  
+  // TODO we need to move these into a standard location
+  private static final String RUNTIME_MARKER_ID =
+      "com.google.cloud.tools.eclipse.appengine.validation.runtimeMarker";
+
+  @Before
+  public void setUp() throws ParserConfigurationException {
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
     DocumentBuilder documentBuilder  = builderFactory.newDocumentBuilder();
-    Document document = documentBuilder.newDocument();
     
-    Element element =
+    document = documentBuilder.newDocument();
+  }
+  
+  @Test
+  public void testCheckForApplication() {
+    Element root =
+        document.createElementNS("http://appengine.google.com/ns/1.0", "appengine-web-app");
+    document.appendChild(root);
+ 
+    Element application =
         document.createElementNS("http://appengine.google.com/ns/1.0", "application");
-    element.setUserData("location", new DocumentLocation(3, 15), null);
+    application.setUserData("location", new DocumentLocation(0, 25), null);
+    root.appendChild(application);
+    Element runtime =
+        document.createElementNS("http://appengine.google.com/ns/1.0", "runtime");
+    root.appendChild(runtime);
+    
+    List<ElementProblem> problems = validator.checkForProblems(null, document);
+    assertEquals(1, problems.size());
+    String markerId = "com.google.cloud.tools.eclipse.appengine.validation.applicationMarker";
+    ElementProblem problem = problems.get(0);
+    assertEquals(markerId, problem.getMarkerId());
+    
+    assertEquals(0, problem.getStart().getLineNumber());
+    assertEquals(12, problem.getStart().getColumnNumber());
+    assertEquals(27, problem.getLength());    
+  }
+
+  @Test
+  public void testCheckForNoRuntime() {
+    Element element =
+        document.createElementNS("http://appengine.google.com/ns/1.0", "appengine-web-app");
     document.appendChild(element);
     
-    AppEngineWebXmlValidator validator = new AppEngineWebXmlValidator();
-    ArrayList<BannedElement> blacklist = validator.checkForElements(null, document);
-    assertEquals(1, blacklist.size());
-    String markerId = "com.google.cloud.tools.eclipse.appengine.validation.applicationMarker";
-    assertEquals(markerId, blacklist.get(0).getMarkerId());
+    DocumentLocation location = new DocumentLocation(2, 1);
+    document.getDocumentElement().setUserData("location", location, null);
+    
+    List<ElementProblem> problems = validator.checkForProblems(null , document);
+    assertEquals(1, problems.size());
+    ElementProblem problem = problems.get(0);
+    assertEquals(RUNTIME_MARKER_ID, problem.getMarkerId());
+    
+    assertEquals(2, problem.getStart().getLineNumber());
+    assertEquals(0, problem.getStart().getColumnNumber());
+    assertEquals(19, problem.getLength());
+  }  
+  
+  @Test
+  public void testCheckForJava7() {
+    Element runtime =
+        document.createElementNS("http://appengine.google.com/ns/1.0", "runtime");
+    runtime.setUserData("location", new DocumentLocation(0, 25), null);
+    document.appendChild(runtime);
+    Node java7 = document.createTextNode("java7");
+    runtime.appendChild(java7);
+    
+    List<ElementProblem> problems = validator.checkForProblems(null, document);
+    assertEquals(1, problems.size());
+    ElementProblem problem = problems.get(0);
+    assertEquals(RUNTIME_MARKER_ID, problem.getMarkerId());
+    
+    assertEquals(0, problem.getStart().getLineNumber());
+    assertEquals(16, problem.getStart().getColumnNumber());
+    assertEquals(24, problem.getLength());    
+  }  
+
+  @Test
+  public void testCheckForJava6() {
+    Element element =
+        document.createElementNS("http://appengine.google.com/ns/1.0", "runtime");
+    element.setUserData("location", new DocumentLocation(3, 15), null);
+    document.appendChild(element);
+    Node java6 = document.createTextNode("java"); // sic; java, not java6
+    element.appendChild(java6);
+    
+    List<ElementProblem> problems = validator.checkForProblems(null, document);
+    assertEquals(1, problems.size());
+    assertEquals(RUNTIME_MARKER_ID, problems.get(0).getMarkerId());
   }
+  
 }

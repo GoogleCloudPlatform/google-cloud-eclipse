@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
-import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineConfigurationUtil;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -61,8 +61,10 @@ public class DatastoreIndexUpdateData {
       return null;
     }
     // datastore-indexes-auto.xml may be generated even if datastore-indexes.xml does not exist
-    IFile datastoreIndexesXml = WebProjectUtil.findInWebInf(defaultService.getProject(),
-        new org.eclipse.core.runtime.Path("datastore-indexes.xml"));
+    IFile datastoreIndexesXml =
+        AppEngineConfigurationUtil.findConfigurationFile(
+            defaultService.getProject(),
+            new org.eclipse.core.runtime.Path("datastore-indexes.xml"));
 
     if (datastoreIndexesXml != null && datastoreIndexesXml.exists()) {
       long sourceTimestamp = datastoreIndexesXml.getLocalTimeStamp();

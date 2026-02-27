@@ -136,29 +136,6 @@ public class ProjectContextMenuTest extends BaseProjectTest {
   }
 
   @Test
-  public void testMavenAppEngineStandardJava7() {
-    project =
-        SwtBotAppEngineActions.createMavenWebAppProject(
-            bot,
-            "projectContextMenuJava7",
-            tempFolder.getRoot().getPath(),
-            "com.example.maven7",
-            AppEngineRuntime.STANDARD_JAVA_7,
-            "com.google.cloud.tools.eclipse.tests",
-            "projectContextMenuJava7");
-    SWTBotTreeItem selected = SwtBotProjectActions.selectProject(bot, project.getName());
-    assertThat(selected.contextMenu("Debug As"), MenuMatcher.hasMenuItem(endsWith("App Engine")));
-    assertThat(selected.contextMenu("Run As"), MenuMatcher.hasMenuItem(endsWith("App Engine")));
-    assertThat(selected.contextMenu(), MenuMatcher.hasMenuItem("Deploy to App Engine Standard..."));
-    assertThat(
-        selected.contextMenu("Configure"),
-        not(MenuMatcher.hasMenuItem("Convert to App Engine Standard Project")));
-    assertThat(
-        selected.contextMenu("Configure"),
-        not(MenuMatcher.hasMenuItem("Reconfigure for App Engine Java 8 runtime")));
-  }
-
-  @Test
   public void testMavenAppEngineStandardJava8() {
     project =
         SwtBotAppEngineActions.createMavenWebAppProject(

@@ -232,7 +232,7 @@ public class LocalAppEngineServerDelegateTest {
     Assert.assertEquals("localhost", delegate.getServer().getHost());
     LocalAppEngineServerBehaviour behaviour = (LocalAppEngineServerBehaviour) delegate.getServer()
         .loadAdapter(LocalAppEngineServerBehaviour.class, null);
-    behaviour.adminPort = 9999;
+    behaviour.serverPort = 9999;
     URL url = delegate.getModuleRootURL(null);
     assertNotNull(url);
     assertEquals("http://localhost:9999", url.toString());

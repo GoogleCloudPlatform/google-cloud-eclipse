@@ -37,6 +37,7 @@ public class AboutIniTest {
     assertTrue(new File("../com.google.cloud.tools.eclipse.ui/icons/about/gcp.png").exists());
   }
 
+  @Test
   public void testAboutText() {
     assertNotNull(aboutIni.get("aboutText"));
     assertEquals("%blurb", aboutIni.get("aboutText"));
@@ -46,10 +47,10 @@ public class AboutIniTest {
         "Google Cloud Tools for Eclipse\n"
             + "Version: {featureVersion}\n"
             + "\n"
-            + "Copyright 2016-2018 Google LLC\n"
+            + "Copyright 2016-2020 Google LLC\n"
             + "\n"
-            + "Cloud Tools for Eclipse is a Google-sponsored plugin that adds \n"
-            + "support for App Engine, Cloud Dataflow, and other parts of \n"
+            + "Cloud Tools for Eclipse is a Google-sponsored plugin that adds "
+            + "support for App Engine, Cloud Dataflow, and other parts of "
             + "the Google Cloud Platform to the Eclipse IDE.\n"
             + "Visit: https://cloud.google.com/eclipse",
         aboutProperties.get("blurb"));

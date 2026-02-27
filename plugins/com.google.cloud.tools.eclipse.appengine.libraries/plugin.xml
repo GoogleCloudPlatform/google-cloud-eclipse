@@ -18,7 +18,7 @@
         <mavenCoordinates
               artifactId="appengine-api-1.0-sdk"
               groupId="com.google.appengine" 
-              version="1.9.64" />
+              version="1.9.77" />
         <exclusionFilter pattern="com/google/appengine/repackaged/**" />
         <exclusionFilter pattern="com/google/appengine/labs/repackaged/**" />
         <inclusionFilter pattern="com/google/apphosting/api/**" />
@@ -38,7 +38,7 @@
         <mavenCoordinates
               artifactId="endpoints-framework"
               groupId="com.google.endpoints" 
-              version="2.0.14"/>
+              version="2.2.1"/>
         <exclusionFilter pattern="com/google/appengine/repackaged/**" />
       </libraryFile>
     </library>
@@ -48,34 +48,34 @@
           group="appengine"
           name="Objectify"
           tooltip="%objectify.tooltip"
+          javaVersion="1.8"
           dependencies="include"
           siteUri="https://github.com/objectify/objectify/wiki" >
-      <libraryDependency id="appengine-api" />
       <libraryFile
-          pinned="true"
           export="true"
-          javadocUri="https://www.javadoc.io/doc/com.googlecode.objectify/objectify/5.1.22">
+          javadocUri="https://www.javadoc.io/doc/com.googlecode.objectify/objectify/6.0.5">
         <mavenCoordinates
               artifactId="objectify"
               groupId="com.googlecode.objectify"
-              version="5.1.22" />
+              version="6.0.5" />
       </libraryFile>
     </library>
     
     <library
           id="objectify6"
-          group="flexible"
+          group="non-appengine-standard"
           name="Objectify"
           tooltip="%objectify.tooltip"
+          javaVersion="1.8"
           dependencies="include"
           siteUri="https://github.com/objectify/objectify/wiki" >
       <libraryFile
           export="true"
-          javadocUri="https://www.javadoc.io/doc/com.googlecode.objectify/objectify/6.0">
+          javadocUri="https://www.javadoc.io/doc/com.googlecode.objectify/objectify/6.0.5">
         <mavenCoordinates
               artifactId="objectify"
               groupId="com.googlecode.objectify"
-              version="6.0" />
+              version="6.0.5" />
       </libraryFile>
     </library>
 

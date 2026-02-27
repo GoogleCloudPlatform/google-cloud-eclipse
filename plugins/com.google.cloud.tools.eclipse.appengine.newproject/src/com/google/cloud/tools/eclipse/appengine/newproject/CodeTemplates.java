@@ -22,7 +22,6 @@ import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
 import com.google.cloud.tools.eclipse.util.Templates;
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import java.util.Collections;
 import java.util.HashMap;
@@ -113,7 +112,7 @@ public class CodeTemplates {
     Map<String, String> properties = new HashMap<>();
     properties.put("package", Strings.nullToEmpty(packageName)); //$NON-NLS-1$
 
-    boolean servlet25 = isStandardProject && isStandardJava7RuntimeSelected(config);
+    boolean servlet25 = isServlet25Selected(config);
     if (servlet25) {
       properties.put("servletVersion", "2.5"); //$NON-NLS-1$ //$NON-NLS-2$
     } else {
@@ -131,9 +130,15 @@ public class CodeTemplates {
         Templates.MOCK_HTTPSERVLETRESPONSE_TEMPLATE,
         testPackageFolder, properties, subMonitor.split(5));
 
-    if (isObjectifySelected(config) && !servlet25) {
+    if (!servlet25 && isObjectifySelected(config)) {
       createChildFile("ObjectifyWebFilter.java", //$NON-NLS-1$
           Templates.OBJECTIFY_WEB_FILTER_TEMPLATE,
+          mainPackageFolder, properties, subMonitor.split(5));
+    }
+    
+    if (isObjectifySelected(config)) {
+      createChildFile("ObjectifyWebListener.java", //$NON-NLS-1$
+          Templates.OBJECTIFY_WEB_LISTENER_TEMPLATE,
           mainPackageFolder, properties, subMonitor.split(5));
     }
 
@@ -144,16 +149,19 @@ public class CodeTemplates {
       AppEngineProjectConfig config, boolean isStandardProject, IProgressMonitor monitor)
       throws CoreException {
     Map<String, String> properties = new HashMap<>();
-    String service = config.getServiceName();
-    if (!Strings.isNullOrEmpty(service)) {
-      properties.put("service", service);  //$NON-NLS-1$
-    }
-    String runtime = config.getRuntimeId();
-    if (!Strings.isNullOrEmpty(runtime)) {
-      properties.put("runtime", runtime); //$NON-NLS-1$
-    }
 
     if (isStandardProject) {
+      String service = config.getServiceName();
+      if (!Strings.isNullOrEmpty(service)) {
+        properties.put("service", service);  //$NON-NLS-1$
+      }
+      AppEngineRuntime runtime = config.getRuntime();
+      if (runtime == null) {
+        properties.put("runtime", "java8"); //$NON-NLS-1$ //$NON-NLS-2$
+      } else {
+        properties.put("runtime", runtime.getRuntimeId()); //$NON-NLS-1$
+      }
+
       IFolder webInf = project.getFolder("src/main/webapp/WEB-INF"); //$NON-NLS-1$
       createChildFile("appengine-web.xml", //$NON-NLS-1$
           Templates.APPENGINE_WEB_XML_TEMPLATE,
@@ -177,11 +185,11 @@ public class CodeTemplates {
         : config.getPackageName() + "."; //$NON-NLS-1$
     properties.put("package", packageValue); //$NON-NLS-1$
 
-    if (isObjectifySelected(config)) {
-      properties.put("objectifyAdded", "true"); //$NON-NLS-1$ //$NON-NLS-2$
-    }
+    if (isServlet25Selected(config)) {
+      if (isObjectifySelected(config)) {
+        properties.put("objectifyAdded", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+      }
 
-    if (isStandardProject && isStandardJava7RuntimeSelected(config)) {
       properties.put("servletVersion", "2.5"); //$NON-NLS-1$ //$NON-NLS-2$
       properties.put("namespace", "http://java.sun.com/xml/ns/javaee"); //$NON-NLS-1$ //$NON-NLS-2$
       properties.put("schemaUrl", "http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -197,8 +205,8 @@ public class CodeTemplates {
   }
 
   @VisibleForTesting
-  static boolean isStandardJava7RuntimeSelected(AppEngineProjectConfig config) {
-    return Objects.equal(AppEngineRuntime.STANDARD_JAVA_7.getId(), config.getRuntimeId());
+  static boolean isServlet25Selected(AppEngineProjectConfig config) {
+    return config.getRuntime() == AppEngineRuntime.STANDARD_JAVA_8_SERVLET_25;
   }
 
   @VisibleForTesting
@@ -206,7 +214,7 @@ public class CodeTemplates {
     Predicate<Library> isObjectify = library ->
         ("objectify".equals(library.getId()) //$NON-NLS-1$
             || "objectify6".equals(library.getId())); //$NON-NLS-1$
-    List<Library> selectedLibraries = config.getAppEngineLibraries();
+    List<Library> selectedLibraries = config.getLibraries();
     return selectedLibraries.stream().anyMatch(isObjectify);
   }
 
@@ -230,36 +238,25 @@ public class CodeTemplates {
     
     String bomVersion = getCurrentVersion(
         "com.google.cloud", //$NON-NLS-1$
-        "google-cloud", //$NON-NLS-1$
-        "0.47.0-alpha"); //$NON-NLS-1$
+        "libraries-bom", //$NON-NLS-1$
+        "3.1.0"); //$NON-NLS-1$
     properties.put("googleCloudJavaBomVersion", bomVersion); //$NON-NLS-1$
     
     String mavenPluginVersion = getCurrentVersion(
         "com.google.cloud.tools", //$NON-NLS-1$
         "appengine-maven-plugin", //$NON-NLS-1$
-        "1.3.2"); //$NON-NLS-1$
+        "2.2.0"); //$NON-NLS-1$
     properties.put("mavenPluginVersion", mavenPluginVersion); //$NON-NLS-1$
 
-    String sdkVersion = getCurrentVersion(
-        "com.google.appengine", //$NON-NLS-1$
-        "appengine-api-1.0-sdk", //$NON-NLS-1$
-        "1.9.64"); //$NON-NLS-1$
-    properties.put("appEngineApiSdkVersion", sdkVersion); //$NON-NLS-1$
-    
-    if (isStandardProject) {
-      if (isStandardJava7RuntimeSelected(config)) {
-        properties.put("servletVersion", "2.5"); //$NON-NLS-1$ //$NON-NLS-2$
-        properties.put("compilerVersion", "1.7"); //$NON-NLS-1$ //$NON-NLS-2$
-      } else {
-        properties.put("servletVersion", "3.1"); //$NON-NLS-1$ //$NON-NLS-2$
-        properties.put("compilerVersion", "1.8"); //$NON-NLS-1$ //$NON-NLS-2$
-      }
-      createChildFile("pom.xml", Templates.POM_XML_STANDARD_TEMPLATE, //$NON-NLS-1$
-          project, properties, monitor);
+    if (isServlet25Selected(config)) {
+      properties.put("servletVersion", "2.5"); //$NON-NLS-1$ //$NON-NLS-2$
     } else {
-      createChildFile("pom.xml", Templates.POM_XML_FLEX_TEMPLATE, //$NON-NLS-1$
-          project, properties, monitor);
+      properties.put("servletVersion", "3.1"); //$NON-NLS-1$ //$NON-NLS-2$
     }
+    properties.put("compilerVersion", "1.8"); //$NON-NLS-1$ //$NON-NLS-2$
+
+    createChildFile(
+        "pom.xml", Templates.POM_XML_TEMPLATE, project, properties, monitor);  //$NON-NLS-1$
   }
 
   private static String getCurrentVersion(String group, String artifact, String defaultVersion) {

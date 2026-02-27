@@ -36,15 +36,14 @@ public interface ILibraryRepositoryService {
   /**
    * Resolves a source artifact for the binary artifact described by a {@link LibraryFile}.
    * <p>
-   * If <code>libraryFile.getSourceUri()</code> is not null, the source will be downloaded from that
-   * URI, otherwise resolving a suitable source artifact is up to the implementation (e.g. using
+   * If <code>libraryFile.getSourceUri()</code> is not null, the source is downloaded from that
+   * URI. Otherwise resolving a suitable source artifact is up to the implementation (e.g. using
    * Maven/M2E).
    *
    * @param libraryFile the artifact whose source artifact needs to be resolved
    * @param versionHint the actual version to be resolved in case <code>libraryFile</code>'s version
    *     is set to latest
-   * @return a path of the resolved source artifact; may return {@code null} if resolution fails
+   * @return a path of the resolved source artifact. Returns {@code null} if resolution fails.
    */
-  IPath resolveSourceArtifact(LibraryFile libraryFile, String versionHint, IProgressMonitor monitor)
-      throws CoreException;
+  IPath resolveSourceArtifact(LibraryFile libraryFile, String versionHint, IProgressMonitor monitor);
 }

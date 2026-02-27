@@ -36,17 +36,19 @@ import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.validation.ValidationFramework;
 import org.eclipse.wst.validation.Validator;
+import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 import org.junit.Rule;
 import org.junit.Test;
 
 public class XmlValidatorTest {
 
-  private static final String XML_NO_BANNED_ELEMENTS = "<test></test>";
+  private static final String XML_NO_PROBLEM_ELEMENTS = "<test></test>";
   private static final String XML =
-      "<application xmlns='http://appengine.google.com/ns/1.0'></application>";
+      "<application xmlns='http://appengine.google.com/ns/1.0'>"
+      + "<runtime>java8</runtime></application>";
   private static final String BAD_XML = "<";
   private static final String APPLICATION_MARKER =
-      "com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker";
+      "com.google.cloud.tools.eclipse.appengine.validation.appEngineProblemMarker";
 
   @Rule public TestProjectCreator appEngineStandardProjectCreator =
       new TestProjectCreator().withFacets(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25,
@@ -88,7 +90,7 @@ public class XmlValidatorTest {
     XmlValidator validator = new XmlValidator();
     validator.setHelper(new AppEngineWebXmlValidator());
 
-    // This method should not apply any markers for malformed XML
+    // This method should not apply any markers for invalid XML
     IFile file = createBogusProjectFile();
     byte[] badXml = BAD_XML.getBytes(StandardCharsets.UTF_8);
     validator.validate(file, badXml);
@@ -115,12 +117,12 @@ public class XmlValidatorTest {
   }
 
   @Test
-  public void testValidate_noBannedElements() throws IOException, CoreException {
+  public void testValidate_noProblemElements() throws IOException, CoreException {
     XmlValidator validator = new XmlValidator();
     validator.setHelper(new AppEngineWebXmlValidator());
 
     IFile file = createBogusProjectFile();
-    byte[] bytes = XML_NO_BANNED_ELEMENTS.getBytes(StandardCharsets.UTF_8);
+    byte[] bytes = XML_NO_PROBLEM_ELEMENTS.getBytes(StandardCharsets.UTF_8);
     validator.validate(file, bytes);
 
     IMarker[] markers = file.findMarkers(APPLICATION_MARKER, true, IResource.DEPTH_ZERO);
@@ -128,7 +130,7 @@ public class XmlValidatorTest {
   }
 
   @Test
-  public void testValidate_withBannedElements() throws IOException, CoreException {
+  public void testValidate_withProblemElements() throws IOException, CoreException {
     XmlValidator validator = new XmlValidator();
     validator.setHelper(new AppEngineWebXmlValidator());
 
@@ -146,6 +148,7 @@ public class XmlValidatorTest {
   @Test
   public void testXsdValidation_appengineWebXml() throws CoreException {
     String xml = "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
+        + "<runtime>java8</runtime>"
         + "<foo></foo>"
         + "</appengine-web-app>";
     IProject project = appEngineStandardProjectCreator.getProject();
@@ -154,8 +157,7 @@ public class XmlValidatorTest {
         new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)), true, false, null);
     ProjectUtils.waitForProjects(project);  // Wait until Eclipse puts an error marker.
 
-    String problemMarker = "org.eclipse.core.resources.problemmarker";
-    IMarker[] markers = file.findMarkers(problemMarker, true, IResource.DEPTH_ZERO);
+    IMarker[] markers = file.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
     ArrayAssertions.assertSize(1, markers);
     assertTrue(markers[0].getAttribute(IMarker.MESSAGE).toString().contains(
         "Invalid content was found starting with element 'foo'."));
@@ -165,7 +167,14 @@ public class XmlValidatorTest {
   public void testCreateMarker() throws CoreException {
     IFile file = createBogusProjectFile();
     String message = "Project ID should be specified at deploy time.";
-    BannedElement element = new BannedElement(message);
+    ElementProblem element = new ElementProblem(
+        message,
+        IMarker.PROBLEM,
+        IMarker.SEVERITY_WARNING,
+        IMessage.NORMAL_SEVERITY,
+        new DocumentLocation(0, 0),
+        0,
+        null);
     XmlValidator.createMarker(file, element);
     IMarker[] markers = file.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
     ArrayAssertions.assertSize(1, markers);

@@ -50,7 +50,7 @@ public class WarPublisherTest {
   @Mock private IProgressMonitor monitor;
 
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator()
-      .withFacets(JavaFacet.VERSION_1_7);
+      .withFacets(JavaFacet.VERSION_1_8);
 
   @Test
   public void testWriteProjectToStageDir_nullProject() throws CoreException {
@@ -119,7 +119,7 @@ public class WarPublisherTest {
 
   @Test
   public void testPublishWar() throws CoreException {
-    IProject project = projectCreator.withFacets(WebFacetUtils.WEB_25).getProject();
+    IProject project = projectCreator.withFacets(WebFacetUtils.WEB_31).getProject();
     IFile war = project.getFile("my-app.war");
     IPath tempDirectory = project.getFolder("temp").getLocation();
     IStatus[] result = WarPublisher.publishWar(project, war.getLocation(), tempDirectory, monitor);

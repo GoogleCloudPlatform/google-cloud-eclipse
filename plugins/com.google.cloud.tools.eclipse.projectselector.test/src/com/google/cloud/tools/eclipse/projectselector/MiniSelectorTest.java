@@ -28,16 +28,17 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
-import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
 import com.google.api.services.cloudresourcemanager.model.ListProjectsResponse;
 import com.google.api.services.cloudresourcemanager.model.Project;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Display;
@@ -53,7 +54,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class MiniSelectorTest {
   @Mock
-  public IGoogleApiFactory apiFactory;
+  public GoogleApiFactory apiFactory;
   @Rule
   public ShellTestResource shellResource = new ShellTestResource();
   
@@ -61,12 +62,17 @@ public class MiniSelectorTest {
 
   @Before
   public void setUp() {
+    GoogleApiFactory.setInstance(apiFactory);
+    doReturn(Optional.of(TestAccountProvider.ACCOUNT_1)).when(apiFactory).getAccount();
+    doReturn(Optional.of(TestAccountProvider.CREDENTIAL_ACCOUNT_1)).when(apiFactory).getCredential();
     bot = new SWTBot(shellResource.getShell());
   }
 
   @Test
   public void testNoCredential() {
-    MiniSelector selector = new MiniSelector(shellResource.getShell(), apiFactory);
+    doReturn(Optional.empty()).when(apiFactory).getAccount();
+    doReturn(Optional.empty()).when(apiFactory).getCredential();
+    MiniSelector selector = new MiniSelector(shellResource.getShell());
     assertNull(selector.getCredential());
     assertNotNull(selector.getSelection());
     assertTrue(selector.getSelection().isEmpty());
@@ -76,10 +82,10 @@ public class MiniSelectorTest {
 
   @Test
   public void testWithCredential() {
-    Credential credential = mock(Credential.class);
-    mockProjectsList(credential, new GcpProject("foo", "foo.id"));
-    MiniSelector selector = new MiniSelector(shellResource.getShell(), apiFactory, credential);
-    assertEquals(credential, selector.getCredential());
+    mockProjectsList(new GcpProject("foo", "foo.id"));
+    MiniSelector selector = new MiniSelector(shellResource.getShell());
+    assertTrue(apiFactory.getCredential().isPresent());
+    assertEquals(apiFactory.getCredential().get(), selector.getCredential());
     assertNotNull(selector.getSelection());
     assertTrue(selector.getSelection().isEmpty());
     assertNull(selector.getProject());
@@ -97,9 +103,8 @@ public class MiniSelectorTest {
 
   @Test
   public void testListenerFired() {
-    Credential credential = mock(Credential.class);
-    mockProjectsList(credential, new GcpProject("foo", "foo.id"));
-    MiniSelector selector = new MiniSelector(shellResource.getShell(), apiFactory, credential);
+    mockProjectsList(new GcpProject("foo", "foo.id"));
+    MiniSelector selector = new MiniSelector(shellResource.getShell());
 
     assertNotNull(selector.getSelection());
     assertTrue(selector.getSelection().isEmpty());
@@ -139,7 +144,7 @@ public class MiniSelectorTest {
   }
 
 
-  private void mockProjectsList(Credential credential, GcpProject... gcpProjects) {
+  private void mockProjectsList(GcpProject... gcpProjects) {
     Projects projectsApi = mock(Projects.class);
     Projects.List listApi = mock(Projects.List.class);
     List<Project> projectsList = new ArrayList<>();
@@ -152,7 +157,7 @@ public class MiniSelectorTest {
     ListProjectsResponse response = new ListProjectsResponse();
     response.setProjects(projectsList);
     try {
-      doReturn(projectsApi).when(apiFactory).newProjectsApi(credential);
+      doReturn(projectsApi).when(apiFactory).newProjectsApi();
       doReturn(listApi).when(listApi).setPageSize(any(Integer.class));
       doReturn(listApi).when(projectsApi).list();
       doReturn(response).when(listApi).execute();

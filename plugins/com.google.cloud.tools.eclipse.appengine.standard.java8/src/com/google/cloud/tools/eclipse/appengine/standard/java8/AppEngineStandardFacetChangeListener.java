@@ -17,9 +17,9 @@
 package com.google.cloud.tools.eclipse.appengine.standard.java8;
 
 import com.google.cloud.tools.appengine.AppEngineDescriptor;
-import com.google.cloud.tools.appengine.api.AppEngineException;
+import com.google.cloud.tools.appengine.AppEngineException;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineConfigurationUtil;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Level;
@@ -156,7 +156,8 @@ public class AppEngineStandardFacetChangeListener implements IFacetedProjectList
    */
   private static IFile findDescriptor(IFacetedProject project) {
     IFile descriptor =
-        WebProjectUtil.findInWebInf(project.getProject(), new Path("appengine-web.xml"));
+        AppEngineConfigurationUtil.findConfigurationFile(
+            project.getProject(), new Path("appengine-web.xml"));
     return descriptor;
   }
 

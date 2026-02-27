@@ -24,6 +24,10 @@
              </requires>
           </and>
         </constraint>
+       <property
+             name="appengine.runtime.obsolete"
+             value="true">
+       </property>
     </project-facet-version>
   </extension>
 
@@ -312,10 +316,20 @@
               <instanceof
                     value="org.eclipse.core.resources.IProject">
               </instanceof>
-              <test
-                    property="org.eclipse.wst.common.project.facet.core.projectFacet"
-                    value="com.google.cloud.tools.eclipse.appengine.facets.standard">
-              </test>
+              <or>
+                 <test
+                       property="org.eclipse.wst.common.project.facet.core.projectFacet"
+                       value="com.google.cloud.tools.eclipse.appengine.facets.standard">
+                 </test>
+                 <test
+                       property="org.eclipse.wst.common.project.facet.core.projectFacet"
+                       value="com.google.cloud.tools.eclipse.appengine.facets.flex">
+                 </test>
+                 <test
+                       property="org.eclipse.wst.common.project.facet.core.projectFacet"
+                       value="com.google.cloud.tools.eclipse.appengine.facets.flex.jar">
+                 </test>
+              </or>
            </and>
         </triggerPoints>
         <possibleChildren>
@@ -332,7 +346,7 @@
                        value="com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineResourceElement">
                  </instanceof>
                  <instanceof
-                       value="com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineStandardProjectElement">
+                       value="com.google.cloud.tools.eclipse.appengine.facets.ui.navigator.model.AppEngineProjectElement">
                  </instanceof>
               </or>
            </enablement>

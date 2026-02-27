@@ -25,7 +25,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
@@ -35,10 +34,7 @@ import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.common.project.facet.core.JavaFacetInstallConfig;
 import org.eclipse.jst.j2ee.project.facet.IJ2EEFacetInstallDataModelProperties;
@@ -46,8 +42,6 @@ import org.eclipse.jst.j2ee.project.facet.IJ2EEModuleFacetInstallDataModelProper
 import org.eclipse.jst.j2ee.web.project.facet.IWebFacetInstallDataModelProperties;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetInstallDataModelProvider;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
-import org.eclipse.wst.common.componentcore.internal.builder.DependencyGraphImpl;
-import org.eclipse.wst.common.componentcore.internal.builder.IDependencyGraph;
 import org.eclipse.wst.common.frameworks.datamodel.DataModelFactory;
 import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
@@ -59,7 +53,6 @@ import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 /**
  * Utility class for processing facets.
  */
-@SuppressWarnings("restriction") // For IDependencyGraph
 public class FacetUtil {
   private static final Logger logger = Logger.getLogger(FacetUtil.class.getName());
 
@@ -222,25 +215,7 @@ public class FacetUtil {
    * @throws CoreException if anything goes wrong while applying facet actions
    */
   public void install(IProgressMonitor monitor) throws CoreException {
-    SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
-
-    // Workaround deadlock bug described in Eclipse bug (https://bugs.eclipse.org/511793).
-    // There are graph update jobs triggered by the completion of the CreateProjectOperation
-    // above (from resource notifications) and from other resource changes from modifying the
-    // project facets. So we force the dependency graph to defer updates
-    try {
-      IDependencyGraph.INSTANCE.preUpdate();
-      try {
-        Job.getJobManager().join(DependencyGraphImpl.GRAPH_UPDATE_JOB_FAMILY,
-            subMonitor.newChild(10));
-      } catch (OperationCanceledException | InterruptedException ex) {
-        logger.log(Level.WARNING, "Exception waiting for WTP Graph Update job", ex);
-      }
-
-      facetedProject.modify(facetInstallSet, subMonitor.newChild(90));
-    } finally {
-      IDependencyGraph.INSTANCE.postUpdate();
-    }
+    facetedProject.modify(facetInstallSet, monitor);
   }
 
   /**

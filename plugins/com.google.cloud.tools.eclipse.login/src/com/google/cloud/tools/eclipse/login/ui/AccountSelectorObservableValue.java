@@ -36,10 +36,12 @@ public class AccountSelectorObservableValue extends AbstractObservableValue<Stri
 
     accountSelector.addSelectionListener(() -> {
       String newValue = accountSelector.getSelectedEmail();
-      fireValueChange(Diffs.createValueDiff(oldValue, newValue));
+      DisplayRealm.getRealm(accountSelector.getDisplay()).asyncExec(() -> 
+        fireValueChange(Diffs.createValueDiff(oldValue, newValue)));
       oldValue = newValue;
     });
   }
+
 
   @Override
   public Object getValueType() {
@@ -50,9 +52,9 @@ public class AccountSelectorObservableValue extends AbstractObservableValue<Stri
   protected String doGetValue() {
     return accountSelector.getSelectedEmail();
   }
-
+  
   @Override
-  protected void doSetValue(final String value) {
-    accountSelector.selectAccount(value);
+  protected void doSetValue(String value) {
+    // nothing is done as this is externally managed
   }
 }

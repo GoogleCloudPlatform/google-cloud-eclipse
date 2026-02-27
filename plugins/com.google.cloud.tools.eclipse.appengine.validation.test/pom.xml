@@ -20,6 +20,9 @@
           <useUIHarness>true</useUIHarness>
           <useUIThread>true</useUIThread>
           <product>org.eclipse.platform.ide</product>
+          <systemProperties>
+            <disablePrivacyTos>true</disablePrivacyTos>
+          </systemProperties>
         </configuration>
       </plugin>
       <plugin>

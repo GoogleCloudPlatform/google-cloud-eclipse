@@ -22,25 +22,31 @@ import java.util.EnumSet;
  * Description of the App Engine runtime environments.
  */
 public enum AppEngineRuntime {
-  STANDARD_JAVA_7(Messages.getString("appengine.runtimes.java7"), null), // $NON-NLS-1$
-  STANDARD_JAVA_8(Messages.getString("appengine.runtimes.java8"), "java8"); // $NON-NLS-1$ //$NON-NLS-2$
+  STANDARD_JAVA_8(
+      Messages.getString("appengine.runtimes.java8"), "java8"), //$NON-NLS-1$ //$NON-NLS-2$
+  STANDARD_JAVA_8_SERVLET_25(
+      Messages.getString("appengine.runtimes.java8.servlet25"), //$NON-NLS-1$
+      "java8"), //$NON-NLS-1$
+  STANDARD_JAVA_11_JETTY(
+      Messages.getString("appengine.runtimes.java11.jetty"), //$NON-NLS-1$
+      "java11"); //$NON-NLS-1$
 
   public static final EnumSet<AppEngineRuntime> STANDARD_RUNTIMES =
-      EnumSet.of(STANDARD_JAVA_7, STANDARD_JAVA_8);
+      EnumSet.of(STANDARD_JAVA_8, STANDARD_JAVA_8_SERVLET_25);
 
   private final String label;
-  private final String id;
+  private final String runtimeId;
 
-  private AppEngineRuntime(String label, String id) {
+  private AppEngineRuntime(String label, String runtimeId) {
     this.label = label;
-    this.id = id;
+    this.runtimeId = runtimeId;
   }
 
   public String getLabel() {
     return label;
   }
 
-  public String getId() {
-    return id;
+  public String getRuntimeId() {
+    return runtimeId;
   }
 }

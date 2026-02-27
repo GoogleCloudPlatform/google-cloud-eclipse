@@ -275,7 +275,7 @@ public class LocalAppEngineServerDelegate extends ServerDelegate implements IURL
     try {
       String url;
       if (module == null) {
-        url = "http://" + getServer().getHost() + ":" + serverBehaviour.getAdminPort(); //$NON-NLS-1$ //$NON-NLS-2$
+        url = "http://" + getServer().getHost() + ":" + serverBehaviour.getServerPort(); //$NON-NLS-1$ //$NON-NLS-2$
       } else {
         String serviceId = getServiceId(module); // never null
         url = serverBehaviour.getServiceUrl(serviceId);

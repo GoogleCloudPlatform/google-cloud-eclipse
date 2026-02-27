@@ -25,7 +25,6 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.junit.Test;
@@ -35,7 +34,7 @@ public class M2RepositoryServiceTest {
   // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1993
   @Test
   public void testResolveSourceArtifact_badUriToUrl()
-      throws URISyntaxException, MalformedURLException, CoreException {
+      throws URISyntaxException, MalformedURLException {
     URI noSchemeUri = new URI("host");
     try {
       noSchemeUri.toURL();

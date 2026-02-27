@@ -22,6 +22,7 @@ import com.google.api.services.cloudresourcemanager.CloudResourceManager.Project
 import com.google.api.services.iam.v1.Iam;
 import com.google.api.services.servicemanagement.ServiceManagement;
 import com.google.api.services.storage.Storage;
+import java.util.Optional;
 
 /**
  * Interface for factory classes to create clients for Google APIs.
@@ -32,27 +33,49 @@ import com.google.api.services.storage.Storage;
 public interface IGoogleApiFactory {
 
   /**
+   * @return the application default credentials account
+   */
+  public Optional<Account> getAccount();
+  
+  /**
+   * @return Credentials if logged in, else null
+   */
+  public Optional<Credential> getCredential();
+  
+  /**
+   * Subscribes to changes in the ADC well known file
+   * @param listener action to be performed upon change
+   */
+  void addCredentialChangeListener(Runnable listener);
+
+  /**
+   * Removes subscription to changes in the ADC well known file
+   * @param listener action to be removed
+   */
+  void removeCredentialChangeListener(Runnable listener);
+  
+  /**
    * @return a Google Cloud Storage API client
    */
-  Storage newStorageApi(Credential credential);
+  Storage newStorageApi();
 
   /**
    * @return an Appengine Apps API client
    */
-  Apps newAppsApi(Credential credential);
+  Apps newAppsApi();
 
   /**
    * @return a CloudResourceManager/Projects API client
    */
-  Projects newProjectsApi(Credential credential);
+  Projects newProjectsApi();
 
   /**
    * @return a ServiceManagement API client
    */
-  ServiceManagement newServiceManagementApi(Credential credential);
+  ServiceManagement newServiceManagementApi();
 
   /**
    * @return an Identity and Access Management API client
    */
-  Iam newIamApi(Credential credential);
+  Iam newIamApi();
 }

@@ -42,7 +42,8 @@ public class LabelImageLoader {
    *
    * Must be called in the UI context.
    */
-  void loadImage(String imageUrl, Label label) throws MalformedURLException {
+  @VisibleForTesting
+  public void loadImage(String imageUrl, Label label) throws MalformedURLException {
     Preconditions.checkNotNull(imageUrl);
 
     ImageData imageData = cache.get(imageUrl);

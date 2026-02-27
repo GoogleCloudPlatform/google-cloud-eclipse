@@ -58,7 +58,7 @@ public class AppEngineStandardWizardPageTest {
   public void testDefaultRuntime() {
     Assert.assertEquals(AppEngineRuntime.STANDARD_JAVA_8,
         AppEngineStandardWizardPage.DEFAULT_RUNTIME);
-    Assert.assertEquals(AppEngineStandardWizardPage.DEFAULT_RUNTIME.getId(), page.getRuntimeId());
+    Assert.assertEquals(AppEngineStandardWizardPage.DEFAULT_RUNTIME, page.getRuntime());
   }
 
   @Test

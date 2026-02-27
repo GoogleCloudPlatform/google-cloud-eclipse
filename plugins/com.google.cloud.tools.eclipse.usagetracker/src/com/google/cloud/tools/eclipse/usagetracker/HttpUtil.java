@@ -16,16 +16,6 @@
 
 package com.google.cloud.tools.eclipse.usagetracker;
 
-import com.google.api.client.http.ByteArrayContent;
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpContent;
-import com.google.api.client.http.HttpHeaders;
-import com.google.api.client.http.HttpMediaType;
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpResponse;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.MultipartContent;
-import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.net.UrlEscapers;
@@ -36,56 +26,30 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-public class HttpUtil {
+class HttpUtil {
 
-  public static final int DEFAULT_CONNECT_TIMEOUT_MS = 3000;
-  public static final int DEFAULT_READ_TIMEOUT_MS = 3000;
+  private static final int DEFAULT_CONNECT_TIMEOUT_MS = 3000;
+  private static final int DEFAULT_READ_TIMEOUT_MS = 3000;
 
-  private static final String MULTIPART_BOUNDARY =
-      "---------------------------45224ee4-f3c1-4b23-8df1-4012f722218c"; // some random UUID
-
-  private static final HttpTransport transport = new NetHttpTransport();
-
-  public static int sendPostMultipart(String urlString, Map<String, String> parameters)
-      throws IOException {
-
-    MultipartContent postBody = new MultipartContent()
-        .setMediaType(new HttpMediaType("multipart/form-data"));
-    postBody.setBoundary(MULTIPART_BOUNDARY);
-
-    for (Map.Entry<String, String> entry : parameters.entrySet()) {
-      HttpContent partContent = ByteArrayContent.fromString(  // uses UTF-8 internally
-          null /* part Content-Type */, entry.getValue());
-      HttpHeaders partHeaders = new HttpHeaders()
-          .set("Content-Disposition",  "form-data; name=\"" + entry.getKey() + "\"");
-
-      postBody.addPart(new MultipartContent.Part(partHeaders, partContent));
-    }
-
-    GenericUrl url = new GenericUrl(new URL(urlString));
-    HttpRequest request = transport.createRequestFactory().buildPostRequest(url, postBody);
-    request.setHeaders(new HttpHeaders().setUserAgent(CloudToolsInfo.USER_AGENT));
-    request.setConnectTimeout(DEFAULT_CONNECT_TIMEOUT_MS);
-    request.setReadTimeout(DEFAULT_READ_TIMEOUT_MS);
-
-    HttpResponse response = request.execute();
-    return response.getStatusCode();
+  static int sendPost(String urlString, Map<String, String> parameters) throws IOException {
+    String parametersString = getParametersString(parameters);
+    return sendPost(urlString, parametersString, "application/x-www-form-urlencoded");
   }
 
-  public static int sendPost(String urlString, Map<String, String> parameters) throws IOException {
-    String parametersString = getParametersString(parameters);
+  static int sendPost(String urlString, String body, String mediaType) throws IOException {
+    byte[] bytesToWrite = body.getBytes(StandardCharsets.UTF_8);
 
+    URL url = new URL(urlString);
     HttpURLConnection connection = null;
     try {
-      URL url = new URL(urlString);
       connection = (HttpURLConnection) url.openConnection();
       connection.setDoOutput(true);
       connection.setRequestMethod("POST");
       // This prevent Analytics from identifying our pings as spam.
       connection.setRequestProperty("User-Agent", CloudToolsInfo.USER_AGENT);
+      connection.setRequestProperty("Content-type", mediaType);
       connection.setConnectTimeout(DEFAULT_CONNECT_TIMEOUT_MS);
       connection.setReadTimeout(DEFAULT_READ_TIMEOUT_MS);
-      byte[] bytesToWrite = parametersString.getBytes(StandardCharsets.UTF_8);
       connection.setFixedLengthStreamingMode(bytesToWrite.length);
 
       try (OutputStream out = connection.getOutputStream()) {

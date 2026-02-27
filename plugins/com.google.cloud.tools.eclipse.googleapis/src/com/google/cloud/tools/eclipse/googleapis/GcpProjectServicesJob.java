@@ -16,13 +16,13 @@
 
 package com.google.cloud.tools.eclipse.googleapis;
 
-import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.servicemanagement.ServiceManagement;
 import com.google.api.services.servicemanagement.ServiceManagement.Services;
 import com.google.api.services.servicemanagement.model.ListServicesResponse;
 import com.google.api.services.servicemanagement.model.ManagedService;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.util.jobs.FuturisticJob;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
@@ -47,19 +47,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
  * </pre>
  */
 public class GcpProjectServicesJob extends FuturisticJob<List<String>> {
-  private final IGoogleApiFactory apiFactory;
 
   /** The GCP Project ID to check. */
   private final String projectId;
 
-  /** The user credential for checks. */
-  private final Credential credential;
-
-  public GcpProjectServicesJob(IGoogleApiFactory apiFactory, Credential credential,
-      String projectId) {
+  public GcpProjectServicesJob(String projectId) {
     super("Checking GCP project configuration");
-    this.apiFactory = apiFactory;
-    this.credential = credential;
     this.projectId = projectId;
   }
 
@@ -68,16 +61,11 @@ public class GcpProjectServicesJob extends FuturisticJob<List<String>> {
     return projectId;
   }
 
-  /** Get the user credential for check. */
-  public Credential getCredential() {
-    return credential;
-  }
-
   @Override
   protected List<String> compute(IProgressMonitor monitor)
       throws GoogleJsonResponseException, IOException {
     String originalProjectId = this.projectId;
-    ServiceManagement serviceManagement = apiFactory.newServiceManagementApi(credential);
+    ServiceManagement serviceManagement = GoogleApiFactory.INSTANCE.newServiceManagementApi();
     ListServicesResponse response = null;
     Collection<String> serviceIds = new ArrayList<>();
     do {

@@ -29,9 +29,7 @@ import com.google.common.base.Strings;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Properties;
@@ -57,17 +55,10 @@ import org.eclipse.m2e.core.project.ProjectImportConfiguration;
  */
 public class DataflowProjectCreator implements IRunnableWithProgress {
 
-  private static final String DEFAULT_JAVA_VERSION = JavaCore.VERSION_1_7;
-  private static final List<String> JAVA_VERSION_BLACKLIST =
-      Collections.unmodifiableList(Arrays.asList(JavaCore.VERSION_1_1, JavaCore.VERSION_1_2,
-          JavaCore.VERSION_1_3, JavaCore.VERSION_1_4, JavaCore.VERSION_1_5, JavaCore.VERSION_1_6,
-          JavaCore.VERSION_CLDC_1_1));
-
   private final IProjectConfigurationManager projectConfigurationManager;
 
   private DataflowProjectArchetype template;
-  // TODO: Configure in constructor
-  private MajorVersion majorVersion = MajorVersion.ONE;
+  private final MajorVersion majorVersion = MajorVersion.TWO;
   private String projectNameTemplate;
   private boolean customLocation;
   private URI projectLocation;
@@ -171,7 +162,8 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
     archetype.setArtifactId(template.getArtifactId());
 
     Properties archetypeProperties = new Properties();
-    archetypeProperties.setProperty("targetPlatform", getTargetPlatform());
+    // only support 1.8 until we support Beam
+    archetypeProperties.setProperty("targetPlatform", JavaCore.VERSION_1_8);
 
     IPath location = null;
     if (customLocation) {
@@ -225,32 +217,6 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
     prefs.save();
   }
 
-  /**
-   * Gets the target platform of the environment's JDT plugin. If not found, use the default target
-   * platform. If not supported, throw a {@link ProjectCreationException}.
-   */
-  private static String getTargetPlatform() throws ProjectCreationException {
-    String targetPlatform = JavaCore.getOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM);
-    if (targetPlatform == null || JAVA_VERSION_BLACKLIST.contains(targetPlatform)) {
-      DataflowCorePlugin.logWarning(
-          "Couldn't find supported target platform. Got %s. Using default version %s",
-          targetPlatform, DEFAULT_JAVA_VERSION);
-      targetPlatform = DEFAULT_JAVA_VERSION;
-    } else {
-      targetPlatform = targetPlatform.toString();
-    }
-    return targetPlatform;
-  }
-
-  private DataflowProjectValidationStatus validateTargetPlatform() {
-    try {
-      getTargetPlatform();
-      return DataflowProjectValidationStatus.OK;
-    } catch (ProjectCreationException e) {
-      return DataflowProjectValidationStatus.UNSUPPORTED_TARGET_PLATFORM;
-    }
-  }
-
   private void checkCancelled(IProgressMonitor monitor) {
     if (monitor.isCanceled()) {
       throw new OperationCanceledException();
@@ -260,7 +226,7 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
   /**
    * Returns all of the validation failures in this {@code DataflowProject}.
    */
-  public Collection<DataflowProjectValidationStatus> failedValidations() {
+  private Collection<DataflowProjectValidationStatus> failedValidations() {
     Collection<DataflowProjectValidationStatus> statuses =
         EnumSet.noneOf(DataflowProjectValidationStatus.class);
     statuses.add(validateProjectName());
@@ -268,7 +234,6 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
     statuses.add(validateMavenGroupId());
     statuses.add(validateMavenArtifactId());
     statuses.add(validatePackage());
-    statuses.add(validateTargetPlatform());
 
     // Must be last: Remove OK so the set contains only failed validations.
     statuses.remove(DataflowProjectValidationStatus.OK);

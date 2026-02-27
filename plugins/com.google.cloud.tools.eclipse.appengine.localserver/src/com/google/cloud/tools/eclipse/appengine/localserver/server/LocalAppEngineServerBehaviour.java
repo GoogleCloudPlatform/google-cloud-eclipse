@@ -16,20 +16,19 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
-import com.google.cloud.tools.appengine.api.AppEngineException;
-import com.google.cloud.tools.appengine.api.devserver.AppEngineDevServer;
-import com.google.cloud.tools.appengine.api.devserver.DefaultRunConfiguration;
-import com.google.cloud.tools.appengine.api.devserver.DefaultStopConfiguration;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDevServer1;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
-import com.google.cloud.tools.appengine.cloudsdk.LocalRun;
-import com.google.cloud.tools.appengine.cloudsdk.process.LegacyProcessHandler;
-import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
-import com.google.cloud.tools.appengine.cloudsdk.process.ProcessHandler;
-import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
-import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
-import com.google.cloud.tools.appengine.cloudsdk.serialization.CloudSdkVersion;
+import com.google.cloud.tools.appengine.AppEngineException;
+import com.google.cloud.tools.appengine.configuration.RunConfiguration;
+import com.google.cloud.tools.appengine.configuration.StopConfiguration;
+import com.google.cloud.tools.appengine.operations.CloudSdk;
+import com.google.cloud.tools.appengine.operations.DevServer;
+import com.google.cloud.tools.appengine.operations.DevServers;
+import com.google.cloud.tools.appengine.operations.cloudsdk.CloudSdkNotFoundException;
+import com.google.cloud.tools.appengine.operations.cloudsdk.process.LegacyProcessHandler;
+import com.google.cloud.tools.appengine.operations.cloudsdk.process.ProcessExitListener;
+import com.google.cloud.tools.appengine.operations.cloudsdk.process.ProcessHandler;
+import com.google.cloud.tools.appengine.operations.cloudsdk.process.ProcessOutputLineListener;
+import com.google.cloud.tools.appengine.operations.cloudsdk.process.ProcessStartListener;
+import com.google.cloud.tools.appengine.operations.cloudsdk.serialization.CloudSdkVersion;
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.sdk.MessageConsoleWriterListener;
@@ -83,14 +82,9 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   }
 
   public static final String SERVER_PORT_ATTRIBUTE_NAME = "appEngineDevServerPort"; //$NON-NLS-1$
-  public static final String ADMIN_HOST_ATTRIBUTE_NAME = "appEngineDevServerAdminHost"; //$NON-NLS-1$
-  public static final String ADMIN_PORT_ATTRIBUTE_NAME = "appEngineDevServerAdminPort"; //$NON-NLS-1$
 
   // These are the default values used by Cloud SDK's dev_appserver
   public static final int DEFAULT_SERVER_PORT = 8080;
-  public static final String DEFAULT_ADMIN_HOST = "localhost"; //$NON-NLS-1$
-  public static final int DEFAULT_ADMIN_PORT = 8000;
-  public static final int DEFAULT_API_PORT = 0; // allocated at random
 
   private static final Logger logger =
       Logger.getLogger(LocalAppEngineServerBehaviour.class.getName());
@@ -100,13 +94,11 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
 
   /** The {@link CloudSdk} instance currently in use; may be {@code null}. */
   private CloudSdk cloudSdk;
-  private AppEngineDevServer devServer;
+  private DevServer devServer;
   private Process devProcess;
 
   @VisibleForTesting
   int serverPort = -1;
-  @VisibleForTesting
-  int adminPort = -1;
 
   private DevAppServerOutputListener serverOutputListener;
   
@@ -129,14 +121,10 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     // then try to shut it down nicely
     if (devServer != null && (!force || serverState != IServer.STATE_STOPPING)) {
       setServerState(IServer.STATE_STOPPING);
-      DefaultStopConfiguration stopConfig = new DefaultStopConfiguration();
-      if (isDevAppServer1()) {
-        stopConfig.setAdminPort(serverPort);        
-      } else {
-        stopConfig.setAdminPort(adminPort);
-      }
+      StopConfiguration.Builder builder = StopConfiguration.builder();
+      builder.port(serverPort);
       try {
-        devServer.stop(stopConfig);
+        devServer.stop(builder.build());
       } catch (AppEngineException ex) {
         logger.log(Level.WARNING, "Error terminating server: " + ex.getMessage(), ex); //$NON-NLS-1$
         terminate();
@@ -240,7 +228,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   }
 
   @VisibleForTesting
-  void checkPorts(DefaultRunConfiguration devServerRunConfiguration,
+  void checkPorts(RunConfiguration devServerRunConfiguration,
       BiPredicate<InetAddress, Integer> portInUse) throws CoreException {
     InetAddress serverHost = InetAddress.getLoopbackAddress();
     if (devServerRunConfiguration.getHost() != null) {
@@ -249,20 +237,6 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     }
     serverPort = checkPort(serverHost,
         ifNull(devServerRunConfiguration.getPort(), DEFAULT_SERVER_PORT), portInUse);
-
-    if (LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2) {
-      InetAddress adminHost = InetAddress.getLoopbackAddress();
-      if (devServerRunConfiguration.getAdminHost() != null) {
-        adminHost = LocalAppEngineServerLaunchConfigurationDelegate
-            .resolveAddress(devServerRunConfiguration.getAdminHost());
-      }
-      adminPort = checkPort(adminHost,
-          ifNull(devServerRunConfiguration.getAdminPort(), DEFAULT_ADMIN_PORT), portInUse);
-    }
-
-    // API port seems to be bound on localhost in practice
-    checkPort(InetAddress.getLoopbackAddress(),
-        ifNull(devServerRunConfiguration.getApiPort(), DEFAULT_API_PORT), portInUse);
   }
 
   /**
@@ -303,14 +277,6 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   }
 
   /**
-   * Returns the admin port of this server. Note that this method returns -1 if the user has never
-   * attempted to launch the server.
-   */
-  public int getAdminPort() {
-    return adminPort;
-  }
-
-  /**
    * @return a short pithy description of this server suitable for use in UI elements
    */
   public String getDescription() {
@@ -330,7 +296,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
    *
    * @param mode the launch mode (see ILaunchManager.*_MODE constants)
    */
-  void startDevServer(String mode, DefaultRunConfiguration devServerRunConfiguration,
+  void startDevServer(String mode, RunConfiguration devServerRunConfiguration,
       Path javaHomePath, MessageConsoleStream outputStream, MessageConsoleStream errorStream)
       throws CoreException, CloudSdkNotFoundException {
 
@@ -378,18 +344,9 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
         .async(true)
         .build();
 
-    LocalRun localRun = LocalRun.builder(cloudSdk).build();
-    devServer = LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2
-        ? localRun.newDevAppServer2(processHandler)
-        : localRun.newDevAppServer1(processHandler);
+    DevServers localRun = DevServers.builder(cloudSdk).build();
+    devServer = localRun.newDevAppServer(processHandler);
     moduleToUrlMap.clear();
-  }
-  
-  /**
-   * @return true if and only if we're using devappserver1
-   */
-  private boolean isDevAppServer1() {
-    return devServer instanceof CloudSdkAppEngineDevServer1;
   }
 
   /**
@@ -421,28 +378,16 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
    * state changes.
    */
   public class DevAppServerOutputListener implements ProcessOutputLineListener {
-    // DevAppServer2 outputs the following for module-started and admin line (on one line):
-    // <<HEADER>> Starting module "default" running at: http://localhost:8080
-    // <<HEADER>> Starting admin server at: http://localhost:8000
-    // where <<HEADER>> = INFO 2017-01-31 21:00:40,700 dispatcher.py:197]
-    
-    // devappserver2 patterns
-    private final Pattern moduleStartedPattern = Pattern.compile(
-        "INFO .*Starting module \"(?<service>[^\"]+)\" running at: (?<url>http://.+:(?<port>[0-9]+))$");
-    private final Pattern adminStartedPattern =
-        Pattern.compile("INFO .*Starting admin server at: (?<url>http://.+:(?<port>[0-9]+))$");
-
     // devappserver1 patterns
     private final Pattern moduleRunningPattern = Pattern.compile(
         "INFO: Module instance (?<service>[\\w\\d\\-]+) is running at (?<url>http://.+:(?<port>[0-9]+)/)$");
-    private final Pattern adminRunningPattern =
-        Pattern.compile("INFO: The admin console is running at (?<url>http://.+:(?<port>[0-9]+))/_ah/admin$");
-      
-    private int serverPortCandidate = 0;
+
+    private final boolean shouldAutoDetectPort = serverPort <= 0;
 
     @Override
     public void onOutputLine(String line) {
       Matcher matcher;
+
       if (line.endsWith("Dev App Server is now running")) { //$NON-NLS-1$
         // App Engine Standard (v1)
         setServerState(IServer.STATE_STARTED);
@@ -455,25 +400,17 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
       } else if (line.contains("Error: A fatal exception has occurred. Program will exit")) { //$NON-NLS-1$
         // terminate the Python process
         stop(false);
-      } else if ((matcher = moduleStartedPattern.matcher(line)).matches()
-          || (matcher = moduleRunningPattern.matcher(line)).matches()) {
+      } else if ((matcher = moduleRunningPattern.matcher(line)).matches()) {
         String serviceId = matcher.group("service");
         String url = matcher.group("url");
         moduleToUrlMap.put(serviceId, url);
-        String portString = matcher.group("port");
-        int port = parseInt(portString, 0);
-        if (port > 0 && (serverPortCandidate == 0 || "default".equals(serviceId))) { // $NON-NLS-1$
-          serverPortCandidate = port;
-        }
-      } else if ((matcher = adminStartedPattern.matcher(line)).matches()
-          || (matcher = adminRunningPattern.matcher(line)).matches()) {
-        int port = parseInt(matcher.group("port"), 0);
-        if (port > 0 && adminPort <= 0) {
-          adminPort = port;
-        }
-        // Admin comes after other modules, so no more module URLs
-        if (serverPort <= 0) {
-          serverPort = serverPortCandidate;
+
+        if (shouldAutoDetectPort) {
+          String portString = matcher.group("port");
+          int port = parseInt(portString, 0);
+          if (port > 0 && (serverPort <= 0 || "default".equals(serviceId))) { // $NON-NLS-1$
+            serverPort = port;
+          }
         }
       }
     }

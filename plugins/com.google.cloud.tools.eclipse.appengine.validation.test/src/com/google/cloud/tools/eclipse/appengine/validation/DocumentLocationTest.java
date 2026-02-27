@@ -21,11 +21,17 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 public class DocumentLocationTest {
-  
+
+  private DocumentLocation location = new DocumentLocation(1, 2);
+
   @Test
   public void testConstructor() {
-    DocumentLocation location = new DocumentLocation(1, 2);
     assertEquals(1, location.getLineNumber());
     assertEquals(2, location.getColumnNumber());
+  }
+  
+  @Test
+  public void testToString() {
+    assertEquals("Line 1; Column 2", location.toString());
   } 
 }

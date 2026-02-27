@@ -28,7 +28,7 @@ public class PluginXmlTest extends BasePluginXmlTest {
   @Test
   public void testExtensionPoint() {
     NodeList extensions = getDocument().getElementsByTagName("extension");
-    assertEquals(3, extensions.getLength());
+    assertEquals(5, extensions.getLength());
 
     // first element is the showPopup command
     Element extension = (Element) extensions.item(0);

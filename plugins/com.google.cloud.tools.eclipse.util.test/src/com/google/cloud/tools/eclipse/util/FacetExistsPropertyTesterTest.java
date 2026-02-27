@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.util;
 
-import com.google.cloud.tools.eclipse.util.FacetExistsPropertyTester;
 import org.junit.Assert;
 import org.junit.Test;
 

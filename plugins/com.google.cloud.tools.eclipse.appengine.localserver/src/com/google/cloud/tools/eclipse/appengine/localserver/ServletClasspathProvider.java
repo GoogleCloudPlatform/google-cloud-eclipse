@@ -93,6 +93,10 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
     IProjectFacetVersion webFacetVersion = DEFAULT_DYNAMIC_WEB_VERSION;
     try {
       IFacetedProject facetedProject = ProjectFacetsManager.create(project);
+      if (facetedProject == null) {
+        // may occur when the project is being deleted
+        return NO_CLASSPATH_ENTRIES;
+      }
       webFacetVersion = facetedProject.getInstalledVersion(WebFacetUtils.WEB_FACET);
       if (webFacetVersion == null) {
         // may occur when the project is in the midst of being updated

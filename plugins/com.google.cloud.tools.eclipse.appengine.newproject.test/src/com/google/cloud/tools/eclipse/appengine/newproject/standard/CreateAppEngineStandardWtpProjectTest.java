@@ -76,7 +76,7 @@ public class CreateAppEngineStandardWtpProjectTest extends CreateAppEngineWtpPro
     Library library = CloudLibraries.getLibrary("appengine-api");
     List<Library> libraries = new ArrayList<>();
     libraries.add(library);
-    config.setAppEngineLibraries(libraries);
+    config.setLibraries(libraries);
     CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
     
     // CreateAppEngineWtpProject/WorkspaceModificationOperation normally acquires the
@@ -88,6 +88,7 @@ public class CreateAppEngineStandardWtpProjectTest extends CreateAppEngineWtpPro
     } finally {
       Job.getJobManager().endRule(rule);
     }
+    ProjectUtils.waitForProjects(project);
 
     assertTrue(project.hasNature(JavaCore.NATURE_ID));
     assertAppEngineApiSdkOnClasspath();

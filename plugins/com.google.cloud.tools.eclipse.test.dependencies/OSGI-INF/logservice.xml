@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true" name="com.google.cloud.tools.eclipse.logging.osgi_slf4j">
+  <implementation class="com.google.cloud.tools.eclipse.test.dependencies.EclipseLoggingAdapter" />
+  <service>
+     <provide interface="org.osgi.service.log.LoggerFactory" />
+     <provide interface="org.eclipse.equinox.log.ExtendedLogService"/>
+     <provide interface="org.osgi.service.log.LogService"/>
+  </service>
+  <property name="service.ranking" type="Integer" value="10000000"/>
+</scr:component>

@@ -29,7 +29,7 @@ import org.junit.Test;
 
 public class DependencyResolverTest {
 
-  private NullProgressMonitor monitor = new NullProgressMonitor();
+  private final NullProgressMonitor monitor = new NullProgressMonitor();
 
   @Test
   public void testGetManagedDependencies() throws CoreException {
@@ -67,6 +67,29 @@ public class DependencyResolverTest {
     Assert.assertTrue(actual.contains("com.google.cloud:google-cloud-datastore:1.4.0"));
     Assert.assertTrue(actual.contains("io.grpc:grpc-protobuf:1.4.0"));
     Assert.assertTrue(actual.contains("com.fasterxml.jackson.core:jackson-core:2.1.3"));
+  }
+
+  @Test
+  public void testOptionalDependenciesIncluded() throws CoreException {
+    Collection<Artifact> dependencies = DependencyResolver.getTransitiveDependencies(
+        "com.googlecode.objectify", "objectify", "5.1.22", monitor);
+    Collection<String> actual = getMavenCoordinates(dependencies);
+    Assert.assertTrue(actual.contains("org.joda:joda-money:0.10.0"));
+  }
+  
+  @Test
+  public void testObjectify6() throws CoreException {
+    Collection<Artifact> dependencies = DependencyResolver.getTransitiveDependencies(
+        "com.googlecode.objectify", "objectify", "6.0.3", monitor);
+    String result = "";
+    for (Artifact artifact : dependencies) {
+      if ("com.fasterxml.jackson.core".equals(artifact.getGroupId())
+          && "jackson-core".equals(artifact.getArtifactId())) {
+        return;
+      }
+      result += artifact.toString() + "\n";
+    }
+    Assert.fail("Jackson missing but contained: \n" + result);
   }
 
   /**

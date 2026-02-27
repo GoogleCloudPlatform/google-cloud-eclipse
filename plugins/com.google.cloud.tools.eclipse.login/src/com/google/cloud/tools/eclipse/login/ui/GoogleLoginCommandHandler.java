@@ -16,9 +16,8 @@
 
 package com.google.cloud.tools.eclipse.login.ui;
 
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.Messages;
-import com.google.cloud.tools.eclipse.ui.util.ServiceUtils;
 import java.util.Map;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -29,26 +28,18 @@ import org.eclipse.ui.menus.UIElement;
 
 public class GoogleLoginCommandHandler extends AbstractHandler implements IElementUpdater {
 
+     
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
-    IGoogleLoginService loginService = ServiceUtils.getService(event, IGoogleLoginService.class);
-
-    if (!loginService.hasAccounts()) {
-      loginService.logIn();
-    } else {
-      new AccountsPanel(HandlerUtil.getActiveShell(event), loginService).open();
-    }
-
+    new AccountsPanel(HandlerUtil.getActiveShell(event)).open();
     return null;
   }
-
+  
   @Override
   public void updateElement(UIElement element, @SuppressWarnings("rawtypes") Map parameters) {
-    IGoogleLoginService loginService =
-        element.getServiceLocator().getService(IGoogleLoginService.class);
-    boolean loggedIn = loginService.hasAccounts();
-
-    element.setText(loggedIn ? Messages.getString("LOGIN_MENU_LOGGED_IN")
+    element.setText(GoogleApiFactory.INSTANCE.getCredential().isPresent() ? Messages.getString("LOGIN_MENU_LOGGED_IN")
         : Messages.getString("LOGIN_MENU_LOGGED_OUT"));
   }
+
+  
 }

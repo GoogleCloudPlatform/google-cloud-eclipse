@@ -18,43 +18,51 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineConfigurationUtil;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 
 public class AppEngineWebXmlValidationTest {
 
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacets(
-      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
+      JavaFacet.VERSION_1_8, WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE8);
 
   @Test
-  public void testStagingElementsInAppEngineWebXml() throws CoreException {
+  public void testValidElementsInAppEngineWebXml() throws CoreException {
     IProject project = projectCreator.getProject();
     IFile appEngineWebXml =
-        WebProjectUtil.findInWebInf(project, new Path("appengine-web.xml"));
+        AppEngineConfigurationUtil.findConfigurationFile(project, new Path("appengine-web.xml"));
     assertTrue(appEngineWebXml.exists());
 
     String contents = "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>\n"
         + "  <staging>\n"
         + "    <enable-jar-classes>true</enable-jar-classes>\n"
         + "  </staging>\n"
+        + "  <automatic-scaling>\n"
+        + "    <min-instances>0</min-instances>\n"
+        + "  </automatic-scaling>\n"
         + "</appengine-web-app>";
     InputStream in = new ByteArrayInputStream(contents.getBytes(StandardCharsets.UTF_8));
     appEngineWebXml.setContents(in, true, false, null);
 
     ProjectUtils.waitForProjects(project);
-    assertTrue(ProjectUtils.waitUntilNoBuildErrors(project));
+    Set<String> buildErrors = ProjectUtils.getAllBuildErrors(project);
+    Assert.assertEquals(1, buildErrors.size());
+    String errorMessage = buildErrors.iterator().next();
+    Assert.assertTrue(errorMessage.endsWith("Java 7 runtime no longer supported"));
   }
 }

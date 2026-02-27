@@ -23,19 +23,25 @@ import java.util.ArrayList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class PomXmlValidatorTest {
+  
+  private final PomXmlValidator validator = new PomXmlValidator();
+  private Document document;
 
-  @Test
-  public void testCheckForElements() throws ParserConfigurationException {
-
+  @Before
+  public void setUp() throws ParserConfigurationException {
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
     DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
-    Document document = documentBuilder.newDocument();
+    document = documentBuilder.newDocument();
+  }
 
+  @Test
+  public void testCheckForElements() {
     Element groupId = document.createElementNS("http://maven.apache.org/POM/4.0.0", "groupId");
     groupId.setUserData("location", new DocumentLocation(2, 1), null);
     groupId.setTextContent("com.google.appengine");
@@ -59,19 +65,14 @@ public class PomXmlValidatorTest {
 
     document.appendChild(build);
   
-    PomXmlValidator validator = new PomXmlValidator();
-    ArrayList<BannedElement> blacklist = validator.checkForElements(null, document);
-    assertEquals(1, blacklist.size());
+    ArrayList<ElementProblem> problems = validator.checkForProblems(null, document);
+    assertEquals(1, problems.size());
     String markerId = "com.google.cloud.tools.eclipse.appengine.validation.mavenPluginMarker";
-    assertEquals(markerId, blacklist.get(0).getMarkerId());
+    assertEquals(markerId, problems.get(0).getMarkerId());
   }
   
   @Test
-  public void testCheckForElements_noElements() throws ParserConfigurationException {
-    DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-    DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
-    Document document = documentBuilder.newDocument();
-    
+  public void testCheckForElements_noElements() {
     Element plugin = document.createElementNS("http://maven.apache.org/POM/4.0.0", "plugin");
     plugin.setUserData("location", new DocumentLocation(1, 1), null);
     
@@ -87,17 +88,13 @@ public class PomXmlValidatorTest {
 
     document.appendChild(plugin);
     
-    PomXmlValidator validator = new PomXmlValidator();
-    ArrayList<BannedElement> blacklist = validator.checkForElements(null, document);
+    ArrayList<ElementProblem> problems = validator.checkForProblems(null, document);
     
-    assertEquals(0, blacklist.size());
+    assertEquals(0, problems.size());
   }
   
   @Test
-  public void testCheckForElements_multiplePluginTags() throws ParserConfigurationException {
-    DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-    DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
-    Document document = documentBuilder.newDocument();
+  public void testCheckForElements_multiplePluginTags() {
     Element rootPlugin = document.createElementNS("http://maven.apache.org/POM/4.0.0", "plugins");
     
     //plugin #1
@@ -149,11 +146,10 @@ public class PomXmlValidatorTest {
     
     document.appendChild(rootPlugin);
     
-    PomXmlValidator validator = new PomXmlValidator();
-    ArrayList<BannedElement> blacklist = validator.checkForElements(null, document);
+    ArrayList<ElementProblem> problems = validator.checkForProblems(null, document);
     
-    assertEquals(1, blacklist.size());
+    assertEquals(1, problems.size());
     String markerId = "com.google.cloud.tools.eclipse.appengine.validation.mavenPluginMarker";
-    assertEquals(markerId, blacklist.get(0).getMarkerId());
+    assertEquals(markerId, problems.get(0).getMarkerId());
   }
 }

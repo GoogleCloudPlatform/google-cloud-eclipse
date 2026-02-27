@@ -21,7 +21,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.ByteStreams;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -67,18 +67,18 @@ public class XmlValidator extends AbstractValidator implements IExecutableExtens
 
   /**
    * Clears all problem markers from the resource, then adds a marker to
-   * the resource for every {@link BannedElement} found in the file.
+   * the resource for every {@link ElementProblem} found in the file.
    */
   void validate(IFile resource, byte[] bytes) throws CoreException, IOException {
     try {
       deleteMarkers(resource);
       Document document = PositionalXmlScanner.parse(bytes);
       if (document != null) {
-        ArrayList<BannedElement> blacklist = helper.checkForElements(resource, document);
+        List<ElementProblem> problems = helper.checkForProblems(resource, document);
         String encoding = (String) document.getDocumentElement().getUserData("encoding");
-        Map<BannedElement, Integer> bannedElementOffsetMap =
-            ValidationUtils.getOffsetMap(bytes, blacklist, encoding);
-        for (Map.Entry<BannedElement, Integer> entry : bannedElementOffsetMap.entrySet()) {
+        Map<ElementProblem, Integer> problemOffsetMap =
+            ValidationUtils.getOffsetMap(bytes, problems, encoding);
+        for (Map.Entry<ElementProblem, Integer> entry : problemOffsetMap.entrySet()) {
           createMarker(resource, entry.getKey());
         }
       }
@@ -126,15 +126,16 @@ public class XmlValidator extends AbstractValidator implements IExecutableExtens
   }
 
   /**
-   * Creates a marker from a given {@link BannedElement}
+   * Creates a marker from a given {@link ElementProblem}
    */
-  static void createMarker(IResource resource, BannedElement element)
+  static void createMarker(IResource resource, ElementProblem problem)
       throws CoreException {
-    IMarker marker = resource.createMarker(element.getMarkerId());
-    marker.setAttribute(IMarker.SEVERITY, element.getIMarkerSeverity());
-    marker.setAttribute(IMarker.MESSAGE, element.getMessage());
-    marker.setAttribute(IMarker.LOCATION, "line " + element.getStart().getLineNumber());
-    marker.setAttribute(IMarker.LINE_NUMBER, element.getStart().getLineNumber());
+    IMarker marker = resource.createMarker(problem.getMarkerId());
+    marker.setAttribute(IMarker.SEVERITY, problem.getIMarkerSeverity());
+    marker.setAttribute(IMarker.MESSAGE, problem.getMessage());
+    int lineNumber = problem.getStart().getLineNumber();
+    marker.setAttribute(IMarker.LOCATION, "line " + lineNumber);
+    marker.setAttribute(IMarker.LINE_NUMBER, lineNumber);
   }
 
 }

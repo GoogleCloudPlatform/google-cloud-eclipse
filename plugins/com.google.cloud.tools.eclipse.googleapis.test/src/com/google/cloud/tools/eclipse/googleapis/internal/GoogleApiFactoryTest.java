@@ -36,6 +36,7 @@ import com.google.api.services.cloudresourcemanager.CloudResourceManager.Project
 import com.google.api.services.iam.v1.Iam;
 import com.google.api.services.servicemanagement.ServiceManagement;
 import com.google.api.services.storage.Storage;
+import com.google.cloud.tools.eclipse.test.util.TestAccountProvider;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.cache.LoadingCache;
 import java.io.IOException;
@@ -50,6 +51,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+@SuppressWarnings("DoNotMock")
 @RunWith(MockitoJUnitRunner.class)
 public class GoogleApiFactoryTest {
 
@@ -65,6 +67,7 @@ public class GoogleApiFactoryTest {
 
   @Before
   public void setUp() {
+    TestAccountProvider.setAsDefaultProvider();
     googleApiFactory = new GoogleApiFactory(proxyFactory);
     when(transportCache.getUnchecked(any(GoogleApi.class)))
         .thenReturn(mock(HttpTransport.class));
@@ -73,45 +76,45 @@ public class GoogleApiFactoryTest {
 
   @Test
   public void testNewAppsApi() {
-    Apps apps = googleApiFactory.newAppsApi(mock(Credential.class));
+    Apps apps = googleApiFactory.newAppsApi();
     assertNotNull(apps);
   }
 
   @Test
   public void testNewProjectsApi() {
-    Projects projects = googleApiFactory.newProjectsApi(mock(Credential.class));
+    Projects projects = googleApiFactory.newProjectsApi();
     assertNotNull(projects);
   }
 
   @Test
   public void testNewStorageApi() {
-    Storage storage = googleApiFactory.newStorageApi(mock(Credential.class));
+    Storage storage = googleApiFactory.newStorageApi();
     assertEquals("https://www.googleapis.com/storage/v1/", storage.getBaseUrl());
   }
 
   @Test
   public void testNewServceManagementApi() {
     ServiceManagement serviceManagement =
-        googleApiFactory.newServiceManagementApi(mock(Credential.class));
+        googleApiFactory.newServiceManagementApi();
     assertEquals("https://servicemanagement.googleapis.com/", serviceManagement.getBaseUrl());
   }
 
   @Test
   public void testNewIamApi() {
-    Iam iam = googleApiFactory.newIamApi(mock(Credential.class));
+    Iam iam = googleApiFactory.newIamApi();
     assertEquals("https://iam.googleapis.com/", iam.getBaseUrl());
   }
 
   @Test
   public void testNewAppsApi_userAgentIsSet() throws IOException {
-    Apps api = googleApiFactory.newAppsApi(mock(Credential.class));
+    Apps api = googleApiFactory.newAppsApi();
     assertThat(api.get("").getRequestHeaders().getUserAgent(),
                containsString(CloudToolsInfo.USER_AGENT));
   }
 
   @Test
   public void testNewProjectsApi_userAgentIsSet() throws IOException {
-    Projects api = googleApiFactory.newProjectsApi(mock(Credential.class));
+    Projects api = googleApiFactory.newProjectsApi();
     assertThat(api.get("").getRequestHeaders().getUserAgent(),
                containsString(CloudToolsInfo.USER_AGENT));
   }

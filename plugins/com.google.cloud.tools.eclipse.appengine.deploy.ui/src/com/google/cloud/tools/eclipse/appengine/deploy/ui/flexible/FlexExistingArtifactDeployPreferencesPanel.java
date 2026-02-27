@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible;
 import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexExistingArtifactDeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.DeployArtifactValidator;
-import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
@@ -29,9 +28,9 @@ import org.eclipse.swt.widgets.Text;
 public class FlexExistingArtifactDeployPreferencesPanel extends FlexDeployPreferencesPanel {
 
   public FlexExistingArtifactDeployPreferencesPanel(Composite parent,
-      IGoogleLoginService loginService, Runnable layoutChangedHandler, boolean requireValues,
+      Runnable layoutChangedHandler, boolean requireValues,
       ProjectRepository projectRepository) {
-    super(parent, null /*project*/, loginService, layoutChangedHandler, requireValues,
+    super(parent, null /*project*/, layoutChangedHandler, requireValues,
         projectRepository, new FlexExistingArtifactDeployPreferences());
   }
 

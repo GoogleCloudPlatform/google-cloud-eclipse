@@ -25,7 +25,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -65,9 +64,10 @@ public class LaunchHelper {
         if (isRunning(existing)) {
           ILaunch launch = existing.getLaunch();
           Preconditions.checkNotNull(launch, "A running server should have a launch"); //$NON-NLS-1$
-          String detail = launchMode.equals(launch.getLaunchMode()) ? Messages.getString("SERVER_ALREADY_RUNNING") //$NON-NLS-1$
-              : MessageFormat.format(Messages.getString("SERVER_ALREADY_RUNNING_IN_MODE"), //$NON-NLS-1$
-                  launch.getLaunchMode());
+          String detail = launchMode.equals(launch.getLaunchMode())
+              ? Messages.getString("SERVER_ALREADY_RUNNING") //$NON-NLS-1$
+              : Messages.getString(
+                  "SERVER_ALREADY_RUNNING_IN_MODE", launch.getLaunchMode()); //$NON-NLS-1$
           throw new CoreException(StatusUtil.info(this, detail));
         }
         server = existing;

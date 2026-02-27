@@ -65,7 +65,7 @@ public class XsltQuickFix implements IMarkerResolution {
     try {
       IFile file = (IFile) marker.getResource();
       IDocument document = getCurrentDocument(file);
-      URL xslPath = ApplicationQuickFix.class.getResource(xsltPath);
+      URL xslPath = XsltQuickFix.class.getResource(xsltPath);
       if (document != null) {
         String currentContents = document.get();
         try (Reader documentReader = new StringReader(currentContents);

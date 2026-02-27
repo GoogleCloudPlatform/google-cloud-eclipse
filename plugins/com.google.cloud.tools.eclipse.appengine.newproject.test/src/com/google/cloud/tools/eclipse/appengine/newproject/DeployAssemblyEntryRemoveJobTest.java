@@ -36,7 +36,7 @@ import org.junit.Test;
 public class DeployAssemblyEntryRemoveJobTest {
 
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator()
-      .withFacets(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
+      .withFacets(JavaFacet.VERSION_1_8, WebFacetUtils.WEB_25);
 
   @Test
   public void testRun_entryRemoved() throws OperationCanceledException, InterruptedException {

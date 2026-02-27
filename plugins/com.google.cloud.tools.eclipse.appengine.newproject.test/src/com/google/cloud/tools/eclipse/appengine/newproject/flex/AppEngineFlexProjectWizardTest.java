@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.flex;
 
+import org.eclipse.jface.wizard.IWizardPage;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -32,8 +33,14 @@ public class AppEngineFlexProjectWizardTest {
   public void testAddPages() {
     wizard.addPages();
     Assert.assertFalse(wizard.canFinish());
-    Assert.assertEquals(1, wizard.getPageCount());
-    Assert.assertNotNull(wizard.getPage("basicNewProjectPage"));
+    Assert.assertEquals(2, wizard.getPageCount());
+    IWizardPage newProjectPage = wizard.getPage("basicNewProjectPage");
+    Assert.assertNotNull(newProjectPage);
+    IWizardPage librariesPage = wizard.getPage("cloudPlatformLibrariesPage");
+    Assert.assertNotNull(librariesPage);
+    
+    Assert.assertEquals(newProjectPage, librariesPage.getPreviousPage());
+    Assert.assertEquals(librariesPage.getPreviousPage(), newProjectPage);
   }
 
 }

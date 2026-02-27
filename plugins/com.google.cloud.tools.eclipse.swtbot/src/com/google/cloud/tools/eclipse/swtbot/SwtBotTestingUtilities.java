@@ -116,7 +116,7 @@ public class SwtBotTestingUtilities {
     bot.waitUntil(new DefaultCondition() {
       @Override
       public String getFailureMessage() {
-        return "Shell " + shell.getText() + " did not close"; //$NON-NLS-1$
+        return "Shell " + shell.getText() + " did not become inactive"; //$NON-NLS-1$
       }
 
       @Override
@@ -124,6 +124,23 @@ public class SwtBotTestingUtilities {
         return !shell.isActive();
       }
     });
+  }
+
+  /**
+   * Blocks the caller until the shell matching the text is open.
+   */
+  public static void waitUntilShellIsOpen(SWTBot bot, String text) {
+    bot.waitUntil(new DefaultCondition() {
+        @Override
+        public String getFailureMessage() {
+          return "Cannot find a shell with text '" + text + "'";
+        }
+
+        @Override
+        public boolean test() throws Exception {
+          return bot.shell(text).isOpen();
+        }
+      });
   }
 
   /**

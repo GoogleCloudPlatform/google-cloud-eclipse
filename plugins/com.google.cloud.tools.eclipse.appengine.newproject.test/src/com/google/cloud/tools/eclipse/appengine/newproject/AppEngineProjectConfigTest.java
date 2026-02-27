@@ -19,12 +19,14 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
@@ -58,9 +60,12 @@ public class AppEngineProjectConfigTest {
 
   @Test
   public void testRuntime() {
-    Assert.assertNull(config.getRuntimeId());
-    config.setRuntimeId("foobar");
-    Assert.assertEquals("foobar", config.getRuntimeId());
+    Assert.assertNull(config.getRuntime());
+    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8);
+    Assert.assertEquals(AppEngineRuntime.STANDARD_JAVA_8, config.getRuntime());
+
+    config.setRuntime(AppEngineRuntime.STANDARD_JAVA_8_SERVLET_25);
+    Assert.assertEquals(AppEngineRuntime.STANDARD_JAVA_8_SERVLET_25, config.getRuntime());
   }
 
   @Test
@@ -71,9 +76,9 @@ public class AppEngineProjectConfigTest {
 
   @Test
   public void testAppEngineLibraries() {
-    config.setAppEngineLibraries(Collections.singleton(new Library("app-engine-library")));
-    assertThat(config.getAppEngineLibraries().size(), is(1));
-    assertThat(config.getAppEngineLibraries().iterator().next().getId(), is("app-engine-library"));
+    config.setLibraries(Collections.singleton(new Library("app-engine-library")));
+    assertThat(config.getLibraries().size(), is(1));
+    assertThat(config.getLibraries().iterator().next().getId(), is("app-engine-library"));
   }
 
   @Test
@@ -88,5 +93,12 @@ public class AppEngineProjectConfigTest {
     assertEquals("group.foo", config.getMavenGroupId());
     assertEquals("artifact.bar", config.getMavenArtifactId());
     assertEquals("version.baz", config.getMavenVersion());
+  }
+  
+  @Test
+  public void testEntryPoint() {
+    assertNull(config.getEntryPoint());
+    config.setEntryPoint("java -Xmx64m -jar your-artifact.jar");
+    assertEquals("java -Xmx64m -jar your-artifact.jar", config.getEntryPoint());
   }
 }

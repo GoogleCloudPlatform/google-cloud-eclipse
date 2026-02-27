@@ -16,14 +16,13 @@
 
 package com.google.cloud.tools.eclipse.projectselector;
 
-import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.services.appengine.v1.model.Application;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
 import com.google.api.services.cloudresourcemanager.model.ListProjectsResponse;
 import com.google.api.services.cloudresourcemanager.model.Project;
-import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.projectselector.model.AppEngine;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.common.annotations.VisibleForTesting;
@@ -44,21 +43,19 @@ public class ProjectRepository {
   
   private static final String PROJECT_DELETE_REQUESTED = "DELETE_REQUESTED";
 
-  private final IGoogleApiFactory apiFactory;
 
-  public ProjectRepository(IGoogleApiFactory apiFactory) {
-    this.apiFactory = apiFactory;
+  public ProjectRepository() {
   }
 
   /**
    * @return all active projects the account identified by {@code credential} has access to
    * @throws ProjectRepositoryException if an error happens while communicating with the backend
    */
-  public List<GcpProject> getProjects(Credential credential) throws ProjectRepositoryException {
-    Preconditions.checkNotNull(credential);
+  public List<GcpProject> getProjects() throws ProjectRepositoryException {
+    Preconditions.checkState(GoogleApiFactory.INSTANCE.getCredential().isPresent());
     // TODO cache results https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1374
     try {
-      Projects projects = apiFactory.newProjectsApi(credential);
+      Projects projects = GoogleApiFactory.INSTANCE.newProjectsApi();
       
       String token = null;
       List<Project> projectList = new ArrayList<>();
@@ -86,11 +83,11 @@ public class ProjectRepository {
    *     {@code credential} has access to the project
    * @throws ProjectRepositoryException if an error happens while communicating with the backend
    */
-  public GcpProject getProject(Credential credential, String projectId)
+  public GcpProject getProject(String projectId)
       throws ProjectRepositoryException {
     try {
-      if (credential != null && !Strings.isNullOrEmpty(projectId)) {
-        return convertToGcpProject(apiFactory.newProjectsApi(credential).get(projectId).execute());
+      if (GoogleApiFactory.INSTANCE.getCredential().isPresent() && !Strings.isNullOrEmpty(projectId)) {
+        return convertToGcpProject(GoogleApiFactory.INSTANCE.newProjectsApi().get(projectId).execute());
       } else {
         return null;
       }
@@ -123,13 +120,13 @@ public class ProjectRepository {
    * @throws ProjectRepositoryException if an error other than HTTP 404 happens while retrieving the
    *     App Engine application
    */
-  public AppEngine getAppEngineApplication(Credential credential, String projectId)
+  public AppEngine getAppEngineApplication(String projectId)
       throws ProjectRepositoryException {
-    Preconditions.checkNotNull(credential);
+    Preconditions.checkState(GoogleApiFactory.INSTANCE.getCredential().isPresent());
     Preconditions.checkArgument(!Strings.isNullOrEmpty(projectId));
 
     try {
-      Application application = apiFactory.newAppsApi(credential).get(projectId).execute();
+      Application application = GoogleApiFactory.INSTANCE.newAppsApi().get(projectId).execute();
 
       // just in case the API changes and exception with 404 won't be
       // used to indicate a missing application

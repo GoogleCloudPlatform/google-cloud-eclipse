@@ -29,15 +29,16 @@ import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.ZipUtil;
-import com.google.cloud.tools.eclipse.test.util.project.JavaRuntimeUtils;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.io.IOException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.IClasspathContainer;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -46,7 +47,6 @@ import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
-import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -63,7 +63,7 @@ public class ImportNativeAppEngineStandardProjectTest extends BaseProjectTest {
   public TemporaryFolder tempFolder = new TemporaryFolder();
 
   @Test
-  public void importAppEngineStandardJava7_from1_3_1() throws IOException, CoreException {
+  public void testImportAppEngineStandardJava7_from1_3_1() throws IOException, CoreException {
     assertFalse(projectExists("AESv7"));
     ZipUtil.extractZip(new URL(
         "platform:/plugin/com.google.cloud.tools.eclipse.integration.appengine/test-projects/cte-1_3_1-appengine-standard-java7.zip"),
@@ -71,11 +71,9 @@ public class ImportNativeAppEngineStandardProjectTest extends BaseProjectTest {
     project = SwtBotAppEngineActions.importNativeProject(bot, "AESv7", tempFolder.getRoot());
     assertTrue(project.exists());
 
-    updateOldContainers();
-
-    ProjectUtils.waitForProjects(project);
-    ProjectUtils.waitUntilNoBuildErrors(project);
-
+    IStatus updateStatus = updateContainers(project);
+    verifyImportedProject(project, updateStatus);
+    
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     assertNotNull("should be a faceted project", facetedProject);
 
@@ -90,8 +88,7 @@ public class ImportNativeAppEngineStandardProjectTest extends BaseProjectTest {
   }
 
   @Test
-  public void importAppEngineStandardJava8_from1_3_1() throws IOException, CoreException {
-    Assume.assumeTrue(JavaRuntimeUtils.hasJavaSE8());
+  public void testImportAppEngineStandardJava8_from1_3_1() throws IOException, CoreException {
     assertFalse(projectExists("AESv8"));
     ZipUtil.extractZip(new URL(
         "platform:/plugin/com.google.cloud.tools.eclipse.integration.appengine/test-projects/cte-1_3_1-appengine-standard-java8.zip"),
@@ -99,11 +96,10 @@ public class ImportNativeAppEngineStandardProjectTest extends BaseProjectTest {
     project = SwtBotAppEngineActions.importNativeProject(bot, "AESv8", tempFolder.getRoot());
     assertTrue(project.exists());
 
-    updateOldContainers();
-
-    ProjectUtils.waitForProjects(project);
+    IStatus updateStatus = updateContainers(project);
     ProjectUtils.waitUntilNoBuildErrors(project);
-
+    verifyImportedProject(project, updateStatus);
+    
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     assertNotNull("should be a faceted project", facetedProject);
 
@@ -117,10 +113,49 @@ public class ImportNativeAppEngineStandardProjectTest extends BaseProjectTest {
         facetedProject.getProjectFacetVersion(WebFacetUtils.WEB_FACET));
   }
 
-  private void updateOldContainers() throws JavaModelException {
+  // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/3202
+  @Test
+  public void testImportProjectFrom131_oldStyleContainerWithAppEngineApi()
+      throws IOException, CoreException {
+    assertFalse(projectExists("old-library-container-with-appengine-api"));
+    ZipUtil.extractZip(new URL(
+        "platform:/plugin/com.google.cloud.tools.eclipse.integration.appengine/test-projects/old-library-container-with-appengine-api.zip"),
+        tempFolder.getRoot());
+    project = SwtBotAppEngineActions.importNativeProject(
+        bot, "old-library-container-with-appengine-api", tempFolder.getRoot());
+    assertTrue(project.exists());
+
+    IStatus updateStatus = updateContainers(project);
+   // ProjectUtils.waitUntilNoBuildErrors(project);
+
+    verifyImportedProject(project, updateStatus);
+    assertTrue(hasAppEngineApi(project));
+  }
+
+  private static boolean hasAppEngineApi(IProject project) throws JavaModelException {
+    IJavaProject javaProject = JavaCore.create(project);
+    IClasspathContainer masterContainer =
+        JavaCore.getClasspathContainer(BuildPath.MASTER_CONTAINER_PATH, javaProject);
+
+    for (IClasspathEntry entry : masterContainer.getClasspathEntries()) {
+      if (entry.getPath().lastSegment().startsWith("appengine-api-1.0-sdk")) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static IStatus updateContainers(IProject project) {
     assertTrue(CloudToolsEclipseProjectUpdater.hasOldContainers(project));
     IStatus updateStatus =
         CloudToolsEclipseProjectUpdater.updateProject(project, SubMonitor.convert(null));
+
+    ProjectUtils.waitForProjects(project);
+    return updateStatus;
+  }
+
+  private static void verifyImportedProject(IProject project, IStatus updateStatus)
+      throws JavaModelException {
     assertTrue("Update failed: " + updateStatus.getMessage(), updateStatus.isOK());
     assertFalse(CloudToolsEclipseProjectUpdater.hasOldContainers(project));
 

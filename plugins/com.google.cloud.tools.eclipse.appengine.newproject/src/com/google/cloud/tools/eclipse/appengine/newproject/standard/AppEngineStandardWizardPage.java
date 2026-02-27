@@ -85,14 +85,13 @@ public class AppEngineStandardWizardPage extends AppEngineWizardPage {
   }
 
   @Override
-  public String getRuntimeId() {
-    AppEngineRuntime selected = DEFAULT_RUNTIME;
+  public AppEngineRuntime getRuntime() {
     if (runtimeField != null && !runtimeField.getSelection().isEmpty()) {
       Preconditions.checkState(runtimeField.getSelection() instanceof IStructuredSelection,
           "ComboViewer should return an IStructuredSelection");
       IStructuredSelection selection = (IStructuredSelection) runtimeField.getSelection();
-      selected = (AppEngineRuntime) selection.getFirstElement();
+      return (AppEngineRuntime) selection.getFirstElement();
     }
-    return selected.getId();
+    return DEFAULT_RUNTIME;
   }
 }

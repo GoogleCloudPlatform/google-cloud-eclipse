@@ -16,11 +16,18 @@
 
 package com.google.cloud.tools.eclipse.swtbot;
 
+import static org.junit.Assert.assertFalse;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
+import org.eclipse.swtbot.swt.finder.finders.UIThreadRunnable;
+import org.eclipse.swtbot.swt.finder.results.Result;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
@@ -31,9 +38,7 @@ import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.hamcrest.StringDescription;
 
-/**
- * Utilities for manipulating trees.
- */
+/** Utilities for manipulating trees. */
 public class SwtBotTreeUtilities {
 
   /**
@@ -42,17 +47,18 @@ public class SwtBotTreeUtilities {
    * @throws TimeoutException if no items appear within the default timeout
    */
   public static SWTBotTreeItem waitUntilTreeHasItems(SWTWorkbenchBot bot, SWTBotTree tree) {
-    bot.waitUntil(new DefaultCondition() {
-      @Override
-      public String getFailureMessage() {
-        return "Tree items never appeared";
-      }
+    bot.waitUntil(
+        new DefaultCondition() {
+          @Override
+          public String getFailureMessage() {
+            return "Tree items never appeared";
+          }
 
-      @Override
-      public boolean test() throws Exception {
-        return tree.hasItems();
-      }
-    });
+          @Override
+          public boolean test() throws Exception {
+            return tree.hasItems();
+          }
+        });
     return tree.getAllItems()[0];
   }
 
@@ -122,21 +128,22 @@ public class SwtBotTreeUtilities {
 
   /**
    * Wait until the given tree has not items.
-   * 
+   *
    * @throws TimeoutException if no items appear within the default timeout
    */
   public static void waitUntilTreeHasNoItems(SWTWorkbenchBot bot, final SWTBotTree tree) {
-    bot.waitUntil(new DefaultCondition() {
-      @Override
-      public String getFailureMessage() {
-        return "Tree items never disappeared";
-      }
+    bot.waitUntil(
+        new DefaultCondition() {
+          @Override
+          public String getFailureMessage() {
+            return "Tree items never disappeared";
+          }
 
-      @Override
-      public boolean test() throws Exception {
-        return !tree.hasItems();
-      }
-    });
+          @Override
+          public boolean test() throws Exception {
+            return !tree.hasItems();
+          }
+        });
   }
 
   /**
@@ -226,5 +233,40 @@ public class SwtBotTreeUtilities {
       item = item.expandNode(nodeNames[i]);
     }
     return item.getNode(nodeNames[leafIndex]).select(); // throws WNFE
+  }
+
+  /** Expand the tree as necessary to find a child matching the given condition. */
+  public static boolean hasChild(SWTWorkbenchBot bot, SWTBotTree tree, Matcher<String> textMatcher) {
+    waitUntilTreeHasItems(bot, tree);
+    // perform breadth-first search; execute directly in SWT thread as the tree may otherwise
+    // be affected by thread changes
+    Result<Boolean> query =
+        () -> {
+          TreeItem[] items = tree.widget.getItems();
+          for (TreeItem item : items) {
+            if (textMatcher.matches(item.getText())) {
+              return true;
+            }
+          }
+          LinkedList<TreeItem> stack = new LinkedList<>();
+          Collections.addAll(stack, items);
+          while (!stack.isEmpty()) {
+            TreeItem parent = stack.removeFirst();
+            items = parent.getItems();
+            // If this assertion fails, it may be due to
+            // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2569
+            // and may require applying the workaround to collapse and re-expand the node
+            assertFalse(
+                "workaround may be required", items.length == 1 && "".equals(items[0].getText()));
+            for (TreeItem item : items) {
+              if (textMatcher.matches(item.getText())) {
+                return true;
+              }
+            }
+            Collections.addAll(stack, items);
+          }
+          return false;
+        };
+    return UIThreadRunnable.syncExec(query);
   }
 }

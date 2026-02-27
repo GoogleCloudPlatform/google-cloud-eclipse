@@ -33,6 +33,7 @@ import org.eclipse.aether.repository.RepositoryPolicy;
 import org.eclipse.aether.resolution.ArtifactDescriptorRequest;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyRequest;
+import org.eclipse.aether.resolution.DependencyResult;
 import org.eclipse.aether.util.artifact.JavaScopes;
 import org.eclipse.aether.util.filter.DependencyFilterUtils;
 import org.eclipse.core.runtime.CoreException;
@@ -72,6 +73,7 @@ public class DependencyResolver {
       throws CoreException {
     SubMonitor progress = SubMonitor.convert(monitor);
     DependencyFilter filter = DependencyFilterUtils.classpathFilter(JavaScopes.RUNTIME);
+    
     // todo we'd prefer not to depend on m2e here
 
     String coords = groupId + ":" + artifactId + ":" + version;
@@ -80,15 +82,15 @@ public class DependencyResolver {
     collectRequest.setRoot(new Dependency(artifact, JavaScopes.RUNTIME));
     collectRequest.setRepositories(centralRepository(system));
     DependencyRequest request = new DependencyRequest(collectRequest, filter);
-
+    
     // ensure checksum errors result in failure
     DefaultRepositorySystemSession session =
         new DefaultRepositorySystemSession(context.getRepositorySession());
     session.setChecksumPolicy(RepositoryPolicy.CHECKSUM_POLICY_FAIL);
 
     try {
-      List<ArtifactResult> artifacts =
-          system.resolveDependencies(session, request).getArtifactResults();
+      DependencyResult resolved = system.resolveDependencies(session, request);
+      List<ArtifactResult> artifacts = resolved.getArtifactResults();
       progress.setWorkRemaining(artifacts.size());
       List<Artifact> dependencies = new ArrayList<>();
       for (ArtifactResult result : artifacts) {
@@ -150,6 +152,7 @@ public class DependencyResolver {
     try {
       List<Dependency> managedDependencies =
           system.readArtifactDescriptor(session, request).getManagedDependencies();
+      
       return managedDependencies;
     } catch (RepositoryException ex) {
       IStatus status = StatusUtil.error(DependencyResolver.class, ex.getMessage(), ex);

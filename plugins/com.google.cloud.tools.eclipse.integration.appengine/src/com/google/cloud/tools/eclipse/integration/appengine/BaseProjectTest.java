@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.integration.appengine;
 
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.operations.CloudSdk;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotWorkbenchActions;
 import java.util.logging.Level;
@@ -45,6 +45,7 @@ public abstract class BaseProjectTest {
 
   @BeforeClass
   public static void setUp() throws Exception {
+    TestUtils.disablePrivacyTos();
     // verify we can find the Google Cloud SDK
     new CloudSdk.Builder().build().validateCloudSdk();
 
